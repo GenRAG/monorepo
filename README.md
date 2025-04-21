@@ -1,3 +1,3 @@
 # monorepo
 
-GenRAG
+GenRAG monorepo

@@ -200,8 +200,8 @@ class CustomRAG:
             for block_name in self.config["pipeline"]:
                 print(f"Executing block: {block_name}")
                 block_class = self.available_blocks.get(block_name)
-                # if not block_class:
-                #     raise ValueError(f"Block '{block_name}' not found in available blocks")
+                if not block_class:
+                    raise ValueError(f"Block '{block_name}' not found in available blocks")
                 if block_name == "generator":
                     block = block_class()
                     block.execute(self.context, config=self.config)
@@ -234,6 +234,13 @@ Example of a custom RAG pipeline
     "pipeline": ["query", "retriever", "generator"]
 }
 """
+
+# Clear history
+@router_custom_RAG.post("/clear_history/")
+async def clear_history():
+    pipeline.context["history"] = []
+    return {"message": "History cleared successfully."}
+
 @router_custom_RAG.post("/update_pipeline/")
 async def config_custom_RAG(pipeline_config: dict):
     return pipeline.update_pipeline(pipeline_config["pipeline"])

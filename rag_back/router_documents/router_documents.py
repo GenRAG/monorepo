@@ -8,5 +8,5 @@ router_documents = APIRouter()
 @router_documents.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
     await upload_document_vectorRAG(file)
-    await upload_document_lightRAG(file)
+    # await upload_document_lightRAG(file)
     return {"message": "Data inserted"}

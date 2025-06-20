@@ -13,6 +13,7 @@ import cohere
 import os
 import pandas as pd
 import uuid
+from fastapi import HTTPException
 
 text_splitter = SemanticChunker(OpenAIEmbeddings())
 
@@ -82,6 +83,9 @@ async def upload_document_vectorRAG(file: UploadFile = File(...)):
 
     elif file.content_type == "text/plain":
         bulk_data.append(file.file.read().decode("utf-8"))
+
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
 
     vectors_to_upsert = []
 

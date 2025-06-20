@@ -27,15 +27,15 @@ export class WorkspaceRolesGuard implements CanActivate {
         }
 
         const request = context.switchToHttp().getRequest();
-        const user = request.user;
-        const workspaceId = request.params.id;
+        const { user } = request;
+        const { id: workspaceId } = request.params;
 
         if (!user || !workspaceId) return false;
 
         const userWorkspace = await this.prisma.userWorkspace.findUnique({
             where: {
                 userId_workspaceId: {
-                    userId: user.id,
+                    userId: user.userId,
                     workspaceId,
                 },
             },

@@ -48,4 +48,28 @@ export class WorkspaceService {
 
         return workspaces;
     }
+
+    async getWorkspaceById(
+        workspaceId: string,
+        userId: string,
+    ): Promise<Workspace> {
+        const workspace = await this.prismaService.workspace.findUnique({
+            where: { id: workspaceId },
+            include: { users: true },
+        });
+
+        if (!workspace) {
+            throw new Error('Workspace not found');
+        }
+
+        const userInWorkspace = workspace.users.find(
+            (user) => user.userId === userId,
+        );
+
+        if (!userInWorkspace) {
+            throw new Error('User does not belong to this workspace');
+        }
+
+        return workspace;
+    }
 }

@@ -1,0 +1,4 @@
+fastapi
+uvicorn
+azure-identity
+azure-mgmt-containerinstance

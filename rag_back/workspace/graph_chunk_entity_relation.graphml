@@ -1,0 +1,639 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d6" for="edge" attr.name="source_id" attr.type="string" />
+  <key id="d5" for="edge" attr.name="keywords" attr.type="string" />
+  <key id="d4" for="edge" attr.name="description" attr.type="string" />
+  <key id="d3" for="edge" attr.name="weight" attr.type="double" />
+  <key id="d2" for="node" attr.name="source_id" attr.type="string" />
+  <key id="d1" for="node" attr.name="description" attr.type="string" />
+  <key id="d0" for="node" attr.name="entity_type" attr.type="string" />
+  <graph edgedefault="undirected">
+    <node id="Valentin Peron">
+      <data key="d0">person</data>
+      <data key="d1">Valentin Peron is a student at Epitech Rennes, part of the class of 2027, who completed an internship developing a Machine Learning Pipeline for Automated Extraction of Articles from Newspaper Archives.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Mme Laurene Boucard">
+      <data key="d0">person</data>
+      <data key="d1">Mme Laurene Boucard is an academic tutor associated with Epitech Rennes, involved in guiding Valentin Peron's internship work.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Mr Julien Perron">
+      <data key="d0">person</data>
+      <data key="d1">Mr Julien Perron serves as a company tutor and is the Head of AI and Data Science at Ouest-France, supervising Valentin Peron's internship project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Michel Le Nouy">
+      <data key="d0">person</data>
+      <data key="d1">Michel Le Nouy is the Head of Applied Research and AI and Co-Director of the Synapses LabCom, who assisted Valentin Peron in understanding Ouest-France's history and AI research.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Tanguy Launay">
+      <data key="d0">person</data>
+      <data key="d1">Tanguy Launay provided invaluable support and guidance to Valentin Peron during his internship.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Victor Klötzer">
+      <data key="d0">person</data>
+      <data key="d1">Victor Klötzer provided invaluable support and guidance to Valentin Peron during his internship.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="The SIRAI team">
+      <data key="d0">organization</data>
+      <data key="d1">A team within Ouest-France, including Baye-Lahad Mbacke, Thomas Girault, Ibrahima Ba, Melvin Leveque, Cédric Jezequel, and Cédric Moreau, which provided expertise and support during the internship.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Numeric support team and SIN team">
+      <data key="d0">organization</data>
+      <data key="d1">Teams within Ouest-France that welcomed Valentin Peron and contributed to his internship experience.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Epitech Rennes">
+      <data key="d0">organization</data>
+      <data key="d1">Epitech Rennes is an educational institution where Valentin Peron studied and completed his internship program.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Ouest-France">
+      <data key="d0">organization</data>
+      <data key="d1">Ouest-France is a major media organization that reported a revenue of €296.8 million in 2023, operating in the media industry with over 1,600 employees. The company has a clear AI strategy focusing on data sovereignty and ethical AI usage.&lt;SEP&gt;Ouest-France is a media organization that demands data sovereignty and internal AI vision compliance in document processing.&lt;SEP&gt;Ouest-France is a prominent French media organization engaged in print media and digital platforms, and recognized as a leading daily newspaper in France.&lt;SEP&gt;Ouest-France is an organization where the author of the document interned, working on developing a machine learning pipeline for automated article extraction from historical newspaper archives.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a&lt;SEP&gt;chunk-0596139f33034f1465d3ec158d3cc134&lt;SEP&gt;chunk-994dfab33a72a337746c11fed565555b&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="The SIPA Ouest-France group">
+      <data key="d0">organization</data>
+      <data key="d1">A group to which Ouest-France belongs, involved in multimedia content expansion including the launch of a national television channel, Novo 19.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Novo 19">
+      <data key="d0">organization</data>
+      <data key="d1">Novo 19 is a national television channel on the French TNT network, set to start broadcasting on 1st September 2025 as part of the SIPA Ouest-France group's multimedia expansion.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Machine Learning Pipeline for Automated Extraction of Articles">
+      <data key="d0">category</data>
+      <data key="d1">A project developed during Valentin Peron's internship to automate the extraction of articles from newspaper archives using a custom pipeline that operates locally within the Ouest-France infrastructure.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Ouest-Éclair">
+      <data key="d0">organization</data>
+      <data key="d1">Ouest-Éclair is the former name of the newspaper now known as Ouest-France, covering the period from 1899 to 2000.&lt;SEP&gt;Ouest-Éclair is the former title of Ouest-France, changed after World War II, and involved in the article extraction project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a&lt;SEP&gt;chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Baye-Lahad Mbacke">
+      <data key="d0">person</data>
+      <data key="d1">Baye-Lahad Mbacke is a member of the SIRAI team at Ouest-France, contributing to Valentin Peron's internship project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Thomas Girault">
+      <data key="d0">person</data>
+      <data key="d1">Thomas Girault is a member of the SIRAI team at Ouest-France, contributing to Valentin Peron's internship project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Ibrahima Ba">
+      <data key="d0">person</data>
+      <data key="d1">Ibrahima Ba is a member of the SIRAI team at Ouest-France, contributing to Valentin Peron's internship project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Melvin Leveque">
+      <data key="d0">person</data>
+      <data key="d1">Melvin Leveque is a member of the SIRAI team at Ouest-France, contributing to Valentin Peron's internship project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Cédric Jezequel">
+      <data key="d0">person</data>
+      <data key="d1">Cédric Jezequel is a member of the SIRAI team at Ouest-France, contributing to Valentin Peron's internship project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Cédric Moreau">
+      <data key="d0">person</data>
+      <data key="d1">Cédric Moreau is a member of the SIRAI team at Ouest-France, contributing to Valentin Peron's internship project.</data>
+      <data key="d2">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </node>
+    <node id="Fabrice Bazard">
+      <data key="d0">person</data>
+      <data key="d1">Fabrice Bazard is the General Director at Ouest-France, playing a key leadership role within the organization.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Christophe Duprat">
+      <data key="d0">person</data>
+      <data key="d1">Christophe Duprat is the Director of Information Systems at Ouest-France, responsible for managing the organization's information systems.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="10 Rue du Breil, Chantepie">
+      <data key="d0">geo</data>
+      <data key="d1">The headquarters of Ouest-France is located at 10 Rue du Breil, Chantepie, where the internship mentioned in the text took place.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="War in Ukraine">
+      <data key="d0">event</data>
+      <data key="d1">The War in Ukraine is mentioned as part of the challenging global context impacting Ouest-France's financial performance.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="SIRAI team">
+      <data key="d0">organization</data>
+      <data key="d1">The SIRAI team is part of Ouest-France, focusing on exploring and developing AI-based solutions, including the Data Science pole.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Data Science pole">
+      <data key="d0">organization</data>
+      <data key="d1">The Data Science pole is a division within the SIRAI team responsible for R&amp;D, building AI models, and responding to departmental requests within Ouest-France.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Products and Services pole">
+      <data key="d0">organization</data>
+      <data key="d1">The Products and Services pole manages the 'Valorisation' platform, ensuring AI models from the Data Science team are integrated and deployed into production.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="AI Charter">
+      <data key="d0">category</data>
+      <data key="d1">Ouest-France has an internal AI Charter outlining ethical and responsible AI use, emphasizing data sovereignty, editorial independence, and data protection.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Internship">
+      <data key="d0">event</data>
+      <data key="d1">An Internship serves as the context during which various strategies for document layout detection and article segmentation are explored and tested.&lt;SEP&gt;The Internship refers to the period during which the pipeline architecture was developed, involving exploratory research and iterative improvements.&lt;SEP&gt;The Internship took place at Ouest-France, involving integration into the SIRAI team and a project focused on indexing historical newspaper pages.&lt;SEP&gt;This was an internship where the author worked on developing a machine learning pipeline for extracting articles from historical newspaper archives.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134&lt;SEP&gt;chunk-994dfab33a72a337746c11fed565555b&lt;SEP&gt;chunk-8c6d4c99f55238b1e1e32848d82d383a&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="World War II">
+      <data key="d0">event</data>
+      <data key="d1">World War II is referenced in the context of Ouest-Éclair changing its name to Ouest-France after being liberated during the war.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="RAG (Retrieval Augmented Generation)">
+      <data key="d0">technology</data>
+      <data key="d1">RAG is a technology mentioned in the context of using newspaper articles as a source for a chatbot to answer questions regarding historical data.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Newspaper indexing pipeline">
+      <data key="d0">technology</data>
+      <data key="d1">The newspaper indexing pipeline was developed to extract articles from high resolution scans of historical newspaper pages from Ouest-France and Ouest-Éclair.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Historical newspaper pages">
+      <data key="d0">category</data>
+      <data key="d1">Refers to the content of newspaper pages from Ouest-France and Ouest-Éclair covering the period 1899 to 2000, subject to the article extraction project.</data>
+      <data key="d2">chunk-994dfab33a72a337746c11fed565555b</data>
+    </node>
+    <node id="Tesseract">
+      <data key="d0">technology</data>
+      <data key="d1">Tesseract is a traditional OCR engine that faced challenges in processing complex historical newspaper layouts.&lt;SEP&gt;Tesseract is a traditional OCR engine that performed poorly on historical documents due to text and layout complexities.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="EasyOCR">
+      <data key="d0">technology</data>
+      <data key="d1">EasyOCR is a traditional OCR engine that struggled with inconsistent formatting and degraded text in historical documents.&lt;SEP&gt;EasyOCR is a traditional OCR engine that, like Tesseract, struggled with the complex layouts of historical newspapers, prompting exploration of more advanced methods.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Vision Language Models (VLMs)">
+      <data key="d0">technology</data>
+      <data key="d1">Vision Language Models are advanced OCR solutions combining natural language understanding with image analysis for reconstructing complex and damaged text.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="Qwen2.5-VL-7B-Instruct">
+      <data key="d0">technology</data>
+      <data key="d1">Qwen2.5-VL-7B-Instruct is an open-source VLM capable of interpreting complex visual content and spotting damaged or incomplete text.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="vLLM">
+      <data key="d0">technology</data>
+      <data key="d1">vLLM is a fast and scalable library used for LLM and VLM inference, enhancing the performance of OCR applications.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="Indexing Pipeline">
+      <data key="d0">technology</data>
+      <data key="d1">The Indexing Pipeline is a modular system developed to handle large-scale, high-resolution document analysis, addressing issues like layout detection, text extraction, and article segmentation.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="Pipeline Architecture">
+      <data key="d0">category</data>
+      <data key="d1">Pipeline Architecture refers to the systematic design and structure of the indexing pipeline, incorporating layout detection, text extraction, and article segmentation.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="Traditional OCR Tools">
+      <data key="d0">category</data>
+      <data key="d1">Traditional OCR Tools describes conventional optical character recognition engines like Tesseract and EasyOCR, used for converting images to text.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="High Resolution Newspaper Pages">
+      <data key="d0">category</data>
+      <data key="d1">High Resolution Newspaper Pages are historical documents with complex layouts and formats, posing a challenge for traditional OCR technology.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="Article Segmentation">
+      <data key="d0">category</data>
+      <data key="d1">Article Segmentation is a step in the indexing pipeline where extracted text blocks are grouped into meaningful articles.&lt;SEP&gt;Article Segmentation is the process of grouping detected text blocks into meaningful articles, which is a complex task due to diverse newspaper layouts and content types.&lt;SEP&gt;Article Segmentation refers to the process of dividing a document into discrete articles, which remains a significant challenge requiring further research and experimentation.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134&lt;SEP&gt;chunk-8c6d4c99f55238b1e1e32848d82d383a&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Text Extraction (OCR)">
+      <data key="d0">category</data>
+      <data key="d1">Text Extraction (OCR) is a crucial process in the indexing pipeline, focused on converting detected blocks into text format.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="Layout Detection">
+      <data key="d0">category</data>
+      <data key="d1">Layout Detection is a process in the pipeline that identifies and classifies different blocks within newspaper pages.</data>
+      <data key="d2">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </node>
+    <node id="VLM based OCR">
+      <data key="d0">category</data>
+      <data key="d1">VLM based OCR refers to vision-language models used to provide state-of-the-art results in text recognition for old, damaged, and multicolumn newspaper text.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="GPU">
+      <data key="d0">technology</data>
+      <data key="d1">GPU (Graphics Processing Unit) is used to handle large computational tasks during model processing, such as in LLM-based grouping strategies.&lt;SEP&gt;The GPU, or Graphics Processing Unit, experienced issues with VRAM capacity when processing entire newspaper pages, prompting a redesign of the system pipeline.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5&lt;SEP&gt;chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="YOLO11-Document-Layout-Analysis">
+      <data key="d0">technology</data>
+      <data key="d1">YOLO11-Document-Layout-Analysis is a model based on the YOLO11 architecture, adapted for document layout recognition to detect classes such as caption, footnote, and table.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="DocLayNet">
+      <data key="d0">category</data>
+      <data key="d1">DocLayNet is a dataset known in document layout recognition, used for adapting YOLO11-Document-Layout-Analysis for detecting different document structures.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="internship presentation">
+      <data key="d0">event</data>
+      <data key="d1">An internship presentation inspired the development of logic-based rules for improving layout detection based on position, size, and proximity of bounding boxes.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="historical document analysis">
+      <data key="d0">category</data>
+      <data key="d1">Historical document analysis is the field focused on processing and interpreting old documents, relevant to the challenges of multicolumn and degraded newspaper layouts.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="OCR engine">
+      <data key="d0">technology</data>
+      <data key="d1">The OCR engine is used to process isolated text regions from newspaper pages after layout detection, allowing for successful text recognition without exceeding memory limits.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="Hugging Face">
+      <data key="d0">organization</data>
+      <data key="d1">Hugging Face is a platform offering various models, including those for layout detection, although initially the available models did not perform well on historical newspapers.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="YOLO11">
+      <data key="d0">technology</data>
+      <data key="d1">YOLO11 is part of an ensemble approach for enhanced layout detection across varied newspaper formats.&lt;SEP&gt;YOLO11, or 'You Only Look Once', is a model architecture originally created for object recognition and adapted for document layout analysis.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="rules-based post-processing">
+      <data key="d0">category</data>
+      <data key="d1">Rules-based post-processing refers to the logic-based rules developed to refine layout detection outputs by merging, filtering, and reducing noise among detected regions.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="bounding boxes">
+      <data key="d0">category</data>
+      <data key="d1">Bounding boxes are regions identified by the layout detection model to segment various document elements, such as text and images, which require further processing for accuracy.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="ensemble approach">
+      <data key="d0">category</data>
+      <data key="d1">The ensemble approach involves combining multiple layout detection methods to enhance accuracy and robustness when parsing diverse historical newspaper formats.</data>
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </node>
+    <node id="PaddleOCR">
+      <data key="d0">organization</data>
+      <data key="d1">PaddleOCR is the organization that developed the PP-DocLayout-L, a document layout detection model designed for complex document structures and high-resolution images.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="PP-DocLayout-L">
+      <data key="d0">technology</data>
+      <data key="d1">PP-DocLayout-L is a document layout detection model developed by PaddleOCR, specifically designed for complex document structures and high-resolution images.&lt;SEP&gt;PP-DocLayout-L is part of an ensemble approach that improved robustness in layout detection for newspapers of different formats.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="YOLO-based model">
+      <data key="d0">technology</data>
+      <data key="d1">The YOLO-based model is a fast layout detection model that often produces overlapping or redundant bounding boxes, but is useful for detecting smaller or irregular blocks in documents.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Ensemble Approach">
+      <data key="d0">concept</data>
+      <data key="d1">Ensemble Approach refers to the method of combining multiple models to leverage each model's strengths and compensate for individual weaknesses, resulting in more robust and accurate predictions.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="HDBSCAN">
+      <data key="d0">technology</data>
+      <data key="d1">HDBSCAN is a density-based clustering algorithm used to detect clusters of semantically similar blocks in the context of article segmentation.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Large Language Models (LLMs)">
+      <data key="d0">technology</data>
+      <data key="d1">Large Language Models (LLMs) are used in this context to predict which text blocks should be grouped together based on their content and spatial information.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Vision-Language Model (VLM)">
+      <data key="d0">technology</data>
+      <data key="d1">Vision-Language Model (VLM) is used to pre-extract article titles to guide the grouping process in article segmentation.&lt;SEP&gt;Vision-Language Model (VLM) refers to a type of model used to pre-extract article titles, aimed at improving the grouping process of newspaper articles.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a&lt;SEP&gt;chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Embedding Cosine Similarity Matrix">
+      <data key="d0">technology</data>
+      <data key="d1">Embedding Cosine Similarity Matrix is used to identify blocks with related content by representing each text block as a vector capturing its meaning.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Rule-based post-processing">
+      <data key="d0">technology</data>
+      <data key="d1">Rule-based post-processing is a method used to improve results for a specific subset of pages in document layout detection, though it lacks robustness to handle the full diversity of an archive.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Hybrid system">
+      <data key="d0">technology</data>
+      <data key="d1">The Hybrid system refers to the combination of PP-DocLayout-L and YOLO-based models in a layout detection approach, aiming to harness the strengths of both for improved accuracy.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Semantic embeddings">
+      <data key="d0">technology</data>
+      <data key="d1">Semantic embeddings are used to represent each text block as a vector capturing its meaning, aiming to identify blocks with related content during article segmentation.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Bounding boxes">
+      <data key="d0">technology</data>
+      <data key="d1">Bounding boxes are used in layout detection models to identify and highlight specific areas or blocks within a document.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Newspaper pages from 1899 to the 1990s">
+      <data key="d0">category</data>
+      <data key="d1">This category represents the dataset of newspaper pages being analyzed for layout detection, highlighting the historical and diverse nature of the documents.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Data science">
+      <data key="d0">category</data>
+      <data key="d1">Data science is the field that involves using techniques like ensembling to solve complex challenges such as document layout detection and text clustering.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Complex document structures">
+      <data key="d0">category</data>
+      <data key="d1">Complex document structures refer to the intricate and varied formatting found in documents, posing challenges for precise layout detection.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="High-resolution images">
+      <data key="d0">category</data>
+      <data key="d1">High-resolution images are used in conjunction with document layout models to ensure accuracy and detail in detection processes.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Text blocks">
+      <data key="d0">category</data>
+      <data key="d1">Text blocks are sections of text within a document layout that are detected and grouped during the processing pipeline.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Clustering algorithms">
+      <data key="d0">category</data>
+      <data key="d1">Clustering algorithms group similar data points together based on specific criteria, such as semantic similarity in text blocks.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="Degraded regions of documents">
+      <data key="d0">category</data>
+      <data key="d1">Degraded regions of documents are areas where the text or images have been damaged, complicating layout detection.</data>
+      <data key="d2">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </node>
+    <node id="LayoutLM">
+      <data key="d0">technology</data>
+      <data key="d1">LayoutLM is a document layout analysis model designed to provide structural awareness and facilitate better article segmentation compared to general-purpose models.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Graph Neural Networks (GNNs)">
+      <data key="d0">technology</data>
+      <data key="d1">Graph Neural Networks (GNNs) are described as a promising option for representing detected blocks as nodes in a graph to reconstruct full articles.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Qwen 2.5 VL (7B)">
+      <data key="d0">technology</data>
+      <data key="d1">Qwen 2.5 VL (7B) is a Vision Language Model used as part of an advanced method deployed to improve newspaper article extraction.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Group Position Embedding (GPE)">
+      <data key="d0">technology</data>
+      <data key="d1">Group Position Embedding (GPE) is a technique designed to enhance layout understanding in machine learning models without architectural changes.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Intern">
+      <data key="d0">person</data>
+      <data key="d1">The intern is the person who worked on developing the machine learning pipeline for Ouest-France during their internship.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Spatial Information">
+      <data key="d0">category</data>
+      <data key="d1">Spatial Information is a crucial component that plays a role in defining what constitutes an article, indicating the importance of layout and position.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Semantic Similarity">
+      <data key="d0">category</data>
+      <data key="d1">Semantic Similarity is described as insufficient alone in grouping diverse content types in newspaper pages, highlighting the need for hybrid methods.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Machine Learning Pipeline">
+      <data key="d0">technology</data>
+      <data key="d1">Machine Learning Pipeline refers to the system being developed to automate the extraction of articles from historical newspapers at Ouest-France.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="OCR Engines">
+      <data key="d0">technology</data>
+      <data key="d1">OCR Engines refers to Optical Character Recognition engines like Tesseract and EasyOCR, which faced challenges with historical newspaper layouts.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="Multicolumn Documents">
+      <data key="d0">category</data>
+      <data key="d1">Multicolumn Documents are high-resolution newspaper formats with varied and complex layouts, presenting challenges for OCR and layout analysis.</data>
+      <data key="d2">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </node>
+    <node id="layout detection">
+      <data key="d2">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+      <data key="d1">The use of VLM based OCR revealed the limitation of processing entire pages, highlighting the need for layout detection to handle memory constraints efficiently.</data>
+      <data key="d0">UNKNOWN</data>
+    </node>
+    <edge source="Valentin Peron" target="Mme Laurene Boucard">
+      <data key="d3">8.0</data>
+      <data key="d4">Mme Laurene Boucard served as Valentin Peron's academic tutor during his internship at Epitech Rennes.</data>
+      <data key="d5">academic guidance, mentorship</data>
+      <data key="d6">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </edge>
+    <edge source="Valentin Peron" target="Mr Julien Perron">
+      <data key="d3">9.0</data>
+      <data key="d4">Mr Julien Perron acted as Valentin Peron's company tutor, overseeing his internship project at Ouest-France.</data>
+      <data key="d5">professional supervision, mentorship</data>
+      <data key="d6">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </edge>
+    <edge source="Valentin Peron" target="Ouest-France">
+      <data key="d3">10.0</data>
+      <data key="d4">Valentin Peron completed an internship at Ouest-France, developing a Machine Learning Pipeline for article extraction.</data>
+      <data key="d5">internship, project development</data>
+      <data key="d6">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </edge>
+    <edge source="Ouest-France" target="The SIPA Ouest-France group">
+      <data key="d3">9.0</data>
+      <data key="d4">Ouest-France is a part of the SIPA Ouest-France group, which has diversified operations including print media and digital platforms.</data>
+      <data key="d5">corporate structure, media operations</data>
+      <data key="d6">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </edge>
+    <edge source="Ouest-France" target="Novo 19">
+      <data key="d3">8.0</data>
+      <data key="d4">Novo 19 is a television channel launched as part of the SIPA Ouest-France group's expansion into multimedia content.</data>
+      <data key="d5">media expansion, broadcasting</data>
+      <data key="d6">chunk-bc514f2622501600ee2b8e93dccb447a</data>
+    </edge>
+    <edge source="Ouest-France" target="Fabrice Bazard">
+      <data key="d3">8.0</data>
+      <data key="d4">Fabrice Bazard is the General Director at Ouest-France, indicating his leadership role in the organization.</data>
+      <data key="d5">leadership, management</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="Ouest-France" target="Christophe Duprat">
+      <data key="d3">8.0</data>
+      <data key="d4">Christophe Duprat is responsible for the information systems at Ouest-France, indicating a key managerial role.</data>
+      <data key="d5">leadership, management</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="Ouest-France" target="AI Charter">
+      <data key="d3">9.0</data>
+      <data key="d4">Ouest-France has established an AI Charter to ensure responsible use of AI, reflecting its commitment to ethics and data sovereignty.</data>
+      <data key="d5">ethics, data sovereignty</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="Ouest-France" target="Ouest-Éclair">
+      <data key="d3">7.0</data>
+      <data key="d4">Ouest-Éclair was the former name of Ouest-France, indicating a historical connection between the two.</data>
+      <data key="d5">historical connection</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="Ouest-France" target="Indexing Pipeline">
+      <data key="d3">8.0</data>
+      <data key="d4">The Indexing Pipeline is developed to comply with Ouest-France's internal AI vision and data sovereignty requirements.</data>
+      <data key="d5">compliance, internal policy</data>
+      <data key="d6">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </edge>
+    <edge source="Ouest-France" target="Internship">
+      <data key="d3">8.0</data>
+      <data key="d4">The internship was conducted at Ouest-France, providing a unique opportunity to develop a machine learning pipeline.</data>
+      <data key="d5">professional experience, machine learning</data>
+      <data key="d6">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </edge>
+    <edge source="Ouest-Éclair" target="World War II">
+      <data key="d3">8.0</data>
+      <data key="d4">Ouest-Éclair changed its name to Ouest-France after being liberated during World War II, indicating a historical transition.</data>
+      <data key="d5">historical transition, rebranding</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="SIRAI team" target="Data Science pole">
+      <data key="d3">8.0</data>
+      <data key="d4">The Data Science pole operates within the SIRAI team, focusing on AI research and development at Ouest-France.</data>
+      <data key="d5">AI development, research</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="SIRAI team" target="Internship">
+      <data key="d3">9.0</data>
+      <data key="d4">The internship involved integration into the SIRAI team, specifically in the Data Science pole, to work on AI-based solutions.</data>
+      <data key="d5">work experience, AI development</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="Data Science pole" target="Products and Services pole">
+      <data key="d3">7.0</data>
+      <data key="d4">The Products and Services pole manages the deployment of AI models developed by the Data Science pole.</data>
+      <data key="d5">deployment, integration</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="RAG (Retrieval Augmented Generation)" target="Newspaper indexing pipeline">
+      <data key="d3">8.0</data>
+      <data key="d4">The pipeline supports RAG by extracting articles from historical newspapers for use in a chatbot to answer historical questions.</data>
+      <data key="d5">data extraction, historical research</data>
+      <data key="d6">chunk-994dfab33a72a337746c11fed565555b</data>
+    </edge>
+    <edge source="Tesseract" target="Indexing Pipeline">
+      <data key="d3">6.0</data>
+      <data key="d4">Tesseract, as a traditional OCR tool, was initially explored but found ineffective for the high-resolution and complex layouts tackled by the indexing pipeline.</data>
+      <data key="d5">technology evaluation, performance limitations</data>
+      <data key="d6">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </edge>
+    <edge source="Tesseract" target="EasyOCR">
+      <data key="d3">6.0</data>
+      <data key="d4">Both Tesseract and EasyOCR struggled with the complex layouts of historical newspapers, leading to exploration of more advanced methods.</data>
+      <data key="d5">limitations, technological challenge</data>
+      <data key="d6">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </edge>
+    <edge source="EasyOCR" target="Indexing Pipeline">
+      <data key="d3">6.0</data>
+      <data key="d4">EasyOCR was assessed in the development of the indexing pipeline but failed to meet the requirements due to layout and formatting challenges.</data>
+      <data key="d5">technology evaluation, inadequate performance</data>
+      <data key="d6">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </edge>
+    <edge source="Vision Language Models (VLMs)" target="Qwen2.5-VL-7B-Instruct">
+      <data key="d3">9.0</data>
+      <data key="d4">Qwen2.5-VL-7B-Instruct is a specific implementation that exemplifies the capabilities of Vision Language Models in OCR tasks.</data>
+      <data key="d5">implementation, advanced OCR</data>
+      <data key="d6">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </edge>
+    <edge source="Qwen2.5-VL-7B-Instruct" target="vLLM">
+      <data key="d3">8.0</data>
+      <data key="d4">vLLM is used for deploying the Qwen2.5-VL-7B-Instruct model efficiently, improving OCR performance.</data>
+      <data key="d5">deployment, performance enhancement</data>
+      <data key="d6">chunk-0596139f33034f1465d3ec158d3cc134</data>
+    </edge>
+    <edge source="Article Segmentation" target="Large Language Models (LLMs)">
+      <data key="d3">6.0</data>
+      <data key="d4">LLMs are explored in the context of Article Segmentation to group related text blocks based on content and spatial information.</data>
+      <data key="d5">text grouping, segmentation strategy</data>
+      <data key="d6">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </edge>
+    <edge source="VLM based OCR" target="layout detection">
+      <data key="d3">8.0</data>
+      <data key="d4">The use of VLM based OCR revealed the limitation of processing entire pages, highlighting the need for layout detection to handle memory constraints efficiently.</data>
+      <data key="d5">system design, technological improvement</data>
+      <data key="d6">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </edge>
+    <edge source="YOLO11-Document-Layout-Analysis" target="DocLayNet">
+      <data key="d3">9.0</data>
+      <data key="d4">YOLO11-Document-Layout-Analysis model uses DocLayNet to detect and analyze various document structures, improving layout detection for newspaper pages.</data>
+      <data key="d5">data adaptation, document recognition</data>
+      <data key="d6">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </edge>
+    <edge source="YOLO11-Document-Layout-Analysis" target="internship presentation">
+      <data key="d3">7.0</data>
+      <data key="d4">The internship presentation highlighted a potential approach of combining machine learning with rule-based post-processing, leading to improvements in YOLO11-Document-Layout-Analysis's performance.</data>
+      <data key="d5">innovation inspiration, process enhancement</data>
+      <data key="d6">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </edge>
+    <edge source="historical document analysis" target="layout detection">
+      <data key="d3">8.0</data>
+      <data key="d4">Layout detection is a crucial component in processing historical documents, addressing challenges in multicolumn and degraded newspaper layouts.</data>
+      <data key="d5">document processing, historical challenges</data>
+      <data key="d6">chunk-a0864f7edcaa451cf3246af07c6c56d5</data>
+    </edge>
+    <edge source="YOLO11" target="PP-DocLayout-L">
+      <data key="d3">7.0</data>
+      <data key="d4">YOLO11 and PP-DocLayout-L were used together in an ensemble approach to improve layout detection.</data>
+      <data key="d5">ensemble approach, layout detection</data>
+      <data key="d6">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </edge>
+    <edge source="PaddleOCR" target="PP-DocLayout-L">
+      <data key="d3">8.0</data>
+      <data key="d4">PaddleOCR developed the PP-DocLayout-L model, indicating its direct involvement in advancing document layout detection technology.</data>
+      <data key="d5">development, technological advancement</data>
+      <data key="d6">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </edge>
+    <edge source="PP-DocLayout-L" target="YOLO-based model">
+      <data key="d3">9.0</data>
+      <data key="d4">The PP-DocLayout-L and YOLO-based model are combined in a hybrid system to improve document layout detection by leveraging the strengths of each model.</data>
+      <data key="d5">model integration, improved accuracy</data>
+      <data key="d6">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </edge>
+    <edge source="PP-DocLayout-L" target="Ensemble Approach">
+      <data key="d3">8.0</data>
+      <data key="d4">The Ensemble Approach uses the PP-DocLayout-L model as the primary source for layout detection due to its high confidence predictions.</data>
+      <data key="d5">model reliability, ensemble strategy</data>
+      <data key="d6">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </edge>
+    <edge source="YOLO-based model" target="Ensemble Approach">
+      <data key="d3">7.0</data>
+      <data key="d4">The Ensemble Approach integrates the YOLO-based model to fill gaps and improve detection of smaller or irregular blocks.</data>
+      <data key="d5">gap filling, ensemble strategy</data>
+      <data key="d6">chunk-8c6d4c99f55238b1e1e32848d82d383a</data>
+    </edge>
+    <edge source="Vision-Language Model (VLM)" target="Qwen 2.5 VL (7B)">
+      <data key="d3">8.0</data>
+      <data key="d4">Qwen 2.5 VL (7B) is a specific type of Vision-Language Model that was used to improve performance in article extraction.</data>
+      <data key="d5">model application, performance enhancement</data>
+      <data key="d6">chunk-ee8de8645b4a1e06c900e60bf623000e</data>
+    </edge>
+  </graph>
+</graphml>

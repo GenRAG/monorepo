@@ -29,6 +29,22 @@ services:
     command: >
       sh -c "yarn dev -- --port 3004 --hostname 0.0.0.0"
 
+  rag_backend:
+    build: ./rag_back
+    container_name: rag_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./rag_back/.env
+  rag_engine:
+    build: ./rag_engine
+    container_name: rag_engine
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./rag_engine/.env
 
   #postgres:
   #  image: postgres:15

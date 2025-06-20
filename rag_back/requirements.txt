@@ -1,0 +1,13 @@
+fastapi[standard]
+langchain-text-splitters
+langchain_pinecone
+langchain_openai
+langchain
+pandas
+cohere
+pdfminer.six
+langchain_experimental
+uvicorn[standard]
+networkx
+graspologic
+nano_vectordb

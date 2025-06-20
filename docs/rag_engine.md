@@ -83,9 +83,8 @@ Uses Azure's HttpResponseError to catch deployment issues. Returns 500 status co
 
 ## Notes and TODOs
 
-- The container group name is currently hardcoded as "GenRAG-ResourceGroup" which means you can only have one deployment at a time
-- CORS is wide open - need to restrict this
-- All configuration is hardcoded - should probably move to config files or environment variables
+- CORS is wide open - we will later restric it based on url of our infra
+- Some configuration values are hardcoded - We will late move to config files or environment variables
 - No authentication on the deployment endpoints - anyone can deploy/undeploy
 - The polling mechanism for deployment completion is pretty basic (just sleeps for 5 seconds)
 - No cleanup of failed deployments

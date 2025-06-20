@@ -1,18 +1,18 @@
 services:
 
   #client:
-  #  build: ./plateform_front
-  #  container_name: web
-  #  restart: unless-stopped
-  #  ports:
-  #    - "3003:3003"
-  #  env_file:
-  #    - ./plateform_front/.env
-  #  volumes:
-  #    - ./plateform_front:/usr/src/app
-  #    - /usr/src/app/node_modules
-  #  command: >
-  #    sh -c "yarn dev -- --port 3003 --hostname 0.0.0.0"
+  # build: ./plateform_front
+  # container_name: web
+  # restart: unless-stopped
+  # ports:
+  #   - "3003:3003"
+  # env_file:
+  #   - ./plateform_front/.env
+  # volumes:
+  #   - ./plateform_front:/usr/src/app
+  #   - /usr/src/app/node_modules
+  # command: >
+  #   sh -c "yarn dev -- --port 3003 --hostname 0.0.0.0"
 #
 #
   #vitrine:

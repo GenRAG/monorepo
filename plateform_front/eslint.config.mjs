@@ -14,6 +14,7 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+      'prettier/prettier': ['warn', { tabWidth: 4, useTabs: false }],
     },
   },
 ];

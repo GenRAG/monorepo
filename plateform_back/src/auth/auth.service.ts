@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from 'src/auth/token-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserRequest } from 'src/users/dto/create-user.request';
+import { BrevoService } from 'src/auth/brevo.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
         private readonly usersService: UsersService,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
+        private readonly brevoService: BrevoService,
     ) {}
 
     login(user: User, response: Response): { tokenPayload: TokenPayload } {
@@ -54,6 +56,10 @@ export class AuthService {
             );
         }
 
+        const emailVerificationToken = Math.floor(
+            Math.random() * 900000 + 100000,
+        );
+
         const createdUser = await this.usersService.createUser({
             ...registerBody,
         });
@@ -64,6 +70,10 @@ export class AuthService {
             );
         }
 
+        await this.brevoService.sendConfirmationEmail(
+            createdUser.email,
+            createdUser.emailVerificationToken,
+        );
         return this.login(createdUser, response);
     }
 

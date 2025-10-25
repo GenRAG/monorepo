@@ -9,6 +9,7 @@ import { TokenPayload } from 'src/auth/token-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserRequest } from 'src/users/dto/create-user.request';
 import { BrevoService } from 'src/auth/brevo.service';
+import { VerifyTokenRequest } from 'src/users/dto/verify-token.request';
 
 @Injectable()
 export class AuthService {
@@ -43,10 +44,7 @@ export class AuthService {
         return { tokenPayload };
     }
 
-    async register(
-        registerBody: CreateUserRequest,
-        response: Response,
-    ): Promise<{ tokenPayload: TokenPayload }> {
+    async register(registerBody: CreateUserRequest): Promise<void> {
         const { email } = registerBody;
 
         const existingUser = await this.usersService.getUser({ email });
@@ -56,25 +54,50 @@ export class AuthService {
             );
         }
 
-        const emailVerificationToken = Math.floor(
-            Math.random() * 900000 + 100000,
-        );
+        const emailVerificationToken =
+            Math.floor(Math.random() * 900000) + 100000;
 
-        const createdUser = await this.usersService.createUser({
+        /*const createdUser = await this.usersService.createUser({
             ...registerBody,
+            emailVerificationToken,
         });
 
         if (!createdUser) {
             throw new UnauthorizedException(
                 'User registration failed. Please try again.',
             );
+        }*/
+
+        /*return await this.brevoService.sendConfirmationEmail(
+            registerBody.email,
+            emailVerificationToken,
+        );*/
+    }
+
+    async verifyEmailToken(
+        emailVerificationToken: VerifyTokenRequest,
+        response: Response,
+    ): Promise<{ tokenPayload: TokenPayload }> {
+        const { email, token } = emailVerificationToken;
+        const user = await this.usersService.getUser({ email });
+
+        if (!user) {
+            throw new UnauthorizedException('User not found.');
         }
 
-        await this.brevoService.sendConfirmationEmail(
-            createdUser.email,
-            createdUser.emailVerificationToken,
-        );
-        return this.login(createdUser, response);
+        if (user.emailVerificationToken !== token) {
+            throw new UnauthorizedException('Invalid verification token.');
+        }
+
+        await this.usersService.updateUser({
+            where: { email },
+            data: {
+                isEmailVerified: true,
+                emailVerificationToken: null,
+            },
+        });
+
+        return this.login(user, response);
     }
 
     async verifyUser(email: string, password: string) {

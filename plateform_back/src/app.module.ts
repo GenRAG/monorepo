@@ -20,8 +20,10 @@ import { ProjectModule } from './project/project.module';
                             : {
                                   target: 'pino-pretty',
                                   options: {
-                                      singleLine: true,
+                                      singleLine: false,
                                       colorize: true,
+                                      ignore: 'pid,hostname',
+                                      translateTime: 'SYS:standard',
                                   },
                               },
                         level: isProduction ? 'info' : 'debug',

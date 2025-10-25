@@ -79,12 +79,12 @@ const Button = {
 			const disabled = props.isDisabled || props.disabled || props.isLoading;
 
 			return {
-				color: disabled ? colors.grey[300] : colors.font.primary,
+				color: disabled ? colors.grey[50] : colors.whites.offwhite,
 				cursor: disabled ? 'not-allowed' : 'pointer',
 
 				background: disabled
-					? 'radial-gradient(95.81% 135.6% at 100% 0%, rgba(236, 183, 70, 0.2) 0%, #F6DCB2 100%)'
-					: 'radial-gradient(35.81% 85.6% at 30% 30%, rgba(236, 183, 70, 0.4) 0%, #F3B556 100%)',
+					? 'radial-gradient(95.81% 135.6% at 100% 0%, rgba(255, 255, 255, 0.99) 0%, #fad08cff 100%)'
+					: 'radial-gradient(35.81% 85.6% at 40% 30%, rgba(255, 255, 255, 0.81) 0%, #e6a646ff 100%)',
 				backgroundSize: '300% 300%',
 				backgroundPosition: '0% 90%',
 				transition: disabled ? 'none' : 'background-position 2s ease-in-out',
@@ -170,7 +170,7 @@ const Button = {
 				background: 'transparent',
 				_hover: {
 					textDecoration: 'none',
-					color: disabled ? colors.grey[300] : colors.font.primary,
+					color: disabled ? colors.grey[300] : colors.whites.offwhite,
 				},
 			};
 		},

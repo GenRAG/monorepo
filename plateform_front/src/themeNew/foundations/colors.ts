@@ -99,6 +99,15 @@ const baseColors = {
 		950: '#1A2013',
 	},
 
+	liquidGlass: {
+		success: 'rgba(72, 187, 120, 0.25)',
+		error: 'rgba(229, 62, 62, 0.25)',
+		warning: 'rgba(236, 201, 75, 0.25)',
+		info: 'rgba(66, 153, 225, 0.25)',      
+		favorite: 'rgba(246, 173, 85, 0.25)',  
+		default: 'rgba(255, 255, 255, 0.15)',
+	},
+
 	gradients: {
 		ESSENTIAL: 'linear-gradient(180deg, #D8D7D7 -0.11%, #F6F6F6 100%)',
 		FLAGSHIP: 'linear-gradient(180deg, #726F6B -0.1%, #989591 99.99%)',

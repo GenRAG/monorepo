@@ -26,7 +26,8 @@
       "components/*": ["components/*"],
       "types/*": ["types/*"],
       "utils/*": ["utils/*"],
-      "pages/*": ["pages/*"]
+      "pages/*": ["pages/*"],
+      "services/*": ["services/*"],
     }
   },
   "include": [

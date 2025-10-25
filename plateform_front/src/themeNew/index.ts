@@ -1,4 +1,4 @@
-import { extendTheme } from '@chakra-ui/react';
+import { extendTheme, ThemeConfig } from '@chakra-ui/react';
 
 import Accordion from 'themeNew/components/accordion';
 import Badge from 'themeNew/components/badge';
@@ -51,6 +51,12 @@ import './index.scss';
 
 // If you update breakpoints values, make sure to update breakpoints in css too
 // file : src/theme/index.css
+
+const config: ThemeConfig = {
+  initialColorMode: "dark",
+  useSystemColorMode: false,
+};
+
 const breakpoints = {
 	sm: '576px',
 	md: '768px',
@@ -61,6 +67,7 @@ const breakpoints = {
 };
 
 const overrides = {
+	config,
 	// Foundations
 	breakpoints,
 	colors,

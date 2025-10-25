@@ -22,6 +22,7 @@ model User {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   emailVerificationToken Int?
+  isEmailVerified Boolean          @default(false)
   workspaces     UserWorkspace[]
 }
 

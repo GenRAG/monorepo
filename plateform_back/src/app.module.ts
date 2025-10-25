@@ -3,6 +3,8 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
+import { WorkspaceModule } from './workspace/workspace.module';
+import { ProjectModule } from './project/project.module';
 
 @Module({
     imports: [
@@ -20,6 +22,8 @@ import { AuthModule } from './auth/auth.module';
                                   options: {
                                       singleLine: false,
                                       colorize: true,
+                                      ignore: 'pid,hostname',
+                                      translateTime: 'SYS:standard',
                                   },
                               },
                         level: isProduction ? 'info' : 'debug',
@@ -33,6 +37,8 @@ import { AuthModule } from './auth/auth.module';
         }),
         UsersModule,
         AuthModule,
+        WorkspaceModule,
+        ProjectModule,
     ],
     controllers: [],
     providers: [],

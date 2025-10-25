@@ -8,7 +8,11 @@ import * as bcrypt from 'bcryptjs';
 export class UsersService {
     constructor(private readonly prismaService: PrismaService) {}
 
-    async createUser(request: CreateUserRequest): Promise<User> {
+    async createUser(
+        request: CreateUserRequest & {
+            emailVerificationToken?: number;
+        },
+    ): Promise<User> {
         return this.prismaService.user.create({
             data: {
                 ...request,
@@ -25,5 +29,22 @@ export class UsersService {
 
     async getUsers(): Promise<User[]> {
         return this.prismaService.user.findMany();
+    }
+
+    async updateUser(params: {
+        where: Prisma.UserWhereUniqueInput;
+        data: Prisma.UserUpdateInput;
+    }): Promise<User> {
+        const { where, data } = params;
+        return this.prismaService.user.update({
+            data,
+            where,
+        });
+    }
+
+    async deleteUser(id: string): Promise<User> {
+        return this.prismaService.user.delete({
+            where: { id },
+        });
     }
 }

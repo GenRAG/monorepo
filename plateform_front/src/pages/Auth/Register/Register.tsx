@@ -11,6 +11,7 @@ import {
 	Input,
 	Link,
 	Text,
+	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react';
 import { AuthHeader } from 'pages/Auth/AuthHeader';
@@ -67,11 +68,12 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
 				{step === RegisterFormSteps.REGISTER_EMAIL ? (
 					<>
 						<FormControl isInvalid={!!errors.email}>
-							<FormLabel color="whites.offwhite">Adresse email</FormLabel>
+							<FormLabel color="whites.offwhite">Email address</FormLabel>
 							<Input
 								{...register('email', { validate: (email) => validateEmail(email ?? undefined) })}
-								placeholder="warren.buffett@gmail.com"
+								placeholder="john.smith@gmail.com"
 								autoComplete="email"
+								color={useColorModeValue("black", "whites.offwhite")}
 							/>
 							{errors.email && <FormErrorMessage>{errors.email.message}</FormErrorMessage>}
 						</FormControl>

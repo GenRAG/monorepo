@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, HStack, Image, Stack, Text, VStack } from '@chakra-ui/react';
+import { Box, Flex, Heading, HStack, Icon, Image, Stack, Text, VStack } from '@chakra-ui/react';
 import Ramify2025 from 'assetsNew/Background/Auth/2025.png';
 import RamifyLogo from 'assetsNew/logoRamify/black/black.svg';
 import { ArrowLeft } from 'lucide-react';
@@ -32,13 +32,7 @@ const AuthDesktopLayout = ({ children, canGoBack }: { children: React.ReactNode;
     <Flex flex={1} h="100%" justify="center" position="relative">
       {canGoBack && (
         <Box position="absolute" top="24px" left="24px" zIndex={3}>
-          <Button
-            btnType="icon"
-            icon={ArrowLeft}
-            variant="secondary"
-            onClick={canGoBack}
-            aria-label="Revenir en arrière"
-          />
+          <Icon as={ArrowLeft} boxSize={6} cursor="pointer" color="whites.offwhite" onClick={canGoBack} />
         </Box>
       )}
       <Flex w="100%" maxW="80%" direction="column" gap="32px" justify="center">

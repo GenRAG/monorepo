@@ -8,28 +8,32 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from 'src/auth/token-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserRequest } from 'src/users/dto/create-user.request';
-import { BrevoService } from 'src/auth/brevo.service';
-import { VerifyTokenRequest } from 'src/users/dto/verify-token.request';
+import { TokenService } from 'src/auth/token.service';
+import { NewPasswordRequest } from 'src/users/dto/verify-token.request';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly usersService: UsersService,
         private readonly configService: ConfigService,
+        private readonly tokenService: TokenService,
         private readonly jwtService: JwtService,
-        private readonly brevoService: BrevoService,
     ) {}
 
     login(user: User, response: Response): { tokenPayload: TokenPayload } {
         const expires = new Date();
-        const jwtExpiration =
-            this.configService.getOrThrow<string>('JWT_EXPIRATION');
-        const expirationMs = ms(jwtExpiration as ms.StringValue);
+        const tokenValidityMs = ms(
+            this.configService.getOrThrow<string>(
+                'JWT_EXPIRATION',
+            ) as ms.StringValue,
+        );
+        console.log('Token validity in ms:', tokenValidityMs);
 
-        if (typeof expirationMs !== 'number') {
+        if (typeof tokenValidityMs !== 'number') {
             throw new Error('Invalid JWT_EXPIRATION format');
         }
-        expires.setMilliseconds(expires.getMilliseconds() + expirationMs);
+
+        expires.setMilliseconds(expires.getMilliseconds() + tokenValidityMs);
 
         const tokenPayload: TokenPayload = { userId: user.id };
 
@@ -54,72 +58,85 @@ export class AuthService {
             );
         }
 
-        const emailVerificationToken =
-            Math.floor(Math.random() * 900000) + 100000;
-
-        /*const createdUser = await this.usersService.createUser({
+        const createdUser = await this.usersService.createUser({
             ...registerBody,
-            emailVerificationToken,
+            isEmailVerified: false,
         });
 
-        if (!createdUser) {
-            throw new UnauthorizedException(
-                'User registration failed. Please try again.',
-            );
-        }*/
-
-        /*return await this.brevoService.sendConfirmationEmail(
-            registerBody.email,
-            emailVerificationToken,
+        /*await this.tokenService.generateAndSendVerificationToken(
+            createdUser.email,
         );*/
     }
 
-    async verifyEmailToken(
-        emailVerificationToken: VerifyTokenRequest,
-        response: Response,
-    ): Promise<{ tokenPayload: TokenPayload }> {
-        const { email, token } = emailVerificationToken;
+    async verifyUser(email: string, password: string) {
+        const user = await this.usersService.getUser({ email });
+        console.log('Verifying user:', user);
+        if (!user || !user.password || typeof user.password !== 'string') {
+            throw new UnauthorizedException('Credentials are not valid.');
+        }
+
+        const authenticated = await bcrypt.compare(password, user.password);
+
+        const not_verified = !user.isEmailVerified;
+
+        if (!authenticated) {
+            throw new UnauthorizedException('Credentials are not valid.');
+        } /*else if (not_verified) {
+            throw new UnauthorizedException('Account not verified');
+        }*/
+        return user;
+    }
+
+    async initiatePasswordReset(email: string): Promise<void> {
+        const user = await this.usersService.getUser({ email });
+        if (!user) {
+            throw new UnauthorizedException(
+                'No user found with the provided email.',
+            );
+        }
+        console.log('Initiating password reset for user:', user);
+        await this.tokenService.generateAndSendPasswordResetToken(user);
+    }
+
+    async verifyPasswordResetToken(
+        verifyTokenBody: NewPasswordRequest,
+    ): Promise<void> {
+        const { email, token, password } = verifyTokenBody;
         const user = await this.usersService.getUser({ email });
 
-        if (!user) {
-            throw new UnauthorizedException('User not found.');
+        if (!user || user.passwordResetToken !== token) {
+            throw new UnauthorizedException('Invalid credentials.');
         }
 
-        if (user.emailVerificationToken !== token) {
-            throw new UnauthorizedException('Invalid verification token.');
+        if (user.passwordResetLastSentAt) {
+            const tokenAgeMs =
+                Date.now() - user.passwordResetLastSentAt.getTime();
+            const tokenValidityMs = ms(
+                this.configService.getOrThrow<string>(
+                    'TOKEN_VALIDITY',
+                ) as ms.StringValue,
+            );
+
+            if (typeof tokenValidityMs !== 'number') {
+                throw new Error('Invalid TOKEN_VALIDITY format');
+            }
+
+            if (tokenAgeMs > tokenValidityMs) {
+                throw new UnauthorizedException(
+                    'Password reset token has expired.',
+                );
+            }
         }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         await this.usersService.updateUser({
             where: { email },
             data: {
-                isEmailVerified: true,
-                emailVerificationToken: null,
+                password: hashedPassword,
+                passwordResetToken: null,
+                passwordResetLastSentAt: null,
             },
         });
-
-        return this.login(user, response);
-    }
-
-    async verifyUser(email: string, password: string) {
-        try {
-            const user = await this.usersService.getUser({ email });
-
-            if (!user || !user.password || typeof user.password !== 'string') {
-                throw new UnauthorizedException('Credentials are not valid.');
-            }
-
-            const authenticated = await bcrypt.compare(password, user.password);
-
-            if (!authenticated) {
-                throw new UnauthorizedException();
-            }
-
-            return user;
-        } catch (error) {
-            throw new UnauthorizedException(
-                'Credentials are not valid.',
-                error,
-            );
-        }
     }
 }

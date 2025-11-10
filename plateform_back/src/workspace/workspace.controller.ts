@@ -27,9 +27,13 @@ export class WorkspaceController {
 
     @Get('all')
     @UseGuards(JwtAuthGuard)
-    getAllWorkspaces(
-        @CurrentUser(CurrentUserPipe) user: UserSafe,
-    ): Promise<Workspace[]> {
+    getAllWorkspaces(@CurrentUser(CurrentUserPipe) user: UserSafe): Promise<
+        {
+            id: string;
+            name: string;
+            projects: { id: string; name: string }[];
+        }[]
+    > {
         return this.workspaceService.getAllWorkspacesForUser(user.id);
     }
 

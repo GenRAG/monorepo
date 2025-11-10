@@ -34,19 +34,30 @@ export class WorkspaceService {
         return workspace;
     }
 
-    async getAllWorkspacesForUser(userId: string): Promise<Workspace[]> {
-        const workspaces = await this.prismaService.workspace.findMany({
+    async getAllWorkspacesForUser(userId: string): Promise<
+        {
+            id: string;
+            name: string;
+            projects: { id: string; name: string }[];
+        }[]
+    > {
+        return this.prismaService.workspace.findMany({
             where: {
                 users: {
-                    some: {
-                        userId,
+                    some: { userId },
+                },
+            },
+            select: {
+                id: true,
+                name: true,
+                projects: {
+                    select: {
+                        id: true,
+                        name: true,
                     },
                 },
             },
-            include: { users: true },
         });
-
-        return workspaces;
     }
 
     async getWorkspaceById(

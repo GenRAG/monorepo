@@ -10,34 +10,20 @@ import {
 	FormLabel,
 	Input,
 	Text,
+	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react';
-//import { confirmCodePromoRules } from 'pagesNew/Auth/utils';
 import { useRegisterMutation } from 'services/auth/auth';
 import useThemedToast from 'hooks/useThemedToast';
 import { ShowHidePasswordInput } from 'components/Molecules/Inputs/ShowHidePasswordInput';
 import { validateEmail } from 'utils/validateEmail';
 
-/*import ErrorFieldMessage from 'components/Basics/Inputs/ErrorMessage';
-import SuccessMessage from 'components/Basics/Inputs/SuccessMessage';
-import { ShowHidePasswordInput } from 'composantsNew/Molecules/Inputs/ShowHidePasswordInput';
-import { isDemoEnv, isParentDemoEnv } from 'demo/utils';
-import { useFcmTokenManager } from 'hooks/auth/useFcmTokenManager';
-import { useTokenManager } from 'hooks/auth/useTokenManager';
-import { usePartnerParams } from 'hooks/usePartnerParams';
-import useThemedToast from 'hooks/useThemedToast';
-import eventTracker from 'services/events/eventTracker';
-import { useRegisterMutation } from 'services/requests/auth';
-import { useGetCorporateCompanyByIdQuery } from 'services/requests/corporate';
-import { codePromoLoader, isNone } from 'utils/functions';
-import { emailPattern, validateEmail } from 'utils/validations/email';*/
 
 type RegisterFormType = {
 	email: string;
 	password: string;
 	confirmPassword: string;
-	promo?: string;
-	corporateEmail?: string;
+	name: string;
 };
 
 type CreateAccountFormProps = {
@@ -72,11 +58,6 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
 		criteriaMode: 'all',
 		defaultValues: {
 			email,
-			promo:
-				searchParams.get('promo') ??
-				searchParams.get('code') ?? // `code` for backward compatibility
-				undefined,
-			corporateEmail: searchParams.get('corporateEmail') ?? undefined,
 		},
 	});
 
@@ -89,34 +70,21 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
 	);
 
 	const onSubmit = handleSubmit((data: RegisterFormType) => {
-		//const comesFromDemo = isParentDemoEnv || isDemoEnv;
-		const redirectLink = searchParams.get('redirect');
 		registerUser({
 			email: data.email,
 			password: data.password,
-			/*comesFromDemo,
-			corporateEmail: data.corporateEmail,
-			partner: partner.name,
-			promo: promoChecked ? data.promo?.toUpperCase() : undefined,
-			redirect: redirectLink ?? undefined,*/
+			name: data.name,
 		})
 			.unwrap()
 			.then((authResponse) => {
-				/*redeemToken(authResponse, {
-					partner: partner.name,
-					redirect: `/valider-email${location.search}`,
-					comesFromDemo: comesFromDemo,
-				});
-				handleFcmToken();
-				if (redirectLink) eventTracker.pipedream.registerInterest(data.email, redirectLink || '');*/
 				console.log('authResponse', authResponse);
 				navigate(`/validate?email=${data.email}`, { replace: true });
 			})
 			.catch((error) => {
 				if ('status' in error) {
 					toast({
-						title: "Une erreur s'est produite.",
-						description: (error.data as { message: string })?.message || "Impossible de valider l'inscription.",
+						title: "An error occurred.",
+						description: error.data.error.message || 'Please try again later.',
 						status: 'error',
 						duration: 9000,
 						isClosable: true,
@@ -132,10 +100,20 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
 					<FormLabel color="whites.offwhite">Email Address</FormLabel>
 					<Input
 						{...register('email', { validate: validateEmail })}
-						placeholder="warren.buffett@gmail.com"
+						placeholder="john.smith@gmail.com"
 						autoComplete="email"
+						disabled={!!email}
+						color={useColorModeValue("black", "whites.offwhite")}
 					/>
 					{errors.email && <FormErrorMessage>{errors.email.message}</FormErrorMessage>}
+				</FormControl>
+				<FormControl>
+					<FormLabel color="whites.offwhite">Name</FormLabel>
+					<Input
+						placeholder="John Smith"
+						autoComplete="name"
+						color={useColorModeValue("black", "whites.offwhite")}
+					/>
 				</FormControl>
 				<FormControl isInvalid={!!errors.password}>
 					<FormLabel color="whites.offwhite">Password</FormLabel>
@@ -153,6 +131,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
 						})}
 						placeholder="Minimum 8 characters"
 						autoComplete="new-password"
+						color={useColorModeValue("black", "whites.offwhite")}
 					/>
 					{errors.password?.type === 'required' && <FormErrorMessage>This field is required</FormErrorMessage>}
 					{errors.password?.type === 'maxLength' && <FormErrorMessage>No more than 100 characters</FormErrorMessage>}
@@ -185,6 +164,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
 						})}
 						placeholder="Minimum 8 characters"
 						autoComplete="new-password"
+						color={useColorModeValue("black", "whites.offwhite")}
 					/>
 					{errors.confirmPassword?.type === 'required' && <FormErrorMessage>This field is required</FormErrorMessage>}
 					{errors.confirmPassword?.type === 'minLength' && <FormErrorMessage>At least 8 characters</FormErrorMessage>}

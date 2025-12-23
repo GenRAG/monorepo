@@ -84,7 +84,7 @@ const Button = {
 
 				background: disabled
 					? 'radial-gradient(95.81% 135.6% at 100% 0%, rgba(255, 255, 255, 0.99) 0%, #fad08cff 100%)'
-					: 'radial-gradient(35.81% 85.6% at 40% 30%, rgba(255, 255, 255, 0.81) 0%, #e6a646ff 100%)',
+					: 'radial-gradient(35.81% 85.6% at 40% 30%, rgba(250, 228, 169, 0.81) 0%, #f38546ff 100%)',
 				backgroundSize: '300% 300%',
 				backgroundPosition: '0% 90%',
 				transition: disabled ? 'none' : 'background-position 2s ease-in-out',
@@ -99,7 +99,7 @@ const Button = {
 				_active: disabled
 					? {}
 					: {
-							background: `radial-gradient(95.74% 135.05% at 96.88% 5.83%, #ECB746 0%, #F3B556 100%)`,
+							background: `radial-gradient(95.74% 135.05% at 96.88% 5.83%, #ECB746 0%, #f38546ff 100%)`,
 					  },
 
 				_focus: {

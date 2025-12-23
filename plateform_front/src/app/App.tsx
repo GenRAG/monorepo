@@ -3,8 +3,9 @@ import Router from 'app/Router';
 import React from 'react';
 
 const App: React.FC = () => {
+
   return (
-    <Box bg={useColorModeValue("gray.100", "gray.900")} minH="100vh">
+    <Box bg={useColorModeValue("grey.100", "grey.900")} minH="100vh" display="flex">
       <Router />
     </Box>
   );

@@ -23,6 +23,9 @@ model User {
   updatedAt      DateTime         @updatedAt
   emailVerificationToken Int?
   isEmailVerified Boolean          @default(false)
+  emailVerificationLastSentAt DateTime?
+  passwordResetToken Int?
+  passwordResetLastSentAt DateTime?
   workspaces     UserWorkspace[]
 }
 

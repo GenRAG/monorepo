@@ -1,17 +1,18 @@
-import { HStack, VStack, PinInput, PinInputField, Button, Text } from "@chakra-ui/react";
+import { HStack, VStack, PinInput, PinInputField, Button, Text, useColorModeValue } from "@chakra-ui/react";
 import useThemedToast from "hooks/useThemedToast";
 import { FileWarningIcon, MailIcon, RepeatIcon, TimerIcon } from "lucide-react";
 import { AuthHeader } from "pages/Auth/AuthHeader";
 import { RegisterFormSteps } from "pages/Auth/Layout/AuthLayout";
 import { FC, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useVerifyEmailTokenMutation } from "services/auth/auth";
+import { useResendEmailTokenMutation, useVerifyEmailTokenMutation } from "services/auth/auth";
 import colors from "themeNew/foundations/colors";
 
 const ValidateAccountForm: FC = () => {
 
   const [searchParams] = useSearchParams();
   const [verifyEmailToken, { isLoading }] = useVerifyEmailTokenMutation();
+  const [resendEmailToken, { isLoading: isResending }] = useResendEmailTokenMutation();
   const [pin, setPin] = useState("");
   const toast = useThemedToast();
 
@@ -32,11 +33,31 @@ const ValidateAccountForm: FC = () => {
         toast({
           status: "error",
           title: "Verification failed",
-          description: (error.data as { message: string })?.message || "Failed to verify email. Please try again.",
+          description: error.data.error.message || "Failed to verify email. Please try again.",
           isClosable: true,
         });
       });
   };
+
+  const onSubmitResend = async () => {
+    if (!email) return;
+    resendEmailToken({ email }).unwrap()
+      .then(() => {
+        toast({
+          status: "success",
+          title: "Verification email resent!",
+          description: "A new verification code has been sent to your email.",
+        });
+      })
+      .catch((error) => {
+        toast({
+          status: "error",
+          title: "Resend failed",
+          description: error.data.error.message || "Failed to resend verification email. Please try again.",
+          isClosable: true,
+        });
+      });
+  }
 
   return (
     <VStack w="100%" align="start" gap="32px">
@@ -68,7 +89,7 @@ const ValidateAccountForm: FC = () => {
           <HStack w="100%" gap="8px">
             <RepeatIcon color="white" />
             <Text variant="body-sm" w="100%" color="whites.offwhite">
-              Still can't find it? <Button variant="link" color="gold.500" p={0} m={0}>Resend code</Button>
+              Still can't find it? <Button isDisabled={isResending} variant="link" color="gold.500" p={0} m={0} onClick={onSubmitResend}>Resend code</Button>
             </Text>
           </HStack>
 
@@ -88,6 +109,7 @@ const ValidateAccountForm: FC = () => {
               flex="1" 
               textAlign="center"
               borderWidth="2px"
+              color={useColorModeValue("black","whites.offwhite")}
             />
           ))}
         </PinInput>

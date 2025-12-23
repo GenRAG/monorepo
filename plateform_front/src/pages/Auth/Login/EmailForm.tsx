@@ -12,7 +12,8 @@ import {
 	Link,
 	Text,
 	VStack,
-	Image
+	Image,
+	useColorModeValue
 } from '@chakra-ui/react';
 import { AuthHeader } from 'pages/Auth/AuthHeader';
 import { AuthStepType } from 'pages/Auth/Layout/AuthLayout';
@@ -23,7 +24,7 @@ import Button from 'components/Atoms/Button';
 import { validateEmail } from 'utils/validateEmail';
 import Google from 'assets/icons/google.svg'
 import Microsoft from 'assets/icons/microsoft.png';
-//import { validateEmail } from 'utils/validations/email';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 
 type EmailFormType = {
 	email: string;
@@ -82,10 +83,11 @@ export const EmailForm: FC<{ setEmail: (email: string) => void; currentStep: Aut
 								<Input
 									onChange={(event) => onChange(event.target.value.trim())}
 									{...rest}
-									placeholder="warren.buffett@gmail.com"
+									placeholder="john.smith@example.com"
 									autoComplete="email"
 									type="email"
 								    data-cy="cy-email"
+									color={useColorModeValue("black","whites.offwhite")}
 								/>
 							)}
 						/>

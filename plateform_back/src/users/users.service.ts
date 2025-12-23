@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma, User } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserRequest } from 'src/users/dto/create-user.request';
@@ -11,6 +11,8 @@ export class UsersService {
     async createUser(
         request: CreateUserRequest & {
             emailVerificationToken?: number;
+            emailVerificationLastSentAt?: Date;
+            isEmailVerified?: boolean;
         },
     ): Promise<User> {
         return this.prismaService.user.create({

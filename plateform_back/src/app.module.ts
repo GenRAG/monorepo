@@ -20,7 +20,7 @@ import { ProjectModule } from './project/project.module';
                             : {
                                   target: 'pino-pretty',
                                   options: {
-                                      singleLine: false,
+                                      singleLine: true,
                                       colorize: true,
                                       ignore: 'pid,hostname',
                                       translateTime: 'SYS:standard',

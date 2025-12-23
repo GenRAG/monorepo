@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
 import { BrevoService } from 'src/auth/brevo.service';
+import { TokenService } from 'src/auth/token.service';
 
 @Module({
     imports: [
@@ -24,6 +25,12 @@ import { BrevoService } from 'src/auth/brevo.service';
         ConfigModule,
     ],
     controllers: [AuthController],
-    providers: [AuthService, LocalStrategy, JwtStrategy, BrevoService],
+    providers: [
+        AuthService,
+        LocalStrategy,
+        JwtStrategy,
+        BrevoService,
+        TokenService,
+    ],
 })
 export class AuthModule {}

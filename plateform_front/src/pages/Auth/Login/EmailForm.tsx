@@ -52,7 +52,6 @@ export const EmailForm: FC<{ setEmail: (email: string) => void; currentStep: Aut
 	const onSubmit = handleSubmit((data: EmailFormType) => {
 		if (data.rememberEmail) remember(data.email);
 		else forget();
-
 		setEmail(data.email);
 	});
 
@@ -87,7 +86,6 @@ export const EmailForm: FC<{ setEmail: (email: string) => void; currentStep: Aut
 									autoComplete="email"
 									type="email"
 								    data-cy="cy-email"
-									color={useColorModeValue("black","whites.offwhite")}
 								/>
 							)}
 						/>

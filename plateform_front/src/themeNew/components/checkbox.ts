@@ -3,6 +3,7 @@ import { createMultiStyleConfigHelpers } from '@chakra-ui/styled-system';
 
 import borderRadius from 'themeNew/foundations/borderRadius';
 import colors from 'themeNew/foundations/colors';
+import { darkThemeColors } from 'themeNew/foundations/themeConfig';
 import { textStyles } from 'themeNew/foundations/typography';
 
 const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(checkboxAnatomy.keys);
@@ -21,11 +22,11 @@ const simpleGold = definePartsStyle({
 		_checked: {
 			_hover: {
 				color: colors.grey[950],
-				background: colors.gold[300],
+				background: colors.whites.white,
 				borderColor: colors.whites.transparent,
 			},
 			color: colors.grey[950],
-			background: colors.gold[300],
+			background: colors.whites.white,
 			borderColor: colors.whites.transparent,
 		},
 		_disabled: {
@@ -50,24 +51,41 @@ const goldWithContainer = definePartsStyle({
 		borderRadius: borderRadius.xs,
 		borderColor: colors.grey[100],
 
-		flexDirection: 'row-reverse',
-		justifyContent: 'space-between',
-
 		background: colors.whites.white,
+
+		_dark: {
+			background: colors.grey[700],
+			borderColor: colors.grey[700],
+			_hover: {
+				borderColor: colors.grey[800],
+				background: colors.grey[900],
+			},
+		},
+
 		_hover: {
 			borderColor: colors.grey[950],
 			background: colors.grey[50],
 			_disabled: {
 				borderColor: colors.grey[300],
+				_dark: {
+					borderColor: colors.grey[600],
+				},
 			},
 		},
 		_disabled: {
 			background: colors.grey[50],
 			color: colors.font.disabled,
+			_dark: {
+				background: colors.grey[800],
+			},
 		},
 
 		_checked: {
-			borderColor: colors.gold[300],
+			bg: darkThemeColors.green.primary,
+			color: colors.whites.white,
+			_dark: {
+				bg: darkThemeColors.green.primary,
+			}
 		},
 	},
 	...simpleGold,

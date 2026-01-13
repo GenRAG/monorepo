@@ -8,10 +8,10 @@ const Progress = defineMultiStyleConfig({
 	baseStyle: {
 		track: {
 			borderRadius: 'full',
-			backgroundColor: 'gold.100',
+			backgroundColor: 'green.100',
 		},
 		filledTrack: {
-			backgroundColor: 'gold.300',
+			backgroundColor: 'green.500',
 		},
 	},
 	defaultProps: {

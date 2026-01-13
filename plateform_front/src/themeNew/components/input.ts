@@ -13,16 +13,17 @@ const baseStyle = definePartsStyle({
 		borderWidth: '1px',
 		borderStyle: 'solid',
 		borderRadius: borderRadius.xs,
-		borderColor: colors.grey[100],
+		borderColor: 'inputBorder',
+		color: 'inputText',
 		_hover: {
-			borderColor: colors.grey[950],
+			borderColor: 'inputBorder',
 		},
 		_disabled: {
 			bg: colors.grey[50],
-			color: colors.font.info,
+			color: 'inputPlaceholder',
 		},
 		_placeholder: {
-			color: colors.font.info,
+			color: 'inputPlaceholder',
 		},
 	},
 });

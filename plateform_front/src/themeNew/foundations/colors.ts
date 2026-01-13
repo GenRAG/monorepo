@@ -100,12 +100,12 @@ const baseColors = {
 	},
 
 	liquidGlass: {
-		success: 'rgba(72, 187, 120, 0.25)',
-		error: 'rgba(229, 62, 62, 0.25)',
-		warning: 'rgba(236, 201, 75, 0.25)',
-		info: 'rgba(66, 153, 225, 0.25)',      
-		favorite: 'rgba(246, 173, 85, 0.25)',  
-		default: 'rgba(255, 255, 255, 0.15)',
+		success: 'rgba(72, 187, 120, 1)',
+		error: 'rgba(229, 62, 62, 1)',
+		warning: 'rgba(236, 201, 75, 0.99)',
+		info: 'rgba(66, 153, 225, 1)',      
+		favorite: 'rgba(246, 174, 85, 1)',  
+		default: 'rgba(255, 255, 255, 1)',
 	},
 
 	gradients: {
@@ -123,7 +123,7 @@ const baseColors = {
 
 export default {
 	font: {
-		primary: baseColors.grey[950],
+		primary: 'textPrimary',
 		secondary: baseColors.grey[800],
 		tertiary: baseColors.grey[500],
 		info: baseColors.grey[400],

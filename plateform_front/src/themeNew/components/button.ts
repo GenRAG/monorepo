@@ -3,6 +3,7 @@ import { StyleFunctionProps } from '@chakra-ui/styled-system';
 import borderRadius from 'themeNew/foundations/borderRadius';
 import colors from 'themeNew/foundations/colors';
 import { shadow } from 'themeNew/foundations/shadow';
+import { darkThemeColors } from 'themeNew/foundations/themeConfig';
 import { textStyles } from 'themeNew/foundations/typography';
 
 const Button = {
@@ -111,9 +112,16 @@ const Button = {
 			const disabled = props.isDisabled || props.disabled || props.isLoading;
 			return {
 				color: disabled ? colors.grey[300] : colors.font.white,
-				background: disabled ? colors.grey[100] : colors.grey[950],
+				background: disabled ? colors.grey[100] : darkThemeColors.green.primary600,
+				_dark: {
+					background: disabled ? darkThemeColors.green.primary200 : darkThemeColors.green.primary700,
+					_hover: {
+						bg: disabled ? `${colors.green[100]} !important` : darkThemeColors.green.primary600,
+					},
+				},
+				border: disabled ? `none` : `1px solid rgba(120, 241, 201, 0.67)`,
 				_hover: {
-					bg: disabled ? `${colors.grey[100]} !important` : colors.grey[900],
+					bg: disabled ? `${colors.grey[100]} !important` : darkThemeColors.green.primary500,
 				},
 				_active: {
 					bg: disabled ? colors.grey[200] : colors.grey[800],
@@ -145,7 +153,7 @@ const Button = {
 		ghost: (props: StyleFunctionProps) => {
 			const disabled = props.isDisabled || props.disabled || props.isLoading;
 			return {
-				color: disabled ? colors.grey[100] : colors.font.primary,
+				color: disabled ? colors.grey[300] : colors.font.primary,
 				cursor: disabled ? 'not-allowed' : 'pointer',
 				background: 'transparent',
 				_hover: {

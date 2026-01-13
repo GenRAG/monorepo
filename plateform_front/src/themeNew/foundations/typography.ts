@@ -4,7 +4,7 @@ import colors from './colors';
 import fonts from './fonts';
 
 export const baseTextStyle = {
-	color: colors.font.primary,
+	color: 'textPrimary',
 	fontFamily: fonts.body,
 	fontWeight: 'normal',
 	lineHeight: 'normal',

@@ -10,7 +10,7 @@ export const thinScrollbar = {
 	},
 	/* scrollbar itself */
 	'&::-webkit-scrollbar-thumb': {
-		backgroundColor: '#babac0',
+		backgroundColor: 'green.500',
 		borderRadius: '8px',
 	},
 	/* set button(top and bottom of the scrollbar) */

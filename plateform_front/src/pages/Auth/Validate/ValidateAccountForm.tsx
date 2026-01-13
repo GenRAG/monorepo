@@ -109,7 +109,7 @@ const ValidateAccountForm: FC = () => {
               flex="1" 
               textAlign="center"
               borderWidth="2px"
-              color={useColorModeValue("black","whites.offwhite")}
+              color={useColorModeValue("whites.offwhite","black")}
             />
           ))}
         </PinInput>

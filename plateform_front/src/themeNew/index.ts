@@ -39,9 +39,11 @@ import { Slider } from './components/slider';
 // import Slider from './components/slider';
 // import Stepper from './components/stepper';
 import Switch from './components/switch';
+import Stepper from 'themeNew/components/stepper';
 import { shadow } from './foundations/shadow';
 
 import './index.scss';
+import colorTokens from 'themeNew/foundations/colorTokens';
 
 // import Textarea from './components/textarea';
 // import Tooltip from './components/tooltip';
@@ -80,6 +82,7 @@ const overrides = {
 	space: spacing,
 	semanticTokens: {
 		space: customsToken,
+		colors: colorTokens,
 	},
 
 	// Components
@@ -115,6 +118,7 @@ const overrides = {
 		Drawer,
 		Modal,
 		Divider,
+		Stepper,
 		// Tooltip,
 		// Textarea,
 	},

@@ -19,7 +19,7 @@ const Sidebar = () => {
 
   const { colorMode, toggleColorMode } = useColorMode();
   const bg = useColorModeValue("grey.50", "grey.900");
-  const border = useColorModeValue("gray.200", "gray.700");
+  const border = useColorModeValue("grey.200", "grey.700");
   const color = useColorModeValue("black", "whites.offwhite");
   const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
 

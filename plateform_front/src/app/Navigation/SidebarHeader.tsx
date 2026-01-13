@@ -7,13 +7,13 @@ interface SidebarHeaderProps {
   color: string;
 }
 
-export const SidebarHeader = ({ 
-    isOpen,
-    onToggle,
-    color
+export const SidebarHeader = ({
+  isOpen,
+  onToggle,
+  color
 }: SidebarHeaderProps) => {
 
-  const iconColor = useColorModeValue("gray.600", "gray.300");
+  const iconColor = useColorModeValue("grey.600", "grey.300");
 
   return (
     <HStack justify="space-between" align="center" p={3}>

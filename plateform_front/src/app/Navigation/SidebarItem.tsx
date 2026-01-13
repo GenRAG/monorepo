@@ -27,15 +27,15 @@ export const SidebarItem = ({
   expandedItem,
   setExpandedItem,
 }: SidebarItemProps) => {
-  const activeBg = useColorModeValue("gray.200", "#f7772da8");
-  const hoverBg = useColorModeValue("gray.100", "#f5935ba8");
+  const activeBg = useColorModeValue("grey.200", "#f7772da8");
+  const hoverBg = useColorModeValue("grey.100", "#f5935ba8");
   const color = useColorModeValue("black", "whites.offwhite");
   const beforeColor = useColorModeValue("black", "red.400");
   const badgeColorValue = useColorModeValue("grey.500", "grey.300");
-  const childLineColor = useColorModeValue("gray.200", "gray.400");
+  const childLineColor = useColorModeValue("grey.200", "grey.400");
   const childTextColor = useColorModeValue("grey.600", "grey.300");
-  const tooltipBg = useColorModeValue("gray.700", "white");
-  const chevronColor = useColorModeValue("gray.500", "gray.300");
+  const tooltipBg = useColorModeValue("grey.700", "white");
+  const chevronColor = useColorModeValue("grey.500", "grey.300");
 
   const hasChildren = childrenItems && childrenItems.length > 0;
   const isExpanded = expandedItem === label;
@@ -78,7 +78,7 @@ export const SidebarItem = ({
         {open && (
           <>
             {badge && (
-              <Badge colorScheme="gray" fontSize="0.7em" borderRadius="md" color={badgeColorValue}>
+              <Badge colorScheme="grey" fontSize="0.7em" borderRadius="md" color={badgeColorValue}>
                 {badge}
               </Badge>
             )}

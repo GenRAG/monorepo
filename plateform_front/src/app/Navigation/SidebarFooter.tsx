@@ -32,7 +32,7 @@ export const SidebarFooter = ({
 }: SidebarFooterProps) => {
 
     const color = useColorModeValue("black", "whites.offwhite");
-    const dividerColor = useColorModeValue("grey.100", "gray.700");
+    const dividerColor = useColorModeValue("grey.100", "grey.700");
 
     return (
         <VStack align="stretch" spacing={2}>

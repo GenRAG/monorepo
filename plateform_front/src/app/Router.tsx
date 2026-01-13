@@ -8,6 +8,7 @@ import ApplyResetPassword from "pages/Auth/Password/ApplyResetPassword";
 import PrivateRoute from "app/PrivateRoute";
 import Sidebar from "app/Navigation/Sidebar";
 import PrivateAppLayout from "app/PrivateAppLayout";
+import OnBoarding from "pages/Onboarding/OnBoarding";
 
 export default function Router() {
   return (
@@ -25,6 +26,7 @@ export default function Router() {
           <Route element={<PrivateAppLayout />}>
             <Route path="/" element={<div>YO</div>} />
             <Route path="/dashboard" element={<div>DASHBOARD</div>} />
+            <Route path="/onboarding" element={<OnBoarding />} />
           </Route>
         </Route>
 

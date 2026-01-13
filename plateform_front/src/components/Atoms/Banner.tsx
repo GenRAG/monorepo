@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Card, CardProps, HStack, StyleProps } from '@chakra-ui/react';
+import { Box, Card, CardProps, HStack, Icon, StyleProps } from '@chakra-ui/react';
 import {
 	ArrowRight,
 	Info,
@@ -32,6 +32,7 @@ export const StyleBannerVariants: Record<string, any> = {
 		bg: 'gold.50',
 		borderColor: 'gold.100',
 		glowColor: colors.gold[100],
+		iconColor: 'gold.700',
 		badgeBg: 'gold.100',
 		_active: {
 			bg: 'gold.50',
@@ -42,6 +43,7 @@ export const StyleBannerVariants: Record<string, any> = {
 		bg: 'blue.50',
 		borderColor: 'blue.100',
 		badgeBg: 'blue.100',
+		iconColor: 'blue.700',
 		glowColor: colors.blue[100],
 		_active: {
 			bg: 'blue.50',
@@ -58,10 +60,11 @@ export const StyleBannerVariants: Record<string, any> = {
 		},
 	},
 	green: {
-		icon: LeafIcon,
-		bg: 'green.50',
+		icon: Info,
+		bg: 'green.100',
 		borderColor: 'green.100',
 		badgeBg: 'green.100',
+		iconColor: 'green.700',
 		glowColor: colors.green[100],
 		_active: {
 			bg: 'green.50',
@@ -72,6 +75,7 @@ export const StyleBannerVariants: Record<string, any> = {
 		bg: 'grey.50',
 		borderColor: 'grey.100',
 		badgeBg: 'grey.100',
+		iconColor: 'grey.700',
 		glowColor: colors.grey[100],
 		_active: {
 			bg: 'grey.50',
@@ -82,6 +86,7 @@ export const StyleBannerVariants: Record<string, any> = {
 		bg: 'olive.50',
 		borderColor: 'olive.100',
 		badgeBg: 'olive.100',
+		iconColor: 'olive.700',
 		glowColor: colors.olive[100],
 		_active: {
 			bg: 'olive.50',
@@ -92,6 +97,7 @@ export const StyleBannerVariants: Record<string, any> = {
 		bg: 'transparent',
 		borderColor: 'transparent',
 		badgeBg: 'transparent',
+		iconColor: 'grey.700',
 		glowColor: colors.grey[100],
 		_active: {
 			bg: 'grey.50',
@@ -132,6 +138,7 @@ const Banner = ({ variant, isCloseable, children, buttonText, onClick, size = 'x
 			_active={onClick ? StyleBannerVariants[variant as any]._active : undefined}
 			onClick={onClick}
 			size={size}
+			padding="16px"
 			{...props}
 		>
 
@@ -153,6 +160,7 @@ const Banner = ({ variant, isCloseable, children, buttonText, onClick, size = 'x
 			)}
 
 			<HStack w="100%" spacing="12px" align="center" position="relative" zIndex={1} flex="4">
+				<Icon as={StyleBannerVariants[variant as any]?.icon || Info} boxSize={5} color={StyleBannerVariants[variant as any]?.iconColor || 'grey.700'} />
 				{children}
 
 				{(buttonText || isCloseable) && (

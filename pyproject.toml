@@ -1,0 +1,17 @@
+[project]
+name = "rag-genrag"
+version = "0.1.0"
+description = "RAG Part of GenRag"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.42.30",
+    "fastapi[standard]>=0.128.0",
+    "gunicorn>=23.0.0",
+    "pdfreader>=0.1.15",
+    "pydantic>=2.12.5",
+    "pypdf>=6.6.0",
+    "python-multipart>=0.0.21",
+    "qdrant-client>=1.16.2",
+    "requests>=2.32.5",
+]

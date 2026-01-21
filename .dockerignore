@@ -1,0 +1,34 @@
+# --- Security & Secrets ---
+.env
+.env.*
+*.pem
+*.key
+
+# --- Heavy Data & Databases ---
+qdrant_data/
+qdrant_storage/
+data/
+
+# --- Python & Environment Garbage ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+uv.lock  
+
+# --- System & IDE Files ---
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+
+# --- Build Artifacts ---
+build/
+dist/
+*.egg-info/

@@ -1,64 +1,107 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from contextlib import asynccontextmanager
+import asyncio
 
 # Import our new services
-from app.services.storage import upload_file, ensure_bucket_exists
-from app.services.ingestion import parse_pdf, chunk_text
-from app.services.embedding import EmbeddingService
-from app.services.vector_db import ensure_collection, upsert_chunks
+from app.services.storage import ensure_bucket_exists
+from app.services.vector_db import ensure_collection
+from app.services.job_manager import job_manager, JobStatus
+from app.services.background_worker import background_worker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ensure_bucket_exists()
     # Qwen embedding size is 4096 dimensions
     ensure_collection("genrag_knowledge_base", vector_size=4096)
+
+    # Start background worker
+    worker_task = asyncio.create_task(background_worker.start_worker())
+
     yield
 
+    # Stop background worker
+    await background_worker.stop_worker()
+    worker_task.cancel()
+
 app = FastAPI(lifespan=lifespan)
-embedder = EmbeddingService() # Initialize once
 
 @app.post("/ingest")
 async def ingest_document(
     file: UploadFile = File(...),
     org_id: str = Form(...)
 ):
+    """Upload a PDF for processing. Returns immediately with job ID."""
     print(f"🚀 Starting ingestion for: {file.filename}")
 
     # 1. READ FILE (Into memory for now)
     file_bytes = await file.read()
-    
-    # 2. SAVE TO STORAGE (MinIO)
-    # Reset cursor before upload because file.read() moved it to the end
-    file.file.seek(0) 
-    upload_file(file.file, f"{org_id}/{file.filename}")
-    
-    # 3. PARSE PDF
-    raw_text = parse_pdf(file_bytes)
-    if not raw_text:
-        return {"error": "Could not extract text from PDF"}
-        
-    # 4. CHUNK TEXT
-    chunks = chunk_text(raw_text)
-    print(f"📄 Generated {len(chunks)} chunks")
-    
-    # 5. EMBED (This part is slow!)
-    vectors = []
-    for chunk in chunks:
-        # Note: In production, we'd batch this (send 10 chunks at once)
-        vec = embedder.get_embedding(chunk)
-        vectors.append(vec)
-        
-    # 6. SAVE TO QDRANT
-    count = upsert_chunks(
-        collection_name="genrag_knowledge_base",
-        chunks=chunks,
-        embeddings=vectors,
-        metadata={"org_id": org_id, "filename": file.filename}
+
+    # 2. CREATE JOB
+    job_id = job_manager.create_job(file.filename, org_id)
+
+    # 3. RESET FILE CURSOR AND ADD TO BACKGROUND QUEUE
+    file.file.seek(0)
+    await background_worker.add_job(
+        job_id=job_id,
+        file_bytes=file_bytes,
+        file_obj=file.file,
+        filename=file.filename,
+        org_id=org_id
     )
-    
+
+    # 4. RETURN IMMEDIATELY
     return {
-        "status": "success", 
-        "filename": file.filename, 
-        "chunks_processed": count,
-        "message": "File is now searchable!"
+        "job_id": job_id,
+        "status": "accepted",
+        "filename": file.filename,
+        "message": "File upload accepted. Processing started in background.",
+        "status_url": f"/job/{job_id}/status"
     }
+
+@app.get("/job/{job_id}/status")
+async def get_job_status(job_id: str):
+    """Get the status of a processing job."""
+    job = job_manager.get_job(job_id)
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    response = {
+        "job_id": job.job_id,
+        "filename": job.filename,
+        "org_id": job.org_id,
+        "status": job.status,
+        "progress": job.progress,
+        "created_at": job.created_at.isoformat(),
+    }
+
+    if job.started_at:
+        response["started_at"] = job.started_at.isoformat()
+
+    if job.completed_at:
+        response["completed_at"] = job.completed_at.isoformat()
+
+    if job.total_chunks > 0:
+        response["chunks_processed"] = job.processed_chunks
+        response["total_chunks"] = job.total_chunks
+
+    if job.status == JobStatus.FAILED and job.error_message:
+        response["error"] = job.error_message
+
+    if job.status == JobStatus.COMPLETED and job.result:
+        response["result"] = job.result
+
+    return response
+
+@app.get("/job/{job_id}/result")
+async def get_job_result(job_id: str):
+    """Get the final result of a completed job."""
+    job = job_manager.get_job(job_id)
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    if job.status != JobStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail=f"Job is not completed. Current status: {job.status}")
+
+    return job.result or {"error": "No result available"}

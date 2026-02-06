@@ -3,13 +3,13 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 export interface ChatMessage {
     id: string;
     question: string;
-    response: string;
+    response: string[];
     timestamp: number;
     isImproved?: boolean;
 }
 
 export interface UseChatOptions {
-    getResponse: (question: string) => Promise<string | { response: string; isImproved?: boolean }> | string | { response: string; isImproved?: boolean };
+    getResponse: (question: string) => Promise<string[] | { response: string[]; isImproved?: boolean }> | string[] | { response: string[]; isImproved?: boolean };
     initialMessages?: ChatMessage[];
     onMessageUpdate?: (message: ChatMessage) => void;
 }
@@ -37,7 +37,7 @@ export const useChat = (options: UseChatOptions) => {
         const questionMessage: ChatMessage = {
             id: questionId,
             question,
-            response: '',
+            response: [],
             timestamp: Date.now(),
         };
 
@@ -48,11 +48,11 @@ export const useChat = (options: UseChatOptions) => {
             const responseResult = await Promise.resolve(getResponseRef.current(question));
 
             const isImproved = typeof responseResult === 'object' && 'isImproved' in responseResult ? responseResult.isImproved : false;
-            const responseText = typeof responseResult === 'object' && 'response' in responseResult ? responseResult.response : (responseResult as string);
+            const responseText = typeof responseResult === 'object' && 'response' in responseResult ? responseResult.response : (responseResult as string[]);
 
             const updatedMessage: ChatMessage = {
                 ...questionMessage,
-                response: responseText,
+                response: Array.isArray(responseText) ? responseText : [responseText],
                 isImproved: isImproved || false,
             };
 
@@ -70,7 +70,7 @@ export const useChat = (options: UseChatOptions) => {
             setMessages(prev =>
                 prev.map(msg =>
                     msg.id === questionId
-                        ? { ...msg, response: 'Sorry, an error occurred while processing your question.' }
+                        ? { ...msg, response: ['Sorry, an error occurred while processing your question.'] }
                         : msg
                 )
             );

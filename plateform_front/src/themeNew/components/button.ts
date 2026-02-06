@@ -84,8 +84,8 @@ const Button = {
 				cursor: disabled ? 'not-allowed' : 'pointer',
 
 				background: disabled
-					? 'radial-gradient(95.81% 135.6% at 100% 0%, rgba(255, 255, 255, 0.99) 0%, #fad08cff 100%)'
-					: 'radial-gradient(35.81% 85.6% at 40% 30%, rgba(250, 228, 169, 0.81) 0%, #f38546ff 100%)',
+					? 'radial-gradient(95.81% 135.6% at 100% 0%, rgba(255, 255, 255, 0.99) 0%,rgb(175, 250, 140) 100%)'
+					: 'radial-gradient(35.81% 85.6% at 40% 30%, rgba(169, 250, 176, 0.81) 0%,rgb(0, 183, 104) 100%)',
 				backgroundSize: '300% 300%',
 				backgroundPosition: '0% 90%',
 				transition: disabled ? 'none' : 'background-position 2s ease-in-out',
@@ -100,7 +100,7 @@ const Button = {
 				_active: disabled
 					? {}
 					: {
-							background: `radial-gradient(95.74% 135.05% at 96.88% 5.83%, #ECB746 0%, #f38546ff 100%)`,
+							background: 'radial-gradient(35.81% 85.6% at 40% 30%, rgba(122, 208, 129, 0.81) 0%,rgb(0, 139, 79) 100%)',
 					  },
 
 				_focus: {
@@ -139,7 +139,7 @@ const Button = {
 				background: disabled ? colors.grey[100] : colors.font.white,
 				border: disabled ? `none` : `1px solid #E7E7E7`,
 				_hover: {
-					bg: disabled ? `${colors.grey[100]} !important` : colors.grey[50],
+					bg: disabled ? `${colors.grey[100]} !important` : colors.grey[100],
 				},
 				_active: {
 					bg: disabled ? colors.grey[200] : '#E7E7E7',

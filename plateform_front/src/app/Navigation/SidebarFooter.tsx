@@ -4,6 +4,8 @@ import {
 import { Moon, Sun } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarSection } from "./SidebarSection";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarFooterProps {
     isOpen: boolean;
@@ -11,8 +13,8 @@ interface SidebarFooterProps {
     toggleColorMode: () => void;
     activeItem: string;
     setActiveItem: (id: string) => void;
-    name: string;
-    email: string;
+    name?: string;
+    email?: string;
     supportMenu: { id: string; icon: any; label: string }[];
     expandedItem: string | null;
     setExpandedItem: React.Dispatch<React.SetStateAction<string | null>>;
@@ -31,17 +33,31 @@ export const SidebarFooter = ({
     setExpandedItem,
 }: SidebarFooterProps) => {
 
-    const color = useColorModeValue("black", "whites.offwhite");
-    const dividerColor = useColorModeValue("grey.100", "grey.700");
+    const navigate = useNavigate();
+    const color = useColorModeValue("grey.900", "white");
+    const dividerColor = useColorModeValue(
+        "grey.100",
+        currentDarkTheme.rgba.primary20
+    );
+    const buttonHoverBg = useColorModeValue(
+        currentDarkTheme.rgba.primary20,
+        currentDarkTheme.rgba.primary20
+    );
+
+    const workspaceId = 12342;
 
     return (
-        <VStack align="stretch" spacing={2}>
+        <VStack align="stretch" gap={0}>
             <SidebarSection title="Support" isOpen={isOpen}>
                 {supportMenu.map(({ id, icon, label }) => (
                     <SidebarItem
                         key={id}
                         active={activeItem === id}
-                        onClick={() => setActiveItem(id)}
+                        onClick={() => {
+                            setActiveItem(id);
+                            console.log(`${workspaceId}/support/${id}`);
+                            navigate(`/${workspaceId}/${id}`);
+                        }}
                         icon={icon}
                         label={label}
                         open={isOpen}
@@ -50,30 +66,29 @@ export const SidebarFooter = ({
                     />
                 ))}
             </SidebarSection>
-
-            <Button
-                mt={2}
-                size="sm"
-                w={isOpen ? "full" : "auto"}
-                variant="ghost"
-                onClick={toggleColorMode}
-                leftIcon={<Icon as={colorMode === "light" ? Moon : Sun} />}
-            >
-                {isOpen && (colorMode === "light" ? "Dark mode" : "Light mode")}
-            </Button>
-
-            <Divider w="100%" borderColor={dividerColor} borderWidth="1px" />
-
-            <HStack p={3} ml={0.5} spacing={3} justify={isOpen ? "flex-start" : ""}>
-                <Avatar size="sm" name={name} />
-                {isOpen && (
-                    <Text fontSize="sm" color={color}>
-                        {(name || email).length > 15
-                            ? (name || email).slice(0, 15) + "..."
-                            : name || email}
-                    </Text>
-                )}
-            </HStack>
+            {name || email && (
+                <VStack align="stretch" gap={0}>
+                    <SidebarItem
+                        icon={colorMode === "light" ? Moon : Sun}
+                        label={colorMode === "light" ? "Dark mode" : "Light mode"}
+                        open={isOpen}
+                        onClick={toggleColorMode}
+                        expandedItem={expandedItem}
+                        setExpandedItem={setExpandedItem}
+                    />
+                    <Divider w="100%" borderColor={dividerColor} borderWidth="1px" />
+                    <HStack mt={2} p={3} ml={0.5} spacing={3} justify={isOpen ? "flex-start" : ""}>
+                        <Avatar size="sm" name={name} />
+                        {isOpen && (
+                            <Text fontSize="sm" color={color}>
+                                {(name || email).length > 15
+                                    ? (name || email).slice(0, 15) + "..."
+                                    : name || email}
+                            </Text>
+                        )}
+                    </HStack>
+                </VStack>
+            )}
         </VStack>
     );
 }

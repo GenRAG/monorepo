@@ -12,19 +12,67 @@ import { SidebarHeader } from "app/Navigation/SidebarHeader";
 import { SidebarItem } from "app/Navigation/SidebarItem";
 import { SidebarSection } from "app/Navigation/SidebarSection";
 import { useUserInfo } from "hooks/useUserInfo";
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useGetUserWorkspacesQuery } from "services/workspace/workspace";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 const Sidebar = () => {
 
   const { colorMode, toggleColorMode } = useColorMode();
-  const bg = useColorModeValue("grey.50", "grey.900");
-  const border = useColorModeValue("grey.200", "grey.700");
-  const color = useColorModeValue("black", "whites.offwhite");
-  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
+  const location = useLocation();
+  const navigate = useNavigate();
+  const bg = useColorModeValue(
+    "black",
+    "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)"
+  );
+  const border = useColorModeValue(
+    "green.100",
+    currentDarkTheme.rgba.primary20
+  );
+  const color = useColorModeValue("grey.900", "white");
+  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: false });
 
-  const [activeItem, setActiveItem] = useState("dashboard");
+  const getActiveItemFromPath = (pathname: string) => {
+    const path = pathname;
+
+    if (path === "/dashboard" || path.startsWith("/dashboard")) {
+      return "dashboard";
+    }
+    if (path === "/" || path === "") {
+      return "dashboard";
+    }
+
+    const featureRoutes: Record<string, string> = {
+      "/analytics": "analytics",
+      "/reports": "reports",
+      "/extensions": "extensions",
+      "/companies": "companies",
+      "/people": "people",
+    };
+
+    for (const [route, id] of Object.entries(featureRoutes)) {
+      if (path === route || path.startsWith(route + "/")) {
+        return id;
+      }
+    }
+
+    if (path.includes("/workspace")) {
+      return "workspaces";
+    }
+
+    return "dashboard";
+  };
+
+  const [activeItem, setActiveItem] = useState<string>(() => getActiveItemFromPath(location.pathname));
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  useEffect(() => {
+    const newActiveItem = getActiveItemFromPath(location.pathname);
+    if (newActiveItem) {
+      setActiveItem(newActiveItem);
+    }
+  }, [location.pathname]);
 
   const { name, email } = useUserInfo();
   const { data: workspaces } = useGetUserWorkspacesQuery();
@@ -32,7 +80,7 @@ const Sidebar = () => {
   return (
     <Box
       h="100vh"
-      w={isOpen ? "240px" : "60px"}
+      w={isOpen ? "220px" : "60px"}
       bg={bg}
       borderRight="1px solid"
       borderColor={border}
@@ -41,17 +89,27 @@ const Sidebar = () => {
       transition="width 0.3s ease"
       zIndex={10}
       justifyContent={"space-between"}
+      position="relative"
+      overflow="hidden"
     >
       <Stack gap={8}>
-        <SidebarHeader isOpen={isOpen} onToggle={onToggle} color={color} />
+        <SidebarHeader title="GenRAG" isOpen={isOpen} onToggle={onToggle} color={color} />
 
-        <Stack>
+        <Stack gap={0}>
           <SidebarSection title="Menu" isOpen={isOpen}>
             {mainMenu.map(({ id, icon, label }) => (
               <SidebarItem
                 key={id}
                 active={activeItem === id}
-                onClick={() => setActiveItem(id)}
+                onClick={() => {
+                  setActiveItem(id);
+                  if (id === "dashboard") {
+                    navigate("/dashboard");
+                  } else if (id === "workspaces" && workspaces && workspaces.length > 0) {
+                    // Navigate to first workspace chat by default
+                    navigate(`/workspace/${workspaces[0].id}/chat`);
+                  }
+                }}
                 icon={icon}
                 label={label}
                 open={isOpen}
@@ -61,20 +119,26 @@ const Sidebar = () => {
                   badge: `${workspaces?.length ?? 0} / 5`,
                   childrenItems: workspaces?.map(w => ({
                     label: w.name,
-                    onClick: () => setActiveItem(`workspace-${w.id}`),
+                    onClick: () => {
+                      setActiveItem(`workspace-${w.id}`);
+                      navigate(`/workspace/${w.id}/chat`);
+                    },
                   })),
                 })}
               />
             ))}
           </SidebarSection>
-          <Divider w="100%" borderColor={border} borderWidth="1px" />
+          <Divider m={0} w="100%" borderColor={border} borderWidth="1px" />
 
           <SidebarSection title="Features" isOpen={isOpen}>
             {featureMenu.map(({ id, icon, label }) => (
               <SidebarItem
                 key={id}
                 active={activeItem === id}
-                onClick={() => setActiveItem(id)}
+                onClick={() => {
+                  setActiveItem(id);
+                  navigate(`/${id}`);
+                }}
                 icon={icon}
                 label={label}
                 open={isOpen}
@@ -83,7 +147,6 @@ const Sidebar = () => {
               />
             ))}
           </SidebarSection>
-          <Divider w="100%" borderColor={border} borderWidth="1px" />
         </Stack>
       </Stack>
 

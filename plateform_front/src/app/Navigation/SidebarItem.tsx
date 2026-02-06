@@ -1,5 +1,6 @@
 import { Badge, Box, Collapse, HStack, Icon, Text, Tooltip, useColorModeValue, VStack } from "@chakra-ui/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface SidebarItemProps {
   icon: any;
@@ -8,6 +9,8 @@ interface SidebarItemProps {
   tag?: string;
   active?: boolean;
   open: boolean;
+  textColor?: string;
+  iconColor?: string;
   childrenItems?: { label: string; icon?: any; onClick?: () => void }[];
   badgeColor?: string;
   onClick?: () => void;
@@ -22,20 +25,36 @@ export const SidebarItem = ({
   tag,
   active,
   open,
+  textColor = "grey.200",
+  iconColor = "grey.200",
   childrenItems,
   onClick,
   expandedItem,
   setExpandedItem,
 }: SidebarItemProps) => {
-  const activeBg = useColorModeValue("grey.200", "#f7772da8");
-  const hoverBg = useColorModeValue("grey.100", "#f5935ba8");
-  const color = useColorModeValue("black", "whites.offwhite");
-  const beforeColor = useColorModeValue("black", "red.400");
+  const activeBg = useColorModeValue(
+    currentDarkTheme.rgba.primary20,
+    currentDarkTheme.rgba.primary20
+  );
+  const hoverBg = useColorModeValue(
+    currentDarkTheme.rgba.primary20,
+    currentDarkTheme.rgba.primary30
+  );
+  const color = useColorModeValue(textColor, "white");
+  const activeColor = currentDarkTheme.primary;
+  const beforeColor = currentDarkTheme.primary;
   const badgeColorValue = useColorModeValue("grey.500", "grey.300");
-  const childLineColor = useColorModeValue("grey.200", "grey.400");
+  const childLineColor = useColorModeValue(
+    currentDarkTheme.rgba.primary20,
+    currentDarkTheme.rgba.primary30
+  );
   const childTextColor = useColorModeValue("grey.600", "grey.300");
-  const tooltipBg = useColorModeValue("grey.700", "white");
+  const tooltipBg = useColorModeValue("grey.700", "green.600");
   const chevronColor = useColorModeValue("grey.500", "grey.300");
+  const iconColorValue = useColorModeValue(
+    iconColor,
+    active ? currentDarkTheme.primary : "grey.300"
+  );
 
   const hasChildren = childrenItems && childrenItems.length > 0;
   const isExpanded = expandedItem === label;
@@ -46,9 +65,9 @@ export const SidebarItem = ({
   };
 
   const content = (
-    <VStack align="stretch" spacing={0}>
+    <VStack align="stretch">
       <HStack
-        p={3}
+        p={4}
         position="relative"
         bg={active ? activeBg : "transparent"}
         _hover={{ bg: hoverBg, cursor: "pointer" }}
@@ -68,9 +87,17 @@ export const SidebarItem = ({
         }}
       >
         <HStack spacing={open ? 3 : 0}>
-          <Icon as={icon} size="18" />
+          <Icon
+            as={icon}
+            size="18"
+            color={active ? activeColor : iconColorValue}
+          />
           {open && (
-            <Text color={color} fontSize="sm" fontWeight={active ? "semibold" : "medium"}>
+            <Text
+              color={active ? activeColor : color}
+              fontSize="sm"
+              fontWeight={active ? "semibold" : "medium"}
+            >
               {label}
             </Text>
           )}
@@ -78,7 +105,7 @@ export const SidebarItem = ({
         {open && (
           <>
             {badge && (
-              <Badge colorScheme="grey" fontSize="0.7em" borderRadius="md" color={badgeColorValue}>
+              <Badge colorScheme="green" fontSize="0.7em" borderRadius="8px" color={badgeColorValue}>
                 {badge}
               </Badge>
             )}
@@ -112,5 +139,5 @@ export const SidebarItem = ({
     </VStack>
   );
 
-  return open ? content : <Tooltip bg={tooltipBg} borderRadius="4px" label={label}>{content}</Tooltip>;
+  return open ? content : <Tooltip bg={tooltipBg} color="white" borderRadius="4px" label={label}>{content}</Tooltip>;
 };

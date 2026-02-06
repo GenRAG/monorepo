@@ -56,11 +56,11 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
 				<AuthHeader currentStep={currentStep} />
 
 				<HStack wrap="wrap" justify="flex-start" w="100%" gap="0">
-					<Text variant="body-sm" color="whites.offwhite" mr={2}>
+					<Text variant="body-sm" color={useColorModeValue('grey.900', 'whites.offwhite')} mr={2}>
 						Already have an account?
 					</Text>
 					<Link as={ReachLink} to={{ pathname: '/login', search: location.search }}>
-						<Text color="whites.offwhite" variant="body-sm-semibold">Sign in</Text>
+						<Text color={useColorModeValue('grey.900', 'whites.offwhite')} variant="body-sm-semibold">Sign in</Text>
 					</Link>
 				</HStack>
 			</VStack>
@@ -68,7 +68,7 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
 				{step === RegisterFormSteps.REGISTER_EMAIL ? (
 					<>
 						<FormControl isInvalid={!!errors.email}>
-							<FormLabel color="whites.offwhite">Email address</FormLabel>
+							<FormLabel color={useColorModeValue('grey.900', 'whites.offwhite')}>Email address</FormLabel>
 							<Input
 								{...register('email', { validate: (email) => validateEmail(email ?? undefined) })}
 								placeholder="john.smith@gmail.com"
@@ -85,11 +85,11 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
 						</Button>
 						<>
 							<HStack w="100%">
-								<Divider borderColor="grey.100" />
-								<Text m="auto" variant="body-sm" color="whites.offwhite">
+								<Divider borderColor={useColorModeValue('grey.300', 'grey.100')} />
+								<Text m="auto" variant="body-sm" color={useColorModeValue('grey.900', 'whites.offwhite')}>
 									or
 								</Text>
-								<Divider borderColor="grey.100" />
+								<Divider borderColor={useColorModeValue('grey.300', 'grey.100')} />
 							</HStack>
 							<VStack w="100%">
 								<Button w="100%" variant="secondary" size="lg">

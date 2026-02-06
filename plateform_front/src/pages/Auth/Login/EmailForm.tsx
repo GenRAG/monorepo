@@ -61,19 +61,19 @@ export const EmailForm: FC<{ setEmail: (email: string) => void; currentStep: Aut
 				<AuthHeader currentStep={currentStep} />
 
 				<HStack wrap="wrap" justify="flex-start" w="100%" gap="0">
-					<Text variant="body-sm" color="whites.offwhite" mr={2}>
+					<Text variant="body-sm" color={useColorModeValue('grey.900', 'whites.offwhite')} mr={2}>
 						You don't have an account yet ?
 					</Text>
 					<Link as={ReachLink} to={{ pathname: '/register', search: location.search }}>
-						<Text color="whites.offwhite" variant="body-sm-semibold">Create an account</Text>
+						<Text color={useColorModeValue('grey.900', 'whites.offwhite')} variant="body-sm-semibold">Create an account</Text>
 					</Link>
 				</HStack>
 			</VStack>
 
 			<chakra.form w="100%" onSubmit={onSubmit}>
-                <VStack align="start" gap="32px">
+				<VStack align="start" gap="32px">
 					<FormControl isInvalid={!!errors.email}>
-						<FormLabel color="whites.offwhite">Email address</FormLabel>
+						<FormLabel color={useColorModeValue('grey.900', 'whites.offwhite')}>Email address</FormLabel>
 						<Controller
 							name="email"
 							control={control}
@@ -85,7 +85,7 @@ export const EmailForm: FC<{ setEmail: (email: string) => void; currentStep: Aut
 									placeholder="john.smith@example.com"
 									autoComplete="email"
 									type="email"
-								    data-cy="cy-email"
+									data-cy="cy-email"
 								/>
 							)}
 						/>
@@ -100,32 +100,32 @@ export const EmailForm: FC<{ setEmail: (email: string) => void; currentStep: Aut
 							type="submit"
 							isLoading={isSubmitting}
 							data-cy="cy-connect-btn"
-							color="whites.offwhite"
+							color={useColorModeValue('grey.900', 'whites.offwhite')}
 						>
 							Sign in
 						</Button>
 					</VStack>
 					<>
 						<HStack w="100%">
-							<Divider borderColor="grey.100" />
-							<Text m="auto" variant="body-sm" color="whites.offwhite">
+							<Divider borderColor={useColorModeValue('grey.300', 'grey.100')} />
+							<Text m="auto" variant="body-sm" color={useColorModeValue('grey.900', 'whites.offwhite')}>
 								or
 							</Text>
-							<Divider borderColor="grey.100" />
+							<Divider borderColor={useColorModeValue('grey.300', 'grey.100')} />
 						</HStack>
 						<VStack w="100%">
-						<Button w="100%" variant="secondary" size="lg">
-							<HStack justify="center" spacing="8px">
-								<Image src={Google} boxSize="24px" />
-								<Text>Continue with Google</Text>
-							</HStack>
-						</Button>
-						<Button w="100%" variant="secondary" size="lg">
-							<HStack justify="center" spacing="8px">
-								<Image src={Microsoft} boxSize="24px" />
-								<Text>Continue with Microsoft</Text>
-							</HStack>
-						</Button>
+							<Button w="100%" variant="secondary" size="lg">
+								<HStack justify="center" spacing="8px">
+									<Image src={Google} boxSize="24px" />
+									<Text color="grey.900">Continue with Google</Text>
+								</HStack>
+							</Button>
+							<Button w="100%" variant="secondary" size="lg">
+								<HStack justify="center" spacing="8px">
+									<Image src={Microsoft} boxSize="24px" />
+									<Text color="grey.900">Continue with Microsoft</Text>
+								</HStack>
+							</Button>
 						</VStack>
 					</>
 				</VStack>

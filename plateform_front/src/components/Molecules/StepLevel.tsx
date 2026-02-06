@@ -21,8 +21,8 @@ const StepLevel: React.FC<StepLevelProps> = ({ level, description, title }) => {
         >
             <HStack spacing={3}>
                 <Circle size="40px" bg={currentDarkTheme.primary} color="white">
-                    <Text fontSize="sm" fontWeight="bold">
-                        {level}/5
+                    <Text fontSize="lg" fontWeight="bold" color="white">
+                        {level}
                     </Text>
                 </Circle>
                 <VStack align="start" spacing={0} flex={1}>

@@ -7,6 +7,7 @@ import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import themeNew from 'themeNew/index';
 import ReduxProvider from 'store/reduxProvider';
 import { AuthProvider } from 'app/AuthContext';
+import { ReactFlowProvider } from '@xyflow/react';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -15,12 +16,14 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
       <ReduxProvider>
-        <ChakraProvider theme={themeNew} resetCSS>
-          <ColorModeScript initialColorMode={themeNew.config.initialColorMode} />
-          <AuthProvider>
-            <App />
-        </AuthProvider>
-        </ChakraProvider>
+        <ReactFlowProvider>
+          <ChakraProvider theme={themeNew} resetCSS>
+            <ColorModeScript initialColorMode={themeNew.config.initialColorMode} />
+            <AuthProvider>
+              <App />
+          </AuthProvider>
+          </ChakraProvider>
+        </ReactFlowProvider>
       </ReduxProvider>
   </React.StrictMode>
 );

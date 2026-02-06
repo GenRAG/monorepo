@@ -1,8 +1,9 @@
-import { Sparkles, FileText, Zap } from "lucide-react";
+import { Sparkles, FileText, Zap, Check } from "lucide-react";
 import { StepConfig } from "pages/Onboarding/OnBoardingProvider";
 import { TestAssistantStepComponent } from "pages/Onboarding/steps/TestAssistantStep";
 import { ImproveAssistantStepComponent } from "pages/Onboarding/steps/ImproveAssistantStep";
 import { CompareIntelligenceStepComponent } from "pages/Onboarding/steps/CompareIntelligenceStep";
+import { UserPreferencesStepComponent } from "pages/Onboarding/steps/UserPreferencesStep";
 
 
 export const stepsConfig: StepConfig[] = [

@@ -33,14 +33,14 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
 }) => {
     const { colorMode } = useColorMode();
 
-    const getResponse = useCallback((question: string): string => {
-        return "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year. These days are calculated based on a full month of work.";
+    const getResponse = useCallback((question: string): string[] => {
+        return ["According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year. These days are calculated based on a full month of work."];
     }, []);
 
     const initialMessages = data.testQuestion && data.testResponse ? [{
         id: 'initial',
         question: data.testQuestion,
-        response: data.testResponse,
+        response: [data.testResponse],
         timestamp: Date.now(),
     }] : [];
 
@@ -50,23 +50,24 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
     const updateDataRef = useRef<typeof updateData | null>(null);
     const lastProcessedMessageRef = useRef<string>('');
 
-    const handleMessageUpdate = useCallback((message: { id: string; question: string; response: string; timestamp: number; isImproved?: boolean }) => {
+    const handleMessageUpdate = useCallback((message: { id: string; question: string; response: string | string[]; timestamp: number; isImproved?: boolean }) => {
         if (!message.response) return;
 
-        const messageKey = `${message.question}-${message.response}`;
+        const responseText = Array.isArray(message.response) ? message.response.join('\n') : message.response;
+        const messageKey = `${message.question}-${responseText}`;
         if (lastProcessedMessageRef.current === messageKey) return;
 
         lastProcessedMessageRef.current = messageKey;
 
         if (setValueRef.current) {
             setValueRef.current('testQuestion', message.question, { shouldValidate: false });
-            setValueRef.current('testResponse', message.response, { shouldValidate: false });
+            setValueRef.current('testResponse', responseText, { shouldValidate: false });
         }
 
         if (updateDataRef.current) {
             updateDataRef.current({
                 testQuestion: message.question,
-                testResponse: message.response,
+                testResponse: responseText,
             });
         }
     }, []);
@@ -138,7 +139,7 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
                             Here's your HR assistant ready to use
                         </Text>
                     </VStack>
-                    <StepLevel 
+                    <StepLevel
                         level={1}
                         title="Demo"
                         description="This model uses only public HR documents. None of your files are used yet."

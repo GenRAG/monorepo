@@ -12,6 +12,7 @@ export const extendedUserApi = backendApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ['User'],
     }),
 
     register: builder.mutation<void, RegisterParams>({
@@ -59,6 +60,7 @@ export const extendedUserApi = backendApi.injectEndpoints({
         url: "/users/me",
         method: "GET",
       }),
+      providesTags: ['User'],
     }),
   }),
 })

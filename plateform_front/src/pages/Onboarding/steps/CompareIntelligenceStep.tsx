@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
     Box,
     Heading,
@@ -19,12 +19,15 @@ import { Sparkles, CheckCircle2, Send } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import Button from 'components/Atoms/Button';
 import StepLevel from 'components/Molecules/StepLevel';
+import { ChatInterface } from 'components/Molecules/ChatInterface';
+import '../onboardingAnimations.css';
+import { useChat } from 'hooks/useChat';
 
 interface LLMResponse {
     id: string;
     label: string;
     description: string;
-    response: string;
+    response: string[];
 }
 
 interface CompareIntelligenceFormData {
@@ -42,9 +45,10 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
     const [selectedLLM, setSelectedLLM] = useState<string | null>(data.selectedLLM || null);
     const [question, setQuestion] = useState<string>(data.testQuestion || data.question || '');
     const [showResponses, setShowResponses] = useState<boolean>(!!data.testQuestion || !!data.question);
+    const [selectedResponseIndex, setSelectedResponseIndex] = useState<number | null>(null);
+    const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
 
     const {
-        watch,
         trigger,
         setValue,
         formState: { errors },
@@ -61,6 +65,41 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
     const triggerRef = useRef(trigger);
     triggerRef.current = trigger;
 
+    const getResponse = useCallback((question: string): string[] => {
+        return ['According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year.', 'According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company.', 'Great question! Your company grants you 27 paid vacation days per year, which is above the legal minimum. This includes 25 days according to the Syntec agreement, plus 2 additional days that your company has chosen to add to improve your work-life balance. These days can be taken according to the terms defined in your internal regulations.'];
+    }, []);
+
+    const setValueRef = useRef<typeof setValue | null>(null);
+    const updateDataRef = useRef<typeof updateData | null>(null);
+    const lastProcessedMessageRef = useRef<string>('');
+
+    const handleMessageUpdate = useCallback((message: { id: string; question: string; response: string | string[]; timestamp: number; isImproved?: boolean }) => {
+        if (!message.response) return;
+
+        const responseText = Array.isArray(message.response) ? message.response.join('\n') : message.response;
+        const messageKey = `${message.question}-${responseText}`;
+        if (lastProcessedMessageRef.current === messageKey) return;
+
+        lastProcessedMessageRef.current = messageKey;
+
+        if (setValueRef.current) {
+            setValueRef.current('question', message.question, { shouldValidate: false });
+            setValueRef.current('selectedLLM', responseText, { shouldValidate: false });
+        }
+
+        if (updateDataRef.current) {
+            updateDataRef.current({
+                testQuestion: message.question,
+                testResponse: responseText,
+            });
+        }
+    }, []);
+
+    const { messages, sendMessage, isLoading } = useChat({
+        getResponse,
+        onMessageUpdate: handleMessageUpdate,
+    });
+
     useEffect(() => {
         if (registerValidateAndGoNext) {
             const validateAndGoNext = async () => {
@@ -72,11 +111,6 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
             registerValidateAndGoNext(validateAndGoNext);
         }
     }, [registerValidateAndGoNext, triggerRef, goNextRef]);
-
-    const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newQuestion = e.target.value;
-        setQuestion(newQuestion);
-    };
 
     const handleQuestionSubmit = (e?: React.FormEvent) => {
         if (e) {
@@ -90,24 +124,36 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
         }
     };
 
-    const llmOptions: LLMResponse[] = [
+    const responseLabels = ['Standard (fast)', 'More precise', 'More creative'];
+    const responseDescriptions = ['Quick and efficient responses', 'In-depth document analysis', 'More detailed and contextual responses'];
+
+    const responseAdvantages = [
         {
-            id: 'standard',
-            label: 'Standard (fast)',
-            description: 'Quick and efficient responses',
-            response: "According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company.",
+            title: 'Standard (fast)',
+            advantages: [
+                'Fast response time for quick queries',
+                'Efficient resource usage',
+                'Perfect for simple questions',
+                'Lower computational cost',
+            ],
         },
         {
-            id: 'precise',
-            label: 'More precise',
-            description: 'In-depth document analysis',
-            response: "According to your collective agreement (article 12.3) and your internal regulations (section 4.2), you are entitled to 27 paid vacation days per year. This allocation includes: 25 base days according to the Syntec agreement + 2 additional days granted by your company as part of its company agreement signed in 2023.",
+            title: 'More precise',
+            advantages: [
+                'Detailed document references',
+                'Accurate citations and article numbers',
+                'In-depth analysis of your documents',
+                'Higher accuracy for complex questions',
+            ],
         },
         {
-            id: 'creative',
-            label: 'More creative',
-            description: 'More detailed and contextual responses',
-            response: "Great question! Your company grants you 27 paid vacation days per year, which is above the legal minimum. This includes 25 days according to the Syntec agreement, plus 2 additional days that your company has chosen to add to improve your work-life balance. These days can be taken according to the terms defined in your internal regulations.",
+            title: 'More creative',
+            advantages: [
+                'Contextual and friendly responses',
+                'Better user experience',
+                'More engaging explanations',
+                'Human-like conversation style',
+            ],
         },
     ];
 
@@ -119,6 +165,13 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
             question: question,
         });
         trigger();
+    };
+
+    const handleResponseSelect = (responseIndex: number, messageId: string) => {
+        setSelectedResponseIndex(responseIndex);
+        setSelectedMessageId(messageId);
+        const llmId = ['standard', 'precise', 'creative'][responseIndex];
+        handleSelect(llmId);
     };
 
     return (
@@ -143,125 +196,77 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                         title="Optimized"
                         description="You can change intelligence at any time. Nothing is final."
                     />
+
+                    <Text fontSize="sm" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}>
+                        Select the response you prefer to improve your assistant.
+                    </Text>
                 </VStack>
-                <Box
-                    w="100%"
-                    border={`1px solid ${colorMode === 'dark' ? 'grey.600' : 'grey.300'}`}
-                    borderRadius="12px"
-                    bg={colorMode === 'dark' ? 'grey.800' : 'white'}
-                    p={6}
-                >
-                    <VStack align="stretch" spacing={6}>
-                        <HStack spacing={2}>
-                            <Box
-                                flex={1}
-                                p={3}
-                                borderRadius="8px"
-                                border={`1px solid ${colorMode === 'dark' ? 'grey.600' : 'grey.300'}`}
-                            >
-                                <Input
-                                    value={question}
-                                    onChange={handleQuestionChange}
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleQuestionSubmit();
-                                        }
-                                    }}
-                                    size="sm"
-                                    placeholder="Enter your question"
-                                    border="none"
-                                    _focus={{ border: 'none', boxShadow: 'none' }}
-                                    bg={colorMode === 'dark' ? 'grey.600' : 'grey.50'}
-                                />
-                            </Box>
-                            <Button
-                                size="md"
-                                bg={currentDarkTheme.primary}
-                                color="white"
-                                _hover={{ bg: currentDarkTheme.primary500 }}
-                                onClick={handleQuestionSubmit}
-                            >
-                                <Icon as={Send} boxSize={4} />
-                            </Button>
-                        </HStack>
-                        {showResponses && (
-                            <>
-                                <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'white' : 'grey.900'} textAlign="center">
-                                    Which one do you prefer?
-                                </Text>
-                                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} w="100%">
-                                    {llmOptions.map((llm) => (
-                                        <Box
-                                            key={llm.id}
-                                            p={4}
-                                            bg={selectedLLM === llm.id
-                                                ? (colorMode === 'dark' ? 'grey.700' : 'grey.50')
-                                                : (colorMode === 'dark' ? 'grey.800' : 'white')
-                                            }
-                                            borderRadius="12px"
-                                            border={`2px solid ${selectedLLM === llm.id ? currentDarkTheme.primary : (colorMode === 'dark' ? 'grey.600' : 'grey.300')}`}
-                                            cursor="pointer"
-                                            onClick={() => handleSelect(llm.id)}
-                                            _hover={{
-                                                borderColor: currentDarkTheme.primary,
-                                                bg: colorMode === 'dark' ? 'grey.700' : 'grey.50',
-                                            }}
-                                            transition="all 0.2s"
-                                            position="relative"
-                                        >
-                                            {selectedLLM === llm.id && (
-                                                <Box
-                                                    position="absolute"
-                                                    top={-2}
-                                                    right={-2}
-                                                    bg={currentDarkTheme.primary}
-                                                    borderRadius="full"
-                                                    p={1}
-                                                >
-                                                    <Icon as={CheckCircle2} boxSize={4} color="white" />
-                                                </Box>
-                                            )}
-                                            <VStack align="start" spacing={2} mb={3}>
-                                                <HStack spacing={2}>
-                                                    <Icon as={Sparkles} boxSize={4} color={currentDarkTheme.primary} />
-                                                    <Text fontSize="xs" fontWeight="semibold" color={currentDarkTheme.primary}>
-                                                        {llm.label}
-                                                    </Text>
-                                                </HStack>
-                                                <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.500'}>
-                                                    {llm.description}
+                <Stack h="100%" direction={{ base: 'column', lg: 'row' }} align="flex-start" spacing={6} w="100%" borderRadius="12px">
+                    {selectedResponseIndex !== null && selectedResponseIndex !== undefined && selectedMessageId && (
+                        <Box
+                            w={{ base: '100%', lg: '400px' }}
+                            minH="500px"
+                            flexShrink={0}
+                            border={`2px solid rgba(0, 255, 187, 0.46)`}
+                            borderRadius="12px"
+                            p={6}
+                            className="slide-in-from-left"
+                            bg={colorMode === 'dark' ? 'grey.800' : 'grey.50'}
+                        >
+                            <VStack align="stretch" spacing={4}>
+                                <HStack spacing={3}>
+                                    <Icon as={Sparkles} boxSize={5} color={currentDarkTheme.primary} />
+                                    <VStack align="start" spacing={1} flex={1}>
+                                        <Text fontSize="lg" fontWeight="semibold" color={colorMode === 'dark' ? 'white' : 'grey.900'}>
+                                            {responseAdvantages[selectedResponseIndex].title}
+                                        </Text>
+                                        <Text fontSize="sm" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}>
+                                            {responseDescriptions[selectedResponseIndex]}
+                                        </Text>
+                                    </VStack>
+                                </HStack>
+
+                                <Box
+                                    p={4}
+                                    bg={colorMode === 'dark' ? 'grey.700' : 'white'}
+                                    borderRadius="8px"
+                                    border={`1px solid ${colorMode === 'dark' ? 'grey.600' : '#E2E8F0'}`}
+                                >
+                                    <Text fontSize="sm" color={colorMode === 'dark' ? 'grey.200' : 'grey.700'} lineHeight="1.6">
+                                        {getResponse(question)[selectedResponseIndex]}
+                                    </Text>
+                                </Box>
+
+                                <Box>
+                                    <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'white' : 'grey.900'} mb={3}>
+                                        Advantages of this intelligence:
+                                    </Text>
+                                    <VStack align="stretch" spacing={2}>
+                                        {responseAdvantages[selectedResponseIndex].advantages.map((advantage, index) => (
+                                            <HStack key={index} spacing={2} align="flex-start">
+                                                <Icon as={CheckCircle2} boxSize={4} color={currentDarkTheme.primary} mt={0.5} flexShrink={0} />
+                                                <Text fontSize="sm" color={colorMode === 'dark' ? 'grey.300' : 'grey.700'}>
+                                                    {advantage}
                                                 </Text>
-                                            </VStack>
-                                            <Text
-                                                fontSize="sm"
-                                                color={colorMode === 'dark' ? 'grey.200' : 'grey.700'}
-                                                lineHeight="1.6"
-                                            >
-                                                {llm.response}
-                                            </Text>
-                                        </Box>
-                                    ))}
-                                </SimpleGrid>
-                                {selectedLLM && (
-                                    <Box
-                                        p={3}
-                                        bg={colorMode === 'dark' ? 'grey.700' : 'grey.50'}
-                                        borderRadius="8px"
-                                        border={`1px solid ${currentDarkTheme.primary}`}
-                                    >
-                                        <HStack spacing={2} justify="center">
-                                            <Icon as={CheckCircle2} boxSize={4} color={currentDarkTheme.primary} />
-                                            <Text fontSize="sm" color={colorMode === 'dark' ? 'white' : 'grey.900'}>
-                                                You selected: {llmOptions.find(llm => llm.id === selectedLLM)?.label}
-                                            </Text>
-                                        </HStack>
-                                    </Box>
-                                )}
-                            </>
-                        )}
-                    </VStack>
-                </Box>
+                                            </HStack>
+                                        ))}
+                                    </VStack>
+                                </Box>
+                            </VStack>
+                        </Box>
+                    )}
+                    <Box flex={1} minW={0}>
+                        <ChatInterface
+                            messages={messages}
+                            onSendMessage={sendMessage}
+                            onResponseSelect={handleResponseSelect}
+                            selectedResponseIndex={selectedResponseIndex}
+                            selectedMessageId={selectedMessageId}
+                            responseLabels={responseLabels}
+                            responseDescriptions={responseDescriptions}
+                        />
+                    </Box>
+                </Stack>
             </Stack>
         </chakra.form>
     );

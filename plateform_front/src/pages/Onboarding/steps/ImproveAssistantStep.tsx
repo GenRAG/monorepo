@@ -33,7 +33,7 @@ import '../onboardingAnimations.css';
 
 interface ImproveAssistantFormData {
     documentsUploaded: boolean;
-    improvedResponse: string;
+    improvedResponse: string[];
 }
 
 export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
@@ -49,14 +49,14 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const testQuestion = data.testQuestion || "How many paid vacation days do I have?";
-    const beforeResponse = "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year.";
-    const afterResponse = "According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company.";
+    const beforeResponse = ["According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year."];
+    const afterResponse = ["According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company."];
 
     const completedFiles = uploadedFiles.filter((f) => f.status === 'completed');
     const processingFiles = uploadedFiles.filter((f) => f.status === 'processing');
     const isProcessing = processingFiles.length > 0;
 
-    const getResponse = useCallback((question: string): { response: string; isImproved: boolean } => {
+    const getResponse = useCallback((question: string): string[] | { response: string[]; isImproved?: boolean } => {
         const isImproved = showComparison && completedFiles.length > 0;
         return {
             response: isImproved ? afterResponse : beforeResponse,
@@ -145,13 +145,13 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
 
     const steps = useMemo(() => [
         {
-            title: 'Documents added',
+            title: 'Add your documents',
             description: 'Your documents are being processed and indexed.',
             isCompleted: completedFiles.length > 0,
             icon: FileText,
         },
         {
-            title: 'Personalized assistant',
+            title: 'Documents are being processed',
             description: 'Your assistant is now using your documents to answer questions.',
             isCompleted: showComparison,
             icon: Sparkles,
@@ -392,6 +392,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                     </VStack>
                     <Stack flex={1}>
                         <ChatInterface
+                            fullHeight
                             messages={messages}
                             onSendMessage={sendMessage}
                             isLoading={isLoading}
@@ -399,8 +400,9 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                             welcomeMessage={
                                 showComparison
                                     ? "Hello! I now have access to your personalized documents. Ask me a question to see the difference!"
-                                    : "Hello! I'm your HR assistant. Ask me a question to test my responses before adding your documents."
+                                    : "Add your documents to improve your assistant"
                             }
+                            disabled={!showComparison}
                         />
                     </Stack>
                 </HStack>

@@ -124,7 +124,7 @@ const Onboarding: React.FC = () => {
 
   const StepperContent = () => (
     <Stepper
-      h={'100%'}
+      h='100%'
       index={currentStep}
       orientation="vertical"
       gap={0}

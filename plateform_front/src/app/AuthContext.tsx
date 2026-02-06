@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import useAuthentification from "hooks/useAuthentification";
+import { AppLoader } from "components/Molecules/AppLoader";
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -23,7 +24,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [isAuthenticated, isLoading]);
 
   if (!isInit) {
-    return <div>Loading...</div>;
+    return <AppLoader message="Checking authentication..." />;
   }
 
   return (

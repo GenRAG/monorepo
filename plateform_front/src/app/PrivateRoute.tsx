@@ -1,14 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "app/AuthContext";
 import { useRef } from "react";
+import { Box, Flex } from "@chakra-ui/react";
+import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
+import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 
 const PrivateRoute: React.FC = () => {
   const { isLoggedIn, isLoading } = useAuth();
   const hasChecked = useRef(false);
 
   if (!isLoading) hasChecked.current = true;
-
-  console.log("PrivateRoute - isLoggedIn:", isLoggedIn, "isLoading:", isLoading, "hasChecked:", hasChecked.current);
 
   if (isLoading || !hasChecked.current) {
     return <div>Loading...</div>;
@@ -18,7 +19,15 @@ const PrivateRoute: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <Flex minH="100vh" w="100vw">
+      <Box flex={1}>
+        <OnboardingProvider steps={stepsConfig}>
+          <Outlet />
+        </OnboardingProvider>
+      </Box>
+    </Flex>
+  );
 };
 
 export default PrivateRoute;

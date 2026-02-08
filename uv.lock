@@ -1101,6 +1101,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
+    { name = "botocore" },
     { name = "fastapi", extra = ["standard"] },
     { name = "gunicorn" },
     { name = "pdfreader" },
@@ -1114,6 +1115,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.42.30" },
+    { name = "botocore", specifier = ">=1.42.30" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.128.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "pdfreader", specifier = ">=0.1.15" },

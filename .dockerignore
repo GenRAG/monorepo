@@ -7,7 +7,11 @@
 # --- Heavy Data & Databases ---
 qdrant_data/
 qdrant_storage/
+qdrant_snapshots/
+minio_data/
+minio_config/
 data/
+logs
 
 # --- Python & Environment Garbage ---
 __pycache__/
@@ -19,7 +23,7 @@ env/
 venv/
 .venv/
 pip-log.txt
-uv.lock  
+uv.lock
 
 # --- System & IDE Files ---
 .git/
@@ -27,6 +31,24 @@ uv.lock
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
+
+# --- Test Files ---
+.coverage
+.pytest_cache/
+tests/
+test_*.py
+*_test.py
+
+# --- Documentation ---
+README.md
+*.md
+docs/
+
+# --- Docker Files ---
+Dockerfile
+docker-compose*.yml
+.dockerignore
 
 # --- Build Artifacts ---
 build/

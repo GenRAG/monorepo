@@ -1,18 +1,38 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from contextlib import asynccontextmanager
 import asyncio
+import json
+import dotenv
+import requests
+import os
+from qdrant_client import QdrantClient
 
+dotenv.load_dotenv()
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 # Import our new services
 from app.services.storage import ensure_bucket_exists
 from app.services.vector_db import ensure_collection
 from app.services.job_manager import job_manager, JobStatus
 from app.services.background_worker import background_worker
 
+client = QdrantClient(url=QDRANT_URL)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    ensure_bucket_exists()
+    try:
+        ensure_bucket_exists()
+    except Exception as e:
+        print(f"⚠️ Warning: Could not connect to MinIO during startup: {e}")
+        print("📦 Bucket will be created when first document is processed")
+
     # Qwen embedding size is 4096 dimensions
-    ensure_collection("genrag_knowledge_base", vector_size=4096)
+    try:
+        ensure_collection("genrag_knowledge_base", vector_size=4096)
+    except Exception as e:
+        print(f"⚠️ Warning: Could not connect to Qdrant during startup: {e}")
+        print("📦 Collection will be created when first document is processed")
 
     # Start background worker
     worker_task = asyncio.create_task(background_worker.start_worker())
@@ -24,6 +44,11 @@ async def lifespan(app: FastAPI):
     worker_task.cancel()
 
 app = FastAPI(lifespan=lifespan)
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "ok"}
 
 @app.post("/ingest")
 async def ingest_document(
@@ -105,3 +130,56 @@ async def get_job_result(job_id: str):
         raise HTTPException(status_code=400, detail=f"Job is not completed. Current status: {job.status}")
 
     return job.result or {"error": "No result available"}
+
+@app.post("/retrieve")
+async def retrieve_documents(query: str, top_k: int = 5, index_name: str = "genrag_knowledge_base"):
+    query_vector = get_embedding(query)
+
+    search_results = client.query_points(
+        collection_name=index_name,
+        query=query_vector,
+        limit=top_k,
+    )
+
+    for point in search_results.points:
+        print("Retrieved point ID:", point.id)
+        print("Payload:", point.payload)
+        print("Vector:", point.vector)
+
+    return {
+        "query": query,
+        "index_name": index_name,
+        "top_k": top_k,
+        "results": search_results
+    }
+
+@app.post("/rag")
+async def rag_query(query: str, org_id: str):
+    """Handle a RAG query and return the generated answer."""
+    from app.blocks.custom_rag import QueryBlock, RetrieveBlock, AnswerGenerationBlock, RagChain
+
+    # Initialize blocks
+    query_block = QueryBlock(name="QueryBlock", description="Handles user queries")
+    retrieve_block = RetrieveBlock(name="RetrieveBlock", description="Retrieves relevant documents", top_k=5, index_name="genrag_knowledge_base")
+    answer_block = AnswerGenerationBlock(name="AnswerBlock", description="Generates answers", model_name="openai/gpt-3.5-turbo")
+
+    # Create RAG chain
+    rag_chain = RagChain(name="RagChain", description="RAG Chain for query processing")
+    rag_chain.add_block(query_block)
+    rag_chain.add_block(retrieve_block)
+    rag_chain.add_block(answer_block)
+
+    # Execute RAG chain
+    async_generator = rag_chain.execute_chain({"query": query, "org_id": org_id})
+
+    # Stream response
+    answer_parts = []
+    async for chunk in async_generator:
+        answer_parts.append(chunk)
+
+    final_answer = "".join(answer_parts)
+
+    return {
+        "query": query,
+        "answer": final_answer
+    }

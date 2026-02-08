@@ -28,7 +28,7 @@ def ensure_bucket_exists():
             s3.create_bucket(Bucket=BUCKET_NAME)
             print(f"✅ Created bucket: {BUCKET_NAME}")
         except Exception as e:
-            print(f"⚠️  Bucket creation warning: {e}")
+            print(f"⚠️ dBucket creation warning: {e}")
 
 def upload_file(file_obj, object_name):
     """

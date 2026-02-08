@@ -37,3 +37,4 @@ def upsert_chunks(collection_name: str, chunks: list, embeddings: list, metadata
         points=points
     )
     return len(points)
+

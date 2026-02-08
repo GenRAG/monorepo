@@ -1,5 +1,11 @@
-from blocks.base_block import BaseBlock
+from typing import Union, Dict, Any
+from .base_block import BaseBlock
+
 
 class QueryBlock(BaseBlock):
-    async def run(self, input_data: str) -> dict:
-        return {"query": input_data}
+    async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
+        if isinstance(input_data, dict):
+            query = input_data.get("query", "")
+        else:
+            query = str(input_data)
+        return {"query": query}

@@ -15,7 +15,11 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 class Settings(BaseSettings):
     """Loads settings from environment variables or .env file."""
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"  # Ignore extra fields in .env
+    )
     OPENROUTER_API_KEY: str
     MINIO_USER: str
     MINIO_PASSWORD: str

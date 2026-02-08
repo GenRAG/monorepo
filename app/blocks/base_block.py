@@ -1,11 +1,13 @@
+from typing import Union, AsyncGenerator, Dict, Any
 from pydantic import BaseModel
-from typing import List, Optional, Union
-from abc import ABC, abstractmethod
+
 
 class BaseBlock(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
-    @abstractmethod
-    async def run(self, input_data: dict) -> dict:
-        raise NotImplementedError("Each block must implement the run method.")
+    async def run(self, input_data: Union[Dict[str, Any], str]) -> Union[Dict[str, Any], AsyncGenerator[str, None]]:
+        raise NotImplementedError
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(name='{self.name}')"

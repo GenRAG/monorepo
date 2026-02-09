@@ -6,7 +6,7 @@ load_dotenv()
 
 
 class Config:
-    QDRANT_URL = "http://localhost:6333"
+    QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
     REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     S3_ENDPOINT = os.getenv("S3_ENDPOINT")
     AWS_ACCESS = os.getenv("MINIO_ROOT_USER", os.getenv("MINIO_USER"))

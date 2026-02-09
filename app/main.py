@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.responses import StreamingResponse
 from contextlib import asynccontextmanager
 import asyncio
 import json
@@ -16,8 +17,12 @@ from app.services.storage import ensure_bucket_exists
 from app.services.vector_db import ensure_collection
 from app.services.job_manager import job_manager, JobStatus
 from app.services.background_worker import background_worker
+from app.services.embedding import EmbeddingService
+from app.models.rag import RagRequest
+from app.pipelines.rag_pipeline import execute_query_from_json
 
 client = QdrantClient(url=QDRANT_URL)
+embedding_service = EmbeddingService()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -133,7 +138,7 @@ async def get_job_result(job_id: str):
 
 @app.post("/retrieve")
 async def retrieve_documents(query: str, top_k: int = 5, index_name: str = "genrag_knowledge_base"):
-    query_vector = get_embedding(query)
+    query_vector = await embedding_service.get_embedding(query)
 
     search_results = client.query_points(
         collection_name=index_name,
@@ -153,33 +158,11 @@ async def retrieve_documents(query: str, top_k: int = 5, index_name: str = "genr
         "results": search_results
     }
 
-@app.post("/rag")
-async def rag_query(query: str, org_id: str):
-    """Handle a RAG query and return the generated answer."""
-    from app.blocks.custom_rag import QueryBlock, RetrieveBlock, AnswerGenerationBlock, RagChain
-
-    # Initialize blocks
-    query_block = QueryBlock(name="QueryBlock", description="Handles user queries")
-    retrieve_block = RetrieveBlock(name="RetrieveBlock", description="Retrieves relevant documents", top_k=5, index_name="genrag_knowledge_base")
-    answer_block = AnswerGenerationBlock(name="AnswerBlock", description="Generates answers", model_name="openai/gpt-3.5-turbo")
-
-    # Create RAG chain
-    rag_chain = RagChain(name="RagChain", description="RAG Chain for query processing")
-    rag_chain.add_block(query_block)
-    rag_chain.add_block(retrieve_block)
-    rag_chain.add_block(answer_block)
-
-    # Execute RAG chain
-    async_generator = rag_chain.execute_chain({"query": query, "org_id": org_id})
-
-    # Stream response
-    answer_parts = []
-    async for chunk in async_generator:
-        answer_parts.append(chunk)
-
-    final_answer = "".join(answer_parts)
-
-    return {
-        "query": query,
-        "answer": final_answer
-    }
+@app.post("/rag/stream")
+async def rag_stream(request: RagRequest):
+    """Execute RAG query with streaming response based on JSON pipeline config."""
+    json_input = request.model_dump()
+    return StreamingResponse(
+        execute_query_from_json(json_input),
+        media_type="text/plain"
+    )

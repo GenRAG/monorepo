@@ -18,7 +18,7 @@ from app.services.vector_db import ensure_collection
 from app.services.job_manager import job_manager, JobStatus
 from app.services.background_worker import background_worker
 from app.services.embedding import EmbeddingService
-from app.models.rag import RagRequest
+from app.schemas.rag import RagRequest
 from app.pipelines.rag_pipeline import execute_query_from_json
 
 client = QdrantClient(url=QDRANT_URL)

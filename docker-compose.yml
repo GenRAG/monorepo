@@ -1,30 +1,49 @@
 services:
   rag_api:
-    build: .
-    container_name: genrag_api
-    ports:
-      - "8000:8000"
-    env_file: .env
-    depends_on:
-      minio:
-        condition: service_healthy
-      qdrant:
-        condition: service_healthy
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      build: .
+      container_name: genrag_api
+      ports:
+        - "8000:8000"
+      env_file: .env
+      
+      # Force logs to appear instantly
+      environment:
+        - PYTHONUNBUFFERED=1
+      
+      volumes:
+        - .:/app
+        - /app/.venv
+      
+      # 1. Use the direct path (cleaner)
+      # 2. --reload (for hot reloading)
+      # 3. REMOVED: --no-access-log (so you can see requests again)
+      command: >
+        /app/.venv/bin/uvicorn app.main:app 
+        --host 0.0.0.0 
+        --port 8000 
+        --reload 
+        --reload-exclude "minio_data" 
+        --reload-exclude "qdrant_data"
 
+      depends_on:
+        minio:
+          condition: service_healthy
+        qdrant:
+          condition: service_healthy
+      restart: unless-stopped
+      deploy:
+        resources:
+          limits:
+            memory: 512M
+            cpus: '0.5'
+          reservations:
+            memory: 256M
+            cpus: '0.25'
+      healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
   minio:
     image: minio/minio:latest
     ports:
@@ -34,9 +53,10 @@ services:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
     command: server /data --console-address ":9001"
+    # 3. Use Named Volumes (Docker manages these, not you)
     volumes:
-      - ./minio_data:/data
-      - ./minio_config:/root/.minio
+      - minio_data:/data
+      - minio_config:/root/.minio
     restart: unless-stopped
     deploy:
       resources:
@@ -56,9 +76,10 @@ services:
     image: qdrant/qdrant:latest
     ports:
       - "6333:6333"
+    # 4. Use Named Volumes here too
     volumes:
-      - ./qdrant_data:/qdrant/storage
-      - ./qdrant_snapshots:/qdrant/snapshots
+      - qdrant_data:/qdrant/storage
+      - qdrant_snapshots:/qdrant/snapshots
     restart: unless-stopped
     deploy:
       resources:
@@ -75,3 +96,10 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
+
+# 5. Define the volumes at the bottom
+volumes:
+  minio_data:
+  minio_config:
+  qdrant_data:
+  qdrant_snapshots:

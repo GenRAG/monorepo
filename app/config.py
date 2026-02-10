@@ -13,3 +13,5 @@ class Config:
     AWS_SECRET = os.getenv("MINIO_ROOT_PASSWORD", os.getenv("MINIO_PASSWORD"))
     BUCKET_NAME = os.getenv("BUCKET_NAME", "genrag-docs")
     OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
+    ZEROENTROPY_KEY = os.getenv("ZEROENTROPY_API_KEY")
+    COHERE_KEY = os.getenv("COHERE_API_KEY")

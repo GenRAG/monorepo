@@ -38,12 +38,19 @@ class RagPipeline(BaseBlock):
 
         data = input_data
 
+
         for block in self.blocks[:-1]:
             data = await block.run(data)
 
         last_block = self.blocks[-1]
         async for chunk in last_block.run(data):
             yield chunk
+
+        print("Pipeline execution completed.")
+        # pretty print final output for debugging
+        import json
+        print("Final output:", json.dumps(data, indent=2))
+        
 
     async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
         if not self.blocks:

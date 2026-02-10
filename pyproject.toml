@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.42.30",
     "botocore>=1.42.30",
+    "cohere>=5.20.4",
     "fastapi[standard]>=0.128.0",
     "gunicorn>=23.0.0",
     "pdfreader>=0.1.15",
@@ -15,4 +16,5 @@ dependencies = [
     "python-multipart>=0.0.21",
     "qdrant-client>=1.16.2",
     "requests>=2.32.5",
+    "zeroentropy>=0.1.0a8",
 ]

@@ -43,10 +43,10 @@ class AnswerGenerationBlock(BaseBlock):
 
     def _format_documents(self, documents: list) -> str:
         if not documents:
-            return "No relevant documents found."
+            return "No relevant documents found"
 
         formatted = []
         for i, doc in enumerate(documents, 1):
             text = doc.get("text", "")
-            formatted.append(f"[Document {i}]: {text[:500]}...")
+            formatted.append(f"[Doc {i}]: {text[:500]}...")
         return "\n\n".join(formatted)

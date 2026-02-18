@@ -7,9 +7,9 @@ QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
 client = QdrantClient(url=QDRANT_URL)
 
 def ensure_collection(collection_name: str, vector_size: int = 4096):
-    """Creates the collection if it doesn't exist."""
+    """Ensure the collection exists in Qdrant."""
     if not client.collection_exists(collection_name):
-        print(f"📦 Creating collection {collection_name}...")
+        print(f"Creating collection {collection_name}...")
         client.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE)

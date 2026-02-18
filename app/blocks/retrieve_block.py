@@ -44,7 +44,7 @@ class RetrieveBlock(BaseBlock):
             "Authorization": f"Bearer {Config.OPENROUTER_KEY}",
             "Content-Type": "application/json",
             "HTTP-Referer": "genrag.com",
-            "X-Title": "GenRAG App"
+            "X-Title": "GenRAG"
         }
         data = {
             "model": "qwen/qwen3-embedding-8b",

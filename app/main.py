@@ -29,15 +29,15 @@ async def lifespan(app: FastAPI):
     try:
         ensure_bucket_exists()
     except Exception as e:
-        print(f"⚠️ Warning: Could not connect to MinIO during startup: {e}")
-        print("📦 Bucket will be created when first document is processed")
+        print(f"Warning: Could not connect to MinIO during startup: {e}")
+        print("Bucket will be created when first document is processed")
 
     # Qwen embedding size is 4096 dimensions
     try:
         ensure_collection("genrag_knowledge_base", vector_size=4096)
     except Exception as e:
-        print(f"⚠️ Warning: Could not connect to Qdrant during startup: {e}")
-        print("📦 Collection will be created when first document is processed")
+        print(f"Warning: Could not connect to Qdrant during startup: {e}")
+        print("Collection will be created when first document is processed")
 
     # Start background worker
     worker_task = asyncio.create_task(background_worker.start_worker())
@@ -61,15 +61,12 @@ async def ingest_document(
     org_id: str = Form(...)
 ):
     """Upload a PDF for processing. Returns immediately with job ID."""
-    print(f"🚀 Starting ingestion for: {file.filename}")
+    print(f"Starting ingestion for: {file.filename}")
 
-    # 1. READ FILE (Into memory for now)
     file_bytes = await file.read()
 
-    # 2. CREATE JOB
     job_id = job_manager.create_job(file.filename, org_id)
 
-    # 3. RESET FILE CURSOR AND ADD TO BACKGROUND QUEUE
     file.file.seek(0)
     await background_worker.add_job(
         job_id=job_id,
@@ -79,7 +76,6 @@ async def ingest_document(
         org_id=org_id
     )
 
-    # 4. RETURN IMMEDIATELY
     return {
         "job_id": job_id,
         "status": "accepted",

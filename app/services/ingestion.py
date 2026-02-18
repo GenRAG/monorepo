@@ -10,11 +10,11 @@ def parse_pdf(file_bytes: bytes) -> str:
             text += page.extract_text() or ""
         return text
     except Exception as e:
-        print(f"❌ PDF Error: {e}")
+        print(f"Error parsing PDF: {e}")
         return ""
 
 def chunk_text(text: str, chunk_size=1000, overlap=100):
-    """Splits text into chunks of roughly 1000 characters."""
+    """Split text into overlapping chunks."""
     chunks = []
     start = 0
     while start < len(text):

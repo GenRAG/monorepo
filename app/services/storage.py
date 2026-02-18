@@ -18,27 +18,24 @@ def get_s3_client():
     )
 
 def ensure_bucket_exists():
-    """Checks if our folder exists in MinIO, creates it if not."""
+    """Ensure storage bucket exists."""
     s3 = get_s3_client()
     try:
         s3.head_bucket(Bucket=BUCKET_NAME)
     except ClientError:
-        # If bucket doesn't exist, create it
         try:
             s3.create_bucket(Bucket=BUCKET_NAME)
-            print(f"✅ Created bucket: {BUCKET_NAME}")
+            print(f"Created bucket: {BUCKET_NAME}")
         except Exception as e:
-            print(f"⚠️ dBucket creation warning: {e}")
+            print(f"Bucket creation warning: {e}")
 
 def upload_file(file_obj, object_name):
-    """
-    Uploads a file object to MinIO.
-    """
+    """Upload a file to MinIO."""
     s3 = get_s3_client()
     try:
         s3.upload_fileobj(file_obj, BUCKET_NAME, object_name)
-        print(f"✅ Uploaded {object_name} to MinIO")
+        print(f"Uploaded {object_name} to storage")
         return True
     except Exception as e:
-        print(f"❌ Upload Failed: {e}")
+        print(f"Upload failed: {e}")
         return False

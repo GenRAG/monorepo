@@ -46,8 +46,8 @@ class RagPipeline(BaseBlock):
         async for chunk in last_block.run(data):
             yield chunk
 
-        print("Pipeline execution completed.")
-        # pretty print final output for debugging
+        print("Pipeline execution completed")
+        # debug information
         import json
         print("Final output:", json.dumps(data, indent=2))
         

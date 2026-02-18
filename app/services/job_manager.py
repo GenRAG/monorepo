@@ -31,10 +31,10 @@ class JobManager:
         self.worker_running = False
 
     def create_job(self, filename: str, org_id: str) -> str:
-        """Creates a new job and returns job ID."""
+        """Create a new job and return ID."""
         job_id = str(uuid.uuid4())
         self.jobs[job_id] = JobInfo(job_id, filename, org_id)
-        print(f"🆔 Created job {job_id} for {filename}")
+        print(f"Created job {job_id} for {filename}")
         return job_id
 
     def get_job(self, job_id: str) -> Optional[JobInfo]:

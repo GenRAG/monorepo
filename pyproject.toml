@@ -10,6 +10,7 @@ dependencies = [
     "cohere>=5.20.4",
     "fastapi[standard]>=0.128.0",
     "gunicorn>=23.0.0",
+    "langfuse>=3.14.3",
     "pdfreader>=0.1.15",
     "pydantic>=2.12.5",
     "pypdf>=6.6.0",

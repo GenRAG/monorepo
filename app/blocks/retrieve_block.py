@@ -1,6 +1,7 @@
 from typing import Union, Dict, Any
 from pydantic import Field
 import requests
+from langfuse import observe
 
 from .base_block import BaseBlock
 from app.config import Config
@@ -10,6 +11,7 @@ class RetrieveBlock(BaseBlock):
     top_k: int = Field(default=5)
     collection_name: str
 
+    @observe()
     async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
         from qdrant_client import QdrantClient
 

@@ -1,7 +1,14 @@
 import json
+import os
 from typing import Union, Dict, Any, AsyncGenerator, Optional
 from pydantic import Field
 
+from langfuse import observe, get_client
+from app.config import Config
+
+langfuse = get_client()
+
+from app.config import Config
 from app.blocks.base_block import BaseBlock
 from app.blocks.query_block import QueryBlock
 from app.blocks.retrieve_block import RetrieveBlock
@@ -32,6 +39,7 @@ class RagPipeline(BaseBlock):
         self.blocks.clear()
         return self
 
+    @observe(name="Pipeline Execution")
     async def execute(self, input_data: Union[Dict[str, Any], str]) -> AsyncGenerator[str, None]:
         if not self.blocks:
             raise ValueError("No blocks configured")
@@ -134,11 +142,17 @@ def create_pipeline_from_json(json_input: Union[str, Dict[str, Any]]) -> RagPipe
     return pipeline
 
 
+@observe(name="RAG Pipeline Request")
 async def execute_query_from_json(json_input: Union[str, Dict[str, Any]]) -> AsyncGenerator[str, None]:
     if isinstance(json_input, str):
         config = json.loads(json_input)
     else:
         config = json_input
+
+    # Update trace metadata with the JSON config
+    langfuse.update_current_trace(
+        metadata={"config": config}
+    )
 
     pipeline = create_pipeline_from_json(config.get("pipeline", {}))
     query = config.get("query", "")

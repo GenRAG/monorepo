@@ -1,5 +1,6 @@
 from typing import Union, Dict, Any, AsyncGenerator, Optional
 from pydantic import Field
+from langfuse import observe
 
 from app.blocks.base_block import BaseBlock
 from app.simple_openrouter_client import OpenRouterClient
@@ -13,6 +14,7 @@ class AnswerGenerationBlock(BaseBlock):
         default="You are a helpful assistant. Use the provided documents to answer the question."
     )
 
+    @observe(as_type="generation")
     async def run(self, input_data: Union[Dict[str, Any], str]) -> AsyncGenerator[str, None]:
         if isinstance(input_data, dict):
             query = input_data.get("query", "")

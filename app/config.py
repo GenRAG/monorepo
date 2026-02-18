@@ -15,3 +15,6 @@ class Config:
     OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
     ZEROENTROPY_KEY = os.getenv("ZEROENTROPY_API_KEY")
     COHERE_KEY = os.getenv("COHERE_API_KEY")
+    LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
+    LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
+    LANGFUSE_BASE_URL = os.getenv("LANGFUSE_BASE_URL", os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"))

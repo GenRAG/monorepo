@@ -14,7 +14,7 @@ class AnswerGenerationBlock(BaseBlock):
         default="You are a helpful assistant. Use the provided documents to answer the question."
     )
 
-    @observe(as_type="generation")
+    @observe(name="AnswerGenerationBlock", as_type="generation")
     async def run(self, input_data: Union[Dict[str, Any], str]) -> AsyncGenerator[str, None]:
         if isinstance(input_data, dict):
             query = input_data.get("query", "")

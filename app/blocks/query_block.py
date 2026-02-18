@@ -4,7 +4,7 @@ from .base_block import BaseBlock
 
 
 class QueryBlock(BaseBlock):
-    @observe()
+    @observe(name="QueryBlock")
     async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
         if isinstance(input_data, dict):
             query = input_data.get("query", "")

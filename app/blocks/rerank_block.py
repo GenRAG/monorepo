@@ -11,7 +11,7 @@ class RerankBlock(BaseBlock):
     model: str = Field(default="rerank-2.0", description="Reranking model to use")
     top_k: int = Field(default=5, description="Number of top documents to return after reranking")
 
-    @observe()
+    @observe(name="RerankBlock")
     async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
         if isinstance(input_data, dict):
             query = input_data.get("query", "")

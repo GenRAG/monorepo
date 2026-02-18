@@ -11,7 +11,7 @@ class RetrieveBlock(BaseBlock):
     top_k: int = Field(default=5)
     collection_name: str
 
-    @observe()
+    @observe(name="RetrieveBlock")
     async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
         from qdrant_client import QdrantClient
 

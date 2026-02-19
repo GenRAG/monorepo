@@ -5,7 +5,6 @@ from langfuse import observe
 from app.blocks.base_block import BaseBlock
 from app.simple_openrouter_client import OpenRouterClient
 
-
 class AnswerGenerationBlock(BaseBlock):
     model_name: str
     temperature: Optional[float] = Field(default=0.7)
@@ -33,12 +32,7 @@ class AnswerGenerationBlock(BaseBlock):
 
         client = OpenRouterClient()
         try:
-            async for chunk in client.chat_completion_stream(
-                model=self.model_name,
-                messages=messages,
-                temperature=self.temperature or 0.7,
-                max_tokens=self.max_tokens or 150,
-            ):
+            async for chunk in client.chat_completion_stream(model=self.model_name, messages=messages, temperature=self.temperature, max_tokens=self.max_tokens):
                 yield chunk
         finally:
             await client.close()
@@ -48,7 +42,8 @@ class AnswerGenerationBlock(BaseBlock):
             return "No relevant documents found"
 
         formatted = []
-        for i, doc in enumerate(documents, 1):
+        for doc in documents:
             text = doc.get("text", "")
-            formatted.append(f"[Doc {i}]: {text[:500]}...")
+            filename = doc.get("filename", "Unknown Source")
+            formatted.append(f"Source: {filename}\nContent: {text}")
         return "\n\n".join(formatted)

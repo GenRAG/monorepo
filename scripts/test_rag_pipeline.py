@@ -114,6 +114,13 @@ async def test_streaming_rag_query_rewrite():
                     "top_k": 5,
                 },
                 {
+                    "type": "rerank",
+                    "name": "rerank",
+                    "provider": "zeroentropy",
+                    "model": "zerank-2",
+                    "top_k": 3,
+                },
+                {
                     "type": "answer",
                     "name": "answer",
                     "model": "google/gemini-2.5-flash",

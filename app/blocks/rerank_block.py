@@ -38,14 +38,18 @@ class RerankBlock(BaseBlock):
             raise ValueError("No documents to rerank")
 
         if self.provider == "zeroentropy":
-            return await self._rerank_zeroentropy(query, text_docs, input_data)
+            return await self._rerank_zeroentropy(query, text_docs, documents, input_data)
         elif self.provider == "cohere":
-            return await self._rerank_cohere(query, text_docs, input_data)
+            return await self._rerank_cohere(query, text_docs, documents, input_data)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
     async def _rerank_zeroentropy(
-        self, query: str, documents: List[str], input_data: Dict[str, Any]
+        self,
+        query: str,
+        text_documents: List[str],
+        original_documents: List[Dict[str, Any]],
+        input_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         from zeroentropy import ZeroEntropy
 
@@ -55,7 +59,7 @@ class RerankBlock(BaseBlock):
         response = zclient.models.rerank(
             model=self.model,
             query=query,
-            documents=documents,
+            documents=text_documents,
         )
         reranked_indices = [
             item.index
@@ -64,14 +68,15 @@ class RerankBlock(BaseBlock):
             )[: self.top_k]
         ]
         # Return original document dictionaries that were reranked
-        reranked_dicts = [
-            documents[i] if isinstance(documents[i], dict) else {"text": documents[i]}
-            for i in reranked_indices
-        ]
+        reranked_dicts = [original_documents[i] for i in reranked_indices]
         return {**input_data, "retrieved_documents": reranked_dicts}
 
     async def _rerank_cohere(
-        self, query: str, documents: List[str], input_data: Dict[str, Any]
+        self,
+        query: str,
+        text_documents: List[str],
+        original_documents: List[Dict[str, Any]],
+        input_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         import cohere
 
@@ -81,7 +86,7 @@ class RerankBlock(BaseBlock):
         response = co.rerank(
             model=self.model,
             query=query,
-            documents=documents,
+            documents=text_documents,
             top_n=self.top_k,
         )
         reranked_indices = [
@@ -91,8 +96,5 @@ class RerankBlock(BaseBlock):
             )
         ]
         # Return original document dictionaries that were reranked
-        reranked_dicts = [
-            documents[i] if isinstance(documents[i], dict) else {"text": documents[i]}
-            for i in reranked_indices
-        ]
+        reranked_dicts = [original_documents[i] for i in reranked_indices]
         return {**input_data, "retrieved_documents": reranked_dicts}

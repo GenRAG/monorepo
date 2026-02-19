@@ -8,6 +8,7 @@ from app.blocks.answer_block import AnswerGenerationBlock
 from app.blocks.base_block import BaseBlock
 from app.blocks.query_block import QueryBlock
 from app.blocks.retrieve_block import RetrieveBlock
+from app.blocks.rerank_block import RerankBlock
 
 langfuse = get_client()
 
@@ -46,9 +47,11 @@ class RagPipeline(BaseBlock):
         data = input_data
 
         for block in self.blocks[:-1]:
+            print(f"Running block: {block.name}")
             data = await block.run(data)
 
         last_block = self.blocks[-1]
+        print(f"Running block: {last_block.name}")
         async for chunk in last_block.run(data):
             yield chunk
 
@@ -112,9 +115,18 @@ def create_pipeline_from_json(json_input: Union[str, Dict[str, Any]]) -> RagPipe
                     top_k=block_config.get("top_k", 5),
                 )
             )
+        
+        elif block_type == "rerank":
+            pipeline.add_block(
+                RerankBlock(
+                    name=block_name,
+                    provider=block_config.get("provider", "zeroentropy"),
+                    model=block_config.get("model", "zrerank-2.0"),
+                    top_k=block_config.get("top_k", 5),
+                )
+            )
 
         elif block_type == "answer":
-            # Build kwargs only with non-None values to avoid validation errors
             answer_kwargs = {
                 "name": block_name,
                 "model_name": block_config.get("model", "deepseek/deepseek-v3.2"),

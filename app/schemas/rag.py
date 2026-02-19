@@ -7,6 +7,7 @@ class BlockConfig(BaseModel):
     name: str
     collection_name: Optional[str] = "genrag_knowledge_base"
     top_k: Optional[int] = 5
+    provider: Optional[str] = None
     model: Optional[str] = "deepseek/deepseek-v3.2"
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None

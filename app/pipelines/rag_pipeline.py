@@ -9,6 +9,18 @@ from app.blocks.base_block import BaseBlock
 from app.blocks.query_block import QueryBlock
 from app.blocks.retrieve_block import RetrieveBlock
 from app.blocks.rerank_block import RerankBlock
+from app.blocks.query_rewriter_block import QueryRewriterBlock
+
+from app.schemas.rag import (
+    BlockConfig,
+    QueryBlockConfig,
+    QueryRewriterBlockConfig,
+    RetrieveBlockConfig,
+    RerankBlockConfig,
+    AnswerGenerationBlockConfig,
+    PipelineConfig,
+)
+
 
 langfuse = get_client()
 
@@ -70,72 +82,59 @@ class RagPipeline(BaseBlock):
         return data
 
 
-def create_simple_pipeline(
-    collection_name: str = "genrag_knowledge_base",
-    model_name: str = "deepseek/deepseek-v3.2",
-    top_k: int = 5,
-) -> RagPipeline:
-    pipeline = RagPipeline(name="simple_rag_pipeline")
-
-    pipeline.add_block(QueryBlock(name="query_block")).add_block(
-        RetrieveBlock(
-            name="retrieve_block", collection_name=collection_name, top_k=top_k
-        )
-    ).add_block(AnswerGenerationBlock(name="answer_block", model_name=model_name))
-
-    return pipeline
-
-
-def create_pipeline_from_json(json_input: Union[str, Dict[str, Any]]) -> RagPipeline:
-    if isinstance(json_input, str):
-        config = json.loads(json_input)
-    else:
-        config = json_input
-
-    pipeline_name = config.get("pipeline_name", "rag_pipeline")
+def create_pipeline_from_json(pipeline_config: PipelineConfig) -> RagPipeline:
+    pipeline_name = pipeline_config.pipeline_name
     pipeline = RagPipeline(name=pipeline_name)
 
-    blocks_config = config.get("blocks", [])
-
-    for block_config in blocks_config:
-        block_type = block_config.get("type", "").lower()
-        block_name = block_config.get("name", f"block_{len(pipeline.blocks)}")
+    for block_config in pipeline_config.blocks:
+        block_type = block_config.type
+        block_name = block_config.name
 
         if block_type == "query":
             pipeline.add_block(QueryBlock(name=block_name))
 
         elif block_type == "retrieve":
+            assert isinstance(block_config, RetrieveBlockConfig)
             pipeline.add_block(
                 RetrieveBlock(
                     name=block_name,
-                    collection_name=block_config.get(
-                        "collection_name", "genrag_knowledge_base"
-                    ),
-                    top_k=block_config.get("top_k", 5),
+                    collection_name=block_config.collection_name,
+                    top_k=block_config.top_k,
                 )
             )
-        
+
         elif block_type == "rerank":
+            assert isinstance(block_config, RerankBlockConfig)
             pipeline.add_block(
                 RerankBlock(
                     name=block_name,
-                    provider=block_config.get("provider", "zeroentropy"),
-                    model=block_config.get("model", "zerank-2"),
-                    top_k=block_config.get("top_k", 5),
+                    provider=block_config.provider,
+                    model=block_config.model,
+                    top_k=block_config.top_k,
+                )
+            )
+
+        elif block_type == "query_rewrite":
+            assert isinstance(block_config, QueryRewriterBlockConfig)
+            pipeline.add_block(
+                QueryRewriterBlock(
+                    name=block_name,
+                    model_name=block_config.model_name,
                 )
             )
 
         elif block_type == "answer":
+            assert isinstance(block_config, AnswerGenerationBlockConfig)
             answer_kwargs = {
                 "name": block_name,
-                "model_name": block_config.get("model", "deepseek/deepseek-v3.2"),
+                "model_name": block_config.model,
             }
-            if block_config.get("temperature") is not None:
-                answer_kwargs["temperature"] = block_config["temperature"]
-            if block_config.get("max_tokens") is not None:
-                answer_kwargs["max_tokens"] = block_config["max_tokens"]
-            if block_config.get("system_prompt") is not None:
-                answer_kwargs["system_prompt"] = block_config["system_prompt"]
+            if block_config.temperature is not None:
+                answer_kwargs["temperature"] = block_config.temperature
+            if block_config.max_tokens is not None:
+                answer_kwargs["max_tokens"] = block_config.max_tokens
+            if block_config.system_prompt is not None:
+                answer_kwargs["system_prompt"] = block_config.system_prompt
 
             pipeline.add_block(AnswerGenerationBlock(**answer_kwargs))
 
@@ -154,7 +153,8 @@ async def execute_query_from_json(
     # Update trace metadata with the JSON config
     langfuse.update_current_trace(metadata={"config": config})
 
-    pipeline = create_pipeline_from_json(config.get("pipeline", {}))
+    pipeline_config = PipelineConfig.model_validate(config.get("pipeline", {}))
+    pipeline = create_pipeline_from_json(pipeline_config)
     query = config.get("query", "")
 
     async for chunk in pipeline.execute({"query": query}):

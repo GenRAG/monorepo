@@ -30,8 +30,8 @@ except Exception as e:
     settings = None
 
 
-class OpenRouterClient:
-    def __init__(
+class OpenRouterClient: # Client for interacting with the OpenRouter API for chat completions
+    def __init__( # Initializes the OpenRouter client with API key and base URL
         self,
         api_key: str = OPENROUTER_API_KEY,
         base_url: str = "https://openrouter.ai/api/v1",
@@ -50,8 +50,7 @@ class OpenRouterClient:
             },
         )
 
-    async def get_models(self) -> List[str]:
-        """Fetch available model IDs."""
+    async def get_models(self) -> List[str]: # Fetches available model IDs from OpenRouter
         try:
             response = await self.client.get("/models")
             response.raise_for_status()
@@ -68,14 +67,13 @@ class OpenRouterClient:
         except Exception as e:
             raise ValueError(f"Error fetching models: {e}")
 
-    async def chat_completion(
+    async def chat_completion( # Performs a non-streaming chat completion request
         self,
         model: str,
         messages: List[Dict[str, str]],
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
     ) -> str:
-        """Non-streaming completion."""
         payload = {"model": model, "messages": messages}
         if temperature is not None:
             payload["temperature"] = temperature
@@ -90,14 +88,13 @@ class OpenRouterClient:
         except Exception as e:
             raise ValueError(f"Chat completion error: {e}")
 
-    async def chat_completion_stream(
+    async def chat_completion_stream( # Streams chat completion responses chunk by chunk
         self,
         model: str,
         messages: List[Dict[str, str]],
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
     ) -> AsyncGenerator[str, None]:
-        """Streaming completion."""
         payload = {"model": model, "messages": messages, "stream": True}
         if temperature is not None:
             payload["temperature"] = temperature
@@ -121,5 +118,5 @@ class OpenRouterClient:
                     except (json.JSONDecodeError, KeyError, IndexError):
                         continue
 
-    async def close(self):
+    async def close(self): # Closes the underlying HTTP client session
         await self.client.aclose()

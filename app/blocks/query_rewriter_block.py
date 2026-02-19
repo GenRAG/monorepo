@@ -1,13 +1,21 @@
-from typing import Any, Dict
+"""
+query_rewriter_block.py
 
+This module defines the `QueryRewriterBlock`, a component of the RAG pipeline
+that focuses on optimizing user queries. It uses a language model to rewrite,
+expand, or clarify incoming queries, making them more effective for document
+retrieval from a knowledge base.
+"""
+
+from typing import Any, Dict
 from langfuse import observe
 
 from app.blocks.base_block import BaseBlock
 from app.simple_openrouter_client import OpenRouterClient
 
 
-class QueryRewriterBlock(BaseBlock):
-    prompt_template: str = """
+class QueryRewriterBlock(BaseBlock): # Block for rewriting and optimizing user queries
+    prompt_template: str = """ # Template for instructing the AI on how to rewrite queries
     You are a query rewriting AI assistant. Your purpose is to
     optimize user queries for a document retrieval system.
     Specifically, you should:
@@ -35,10 +43,10 @@ class QueryRewriterBlock(BaseBlock):
 
     Original Query: "{query}"
     Rewritten Query:"""
-    model_name: str
+    model_name: str # The name of the LLM model to use for query rewriting
 
     @observe(name="QueryRewriterBlock", as_type="generation")
-    async def run(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, input_data: Dict[str, Any]) -> Dict[str, Any]: # Rewrites the input query using an LLM
         query = input_data.get("query", "")
         if not query:
             raise ValueError("Input data must contain a 'query' field")
@@ -47,6 +55,7 @@ class QueryRewriterBlock(BaseBlock):
         client = OpenRouterClient()
         try:
             rewritten_query = ""
+            # Stream chunks from the LLM to build the rewritten query
             async for chunk in client.chat_completion_stream(
                 model=self.model_name,
                 messages=[
@@ -55,7 +64,7 @@ class QueryRewriterBlock(BaseBlock):
                 ],
             ):
                 rewritten_query += chunk
-            return {**input_data, "query": rewritten_query.strip()}
-            
+            return {**input_data, "query": rewritten_query.strip()} # Return input data with the rewritten query
+
         finally:
             await client.close()

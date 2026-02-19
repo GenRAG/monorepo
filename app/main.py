@@ -24,27 +24,28 @@ client = QdrantClient(url=QDRANT_URL)
 embedding_service = EmbeddingService()
 
 
-@asynccontextmanager
+@asynccontextmanager # Manages application startup and shutdown
 async def lifespan(app: FastAPI):
+    # Ensure MinIO bucket exists; warnings if not connecting immediately
     try:
         ensure_bucket_exists()
     except Exception as e:
         print(f"Warning: Could not connect to MinIO during startup: {e}")
         print("Bucket will be created when first document is processed")
 
-    # Qwen embedding size is 4096 dimensions
+    # Ensure Qdrant collection exists for RAG knowledge base; warnings if not connecting
     try:
-        ensure_collection("genrag_knowledge_base", vector_size=4096)
+        ensure_collection("genrag_knowledge_base", vector_size=4096) # Qwen embedding size is 4096 dimensions
     except Exception as e:
         print(f"Warning: Could not connect to Qdrant during startup: {e}")
         print("Collection will be created when first document is processed")
 
-    # Start background worker
+    # Start background worker for ingestion job processing
     worker_task = asyncio.create_task(background_worker.start_worker())
 
-    yield
+    yield # Application starts here
 
-    # Stop background worker
+    # Stop background worker gracefully on shutdown
     await background_worker.stop_worker()
     worker_task.cancel()
 
@@ -52,22 +53,20 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint."""
+@app.get("/health") # Health check endpoint
+async def health_check(): # Checks if the API is running
     return {"status": "ok"}
 
 
-@app.post("/ingest")
-async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...)):
-    """Upload a PDF for processing. Returns immediately with job ID."""
-    print(f"Starting ingestion for: {file.filename}")
+@app.post("/ingest") # Endpoint for uploading PDFs for processing
+async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...)): # Uploads PDF, starts background processing
+    print(f"Starting ingestion for: {file.filename} for org_id: {org_id}")
 
     file_bytes = await file.read()
 
     job_id = job_manager.create_job(file.filename, org_id)
 
-    file.file.seek(0)
+    file.file.seek(0) # Reset file pointer for background worker
     await background_worker.add_job(
         job_id=job_id,
         file_bytes=file_bytes,
@@ -85,9 +84,8 @@ async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...))
     }
 
 
-@app.get("/job/{job_id}/status")
-async def get_job_status(job_id: str):
-    """Get the status of a processing job."""
+@app.get("/job/{job_id}/status") # Endpoint to get the status of an ingestion job
+async def get_job_status(job_id: str): # Retrieves the current status and progress of a job
     job = job_manager.get_job(job_id)
 
     if not job:
@@ -121,9 +119,8 @@ async def get_job_status(job_id: str):
     return response
 
 
-@app.get("/job/{job_id}/result")
-async def get_job_result(job_id: str):
-    """Get the final result of a completed job."""
+@app.get("/job/{job_id}/result") # Endpoint to get the result of a completed ingestion job
+async def get_job_result(job_id: str): # Retrieves the final result of a completed job
     job = job_manager.get_job(job_id)
 
     if not job:
@@ -138,11 +135,11 @@ async def get_job_result(job_id: str):
     return job.result or {"error": "No result available"}
 
 
-@app.post("/retrieve")
-async def retrieve_documents(
+@app.post("/retrieve") # Endpoint for direct vector-based document retrieval
+async def retrieve_documents( # Fetches relevant documents from Qdrant based on query embedding
     query: str, top_k: int = 5, index_name: str = "genrag_knowledge_base"
 ):
-    query_vector = await embedding_service.get_embedding(query)
+    query_vector = await embedding_service.get_embedding(query) # Get embedding for the input query
 
     search_results = client.query_points(
         collection_name=index_name,
@@ -163,10 +160,9 @@ async def retrieve_documents(
     }
 
 
-@app.post("/rag/stream")
-async def rag_stream(request: RagRequest):
-    """Execute RAG query with streaming response based on JSON pipeline config."""
-    json_input = request.model_dump()
+@app.post("/rag/stream") # Endpoint for streaming RAG pipeline execution
+async def rag_stream(request: RagRequest): # Executes dynamic RAG pipeline and streams response
+    json_input = request.model_dump() # Convert Pydantic model to a dictionary
     return StreamingResponse(
         execute_query_from_json(json_input), media_type="text/plain"
     )

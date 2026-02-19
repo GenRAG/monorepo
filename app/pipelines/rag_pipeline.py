@@ -25,67 +25,81 @@ from app.schemas.rag import (
 langfuse = get_client()
 
 
-class RagPipeline(BaseBlock):
-    blocks: list[BaseBlock] = Field(default_factory=list)
+class RagPipeline(BaseBlock): # Orchestrates the execution of RAG pipeline blocks
+    blocks: list[BaseBlock] = Field(default_factory=list) # Ordered list of blocks in the pipeline
 
-    def add_block(self, block: BaseBlock) -> "RagPipeline":
+    def add_block(self, block: BaseBlock) -> "RagPipeline": # Adds a block to the pipeline
         self.blocks.append(block)
         return self
 
-    def remove_block(self, block_name: str) -> "RagPipeline":
+    def remove_block(self, block_name: str) -> "RagPipeline": # Removes a block from the pipeline by name
         self.blocks = [b for b in self.blocks if b.name != block_name]
         return self
 
-    def get_block(self, block_name: str) -> Optional[BaseBlock]:
+    def get_block(self, block_name: str) -> Optional[BaseBlock]: # Retrieves a block by its name
         for block in self.blocks:
             if block.name == block_name:
                 return block
         return None
 
-    def list_blocks(self) -> list[str]:
+    def list_blocks(self) -> list[str]: # Lists the names of all blocks in order
         return [block.name for block in self.blocks]
 
-    def clear_blocks(self) -> "RagPipeline":
+    def clear_blocks(self) -> "RagPipeline": # Clears all blocks from the pipeline
         self.blocks.clear()
         return self
 
     @observe(name="Pipeline Execution")
-    async def execute(
+    async def execute( # Executes the RAG pipeline with streaming output
         self, input_data: Union[Dict[str, Any], str]
     ) -> AsyncGenerator[str, None]:
         if not self.blocks:
             raise ValueError("No blocks configured")
 
         data = input_data
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                data = {"query": data} # Assume string is a query if not JSON
 
+        # Run all blocks except the last one; they transform data
         for block in self.blocks[:-1]:
             print(f"Running block: {block.name}")
             data = await block.run(data)
 
+        # The last block is expected to be a streaming block
         last_block = self.blocks[-1]
-        print(f"Running block: {last_block.name}")
+        print(f"Running last block: {last_block.name} (streaming)")
         async for chunk in last_block.run(data):
             yield chunk
 
         print("Pipeline execution completed")
-        import json
+        # Final output print commented as streaming handles this, tracing should capture overall state
+        # print("Final output:", json.dumps(data, indent=2))
 
-        print("Final output:", json.dumps(data, indent=2))
-
-    async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
+    async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]: # Executes pipeline as a non-streaming block
         if not self.blocks:
             raise ValueError("No blocks configured")
 
         data = input_data
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except json.JSONDecodeError:
+                data = {"query": data} # Assume string is a query if not JSON
+
+        # Run all blocks sequentially, passing data along
         for block in self.blocks:
             data = await block.run(data)
         return data
 
 
-def create_pipeline_from_json(pipeline_config: PipelineConfig) -> RagPipeline:
+def create_pipeline_from_json(pipeline_config: PipelineConfig) -> RagPipeline: # Creates a RagPipeline from configuration
     pipeline_name = pipeline_config.pipeline_name
     pipeline = RagPipeline(name=pipeline_name)
 
+    # Instantiate blocks dynamically based on their type in the config
     for block_config in pipeline_config.blocks:
         block_type = block_config.type
         block_name = block_config.name
@@ -129,6 +143,7 @@ def create_pipeline_from_json(pipeline_config: PipelineConfig) -> RagPipeline:
                 "name": block_name,
                 "model_name": block_config.model,
             }
+            # Add optional parameters only if provided in config
             if block_config.temperature is not None:
                 answer_kwargs["temperature"] = block_config.temperature
             if block_config.max_tokens is not None:
@@ -142,7 +157,7 @@ def create_pipeline_from_json(pipeline_config: PipelineConfig) -> RagPipeline:
 
 
 @observe(name="RAG Pipeline Request")
-async def execute_query_from_json(
+async def execute_query_from_json( # Main entry for executing RAG pipeline from JSON config
     json_input: Union[str, Dict[str, Any]],
 ) -> AsyncGenerator[str, None]:
     if isinstance(json_input, str):
@@ -150,12 +165,14 @@ async def execute_query_from_json(
     else:
         config = json_input
 
-    # Update trace metadata with the JSON config
+    # Update tracing metadata with the pipeline configuration
     langfuse.update_current_trace(metadata={"config": config})
 
+    # Validate and build the pipeline
     pipeline_config = PipelineConfig.model_validate(config.get("pipeline", {}))
     pipeline = create_pipeline_from_json(pipeline_config)
     query = config.get("query", "")
 
+    # Execute the pipeline and yield streaming output
     async for chunk in pipeline.execute({"query": query}):
         yield chunk

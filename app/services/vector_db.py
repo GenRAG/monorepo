@@ -7,8 +7,7 @@ QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
 client = QdrantClient(url=QDRANT_URL)
 
 
-def ensure_collection(collection_name: str, vector_size: int = 4096):
-    """Ensure the collection exists in Qdrant."""
+def ensure_collection(collection_name: str, vector_size: int = 4096): # Ensures Qdrant collection exists
     if not client.collection_exists(collection_name):
         print(f"Creating collection {collection_name}...")
         client.create_collection(
@@ -18,7 +17,6 @@ def ensure_collection(collection_name: str, vector_size: int = 4096):
 
 
 def upsert_chunks(collection_name: str, chunks: list, embeddings: list, metadata: dict):
-    """Saves vectors to Qdrant."""
     points = []
     for i, (chunk, vector) in enumerate(zip(chunks, embeddings)):
         if not vector:

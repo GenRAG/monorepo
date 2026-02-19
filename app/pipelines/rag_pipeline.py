@@ -1,18 +1,15 @@
 import json
-import os
-from typing import Union, Dict, Any, AsyncGenerator, Optional
+from typing import Any, AsyncGenerator, Dict, Optional, Union
+
+from langfuse import get_client, observe
 from pydantic import Field
 
-from langfuse import observe, get_client
-from app.config import Config
-
-langfuse = get_client()
-
-from app.config import Config
+from app.blocks.answer_block import AnswerGenerationBlock
 from app.blocks.base_block import BaseBlock
 from app.blocks.query_block import QueryBlock
 from app.blocks.retrieve_block import RetrieveBlock
-from app.blocks.answer_block import AnswerGenerationBlock
+
+langfuse = get_client()
 
 
 class RagPipeline(BaseBlock):
@@ -40,12 +37,13 @@ class RagPipeline(BaseBlock):
         return self
 
     @observe(name="Pipeline Execution")
-    async def execute(self, input_data: Union[Dict[str, Any], str]) -> AsyncGenerator[str, None]:
+    async def execute(
+        self, input_data: Union[Dict[str, Any], str]
+    ) -> AsyncGenerator[str, None]:
         if not self.blocks:
             raise ValueError("No blocks configured")
 
         data = input_data
-
 
         for block in self.blocks[:-1]:
             data = await block.run(data)
@@ -57,8 +55,8 @@ class RagPipeline(BaseBlock):
         print("Pipeline execution completed")
         # debug information
         import json
+
         print("Final output:", json.dumps(data, indent=2))
-        
 
     async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]:
         if not self.blocks:
@@ -77,20 +75,11 @@ def create_simple_pipeline(
 ) -> RagPipeline:
     pipeline = RagPipeline(name="simple_rag_pipeline")
 
-    pipeline.add_block(
-        QueryBlock(name="query_block")
-    ).add_block(
+    pipeline.add_block(QueryBlock(name="query_block")).add_block(
         RetrieveBlock(
-            name="retrieve_block",
-            collection_name=collection_name,
-            top_k=top_k
+            name="retrieve_block", collection_name=collection_name, top_k=top_k
         )
-    ).add_block(
-        AnswerGenerationBlock(
-            name="answer_block",
-            model_name=model_name
-        )
-    )
+    ).add_block(AnswerGenerationBlock(name="answer_block", model_name=model_name))
 
     return pipeline
 
@@ -111,16 +100,16 @@ def create_pipeline_from_json(json_input: Union[str, Dict[str, Any]]) -> RagPipe
         block_name = block_config.get("name", f"block_{len(pipeline.blocks)}")
 
         if block_type == "query":
-            pipeline.add_block(
-                QueryBlock(name=block_name)
-            )
+            pipeline.add_block(QueryBlock(name=block_name))
 
         elif block_type == "retrieve":
             pipeline.add_block(
                 RetrieveBlock(
                     name=block_name,
-                    collection_name=block_config.get("collection_name", "genrag_knowledge_base"),
-                    top_k=block_config.get("top_k", 5)
+                    collection_name=block_config.get(
+                        "collection_name", "genrag_knowledge_base"
+                    ),
+                    top_k=block_config.get("top_k", 5),
                 )
             )
 
@@ -128,7 +117,7 @@ def create_pipeline_from_json(json_input: Union[str, Dict[str, Any]]) -> RagPipe
             # Build kwargs only with non-None values to avoid validation errors
             answer_kwargs = {
                 "name": block_name,
-                "model_name": block_config.get("model", "deepseek/deepseek-v3.2")
+                "model_name": block_config.get("model", "deepseek/deepseek-v3.2"),
             }
             if block_config.get("temperature") is not None:
                 answer_kwargs["temperature"] = block_config["temperature"]
@@ -143,16 +132,16 @@ def create_pipeline_from_json(json_input: Union[str, Dict[str, Any]]) -> RagPipe
 
 
 @observe(name="RAG Pipeline Request")
-async def execute_query_from_json(json_input: Union[str, Dict[str, Any]]) -> AsyncGenerator[str, None]:
+async def execute_query_from_json(
+    json_input: Union[str, Dict[str, Any]],
+) -> AsyncGenerator[str, None]:
     if isinstance(json_input, str):
         config = json.loads(json_input)
     else:
         config = json_input
 
     # Update trace metadata with the JSON config
-    langfuse.update_current_trace(
-        metadata={"config": config}
-    )
+    langfuse.update_current_trace(metadata={"config": config})
 
     pipeline = create_pipeline_from_json(config.get("pipeline", {}))
     query = config.get("query", "")

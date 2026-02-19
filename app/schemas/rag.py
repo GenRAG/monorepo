@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Any, Dict
+from typing import Optional, List
 
 
 class BlockConfig(BaseModel):
@@ -16,8 +16,13 @@ class BlockConfig(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {"type": "query", "name": "query"},
-                {"type": "retrieve", "name": "retrieve", "collection_name": "genrag_knowledge_base", "top_k": 5},
-                {"type": "answer", "name": "answer", "model": "deepseek/deepseek-v3.2"}
+                {
+                    "type": "retrieve",
+                    "name": "retrieve",
+                    "collection_name": "genrag_knowledge_base",
+                    "top_k": 5,
+                },
+                {"type": "answer", "name": "answer", "model": "deepseek/deepseek-v3.2"},
             ]
         }
     }
@@ -34,9 +39,18 @@ class PipelineConfig(BaseModel):
                     "pipeline_name": "custom_rag",
                     "blocks": [
                         {"type": "query", "name": "query"},
-                        {"type": "retrieve", "name": "retrieve", "collection_name": "genrag_knowledge_base", "top_k": 5},
-                        {"type": "answer", "name": "answer", "model": "deepseek/deepseek-v3.2"}
-                    ]
+                        {
+                            "type": "retrieve",
+                            "name": "retrieve",
+                            "collection_name": "genrag_knowledge_base",
+                            "top_k": 5,
+                        },
+                        {
+                            "type": "answer",
+                            "name": "answer",
+                            "model": "deepseek/deepseek-v3.2",
+                        },
+                    ],
                 }
             ]
         }
@@ -56,12 +70,21 @@ class RagRequest(BaseModel):
                         "pipeline_name": "custom_rag",
                         "blocks": [
                             {"type": "query", "name": "query"},
-                            {"type": "retrieve", "name": "retrieve", "collection_name": "genrag_knowledge_base", "top_k": 5},
-                            {"type": "answer", "name": "answer", "model": "deepseek/deepseek-v3.2"}
-                        ]
+                            {
+                                "type": "retrieve",
+                                "name": "retrieve",
+                                "collection_name": "genrag_knowledge_base",
+                                "top_k": 5,
+                            },
+                            {
+                                "type": "answer",
+                                "name": "answer",
+                                "model": "deepseek/deepseek-v3.2",
+                            },
+                        ],
                     },
                     "query": "What is RAG?",
-                    "org_id": None
+                    "org_id": None,
                 }
             ]
         }

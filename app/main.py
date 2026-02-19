@@ -1,28 +1,28 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import StreamingResponse
-from contextlib import asynccontextmanager
 import asyncio
-import json
-import dotenv
-import requests
 import os
+from contextlib import asynccontextmanager
+
+import dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from qdrant_client import QdrantClient
+
+from app.pipelines.rag_pipeline import execute_query_from_json
+from app.schemas.rag import RagRequest
+from app.services.background_worker import background_worker
+from app.services.embedding import EmbeddingService
+from app.services.job_manager import JobStatus, job_manager
+from app.services.storage import ensure_bucket_exists
+from app.services.vector_db import ensure_collection
 
 dotenv.load_dotenv()
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
-# Import our new services
-from app.services.storage import ensure_bucket_exists
-from app.services.vector_db import ensure_collection
-from app.services.job_manager import job_manager, JobStatus
-from app.services.background_worker import background_worker
-from app.services.embedding import EmbeddingService
-from app.schemas.rag import RagRequest
-from app.pipelines.rag_pipeline import execute_query_from_json
 
 client = QdrantClient(url=QDRANT_URL)
 embedding_service = EmbeddingService()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,18 +48,18 @@ async def lifespan(app: FastAPI):
     await background_worker.stop_worker()
     worker_task.cancel()
 
+
 app = FastAPI(lifespan=lifespan)
+
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {"status": "ok"}
 
+
 @app.post("/ingest")
-async def ingest_document(
-    file: UploadFile = File(...),
-    org_id: str = Form(...)
-):
+async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...)):
     """Upload a PDF for processing. Returns immediately with job ID."""
     print(f"Starting ingestion for: {file.filename}")
 
@@ -73,7 +73,7 @@ async def ingest_document(
         file_bytes=file_bytes,
         file_obj=file.file,
         filename=file.filename,
-        org_id=org_id
+        org_id=org_id,
     )
 
     return {
@@ -81,8 +81,9 @@ async def ingest_document(
         "status": "accepted",
         "filename": file.filename,
         "message": "File upload accepted. Processing started in background.",
-        "status_url": f"/job/{job_id}/status"
+        "status_url": f"/job/{job_id}/status",
     }
+
 
 @app.get("/job/{job_id}/status")
 async def get_job_status(job_id: str):
@@ -119,6 +120,7 @@ async def get_job_status(job_id: str):
 
     return response
 
+
 @app.get("/job/{job_id}/result")
 async def get_job_result(job_id: str):
     """Get the final result of a completed job."""
@@ -128,12 +130,18 @@ async def get_job_result(job_id: str):
         raise HTTPException(status_code=404, detail="Job not found")
 
     if job.status != JobStatus.COMPLETED:
-        raise HTTPException(status_code=400, detail=f"Job is not completed. Current status: {job.status}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Job is not completed. Current status: {job.status}",
+        )
 
     return job.result or {"error": "No result available"}
 
+
 @app.post("/retrieve")
-async def retrieve_documents(query: str, top_k: int = 5, index_name: str = "genrag_knowledge_base"):
+async def retrieve_documents(
+    query: str, top_k: int = 5, index_name: str = "genrag_knowledge_base"
+):
     query_vector = await embedding_service.get_embedding(query)
 
     search_results = client.query_points(
@@ -151,14 +159,14 @@ async def retrieve_documents(query: str, top_k: int = 5, index_name: str = "genr
         "query": query,
         "index_name": index_name,
         "top_k": top_k,
-        "results": search_results
+        "results": search_results,
     }
+
 
 @app.post("/rag/stream")
 async def rag_stream(request: RagRequest):
     """Execute RAG query with streaming response based on JSON pipeline config."""
     json_input = request.model_dump()
     return StreamingResponse(
-        execute_query_from_json(json_input),
-        media_type="text/plain"
+        execute_query_from_json(json_input), media_type="text/plain"
     )

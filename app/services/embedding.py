@@ -3,13 +3,14 @@ import requests
 import json
 from typing import List
 
+
 class EmbeddingService:
     def __init__(self):
         self.api_key = os.getenv("OPENROUTER_API_KEY")
         self.base_url = "https://openrouter.ai/api/v1/embeddings"
         self.model = "qwen/qwen3-embedding-8b"
         self.batch_size = 10  # Process 10 chunks at once
-        
+
     def get_embedding(self, text: str):
         """Sends text to OpenRouter and returns a vector list."""
         if not text or not text.strip():
@@ -21,14 +22,11 @@ class EmbeddingService:
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": "genrag.com",
-                "X-Title": "GenRAG App"
+                "X-Title": "GenRAG App",
             },
-            data=json.dumps({
-                "model": self.model,
-                "input": text
-            })
+            data=json.dumps({"model": self.model, "input": text}),
         )
-        
+
         if response.status_code == 200:
             data = response.json()
             return data["data"][0]["embedding"]
@@ -52,12 +50,9 @@ class EmbeddingService:
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json",
                     "HTTP-Referer": "genrag.com",
-                    "X-Title": "GenRAG App"
+                    "X-Title": "GenRAG App",
                 },
-                data=json.dumps({
-                    "model": self.model,
-                    "input": valid_texts
-                })
+                data=json.dumps({"model": self.model, "input": valid_texts}),
             )
 
             if response.status_code == 200:
@@ -78,8 +73,10 @@ class EmbeddingService:
         all_embeddings = []
 
         for i in range(0, len(chunks), self.batch_size):
-            batch = chunks[i:i + self.batch_size]
-            print(f"Processing batch {i//self.batch_size + 1}/{(len(chunks) + self.batch_size - 1)//self.batch_size} ({len(batch)} chunks)")
+            batch = chunks[i : i + self.batch_size]
+            print(
+                f"Processing batch {i // self.batch_size + 1}/{(len(chunks) + self.batch_size - 1) // self.batch_size} ({len(batch)} chunks)"
+            )
 
             batch_embeddings = self.get_batch_embeddings(batch)
 

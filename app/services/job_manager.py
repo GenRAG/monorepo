@@ -1,14 +1,15 @@
-import asyncio
 import uuid
 from typing import Dict, Optional
 from datetime import datetime
 from enum import Enum
+
 
 class JobStatus(str, Enum):
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
+
 
 class JobInfo:
     def __init__(self, job_id: str, filename: str, org_id: str):
@@ -24,6 +25,7 @@ class JobInfo:
         self.processed_chunks = 0
         self.error_message: Optional[str] = None
         self.result: Optional[Dict] = None
+
 
 class JobManager:
     def __init__(self):
@@ -41,7 +43,9 @@ class JobManager:
         """Gets job info by ID."""
         return self.jobs.get(job_id)
 
-    def update_job_status(self, job_id: str, status: JobStatus, error_message: str = None):
+    def update_job_status(
+        self, job_id: str, status: JobStatus, error_message: str = None
+    ):
         """Updates job status."""
         if job_id in self.jobs:
             job = self.jobs[job_id]
@@ -53,18 +57,23 @@ class JobManager:
             if error_message:
                 job.error_message = error_message
 
-    def update_job_progress(self, job_id: str, processed_chunks: int, total_chunks: int):
+    def update_job_progress(
+        self, job_id: str, processed_chunks: int, total_chunks: int
+    ):
         """Updates job progress."""
         if job_id in self.jobs:
             job = self.jobs[job_id]
             job.processed_chunks = processed_chunks
             job.total_chunks = total_chunks
-            job.progress = int((processed_chunks / total_chunks) * 100) if total_chunks > 0 else 0
+            job.progress = (
+                int((processed_chunks / total_chunks) * 100) if total_chunks > 0 else 0
+            )
 
     def set_job_result(self, job_id: str, result: Dict):
         """Sets job result when completed."""
         if job_id in self.jobs:
             self.jobs[job_id].result = result
+
 
 # Global job manager instance
 job_manager = JobManager()

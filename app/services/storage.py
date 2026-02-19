@@ -8,14 +8,16 @@ ACCESS_KEY = os.getenv("MINIO_USER")
 SECRET_KEY = os.getenv("MINIO_PASSWORD")
 BUCKET_NAME = os.getenv("BUCKET_NAME", "genrag-documents")
 
+
 def get_s3_client():
     """Creates the connection to MinIO"""
     return boto3.client(
-        's3',
+        "s3",
         endpoint_url=ENDPOINT,
         aws_access_key_id=ACCESS_KEY,
-        aws_secret_access_key=SECRET_KEY
+        aws_secret_access_key=SECRET_KEY,
     )
+
 
 def ensure_bucket_exists():
     """Ensure storage bucket exists."""
@@ -28,6 +30,7 @@ def ensure_bucket_exists():
             print(f"Created bucket: {BUCKET_NAME}")
         except Exception as e:
             print(f"Bucket creation warning: {e}")
+
 
 def upload_file(file_obj, object_name):
     """Upload a file to MinIO."""

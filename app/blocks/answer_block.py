@@ -5,6 +5,7 @@ from langfuse import observe
 from app.blocks.base_block import BaseBlock
 from app.simple_openrouter_client import OpenRouterClient
 
+
 class AnswerGenerationBlock(BaseBlock):
     model_name: str
     temperature: Optional[float] = Field(default=0.7)
@@ -14,7 +15,9 @@ class AnswerGenerationBlock(BaseBlock):
     )
 
     @observe(name="AnswerGenerationBlock", as_type="generation")
-    async def run(self, input_data: Union[Dict[str, Any], str]) -> AsyncGenerator[str, None]:
+    async def run(
+        self, input_data: Union[Dict[str, Any], str]
+    ) -> AsyncGenerator[str, None]:
         if isinstance(input_data, dict):
             query = input_data.get("query", "")
             retrieved_docs = input_data.get("retrieved_documents", [])
@@ -26,13 +29,18 @@ class AnswerGenerationBlock(BaseBlock):
             {"role": "system", "content": self.system_prompt},
             {
                 "role": "user",
-                "content": f"Question: {query}\n\nDocuments: {self._format_documents(retrieved_docs)}\n\nAnswer:"
-            }
+                "content": f"Question: {query}\n\nDocuments: {self._format_documents(retrieved_docs)}\n\nAnswer:",
+            },
         ]
 
         client = OpenRouterClient()
         try:
-            async for chunk in client.chat_completion_stream(model=self.model_name, messages=messages, temperature=self.temperature, max_tokens=self.max_tokens):
+            async for chunk in client.chat_completion_stream(
+                model=self.model_name,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            ):
                 yield chunk
         finally:
             await client.close()

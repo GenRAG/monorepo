@@ -1,5 +1,4 @@
 import os
-import socket
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,4 +16,6 @@ class Config:
     COHERE_KEY = os.getenv("COHERE_API_KEY")
     LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
     LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
-    LANGFUSE_BASE_URL = os.getenv("LANGFUSE_BASE_URL", os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"))
+    LANGFUSE_BASE_URL = os.getenv(
+        "LANGFUSE_BASE_URL", os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
+    )

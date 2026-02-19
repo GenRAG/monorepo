@@ -6,7 +6,9 @@ class BaseBlock(BaseModel):
     name: str
     description: str | None = None
 
-    async def run(self, input_data: Union[Dict[str, Any], str]) -> Union[Dict[str, Any], AsyncGenerator[str, None]]:
+    async def run(
+        self, input_data: Union[Dict[str, Any], str]
+    ) -> Union[Dict[str, Any], AsyncGenerator[str, None]]:
         raise NotImplementedError
 
     def __str__(self) -> str:

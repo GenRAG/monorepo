@@ -8,20 +8,23 @@ from app.services.ingestion import parse_pdf, chunk_text
 from app.services.embedding import EmbeddingService
 from app.services.vector_db import upsert_chunks
 
+
 class BackgroundWorker:
     def __init__(self):
         self.embedder = EmbeddingService()
         self.job_queue = asyncio.Queue()
         self.running = False
 
-    async def add_job(self, job_id: str, file_bytes: bytes, file_obj, filename: str, org_id: str):
+    async def add_job(
+        self, job_id: str, file_bytes: bytes, file_obj, filename: str, org_id: str
+    ):
         """Add a job to the processing queue."""
         job_data = {
             "job_id": job_id,
             "file_bytes": file_bytes,
             "file_obj": file_obj,
             "filename": filename,
-            "org_id": org_id
+            "org_id": org_id,
         }
         await self.job_queue.put(job_data)
         print(f"Job {job_id} added to queue")
@@ -70,7 +73,9 @@ class BackgroundWorker:
             # Parse PDF content
             raw_text = parse_pdf(file_bytes)
             if not raw_text:
-                job_manager.update_job_status(job_id, JobStatus.FAILED, "PDF text extraction failed")
+                job_manager.update_job_status(
+                    job_id, JobStatus.FAILED, "PDF text extraction failed"
+                )
                 return
 
             # Generate chunks
@@ -91,7 +96,7 @@ class BackgroundWorker:
                 collection_name="genrag_knowledge_base",
                 chunks=chunks,
                 embeddings=vectors,
-                metadata={"org_id": org_id, "filename": filename}
+                metadata={"org_id": org_id, "filename": filename},
             )
 
             # Finalize job
@@ -99,7 +104,7 @@ class BackgroundWorker:
                 "status": "success",
                 "filename": filename,
                 "chunks_processed": count,
-                "message": "Document processed and indexed"
+                "message": "Document processed and indexed",
             }
 
             job_manager.set_job_result(job_id, result)
@@ -111,6 +116,7 @@ class BackgroundWorker:
             job_manager.update_job_status(job_id, JobStatus.FAILED, error_msg)
             print(f"Job {job_id} failed: {error_msg}")
             print(traceback.format_exc())
+
 
 # Global worker instance
 background_worker = BackgroundWorker()

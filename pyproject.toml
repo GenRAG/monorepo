@@ -19,3 +19,8 @@ dependencies = [
     "requests>=2.32.5",
     "zeroentropy>=0.1.0a8",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.1",
+]

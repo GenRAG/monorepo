@@ -46,12 +46,9 @@ class RetrieveBlock(BaseBlock):
             "Authorization": f"Bearer {Config.OPENROUTER_KEY}",
             "Content-Type": "application/json",
             "HTTP-Referer": "genrag.com",
-            "X-Title": "GenRAG"
+            "X-Title": "GenRAG",
         }
-        data = {
-            "model": "qwen/qwen3-embedding-8b",
-            "input": text
-        }
+        data = {"model": "qwen/qwen3-embedding-8b", "input": text}
 
         response = requests.post(url, headers=headers, json=data)
 

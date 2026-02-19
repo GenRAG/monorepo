@@ -1,6 +1,7 @@
 import io
 from pypdf import PdfReader
 
+
 def parse_pdf(file_bytes: bytes) -> str:
     """Extracts raw text from PDF bytes."""
     try:
@@ -13,6 +14,7 @@ def parse_pdf(file_bytes: bytes) -> str:
         print(f"Error parsing PDF: {e}")
         return ""
 
+
 def chunk_text(text: str, chunk_size=1000, overlap=100):
     """Split text into overlapping chunks."""
     chunks = []
@@ -21,5 +23,5 @@ def chunk_text(text: str, chunk_size=1000, overlap=100):
         end = start + chunk_size
         chunks.append(text[start:end])
         # Move forward, leaving some overlap context
-        start += (chunk_size - overlap)
+        start += chunk_size - overlap
     return chunks

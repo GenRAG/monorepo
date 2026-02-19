@@ -56,7 +56,6 @@ class RagPipeline(BaseBlock):
             yield chunk
 
         print("Pipeline execution completed")
-        # debug information
         import json
 
         print("Final output:", json.dumps(data, indent=2))
@@ -121,7 +120,7 @@ def create_pipeline_from_json(json_input: Union[str, Dict[str, Any]]) -> RagPipe
                 RerankBlock(
                     name=block_name,
                     provider=block_config.get("provider", "zeroentropy"),
-                    model=block_config.get("model", "zrerank-2.0"),
+                    model=block_config.get("model", "zerank-2"),
                     top_k=block_config.get("top_k", 5),
                 )
             )

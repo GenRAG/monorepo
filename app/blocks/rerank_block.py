@@ -10,7 +10,7 @@ class RerankBlock(BaseBlock):
     provider: str = Field(
         default="zeroentropy", description="Reranking provider (zeroentropy or cohere)"
     )
-    model: str = Field(default="rerank-2.0", description="Reranking model to use")
+    model: str = Field(default="zerank-2", description="Reranking model to use")
     top_k: int = Field(
         default=5, description="Number of top documents to return after reranking"
     )

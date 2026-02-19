@@ -11,5 +11,5 @@ class BaseBlock(BaseModel):
     ) -> Union[Dict[str, Any], AsyncGenerator[str, None]]:
         raise NotImplementedError
 
-    def __str__(self) -> str:
+    def __str__(self) -> str: # String representation for debugging
         return f"{self.__class__.__name__}(name='{self.name}')"

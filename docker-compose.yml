@@ -8,17 +8,10 @@ services:
       extra_hosts:
         - "host.docker.internal:host-gateway"
 
-      # Force logs to appear instantly
-      environment:
-        - PYTHONUNBUFFERED=1
-      
       volumes:
         - .:/app
         - /app/.venv
       
-      # 1. Use the direct path (cleaner)
-      # 2. --reload (for hot reloading)
-      # 3. REMOVED: --no-access-log (so you can see requests again)
       command: >
         /app/.venv/bin/uvicorn app.main:app 
         --host 0.0.0.0 
@@ -55,7 +48,6 @@ services:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
     command: server /data --console-address ":9001"
-    # 3. Use Named Volumes (Docker manages these, not you)
     volumes:
       - minio_data:/data
       - minio_config:/root/.minio
@@ -78,7 +70,6 @@ services:
     image: qdrant/qdrant:latest
     ports:
       - "6333:6333"
-    # 4. Use Named Volumes here too
     volumes:
       - qdrant_data:/qdrant/storage
       - qdrant_snapshots:/qdrant/snapshots
@@ -99,7 +90,6 @@ services:
       timeout: 10s
       retries: 3
 
-# 5. Define the volumes at the bottom
 volumes:
   minio_data:
   minio_config:

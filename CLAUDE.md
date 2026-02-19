@@ -47,13 +47,13 @@ uv run fastapi run app/main.py --host 0.0.0.0 --port 8000
 ### Database Setup
 ```bash
 # Initialize Qdrant collection and indexes
-python init_db.py
+python scripts/init_db.py
 ```
 
 ### Testing
 ```bash
-# Test embedding service (requires OPENROUTER_API_KEY in .env)
-python embed.py
+# Test the RAG pipeline streaming endpoint
+uv run python scripts/test_rag_pipeline.py
 ```
 
 ## Environment Configuration

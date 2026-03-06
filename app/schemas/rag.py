@@ -72,10 +72,16 @@ class PipelineConfig(BaseModel): # Defines the overall structure of a RAG pipeli
     }
 
 
+class Message(BaseModel):
+    role: str
+    content: str
+
+
 class RagRequest(BaseModel): # Represents the full request body for a RAG query
     pipeline: PipelineConfig # Configuration defining the RAG pipeline to execute
     query: str = Field(default="What is RAG?", examples=["What is RAG?"]) # Natural language query
     org_id: Optional[str] = None # Org ID for multi-tenant data isolation
+    chat_history: List[Message] = Field(default_factory=list) # Optional chat history to provide context for the query
 
     model_config = {
         "json_schema_extra": {

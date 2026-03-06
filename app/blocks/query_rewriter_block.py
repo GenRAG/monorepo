@@ -29,6 +29,7 @@ class QueryRewriterBlock(BaseBlock): # Block for rewriting and optimizing user q
         reflects the core intent of the user's original question.
     4.  **Produce Only the Rewritten Question**: Your output must be *only* the rewritten question.
         Do not include any conversational filler, explanations, or pleasantries.
+    5.  **Preserve Conversational Intent or Clear Questions**: If the user's query is just a conversational greeting (like 'Hello' or 'Thank you') OR if it is already a perfectly clear standalone question, output the original query exactly as is without rewriting it. Do not attempt to over-engineer an already good question or a simple greeting into a search query.
 
     Here are some examples:
 
@@ -51,6 +52,18 @@ class QueryRewriterBlock(BaseBlock): # Block for rewriting and optimizing user q
         if not query:
             raise ValueError("Input data must contain a 'query' field")
 
+        chat_history = input_data.get("chat_history", [])
+        history_str = ""
+        if chat_history:
+            history_str = "\n".join([f"{msg.get('role', msg.get('role', 'user'))}: {msg.get('content', '')}" for msg in chat_history])
+
+        system_prompt = self.prompt_template
+        user_message_content = query
+
+        if history_str:
+            system_prompt += "\n\nConsider the following chat history to resolve any references or context:\n" + history_str
+            user_message_content = f"Chat History:\n{history_str}\n\nCurrent Query:\n{query}\n\nRewrite the current query..."
+
 
         client = OpenRouterClient()
         try:
@@ -59,8 +72,8 @@ class QueryRewriterBlock(BaseBlock): # Block for rewriting and optimizing user q
             async for chunk in client.chat_completion_stream(
                 model=self.model_name,
                 messages=[
-                    {"role": "system", "content": self.prompt_template},
-                    {"role": "user", "content": query},
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_message_content},
                 ],
             ):
                 rewritten_query += chunk

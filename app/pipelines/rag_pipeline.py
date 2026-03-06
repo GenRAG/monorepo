@@ -175,8 +175,9 @@ async def execute_query_from_json( # Main entry for executing RAG pipeline from 
     pipeline_config = PipelineConfig.model_validate(config.get("pipeline", {}))
     pipeline = create_pipeline_from_json(pipeline_config, org_id)
     query = config.get("query", "")
+    chat_history = config.get("chat_history", [])
     original_query = query # Store the original query
 
     # Execute the pipeline and yield streaming output
-    async for chunk in pipeline.execute({"query": query, "org_id": org_id, "original_query": original_query}):
+    async for chunk in pipeline.execute({"query": query, "org_id": org_id, "original_query": original_query, "chat_history": chat_history}):
         yield chunk

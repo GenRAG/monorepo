@@ -160,8 +160,26 @@ async def test_streaming_rag_query_rewrite():
                 },
             ],
         },
-        "query": "What is GenRAG?",
-        "org_id": "test",
+        "query": "What was the last question I asked about GenRAG?",
+        # "chat_history": [
+        #     {
+        #         "role": "user",
+        #         "content": "What is Ouest-France?"
+        #     },
+        #     {
+        #         "role": "assistant",
+        #         "content": "GenRAG is a robust and flexible multi-tenant RAG pipeline system designed for ingesting pdf documents and answering natural language questions based on their content."
+        #     },
+        #     {
+        #         "role": "user",
+        #         "content": "How does it handle multi-tenancy?"
+        #     },
+        #     {
+        #         "role": "assistant",
+        #         "content": "GenRAG uses org_ids in its database to isolate data between tenants."
+        #     }
+        # ],
+        "org_id": "string",
     }
 
     print(f"Sending query rewrite request to {url}...")
@@ -182,11 +200,67 @@ async def test_streaming_rag_query_rewrite():
             print(f"An error occurred during query rewrite test: {e}")
 
 
+async def test_streaming_rag_query_rewrite_greeting():
+    url = "http://localhost:8000/rag/stream"
+
+    payload = {
+        "pipeline": {
+            "pipeline_name": "test_rag_query_rewrite",
+            "blocks": [
+                {"type": "query", "name": "query"},
+                # {
+                #     "type": "query_rewrite",
+                #     "name": "query_rewrite",
+                #     "model_name": "google/gemini-2.5-flash",
+                # },
+                {
+                    "type": "retrieve",
+                    "name": "retrieve",
+                    "collection_name": "genrag_knowledge_base",
+                    "top_k": 5,
+                },
+                {
+                    "type": "rerank",
+                    "name": "rerank",
+                    "provider": "zeroentropy",
+                    "model": "zerank-2",
+                    "top_k": 3,
+                },
+                {
+                    "type": "answer",
+                    "name": "answer",
+                    "model": "google/gemini-2.5-flash",
+                },
+            ],
+        },
+        "query": "Hello how are you?",
+        "org_id": "string",
+    }
+
+    print(f"Sending greeting request to {url}...")
+
+    async with httpx.AsyncClient(timeout=60.0, headers={"X-API-Key": API_KEY}) as client:
+        try:
+            async with client.stream("POST", url, json=payload) as response:
+                if response.status_code != 200:
+                    print(f"Error: {response.status_code}")
+                    print(await response.aread())
+                    return
+
+                print("Response stream for greeting:")
+                async for chunk in response.aiter_text():
+                    print(chunk, end="", flush=True)
+                print("\n\nStream finished for greeting.")
+        except Exception as e:
+            print(f"An error occurred during greeting test: {e}")
+
 if __name__ == "__main__":
     # print("Running RAG pipeline test with reranking...")
     # asyncio.run(test_streaming_rag_rerank())
     # print("\nRunning RAG pipeline test without reranking...")
     # asyncio.run(test_streaming_rag())
-    print("\nRunning RAG pipeline test with query rewriting...")
-    asyncio.run(test_streaming_rag_query_rewrite())
+    # print("\nRunning RAG pipeline test with query rewriting...")
+    # asyncio.run(test_streaming_rag_query_rewrite())
+    print("\nRunning RAG pipeline test with greeting...")
+    asyncio.run(test_streaming_rag_query_rewrite_greeting())
 

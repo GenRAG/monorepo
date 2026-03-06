@@ -4,15 +4,13 @@ import { Task } from "lib/type/task";
 import { TaskRegistry } from "lib/workflow/task/registry";
 import { useMemo } from "react";
 
-
 const useNodeInformation = (selectedNodeId: string | null) => {
-
     const { getNode } = useReactFlow();
 
     const selectedNode = useMemo(() => {
         if (!selectedNodeId) return null;
-        return getNode(selectedNodeId as string);
-    }, [selectedNodeId]);
+        return getNode(selectedNodeId);
+    }, [selectedNodeId, getNode]);
 
     const nodeData = selectedNode?.data as AppNodeData;
 
@@ -23,6 +21,7 @@ const useNodeInformation = (selectedNodeId: string | null) => {
 
     return {
         task,
+        nodeData,
     };
 };
 

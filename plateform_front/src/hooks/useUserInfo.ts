@@ -1,24 +1,25 @@
-import { useGetMeQuery } from "services/auth/auth"
+import { useGetMeQuery } from "services/auth/auth";
 
 export const useUserInfo = () => {
-  const { data, error, isLoading, refetch, isFetching, isSuccess } = useGetMeQuery()
+    const { data, error, isLoading, refetch, isFetching, isSuccess } =
+        useGetMeQuery();
 
-  const id = data?.id ?? ""
-  const name = data?.name ?? ""
-  const email = data?.email ?? ""
-  const createdAt = data?.createdAt ?? ""
-  const updatedAt = data?.updatedAt ?? ""
+    const id = data?.id ?? "";
+    const name = data?.name ?? "";
+    const email = data?.email ?? "";
+    const createdAt = data?.createdAt ?? "";
+    const updatedAt = data?.updatedAt ?? "";
 
-  return {
-    id,
-    name,
-    email,
-    createdAt,
-    updatedAt,
-    error,
-    isLoading,
-    isFetching,
-    isSuccess,
-    refetch,
-  }
-}
+    return {
+        id,
+        name,
+        email,
+        createdAt,
+        updatedAt,
+        error,
+        isLoading,
+        isFetching,
+        isSuccess,
+        refetch,
+    };
+};

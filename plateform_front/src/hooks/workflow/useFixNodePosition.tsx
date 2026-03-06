@@ -4,7 +4,7 @@ import { useCallback } from "react";
 const useFixNodePosition = (nodeId: string) => {
     const { setCenter, getNode } = useReactFlow();
 
-    const fixPosition = useCallback(() => {
+    const fixPosition = useCallback(async () => {
         const node = getNode(nodeId);
         if (!node) return;
 
@@ -16,8 +16,8 @@ const useFixNodePosition = (nodeId: string) => {
         const y = position.y + (height || 200) / 2;
 
         if (x !== undefined && y !== undefined) {
-            setCenter(x, y, {
-                zoom: 1,
+            await setCenter(x, y, {
+                zoom: 1.2,
                 duration: 500,
             });
         }

@@ -1,0 +1,3 @@
+[submodule "RAG-GenRag"]
+	path = RAG-GenRag
+	url = https://github.com/GenRAG/RAG-GenRag.git

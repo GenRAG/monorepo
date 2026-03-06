@@ -5,14 +5,14 @@ import tseslint from "typescript-eslint";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
-function downgradeRulesToWarn(config: { rules?: Record<string, unknown> }) {
+function downgradeRulesToWarn(config) {
   if (!config?.rules) return config;
   const downgraded = { ...config };
   downgraded.rules = Object.fromEntries(
     Object.entries(config.rules).map(([rule, value]) => {
       if (value === "error") return [rule, "warn"];
       if (Array.isArray(value) && value[0] === "error") {
-        return [rule, ["warn", ...(value as unknown[]).slice(1)]];
+        return [rule, ["warn", ...value.slice(1)]];
       }
       return [rule, value];
     })
@@ -22,16 +22,13 @@ function downgradeRulesToWarn(config: { rules?: Record<string, unknown> }) {
 
 export default tseslint.config(
   {
-    ignores: ["eslint.config.mts", "build", "node_modules", "public"],
-    ...[downgradeRulesToWarn(eslint.configs.recommended)],
-    ...tseslint.configs.recommendedTypeChecked.map((config) =>
-      downgradeRulesToWarn({
-        ...(typeof config === "object" ? config : {}),
-        rules: (config as any).rules,
-      })
-    ),
-    ...[downgradeRulesToWarn(eslintPluginPrettierRecommended)],
-    ...[downgradeRulesToWarn(pluginReact.configs.flat.recommended)],
+    ignores: ["eslint.config.mjs", "eslint.config.mts", "build", "node_modules", "public"],
+  },
+  downgradeRulesToWarn(eslint.configs.recommended),
+  ...tseslint.configs.recommended.map(downgradeRulesToWarn),
+  downgradeRulesToWarn(eslintPluginPrettierRecommended),
+  downgradeRulesToWarn(pluginReact.configs.flat.recommended),
+  {
     files: ["**/*.{ts,tsx}"],
     plugins: {
       "react-hooks": reactHooks,
@@ -43,7 +40,7 @@ export default tseslint.config(
           jsx: true,
         },
         projectService: true,
-        tsconfigRootDir: import.meta.url,
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.browser,
@@ -65,6 +62,14 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       indent: ["off"],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "prettier/prettier": ["warn", { tabWidth: 4, useTabs: false }],
     },
   }

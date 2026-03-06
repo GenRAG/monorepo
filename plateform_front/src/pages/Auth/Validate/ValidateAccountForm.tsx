@@ -113,7 +113,7 @@ const ValidateAccountForm: FC = () => {
                             w="100%"
                             color="whites.offwhite"
                         >
-                            Can't find the email? Check your spam or junk
+                            Can&apos;t find the email? Check your spam or junk
                             folder.
                         </Text>
                     </HStack>
@@ -125,7 +125,7 @@ const ValidateAccountForm: FC = () => {
                             w="100%"
                             color="whites.offwhite"
                         >
-                            Still can't find it?{" "}
+                            Still can&apos;t find it?{" "}
                             <Button
                                 isDisabled={isResending}
                                 variant="link"

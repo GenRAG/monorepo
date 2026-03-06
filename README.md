@@ -34,7 +34,7 @@ A FastAPI-based RAG (Retrieval Augmented Generation) service that ingests PDF do
 ### Prerequisites
 
 - Docker and Docker Compose
-- Python 3.9+
+- Python 3.11+
 - uv (for dependency management)
 
 ### Setup
@@ -45,14 +45,24 @@ git clone <repository-url>
 cd RAG-GenRag
 ```
 
-2. Create a `.env` file with your configuration:
-```bash
-OPENROUTER_API_KEY=your_key_here
-MINIO_USER=minioadmin
-MINIO_PASSWORD=minioadmin
+2. Create a `.env` file with the following configuration:
+```
+OPENROUTER_API_KEY=sk-or-v1-xxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+COHERE_API_KEY=xxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ZEROENTROPY_API_KEY=ze_xxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+# Minio Configuration
+MINIO_USER=admin
+MINIO_PASSWORD=password
+S3_ENDPOINT=http://minio:9000
 BUCKET_NAME=genrag-documents
-QDRANT_URL=http://localhost:6333
-S3_ENDPOINT=http://localhost:9000
+
+# Qdrant Configuration
+QDRANT_URL=http://qdrant:6333
+
+# Langfuse Configuration
+LANGFUSE_SECRET_KEY = "sk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+LANGFUSE_PUBLIC_KEY = "pk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
 ```
 
 3. Install dependencies:
@@ -60,17 +70,32 @@ S3_ENDPOINT=http://localhost:9000
 uv sync
 ```
 
-4. Start the services:
-```bash
-docker-compose up -d
-```
+### Running the Project
 
-5. Run the FastAPI development server:
+
+For local development with hot-reloading (recommended for active development), use Docker Compose:
+
+### (Recommended)
+1. Start all services with Docker Compose (includes FastAPI with hot-reload):
+```bash
+docker-compose up --build
+```
+This will start the FastAPI application, MinIO, and Qdrant. The FastAPI service inside Docker Compose will automatically reload on code changes.
+
+For running the FastAPI application outside of Docker Compose (e.g., for specific debugging or integration with an IDE's run configuration):
+
+### (Not Recommended)
+1. Ensure Docker Compose services (MinIO, Qdrant) are running:
+```bash
+docker-compose up -d minio qdrant
+```
+2. Then run the FastAPI development server directly:
 ```bash
 uv run fastapi run app/main.py --host 0.0.0.0 --port 8000
 ```
 
 ## API Endpoints
+Check the [API documentation](http://localhost:8000/docs) for interactive testing and detailed request/response schemas.
 
 ### Background Job System
 
@@ -148,29 +173,35 @@ Get the final results when processing is completed.
 | MinIO Console | 9001 |
 | Qdrant | 6333 |
 
-## Development
+## Development Commands
+
+### Local Development
+```bash
+# Install dependencies (requires uv)
+uv sync
+
+# Run services locally with Docker
+docker-compose up -d
+
+# Run FastAPI development server
+uv run fastapi run app/main.py --host 0.0.0.0 --port 8000
+```
 
 ### Database Setup
 ```bash
 # Initialize Qdrant collection and indexes
-python init_db.py
+python scripts/init_db.py
 ```
 
 ### Testing
 ```bash
-# Test embedding service (requires OPENROUTER_API_KEY in .env)
-python embed.py
-```
-
-### Clean up
-```bash
-# Remove all Docker containers, images, and volumes
-docker system prune -a --volumes -f
+# Test the RAG pipeline streaming endpoint
+uv run python scripts/test_rag_pipeline.py
 ```
 
 ## Performance Optimizations
 
-- ✅ **Batch Embedding**: Processes 10 chunks per API call (reduces API calls by ~90%)
+- ✅ **Batch Embedding**: Processes up to 10 chunks per API call (reduces API calls by ~90%)
 - ✅ **Background Jobs**: Non-blocking uploads with immediate response
 - ✅ **Progress Tracking**: Real-time status updates during processing
 
@@ -181,6 +212,10 @@ docker system prune -a --volumes -f
 - No authentication/authorization beyond org_id parameter
 - Batch size of 10 chunks (configurable via `EmbeddingService.batch_size`)
 
-## License
+## LICENSE
 
-MIT
+This project is **private and proprietary**. 
+
+By accessing this code, you agree to the terms in the [LICENSE](./LICENSE) file:
+* **No sharing** of the original code or your modifications.
+* **All improvements** remain the property of the project owner.

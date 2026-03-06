@@ -1,55 +1,55 @@
-export type UserRole = "ADMIN" | "EDITOR" | "VIEWER"
+export type UserRole = "ADMIN" | "EDITOR" | "VIEWER";
 
 export interface UserWorkspace {
-  workspaceId: string
-  role: UserRole
-  workspace?: Workspace
+    workspaceId: string;
+    role: UserRole;
+    workspace?: Workspace;
 }
 
 export interface Workspace {
-  id: string
-  name: string
-  description?: string
-  createdAt: string
-  updatedAt: string
+    id: string;
+    name: string;
+    description?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface User {
-  id: string
-  email: string
-  name?: string
-  createdAt: string
-  updatedAt: string
-  isEmailVerified: boolean
-  workspaces?: UserWorkspace[]
+    id: string;
+    email: string;
+    name?: string;
+    createdAt: string;
+    updatedAt: string;
+    isEmailVerified: boolean;
+    workspaces?: UserWorkspace[];
 }
 
 export interface LoginParams {
-    email: string
-    password: string
+    email: string;
+    password: string;
 }
 
 export interface RegisterParams extends LoginParams {
-    name: string
+    name: string;
 }
 
 export interface AuthResponse {
-  tokenPayload: {
-    userId: string
-  }
+    tokenPayload: {
+        userId: string;
+    };
 }
 
 export interface VerifyTokenRequest {
-    email: string
-    token: number
+    email: string;
+    token: number;
 }
 
 export interface ResendVerifyTokenRequest {
-    email: string
+    email: string;
 }
 
 export interface ResetPasswordRequest extends ResendVerifyTokenRequest {}
 
 export interface NewPasswordRequest extends VerifyTokenRequest {
-    password: string
+    password: string;
 }

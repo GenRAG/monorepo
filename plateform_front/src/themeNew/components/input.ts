@@ -1,66 +1,67 @@
-import { inputAnatomy } from '@chakra-ui/anatomy';
-import { createMultiStyleConfigHelpers } from '@chakra-ui/styled-system';
+import { inputAnatomy } from "@chakra-ui/anatomy";
+import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 
-import borderRadius from 'themeNew/foundations/borderRadius';
-import colors from 'themeNew/foundations/colors';
-import { textStyles } from 'themeNew/foundations/typography';
+import borderRadius from "themeNew/foundations/borderRadius";
+import colors from "themeNew/foundations/colors";
+import { textStyles } from "themeNew/foundations/typography";
 
-const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(inputAnatomy.keys);
+const { definePartsStyle, defineMultiStyleConfig } =
+    createMultiStyleConfigHelpers(inputAnatomy.keys);
 
 const baseStyle = definePartsStyle({
-	field: {
-		...textStyles?.['body-md'],
-		borderWidth: '1px',
-		borderStyle: 'solid',
-		borderRadius: borderRadius.xs,
-		borderColor: 'inputBorder',
-		color: 'inputText',
-		_hover: {
-			borderColor: 'inputBorder',
-		},
-		_disabled: {
-			bg: colors.grey[50],
-			color: 'inputPlaceholder',
-		},
-		_placeholder: {
-			color: 'inputPlaceholder',
-		},
-	},
+    field: {
+        ...textStyles?.["body-md"],
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderRadius: borderRadius.xs,
+        borderColor: "inputBorder",
+        color: "inputText",
+        _hover: {
+            borderColor: "inputBorder",
+        },
+        _disabled: {
+            bg: colors.grey[50],
+            color: "inputPlaceholder",
+        },
+        _placeholder: {
+            color: "inputPlaceholder",
+        },
+    },
 });
 
 const Input = defineMultiStyleConfig({
-	baseStyle,
-	variants: {
-		default: {
-			...baseStyle,
-		},
-	},
-	sizes: {
-		lg: {
-			field: {
-				height: '56px',
-			},
-		},
-		md: {
-			field: {
-				height: '48px',
-			},
-		},
-		sm: {
-			field: {
-				height: '40px',
-			},
-		},
-		xs: {
-			field: {
-				height: '32px',
-			},
-		},
-	},
-	defaultProps: {
-		size: 'md',
-		variant: 'default', // Chakra ui applie un variant "outline" par défaut donc on l'override
-	},
+    baseStyle,
+    variants: {
+        default: {
+            ...baseStyle,
+        },
+    },
+    sizes: {
+        lg: {
+            field: {
+                height: "56px",
+            },
+        },
+        md: {
+            field: {
+                height: "48px",
+            },
+        },
+        sm: {
+            field: {
+                height: "40px",
+            },
+        },
+        xs: {
+            field: {
+                height: "32px",
+            },
+        },
+    },
+    defaultProps: {
+        size: "md",
+        variant: "default", // Chakra ui applie un variant "outline" par défaut donc on l'override
+    },
 });
 
 export default Input;

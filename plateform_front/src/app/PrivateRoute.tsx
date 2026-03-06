@@ -6,28 +6,24 @@ import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 
 const PrivateRoute: React.FC = () => {
-  const { isLoggedIn, isLoading } = useAuth();
-  const hasChecked = useRef(false);
+    const { isLoggedIn, isLoading } = useAuth();
+    const hasChecked = useRef(false);
 
-  if (!isLoading) hasChecked.current = true;
+    if (!isLoading) hasChecked.current = true;
 
-  if (isLoading || !hasChecked.current) {
-    return <div>Loading...</div>;
-  }
+    if (!isLoggedIn) {
+        return <Navigate to="/login" replace />;
+    }
 
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return (
-    <Flex minH="100vh" w="100vw">
-      <Box flex={1}>
-        <OnboardingProvider steps={stepsConfig}>
-          <Outlet />
-        </OnboardingProvider>
-      </Box>
-    </Flex>
-  );
+    return (
+        <Flex w="100vw">
+            <Box flex={1}>
+                <OnboardingProvider steps={stepsConfig}>
+                    <Outlet />
+                </OnboardingProvider>
+            </Box>
+        </Flex>
+    );
 };
 
 export default PrivateRoute;

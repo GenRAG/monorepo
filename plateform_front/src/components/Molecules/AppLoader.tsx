@@ -1,21 +1,13 @@
-import React from 'react';
-import {
-    Box,
-    VStack,
-    Text,
-    useColorMode,
-    Icon,
-    Spinner,
-} from '@chakra-ui/react';
-import { Sparkles } from 'lucide-react';
-import { currentDarkTheme } from 'themeNew/foundations/themeConfig';
+import React from "react";
+import { Box, VStack, Text, useColorMode, Spinner } from "@chakra-ui/react";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface AppLoaderProps {
     message?: string;
 }
 
 export const AppLoader: React.FC<AppLoaderProps> = ({
-    message = 'Loading...'
+    message = "Loading...",
 }) => {
     const { colorMode } = useColorMode();
 
@@ -26,7 +18,7 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
             left={0}
             right={0}
             bottom={0}
-            bg={colorMode === 'dark' ? 'grey.900' : 'white'}
+            bg={colorMode === "dark" ? "grey.900" : "white"}
             display="flex"
             alignItems="center"
             justifyContent="center"
@@ -34,12 +26,6 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
         >
             <VStack spacing={6} align="center">
                 <Box position="relative">
-                    <Icon
-                        as={Sparkles}
-                        boxSize={12}
-                        color={currentDarkTheme.primary}
-                        className="pulse-animation"
-                    />
                     <Box
                         position="absolute"
                         top="50%"
@@ -51,7 +37,9 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
                             thickness="4px"
                             speed="0.65s"
                             color={currentDarkTheme.primary}
-                            emptyColor={colorMode === 'dark' ? 'grey.700' : 'grey.200'}
+                            emptyColor={
+                                colorMode === "dark" ? "grey.700" : "grey.200"
+                            }
                         />
                     </Box>
                 </Box>
@@ -59,13 +47,13 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
                     <Text
                         fontSize="xl"
                         fontWeight="semibold"
-                        color={colorMode === 'dark' ? 'white' : 'grey.900'}
+                        color={colorMode === "dark" ? "white" : "grey.900"}
                     >
                         GenRAG
                     </Text>
                     <Text
                         fontSize="sm"
-                        color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
                     >
                         {message}
                     </Text>
@@ -90,4 +78,3 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
         </Box>
     );
 };
-

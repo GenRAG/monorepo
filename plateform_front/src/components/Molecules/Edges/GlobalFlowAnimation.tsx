@@ -8,22 +8,20 @@ interface GlobalFlowAnimationProps {
     setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void;
 }
 
-export default function GlobalFlowAnimation({ edges, nodes, setEdges }: GlobalFlowAnimationProps) {
+export default function GlobalFlowAnimation({
+    edges,
+    nodes,
+    setEdges,
+}: GlobalFlowAnimationProps) {
     const { getEdges, getNodes } = useReactFlow();
     const [currentEdgeIndex, setCurrentEdgeIndex] = useState(0);
     const animationKeyRef = useRef(0);
     const previousActiveEdgeIdRef = useRef<string | null>(null);
     const setEdgesRef = useRef(setEdges);
-    const edgesIdsRef = useRef<string>('');
 
     useEffect(() => {
         setEdgesRef.current = setEdges;
     }, [setEdges]);
-
-    const edgesIds = useMemo(() => {
-        const allEdges = edges.length > 0 ? edges : getEdges();
-        return allEdges.map(e => e.id).join(',');
-    }, [edges, getEdges]);
 
     const sortedEdgeIds = useMemo(() => {
         const allEdges = edges.length > 0 ? edges : getEdges();
@@ -33,6 +31,7 @@ export default function GlobalFlowAnimation({ edges, nodes, setEdges }: GlobalFl
             .map((edge) => {
                 const sourceNode = allNodes.find((n) => n.id === edge.source);
                 const targetNode = allNodes.find((n) => n.id === edge.target);
+
                 if (!sourceNode || !targetNode) return null;
 
                 const sourceX = sourceNode.position?.x || 0;
@@ -45,10 +44,13 @@ export default function GlobalFlowAnimation({ edges, nodes, setEdges }: GlobalFl
                 };
             })
             .filter((edge) => edge !== null)
-            .sort((a, b) => (a?.avgX || 0) - (b?.avgX || 0)) as Array<{ id: string; avgX: number }>;
+            .sort((a, b) => (a?.avgX || 0) - (b?.avgX || 0)) as Array<{
+            id: string;
+            avgX: number;
+        }>;
 
-        return sorted.map(e => e.id);
-    }, [edgesIds, nodes, getEdges, getNodes]);
+        return sorted.map((e) => e.id);
+    }, [nodes, getEdges, getNodes, edges]);
 
     useEffect(() => {
         if (sortedEdgeIds.length === 0) return;
@@ -67,7 +69,10 @@ export default function GlobalFlowAnimation({ edges, nodes, setEdges }: GlobalFl
                 data: {
                     ...edge.data,
                     isActive: edge.id === currentEdgeId,
-                    animationKey: edge.id === currentEdgeId ? animationKeyRef.current : undefined,
+                    animationKey:
+                        edge.id === currentEdgeId
+                            ? animationKeyRef.current
+                            : undefined,
                 },
             }));
         });
@@ -85,4 +90,3 @@ export default function GlobalFlowAnimation({ edges, nodes, setEdges }: GlobalFl
 
     return null;
 }
-

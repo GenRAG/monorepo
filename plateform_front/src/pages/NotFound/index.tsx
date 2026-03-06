@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Box,
     Heading,
@@ -8,11 +8,11 @@ import {
     HStack,
     useColorMode,
     Icon,
-} from '@chakra-ui/react';
-import { Home, ArrowLeft } from 'lucide-react';
-import { currentDarkTheme } from 'themeNew/foundations/themeConfig';
-import Button from 'components/Atoms/Button';
-import '../Onboarding/onboardingAnimations.css';
+} from "@chakra-ui/react";
+import { Home, ArrowLeft } from "lucide-react";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import Button from "components/Atoms/Button";
+import "../Onboarding/onboardingAnimations.css";
 
 const NotFound: React.FC = () => {
     const { colorMode } = useColorMode();
@@ -25,7 +25,7 @@ const NotFound: React.FC = () => {
             display="flex"
             alignItems="center"
             justifyContent="center"
-            bg={colorMode === 'dark' ? 'grey.900' : 'grey.100'}
+            bg={colorMode === "dark" ? "grey.900" : "grey.100"}
             px={4}
         >
             <VStack
@@ -38,7 +38,7 @@ const NotFound: React.FC = () => {
             >
                 <VStack spacing={4}>
                     <Heading
-                        fontSize={{ base: '120px', md: '180px' }}
+                        fontSize={{ base: "120px", md: "180px" }}
                         fontWeight="bold"
                         lineHeight="1"
                         color={currentDarkTheme.primary}
@@ -58,17 +58,17 @@ const NotFound: React.FC = () => {
                     <Heading
                         variant="heading-2xl"
                         fontWeight="bold"
-                        color={colorMode === 'dark' ? 'white' : 'grey.900'}
+                        color={colorMode === "dark" ? "white" : "grey.900"}
                     >
                         Page Not Found
                     </Heading>
                     <Text
                         fontSize="lg"
-                        color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
                         lineHeight="1.6"
                     >
-                        The page you're looking for doesn't exist or has been moved.
-                        Let's get you back on track.
+                        The page you're looking for doesn't exist or has been
+                        moved. Let's get you back on track.
                     </Text>
                 </VStack>
                 <HStack spacing={4} flexWrap="wrap" justify="center">
@@ -76,7 +76,7 @@ const NotFound: React.FC = () => {
                         variant="solid"
                         colorScheme={currentDarkTheme.colorScheme}
                         leftIcon={Home}
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate("/")}
                         size="lg"
                     >
                         Go Home
@@ -121,4 +121,3 @@ const NotFound: React.FC = () => {
 };
 
 export default NotFound;
-

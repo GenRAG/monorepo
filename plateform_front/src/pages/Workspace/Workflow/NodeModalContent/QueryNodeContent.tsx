@@ -1,7 +1,13 @@
 import { Task, TaskParam } from "lib/type/task";
 import { AppNodeData } from "lib/type/app-node";
 import { useState } from "react";
-import { Button, Grid, Textarea, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import {
+    Button,
+    Grid,
+    Textarea,
+    useColorMode,
+    useColorModeValue,
+} from "@chakra-ui/react";
 import { Flex, Text, VStack, Box, HStack, Icon } from "@chakra-ui/react";
 import { FileText, ArrowRight, Database, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,8 +17,13 @@ import MenuDropDown from "components/Atoms/MenuDropDown";
 import { useNavigate } from "react-router-dom";
 import Banner from "components/Atoms/Banner";
 
-const QueryNodeModal = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) => {
-
+const QueryNodeModal = ({
+    task,
+    nodeData,
+}: {
+    task: Task;
+    nodeData: AppNodeData;
+}) => {
     const [selectedTab, setSelectedTab] = useState<string>("Overview");
     const borderColor = useColorModeValue("grey.200", "grey.700");
     const labelColor = useColorModeValue("grey.600", "grey.400");
@@ -41,14 +52,21 @@ const QueryNodeModal = ({ task, nodeData }: { task: Task, nodeData: AppNodeData 
                     </Text>
                 ))}
             </Flex>
-            {selectedTab === "Settings" && <SettingsTab task={task} nodeData={nodeData} />}
+            {selectedTab === "Settings" && (
+                <SettingsTab task={task} nodeData={nodeData} />
+            )}
             {selectedTab === "Overview" && <OverviewTab />}
         </>
-    )
-}
+    );
+};
 
-const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) => {
-
+const SettingsTab = ({
+    task,
+    nodeData,
+}: {
+    task: Task;
+    nodeData: AppNodeData;
+}) => {
     const { control, watch, reset } = useForm({
         defaultValues: nodeData || {},
     });
@@ -94,7 +112,11 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                 p="0"
                                 m="0"
                                 label={field.value || `Select ${param.name}`}
-                                variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                variant={
+                                    colorMode === "dark"
+                                        ? "primary"
+                                        : "secondary"
+                                }
                             >
                                 {options.map((option) => (
                                     <Button
@@ -103,12 +125,25 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                         borderRadius="0px"
                                         textAlign="left"
                                         alignContent="center"
-                                        variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                        variant={
+                                            colorMode === "dark"
+                                                ? "primary"
+                                                : "secondary"
+                                        }
                                         border="none"
-                                        color={colorMode === 'dark' ? 'grey.300' : 'grey.700'}
+                                        color={
+                                            colorMode === "dark"
+                                                ? "grey.300"
+                                                : "grey.700"
+                                        }
                                         justifyContent="flex-start"
                                         onClick={() => field.onChange(option)}
-                                        _hover={{ bg: colorMode === 'dark' ? 'grey.700' : 'grey.100' }}
+                                        _hover={{
+                                            bg:
+                                                colorMode === "dark"
+                                                    ? "grey.700"
+                                                    : "grey.100",
+                                        }}
                                     >
                                         {option}
                                     </Button>
@@ -134,7 +169,11 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                 p="0"
                                 m="0"
                                 label={field.value || `Select ${param.name}`}
-                                variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                variant={
+                                    colorMode === "dark"
+                                        ? "primary"
+                                        : "secondary"
+                                }
                             >
                                 {options.map((option) => (
                                     <Button
@@ -143,12 +182,25 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                         borderRadius="0px"
                                         textAlign="left"
                                         alignContent="center"
-                                        variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                        variant={
+                                            colorMode === "dark"
+                                                ? "primary"
+                                                : "secondary"
+                                        }
                                         border="none"
-                                        color={colorMode === 'dark' ? 'grey.300' : 'grey.700'}
+                                        color={
+                                            colorMode === "dark"
+                                                ? "grey.300"
+                                                : "grey.700"
+                                        }
                                         justifyContent="flex-start"
                                         onClick={() => field.onChange(option)}
-                                        _hover={{ bg: colorMode === 'dark' ? 'grey.700' : 'grey.100' }}
+                                        _hover={{
+                                            bg:
+                                                colorMode === "dark"
+                                                    ? "grey.700"
+                                                    : "grey.100",
+                                        }}
                                     >
                                         {option}
                                     </Button>
@@ -161,13 +213,7 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
     };
 
     return (
-        <VStack
-            flex={1}
-            p={4}
-            spacing={4}
-            align="stretch"
-            overflowY="auto"
-        >
+        <VStack flex={1} p={4} spacing={4} align="stretch" overflowY="auto">
             <Box>
                 <HStack justify="space-between" mb={2}>
                     <Text fontSize="md" fontWeight="semibold">
@@ -260,7 +306,17 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                     <Text fontSize="sm" color="grey.900">
                         You can manage your settings
                     </Text>
-                    <Text fontSize="sm" _hover={{ textDecoration: 'underline' }} onClick={() => { navigate('/workspace/12342/documents') }} cursor="pointer" color="green.500">here</Text>
+                    <Text
+                        fontSize="sm"
+                        _hover={{ textDecoration: "underline" }}
+                        onClick={() => {
+                            navigate("/workspace/12342/documents");
+                        }}
+                        cursor="pointer"
+                        color="green.500"
+                    >
+                        here
+                    </Text>
                 </HStack>
             </Banner>
             <Box>
@@ -277,8 +333,8 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                 />
             </Box>
         </VStack>
-    )
-}
+    );
+};
 
 export const OverviewTab = () => {
     const bgColor = useColorModeValue("white", "grey.900");
@@ -286,13 +342,7 @@ export const OverviewTab = () => {
     const { colorMode } = useColorMode();
 
     return (
-        <VStack
-            flex={1}
-            p={4}
-            spacing={6}
-            align="stretch"
-            overflowY="auto"
-        >
+        <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             {/* Header */}
             <Box>
                 <Text
@@ -308,7 +358,8 @@ export const OverviewTab = () => {
                     fontSize="sm"
                     color={colorMode === "dark" ? "grey.400" : "grey.600"}
                 >
-                    The query is the starting point of the entire GenRAG workflow.
+                    The query is the starting point of the entire GenRAG
+                    workflow.
                 </Text>
 
                 <Text
@@ -316,7 +367,8 @@ export const OverviewTab = () => {
                     mt={2}
                     color={colorMode === "dark" ? "grey.400" : "grey.600"}
                 >
-                    <strong>Ask a question.</strong> We propagate it through the pipeline.
+                    <strong>Ask a question.</strong> We propagate it through the
+                    pipeline.
                 </Text>
             </Box>
 
@@ -338,11 +390,18 @@ export const OverviewTab = () => {
             <VStack spacing={3} align="stretch">
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.400" />
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.400"
+                        />
                         <Text
                             fontSize="sm"
                             fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
                         >
                             1. User Input
                         </Text>
@@ -352,17 +411,25 @@ export const OverviewTab = () => {
                         color={colorMode === "dark" ? "grey.400" : "grey.600"}
                         pl={5}
                     >
-                        The user writes a natural language question or instruction.
+                        The user writes a natural language question or
+                        instruction.
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.500" />
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.500"
+                        />
                         <Text
                             fontSize="sm"
                             fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
                         >
                             2. Query Normalization
                         </Text>
@@ -372,17 +439,25 @@ export const OverviewTab = () => {
                         color={colorMode === "dark" ? "grey.400" : "grey.600"}
                         pl={5}
                     >
-                        The query is cleaned and formatted to be understood by the system.
+                        The query is cleaned and formatted to be understood by
+                        the system.
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.600" />
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.600"
+                        />
                         <Text
                             fontSize="sm"
                             fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
                         >
                             3. Context Injection
                         </Text>
@@ -392,17 +467,25 @@ export const OverviewTab = () => {
                         color={colorMode === "dark" ? "grey.400" : "grey.600"}
                         pl={5}
                     >
-                        System instructions and metadata are attached to guide retrieval.
+                        System instructions and metadata are attached to guide
+                        retrieval.
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.700" />
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.700"
+                        />
                         <Text
                             fontSize="sm"
                             fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
                         >
                             4. Pipeline Trigger
                         </Text>
@@ -412,7 +495,8 @@ export const OverviewTab = () => {
                         color={colorMode === "dark" ? "grey.400" : "grey.600"}
                         pl={5}
                     >
-                        The query is sent downstream to retrieval, ranking, and generation.
+                        The query is sent downstream to retrieval, ranking, and
+                        generation.
                     </Text>
                 </Box>
             </VStack>
@@ -420,8 +504,14 @@ export const OverviewTab = () => {
     );
 };
 
-
-import { MessageSquare, User, Send, Sparkles, WandSparkles, Zap } from "lucide-react";
+import {
+    MessageSquare,
+    User,
+    Send,
+    Sparkles,
+    WandSparkles,
+    Zap,
+} from "lucide-react";
 
 const QueryAnimation = () => {
     const [step, setStep] = useState(0);
@@ -438,7 +528,7 @@ const QueryAnimation = () => {
         const progressInterval = setInterval(() => {
             setProgress((prev) => {
                 if (prev >= 100) return 100;
-                return prev + (100 / 30);
+                return prev + 100 / 30;
             });
         }, 100);
 
@@ -549,7 +639,12 @@ const UserInputStep = () => {
                         <Icon as={User} color="green.600" boxSize={5} />
                     </Box>
 
-                    <Box flex={1} display="flex" alignItems="center" minH="36px">
+                    <Box
+                        flex={1}
+                        display="flex"
+                        alignItems="center"
+                        minH="36px"
+                    >
                         <HStack spacing={0}>
                             <Text fontSize="sm" color={textColor}>
                                 {displayedText}
@@ -593,15 +688,17 @@ const UserInputStep = () => {
 };
 
 const QueryNormalizationStep = () => {
-    const [phase, setPhase] = useState<'initial' | 'lowercase' | 'deleting' | 'replacing' | 'complete'>('initial');
+    const [phase, setPhase] = useState<
+        "initial" | "lowercase" | "deleting" | "replacing" | "complete"
+    >("initial");
     const bgColor = useColorModeValue("white", "grey.800");
     const textColor = useColorModeValue("grey.800", "grey.200");
 
     useEffect(() => {
-        const timer1 = setTimeout(() => setPhase('lowercase'), 400);
-        const timer2 = setTimeout(() => setPhase('deleting'), 900);
-        const timer3 = setTimeout(() => setPhase('replacing'), 1400);
-        const timer4 = setTimeout(() => setPhase('complete'), 2000);
+        const timer1 = setTimeout(() => setPhase("lowercase"), 400);
+        const timer2 = setTimeout(() => setPhase("deleting"), 900);
+        const timer3 = setTimeout(() => setPhase("replacing"), 1400);
+        const timer4 = setTimeout(() => setPhase("complete"), 2000);
         return () => {
             clearTimeout(timer1);
             clearTimeout(timer2);
@@ -610,9 +707,9 @@ const QueryNormalizationStep = () => {
         };
     }, []);
 
-    const isLowercase = phase !== 'initial';
-    const isDeleting = phase === 'deleting';
-    const isReplacing = phase === 'replacing' || phase === 'complete';
+    const isLowercase = phase !== "initial";
+    const isDeleting = phase === "deleting";
+    const isReplacing = phase === "replacing" || phase === "complete";
 
     return (
         <motion.div
@@ -660,24 +757,37 @@ const QueryNormalizationStep = () => {
                                 color={isLowercase ? "green.400" : textColor}
                                 fontWeight={isLowercase ? "medium" : "normal"}
                             >
-                                {isLowercase ? 'what' : 'What'}
+                                {isLowercase ? "what" : "What"}
                             </Text>
                         </motion.div>
                     </Box>
 
-                    <Text fontSize="sm" color={textColor}>is</Text>
-                    <Text fontSize="sm" color={textColor}>a</Text>
-                    <Text fontSize="sm" color={textColor}>vector</Text>
+                    <Text fontSize="sm" color={textColor}>
+                        is
+                    </Text>
+                    <Text fontSize="sm" color={textColor}>
+                        a
+                    </Text>
+                    <Text fontSize="sm" color={textColor}>
+                        vector
+                    </Text>
                     <Box position="relative" display="inline-block" minW="70px">
                         <motion.div
                             animate={{
                                 opacity: isReplacing ? 0 : 1,
                             }}
                             transition={{ duration: 0.2 }}
-                            style={{ position: "relative", display: "inline-block" }}
+                            style={{
+                                position: "relative",
+                                display: "inline-block",
+                            }}
                         >
                             <HStack spacing={0}>
-                                <Text fontSize="sm" color={textColor} display="inline">
+                                <Text
+                                    fontSize="sm"
+                                    color={textColor}
+                                    display="inline"
+                                >
                                     DB?
                                 </Text>
                             </HStack>
@@ -707,7 +817,7 @@ const QueryNormalizationStep = () => {
                                 transition={{
                                     type: "spring",
                                     stiffness: 300,
-                                    damping: 20
+                                    damping: 20,
                                 }}
                                 style={{
                                     position: "absolute",
@@ -725,7 +835,7 @@ const QueryNormalizationStep = () => {
                                     >
                                         database
                                     </Text>
-                                    {phase === 'replacing' && (
+                                    {phase === "replacing" && (
                                         <motion.div
                                             animate={{
                                                 opacity: [0, 0.4, 0],
@@ -741,7 +851,8 @@ const QueryNormalizationStep = () => {
                                                 left: -3,
                                                 right: -3,
                                                 bottom: -3,
-                                                backgroundColor: "rgba(34, 197, 94, 0.15)",
+                                                backgroundColor:
+                                                    "rgba(34, 197, 94, 0.15)",
                                                 borderRadius: "6px",
                                                 border: "1px solid rgba(34, 197, 94, 0.3)",
                                                 zIndex: -1,
@@ -765,9 +876,27 @@ const ContextInjectionStep = () => {
     const enrichedBg = useColorModeValue("green.50", "green.900");
 
     const contextItems = [
-        { id: 1, label: "System Instructions", color: "green.400", angle: -120, distance: 100 },
-        { id: 2, label: "User Context", color: "green.500", angle: 180, distance: 90 },
-        { id: 3, label: "Metadata", color: "green.300", angle: 120, distance: 95 },
+        {
+            id: 1,
+            label: "System Instructions",
+            color: "green.400",
+            angle: -120,
+            distance: 100,
+        },
+        {
+            id: 2,
+            label: "User Context",
+            color: "green.500",
+            angle: 180,
+            distance: 90,
+        },
+        {
+            id: 3,
+            label: "Metadata",
+            color: "green.300",
+            angle: 120,
+            distance: 95,
+        },
     ];
 
     useEffect(() => {
@@ -822,11 +951,20 @@ const ContextInjectionStep = () => {
                             borderColor="green.400"
                             borderRadius="18px"
                             p={3}
-                            boxShadow={merged ? "0 0 25px rgba(34, 197, 94, 0.5)" : "md"}
+                            boxShadow={
+                                merged
+                                    ? "0 0 25px rgba(34, 197, 94, 0.5)"
+                                    : "md"
+                            }
                             transition="all 0.6s"
                         >
                             <VStack spacing={1}>
-                                <Text fontSize="sm" color={textColor} fontWeight="medium" textAlign="center">
+                                <Text
+                                    fontSize="sm"
+                                    color={textColor}
+                                    fontWeight="medium"
+                                    textAlign="center"
+                                >
                                     what is a vector database
                                 </Text>
                                 <AnimatePresence>
@@ -837,8 +975,16 @@ const ContextInjectionStep = () => {
                                             transition={{ delay: 0.3 }}
                                         >
                                             <HStack spacing={1}>
-                                                <Icon as={Sparkles} color="green.500" boxSize={3} />
-                                                <Text fontSize="xs" color="green.600" fontWeight="semibold">
+                                                <Icon
+                                                    as={Sparkles}
+                                                    color="green.500"
+                                                    boxSize={3}
+                                                />
+                                                <Text
+                                                    fontSize="xs"
+                                                    color="green.600"
+                                                    fontWeight="semibold"
+                                                >
                                                     enriched
                                                 </Text>
                                             </HStack>
@@ -850,8 +996,10 @@ const ContextInjectionStep = () => {
                     </motion.div>
                 </Box>
                 {contextItems.map((item, i) => {
-                    const startX = Math.cos((item.angle * Math.PI) / 180) * item.distance;
-                    const startY = Math.sin((item.angle * Math.PI) / 180) * item.distance;
+                    const startX =
+                        Math.cos((item.angle * Math.PI) / 180) * item.distance;
+                    const startY =
+                        Math.sin((item.angle * Math.PI) / 180) * item.distance;
 
                     return (
                         <motion.div
@@ -949,12 +1097,20 @@ const PipelineTriggerStep = () => {
                         p={2}
                         boxShadow="sm"
                     >
-                        <Text fontSize="xs" color={textColor} textAlign="center">
+                        <Text
+                            fontSize="xs"
+                            color={textColor}
+                            textAlign="center"
+                        >
                             what is a vector database
                         </Text>
                         <HStack spacing={1} justify="center">
                             <Icon as={Sparkles} color="green.500" boxSize={3} />
-                            <Text fontSize="xs" color="green.600" fontWeight="semibold">
+                            <Text
+                                fontSize="xs"
+                                color="green.600"
+                                fontWeight="semibold"
+                            >
                                 enriched
                             </Text>
                         </HStack>
@@ -971,7 +1127,7 @@ const PipelineTriggerStep = () => {
                                 scale: 0,
                             }}
                             animate={{
-                                x: [- 50, 40 + i * 5],
+                                x: [-50, 40 + i * 5],
                                 y: [0, Math.sin(i) * 15],
                                 opacity: [0, 0.8, 0.4, 0],
                                 scale: [0, 1, 0.8, 0],
@@ -1024,7 +1180,11 @@ const PipelineTriggerStep = () => {
                                     bg="white"
                                     borderRadius="999px"
                                 />
-                                <Text fontSize="xs" color="white" fontWeight="semibold">
+                                <Text
+                                    fontSize="xs"
+                                    color="white"
+                                    fontWeight="semibold"
+                                >
                                     {step.label}
                                 </Text>
                             </HStack>

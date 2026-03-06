@@ -127,7 +127,7 @@ $breakpoint-3xl: 1920px;
         --genrag-heading-size-lg: 24px;
         --genrag-heading-size-xl: 30px;
         --genrag-heading-size-2xl: 36px;
-        --genrag-heading-size-3xl: 48px;
+        --genrag-heading-size-3xl: 56px;
 }
 /* ------ heading size -------- */
 
@@ -136,3 +136,37 @@ $breakpoint-3xl: 1920px;
   stroke-width: 1.5px;
 }
 /* ------ Lucide -------- */
+
+/* ------ Scrollbar dark mode: thumb visible, track/background transparent -------- */
+[data-theme="dark"] *,
+.chakra-ui-dark * {
+  &::-webkit-scrollbar {
+    background: transparent !important;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(121, 121, 121, 0.5) !important;
+    border-radius: 4px;
+    width: 2px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7) !important;
+  }
+}
+
+[data-theme="light"] *,
+.chakra-ui-light * {
+  &::-webkit-scrollbar {
+    background: transparent !important;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(185, 185, 185, 0.5) !important;
+    border-radius: 4px;
+    width: 2px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7) !important;
+  }
+}
+/* ------ Scrollbar dark mode -------- */

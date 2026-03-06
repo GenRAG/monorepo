@@ -1,24 +1,23 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useRef, useCallback } from "react";
+import { useForm } from "react-hook-form";
 import {
     Box,
     Heading,
-    HStack,
     Stack,
     Text,
     VStack,
     useColorMode,
     chakra,
     Icon,
-    Circle,
-} from '@chakra-ui/react';
-import { StepComponentProps } from 'pages/Onboarding/OnBoardingProvider';
-import { currentDarkTheme } from 'themeNew/foundations/themeConfig';
-import { MessageSquare } from 'lucide-react';
-import Button from 'components/Atoms/Button';
-import { useChat } from '../../../hooks/useChat';
-import { ChatInterface } from '../../../components/Molecules/ChatInterface';
-import StepLevel from 'components/Molecules/StepLevel';
+} from "@chakra-ui/react";
+import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import { MessageSquare } from "lucide-react";
+import Button from "components/Atoms/Button";
+import { useChat, useHandleMessageUpdate } from "../../../hooks/useChat";
+import { ChatInterface } from "../../../components/Molecules/ChatInterface";
+import StepLevel from "components/Molecules/StepLevel";
+import { useAppResponsive } from "hooks/useAppResponsive";
 
 interface TestAssistantFormData {
     testQuestion: string;
@@ -32,65 +31,49 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
     registerValidateAndGoNext,
 }) => {
     const { colorMode } = useColorMode();
+    const isMobile = useAppResponsive({ base: true, lg: false });
 
-    const getResponse = useCallback((question: string): string[] => {
-        return ["According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year. These days are calculated based on a full month of work."];
+    const getResponse = useCallback((_question: string): string[] => {
+        return [
+            "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year. These days are calculated based on a full month of work.",
+        ];
     }, []);
 
-    const initialMessages = data.testQuestion && data.testResponse ? [{
-        id: 'initial',
-        question: data.testQuestion,
-        response: [data.testResponse],
-        timestamp: Date.now(),
-    }] : [];
-
-    console.log(data.testQuestion, data.testResponse);
+    const initialMessages =
+        data.testQuestion && data.testResponse
+            ? [
+                  {
+                      id: "initial",
+                      question: data.testQuestion,
+                      response: [data.testResponse],
+                      timestamp: Date.now(),
+                  },
+              ]
+            : [];
 
     const setValueRef = useRef<typeof setValue | null>(null);
     const updateDataRef = useRef<typeof updateData | null>(null);
-    const lastProcessedMessageRef = useRef<string>('');
 
-    const handleMessageUpdate = useCallback((message: { id: string; question: string; response: string | string[]; timestamp: number; isImproved?: boolean }) => {
-        if (!message.response) return;
+    const { trigger, setValue } = useForm<TestAssistantFormData>({
+        defaultValues: {
+            testQuestion: data.testQuestion || "",
+            testResponse: data.testResponse || "",
+        },
+        mode: "onChange",
+    });
 
-        const responseText = Array.isArray(message.response) ? message.response.join('\n') : message.response;
-        const messageKey = `${message.question}-${responseText}`;
-        if (lastProcessedMessageRef.current === messageKey) return;
-
-        lastProcessedMessageRef.current = messageKey;
-
-        if (setValueRef.current) {
-            setValueRef.current('testQuestion', message.question, { shouldValidate: false });
-            setValueRef.current('testResponse', responseText, { shouldValidate: false });
-        }
-
-        if (updateDataRef.current) {
-            updateDataRef.current({
-                testQuestion: message.question,
-                testResponse: responseText,
-            });
-        }
-    }, []);
+    const handleMessageUpdate = useHandleMessageUpdate({
+        setValue: (name, value, options) =>
+            setValue(name as "testQuestion" | "testResponse", value, options),
+        updateData,
+        refQuestion: "testQuestion",
+        refResponse: "testResponse",
+    });
 
     const { messages, sendMessage, isLoading } = useChat({
         getResponse,
         initialMessages,
         onMessageUpdate: handleMessageUpdate,
-    });
-
-    console.log(messages);
-
-    const {
-        watch,
-        trigger,
-        setValue,
-        formState: { errors },
-    } = useForm<TestAssistantFormData>({
-        defaultValues: {
-            testQuestion: data.testQuestion || '',
-            testResponse: data.testResponse || '',
-        },
-        mode: 'onChange',
     });
 
     setValueRef.current = setValue;
@@ -119,25 +102,34 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
         "Can I carry over my vacation days?",
     ];
 
-    const handleQuestionClick = (suggestedQuestion: string) => {
-        sendMessage(suggestedQuestion);
+    const handleQuestionClick = async (suggestedQuestion: string) => {
+        await sendMessage(suggestedQuestion);
     };
 
     return (
-        <chakra.form w="100%">
-            <Stack w="100%" spacing={8}>
+        <chakra.form w="100%" h="100%">
+            <Stack w="100%" spacing={4} h="100%">
                 <VStack align="start" spacing={4} w="100%">
                     <VStack align="start" spacing={2} w="100%">
                         <Heading
-                            variant="heading-2xl"
+                            variant={isMobile ? "heading-lg" : "heading-2xl"}
                             fontWeight="bold"
-                            color={colorMode === 'dark' ? 'white' : 'grey.900'}
+                            color={colorMode === "dark" ? "white" : "grey.900"}
                         >
                             Test your HR assistant in 30 seconds
                         </Heading>
-                        <Text color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} variant="body-xl">
-                            Here's your HR assistant ready to use
-                        </Text>
+                        {!isMobile && (
+                            <Text
+                                color={
+                                    colorMode === "dark"
+                                        ? "grey.400"
+                                        : "grey.600"
+                                }
+                                variant={isMobile ? "body-lg" : "body-xl"}
+                            >
+                                Here&apos;s your HR assistant ready to use
+                            </Text>
+                        )}
                     </VStack>
                     <StepLevel
                         level={1}
@@ -148,7 +140,13 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
 
                 {messages.length === 0 && (
                     <VStack align="stretch" spacing={2}>
-                        <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.500'} mb={2}>
+                        <Text
+                            fontSize="xs"
+                            color={
+                                colorMode === "dark" ? "grey.400" : "grey.500"
+                            }
+                            mb={2}
+                        >
                             Suggested questions:
                         </Text>
                         {suggestedQuestions.map((suggestedQuestion, index) => (
@@ -156,13 +154,22 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
                                 key={index}
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleQuestionClick(suggestedQuestion)}
+                                onClick={() =>
+                                    handleQuestionClick(suggestedQuestion)
+                                }
                                 justifyContent="flex-start"
                                 textAlign="left"
-                                bg={colorMode === 'dark' ? 'grey.700' : 'white'}
-                                borderColor={colorMode === 'dark' ? 'grey.600' : 'grey.300'}
+                                bg={colorMode === "dark" ? "grey.700" : "white"}
+                                borderColor={
+                                    colorMode === "dark"
+                                        ? "grey.600"
+                                        : "grey.300"
+                                }
                                 _hover={{
-                                    bg: colorMode === 'dark' ? 'grey.600' : 'grey.50',
+                                    bg:
+                                        colorMode === "dark"
+                                            ? "grey.600"
+                                            : "grey.50",
                                     borderColor: currentDarkTheme.primary,
                                 }}
                             >
@@ -173,15 +180,18 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
                     </VStack>
                 )}
 
-                <ChatInterface
-                    messages={messages}
-                    onSendMessage={sendMessage}
-                    isLoading={isLoading}
-                    placeholder="Enter your question"
-                    welcomeMessage="Hello! I'm your HR assistant. Ask me a question about vacation, RTT, or any other HR topic."
-                />
+                <Box flex={1} minH={0} display="flex" flexDirection="column">
+                    <ChatInterface
+                        fullHeight
+                        compact
+                        messages={messages}
+                        onSendMessage={sendMessage}
+                        isLoading={isLoading}
+                        placeholder="Enter your question"
+                        welcomeMessage="Hello! I'm your HR assistant. Ask me a question about vacation, RTT, or any other HR topic."
+                    />
+                </Box>
             </Stack>
         </chakra.form>
     );
 };
-

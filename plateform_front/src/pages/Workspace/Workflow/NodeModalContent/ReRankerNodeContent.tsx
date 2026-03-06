@@ -6,8 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Task } from "lib/type/task";
 import { AppNodeData } from "lib/type/app-node";
 
-const RerankerNodeModal = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) => {
-
+const RerankerNodeModal = ({
+    task,
+    nodeData,
+}: {
+    task: Task;
+    nodeData: AppNodeData;
+}) => {
     const [selectedTab, setSelectedTab] = useState<string>("Overview");
     const borderColor = useColorModeValue("grey.200", "grey.700");
     const labelColor = useColorModeValue("grey.600", "grey.400");
@@ -39,34 +44,41 @@ const RerankerNodeModal = ({ task, nodeData }: { task: Task, nodeData: AppNodeDa
             {/*selectedTab === "Settings" && <SettingsTab task={task} nodeData={nodeData} />*/}
             {selectedTab === "Overview" && <OverviewTab />}
         </>
-    )
-}
+    );
+};
 
 export const OverviewTab = () => {
-
     const { colorMode } = useColorMode();
     const bgColor = useColorModeValue("white", "grey.900");
     const borderColor = useColorModeValue("grey.200", "grey.700");
 
     return (
-        <VStack
-            flex={1}
-            p={4}
-            spacing={6}
-            align="stretch"
-            overflowY="auto"
-        >
+        <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             <Box>
-                <Text fontSize="lg" fontWeight="bold" mb={2} color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>
+                <Text
+                    fontSize="lg"
+                    fontWeight="bold"
+                    mb={2}
+                    color={colorMode === "dark" ? "grey.100" : "grey.900"}
+                >
                     How Do We Improve Result Relevance?
                 </Text>
 
-                <Text fontSize="sm" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}>
-                    We analyze and reorder retrieved results to prioritize the most relevant information
+                <Text
+                    fontSize="sm"
+                    color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                >
+                    We analyze and reorder retrieved results to prioritize the
+                    most relevant information
                 </Text>
 
-                <Text fontSize="sm" mt={2} color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}>
-                    <strong>Multiple results in.</strong> We surface the <strong>best ones out</strong>.
+                <Text
+                    fontSize="sm"
+                    mt={2}
+                    color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                >
+                    <strong>Multiple results in.</strong> We surface the{" "}
+                    <strong>best ones out</strong>.
                 </Text>
             </Box>
 
@@ -86,55 +98,120 @@ export const OverviewTab = () => {
             <VStack spacing={3} align="stretch">
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.400" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.400"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
                             1. Incoming Results
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        We receive multiple retrieved documents or passages from previous steps (e.g. search results, document ingestion, etc.)
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        We receive multiple retrieved documents or passages from
+                        previous steps (e.g. search results, document ingestion,
+                        etc.)
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.500" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.500"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
                             2. Relevance Evaluation
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        Each result is evaluated against the user question using an AI ranking model
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        Each result is evaluated against the user question using
+                        an AI ranking model
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.600" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.600"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
                             3. Intelligent Reordering
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        Results are reordered to bring the most relevant content to the top
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        Results are reordered to bring the most relevant content
+                        to the top
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.700" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.700"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
                             4. Optimized Output
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        Downstream components receive higher-quality, better-ranked results
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        Downstream components receive higher-quality,
+                        better-ranked results
                     </Text>
                 </Box>
             </VStack>
         </VStack>
-    )
-}
+    );
+};
 
 export const RerankerAnimation = () => {
     const [step, setStep] = useState(0);
@@ -151,7 +228,7 @@ export const RerankerAnimation = () => {
         const progressInterval = setInterval(() => {
             setProgress((prev) => {
                 if (prev >= 100) return 100;
-                return prev + (100 / 30);
+                return prev + 100 / 30;
             });
         }, 100);
 
@@ -198,7 +275,6 @@ export const RerankerAnimation = () => {
 };
 
 const IncomingResultsStep = () => {
-
     const { colorMode } = useColorMode();
 
     const cards = [
@@ -239,9 +315,11 @@ const IncomingResultsStep = () => {
                     >
                         <Box
                             h="40px"
-                            bg={colorMode === 'dark' ? 'grey.800' : 'white'}
+                            bg={colorMode === "dark" ? "grey.800" : "white"}
                             border="2px solid"
-                            borderColor={colorMode === 'dark' ? 'green.300' : 'green.200'}
+                            borderColor={
+                                colorMode === "dark" ? "green.300" : "green.200"
+                            }
                             borderRadius="12px"
                             display="flex"
                             alignItems="center"
@@ -249,9 +327,24 @@ const IncomingResultsStep = () => {
                             boxShadow="sm"
                         >
                             <HStack spacing={2} w="100%">
-                                <Box w="24px" h="24px" borderRadius="8px" bg="green.100" />
-                                <Box flex={1} h="3px" bg="green.200" borderRadius="999px" />
-                                <Box w="60px" h="3px" bg="green.200" borderRadius="999px" />
+                                <Box
+                                    w="24px"
+                                    h="24px"
+                                    borderRadius="8px"
+                                    bg="green.100"
+                                />
+                                <Box
+                                    flex={1}
+                                    h="3px"
+                                    bg="green.200"
+                                    borderRadius="999px"
+                                />
+                                <Box
+                                    w="60px"
+                                    h="3px"
+                                    bg="green.200"
+                                    borderRadius="999px"
+                                />
                             </HStack>
                         </Box>
                     </motion.div>
@@ -285,11 +378,11 @@ const EvaluationStep = () => {
         const interval = setInterval(() => {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / animationDuration, 1);
-            const currentY = startY + (totalDistance * progress);
+            const currentY = startY + totalDistance * progress;
 
             const newScannedCards = new Set<number>();
             cardPositions.forEach((cardTop, index) => {
-                const cardBottom = cardTop + 40
+                const cardBottom = cardTop + 40;
                 if (currentY >= cardTop && currentY <= cardBottom) {
                     newScannedCards.add(cards[index].id);
                 }
@@ -344,11 +437,20 @@ const EvaluationStep = () => {
                             >
                                 <Box
                                     h="40px"
-                                    bg={colorMode === 'dark' ? 'grey.800' : 'white'}
+                                    bg={
+                                        colorMode === "dark"
+                                            ? "grey.800"
+                                            : "white"
+                                    }
                                     border="2px solid"
-                                    borderColor={isScanned
-                                        ? (colorMode === 'dark' ? 'green.500' : 'green.400')
-                                        : (colorMode === 'dark' ? 'green.300' : 'green.200')
+                                    borderColor={
+                                        isScanned
+                                            ? colorMode === "dark"
+                                                ? "green.500"
+                                                : "green.400"
+                                            : colorMode === "dark"
+                                              ? "green.300"
+                                              : "green.200"
                                     }
                                     borderRadius="12px"
                                     display="flex"
@@ -363,20 +465,32 @@ const EvaluationStep = () => {
                                             w="24px"
                                             h="24px"
                                             borderRadius="8px"
-                                            bg={isScanned ? 'green.300' : 'green.100'}
+                                            bg={
+                                                isScanned
+                                                    ? "green.300"
+                                                    : "green.100"
+                                            }
                                             transition="background-color 0.3s ease"
                                         />
                                         <Box
                                             flex={1}
                                             h="3px"
-                                            bg={isScanned ? 'green.400' : 'green.200'}
+                                            bg={
+                                                isScanned
+                                                    ? "green.400"
+                                                    : "green.200"
+                                            }
                                             borderRadius="999px"
                                             transition="background-color 0.3s ease"
                                         />
                                         <Box
                                             w="60px"
                                             h="3px"
-                                            bg={isScanned ? 'green.400' : 'green.200'}
+                                            bg={
+                                                isScanned
+                                                    ? "green.400"
+                                                    : "green.200"
+                                            }
                                             borderRadius="999px"
                                             transition="background-color 0.3s ease"
                                         />
@@ -411,7 +525,9 @@ const EvaluationStep = () => {
 };
 
 const ReorganizationStep = () => {
-    const [phase, setPhase] = useState<'idle' | 'selecting' | 'moving' | 'reordering'>('idle');
+    const [phase, setPhase] = useState<
+        "idle" | "selecting" | "moving" | "reordering"
+    >("idle");
     const { colorMode } = useColorMode();
     const cardsInitial = [
         { id: 1, relevance: 0.6, position: 0 },
@@ -420,14 +536,16 @@ const ReorganizationStep = () => {
         { id: 4, relevance: 0.7, position: 3 },
     ];
 
-    const cardsSorted = [...cardsInitial].sort((a, b) => b.relevance - a.relevance);
+    const cardsSorted = [...cardsInitial].sort(
+        (a, b) => b.relevance - a.relevance,
+    );
     const bestCard = cardsSorted[0];
 
     useEffect(() => {
         const timers = [
-            setTimeout(() => setPhase('selecting'), 400),
-            setTimeout(() => setPhase('moving'), 1200),
-            setTimeout(() => setPhase('reordering'), 1800),
+            setTimeout(() => setPhase("selecting"), 400),
+            setTimeout(() => setPhase("moving"), 1200),
+            setTimeout(() => setPhase("reordering"), 1800),
         ];
 
         return () => timers.forEach(clearTimeout);
@@ -437,17 +555,21 @@ const ReorganizationStep = () => {
     const CARD_SPACING = 16;
     const CARD_OFFSET = CARD_HEIGHT + CARD_SPACING;
 
-    const getCardAnimation = (card: typeof cardsInitial[0]) => {
+    const getCardAnimation = (card: (typeof cardsInitial)[0]) => {
         const isBest = card.id === bestCard.id;
         const initialY = card.position * CARD_OFFSET;
-        const finalIndex = cardsSorted.findIndex(c => c.id === card.id);
+        const finalIndex = cardsSorted.findIndex((c) => c.id === card.id);
         const finalY = finalIndex * CARD_OFFSET;
 
-        if (phase === 'idle') {
-            return { y: initialY, scale: 1, opacity: 0.5 + card.relevance * 0.5 };
+        if (phase === "idle") {
+            return {
+                y: initialY,
+                scale: 1,
+                opacity: 0.5 + card.relevance * 0.5,
+            };
         }
 
-        if (phase === 'selecting') {
+        if (phase === "selecting") {
             return {
                 y: initialY,
                 scale: isBest ? 1.15 : 1,
@@ -455,7 +577,7 @@ const ReorganizationStep = () => {
             };
         }
 
-        if (phase === 'moving') {
+        if (phase === "moving") {
             return {
                 y: isBest ? 0 : initialY,
                 scale: isBest ? 1.15 : 1,
@@ -494,7 +616,9 @@ const ReorganizationStep = () => {
                 {cardsInitial.map((card) => {
                     const isBest = card.id === bestCard.id;
                     const animation = getCardAnimation(card);
-                    const finalIndex = cardsSorted.findIndex(c => c.id === card.id);
+                    const finalIndex = cardsSorted.findIndex(
+                        (c) => c.id === card.id,
+                    );
 
                     return (
                         <motion.div
@@ -502,26 +626,35 @@ const ReorganizationStep = () => {
                             style={{
                                 position: "absolute",
                                 width: "100%",
-                                zIndex: isBest && phase !== 'reordering' ? 10 : 5 - finalIndex,
+                                zIndex:
+                                    isBest && phase !== "reordering"
+                                        ? 10
+                                        : 5 - finalIndex,
                             }}
                             animate={animation}
                             transition={{
                                 type: "spring",
                                 stiffness: 150,
                                 damping: 25,
-                                delay: phase === 'reordering' && !isBest ? finalIndex * 0.1 : 0,
+                                delay:
+                                    phase === "reordering" && !isBest
+                                        ? finalIndex * 0.1
+                                        : 0,
                             }}
                         >
                             <Box
                                 h={`${CARD_HEIGHT}px`}
-                                bg={colorMode === 'dark' ? 'grey.800' : 'white'}
+                                bg={colorMode === "dark" ? "grey.800" : "white"}
                                 border="2px solid"
                                 borderColor={
-                                    isBest && phase !== 'reordering'
+                                    isBest && phase !== "reordering"
                                         ? "green.400"
-                                        : phase === 'reordering' && finalIndex === 0
-                                            ? "green.400"
-                                            : colorMode === 'dark' ? 'green.700' : 'green.200'
+                                        : phase === "reordering" &&
+                                            finalIndex === 0
+                                          ? "green.400"
+                                          : colorMode === "dark"
+                                            ? "green.700"
+                                            : "green.200"
                                 }
                                 borderRadius="12px"
                                 display="flex"
@@ -534,13 +667,26 @@ const ReorganizationStep = () => {
                                         h="24px"
                                         borderRadius="8px"
                                         bg={
-                                            (isBest && phase !== 'reordering') || (phase === 'reordering' && finalIndex === 0)
+                                            (isBest &&
+                                                phase !== "reordering") ||
+                                            (phase === "reordering" &&
+                                                finalIndex === 0)
                                                 ? "green.200"
                                                 : "green.100"
                                         }
                                     />
-                                    <Box flex={1} h="3px" bg="green.200" borderRadius="999px" />
-                                    <Box w="60px" h="3px" bg="green.200" borderRadius="999px" />
+                                    <Box
+                                        flex={1}
+                                        h="3px"
+                                        bg="green.200"
+                                        borderRadius="999px"
+                                    />
+                                    <Box
+                                        w="60px"
+                                        h="3px"
+                                        bg="green.200"
+                                        borderRadius="999px"
+                                    />
                                 </HStack>
                             </Box>
                         </motion.div>
@@ -597,14 +743,20 @@ const FinalResultStep = () => {
                     >
                         <Box
                             h={index === 0 ? "50px" : "40px"}
-                            bg={colorMode === 'dark' ? 'grey.800' : 'white'}
+                            bg={colorMode === "dark" ? "grey.800" : "white"}
                             border="2px solid"
-                            borderColor={index === 0 ? "green.400" : "green.300"}
+                            borderColor={
+                                index === 0 ? "green.400" : "green.300"
+                            }
                             borderRadius="12px"
                             display="flex"
                             alignItems="center"
                             px={3}
-                            boxShadow={index === 0 ? "0 0 20px rgba(34, 197, 94, 0.4)" : "sm"}
+                            boxShadow={
+                                index === 0
+                                    ? "0 0 20px rgba(34, 197, 94, 0.4)"
+                                    : "sm"
+                            }
                             opacity={index === 0 ? 1 : 0.4 + index * 0.1}
                         >
                             <HStack spacing={2} w="100%">
@@ -627,7 +779,11 @@ const FinalResultStep = () => {
                                     borderRadius="999px"
                                 />
                                 {index === 0 && (
-                                    <Icon as={CheckCircle2} color="green.500" boxSize={5} />
+                                    <Icon
+                                        as={CheckCircle2}
+                                        color="green.500"
+                                        boxSize={5}
+                                    />
                                 )}
                             </HStack>
                         </Box>

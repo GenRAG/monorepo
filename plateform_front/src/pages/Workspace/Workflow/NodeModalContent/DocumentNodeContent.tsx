@@ -1,7 +1,13 @@
 import { Task, TaskParam } from "lib/type/task";
 import { AppNodeData } from "lib/type/app-node";
 import { useState } from "react";
-import { Button, Grid, Textarea, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import {
+    Button,
+    Grid,
+    Textarea,
+    useColorMode,
+    useColorModeValue,
+} from "@chakra-ui/react";
 import { Flex, Text, VStack, Box, HStack, Icon } from "@chakra-ui/react";
 import { FileText, ArrowRight, Database, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,8 +17,13 @@ import MenuDropDown from "components/Atoms/MenuDropDown";
 import { useNavigate } from "react-router-dom";
 import Banner from "components/Atoms/Banner";
 
-const DatabaseNodeModal = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) => {
-
+const DatabaseNodeModal = ({
+    task,
+    nodeData,
+}: {
+    task: Task;
+    nodeData: AppNodeData;
+}) => {
     const [selectedTab, setSelectedTab] = useState<string>("Overview");
     const borderColor = useColorModeValue("grey.200", "grey.700");
     const labelColor = useColorModeValue("grey.600", "grey.400");
@@ -41,14 +52,21 @@ const DatabaseNodeModal = ({ task, nodeData }: { task: Task, nodeData: AppNodeDa
                     </Text>
                 ))}
             </Flex>
-            {selectedTab === "Settings" && <SettingsTab task={task} nodeData={nodeData} />}
-            {selectedTab === "Overview" && <OverviewTab/>}
+            {selectedTab === "Settings" && (
+                <SettingsTab task={task} nodeData={nodeData} />
+            )}
+            {selectedTab === "Overview" && <OverviewTab />}
         </>
-    )
-}
+    );
+};
 
-const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) => {
-
+const SettingsTab = ({
+    task,
+    nodeData,
+}: {
+    task: Task;
+    nodeData: AppNodeData;
+}) => {
     const { control, watch, reset } = useForm({
         defaultValues: nodeData || {},
     });
@@ -94,7 +112,11 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                 p="0"
                                 m="0"
                                 label={field.value || `Select ${param.name}`}
-                                variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                variant={
+                                    colorMode === "dark"
+                                        ? "primary"
+                                        : "secondary"
+                                }
                             >
                                 {options.map((option) => (
                                     <Button
@@ -103,12 +125,25 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                         borderRadius="0px"
                                         textAlign="left"
                                         alignContent="center"
-                                        variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                        variant={
+                                            colorMode === "dark"
+                                                ? "primary"
+                                                : "secondary"
+                                        }
                                         border="none"
-                                        color={colorMode === 'dark' ? 'grey.300' : 'grey.700'}
+                                        color={
+                                            colorMode === "dark"
+                                                ? "grey.300"
+                                                : "grey.700"
+                                        }
                                         justifyContent="flex-start"
                                         onClick={() => field.onChange(option)}
-                                        _hover={{ bg: colorMode === 'dark' ? 'grey.700' : 'grey.100' }}
+                                        _hover={{
+                                            bg:
+                                                colorMode === "dark"
+                                                    ? "grey.700"
+                                                    : "grey.100",
+                                        }}
                                     >
                                         {option}
                                     </Button>
@@ -134,7 +169,11 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                 p="0"
                                 m="0"
                                 label={field.value || `Select ${param.name}`}
-                                variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                variant={
+                                    colorMode === "dark"
+                                        ? "primary"
+                                        : "secondary"
+                                }
                             >
                                 {options.map((option) => (
                                     <Button
@@ -143,12 +182,25 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                                         borderRadius="0px"
                                         textAlign="left"
                                         alignContent="center"
-                                        variant={colorMode === 'dark' ? 'primary' : 'secondary'}
+                                        variant={
+                                            colorMode === "dark"
+                                                ? "primary"
+                                                : "secondary"
+                                        }
                                         border="none"
-                                        color={colorMode === 'dark' ? 'grey.300' : 'grey.700'}
+                                        color={
+                                            colorMode === "dark"
+                                                ? "grey.300"
+                                                : "grey.700"
+                                        }
                                         justifyContent="flex-start"
                                         onClick={() => field.onChange(option)}
-                                        _hover={{ bg: colorMode === 'dark' ? 'grey.700' : 'grey.100' }}
+                                        _hover={{
+                                            bg:
+                                                colorMode === "dark"
+                                                    ? "grey.700"
+                                                    : "grey.100",
+                                        }}
                                     >
                                         {option}
                                     </Button>
@@ -161,13 +213,7 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
     };
 
     return (
-        <VStack
-            flex={1}
-            p={4}
-            spacing={4}
-            align="stretch"
-            overflowY="auto"
-        >
+        <VStack flex={1} p={4} spacing={4} align="stretch" overflowY="auto">
             <Box>
                 <HStack justify="space-between" mb={2}>
                     <Text fontSize="md" fontWeight="semibold">
@@ -260,7 +306,17 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                     <Text fontSize="sm" color="grey.900">
                         You can manage your settings
                     </Text>
-                    <Text fontSize="sm" _hover={{ textDecoration: 'underline' }} onClick={() => { navigate('/workspace/12342/documents') }} cursor="pointer" color="blue.500">here</Text>
+                    <Text
+                        fontSize="sm"
+                        _hover={{ textDecoration: "underline" }}
+                        onClick={async () => {
+                            await navigate("/workspaces/12342/documents");
+                        }}
+                        cursor="pointer"
+                        color="blue.500"
+                    >
+                        here
+                    </Text>
                 </HStack>
             </Banner>
             <Box>
@@ -277,8 +333,8 @@ const SettingsTab = ({ task, nodeData }: { task: Task, nodeData: AppNodeData }) 
                 />
             </Box>
         </VStack>
-    )
-}
+    );
+};
 
 export const OverviewTab = () => {
     const bgColor = useColorModeValue("white", "grey.900");
@@ -286,22 +342,30 @@ export const OverviewTab = () => {
     const { colorMode } = useColorMode();
 
     return (
-        <VStack
-            flex={1}
-            p={4}
-            spacing={6}
-            align="stretch"
-            overflowY="auto"
-        >
+        <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             <Box>
-                <Text fontSize="lg" fontWeight="bold" mb={2} color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>
+                <Text
+                    fontSize="lg"
+                    fontWeight="bold"
+                    mb={2}
+                    color={colorMode === "dark" ? "grey.100" : "grey.900"}
+                >
                     How Do We Handle Your Documents?
                 </Text>
-                <Text fontSize="sm" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}>
-                    We transform and store documents as searchable vectors for AI-powered retrieval
+                <Text
+                    fontSize="sm"
+                    color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                >
+                    We transform and store documents as searchable vectors for
+                    AI-powered retrieval
                 </Text>
-                <Text fontSize="sm" mt={2} color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}>
-                    <strong>Upload</strong> your documents. We take care of <strong>everything else</strong>.
+                <Text
+                    fontSize="sm"
+                    mt={2}
+                    color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                >
+                    <strong>Upload</strong> your documents. We take care of{" "}
+                    <strong>everything else</strong>.
                 </Text>
             </Box>
 
@@ -321,47 +385,119 @@ export const OverviewTab = () => {
             <VStack spacing={3} align="stretch">
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.400" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>1. Document Ingestion</Text>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.400"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
+                            1. Document Ingestion
+                        </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        You can upload and process various document formats (PDF, TXT, DOCX)
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        You can upload and process various document formats
+                        (PDF, TXT, DOCX)
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.500" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>2. Vectorization</Text>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.500"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
+                            2. Vectorization
+                        </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        We convert text into numerical vectors using AI embeddings
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        We convert text into numerical vectors using AI
+                        embeddings
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.600" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>3. Vector Storage</Text>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.600"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
+                            3. Vector Storage
+                        </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        We store vectors in an optimized database for fast retrieval
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        We store vectors in an optimized database for fast
+                        retrieval
                     </Text>
                 </Box>
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.700" />
-                        <Text fontSize="sm" fontWeight="semibold" color={colorMode === 'dark' ? 'grey.100' : 'grey.900'}>4. Semantic Search</Text>
+                        <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg="green.700"
+                        />
+                        <Text
+                            fontSize="sm"
+                            fontWeight="semibold"
+                            color={
+                                colorMode === "dark" ? "grey.100" : "grey.900"
+                            }
+                        >
+                            4. Semantic Search
+                        </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} pl={5}>
-                        We find similar documents based on meaning, not just keywords
+                    <Text
+                        fontSize="xs"
+                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
+                        pl={5}
+                    >
+                        We find similar documents based on meaning, not just
+                        keywords
                     </Text>
                 </Box>
             </VStack>
         </VStack>
-    )
-}
+    );
+};
 
 export const DocumentDatabaseAnimation = () => {
     const [step, setStep] = useState(0);
@@ -379,7 +515,7 @@ export const DocumentDatabaseAnimation = () => {
         const progressInterval = setInterval(() => {
             setProgress((prev) => {
                 if (prev >= 100) return 100;
-                return prev + (100 / 30);
+                return prev + 100 / 30;
             });
         }, 100);
 
@@ -426,7 +562,6 @@ export const DocumentDatabaseAnimation = () => {
 };
 
 const DocumentIngestionStep = () => {
-
     const { colorMode } = useColorMode();
 
     return (
@@ -460,14 +595,24 @@ const DocumentIngestionStep = () => {
                         <VStack
                             w="60px"
                             h="80px"
-                            bg={colorMode === 'dark' ? 'grey.800' : 'white'}
+                            bg={colorMode === "dark" ? "grey.800" : "white"}
                             border="2px solid"
-                            borderColor={colorMode === 'dark' ? 'green.300' : 'green.200'}
+                            borderColor={
+                                colorMode === "dark" ? "green.300" : "green.200"
+                            }
                             borderRadius="8px"
                             justify="center"
                             boxShadow="md"
                         >
-                            <Icon as={FileText} color={colorMode === 'dark' ? 'green.400' : 'green.500'} boxSize={6} />
+                            <Icon
+                                as={FileText}
+                                color={
+                                    colorMode === "dark"
+                                        ? "green.400"
+                                        : "green.500"
+                                }
+                                boxSize={6}
+                            />
                             <Box w="70%" h="2px" bg="grey.300" />
                             <Box w="70%" h="2px" bg="grey.300" />
                             <Box w="50%" h="2px" bg="grey.300" />
@@ -531,7 +676,10 @@ const VectorizationStep = () => {
                             key={`vector-${i}`}
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.8 + i * 0.05, duration: 0.3 }}
+                            transition={{
+                                delay: 0.8 + i * 0.05,
+                                duration: 0.3,
+                            }}
                         >
                             <Box
                                 w="8px"
@@ -643,7 +791,11 @@ const SemanticSearchStep = () => {
                             <Box
                                 w="12px"
                                 h="12px"
-                                bg={highlighted.includes(i) ? "green.400" : "grey.400"}
+                                bg={
+                                    highlighted.includes(i)
+                                        ? "green.400"
+                                        : "grey.400"
+                                }
                                 borderRadius="8px"
                             />
                         </motion.div>

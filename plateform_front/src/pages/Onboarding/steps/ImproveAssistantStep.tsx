@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, {
+    useState,
+    useRef,
+    useEffect,
+    useCallback,
+    useMemo,
+} from "react";
 import {
     Box,
     Heading,
@@ -9,9 +15,7 @@ import {
     useColorMode,
     chakra,
     Icon,
-    Circle,
     Progress,
-    SimpleGrid,
     Stepper,
     Step,
     StepIndicator,
@@ -19,44 +23,72 @@ import {
     StepTitle,
     StepDescription,
     StepSeparator,
-    useSteps,
-} from '@chakra-ui/react';
-import { StepComponentProps } from 'pages/Onboarding/OnBoardingProvider';
-import { currentDarkTheme } from 'themeNew/foundations/themeConfig';
-import { Upload, CheckCircle2, FileText, ArrowRight, Check, Sparkles, Loader2 } from 'lucide-react';
-import Button from 'components/Atoms/Button';
-import { useForm } from 'react-hook-form';
-import { useChat } from '../../../hooks/useChat';
-import { ChatInterface } from '../../../components/Molecules/ChatInterface';
-import StepLevel from 'components/Molecules/StepLevel';
-import '../onboardingAnimations.css';
+} from "@chakra-ui/react";
+import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import {
+    Upload,
+    CheckCircle2,
+    FileText,
+    Check,
+    Sparkles,
+    Loader2,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useChat } from "../../../hooks/useChat";
+import { ChatInterface } from "../../../components/Molecules/ChatInterface";
+import StepLevel from "components/Molecules/StepLevel";
+import "../onboardingAnimations.css";
+import useUploadDocuments from "hooks/useUploadDocuments";
+import useDragDrop from "hooks/useDragDrop";
+import { useAppResponsive } from "hooks/useAppResponsive";
 
 interface ImproveAssistantFormData {
     documentsUploaded: boolean;
     improvedResponse: string[];
 }
 
+export enum Status {
+    PROCESSING = "processing",
+    COMPLETED = "completed",
+    ERROR = "error",
+}
+
 export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     data,
-    updateData,
     registerValidateAndGoNext,
     goNext,
 }) => {
     const { colorMode } = useColorMode();
-    const [isDragging, setIsDragging] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; status: 'processing' | 'completed' }>>([]);
-    const [showComparison, setShowComparison] = useState(data.documentsUploaded || false);
+    const isMobile = useAppResponsive({ base: true, lg: false });
+    const [showComparison, setShowComparison] = useState(
+        data.documentsUploaded || false,
+    );
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { uploadDocuments, sources } = useUploadDocuments();
 
-    const testQuestion = data.testQuestion || "How many paid vacation days do I have?";
-    const beforeResponse = ["According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year."];
-    const afterResponse = ["According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company."];
+    const beforeResponse = useMemo(
+        () => [
+            "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year.",
+        ],
+        [],
+    );
+    const afterResponse = useMemo(
+        () => [
+            "According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company.",
+        ],
+        [],
+    );
 
-    const completedFiles = uploadedFiles.filter((f) => f.status === 'completed');
-    const processingFiles = uploadedFiles.filter((f) => f.status === 'processing');
+    const completedFiles = sources.filter((s) => s.status === Status.COMPLETED);
+    const processingFiles = sources.filter(
+        (s) => s.status === Status.PROCESSING,
+    );
     const isProcessing = processingFiles.length > 0;
 
-    const getResponse = useCallback((question: string): string[] | { response: string[]; isImproved?: boolean } => {
+    const getResponse = useCallback(():
+        | string[]
+        | { response: string[]; isImproved?: boolean } => {
         const isImproved = showComparison && completedFiles.length > 0;
         return {
             response: isImproved ? afterResponse : beforeResponse,
@@ -68,17 +100,12 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
         getResponse,
     });
 
-    const {
-        watch,
-        trigger,
-        setValue,
-        formState: { errors },
-    } = useForm<ImproveAssistantFormData>({
+    const { trigger, setValue } = useForm<ImproveAssistantFormData>({
         defaultValues: {
             documentsUploaded: data.documentsUploaded || false,
-            improvedResponse: data.improvedResponse || '',
+            improvedResponse: data.improvedResponse || "",
         },
-        mode: 'onChange',
+        mode: "onChange",
     });
 
     const goNextRef = useRef(goNext);
@@ -98,68 +125,45 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
         }
     }, [registerValidateAndGoNext, triggerRef, goNextRef]);
 
-    const handleFileUpload = (files: FileList | null) => {
+    const handleFileUpload = async (files: FileList | null) => {
         if (!files) return;
 
-        const newFiles = Array.from(files).map((file) => ({
-            name: file.name,
-            status: 'processing' as const,
-        }));
+        await uploadDocuments(files);
 
-        setUploadedFiles((prev) => [...prev, ...newFiles]);
-
-        newFiles.forEach((file, index) => {
-            setTimeout(() => {
-                setUploadedFiles((prev) =>
-                    prev.map((f, i) =>
-                        i === prev.length - newFiles.length + index
-                            ? { ...f, status: 'completed' as const }
-                            : f
-                    )
-                );
-            }, 2000 + index * 500);
-        });
-
-        setTimeout(() => {
+        setTimeout(async () => {
             setShowComparison(true);
-            setValue('documentsUploaded', true);
-            setValue('improvedResponse', afterResponse);
-            trigger();
+            setValue("documentsUploaded", true);
+            setValue("improvedResponse", afterResponse);
+            await trigger();
         }, 0);
     };
 
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
+    const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
+        useDragDrop((e: React.DragEvent) =>
+            handleFileUpload(e.dataTransfer.files),
+        );
 
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-        handleFileUpload(e.dataTransfer.files);
-    };
-
-    const steps = useMemo(() => [
-        {
-            title: 'Add your documents',
-            description: 'Your documents are being processed and indexed.',
-            isCompleted: completedFiles.length > 0,
-            icon: FileText,
-        },
-        {
-            title: 'Documents are being processed',
-            description: 'Your assistant is now using your documents to answer questions.',
-            isCompleted: showComparison,
-            icon: Sparkles,
-        },
-    ], [completedFiles.length, showComparison]);
+    const steps = useMemo(
+        () => [
+            {
+                title: "Add your documents",
+                description: "Your documents are being processed and indexed.",
+                isCompleted: completedFiles.length > 0,
+                icon: FileText,
+            },
+            {
+                title: "Documents are being processed",
+                description:
+                    "Your assistant is now using your documents to answer questions.",
+                isCompleted: showComparison,
+                icon: Sparkles,
+            },
+        ],
+        [completedFiles.length, showComparison],
+    );
 
     const activeStepIndex = useMemo(() => {
-        if (showComparison && completedFiles.length > 0) {
+        if (showComparison /*&& completedFiles.length > 0*/) {
             return 2;
         }
         if (completedFiles.length > 0) {
@@ -168,38 +172,57 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
         return 0;
     }, [showComparison, completedFiles.length]);
 
-    console.log(activeStepIndex);
-
     return (
-        <chakra.form w="100%">
-            <Stack w="100%" spacing={8}>
+        <chakra.form w="100%" h="100%">
+            <Stack w="100%" h="100%" spacing={8}>
                 <VStack align="start" spacing={2} w="100%">
                     <Heading
-                        variant="heading-2xl"
+                        variant={isMobile ? "heading-lg" : "heading-2xl"}
                         fontWeight="bold"
-                        color={colorMode === 'dark' ? 'white' : 'grey.900'}
+                        color={colorMode === "dark" ? "white" : "grey.900"}
                     >
                         Improve your assistant with your documents
                     </Heading>
-                    <Text color={colorMode === 'dark' ? 'grey.400' : 'grey.600'} variant="body-xl">
-                        Now, make it truly tailored to your company
-                    </Text>
+                    {!isMobile && (
+                        <Text
+                            color={
+                                colorMode === "dark" ? "grey.400" : "grey.600"
+                            }
+                            variant="body-xl"
+                        >
+                            Now, make it truly tailored to your company
+                        </Text>
+                    )}
                 </VStack>
                 <StepLevel
-                    level={showComparison ? 3 : completedFiles.length > 0 ? 2 : 1}
-                    title={showComparison ? 'Personalized' : completedFiles.length > 0 ? 'In progress' : 'Demo'}
+                    level={
+                        showComparison ? 3 : completedFiles.length > 0 ? 2 : 1
+                    }
+                    title={
+                        showComparison
+                            ? "Personalized"
+                            : completedFiles.length > 0
+                              ? "In progress"
+                              : "Demo"
+                    }
                     description="Your assistant is now using your documents to answer questions."
                 />
-                <HStack w="100%" spacing={8} align="start">
-                    <VStack flex={1}>
+                <HStack
+                    flexDirection={isMobile ? "column" : "row"}
+                    w="100%"
+                    h="100%"
+                    spacing={8}
+                    align="start"
+                >
+                    <VStack flex={1} w="100%">
                         <VStack spacing={4} w="100%">
                             <Box
                                 w="100%"
                                 p={4}
-                                bg={colorMode === 'dark' ? 'grey.700' : 'white'}
+                                bg={colorMode === "dark" ? "grey.700" : "white"}
                                 borderRadius="12px"
                                 mb="4px"
-                                border={`1px solid ${colorMode === 'dark' ? 'grey.600' : '#E7E7E7'}`}
+                                border={`1px solid ${colorMode === "dark" ? "grey.600" : "#E7E7E7"}`}
                             >
                                 <Stepper
                                     index={activeStepIndex}
@@ -207,20 +230,41 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                                     gap={0}
                                     w="100%"
                                     h="120px"
-                                    colorScheme={colorMode === 'dark' ? currentDarkTheme.colorScheme : currentDarkTheme.colorScheme}
-                                    variant={colorMode === 'dark' ? 'solid' : 'solid'}
+                                    colorScheme={
+                                        colorMode === "dark"
+                                            ? currentDarkTheme.colorScheme
+                                            : currentDarkTheme.colorScheme
+                                    }
+                                    variant={
+                                        colorMode === "dark" ? "solid" : "solid"
+                                    }
                                 >
                                     {steps.map((step, index) => (
                                         <Step key={index}>
                                             <StepIndicator
                                                 flexShrink={0}
-                                                border={index < activeStepIndex || index === activeStepIndex ? 'none' : '1px solid #E7E7E7'}
-                                                bg={index <= activeStepIndex ? colorMode === 'dark' ? currentDarkTheme.primary : currentDarkTheme.primary : colorMode === 'dark' ? 'rgba(255, 255, 255, 1)' : 'white'}
+                                                border={
+                                                    index < activeStepIndex ||
+                                                    index === activeStepIndex
+                                                        ? "none"
+                                                        : "1px solid #E7E7E7"
+                                                }
+                                                bg={
+                                                    index <= activeStepIndex
+                                                        ? colorMode === "dark"
+                                                            ? currentDarkTheme.primary
+                                                            : currentDarkTheme.primary
+                                                        : colorMode === "dark"
+                                                          ? "rgba(255, 255, 255, 1)"
+                                                          : "white"
+                                                }
                                             >
                                                 <StepStatus
                                                     complete={
                                                         <Box
-                                                            bg={currentDarkTheme.primary}
+                                                            bg={
+                                                                currentDarkTheme.primary
+                                                            }
                                                             borderRadius="full"
                                                             w="28px"
                                                             h="28px"
@@ -236,7 +280,8 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                                                         </Box>
                                                     }
                                                     incomplete={
-                                                        index === 1 && isProcessing ? (
+                                                        index === 1 &&
+                                                        isProcessing ? (
                                                             <Box
                                                                 display="flex"
                                                                 alignItems="center"
@@ -246,17 +291,29 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                                                             >
                                                                 <Icon
                                                                     as={Loader2}
-                                                                    color={currentDarkTheme.primary}
+                                                                    color={
+                                                                        currentDarkTheme.primary
+                                                                    }
                                                                     boxSize={4}
                                                                     className="spinning"
                                                                 />
                                                             </Box>
                                                         ) : (
-                                                            <Icon as={step.icon} color={colorMode === 'dark' ? 'grey.500' : 'grey.400'} boxSize={4} />
+                                                            <Icon
+                                                                as={step.icon}
+                                                                color={
+                                                                    colorMode ===
+                                                                    "dark"
+                                                                        ? "grey.500"
+                                                                        : "grey.400"
+                                                                }
+                                                                boxSize={4}
+                                                            />
                                                         )
                                                     }
                                                     active={
-                                                        index === 1 && isProcessing ? (
+                                                        index === 1 &&
+                                                        isProcessing ? (
                                                             <Box
                                                                 display="flex"
                                                                 alignItems="center"
@@ -272,7 +329,16 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                                                                 />
                                                             </Box>
                                                         ) : (
-                                                            <Icon as={step.icon} color={colorMode === 'dark' ? 'white' : 'white'} boxSize={4} />
+                                                            <Icon
+                                                                as={step.icon}
+                                                                color={
+                                                                    colorMode ===
+                                                                    "dark"
+                                                                        ? "white"
+                                                                        : "white"
+                                                                }
+                                                                boxSize={4}
+                                                            />
                                                         )
                                                     }
                                                 />
@@ -282,32 +348,48 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                                                     <Text
                                                         fontWeight="semibold"
                                                         color={
-                                                            index < activeStepIndex || index === activeStepIndex
-                                                                ? (colorMode === 'dark' ? 'white' : 'grey.900')
-                                                                : (colorMode === 'dark' ? 'grey.400' : 'grey.600')
+                                                            index <
+                                                                activeStepIndex ||
+                                                            index ===
+                                                                activeStepIndex
+                                                                ? colorMode ===
+                                                                  "dark"
+                                                                    ? "white"
+                                                                    : "grey.900"
+                                                                : colorMode ===
+                                                                    "dark"
+                                                                  ? "grey.400"
+                                                                  : "grey.600"
                                                         }
                                                         fontSize="sm"
                                                     >
                                                         {step.title}
                                                     </Text>
                                                 </StepTitle>
-                                                <StepDescription>
-                                                    <Text
-                                                        fontSize="xs"
-                                                        color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}
-                                                        mt={1}
-                                                    >
-                                                        {step.description}
-                                                    </Text>
+                                                <StepDescription
+                                                    style={{
+                                                        color:
+                                                            colorMode === "dark"
+                                                                ? "grey.400"
+                                                                : "grey.600",
+                                                        fontSize: "xs",
+                                                    }}
+                                                >
+                                                    {step.description}
                                                 </StepDescription>
                                             </Box>
                                             <StepSeparator
                                                 style={{
-                                                    backgroundColor: 'transparent',
-                                                    borderLeft: showComparison && completedFiles.length > 0
-                                                        ? `2px solid ${currentDarkTheme.primary}`
-                                                        : `2px dashed ${colorMode === 'dark' ? currentDarkTheme.rgba.primary30 : '#D1D5DB'}`,
-                                                    transition: 'all 0.3s ease-in-out',
+                                                    backgroundColor:
+                                                        "transparent",
+                                                    borderLeft:
+                                                        showComparison &&
+                                                        completedFiles.length >
+                                                            0
+                                                            ? `2px solid ${currentDarkTheme.primary}`
+                                                            : `2px dashed ${colorMode === "dark" ? currentDarkTheme.rgba.primary30 : "#D1D5DB"}`,
+                                                    transition:
+                                                        "all 0.3s ease-in-out",
                                                 }}
                                             />
                                         </Step>
@@ -317,10 +399,10 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                         </VStack>
                         <Box
                             w="100%"
-                            border={`2px dashed ${isDragging ? currentDarkTheme.primary : (colorMode === 'dark' ? 'grey' : 'grey')}`}
+                            border={`2px dashed ${isDragging ? currentDarkTheme.primary : colorMode === "dark" ? "grey" : "grey"}`}
                             borderRadius="12px"
                             p={8}
-                            bg={colorMode === 'dark' ? 'grey.700' : 'grey.50'}
+                            bg={colorMode === "dark" ? "grey.700" : "grey.50"}
                             textAlign="center"
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
@@ -329,7 +411,10 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                             cursor="pointer"
                             _hover={{
                                 borderColor: currentDarkTheme.primary,
-                                bg: colorMode === 'dark' ? 'grey.600' : 'grey.100',
+                                bg:
+                                    colorMode === "dark"
+                                        ? "grey.600"
+                                        : "grey.100",
                             }}
                             transition="all 0.2s"
                         >
@@ -338,47 +423,101 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                                 type="file"
                                 multiple
                                 accept=".pdf,.docx,.txt,.png"
-                                style={{ display: 'none' }}
-                                onChange={(e) => handleFileUpload(e.target.files)}
+                                style={{ display: "none" }}
+                                onChange={(e) =>
+                                    handleFileUpload(e.target.files)
+                                }
                             />
                             <VStack spacing={3}>
-                                <Icon as={Upload} boxSize={10} color={currentDarkTheme.primary} />
-                                <Text fontWeight="semibold" color={colorMode === 'dark' ? 'white' : 'grey.900'}>
-                                    Add your internal regulations, collective agreement, or HR PDF
+                                <Icon
+                                    as={Upload}
+                                    boxSize={10}
+                                    color={currentDarkTheme.primary}
+                                />
+                                <Text
+                                    fontWeight="semibold"
+                                    color={
+                                        colorMode === "dark"
+                                            ? "white"
+                                            : "grey.900"
+                                    }
+                                >
+                                    Add your internal regulations, collective
+                                    agreement, or HR PDF
                                 </Text>
-                                <Text fontSize="sm" color={colorMode === 'dark' ? 'grey.400' : 'grey.600'}>
+                                <Text
+                                    fontSize="sm"
+                                    color={
+                                        colorMode === "dark"
+                                            ? "grey.400"
+                                            : "grey.600"
+                                    }
+                                >
                                     Drag & drop or click to select
                                 </Text>
                             </VStack>
                         </Box>
 
-                        {uploadedFiles.length > 0 && (
+                        {sources.length > 0 && (
                             <VStack align="start" w="100%" spacing={2} mt="4px">
-                                <Text fontWeight="semibold" color={colorMode === 'dark' ? 'white' : 'grey.900'}>
+                                <Text
+                                    fontWeight="semibold"
+                                    color={
+                                        colorMode === "dark"
+                                            ? "white"
+                                            : "grey.900"
+                                    }
+                                >
                                     Added files
                                 </Text>
-                                {uploadedFiles.map((file, index) => (
+                                {sources.map((source, index) => (
                                     <Box
                                         key={index}
                                         w="100%"
                                         p={3}
-                                        border={`1px solid ${colorMode === 'dark' ? 'grey.600' : 'grey.300'}`}
+                                        border={`1px solid ${colorMode === "dark" ? "grey.600" : "grey.300"}`}
                                         borderRadius="8px"
-                                        bg={colorMode === 'dark' ? 'grey.700' : 'grey.50'}
+                                        bg={
+                                            colorMode === "dark"
+                                                ? "grey.700"
+                                                : "grey.50"
+                                        }
                                     >
                                         <HStack spacing={3}>
                                             <Icon
-                                                as={file.status === 'completed' ? CheckCircle2 : FileText}
+                                                as={
+                                                    source.status ===
+                                                    Status.COMPLETED
+                                                        ? CheckCircle2
+                                                        : FileText
+                                                }
                                                 boxSize={4}
-                                                color={file.status === 'completed' ? 'green.500' : currentDarkTheme.primary}
+                                                color={
+                                                    source.status ===
+                                                    Status.COMPLETED
+                                                        ? "green.500"
+                                                        : currentDarkTheme.primary
+                                                }
                                             />
-                                            <Text fontSize="sm" color={colorMode === 'dark' ? 'white' : 'grey.900'}>
-                                                {file.name}
+                                            <Text
+                                                fontSize="sm"
+                                                color={
+                                                    colorMode === "dark"
+                                                        ? "white"
+                                                        : "grey.900"
+                                                }
+                                            >
+                                                {source.name}
                                             </Text>
-                                            {file.status === 'processing' && (
+                                            {source.status ===
+                                                Status.PROCESSING && (
                                                 <Progress
                                                     value={50}
-                                                    colorScheme={colorMode === 'dark' ? 'green' : 'blue'}
+                                                    colorScheme={
+                                                        colorMode === "dark"
+                                                            ? "green"
+                                                            : "blue"
+                                                    }
                                                     size="sm"
                                                     borderRadius="999px"
                                                     flex={1}
@@ -390,9 +529,16 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                             </VStack>
                         )}
                     </VStack>
-                    <Stack flex={1}>
+                    <Stack
+                        flex={1}
+                        minH={0}
+                        display="flex"
+                        flexDirection="column"
+                        h="100%"
+                    >
                         <ChatInterface
-                            fullHeight
+                            fullHeight={!isMobile}
+                            compact={!isMobile}
                             messages={messages}
                             onSendMessage={sendMessage}
                             isLoading={isLoading}
@@ -410,4 +556,3 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
         </chakra.form>
     );
 };
-

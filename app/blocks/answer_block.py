@@ -29,9 +29,11 @@ class AnswerGenerationBlock(BaseBlock): # Block for generating answers using an 
         # Extract query and retrieved documents from input data
         if isinstance(input_data, dict):
             query = input_data.get("query", "")
+            original_query = input_data.get("original_query", query)  # Use original_query if available
             retrieved_docs = input_data.get("retrieved_documents", [])
         else:
             query = str(input_data)
+            original_query = query # If input is string, it's the original query
             retrieved_docs = []
 
         # Construct messages for the LLM chat completion

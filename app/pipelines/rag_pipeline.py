@@ -95,7 +95,7 @@ class RagPipeline(BaseBlock): # Orchestrates the execution of RAG pipeline block
         return data
 
 
-def create_pipeline_from_json(pipeline_config: PipelineConfig) -> RagPipeline: # Creates a RagPipeline from configuration
+def create_pipeline_from_json(pipeline_config: PipelineConfig, org_id: Optional[str] = None) -> RagPipeline: # Creates a RagPipeline from configuration
     pipeline_name = pipeline_config.pipeline_name
     pipeline = RagPipeline(name=pipeline_name)
 
@@ -114,6 +114,7 @@ def create_pipeline_from_json(pipeline_config: PipelineConfig) -> RagPipeline: #
                     name=block_name,
                     collection_name=block_config.collection_name,
                     top_k=block_config.top_k,
+                    org_id=org_id,
                 )
             )
 
@@ -165,14 +166,17 @@ async def execute_query_from_json( # Main entry for executing RAG pipeline from 
     else:
         config = json_input
 
+    org_id = config.get("org_id")
+
     # Update tracing metadata with the pipeline configuration
     langfuse.update_current_trace(metadata={"config": config})
 
     # Validate and build the pipeline
     pipeline_config = PipelineConfig.model_validate(config.get("pipeline", {}))
-    pipeline = create_pipeline_from_json(pipeline_config)
+    pipeline = create_pipeline_from_json(pipeline_config, org_id)
     query = config.get("query", "")
+    original_query = query # Store the original query
 
     # Execute the pipeline and yield streaming output
-    async for chunk in pipeline.execute({"query": query}):
+    async for chunk in pipeline.execute({"query": query, "org_id": org_id, "original_query": original_query}):
         yield chunk

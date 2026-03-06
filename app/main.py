@@ -3,7 +3,7 @@ import os
 from contextlib import asynccontextmanager
 
 import dotenv
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Depends
 from fastapi.responses import StreamingResponse
 from qdrant_client import QdrantClient
 
@@ -14,13 +14,10 @@ from app.services.embedding import EmbeddingService
 from app.services.job_manager import JobStatus, job_manager
 from app.services.storage import ensure_bucket_exists
 from app.services.vector_db import ensure_collection
+from app.config import settings
+from app.dependencies import verify_api_key
 
-dotenv.load_dotenv()
-
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
-
-client = QdrantClient(url=QDRANT_URL)
+client = QdrantClient(url=settings.qdrant_url)
 embedding_service = EmbeddingService()
 
 
@@ -58,7 +55,7 @@ async def health_check(): # Checks if the API is running
     return {"status": "ok"}
 
 
-@app.post("/ingest") # Endpoint for uploading PDFs for processing
+@app.post("/ingest", dependencies=[Depends(verify_api_key)]) # Endpoint for uploading PDFs for processing
 async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...)): # Uploads PDF, starts background processing
     print(f"Starting ingestion for: {file.filename} for org_id: {org_id}")
 
@@ -135,9 +132,9 @@ async def get_job_result(job_id: str): # Retrieves the final result of a complet
     return job.result or {"error": "No result available"}
 
 
-@app.post("/retrieve") # Endpoint for direct vector-based document retrieval
+@app.post("/retrieve", dependencies=[Depends(verify_api_key)]) # Endpoint for direct vector-based document retrieval
 async def retrieve_documents( # Fetches relevant documents from Qdrant based on query embedding
-    query: str, top_k: int = 5, index_name: str = "genrag_knowledge_base"
+    query: str, org_id: str, top_k: int = 5, index_name: str = "genrag_knowledge_base"
 ):
     query_vector = await embedding_service.get_embedding(query) # Get embedding for the input query
 
@@ -145,6 +142,11 @@ async def retrieve_documents( # Fetches relevant documents from Qdrant based on 
         collection_name=index_name,
         query=query_vector,
         limit=top_k,
+        query_filter={
+            "must": [
+                {"key": "org_id", "match": {"value": org_id}}
+            ]
+        },
     )
 
     for point in search_results.points:
@@ -160,7 +162,7 @@ async def retrieve_documents( # Fetches relevant documents from Qdrant based on 
     }
 
 
-@app.post("/rag/stream") # Endpoint for streaming RAG pipeline execution
+@app.post("/rag/stream", dependencies=[Depends(verify_api_key)]) # Endpoint for streaming RAG pipeline execution
 async def rag_stream(request: RagRequest): # Executes dynamic RAG pipeline and streams response
     json_input = request.model_dump() # Convert Pydantic model to a dictionary
     return StreamingResponse(

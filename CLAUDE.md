@@ -99,6 +99,9 @@ S3_ENDPOINT=http://localhost:9000
 - `GET /job/{job_id}/status` - Check processing progress and status
 - `GET /job/{job_id}/result` - Get final results when completed
 
+### Retrieval and RAG Stream Endpoints Security
+The `/retrieve` and `/rag/stream` endpoints now require an `org_id` parameter to enforce multi-tenancy. This `org_id` is implicitly trusted from the calling backend and is used to filter all Qdrant retrieval operations, ensuring users only access documents associated with their organization.
+
 ### Job Status Flow
 1. Upload → `{"job_id": "uuid", "status": "accepted"}`
 2. Processing → `{"status": "processing", "progress": 45, "chunks_processed": 45, "total_chunks": 100}`
@@ -112,5 +115,13 @@ S3_ENDPOINT=http://localhost:9000
 ## Production Considerations
 - Point IDs in vector DB use simple incrementing integers (should use UUIDs in production)
 - Job storage is in-memory (should use Redis/database for persistence)
-- No authentication/authorization beyond org_id parameter
 - Batch size of 10 chunks (configurable via `EmbeddingService.batch_size`)
+
+### API Key Authentication
+To secure sensitive endpoints, the RAG engine uses API Key authentication.
+- **Header**: The API key must be passed in the `X-API-Key` HTTP header.
+- **Protected Endpoints**:
+  - `POST /ingest`
+  - `POST /retrieve`
+  - `POST /rag/stream`
+- **Configuration**: Set the `RAG_ENGINE_API_KEY` environment variable in your `.env` file.

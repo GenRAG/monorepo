@@ -11,7 +11,7 @@ from pydantic import Field
 from langfuse import observe
 
 from .base_block import BaseBlock
-from app.config import Config
+from app.config import settings
 
 
 class RerankBlock(BaseBlock): # Block for reranking retrieved documents
@@ -46,7 +46,8 @@ class RerankBlock(BaseBlock): # Block for reranking retrieved documents
         if not query:
             raise ValueError("Query cannot be empty")
         if not text_docs:
-            raise ValueError("No documents to rerank")
+            print("No documents to rerank, skipping reranking step.")
+            return input_data
 
         # Call the appropriate reranking provider based on configuration
         if self.provider == "zeroentropy":
@@ -65,9 +66,9 @@ class RerankBlock(BaseBlock): # Block for reranking retrieved documents
     ) -> Dict[str, Any]:
         from zeroentropy import ZeroEntropy
 
-        if not Config.ZEROENTROPY_KEY:
+        if not settings.zeroentropy_key:
             raise ValueError("ZEROENTROPY_API_KEY not found in environment variables")
-        zclient = ZeroEntropy(api_key=Config.ZEROENTROPY_KEY)
+        zclient = ZeroEntropy(api_key=settings.zeroentropy_key)
         response = zclient.models.rerank(
             model=self.model,
             query=query,
@@ -93,9 +94,9 @@ class RerankBlock(BaseBlock): # Block for reranking retrieved documents
     ) -> Dict[str, Any]:
         import cohere
 
-        if not Config.COHERE_KEY:
+        if not settings.cohere_key:
             raise ValueError("COHERE_API_KEY not found in environment variables")
-        co = cohere.ClientV2(api_key=Config.COHERE_KEY)
+        co = cohere.ClientV2(api_key=settings.cohere_key)
         response = co.rerank(
             model=self.model,
             query=query,

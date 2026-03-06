@@ -1,5 +1,11 @@
 import asyncio
+import os
 import httpx
+import dotenv
+
+dotenv.load_dotenv()
+
+API_KEY = os.getenv("RAG_ENGINE_API_KEY")
 
 async def test_streaming_rag_rerank():
     url = "http://localhost:8000/rag/stream"
@@ -30,12 +36,12 @@ async def test_streaming_rag_rerank():
             ],
         },
         "query": "What is this document about? Please cite the filenames of the sources you are using.",
-        "org_id": "test_org",
+        "org_id": "string",
     }
 
     print(f"Sending request to {url}...")
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=60.0, headers={"X-API-Key": API_KEY}) as client:
         try:
             async with client.stream("POST", url, json=payload) as response:
                 if response.status_code != 200:
@@ -72,12 +78,12 @@ async def test_streaming_rag():
             ],
         },
         "query": "What is this document about? Please cite the filenames of the sources you are using.",
-        "org_id": "test_org",
+        "org_id": "string",
     }
 
     print(f"Sending request to {url}...")
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=60.0, headers={"X-API-Key": API_KEY}) as client:
         try:
             async with client.stream("POST", url, json=payload) as response:
                 if response.status_code != 200:
@@ -93,6 +99,33 @@ async def test_streaming_rag():
             print(f"An error occurred: {e}")
 
 
+
+async def test_missing_api_key():
+    url = "http://localhost:8000/ingest"
+    print(f"\nTesting ingest endpoint without API key to expect 401 Unauthorized for {url}...")
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(url, headers={}, files={"file": ("test.pdf", b"pdf_content", "application/pdf")}, data={"org_id": "string"})
+            if response.status_code == 401:
+                print(f"Success: Received expected 401 Unauthorized for missing API key: {response.text}")
+            else:
+                print(f"Error: Expected 401 Unauthorized but got {response.status_code}: {response.text}")
+        except Exception as e:
+            print(f"An error occurred during missing API key test: {e}")
+
+async def test_invalid_api_key():
+    url = "http://localhost:8000/ingest"
+    print(f"\nTesting ingest endpoint with invalid API key to expect 401 Unauthorized for {url}...")
+    headers = {"X-API-Key": "invalid_key"}
+    async with httpx.AsyncClient(timeout=60.0, headers=headers) as client:
+        try:
+            response = await client.post(url, files={"file": ("test.pdf", b"pdf_content", "application/pdf")}, data={"org_id": "string"})
+            if response.status_code == 401:
+                print(f"Success: Received expected 401 Unauthorized for invalid API key: {response.text}")
+            else:
+                print(f"Error: Expected 401 Unauthorized but got {response.status_code}: {response.text}")
+        except Exception as e:
+            print(f"An error occurred during invalid API key test: {e}")
 
 async def test_streaming_rag_query_rewrite():
     url = "http://localhost:8000/rag/stream"
@@ -128,12 +161,12 @@ async def test_streaming_rag_query_rewrite():
             ],
         },
         "query": "What is GenRAG?",
-        "org_id": "test_org",
+        "org_id": "test",
     }
 
     print(f"Sending query rewrite request to {url}...")
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=60.0, headers={"X-API-Key": API_KEY}) as client:
         try:
             async with client.stream("POST", url, json=payload) as response:
                 if response.status_code != 200:

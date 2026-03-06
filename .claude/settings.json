@@ -4,10 +4,10 @@
     "allow": [
       "Bash(npm run lint)",
       "Bash(npm run test *)",
-      "Read(~/.zshrc)"
+      "Read(~/.zshrc)",
+      "Bash(curl *)"
     ],
     "deny": [
-      "Bash(curl *)",
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)"
@@ -18,8 +18,6 @@
     "OTEL_METRICS_EXPORTER": "otlp"
   },
   "companyAnnouncements": [
-    "Welcome to Acme Corp! Review our code guidelines at docs.acme.com",
-    "Reminder: Code reviews required for all PRs",
-    "New security policy in effect"
+    "Welcome to GenRag! This is a private repository for RAG Engine development. Please ensure that all code changes are reviewed and tested thoroughly before merging. If you have any questions or need assistance, feel free to reach out to the team. Let's build something amazing together!"
   ]
 }

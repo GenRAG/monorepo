@@ -7,21 +7,25 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import { WorkspaceCard } from "pages/Workspace/WorkspaceCard";
+import { useGetUserWorkspacesQuery } from "services/workspace/workspace";
 import { WorkspacePreview } from "types/workspace";
+
+const MOCK_WORKSPACES: WorkspacePreview[] = [
+    {
+        id: "mock-workspace-1",
+        name: "Workspace Demo",
+        documentsCount: 12,
+        updatedAt: new Date().toISOString(),
+    },
+];
 
 export const Workspaces = () => {
     const { colorMode } = useColorMode();
-    //const { data: workspaces = [], isLoading } = useGetUserWorkspacesQuery();
+    const { data: workspaces = [], isLoading } = useGetUserWorkspacesQuery();
     const textPrimary = useColorModeValue("grey.950", "grey.50");
     const textSecondary = useColorModeValue("grey.500", "grey.400");
-    const mockWorkspaces: WorkspacePreview[] = [
-        {
-            id: "1",
-            name: "Workspace 1",
-            documentsCount: 10,
-            updatedAt: new Date().toISOString(),
-        },
-    ];
+    const displayedWorkspaces =
+        workspaces.length > 0 ? workspaces : MOCK_WORKSPACES;
 
     return (
         <Stack p={{ base: 4, lg: 6 }} gap={8} overflow="auto" maxH="100vh">
@@ -52,19 +56,18 @@ export const Workspaces = () => {
                 </Text>
             </VStack>
 
-            {/*isLoading ? (
-                <Text color={textSecondary}>Chargement...</Text>
-            ) : workspaces.length === 0 ? (
-                <Text color={textSecondary}>
-                    Aucun workspace. Créez-en un pour commencer.
-                </Text>
-            ) : (*/}
-            <VStack align="stretch" spacing={4}>
-                {mockWorkspaces.map((workspace) => (
-                    <WorkspaceCard key={workspace.id} workspace={workspace} />
-                ))}
-            </VStack>
-            {/*)}*/}
+            {isLoading ? (
+                <Text color={textSecondary}>Loading...</Text>
+            ) : (
+                <VStack align="stretch" spacing={4}>
+                    {displayedWorkspaces.map((workspace) => (
+                        <WorkspaceCard
+                            key={workspace.id}
+                            workspace={workspace}
+                        />
+                    ))}
+                </VStack>
+            )}
         </Stack>
     );
 };

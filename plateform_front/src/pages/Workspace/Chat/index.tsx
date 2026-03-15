@@ -1,4 +1,5 @@
 import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
+import { useParams } from "react-router-dom";
 import Banner from "components/Atoms/Banner";
 import { ChatInterface } from "components/Molecules/ChatInterface";
 import WorkspaceHeader from "components/Molecules/WorkspaceHeader";
@@ -6,6 +7,10 @@ import { useUserInfo } from "hooks/useUserInfo";
 
 const ChatWorkspace = () => {
     const { name } = useUserInfo();
+    const { workspaceId, agentId } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
 
     return (
         <VStack
@@ -37,7 +42,11 @@ const ChatWorkspace = () => {
                         >
                             Based on 12 documents, see more details in the{" "}
                             <Link
-                                href="/workspaces/12342/documents"
+                                href={
+                                    workspaceId && agentId
+                                        ? `/workspaces/${workspaceId}/agents/${agentId}/documents`
+                                        : "#"
+                                }
                                 color="blue.500"
                             >
                                 documents page

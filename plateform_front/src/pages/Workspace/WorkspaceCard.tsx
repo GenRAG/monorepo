@@ -48,7 +48,7 @@ export const WorkspaceCard: React.FC<WorkspaceCardProps> = ({
                 transform: "translateY(-2px)",
                 shadow: "md",
             }}
-            onClick={() => navigate(`/workspaces/${workspace.id}/chat`)}
+            onClick={() => navigate(`/workspaces/${workspace.id}/agents`)}
         >
             <VStack align="stretch" spacing={4}>
                 <Heading

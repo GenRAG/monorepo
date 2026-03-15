@@ -1,0 +1,126 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes fillProgress {
+  from {
+    height: 0%;
+    opacity: 0;
+  }
+
+  to {
+    height: 100%;
+    opacity: 1;
+  }
+}
+
+.step-text-animation {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.step-content-animation {
+  animation: slideIn 0.8s ease-in-out;
+}
+
+.step-indicator-animation {
+  animation: scaleIn 0.6s ease-in-out;
+}
+
+.step-indicator-active {
+  animation: pulse 0.6s ease-in-out;
+}
+
+.step-separator-wrapper {
+  pointer-events: none;
+}
+
+.step-separator-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  background: var(--separator-fill-color);
+  animation: fillProgress 0.8s ease-in-out forwards;
+  transform-origin: top;
+  z-index: 2;
+  border-radius: 1px;
+  box-shadow: 0 0 2px var(--separator-fill-color);
+}
+
+.step-separator-static {
+  animation: none !important;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+.slide-in-from-left {
+  animation: slideInFromLeft 0.5s ease-out;
+}

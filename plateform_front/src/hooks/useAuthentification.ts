@@ -5,7 +5,12 @@ const useAuthentification = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const { data: userData, isLoading: isUserLoading, isSuccess, isFetching: isUserFetching } = useGetMeQuery();
+    const {
+        data: userData,
+        isLoading: isUserLoading,
+        isSuccess,
+        isFetching: isUserFetching,
+    } = useGetMeQuery();
 
     useEffect(() => {
         if (isUserLoading || isUserFetching) {

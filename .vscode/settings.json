@@ -18,5 +18,12 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "editor.formatOnSave": true
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.formatOnSave": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "plantuml.render": "PlantUMLServer",
+  "plantuml.server": "https://www.plantuml.com/plantuml",
+  "plantuml.exportFormat": "png"
 }

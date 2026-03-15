@@ -1,10 +1,7 @@
-export interface ProjectPreview {
-  id: string
-  name: string
-}
-
 export interface WorkspacePreview {
-  id: string
-  name: string
-  projects: ProjectPreview[]
+    id: string;
+    name: string;
+    documentsCount?: number;
+    updatedAt?: string;
+    agentsCount?: number;
 }

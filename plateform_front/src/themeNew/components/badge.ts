@@ -1,111 +1,126 @@
-import { textStyles } from 'themeNew/foundations/typography';
+import { textStyles } from "themeNew/foundations/typography";
 
 export type BadgeProps = {
-	colorScheme: 'gold' | 'white' | 'green' | 'olive' | 'red' | 'transparent' | 'grey' | 'blue' | 'lightGold';
-	size: 'lg' | 'md' | 'sm' | 'xs' | '2xs';
+    colorScheme:
+        | "gold"
+        | "white"
+        | "green"
+        | "olive"
+        | "red"
+        | "transparent"
+        | "grey"
+        | "blue"
+        | "lightGold";
+    size: "lg" | "md" | "sm" | "xs" | "2xs";
 };
 
-const getColorScheme = (colorScheme: BadgeProps['colorScheme']) => {
-	const badgeColors = {
-		gold: {
-			bg: 'gold.200',
-			color: 'font.primary',
-		},
-		mediumGold: {
-			bg: 'gold.100',
-			color: 'grey.950',
-		},
-		lightGold: {
-			bg: 'gold.50',
-			color: 'grey.950',
-		},
+import { mode, StyleFunctionProps } from "@chakra-ui/theme-tools";
 
-		green: {
-			bg: 'green.50',
-			color: 'green.600',
-		},
-		olive: {
-			bg: 'olive.50',
-			color: 'olive.600',
-		},
-		red: {
-			bg: 'red.50',
-			color: 'red.600',
-		},
-		grey: {
-			bg: 'grey.50',
-			color: 'font.primary',
-		},
-		blue: {
-			bg: 'blue.50',
-			color: 'blue.900',
-		},
-
-		white: {
-			bg: 'whites.white',
-			color: 'font.primary',
-		},
-		transparent: {
-			bg: 'transparent',
-			color: 'font.primary',
-		},
-		semiTransparent: {
-			bg: 'whites.lightwhite',
-			color: 'font.primary',
-		},
-	};
-
-	return badgeColors[colorScheme];
+const getColorScheme = (
+    colorScheme: BadgeProps["colorScheme"],
+    props: StyleFunctionProps,
+) => {
+    const badgeColors = {
+        gold: {
+            bg: mode("gold.200", "gold.400")(props),
+            color: mode("font.primary", "grey.950")(props),
+        },
+        mediumGold: {
+            bg: mode("gold.100", "gold.300")(props),
+            color: mode("grey.950", "grey.100")(props),
+        },
+        lightGold: {
+            bg: mode("gold.50", "gold.200")(props),
+            color: mode("grey.950", "grey.100")(props),
+        },
+        orange: {
+            bg: mode("orange.50", "orange.700")(props),
+            color: mode("grey.950", "orange.500")(props),
+        },
+        green: {
+            bg: mode("green.50", "green.700")(props),
+            color: mode("green.600", "green.100")(props),
+        },
+        olive: {
+            bg: mode("olive.50", "olive.800")(props),
+            color: mode("olive.600", "olive.50")(props),
+        },
+        red: {
+            bg: mode("red.50", "red.700")(props),
+            color: mode("red.600", "red.100")(props),
+        },
+        grey: {
+            bg: mode("grey.50", "grey.800")(props),
+            color: mode("font.primary", "grey.50")(props),
+        },
+        blue: {
+            bg: mode("blue.50", "blue.800")(props),
+            color: mode("blue.900", "blue.100")(props),
+        },
+        white: {
+            bg: mode("whites.white", "grey.900")(props),
+            color: mode("font.primary", "grey.50")(props),
+        },
+        transparent: {
+            bg: "transparent",
+            color: mode("font.primary", "grey.50")(props),
+        },
+        semiTransparent: {
+            bg: mode("whites.lightwhite", "grey.900")(props),
+            color: mode("font.primary", "grey.50")(props),
+        },
+    };
+    return badgeColors[colorScheme];
 };
 
 const Badge = {
-	sizes: {
-		lg: {
-			padding: '12px 16px',
-			...textStyles['caption-md'],
-		},
-		md: {
-			padding: '6px 12px',
-			...textStyles['caption-sm'],
-		},
-		sm: {
-			padding: '4px 8px',
-			...textStyles['caption-sm'],
-		},
-		xs: {
-			padding: '4px 8px',
-			...textStyles['caption-xs'],
-		},
-		'2xs': {
-			padding: '2px 4px',
-			...textStyles['caption-xs'],
-		},
-	},
+    sizes: {
+        lg: {
+            padding: "12px 16px",
+            ...textStyles["caption-md"],
+        },
+        md: {
+            padding: "6px 12px",
+            ...textStyles["caption-sm"],
+        },
+        sm: {
+            padding: "4px 8px",
+            ...textStyles["caption-sm"],
+        },
+        xs: {
+            padding: "4px 8px",
+            ...textStyles["caption-xs"],
+        },
+        "2xs": {
+            padding: "2px 4px",
+            ...textStyles["caption-xs"],
+        },
+    },
 
-	variants: {
-		// We are forced to set colorScheme in variants, due to the way Chakra V2 handle colorScheme
-		// (It's not overriden if set in baseStyle)
-		base: (props: BadgeProps) => ({
-			borderRadius: '4px',
-			borderWidth: '0px',
-			...getColorScheme(props.colorScheme ?? 'gold'),
-		}),
+    variants: {
+        // We are forced to set colorScheme in variants, due to the way Chakra V2 handle colorScheme
+        // (It's not overriden if set in baseStyle)
+        base: (props: BadgeProps) => ({
+            borderRadius: "4px",
+            borderWidth: "0px",
+            ...getColorScheme(props.colorScheme ?? "gold", props as any),
+        }),
 
-		// Used for performances for example
-		numberRounded: (props: BadgeProps) => ({
-			borderRadius: 'full',
-			padding: '0px 8px',
-			...textStyles['body-sm-semibold'],
-			textTransform: 'uppercase',
-			...getColorScheme(props.colorScheme ?? 'gold'),
-		}),
-	},
+        // Used for performances for example
+        numberRounded: (props: BadgeProps) => ({
+            borderRadius: "full",
+            padding: "0px 8px",
+            ...textStyles["body-sm-semibold"],
+            textTransform: "uppercase",
+            ...getColorScheme(props.colorScheme ?? "gold", props as any),
+        }),
+    },
 
-	defaultProps: {
-		variant: 'base',
-		size: 'md',
-		colorScheme: 'gold',
-	},
+    defaultProps: {
+        variant: "base",
+        size: "md",
+        colorScheme: "gold",
+    },
 };
 
 export default Badge;

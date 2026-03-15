@@ -38,7 +38,7 @@ export class WorkspaceService {
         {
             id: string;
             name: string;
-            projects: { id: string; name: string }[];
+            updatedAt: Date;
         }[]
     > {
         return this.prismaService.workspace.findMany({
@@ -50,12 +50,7 @@ export class WorkspaceService {
             select: {
                 id: true,
                 name: true,
-                projects: {
-                    select: {
-                        id: true,
-                        name: true,
-                    },
-                },
+                updatedAt: true,
             },
         });
     }

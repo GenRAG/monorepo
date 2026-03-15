@@ -49,42 +49,41 @@ export const SidebarFooter = ({
                     />
                 ))}
             </SidebarSection>
-            {name ||
-                (email && (
-                    <VStack align="stretch" gap={0}>
-                        <SidebarItem
-                            icon={colorMode === "light" ? Moon : Sun}
-                            label={
-                                colorMode === "light"
-                                    ? "Dark mode"
-                                    : "Light mode"
-                            }
-                            open={isOpen}
-                            onClick={toggleColorMode}
-                        />
-                        <Divider
-                            w="100%"
-                            borderColor={dividerColor}
-                            borderWidth="1px"
-                        />
-                        <HStack
-                            mt={2}
-                            p={3}
-                            ml={0.5}
-                            spacing={3}
-                            justify={isOpen ? "flex-start" : ""}
-                        >
-                            <Avatar size="sm" name={name} />
-                            {isOpen && (
-                                <Text fontSize="sm" color={color}>
-                                    {(name || email).length > 15
-                                        ? (name || email).slice(0, 15) + "..."
-                                        : name || email}
-                                </Text>
-                            )}
-                        </HStack>
-                    </VStack>
-                ))}
+            {(name || email) && (
+                <VStack align="stretch" gap={0}>
+                    <SidebarItem
+                        icon={colorMode === "light" ? Moon : Sun}
+                        label={
+                            colorMode === "light"
+                                ? "Dark mode"
+                                : "Light mode"
+                        }
+                        open={isOpen}
+                        onClick={toggleColorMode}
+                    />
+                    <Divider
+                        w="100%"
+                        borderColor={dividerColor}
+                        borderWidth="1px"
+                    />
+                    <HStack
+                        mt={2}
+                        p={3}
+                        ml={0.5}
+                        spacing={3}
+                        justify={isOpen ? "flex-start" : ""}
+                    >
+                        <Avatar size="sm" name={name} />
+                        {isOpen && (
+                            <Text fontSize="sm" color={color}>
+                                {(name || email).length > 15
+                                    ? (name || email).slice(0, 15) + "..."
+                                    : name || email}
+                            </Text>
+                        )}
+                    </HStack>
+                </VStack>
+            )}
         </VStack>
     );
 };

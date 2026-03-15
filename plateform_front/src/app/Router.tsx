@@ -43,6 +43,7 @@ export default function Router() {
                 </Route>
 
                 <Route element={<PrivateRoute />}>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/onboarding" element={<OnBoarding />} />
 
                     <Route element={<PrivateAppLayout />}>

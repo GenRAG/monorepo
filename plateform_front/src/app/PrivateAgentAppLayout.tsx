@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
 import { Box, Flex } from "@chakra-ui/react";
-import SidebarWorkspace from "app/Navigation/WorkspaceSidebar/WorkspaceSidebar";
+import AgentSidebar from "app/Navigation/AgentSidebar/AgentSidebar";
 
-const PrivateWorkspaceAppLayout: React.FC = () => {
+const PrivateAgentAppLayout: React.FC = () => {
     return (
         <Flex overflow="hidden">
-            <SidebarWorkspace />
+            <AgentSidebar />
             <Box
                 flex={1}
                 minW={0}
@@ -19,4 +19,4 @@ const PrivateWorkspaceAppLayout: React.FC = () => {
     );
 };
 
-export default PrivateWorkspaceAppLayout;
+export default PrivateAgentAppLayout;

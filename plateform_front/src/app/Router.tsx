@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "pages/Auth/Login";
 import Register from "pages/Auth/Register";
 import AuthLayout from "pages/Auth/Layout/AuthLayout";
@@ -10,17 +10,16 @@ import OnBoarding from "pages/Onboarding/OnBoarding";
 import NotFound from "pages/NotFound";
 import ChatWorkspace from "pages/Workspace/Chat";
 import { DocumentWorkspace } from "pages/Workspace/Documents";
-import RessourcesWorkspace from "pages/Workspace/Ressources";
 import WorkflowWorkspace from "pages/Workspace/Workflow";
-import AnalyticsWorkspace from "pages/Workspace/Analytics";
 import DeploymentWorkspace from "pages/Workspace/Deployment";
 import { BillingWorkspace } from "pages/Workspace/Billing";
-import PrivateWorkspaceAppLayout from "app/PrivateWorkspaceAppLayout";
+import PrivateAgentAppLayout from "app/PrivateAgentAppLayout";
 import PrivateAppLayout from "app/PrivateAppLayout";
 import Dashboard from "pages/Dashboard";
 import { AssistantsList } from "pages/Assistant/AssistantList";
 import { Assistant } from "pages/Assistant/Assistant";
 import { useParams } from "react-router-dom";
+import { AgentsList } from "pages/Organisation/Agents";
 import { Workspaces } from "pages/Workspace";
 
 const ChatRoute = () => {
@@ -45,6 +44,7 @@ export default function Router() {
 
                 <Route element={<PrivateRoute />}>
                     <Route path="/onboarding" element={<OnBoarding />} />
+
                     <Route element={<PrivateAppLayout />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route
@@ -56,38 +56,39 @@ export default function Router() {
                             element={<ChatRoute />}
                         />
                         <Route path="/billing" element={<BillingWorkspace />} />
-                        <Route path="/workspaces" element={<Workspaces />} />
 
-                        <Route element={<PrivateWorkspaceAppLayout />}>
-                            <Route
-                                path="/workspaces/:workspaceId/ressources"
-                                element={<RessourcesWorkspace />}
-                            />
-                            <Route
-                                path="/workspaces/:workspaceId/chat"
-                                element={<ChatWorkspace />}
-                            />
-                            <Route
-                                path="/workspaces/:workspaceId/workflow"
-                                element={<WorkflowWorkspace />}
-                            />
-                            <Route
-                                path="/workspaces/:workspaceId/documents"
-                                element={<DocumentWorkspace />}
-                            />
-                            <Route
-                                path="/workspaces/:workspaceId/analytics"
-                                element={<AnalyticsWorkspace />}
-                            />
-                            <Route
-                                path="/workspaces/:workspaceId/deployment"
-                                element={<DeploymentWorkspace />}
-                            />
-                            <Route
-                                path="/workspaces/:workspaceId/settings"
-                                element={<div>SETTINGS</div>}
-                            />
-                        </Route>
+                        <Route path="/workspaces" element={<Workspaces />} />
+                        <Route
+                            path="/workspaces/:workspaceId/agents"
+                            element={<AgentsList />}
+                        />
+                    </Route>
+
+                    <Route element={<PrivateAgentAppLayout />}>
+                        <Route
+                            path="/workspaces/:workspaceId/agents/:agentId"
+                            element={<Navigate to="playground" replace />}
+                        />
+                        <Route
+                            path="/workspaces/:workspaceId/agents/:agentId/playground"
+                            element={<ChatWorkspace />}
+                        />
+                        <Route
+                            path="/workspaces/:workspaceId/agents/:agentId/documents"
+                            element={<DocumentWorkspace />}
+                        />
+                        <Route
+                            path="/workspaces/:workspaceId/agents/:agentId/workflow"
+                            element={<WorkflowWorkspace />}
+                        />
+                        <Route
+                            path="/workspaces/:workspaceId/agents/:agentId/deploy"
+                            element={<DeploymentWorkspace />}
+                        />
+                        <Route
+                            path="/workspaces/:workspaceId/agents/:agentId/settings"
+                            element={<div>SETTINGS</div>}
+                        />
                     </Route>
                 </Route>
 

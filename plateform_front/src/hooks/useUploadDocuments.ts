@@ -2,6 +2,11 @@ import { useState } from "react";
 import { Status } from "pages/Onboarding/steps/ImproveAssistantStep";
 
 export interface UploadedSource {
+    /**
+     * Stable identifier for this source. Optional at the type level to avoid
+     * breaking existing usages, but always set when created by this hook.
+     */
+    id?: string;
     type: "file";
     name: string;
     status: Status;
@@ -31,22 +36,27 @@ const useUploadDocuments = () => {
     ): Promise<UploadedSource[]> => {
         // Create a source in PROCESSING state for each file immediately
         // so the UI can show a loading state right away
-        const newSources: UploadedSource[] = Array.from(files).map((file) => ({
-            type: "file" as const,
-            name: file.name,
-            status: Status.PROCESSING,
-            progress: 0,
-            metadata: {
-                pages: 0,
-                documents: 1,
-                estimatedTime: "2-3 min",
-            },
-        }));
+        const timestamp = Date.now();
+        const newSources: UploadedSource[] = Array.from(files).map(
+            (file, index) => ({
+                id: `${timestamp}-${index}-${file.name}`,
+                type: "file" as const,
+                name: file.name,
+                status: Status.PROCESSING,
+                progress: 0,
+                metadata: {
+                    pages: 0,
+                    documents: 1,
+                    estimatedTime: "2-3 min",
+                },
+            }),
+        );
 
         setSources((prev) => [...prev, ...newSources]);
 
         // Upload each file independently so they can resolve at different times
         Array.from(files).forEach(async (file, index) => {
+            const sourceId = newSources[index]?.id;
             try {
                 const formData = new FormData();
                 formData.append("file", file);
@@ -74,7 +84,16 @@ const useUploadDocuments = () => {
                 // Update the specific source to COMPLETED with real metadata from the API
                 setSources((prev) => {
                     const updated = [...prev];
-                    const sourceIndex = updated.length - files.length + index;
+                    if (!sourceId) {
+                        return updated;
+                    }
+                    const sourceIndex = updated.findIndex(
+                        (source) => source.id === sourceId,
+                    );
+                    if (sourceIndex === -1) {
+                        // The source may have been removed while the upload was in progress.
+                        return updated;
+                    }
                     updated[sourceIndex] = {
                         ...updated[sourceIndex],
                         status: Status.COMPLETED,

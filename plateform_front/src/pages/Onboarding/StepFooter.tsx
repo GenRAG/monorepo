@@ -54,7 +54,7 @@ const StepFooter = ({
                     px={8}
                     onClick={handleNext}
                 >
-                    Sauvegarder and continuer
+                    Sauvegarder et continuer
                 </Button>
             </HStack>
         </VStack>

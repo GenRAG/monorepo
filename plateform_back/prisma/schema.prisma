@@ -15,18 +15,18 @@ datasource db {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  email          String           @unique
-  name           String?
-  password       String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  id String @id @default(cuid())
+  email String @unique
+  name String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   emailVerificationToken Int?
-  isEmailVerified Boolean          @default(false)
+  isEmailVerified Boolean @default(false)
   emailVerificationLastSentAt DateTime?
   passwordResetToken Int?
   passwordResetLastSentAt DateTime?
-  workspaces     UserWorkspace[]
+  workspaces UserWorkspace[]
 }
 
 enum UserRole {
@@ -39,7 +39,6 @@ model UserWorkspace {
   userId     String
   workspaceId String
   role       UserRole
-
   user       User     @relation(fields: [userId], references: [id])
   workspace  Workspace @relation(fields: [workspaceId], references: [id])
 
@@ -48,16 +47,16 @@ model UserWorkspace {
 
 
 model Workspace {
-  id             String           @id @default(cuid())
-  name           String
-  description    String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  users          UserWorkspace[]
-  projects       Project[]
+  id String @id @default(cuid())
+  name String
+  description String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  users UserWorkspace[]
+  agents Agent[]
 }
 
-model Project {
+/*model Project {
   id          String   @id @default(cuid())
   name        String
   description String?
@@ -65,4 +64,19 @@ model Project {
   updatedAt   DateTime @updatedAt
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
+}*/
+
+model Agent {
+  id String   @id @default(cuid())
+  name String
+  description String?
+  workflow Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  workspaceId String
+  workspace  Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+model FolderSystem {
+  
 }

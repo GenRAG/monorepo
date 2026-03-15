@@ -36,6 +36,8 @@ export const SidebarFooter = ({
         currentDarkTheme.rgba.primary20,
     );
 
+    if (!name && !email) return null;
+
     return (
         <VStack align="stretch" gap={0}>
             <SidebarSection title="Support" isOpen={isOpen}>
@@ -54,9 +56,7 @@ export const SidebarFooter = ({
                     <SidebarItem
                         icon={colorMode === "light" ? Moon : Sun}
                         label={
-                            colorMode === "light"
-                                ? "Dark mode"
-                                : "Light mode"
+                            colorMode === "light" ? "Dark mode" : "Light mode"
                         }
                         open={isOpen}
                         onClick={toggleColorMode}
@@ -76,9 +76,10 @@ export const SidebarFooter = ({
                         <Avatar size="sm" name={name} />
                         {isOpen && (
                             <Text fontSize="sm" color={color}>
-                                {(name || email).length > 15
-                                    ? (name || email).slice(0, 15) + "..."
-                                    : name || email}
+                                {((name || email) ?? "").length > 15
+                                    ? ((name || email) ?? "").slice(0, 15) +
+                                      "..."
+                                    : ((name || email) ?? "")}
                             </Text>
                         )}
                     </HStack>

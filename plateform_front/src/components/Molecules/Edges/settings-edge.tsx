@@ -1,16 +1,13 @@
 import {
     BaseEdge,
-    EdgeLabelRenderer,
     EdgeProps,
     getSmoothStepPath,
 } from "@xyflow/react";
 import { useMemo } from "react";
-import { Box, Stack, Text } from "@chakra-ui/react";
 
 export default function SettingsEdge(props: EdgeProps) {
     const [edgePath] = getSmoothStepPath(props);
     const edgeId = useMemo(() => `settings-edge-${props.id}`, [props.id]);
-    const label = (props.data as { label?: string })?.label;
 
     return (
         <>

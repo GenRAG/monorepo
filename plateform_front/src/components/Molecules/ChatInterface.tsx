@@ -11,6 +11,7 @@ import {
     Divider,
     Circle,
 } from "@chakra-ui/react";
+import ReactMarkdown from "react-markdown";
 import { Send, Sparkles, CheckCircle2 } from "lucide-react";
 import Button from "components/Atoms/Button";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -321,7 +322,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                                         >
                                                             {description}
                                                         </Text>
-                                                        <Text
+                                                        <Box
                                                             fontSize="sm"
                                                             color={
                                                                 colorMode ===
@@ -329,9 +330,105 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                                                     ? "grey.200"
                                                                     : "grey.700"
                                                             }
+                                                            sx={{
+                                                                "& p": {
+                                                                    marginBottom:
+                                                                        "8px",
+                                                                },
+                                                                "& p:last-child":
+                                                                    {
+                                                                        marginBottom: 0,
+                                                                    },
+                                                                "& strong": {
+                                                                    fontWeight:
+                                                                        "bold",
+                                                                },
+                                                                "& em": {
+                                                                    fontStyle:
+                                                                        "italic",
+                                                                },
+                                                                "& ul": {
+                                                                    paddingLeft:
+                                                                        "20px",
+                                                                    marginBottom:
+                                                                        "8px",
+                                                                },
+                                                                "& ol": {
+                                                                    paddingLeft:
+                                                                        "20px",
+                                                                    marginBottom:
+                                                                        "8px",
+                                                                },
+                                                                "& li": {
+                                                                    marginBottom:
+                                                                        "4px",
+                                                                },
+                                                                "& h1, & h2, & h3":
+                                                                    {
+                                                                        fontWeight:
+                                                                            "bold",
+                                                                        marginBottom:
+                                                                            "8px",
+                                                                    },
+                                                                "& h1": {
+                                                                    fontSize:
+                                                                        "lg",
+                                                                },
+                                                                "& h2": {
+                                                                    fontSize:
+                                                                        "md",
+                                                                },
+                                                                "& h3": {
+                                                                    fontSize:
+                                                                        "sm",
+                                                                },
+                                                                "& code": {
+                                                                    bg:
+                                                                        colorMode ===
+                                                                        "dark"
+                                                                            ? "grey.900"
+                                                                            : "grey.100",
+                                                                    px: "4px",
+                                                                    borderRadius:
+                                                                        "4px",
+                                                                    fontFamily:
+                                                                        "mono",
+                                                                    fontSize:
+                                                                        "xs",
+                                                                },
+                                                                "& pre": {
+                                                                    bg:
+                                                                        colorMode ===
+                                                                        "dark"
+                                                                            ? "grey.900"
+                                                                            : "grey.100",
+                                                                    p: "12px",
+                                                                    borderRadius:
+                                                                        "8px",
+                                                                    overflowX:
+                                                                        "auto",
+                                                                    marginBottom:
+                                                                        "8px",
+                                                                },
+                                                                "& blockquote":
+                                                                    {
+                                                                        borderLeft: `3px solid ${currentDarkTheme.primary}`,
+                                                                        paddingLeft:
+                                                                            "12px",
+                                                                        color:
+                                                                            colorMode ===
+                                                                            "dark"
+                                                                                ? "grey.400"
+                                                                                : "grey.500",
+                                                                        fontStyle:
+                                                                            "italic",
+                                                                    },
+                                                            }}
                                                         >
-                                                            {response}
-                                                        </Text>
+                                                            <ReactMarkdown>
+                                                                {response}
+                                                            </ReactMarkdown>
+                                                        </Box>
                                                         {message.isImproved && (
                                                             <Badge
                                                                 colorScheme="green"

@@ -46,12 +46,19 @@ export const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
             minW={0}
             overflowY="auto"
             overflowX="hidden"
-            p={4}
-            pb={4}
+            px={{ base: 3, md: 6 }}
+            py={{ base: 3, md: 5 }}
             display="flex"
             flexDirection="column"
         >
-            <VStack align="stretch" spacing={4} w="100%" minW={0} maxW="100%">
+            <VStack
+                align="stretch"
+                spacing={5}
+                w="100%"
+                minW={0}
+                maxW="920px"
+                mx="auto"
+            >
                 {showWelcome && (
                     <Box
                         p={4}

@@ -1,4 +1,4 @@
-import { Sparkles, FileText, Zap, Check } from "lucide-react";
+import { Sparkles, FileText, Zap } from "lucide-react";
 import { StepConfig } from "pages/Onboarding/OnBoardingProvider";
 import { TestAssistantStepComponent } from "pages/Onboarding/steps/TestAssistantStep";
 import { ImproveAssistantStepComponent } from "pages/Onboarding/steps/ImproveAssistantStep";
@@ -34,8 +34,8 @@ export const stepsConfig: StepConfig[] = [
     },
     {
         id: "compare-intelligence",
-        title: "Compare your assistant's intelligence",
-        description: "Compare the quality of responses",
+        title: "Compare l'intelligence de ton assistant",
+        description: "Compare la qualité des réponses",
         icon: Zap,
         component: CompareIntelligenceStepComponent,
         validate: (data) => {

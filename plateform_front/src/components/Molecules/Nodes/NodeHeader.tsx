@@ -96,9 +96,6 @@ function NodeHeader({
                             size={"icon"}
                             onClick={async () => {
                                 await handleDeleteNode();
-                                await deleteElements({
-                                    nodes: [{ id: nodeId }],
-                                });
                             }}
                         >
                             <TrashIcon size={12} className="cursor-pointer" />

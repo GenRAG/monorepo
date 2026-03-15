@@ -29,7 +29,7 @@ const NodeCard = ({
         }, 500);
     };
 
-    const headerBg = useColorModeValue("green.50", "grey.750");
+    const headerBg = useColorModeValue("green.50", "grey.900");
     const bodyBg = useColorModeValue("white", "grey.800");
     const borderColor = useColorModeValue("green.200", "grey.700");
     const borderActive = useColorModeValue("green.400", "green.500");

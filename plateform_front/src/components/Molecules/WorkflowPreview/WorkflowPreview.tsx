@@ -9,10 +9,14 @@ interface WorkflowPreviewProps {
     height?: string | number | { base: string | number; lg: string | number };
     nodes?: AppNode[];
     edges?: Edge[];
+    zoom?: number;
+    padding?: number;
 }
 
 export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
     height = "200px",
+    zoom = 0.8,
+    padding = 0.2,
 }: WorkflowPreviewProps) => {
     const { colorMode } = useColorMode();
     const borderColor = useColorModeValue("grey.200", "grey.700");
@@ -26,7 +30,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
             position="relative"
             h={height}
             w="100%"
-            borderRadius="12px"
+            borderTopRadius="12px"
             border="1px solid"
             borderColor={borderColor}
             overflow="hidden"
@@ -38,7 +42,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 fitView
-                fitViewOptions={{ padding: 0.2, minZoom: 0.8, maxZoom: 1 }}
+                fitViewOptions={{ padding: padding, minZoom: zoom, maxZoom: 1 }}
                 nodesDraggable={false}
                 nodesConnectable={false}
                 elementsSelectable={false}
@@ -50,7 +54,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
                 <Background
                     variant={BackgroundVariant.Dots}
                     gap={12}
-                    size={0.5}
+                    size={2}
                 />
             </ReactFlow>
         </Box>

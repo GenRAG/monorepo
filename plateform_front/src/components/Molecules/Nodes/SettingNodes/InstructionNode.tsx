@@ -225,12 +225,12 @@ export const InstructionNode = ({
                         transition={{ duration: 0.2, ease: "easeOut" }}
                     >
                         <VStack
-                            spacing={1}
+                            spacing={0}
                             bg={bgTextarea}
                             border="1px solid"
                             borderColor={borderColor}
                             borderRadius="12px"
-                            p={2}
+                            p={0}
                             w="220px"
                             boxShadow="0 4px 12px rgba(0,0,0,0.08)"
                         >
@@ -243,7 +243,7 @@ export const InstructionNode = ({
                                 maxH="160px"
                                 resize="vertical"
                                 borderColor="green.300"
-                                borderRadius="8px"
+                                borderTopRadius="8px"
                                 fontSize="xs"
                                 _focus={{
                                     borderColor: "green.400",
@@ -252,22 +252,26 @@ export const InstructionNode = ({
                                 }}
                                 onClick={(e) => e.stopPropagation()}
                             />
-                            <HStack w="100%" justify="flex-end" spacing={2}>
-                                {stringValue && (
-                                    <Button
-                                        size="xs"
-                                        variant="ghost"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            updateNodeData(id, {
-                                                isEditing: false,
-                                            });
-                                        }}
-                                    >
-                                        Cancel
-                                    </Button>
-                                )}
+                            <HStack w="100%" spacing={2}>
                                 <Button
+                                    w="100%"
+                                    size="xs"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        updateNodeData(id, {
+                                            isEditing: false,
+                                            isPlaceholder: !stringValue.trim(),
+                                        });
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    borderRadius="0px"
+                                    borderBottomRightRadius="12px"
+                                    h="100%"
+                                    w="100%"
                                     size="xs"
                                     colorScheme="green"
                                     leftIcon={<Check size={11} />}

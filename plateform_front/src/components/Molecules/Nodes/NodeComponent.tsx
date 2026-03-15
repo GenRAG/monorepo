@@ -1,5 +1,5 @@
 import { Handle, NodeProps, Position } from "@xyflow/react";
-import { memo, useRef } from "react";
+import { memo } from "react";
 import NodeCard from "components/Molecules/Nodes/NodeCard";
 import { AppNodeData } from "lib/type/app-node";
 import { TaskRegistry } from "lib/workflow/task/registry";
@@ -11,17 +11,22 @@ import {
     HStack,
     Badge,
     useColorModeValue,
+    Button,
 } from "@chakra-ui/react";
 import { NodeShape } from "components/Molecules/Nodes/NodeShape";
 import InstructionNode from "components/Molecules/Nodes/SettingNodes/InstructionNode";
 import ModelNode from "components/Molecules/Nodes/SettingNodes/ModelNode";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { TrashIcon } from "lucide-react";
+import { useWorkflowNodes } from "hooks/workflow/useWorkflowNodes";
 
 const NodeHeader = ({
+    id,
     task,
     isSelected,
     isMobile,
 }: {
+    id: string;
     task: Task;
     isSelected: boolean;
     isMobile: boolean;
@@ -30,6 +35,7 @@ const NodeHeader = ({
     const badgeBg = useColorModeValue("green.400", "grey.700");
     const badgeColor = useColorModeValue("white", "green.300");
     const badgeBorder = useColorModeValue("green.200", "grey.600");
+    const { handleRemoveChainNode } = useWorkflowNodes();
 
     return (
         <HStack spacing={2} justify="space-between">
@@ -71,6 +77,19 @@ const NodeHeader = ({
                     {task.isEntryPoint ? "input" : "output"}
                 </Badge>
             )}
+
+            {task.isDeletable && (
+                <Button
+                    variant="secondary"
+                    p="1"
+                    size={"icon"}
+                    onClick={async () => {
+                        await handleRemoveChainNode(id ?? "");
+                    }}
+                >
+                    <TrashIcon size={12} className="cursor-pointer" />
+                </Button>
+            )}
         </HStack>
     );
 };
@@ -79,19 +98,77 @@ const NodeBody = ({
     configInputs,
     isSelected,
     isMobile,
+    task,
 }: {
     configInputs: TaskParam[];
     isSelected: boolean;
     isMobile: boolean;
+    task: Task;
 }) => {
     const labelColor = useColorModeValue("grey.500", "grey.400");
     const rowHoverBg = useColorModeValue("grey.50", "grey.750");
     const dividerColor = useColorModeValue("grey.100", "grey.700");
 
-    if (configInputs.length === 0) return null;
+    //if (configInputs.length === 0) return null;
 
     return (
         <Flex direction="column" gap={0}>
+            {!task.isEntryPoint && (
+                <Box>
+                    <HStack
+                        justify="start"
+                        align="center"
+                        //py={2}
+                        borderRadius="6px"
+                        position="relative"
+                        _hover={{ bg: rowHoverBg }}
+                        transition="background 0.1s"
+                        ml="-3px"
+                        h="full"
+                    >
+                        <Box
+                            position="relative"
+                            w="8px"
+                            h="full"
+                            flexShrink={0}
+                        >
+                            <Handle
+                                id={`main-target`}
+                                type="target"
+                                position={Position.Left}
+                                style={{
+                                    position: "relative",
+                                    top: "auto",
+                                    right: "auto",
+                                    transform: "none",
+                                    backgroundColor: "#34D3A9",
+                                    borderRadius: "0px",
+                                    borderRight: isSelected
+                                        ? "1px solid #34D3A9"
+                                        : "1px solid #E7E7E7",
+                                    borderColor: "transparent",
+                                    borderRightColor: isSelected
+                                        ? "#34D3A9"
+                                        : "#E7E7E7",
+                                    width: "8px",
+                                    height: "26px",
+                                    display: "block",
+                                }}
+                            />
+                        </Box>
+                        <Text
+                            fontSize={isMobile ? "9px" : "11px"}
+                            fontWeight={500}
+                            color={labelColor}
+                            letterSpacing="0.02em"
+                            noOfLines={1}
+                        >
+                            Input
+                        </Text>
+                    </HStack>
+                </Box>
+            )}
+            <Box borderTop="1px solid" borderColor={dividerColor} />
             {configInputs.map((input, i) => (
                 <Box key={input.name}>
                     {i > 0 && (
@@ -144,6 +221,57 @@ const NodeBody = ({
                     </HStack>
                 </Box>
             ))}
+            {!task.isEndPoint && (
+                <>
+                    <Box borderTop="1px solid" borderColor={dividerColor} />
+                    <Box>
+                        <HStack
+                            justify="end"
+                            align="center"
+                            borderRadius="6px"
+                            position="relative"
+                            _hover={{ bg: rowHoverBg }}
+                            transition="background 0.1s"
+                            mr="-3px"
+                        >
+                            <Text
+                                fontSize={isMobile ? "9px" : "11px"}
+                                fontWeight={500}
+                                color={labelColor}
+                                letterSpacing="0.02em"
+                                noOfLines={1}
+                            >
+                                Output
+                            </Text>
+                            <Box position="relative" w="8px" flexShrink={0}>
+                                <Handle
+                                    id={`main-source`}
+                                    type="source"
+                                    position={Position.Right}
+                                    style={{
+                                        position: "relative",
+                                        top: "auto",
+                                        right: "auto",
+                                        transform: "none",
+                                        backgroundColor: "#34D3A9",
+                                        borderRadius: "0px",
+                                        borderLeft: isSelected
+                                            ? "1px solid #34D3A9"
+                                            : "1px solid #E7E7E7",
+                                        borderColor: "transparent",
+                                        borderLeftColor: isSelected
+                                            ? "#34D3A9"
+                                            : "#E7E7E7",
+                                        width: "8px",
+                                        height: "26px",
+                                        display: "block",
+                                    }}
+                                />
+                            </Box>
+                        </HStack>
+                    </Box>
+                </>
+            )}
         </Flex>
     );
 };
@@ -184,11 +312,11 @@ const NodeComponent = memo(
         const configInputs = task.inputs.filter(
             (i: TaskParam) => !i.hideHandle,
         );
-        const hasBody = configInputs.length > 0;
+        const hasBody = true;
 
         return (
-            <Box position="relative">
-                {!task.isEntryPoint && (
+            <Box position="relative" className="drag-handle">
+                {/*!task.isEntryPoint && (
                     <Handle
                         id="main-target"
                         type="target"
@@ -206,7 +334,7 @@ const NodeComponent = memo(
                             height: "8px",
                         }}
                     />
-                )}
+                )*/}
 
                 <NodeCard
                     nodeId={props.id}
@@ -215,6 +343,7 @@ const NodeComponent = memo(
                     header={
                         <NodeHeader
                             task={task}
+                            id={props.id}
                             isSelected={!!props.selected}
                             isMobile={isMobile}
                         />
@@ -222,6 +351,7 @@ const NodeComponent = memo(
                     body={
                         hasBody ? (
                             <NodeBody
+                                task={task}
                                 configInputs={configInputs}
                                 isSelected={!!props.selected}
                                 isMobile={isMobile}
@@ -230,8 +360,7 @@ const NodeComponent = memo(
                     }
                 />
 
-                {/* Handle sortie principale */}
-                {!task.isEndPoint && (
+                {/*!task.isEndPoint && (
                     <Handle
                         id="main-source"
                         type="source"
@@ -249,7 +378,7 @@ const NodeComponent = memo(
                             height: "8px",
                         }}
                     />
-                )}
+                )*/}
             </Box>
         );
     },

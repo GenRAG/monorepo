@@ -128,6 +128,7 @@ const ModelPlaceholder = ({
     const bgHover = useColorModeValue("green.50", "grey.700");
     const iconColor = useColorModeValue("green.400", "green.400");
     const textColor = useColorModeValue("grey.500", "grey.400");
+    const bg = useColorModeValue("white", "grey.800");
 
     return (
         <Flex
@@ -143,6 +144,7 @@ const ModelPlaceholder = ({
             cursor="pointer"
             transition="all 0.15s"
             _hover={{ bg: bgHover, borderColor: iconColor }}
+            bg={bg}
             onClick={onClick}
         >
             <Icon as={Cpu} boxSize={4} color={iconColor} />

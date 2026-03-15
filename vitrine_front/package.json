@@ -3,25 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@genrag/workflow": "file:../packages/workflow",
     "@radix-ui/react-label": "^2.1.8",
     "@splinetool/react-spline": "^4.1.0",
+    "@xyflow/react": "^12.6.0",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.35.2",
     "lucide-react": "^0.556.0",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "reactflow": "^11.11.4",
     "shadcn-ui": "^0.9.5",
-    "tailwind-merge": "^3.4.0"
+    "simple-icons": "^16.11.0",
+    "tailwind-merge": "^3.4.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

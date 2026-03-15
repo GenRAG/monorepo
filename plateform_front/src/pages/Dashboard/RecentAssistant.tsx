@@ -81,7 +81,7 @@ const RecentAssistant = () => {
                 </Button>
             </Stack>
             <Box
-                borderRadius="16px"
+                borderRadius="8px"
                 border="1px solid"
                 borderColor={borderColor}
                 overflow="hidden"

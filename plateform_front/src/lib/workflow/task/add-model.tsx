@@ -13,7 +13,7 @@ export const AddModel = {
     },
     isEntryPoint: false,
     isEndPoint: false,
-    isDeletable: true,
+    isDeletable: false,
     isDraggable: true,
     sourcePosition: Position.Left,
     position: {

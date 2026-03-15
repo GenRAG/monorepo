@@ -1,5 +1,5 @@
 import { ShapeType } from "components/Molecules/Nodes/NodeShape";
-import { TaskParamType, TaskType } from "lib/type/task";
+import { TaskType } from "lib/type/task";
 import { Database, type LucideIcon } from "lucide-react";
 
 export const AddDatabase = {

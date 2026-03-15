@@ -78,6 +78,91 @@ interface HandleMessageUpdateProps {
     refResponse: string;
 }
 
+interface StreamingState {
+    text: string;
+    isStreaming: boolean;
+    error: string | null;
+}
+
+export const useStreamingQuery = () => {
+    const [state, setState] = useState<StreamingState>({
+        text: "",
+        isStreaming: false,
+        error: null,
+    });
+
+    const sendQuery = useCallback(
+        async (
+            query: string,
+            onChunk?: (fullText: string) => void,
+        ): Promise<string> => {
+            setState({ text: "", isStreaming: true, error: null });
+            let fullText = "";
+
+            try {
+                const response = await fetch(
+                    "http://localhost:8000/rag/stream",
+                    {
+                        method: "POST",
+                        headers: {
+                            accept: "application/json",
+                            "X-API-Key": "ee22f7e7503f478a87317781b0f589c3",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            pipeline: {
+                                blocks: [
+                                    { name: "query", type: "query" },
+                                    {
+                                        collection_name:
+                                            "genrag_knowledge_base",
+                                        name: "retrieve",
+                                        top_k: 5,
+                                        type: "retrieve",
+                                    },
+                                    {
+                                        model: "google/gemini-2.5-flash",
+                                        name: "answer",
+                                        type: "answer",
+                                    },
+                                ],
+                                pipeline_name: "custom_rag",
+                            },
+                            query,
+                        }),
+                    },
+                );
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const reader = response.body!.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
+
+                    setState((prev) => ({ ...prev, text: fullText }));
+                    onChunk?.(fullText);
+                }
+
+                return fullText;
+            } catch (err) {
+                setState((prev) => ({ ...prev, error: String(err) }));
+                throw err;
+            } finally {
+                setState((prev) => ({ ...prev, isStreaming: false }));
+            }
+        },
+        [],
+    );
+
+    return { ...state, sendQuery };
+};
+
 export const useHandleMessageUpdate = (props: HandleMessageUpdateProps) => {
     const {
         setValue: _setValue,
@@ -200,11 +285,12 @@ export const useChat = (options: UseChatOptions) => {
      *
      * @param question - The user's input string.
      */
+    const currentMessageIdRef = useRef<string | null>(null);
     const sendMessage = useCallback(async (question: string) => {
         if (!question.trim()) return;
 
         const questionId = `msg-${Date.now()}-${Math.random().toString(36)}`;
-
+        currentMessageIdRef.current = questionId;
         // Create the message immediately with an empty response so the UI
         // can show a loading state right away.
         const questionMessage: ChatMessage = {
@@ -348,5 +434,6 @@ export const useChat = (options: UseChatOptions) => {
         updateMessage,
         /** True while a response is being awaited. */
         isLoading,
+        currentMessageIdRef,
     };
 };

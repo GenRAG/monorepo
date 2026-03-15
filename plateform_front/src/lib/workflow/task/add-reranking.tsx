@@ -27,7 +27,7 @@ export const AddReranking = {
             hideHandle: false,
             items: ReRanker,
             id: "tooltip-workflow-reranking-model",
-            position: { x: 0, y: 0 },
+            position: { x: 300, y: 0 },
         },
     ],
     chainOutputs: [],

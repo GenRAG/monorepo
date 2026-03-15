@@ -4,7 +4,6 @@ import { TaskType, TaskParam, TaskChainOutput } from "lib/type/task";
 import { TaskRegistry } from "lib/workflow/task/registry";
 import { Edge } from "@xyflow/react";
 
-// ── CreateFlowNode — inchangé ──────────────────────────────────────────────────
 export function CreateFlowNode(
     nodeType: TaskType,
     position?: { x: number; y: number },

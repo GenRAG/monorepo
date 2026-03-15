@@ -1,4 +1,4 @@
-import { Edge, Node } from "@xyflow/react";
+import { Node } from "@xyflow/react";
 import { TaskType } from "./task";
 import { TaskParam } from "./task";
 

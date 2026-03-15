@@ -6,7 +6,16 @@ import { AddModel } from "lib/workflow/task/add-model";
 import { AddInstruction } from "lib/workflow/task/add-instruction";
 import { AddRewriter } from "lib/workflow/task/add-rewriter";
 
-export const TaskRegistry = {
+type TaskComponent =
+    | typeof AddReranking
+    | typeof AddResponse
+    | typeof AddDatabase
+    | typeof AddQuery
+    | typeof AddModel
+    | typeof AddInstruction
+    | typeof AddRewriter;
+
+export const TaskRegistry: Record<string, TaskComponent> = {
     RERANKER: AddReranking,
     RESPONSE: AddResponse,
     RETRIEVER: AddDatabase,

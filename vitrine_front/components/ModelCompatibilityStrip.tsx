@@ -36,7 +36,6 @@ export function ModelCompatibilityStrip({
   accent,
   accentDim,
   accentBorder,
-  border,
   surfaceAlt,
   textPrimary,
   textMuted,
@@ -49,8 +48,6 @@ export function ModelCompatibilityStrip({
       style={{
         marginTop: '20px',
         width: '100%',
-        //border: `1px solid ${border}`,
-        //borderRadius: 14,
         padding: '4px 16px',
         display: 'flex',
         flexWrap: 'wrap',

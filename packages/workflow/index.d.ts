@@ -1,4 +1,12 @@
-import type { Edge, NodeChange, EdgeChange, Connection } from "@xyflow/react";
+import type {
+  Edge,
+  Node,
+  NodeChange,
+  EdgeChange,
+  Connection,
+  EdgeTypes,
+  NodeTypes,
+} from "@xyflow/react";
 import type { JSX } from "react";
 
 export enum TaskType {
@@ -11,42 +19,53 @@ export enum TaskType {
   INSTRUCTION = "INSTRUCTION",
 }
 
+export interface AppNodeData {
+  type: TaskType;
+  inputs: Record<string, string>;
+  outputs: string[];
+  [key: string]: any;
+}
+
+export interface AppNode extends Node {
+  data: AppNodeData;
+}
+
 export declare function useFlowTypes(options?: {
+  isMenuOpen?: boolean;
+  onMenuOpen?: () => void;
+  onMenuClose?: () => void;
+  onNodeClick?: (nodeId: string) => void;
   isVertical?: boolean;
 }): {
-  nodeTypes: Record<string, unknown>;
-  edgeTypes: Record<string, unknown>;
+  nodeTypes: NodeTypes;
+  edgeTypes: EdgeTypes;
 };
 
-export declare function useNodeSelection(options: {
+export declare function useNodeSelection(): {
   selectedNodeId: string | null;
-  nodes: any[];
-  setNodes: (updater: (nodes: any[]) => any[]) => void;
-}): {
-  node: any;
-  selectedNode: any;
-  updateNodeParamValue: (paramName: string, value: string) => void;
-  updateInputNodeModelType: (value: string) => void;
-  updateInputNodeInstructionPrompt: (value: string) => void;
+  task: any;
+  nodeData: any;
+  isModalOpen: boolean;
+  handleNodeClick: (nodeId: string) => void;
+  handleModalClose: () => void;
 };
 
-export declare function useWorkflowNodes(options?: {
-  isVertical?: boolean;
+export declare function useWorkflowNodes(options?: boolean | {
+  initialVertical?: boolean;
+  preset?: "default" | "showcase";
 }): {
-  nodes: any[];
+  nodes: AppNode[];
   edges: Edge[];
-  selectedNode: any;
-  setNodes: (updater: any) => void;
-  setEdges: (updater: any) => void;
+  isVertical: boolean;
+  setIsVertical: (value: boolean) => void;
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
-  onDragOver: (event: DragEvent) => void;
-  onDrop: (event: DragEvent) => void;
-  onNodeClick: (event: MouseEvent, node: any) => void;
-  onInit: (instance: any) => void;
-  handleDeleteNode: (nodeId: string) => void;
-  setSelectedNode: (node: any) => void;
+  onDragOver: (event: any) => void;
+  onDrop: (event: any) => void;
+  handleSettingSelect: (nodeId: string, item: string) => void;
+  handleAddChainNode: (nodeType: any) => void;
+  handleRemoveChainNode: (nodeId: string) => void;
 };
 
 export declare function WorkflowBuilder(props: {

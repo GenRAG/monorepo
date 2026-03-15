@@ -4,6 +4,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import pluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
+import { fileURLToPath } from "node:url";
 
 function downgradeRulesToWarn(config: { rules?: Record<string, unknown> }) {
   if (!config?.rules) return config;
@@ -43,7 +44,7 @@ export default tseslint.config(
           jsx: true,
         },
         projectService: true,
-        tsconfigRootDir: import.meta.url,
+        tsconfigRootDir: fileURLToPath(new URL(".", import.meta.url)),
       },
       globals: {
         ...globals.browser,

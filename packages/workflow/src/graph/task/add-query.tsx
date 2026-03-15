@@ -1,6 +1,6 @@
-import { ShapeType } from "../../components/nodes/NodeShape";
 import { TaskType } from "../../types/task";
 import { type LucideIcon, Search } from "lucide-react";
+import { ShapeType } from "../../components/nodes";
 
 export const AddQuery = {
     type: TaskType.QUERY,

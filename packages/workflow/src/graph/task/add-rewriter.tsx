@@ -1,7 +1,7 @@
 import { LLMSRewriter } from "../../components/nodes/Common";
-import { ShapeType } from "../../components/nodes/NodeShape";
 import { TaskParamType, TaskType } from "../../types/task";
 import { type LucideIcon, PencilIcon } from "lucide-react";
+import { ShapeType } from "../../components/nodes";
 
 export const AddRewriter = {
     type: TaskType.REWRITER,
@@ -27,7 +27,7 @@ export const AddRewriter = {
             hideHandle: false,
             items: LLMSRewriter,
             id: "tooltip-workflow-rewriter-llm",
-            position: { x: 300, y: -10 },
+            position: { x: 300, y: 50 },
         },
     ],
 

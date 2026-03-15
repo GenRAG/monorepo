@@ -1,13 +1,4 @@
-import {
-    Box,
-    HStack,
-    IconButton,
-    Text,
-    VStack,
-    useColorMode,
-    Spinner,
-} from "@chakra-ui/react";
-import { ArrowLeft } from "lucide-react";
+import { Box, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DeployedChatInterface } from "components/Molecules/DeployedChatInterface";
@@ -63,8 +54,9 @@ export const Assistant = () => {
     >(null);
 
     const [sendChatMessage] = useSendChatMessageMutation();
-    const { data: metadata, isLoading: isLoadingMetadata } =
-        useGetAssistantMetadataQuery(assistantId ?? "", { skip: !assistantId });
+    const { data: metadata } = useGetAssistantMetadataQuery(assistantId ?? "", {
+        skip: !assistantId,
+    });
     const { data: historyData } = useGetChatHistoryQuery(
         {
             assistantId: assistantId ?? "",
@@ -98,8 +90,6 @@ export const Assistant = () => {
         (assistantId
             ? (MOCK_ASSISTANT_TITLES[assistantId] ?? "Assistant")
             : "Assistant");
-    const sharedBy = metadata?.sharedBy ?? "";
-
     const getResponse = useCallback(
         async (question: string) => {
             if (!assistantId) return { response: ["Error: No assistant ID."] };
@@ -187,73 +177,10 @@ export const Assistant = () => {
             overflow="hidden"
             bg={colorMode === "dark" ? "grey.950" : "grey.50"}
         >
-            <HStack
-                w="100%"
-                p={4}
-                borderBottom="1px solid"
-                borderColor={colorMode === "dark" ? "grey.700" : "grey.200"}
-                bg={colorMode === "dark" ? "grey.900" : "white"}
-                spacing={4}
-                flexShrink={0}
-            >
-                <IconButton
-                    aria-label="Retour aux assistants"
-                    icon={<ArrowLeft size={20} />}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate("/assistants")}
-                    _hover={{
-                        bg: colorMode === "dark" ? "grey.700" : "grey.100",
-                    }}
-                />
-                <VStack align="flex-start" spacing={0} flex={1} minW={0}>
-                    {isLoadingMetadata ? (
-                        <HStack spacing={2}>
-                            <Spinner size="sm" />
-                            <Text
-                                fontSize="sm"
-                                color={
-                                    colorMode === "dark"
-                                        ? "grey.400"
-                                        : "grey.500"
-                                }
-                            >
-                                Chargement...
-                            </Text>
-                        </HStack>
-                    ) : (
-                        <>
-                            <Text
-                                fontWeight="semibold"
-                                fontSize="lg"
-                                color={
-                                    colorMode === "dark" ? "white" : "grey.900"
-                                }
-                                noOfLines={1}
-                            >
-                                {title}
-                            </Text>
-                            {sharedBy && (
-                                <Text
-                                    fontSize="xs"
-                                    color={
-                                        colorMode === "dark"
-                                            ? "grey.400"
-                                            : "grey.500"
-                                    }
-                                >
-                                    Partagé par {sharedBy}
-                                </Text>
-                            )}
-                        </>
-                    )}
-                </VStack>
-            </HStack>
-
             <Box
                 flex={1}
                 minH={0}
-                p={{ base: 4, md: 8, lg: 12 }}
+                p={4}
                 w="100%"
                 display="flex"
                 flexDirection="column"
@@ -269,6 +196,11 @@ export const Assistant = () => {
                 >
                     <DeployedChatInterface
                         title={title}
+                        emptyStateTitle={
+                            name
+                                ? `What's on your mind, ${name}?`
+                                : "What's on your mind?"
+                        }
                         messages={messages}
                         assistants={assistants}
                         currentAssistantId={assistantId}

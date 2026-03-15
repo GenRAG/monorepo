@@ -91,7 +91,7 @@ export const AssistantsList = () => {
                             transform: "translateY(-2px)",
                             shadow: "md",
                         }}
-                        onClick={() => navigate(`/Assistants/${Assistant.id}`)}
+                        onClick={() => navigate(`/assistants/${Assistant.id}`)}
                     >
                         <VStack align="stretch" spacing={2}>
                             <Heading

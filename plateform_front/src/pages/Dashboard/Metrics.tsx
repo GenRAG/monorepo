@@ -1,26 +1,19 @@
 import { Grid } from "@chakra-ui/react";
-import { Brain, FileText, MessageSquare, Zap } from "lucide-react";
 import { StatCard } from "pages/Workspace/Documents/SimpleDocumentWorkspace";
 
 const METRICS = [
-    { icon: Zap, value: "1.4s", label: "Avg Response Time", color: "green" },
+    { value: "1.4s", label: "Avg Response Time" },
     {
-        icon: MessageSquare,
         value: "124",
         label: "Total Conversations",
-        color: "blue",
     },
     {
-        icon: FileText,
         value: "38",
         label: "Documents Indexed",
-        color: "orange",
     },
     {
-        icon: Brain,
         value: "2",
         label: "Active Assistants",
-        color: "purple",
     },
 ];
 

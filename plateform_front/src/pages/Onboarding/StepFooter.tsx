@@ -2,19 +2,21 @@ import { HStack, Text, VStack } from "@chakra-ui/react";
 import Button from "components/Atoms/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-const StepFooter: React.FC<{
+interface StepFooterProps {
     currentStep: number;
     goNext: () => void;
     goPrevious: () => void;
     onValidateAndGoNext?: () => Promise<void>;
     showReassuringMessage?: boolean;
-}> = ({
+}
+
+const StepFooter = ({
     currentStep,
     goNext,
     goPrevious,
     onValidateAndGoNext,
     showReassuringMessage,
-}) => {
+}: StepFooterProps) => {
     const handleNext = async () => {
         if (onValidateAndGoNext) {
             await onValidateAndGoNext();
@@ -32,8 +34,8 @@ const StepFooter: React.FC<{
                     textAlign="center"
                     fontStyle="italic"
                 >
-                    You can continue with your current setup and add more
-                    sources later
+                    Vous pouvez continuer avec votre configuration actuelle et
+                    ajouter d&apos;autres sources ultérieurement.
                 </Text>
             )}
             <HStack w="100%" justify="space-between">
@@ -43,7 +45,7 @@ const StepFooter: React.FC<{
                     onClick={goPrevious}
                 >
                     <ArrowLeft size={18} style={{ marginRight: 8 }} />
-                    Back
+                    Retour
                 </Button>
                 <Button
                     rightIcon={ArrowRight}
@@ -52,7 +54,7 @@ const StepFooter: React.FC<{
                     px={8}
                     onClick={handleNext}
                 >
-                    Save and continue
+                    Sauvegarder and continuer
                 </Button>
             </HStack>
         </VStack>

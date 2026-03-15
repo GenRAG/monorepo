@@ -19,7 +19,7 @@ import Dashboard from "pages/Dashboard";
 import { AssistantsList } from "pages/Assistant/AssistantList";
 import { Assistant } from "pages/Assistant/Assistant";
 import { useParams } from "react-router-dom";
-import { AgentsList } from "pages/Organisation/Agents";
+import { AgentsList } from "pages/Agents";
 import { Workspaces } from "pages/Workspace";
 
 const ChatRoute = () => {

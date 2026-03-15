@@ -11,10 +11,11 @@ import {
     Icon,
 } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import { MessageSquare } from "lucide-react";
-import Button from "components/Atoms/Button";
-import { useChat, useHandleMessageUpdate } from "../../../hooks/useChat";
+import {
+    useChat,
+    useHandleMessageUpdate,
+    useStreamingQuery,
+} from "../../../hooks/useChat";
 import { ChatInterface } from "../../../components/Molecules/ChatInterface";
 import StepLevel from "components/Molecules/StepLevel";
 import { useAppResponsive } from "hooks/useAppResponsive";
@@ -33,23 +34,9 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
     const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
 
-    const getResponse = useCallback((_question: string): string[] => {
-        return [
-            "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year. These days are calculated based on a full month of work.",
-        ];
-    }, []);
+    const { sendQuery } = useStreamingQuery();
 
-    const initialMessages =
-        data.testQuestion && data.testResponse
-            ? [
-                  {
-                      id: "initial",
-                      question: data.testQuestion,
-                      response: [data.testResponse],
-                      timestamp: Date.now(),
-                  },
-              ]
-            : [];
+    const initialMessages: any = [];
 
     const setValueRef = useRef<typeof setValue | null>(null);
     const updateDataRef = useRef<typeof updateData | null>(null);
@@ -70,11 +57,39 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
         refResponse: "testResponse",
     });
 
-    const { messages, sendMessage, isLoading } = useChat({
-        getResponse,
+    const {
+        messages,
+        sendMessage,
+        isLoading,
+        updateMessage,
+        currentMessageIdRef,
+    } = useChat({
+        getResponse: useCallback(
+            async (question: string) => {
+                const fullText = await sendQuery(
+                    question,
+                    (chunkSoFar: string) => {
+                        if (currentMessageIdRef.current) {
+                            updateMessage(currentMessageIdRef.current, {
+                                response: [chunkSoFar],
+                            });
+                        }
+                    },
+                );
+
+                return { response: [fullText], isImproved: false };
+            },
+            [sendQuery],
+        ),
         initialMessages,
         onMessageUpdate: handleMessageUpdate,
     });
+
+    /*const { messages, sendMessage, isLoading } = useChat({
+        getResponse,
+        initialMessages,
+        onMessageUpdate: handleMessageUpdate,
+    });*/
 
     setValueRef.current = setValue;
     updateDataRef.current = updateData;
@@ -138,7 +153,7 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
                     />
                 </VStack>
 
-                {messages.length === 0 && (
+                {/*messages.length === 0 && (
                     <VStack align="stretch" spacing={2}>
                         <Text
                             fontSize="xs"
@@ -178,7 +193,7 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
                             </Button>
                         ))}
                     </VStack>
-                )}
+                )*/}
 
                 <Box flex={1} minH={0} display="flex" flexDirection="column">
                     <ChatInterface

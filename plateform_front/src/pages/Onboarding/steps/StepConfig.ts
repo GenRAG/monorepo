@@ -8,8 +8,8 @@ import { CompareIntelligenceStepComponent } from "pages/Onboarding/steps/Compare
 export const stepsConfig: StepConfig[] = [
     {
         id: "test-assistant",
-        title: "Test your HR assistant in 30 seconds",
-        description: "Here's your HR assistant ready to use",
+        title: "Essaye ton assistant RH en 30 secondes",
+        description: "Voici ton assistant RG prêt à être utilisé",
         icon: Sparkles,
         component: TestAssistantStepComponent,
         validate: (data) => {
@@ -21,8 +21,8 @@ export const stepsConfig: StepConfig[] = [
     },
     {
         id: "improve-assistant",
-        title: "Improve your assistant with your documents",
-        description: "Now, make it truly tailored to your company",
+        title: "Améliore ton assistant en ajoutant tes documents",
+        description: "Maintenant, adaptez-le vraiment à ton entreprise",
         icon: FileText,
         component: ImproveAssistantStepComponent,
         validate: (data) => {

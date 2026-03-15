@@ -62,6 +62,43 @@ export const extendedChatApi = backendApi.injectEndpoints({
             }),
         }),
 
+        sendMockQuery: builder.mutation<ChatResponse, { query: string }>({
+            query: ({ query }) => ({
+                url: "http://localhost:8000/rag/stream",
+                headers: {
+                    accept: "application/json",
+                    "X-API-Key": "ee22f7e7503f478a87317781b0f589c3",
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                responseHandler: (response) => response.text(),
+                body: {
+                    pipeline: {
+                        blocks: [
+                            { name: "query", type: "query" },
+                            {
+                                collection_name: "genrag_knowledge_base",
+                                name: "retrieve",
+                                top_k: 5,
+                                type: "retrieve",
+                            },
+                            {
+                                model: "google/gemini-2.5-flash",
+                                name: "answer",
+                                type: "answer",
+                            },
+                        ],
+                        pipeline_name: "custom_rag",
+                    },
+                    query,
+                },
+            }),
+            transformResponse: (response: string) => ({
+                response: [response],
+                isImproved: false,
+            }),
+        }),
+
         getChatMetadata: builder.query<ChatMetadata | null, string>({
             query: (id) => ({
                 url: `/v1/chats/${id}`,
@@ -156,4 +193,5 @@ export const {
     useGetChatHistoryQuery,
     useGetAssistantsListQuery,
     useGetConversationsForAssistantQuery,
+    useSendMockQueryMutation,
 } = extendedChatApi;

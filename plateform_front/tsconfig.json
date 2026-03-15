@@ -21,13 +21,27 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
     "paths": {
-      "themeNew/*": ["themeNew/*"],
-      "hooks/*": ["hooks/*"],
-      "components/*": ["components/*"],
-      "types/*": ["types/*"],
-      "utils/*": ["utils/*"],
-      "pages/*": ["pages/*"],
-      "services/*": ["services/*"],
+      "themeNew/*": [
+        "themeNew/*"
+      ],
+      "hooks/*": [
+        "hooks/*"
+      ],
+      "components/*": [
+        "components/*"
+      ],
+      "types/*": [
+        "types/*"
+      ],
+      "utils/*": [
+        "utils/*"
+      ],
+      "pages/*": [
+        "pages/*"
+      ],
+      "services/*": [
+        "services/*"
+      ]
     }
   },
   "include": [

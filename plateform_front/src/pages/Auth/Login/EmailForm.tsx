@@ -164,28 +164,56 @@ export const EmailForm: FC<{
                             />
                         </HStack>
                         <VStack w="100%">
-                            <Button w="100%" variant="secondary" size="lg">
+                            <Button
+                                w="100%"
+                                bg={
+                                    colorMode === "dark"
+                                        ? "grey.800 !important"
+                                        : "white"
+                                }
+                                border="1px solid"
+                                borderColor="grey.200"
+                                _hover={{
+                                    borderColor: "grey.300",
+                                    bg: "grey.50",
+                                }}
+                                size="lg"
+                            >
                                 <HStack justify="center" spacing="8px">
                                     <Image src={Google} boxSize="24px" />
                                     <Text
                                         color={
                                             colorMode === "dark"
                                                 ? "white"
-                                                : "grey.900"
+                                                : "black"
                                         }
                                     >
                                         Continue with Google
                                     </Text>
                                 </HStack>
                             </Button>
-                            <Button w="100%" variant="secondary" size="lg">
+                            <Button
+                                w="100%"
+                                bg={
+                                    colorMode === "dark"
+                                        ? "grey.800 !important"
+                                        : "white"
+                                }
+                                border="1px solid"
+                                borderColor="grey.200"
+                                _hover={{
+                                    borderColor: "grey.300",
+                                    bg: "grey.50",
+                                }}
+                                size="lg"
+                            >
                                 <HStack justify="center" spacing="8px">
                                     <Image src={Microsoft} boxSize="24px" />
                                     <Text
                                         color={
                                             colorMode === "dark"
                                                 ? "white"
-                                                : "grey.900"
+                                                : "black"
                                         }
                                     >
                                         Continue with Microsoft

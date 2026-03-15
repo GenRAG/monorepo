@@ -63,7 +63,7 @@ const AuthDesktopLayout = ({
                 justify="center"
                 position="relative"
                 borderLeft="1px solid"
-                borderColor={currentDarkTheme.rgba.primary30}
+                borderColor="grey.500"
             >
                 <HStack
                     position="absolute"

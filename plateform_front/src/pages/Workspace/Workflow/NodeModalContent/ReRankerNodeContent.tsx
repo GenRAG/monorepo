@@ -4,7 +4,10 @@ import { Flex, Text, VStack, Box, HStack, Icon } from "@chakra-ui/react";
 import { FileText, ScanSearch, ArrowUpDown, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Task } from "lib/type/task";
-import { AppNodeData } from "lib/type/app-node";
+import * as WorkflowPackage from "@genrag/workflow";
+
+import type { AppNodeData } from "@genrag/workflow";
+
 
 const RerankerNodeModal = ({
     task,

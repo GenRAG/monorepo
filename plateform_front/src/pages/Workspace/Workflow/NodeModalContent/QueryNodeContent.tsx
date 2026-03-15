@@ -1,5 +1,3 @@
-import { Task, TaskParam } from "lib/type/task";
-import { AppNodeData } from "lib/type/app-node";
 import { useState } from "react";
 import {
     Button,
@@ -15,6 +13,8 @@ import { useEffect } from "react";
 import MenuDropDown from "components/Atoms/MenuDropDown";
 import { useNavigate, useParams } from "react-router-dom";
 import Banner from "components/Atoms/Banner";
+
+import type { Task, TaskParam, AppNodeData } from "@genrag/workflow";
 
 const QueryNodeModal = ({
     task,

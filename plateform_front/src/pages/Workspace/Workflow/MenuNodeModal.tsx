@@ -18,17 +18,18 @@ import {
 } from "@chakra-ui/react";
 import { Info, Search, X, Plus, CommandIcon } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
-import { TaskRegistry } from "lib/workflow/task/registry";
-import { Task, TaskType } from "lib/type/task";
-import { NodeShape } from "components/Molecules/Nodes/NodeShape";
 import { useMemo, useState, useEffect, useRef } from "react";
-import { AppNode } from "lib/type/app-node";
 import RerankerInformation from "pages/Workspace/Workflow/NodeInformation/Reranker";
+import { NodeShape } from "pages/Workspace/Workflow/NodeShape";
 import StyledKbd from "components/Atoms/KdbStyles";
-import { CreateFlowNode } from "lib/workflow/create-flow-node";
+import * as WorkflowPackage from "@genrag/workflow";
+
+import type { AppNodeData } from "@genrag/workflow";
+import { Task, TaskType } from "@genrag/workflow";
+const { TaskRegistry } = WorkflowPackage as any;
 
 interface MenuNodeModalProps {
-    usedNodes: AppNode[];
+    usedNodes: AppNodeData[];
     isOpen: boolean;
     onClose: () => void;
     onToggle: () => void;

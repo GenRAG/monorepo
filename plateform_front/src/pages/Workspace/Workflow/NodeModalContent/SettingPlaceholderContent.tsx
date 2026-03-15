@@ -1,15 +1,15 @@
-import { AppNodeData } from "lib/type/app-node";
 import { Task } from "lib/type/task";
 import {
     VStack,
     HStack,
     Text,
     Box,
-    Badge,
     useColorModeValue,
     useColorMode,
 } from "@chakra-ui/react";
 import { ModelOption } from "components/Molecules/Nodes/Common";
+
+import type { AppNodeData } from "@genrag/workflow";
 
 const BADGE_CONFIG: Record<
     string,

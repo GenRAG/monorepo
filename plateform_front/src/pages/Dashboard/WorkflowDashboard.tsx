@@ -73,8 +73,8 @@ export const WorkflowDashboard = () => {
         };
     }, [isMobile]);
 
-    const [nodes] = useNodesState<AppNode>(initialState.nodes);
-    const [edges] = useEdgesState<Edge>(initialState.edges);
+    const [nodes, , onNodesChange] = useNodesState<AppNode>(initialState.nodes);
+    const [edges, , onEdgesChange] = useEdgesState<Edge>(initialState.edges);
 
     const snapGrid: [number, number] = [50, 50];
     const fitViewOptions = { padding: 0.1, minZoom: 0.5, maxZoom: 1 };
@@ -123,6 +123,8 @@ export const WorkflowDashboard = () => {
                     colorMode={colorMode === "dark" ? "dark" : "light"}
                     nodes={nodes}
                     edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
                     snapGrid={snapGrid}

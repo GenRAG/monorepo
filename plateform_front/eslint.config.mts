@@ -24,15 +24,17 @@ function downgradeRulesToWarn(config: { rules?: Record<string, unknown> }) {
 export default tseslint.config(
   {
     ignores: ["eslint.config.mts", "build", "node_modules", "public"],
-    ...[downgradeRulesToWarn(eslint.configs.recommended)],
-    ...tseslint.configs.recommendedTypeChecked.map((config) =>
-      downgradeRulesToWarn({
-        ...(typeof config === "object" ? config : {}),
-        rules: (config as any).rules,
-      })
-    ),
-    ...[downgradeRulesToWarn(eslintPluginPrettierRecommended)],
-    ...[downgradeRulesToWarn(pluginReact.configs.flat.recommended)],
+  },
+  downgradeRulesToWarn(eslint.configs.recommended),
+  ...tseslint.configs.recommendedTypeChecked.map((config) =>
+    downgradeRulesToWarn({
+      ...(typeof config === "object" ? config : {}),
+      rules: (config as any).rules,
+    })
+  ),
+  downgradeRulesToWarn(eslintPluginPrettierRecommended),
+  downgradeRulesToWarn(pluginReact.configs.flat.recommended),
+  {
     files: ["**/*.{ts,tsx}"],
     plugins: {
       "react-hooks": reactHooks,

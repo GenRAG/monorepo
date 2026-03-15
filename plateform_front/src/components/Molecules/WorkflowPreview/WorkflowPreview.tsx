@@ -17,11 +17,15 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
     height = "200px",
     zoom = 0.8,
     padding = 0.2,
+    nodes: propNodes,
+    edges: propEdges,
 }: WorkflowPreviewProps) => {
     const { colorMode } = useColorMode();
     const borderColor = useColorModeValue("grey.200", "grey.700");
 
-    const { nodes, edges } = useWorkflowNodes(false);
+    const { nodes: hookNodes, edges: hookEdges } = useWorkflowNodes(false);
+    const nodes = propNodes ?? hookNodes;
+    const edges = propEdges ?? hookEdges;
 
     const { edgeTypes, nodeTypes } = useFlowTypes({ isVertical: false });
 

@@ -7,11 +7,15 @@ const colorTokens = {
     },
     inputBorder: {
         default: "grey.100",
-        _dark: "grey.100",
+        _dark: "grey.400",
     },
     inputPlaceholder: {
         default: "grey.500",
         _dark: "grey.400",
+    },
+    inputActiveBorder: {
+        default: "grey.900",
+        _dark: "white",
     },
     textPrimary: {
         default: "grey.900",

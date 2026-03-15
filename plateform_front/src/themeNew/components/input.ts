@@ -26,6 +26,12 @@ const baseStyle = definePartsStyle({
         _placeholder: {
             color: "inputPlaceholder",
         },
+        _active : {
+            borderColor: "inputActiveBorder",
+        },
+        _focus: {
+            borderColor: "inputActiveBorder",
+        },
     },
 });
 
@@ -60,7 +66,7 @@ const Input = defineMultiStyleConfig({
     },
     defaultProps: {
         size: "md",
-        variant: "default", // Chakra ui applie un variant "outline" par défaut donc on l'override
+        variant: "default",
     },
 });
 

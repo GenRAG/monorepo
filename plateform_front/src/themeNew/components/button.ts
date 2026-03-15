@@ -90,7 +90,7 @@ const Button = {
 
                 background: disabled
                     ? "radial-gradient(95.81% 135.6% at 100% 0%, rgba(255, 255, 255, 0.99) 0%,rgb(175, 250, 140) 100%)"
-                    : "radial-gradient(35.81% 85.6% at 40% 30%, rgba(169, 250, 176, 0.81) 0%,rgb(0, 183, 104) 100%)",
+                    : "radial-gradient(35.81% 85.6% at 40% 30%, rgba(127, 221, 142, 0.81) 0%,rgb(0, 183, 104) 100%)",
                 backgroundSize: "300% 300%",
                 backgroundPosition: "0% 90%",
                 transition: disabled
@@ -124,7 +124,7 @@ const Button = {
                 color: disabled ? colors.grey[200] : colors.font.white,
                 background: disabled
                     ? colors.grey[100]
-                    : darkThemeColors.green.primary600,
+                    : darkThemeColors.green.primary400,
                 _dark: {
                     background: disabled
                         ? darkThemeColors.green.primary500
@@ -144,7 +144,9 @@ const Button = {
                         : darkThemeColors.green.primary500,
                 },
                 _active: {
-                    bg: disabled ? colors.grey[200] : colors.grey[800],
+                    bg: disabled
+                        ? colors.grey[200]
+                        : darkThemeColors.green.primary500,
                 },
                 _focus: {
                     boxShadow: disabled ? "none" : shadow["focus-button"],

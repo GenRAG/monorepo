@@ -23,8 +23,8 @@ import { AgentsList } from "pages/Agents";
 import { Workspaces } from "pages/Workspace";
 
 const ChatRoute = () => {
-    const { chatId } = useParams<{ chatId: string }>();
-    return <Assistant key={chatId} />;
+    const { assistantId } = useParams<{ assistantId: string }>();
+    return <Assistant key={assistantId} />;
 };
 
 export default function Router() {

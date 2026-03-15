@@ -92,6 +92,7 @@ export default function Router() {
                     </Route>
                 </Route>
 
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>

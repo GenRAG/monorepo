@@ -30,5 +30,6 @@ export interface DeployedChatInterfaceProps {
     placeholder?: string;
     welcomeMessage?: string;
     title?: string;
+    emptyStateTitle?: string;
     showOnlineBadge?: boolean;
 }

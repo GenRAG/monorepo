@@ -3,6 +3,7 @@ import {
     Box,
     Flex,
     IconButton,
+    Text,
     useColorMode,
     useDisclosure,
 } from "@chakra-ui/react";
@@ -33,6 +34,7 @@ export const DeployedChatInterface: React.FC<DeployedChatInterfaceProps> = ({
     placeholder = "Posez votre question...",
     welcomeMessage,
     title = "Assistant",
+    emptyStateTitle = "What's on your mind?",
     showOnlineBadge = true,
 }) => {
     const { colorMode } = useColorMode();
@@ -44,6 +46,13 @@ export const DeployedChatInterface: React.FC<DeployedChatInterfaceProps> = ({
         defaultIsOpen: !isMobile,
     });
 
+    const animatedPlaceholders = [
+        "How can this assistant help me today?",
+        "Summarize the key risks in this contract.",
+        "Find the most important information in my documents.",
+        "Draft a quick answer based on my knowledge base.",
+    ];
+
     const [editingMessageId, setEditingMessageId] = useState<string | null>(
         null,
     );
@@ -51,10 +60,11 @@ export const DeployedChatInterface: React.FC<DeployedChatInterfaceProps> = ({
     const [editType, setEditType] = useState<"question" | "response">(
         "question",
     );
+    const hasMessages = messages.length > 0;
 
     const lastMessage = messages[messages.length - 1];
-    const canEditMessage = (messageId: string) =>
-        onUpdateMessage && lastMessage?.id === messageId;
+    const canEditMessage: (messageId: string) => boolean = (messageId) =>
+        !!(onUpdateMessage && lastMessage?.id === messageId);
 
     const scrollToBottom = useCallback(() => {
         if (messagesContainerRef.current) {
@@ -126,12 +136,12 @@ export const DeployedChatInterface: React.FC<DeployedChatInterfaceProps> = ({
             h="100%"
             minH="600px"
             border={`1px solid ${colorMode === "dark" ? "grey.600" : "#E7E7E7"}`}
-            borderRadius="12px"
+            borderRadius="16px"
             bg={colorMode === "dark" ? "grey.800" : "white"}
             overflow="hidden"
             position="relative"
         >
-            {isSidebarOpen && isMobile && (
+            {hasMessages && isSidebarOpen && isMobile && (
                 <Box
                     position="absolute"
                     inset={0}
@@ -140,19 +150,21 @@ export const DeployedChatInterface: React.FC<DeployedChatInterfaceProps> = ({
                     onClick={toggleSidebar}
                 />
             )}
-            <DeployedChatSidebar
-                assistants={assistants}
-                currentAssistantId={currentAssistantId}
-                onAssistantSelect={onAssistantSelect}
-                conversations={conversations}
-                currentConversationId={currentConversationId}
-                onConversationSelect={onConversationSelect}
-                onNewConversation={onNewConversation}
-                onClose={toggleSidebar}
-                isOpen={isSidebarOpen}
-            />
+            {hasMessages && (
+                <DeployedChatSidebar
+                    assistants={assistants}
+                    currentAssistantId={currentAssistantId}
+                    onAssistantSelect={onAssistantSelect}
+                    conversations={conversations}
+                    currentConversationId={currentConversationId}
+                    onConversationSelect={onConversationSelect}
+                    onNewConversation={onNewConversation}
+                    onClose={toggleSidebar}
+                    isOpen={isSidebarOpen}
+                />
+            )}
 
-            {!isSidebarOpen && (
+            {hasMessages && !isSidebarOpen && (
                 <Box
                     position="absolute"
                     left={0}
@@ -180,37 +192,104 @@ export const DeployedChatInterface: React.FC<DeployedChatInterfaceProps> = ({
                 </Box>
             )}
 
-            <Flex flex={1} flexDirection="column" minW={0}>
-                <ChatHeader
-                    title={title}
-                    showOnlineBadge={showOnlineBadge}
-                    isMobile={isMobile}
-                />
-                <ChatMessagesList
-                    messages={messages}
-                    welcomeMessage={welcomeMessage}
-                    isLoading={isLoading}
-                    isMobile={isMobile}
-                    editingMessageId={editingMessageId}
-                    editType={editType}
-                    editContent={editContent}
-                    //canEditMessage={canEditMessage}
-                    canEditMessage={() => false}
-                    onEditContentChange={setEditContent}
-                    onCopy={copyToClipboard}
-                    onStartEdit={startEdit}
-                    onSaveEdit={saveEdit}
-                    onCancelEdit={cancelEdit}
-                    messagesContainerRef={messagesContainerRef}
-                />
-                <ChatInput
-                    value={question}
-                    onChange={setQuestion}
-                    onSubmit={handleSubmit}
-                    placeholder={placeholder}
-                    isLoading={isLoading}
-                    isMobile={isMobile}
-                />
+            <Flex flex={1} flexDirection="column" minW={0} position="relative">
+                {!hasMessages ? (
+                    <Flex
+                        flex={1}
+                        align="center"
+                        justify="center"
+                        position="relative"
+                        px={{ base: 4, md: 8 }}
+                        bg={colorMode === "dark" ? "grey.900" : "grey.50"}
+                        overflow="hidden"
+                    >
+                        <Box
+                            position="absolute"
+                            top="10%"
+                            left="50%"
+                            transform="translateX(-50%)"
+                            w={{ base: "340px", md: "1280px" }}
+                            h={{ base: "260px", md: "860px" }}
+                            borderRadius="full"
+                            filter="blur(100px)"
+                            bgGradient={
+                                colorMode === "dark"
+                                    ? "linear(to-b, green.50, green.900)"
+                                    : "linear(to-b, green.200, green.500)"
+                            }
+                            opacity={colorMode === "dark" ? 0.45 : 0.2}
+                            pointerEvents="none"
+                        />
+
+                        <Box zIndex={1} w="100%" maxW="760px">
+                            <Text
+                                textAlign="center"
+                                fontSize={{ base: "2xl", md: "4xl" }}
+                                fontWeight="semibold"
+                                color={
+                                    colorMode === "dark" ? "white" : "grey.900"
+                                }
+                                mb={8}
+                            >
+                                {emptyStateTitle}
+                            </Text>
+
+                            <ChatInput
+                                value={question}
+                                onChange={setQuestion}
+                                onSubmit={handleSubmit}
+                                placeholder={placeholder}
+                                animatedPlaceholders={animatedPlaceholders}
+                                isLoading={isLoading}
+                                isMobile={isMobile}
+                                isEmptyState
+                            />
+                        </Box>
+                    </Flex>
+                ) : (
+                    <>
+                        <ChatHeader
+                            title={title}
+                            showOnlineBadge={showOnlineBadge}
+                            isMobile={isMobile}
+                        />
+                        <ChatMessagesList
+                            messages={messages}
+                            welcomeMessage={welcomeMessage}
+                            isLoading={isLoading}
+                            isMobile={isMobile}
+                            editingMessageId={editingMessageId}
+                            editType={editType}
+                            editContent={editContent}
+                            canEditMessage={canEditMessage}
+                            onEditContentChange={setEditContent}
+                            onCopy={copyToClipboard}
+                            onStartEdit={startEdit}
+                            onSaveEdit={saveEdit}
+                            onCancelEdit={cancelEdit}
+                            messagesContainerRef={messagesContainerRef}
+                        />
+                        <Box
+                            px={{ base: 2, md: 3 }}
+                            pb={{ base: 2, md: 3 }}
+                            pt={2}
+                            bg={colorMode === "dark" ? "grey.800" : "white"}
+                            borderTop={`1px solid ${
+                                colorMode === "dark" ? "grey.700" : "grey.100"
+                            }`}
+                        >
+                            <ChatInput
+                                value={question}
+                                onChange={setQuestion}
+                                onSubmit={handleSubmit}
+                                placeholder={placeholder}
+                                animatedPlaceholders={animatedPlaceholders}
+                                isLoading={isLoading}
+                                isMobile={isMobile}
+                            />
+                        </Box>
+                    </>
+                )}
             </Flex>
         </Flex>
     );

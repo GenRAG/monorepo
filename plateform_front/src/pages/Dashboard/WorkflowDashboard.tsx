@@ -101,7 +101,7 @@ export const WorkflowDashboard = () => {
                 />
             ),
         }),
-        [],
+        [isMobile],
     );
 
     return (

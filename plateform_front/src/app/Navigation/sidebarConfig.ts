@@ -13,7 +13,7 @@ import {
 
 export const mainMenu = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { id: "workspaces", icon: Folder, label: "Workspaces" },
+    { id: "workspaces", icon: Folder, label: "Agents" },
     { id: "assistants", icon: MessageCircle, label: "Assistants" },
     { id: "billing", icon: CreditCard, label: "Billing" },
 ];
@@ -23,17 +23,20 @@ export const supportMenu = [
     { id: "notifications", icon: Bell, label: "Documentation" },
 ];
 
-export const workspaceMenu = [
-    { id: "chat", icon: MessageCircle, label: "Chat" },
+export const agentMenu = [
+    { id: "playground", icon: MessageCircle, label: "Playground" },
 ];
 
-export const workspaceFeaturesMenu = [
+export const agentFeaturesMenu = [
     { id: "workflow", icon: GitGraph, label: "Workflow" },
     { id: "documents", icon: FileText, label: "Documents" },
-    /*{ id: "analytics", icon: BarChart2, label: "Analytics" },*/
-    { id: "deployment", icon: Cloud, label: "Deployment" },
+    { id: "deploy", icon: Cloud, label: "Deployment" },
 ];
 
-export const workspaceSettingsMenu = [
+export const agentSettingsMenu = [
     { id: "settings", icon: Settings, label: "Settings" },
 ];
+
+export const workspaceMenu = agentMenu;
+export const workspaceFeaturesMenu = agentFeaturesMenu;
+export const workspaceSettingsMenu = agentSettingsMenu;

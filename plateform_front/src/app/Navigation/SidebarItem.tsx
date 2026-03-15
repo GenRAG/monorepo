@@ -25,8 +25,6 @@ interface SidebarItemProps {
     childrenItems?: { label: string; icon?: any; onClick?: () => void }[];
     badgeColor?: string;
     onClick?: () => void;
-    //expandedItem: string | null;
-    //setExpandedItem: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const SidebarItem = ({
@@ -36,7 +34,7 @@ export const SidebarItem = ({
     tag,
     active,
     open,
-    textColor = "grey.200",
+    textColor = "white",
     iconColor = "grey.200",
     childrenItems,
     onClick,
@@ -55,10 +53,7 @@ export const SidebarItem = ({
     const activeColor = currentDarkTheme.primary500;
     const beforeColor = currentDarkTheme.primary;
     const badgeColorValue = useColorModeValue("grey.500", "grey.300");
-    const childLineColor = useColorModeValue(
-        currentDarkTheme.rgba.primary20,
-        currentDarkTheme.rgba.primary30,
-    );
+    const childLineColor = useColorModeValue("grey.800", "grey.800");
     const childTextColor = useColorModeValue("grey.300", "grey.300");
     const tooltipBg = useColorModeValue("grey.700", "green.600");
     const chevronColor = useColorModeValue("grey.500", "grey.300");
@@ -166,9 +161,9 @@ export const SidebarItem = ({
                 <Collapse in={isExpanded && open}>
                     <HStack align="stretch" pl={4} spacing={2} mt={1} mb={4}>
                         <Box
-                            w="4px"
+                            w="1.5px"
                             bg={childLineColor}
-                            borderRadius="9999px"
+                            borderRadius="0px"
                             pb={4}
                             mr={2}
                         />
@@ -195,7 +190,11 @@ export const SidebarItem = ({
                                     _hover={{ cursor: "pointer", bg: hoverBg }}
                                 >
                                     {child.icon && (
-                                        <Icon as={child.icon} boxSize={3} />
+                                        <Icon
+                                            as={child.icon}
+                                            boxSize={4}
+                                            color={"grey.200"}
+                                        />
                                     )}
                                     <Text
                                         fontSize="sm"

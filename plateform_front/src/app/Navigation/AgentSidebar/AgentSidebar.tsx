@@ -10,11 +10,11 @@ import {
     Stack,
     Divider,
 } from "@chakra-ui/react";
-import { Menu } from "lucide-react";
+import { LayoutDashboard, Menu } from "lucide-react";
 import {
-    workspaceMenu,
-    workspaceFeaturesMenu,
-    workspaceSettingsMenu,
+    agentMenu,
+    agentFeaturesMenu,
+    agentSettingsMenu,
 } from "app/Navigation/sidebarConfig";
 import { SidebarHeader } from "app/Navigation/SidebarHeader";
 import { SidebarItem } from "app/Navigation/SidebarItem";
@@ -24,14 +24,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
 
-const SidebarWorkspace = () => {
+const AgentSidebar = () => {
     const navigate = useNavigate();
-    const { workspaceId } = useParams<{ workspaceId: string }>();
+    const { workspaceId, agentId } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const activePath = useActiveSidebarItem([
-        ...workspaceMenu.map((i) => i.id),
-        ...workspaceFeaturesMenu.map((i) => i.id),
-        ...workspaceSettingsMenu.map((i) => i.id),
+        ...agentMenu.map((i) => i.id),
+        ...agentFeaturesMenu.map((i) => i.id),
+        ...agentSettingsMenu.map((i) => i.id),
     ]);
 
     const bg = useColorModeValue(
@@ -53,10 +56,17 @@ const SidebarWorkspace = () => {
     });
 
     const handleItemClick = async (id: string) => {
-        if (workspaceId) {
-            await navigate(`/workspaces/${workspaceId}/${id}`);
+        if (workspaceId && agentId) {
+            await navigate(
+                `/workspaces/${workspaceId}/agents/${agentId}/${id}`,
+            );
             if (isMobile) onToggle();
         }
+    };
+
+    const handleDashboardClick = async () => {
+        await navigate("/dashboard");
+        if (isMobile) onToggle();
     };
 
     const sidebarContent = (
@@ -64,7 +74,7 @@ const SidebarWorkspace = () => {
             <SidebarHeader
                 titleColor="green.500"
                 iconColor="grey.900"
-                title="Workspace"
+                title="Agent"
                 isOpen={isOpen}
                 onToggle={onToggle}
                 color={color}
@@ -72,8 +82,21 @@ const SidebarWorkspace = () => {
             />
 
             <Stack gap={0} flex={1}>
+                <SidebarSection title="Quick Access" isOpen={isOpen}>
+                    <SidebarItem
+                        icon={LayoutDashboard}
+                        label="Dashboard"
+                        active={false}
+                        onClick={handleDashboardClick}
+                        open={isOpen}
+                        textColor="grey.900"
+                        iconColor="grey.900"
+                    />
+                </SidebarSection>
+                <Divider w="100%" borderColor={border} borderWidth="1px" />
+
                 <SidebarSection title="Menu" isOpen={isOpen}>
-                    {workspaceMenu.map(({ id, icon, label }) => (
+                    {agentMenu.map(({ id, icon, label }) => (
                         <SidebarItem
                             key={id}
                             active={activePath === id}
@@ -81,8 +104,6 @@ const SidebarWorkspace = () => {
                             icon={icon}
                             label={label}
                             open={isOpen}
-                            //expandedItem={expandedItem}
-                            //setExpandedItem={setExpandedItem}
                             textColor="grey.900"
                             iconColor="grey.900"
                         />
@@ -91,7 +112,7 @@ const SidebarWorkspace = () => {
                 <Divider w="100%" borderColor={border} borderWidth="1px" />
 
                 <SidebarSection title="Features" isOpen={isOpen}>
-                    {workspaceFeaturesMenu.map(({ id, icon, label }) => (
+                    {agentFeaturesMenu.map(({ id, icon, label }) => (
                         <SidebarItem
                             key={id}
                             active={activePath === id}
@@ -99,8 +120,6 @@ const SidebarWorkspace = () => {
                             icon={icon}
                             label={label}
                             open={isOpen}
-                            //expandedItem={expandedItem}
-                            //setExpandedItem={setExpandedItem}
                             textColor="grey.900"
                             iconColor="grey.900"
                         />
@@ -109,7 +128,7 @@ const SidebarWorkspace = () => {
             </Stack>
 
             <SidebarSection title="Settings" isOpen={isOpen}>
-                {workspaceSettingsMenu.map(({ id, icon, label }) => (
+                {agentSettingsMenu.map(({ id, icon, label }) => (
                     <SidebarItem
                         key={id}
                         active={activePath === id}
@@ -142,7 +161,7 @@ const SidebarWorkspace = () => {
                     flexShrink={0}
                 >
                     <IconButton
-                        aria-label="Ouvrir le menu workspace"
+                        aria-label="Open agent menu"
                         icon={<Menu size={20} />}
                         variant="ghost"
                         color={color}
@@ -188,4 +207,4 @@ const SidebarWorkspace = () => {
     );
 };
 
-export default SidebarWorkspace;
+export default AgentSidebar;

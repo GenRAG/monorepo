@@ -29,8 +29,6 @@ export const SidebarFooter = ({
     name,
     email,
     supportMenu,
-    //expandedItem,
-    //setExpandedItem,
 }: SidebarFooterProps) => {
     const color = useColorModeValue("grey.300", "white");
     const dividerColor = useColorModeValue(

@@ -1,11 +1,11 @@
 import {
     HStack,
     Text,
-    Button,
     Icon,
     useColorModeValue,
+    IconButton,
 } from "@chakra-ui/react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface SidebarHeaderProps {
@@ -39,7 +39,7 @@ export const SidebarHeader = ({
                     {title}
                 </Text>
             )}
-            <Button
+            <IconButton
                 size="sm"
                 variant="ghost"
                 onClick={onMobileClose ?? onToggle}
@@ -48,9 +48,13 @@ export const SidebarHeader = ({
                 _hover={{
                     bg: hoverBg,
                 }}
-            >
-                <Icon as={isOpen ? ChevronLeft : ChevronRight} />
-            </Button>
+                icon={
+                    <Icon
+                        boxSize={5}
+                        as={isOpen ? PanelRightOpen : PanelRightClose}
+                    />
+                }
+            />
         </HStack>
     );
 };

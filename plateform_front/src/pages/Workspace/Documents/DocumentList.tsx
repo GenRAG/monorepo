@@ -18,7 +18,6 @@ import {
     Icon,
     useColorMode,
     useColorModeValue,
-    Flex,
 } from "@chakra-ui/react";
 import { DeleteIcon, Upload, FileText, File, FolderTree } from "lucide-react";
 import { Document, Folder } from "pages/Workspace/Documents/document-type";
@@ -61,67 +60,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({
 
     return (
         <VStack h="100%" align="stretch" spacing={0}>
-            <Flex
-                px={{ base: 4, md: 6 }}
-                py={4}
-                borderBottom="1px solid"
-                borderColor={colorMode === "dark" ? "grey.700" : "grey.100"}
-                justify="space-between"
-                align="center"
-                flexWrap="wrap"
-                gap={3}
-            >
-                <HStack spacing={3} flex={1} minW={0}>
-                    {onOpenFolderDrawer && (
-                        <IconButton
-                            aria-label="Open folders"
-                            icon={<FolderTree size={20} />}
-                            size="sm"
-                            variant="outline"
-                            onClick={onOpenFolderDrawer}
-                            flexShrink={0}
-                        />
-                    )}
-                    <Box minW={0}>
-                        <Text
-                            fontWeight="semibold"
-                            fontSize={{ base: "md", md: "lg" }}
-                            color={
-                                colorMode === "dark" ? "grey.100" : "grey.800"
-                            }
-                            noOfLines={1}
-                        >
-                            {selectedFolder
-                                ? selectedFolder.name
-                                : "All Documents"}
-                        </Text>
-                        <Text
-                            fontSize="sm"
-                            color={
-                                colorMode === "dark" ? "grey.300" : "grey.400"
-                            }
-                            mt={1}
-                        >
-                            {documents.length}{" "}
-                            {documents.length === 1 ? "document" : "documents"}
-                        </Text>
-                    </Box>
-                </HStack>
-                <Button
-                    leftIcon={<Upload size={18} />}
-                    variant="secondary"
-                    onClick={onUploadClick}
-                    size={{ base: "sm", md: "md" }}
-                >
-                    {isMobile ? "Upload" : "Upload Documents"}
-                </Button>
-            </Flex>
             {isMobile ? (
                 <Box
                     flex={1}
                     overflowY="auto"
-                    px={4}
-                    py={4}
                     css={{
                         "&::-webkit-scrollbar": { width: "6px" },
                         "&::-webkit-scrollbar-thumb": {
@@ -143,8 +85,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                 </Box>
             ) : (
                 <Box
-                    margin={{ base: "12px", md: "16px" }}
-                    borderRadius="16px"
+                    borderRadius="8px"
                     border="1px solid"
                     borderColor={colorMode === "dark" ? "grey.700" : "grey.100"}
                     overflow="auto"
@@ -154,6 +95,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                         <Thead
                             position="sticky"
                             top={0}
+                            padding={5}
                             bg={colorMode === "dark" ? "grey.800" : "white"}
                             zIndex={1}
                             color={

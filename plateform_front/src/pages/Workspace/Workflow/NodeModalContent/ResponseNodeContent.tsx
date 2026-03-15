@@ -14,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import { useEffect } from "react";
 import MenuDropDown from "components/Atoms/MenuDropDown";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Banner from "components/Atoms/Banner";
 
 const ResponseNodeModal = ({
@@ -72,6 +72,10 @@ const SettingsTab = ({
     });
 
     const navigate = useNavigate();
+    const { workspaceId, agentId } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
 
     useEffect(() => {
         if (nodeData) {
@@ -309,11 +313,15 @@ const SettingsTab = ({
                     <Text
                         fontSize="sm"
                         _hover={{ textDecoration: "underline" }}
-                        onClick={() => {
-                            navigate("/workspace/12342/documents");
+                        onClick={async () => {
+                            await navigate(
+                                workspaceId && agentId
+                                    ? `/workspaces/${workspaceId}/agents/${agentId}/documents`
+                                    : "#",
+                            );
                         }}
                         cursor="pointer"
-                        color="n.500"
+                        color="green.500"
                     >
                         here
                     </Text>

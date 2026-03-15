@@ -3,18 +3,17 @@ import { AppNodeData } from "lib/type/app-node";
 import { useState } from "react";
 import {
     Button,
-    Grid,
     Textarea,
     useColorMode,
     useColorModeValue,
 } from "@chakra-ui/react";
 import { Flex, Text, VStack, Box, HStack, Icon } from "@chakra-ui/react";
-import { FileText, ArrowRight, Database, Search } from "lucide-react";
+import { Database } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import { useEffect } from "react";
 import MenuDropDown from "components/Atoms/MenuDropDown";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Banner from "components/Atoms/Banner";
 
 const QueryNodeModal = ({
@@ -61,7 +60,7 @@ const QueryNodeModal = ({
 };
 
 const SettingsTab = ({
-    task,
+    task: _task,
     nodeData,
 }: {
     task: Task;
@@ -72,6 +71,10 @@ const SettingsTab = ({
     });
 
     const navigate = useNavigate();
+    const { workspaceId, agentId } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
 
     useEffect(() => {
         if (nodeData) {
@@ -92,7 +95,7 @@ const SettingsTab = ({
         }
     };
 
-    const renderParamInput = (param: TaskParam) => {
+    const _renderParamInput = (param: TaskParam) => {
         const options = getOptionsForParam(param);
         const fieldName = param.name;
         const currentValue = watch(fieldName) || nodeData?.[fieldName];
@@ -310,7 +313,11 @@ const SettingsTab = ({
                         fontSize="sm"
                         _hover={{ textDecoration: "underline" }}
                         onClick={() => {
-                            navigate("/workspace/12342/documents");
+                            void navigate(
+                                workspaceId && agentId
+                                    ? `/workspaces/${workspaceId}/agents/${agentId}/documents`
+                                    : "#",
+                            );
                         }}
                         cursor="pointer"
                         color="green.500"

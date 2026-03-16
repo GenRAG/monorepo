@@ -1,7 +1,7 @@
 import { Position } from "@xyflow/react";
-import { ShapeType } from "../../components/nodes/NodeShape";
 import { TaskType } from "../../types/task";
 import { type LucideIcon, Brain } from "lucide-react";
+import { ShapeType } from "../../components/nodes";
 
 export const AddModel = {
     type: TaskType.MODEL,

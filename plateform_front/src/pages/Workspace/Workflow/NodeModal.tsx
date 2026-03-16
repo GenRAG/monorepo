@@ -3,13 +3,10 @@ import {
     HStack,
     IconButton,
     Text,
-    useColorMode,
     useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
-import { NodeShape } from "components/Molecules/Nodes/NodeShape";
-import { Task, TaskType } from "lib/type/task";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DatabaseNodeModal from "pages/Workspace/Workflow/NodeModalContent/DocumentNodeContent";
@@ -17,6 +14,9 @@ import RerankerNodeModal from "pages/Workspace/Workflow/NodeModalContent/ReRanke
 import QueryNodeModal from "pages/Workspace/Workflow/NodeModalContent/QueryNodeContent";
 import ResponseNodeModal from "pages/Workspace/Workflow/NodeModalContent/ResponseNodeContent";
 import SettingPlaceholderContent from "pages/Workspace/Workflow/NodeModalContent/SettingPlaceholderContent";
+import { NodeShape } from "pages/Workspace/Workflow/NodeShape";
+
+import { Task, TaskType } from "@genrag/workflow";
 
 interface NodeModalProps {
     task: Task | null;

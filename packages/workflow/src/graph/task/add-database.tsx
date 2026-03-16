@@ -1,6 +1,6 @@
-import { ShapeType } from "../../components/nodes/NodeShape";
 import { TaskType } from "../../types/task";
 import { Database, type LucideIcon } from "lucide-react";
+import { ShapeType } from "../../components/nodes";
 
 export const AddDatabase = {
     type: TaskType.RETRIEVER,

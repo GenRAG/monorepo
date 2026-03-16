@@ -7,11 +7,14 @@ import {
     Icon,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { AppNodeData } from "lib/type/app-node";
-import { TaskRegistry } from "lib/workflow/task/registry";
-import { Task, TaskType } from "lib/type/task";
 import { Cpu, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import * as WorkflowPackage from "@genrag/workflow";
+
+import type { AppNodeData, Task } from "@genrag/workflow";
+import { TaskType } from "@genrag/workflow";
+
+const { TaskRegistry } = WorkflowPackage as any;
 
 interface ModelNodeProps {
     id: string;
@@ -128,7 +131,6 @@ const ModelPlaceholder = ({
     const bgHover = useColorModeValue("green.50", "grey.700");
     const iconColor = useColorModeValue("green.400", "green.400");
     const textColor = useColorModeValue("grey.500", "grey.400");
-    const bg = useColorModeValue("white", "grey.800");
 
     return (
         <Flex
@@ -144,7 +146,6 @@ const ModelPlaceholder = ({
             cursor="pointer"
             transition="all 0.15s"
             _hover={{ bg: bgHover, borderColor: iconColor }}
-            bg={bg}
             onClick={onClick}
         >
             <Icon as={Cpu} boxSize={4} color={iconColor} />
@@ -155,12 +156,7 @@ const ModelPlaceholder = ({
     );
 };
 
-export const ModelNode = ({
-    id,
-    data,
-    selected,
-    onNodeClick,
-}: ModelNodeProps) => {
+const ModelNode = ({ id, data, selected, onNodeClick }: ModelNodeProps) => {
     const nodeData = data as AppNodeData;
     const task = TaskRegistry[TaskType.MODEL] as Task;
     const isPlaceholder = nodeData.isPlaceholder;
@@ -180,7 +176,6 @@ export const ModelNode = ({
             alignItems="center"
             position="relative"
         >
-            {/* Handle */}
             <Handle
                 id="setting-target"
                 type="target"

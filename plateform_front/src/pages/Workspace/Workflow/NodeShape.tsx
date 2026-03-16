@@ -1,6 +1,6 @@
-import { Box, Flex, HStack, Icon, useColorModeValue } from "@chakra-ui/react";
-import { useAppResponsive } from "hooks/useAppResponsive";
+import { Box, Icon, useColorModeValue } from "@chakra-ui/react";
 import { useState } from "react";
+import { useAppResponsive } from "hooks/useAppResponsive";
 
 export enum ShapeType {
     CIRCLE = "circle",
@@ -14,7 +14,7 @@ export enum ShapeType {
 }
 
 interface NodeShapeProps {
-    shape: ShapeType;
+    shape: ShapeType | string;
     icon: any;
     isSelected: boolean;
     size?: number;
@@ -24,7 +24,7 @@ interface NodeShapeProps {
     iconSize?: number;
 }
 
-const SHAPE_CONFIGS = {
+const SHAPE_CONFIGS: Record<string, Record<string, string>> = {
     [ShapeType.CIRCLE]: {
         borderRadius: "50%",
     },
@@ -66,7 +66,8 @@ export const NodeShape = ({
     canHover = true,
 }: NodeShapeProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const isMobile = useAppResponsive({ base: true, lg: false });
+
+    useAppResponsive({ base: true, lg: false });
 
     const borderColorValue = useColorModeValue(
         borderColor.light,
@@ -79,7 +80,7 @@ export const NodeShape = ({
     );
     const selectedBackgroundColor = useColorModeValue("#F0FFF4", "#2F855A");
 
-    const shapeConfig = SHAPE_CONFIGS[shape];
+    const shapeConfig = SHAPE_CONFIGS[shape] ?? SHAPE_CONFIGS[ShapeType.SQUARE];
     const isDiamond = shape === ShapeType.DIAMOND;
     const borderWidth = 1;
 

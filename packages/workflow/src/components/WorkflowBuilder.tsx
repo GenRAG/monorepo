@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ReactFlow, Background, BackgroundVariant, useNodesInitialized, useReactFlow } from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, BackgroundVariant, useNodesInitialized, useReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useFlowTypes } from '../hooks/useFlowTypes';
 import { WorkflowPreset, useWorkflowNodes } from '../hooks/useWorkflowNodes';
@@ -22,7 +22,7 @@ const ShowcaseViewportController = ({ interactive }: { interactive: boolean }) =
   return null;
 };
 
-export const WorkflowBuilder = ({ interactive = true, preset }: WorkflowBuilderProps) => {
+const WorkflowBuilderInner = ({ interactive, preset }: Required<WorkflowBuilderProps>) => {
   const resolvedPreset: WorkflowPreset = preset ?? (interactive ? "default" : "showcase");
   const fitViewOptions = interactive
     ? { padding: 0.7 }
@@ -67,5 +67,13 @@ export const WorkflowBuilder = ({ interactive = true, preset }: WorkflowBuilderP
       <ShowcaseViewportController interactive={interactive} />
       <Background variant={BackgroundVariant.Dots} gap={16} />
     </ReactFlow>
+  );
+};
+
+export const WorkflowBuilder = ({ interactive = true, preset = "default" }: WorkflowBuilderProps) => {
+  return (
+    <ReactFlowProvider>
+      <WorkflowBuilderInner interactive={interactive} preset={preset} />
+    </ReactFlowProvider>
   );
 };

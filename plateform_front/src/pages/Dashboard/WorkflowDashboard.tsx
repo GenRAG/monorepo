@@ -7,19 +7,16 @@ import {
     useEdgesState,
     useNodesState,
 } from "@xyflow/react";
-import GenEdge from "components/Molecules/Edges/eges";
-import SettingsEdge from "components/Molecules/Edges/settings-edge";
-import NodeComponent from "components/Molecules/Nodes/NodeComponent";
+import * as WorkflowPackage from "@genrag/workflow";
+import { TaskType } from "@genrag/workflow";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import { AppNode } from "lib/type/app-node";
-import { TaskType } from "lib/type/task";
-import {
-    CreateFlowNode,
-    createSettingPlaceholders,
-    linkNodes,
-} from "lib/workflow/create-flow-node";
-import { getConfigInputs } from "hooks/workflow/useWorkflowNodes";
 import { useMemo } from "react";
+import NodeComponent from "components/Molecules/Nodes/NodeComponent";
+
+import type { AppNode } from "@genrag/workflow";
+
+const { GenEdge, SettingsEdge, CreateFlowNode, linkNodes } =
+    WorkflowPackage as any;
 
 export const WorkflowDashboard = () => {
     const { colorMode } = useColorMode();

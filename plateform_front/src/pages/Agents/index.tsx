@@ -144,6 +144,7 @@ export const AgentsList = () => {
                         placeholder="Search agents..."
                         bg="transparent"
                         fontSize="13px"
+                        borderRadius="12px"
                         color={textPrimary}
                         _placeholder={{ color: textSecondary }}
                     />

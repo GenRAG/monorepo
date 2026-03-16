@@ -1,7 +1,7 @@
-import { LLMS, ReRanker } from "../../components/nodes/Common";
-import { ShapeType } from "../../components/nodes/NodeShape";
+import { ReRanker } from "../../components/nodes/Common";
 import { TaskParamType, TaskType } from "../../types/task";
 import { type LucideIcon, Sparkle } from "lucide-react";
+import { ShapeType } from "../../components/nodes";
 
 export const AddReranking = {
     type: TaskType.RERANKER,

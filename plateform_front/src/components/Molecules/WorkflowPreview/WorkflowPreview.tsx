@@ -1,9 +1,28 @@
 import { Box, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { Background, BackgroundVariant, Edge, ReactFlow } from "@xyflow/react";
+import {
+    Background,
+    BackgroundVariant,
+    Edge,
+    ReactFlow,
+    ReactFlowProvider,
+} from "@xyflow/react";
+import { useMemo } from "react";
 
-import { useFlowTypes } from "hooks/workflow/useFlowTypes";
-import { useWorkflowNodes } from "hooks/workflow/useWorkflowNodes";
-import { AppNode } from "lib/type/app-node";
+import * as WorkflowPackage from "@genrag/workflow";
+import type { AppNode } from "@genrag/workflow";
+import NodeComponent from "components/Molecules/Nodes/NodeComponent";
+
+const { useFlowTypes, useWorkflowNodes } = WorkflowPackage as any;
+
+type WorkflowNodesResult = {
+    nodes: AppNode[];
+    edges: Edge[];
+};
+
+type FlowTypesResult = {
+    nodeTypes: any;
+    edgeTypes: any;
+};
 
 interface WorkflowPreviewProps {
     height?: string | number | { base: string | number; lg: string | number };
@@ -23,12 +42,6 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
     const { colorMode } = useColorMode();
     const borderColor = useColorModeValue("grey.200", "grey.700");
 
-    const { nodes: hookNodes, edges: hookEdges } = useWorkflowNodes(false);
-    const nodes = propNodes ?? hookNodes;
-    const edges = propEdges ?? hookEdges;
-
-    const { edgeTypes, nodeTypes } = useFlowTypes({ isVertical: false });
-
     return (
         <Box
             position="relative"
@@ -39,28 +52,70 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
             borderColor={borderColor}
             overflow="hidden"
         >
-            <ReactFlow
-                colorMode={colorMode === "dark" ? "dark" : "light"}
-                nodes={nodes}
-                edges={edges}
-                nodeTypes={nodeTypes}
-                edgeTypes={edgeTypes}
-                fitView
-                fitViewOptions={{ padding: padding, minZoom: zoom, maxZoom: 1 }}
-                nodesDraggable={false}
-                nodesConnectable={false}
-                elementsSelectable={false}
-                panOnDrag={false}
-                zoomOnScroll={false}
-                zoomOnPinch={false}
-                zoomOnDoubleClick={false}
-            >
-                <Background
-                    variant={BackgroundVariant.Dots}
-                    gap={12}
-                    size={2}
+            <ReactFlowProvider>
+                <WorkflowPreviewCanvas
+                    colorMode={colorMode}
+                    zoom={zoom}
+                    padding={padding}
+                    propNodes={propNodes}
+                    propEdges={propEdges}
                 />
-            </ReactFlow>
+            </ReactFlowProvider>
         </Box>
+    );
+};
+
+const WorkflowPreviewCanvas = ({
+    colorMode,
+    zoom,
+    padding,
+    propNodes,
+    propEdges,
+}: {
+    colorMode: string;
+    zoom: number;
+    padding: number;
+    propNodes?: AppNode[];
+    propEdges?: Edge[];
+}) => {
+    const { nodes: hookNodes, edges: hookEdges } = (
+        useWorkflowNodes as (options?: boolean) => WorkflowNodesResult
+    )(false);
+    const nodes = propNodes ?? hookNodes;
+    const edges = propEdges ?? hookEdges;
+
+    const { edgeTypes, nodeTypes } = (
+        useFlowTypes as (options?: { isVertical?: boolean }) => FlowTypesResult
+    )({ isVertical: false });
+
+    const appNodeTypes = useMemo(
+        () => ({
+            ...nodeTypes,
+            GenNode: (props: any) => (
+                <NodeComponent {...props} isVertical={false} />
+            ),
+        }),
+        [nodeTypes],
+    );
+
+    return (
+        <ReactFlow
+            colorMode={colorMode === "dark" ? "dark" : "light"}
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={appNodeTypes}
+            edgeTypes={edgeTypes}
+            fitView
+            fitViewOptions={{ padding: padding, minZoom: zoom, maxZoom: 1 }}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={false}
+            panOnDrag={false}
+            zoomOnScroll={false}
+            zoomOnPinch={false}
+            zoomOnDoubleClick={false}
+        >
+            <Background variant={BackgroundVariant.Dots} gap={12} size={2} />
+        </ReactFlow>
     );
 };

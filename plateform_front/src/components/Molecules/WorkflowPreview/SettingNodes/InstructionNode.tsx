@@ -12,10 +12,10 @@ import {
     Button,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { AppNodeData } from "lib/type/app-node";
-import { FileText, Pencil, Check } from "lucide-react";
+import { FileText, Pencil, Check, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus } from "lucide-react";
+
+import type { AppNodeData } from "@genrag/workflow";
 
 interface InstructionNodeProps {
     id: string;
@@ -123,7 +123,7 @@ const InstructionCard = ({
     );
 };
 
-export const InstructionNode = ({
+const InstructionNode = ({
     id,
     data,
     selected,
@@ -278,14 +278,14 @@ export const InstructionNode = ({
                                     isDisabled={!draft.trim()}
                                     onClick={handleValidate}
                                 >
-                                    Validate
+                                    Save
                                 </Button>
                             </HStack>
                         </VStack>
                     </motion.div>
                 )}
 
-                {isValidated && (
+                {isValidated && !nodeData.isEditing && (
                     <motion.div
                         key="card"
                         initial={{ opacity: 0, scale: 0.95, y: -4 }}

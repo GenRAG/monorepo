@@ -216,7 +216,7 @@ export const BillingWorkspace = () => {
                 align="stretch"
                 spacing={0}
                 overflow="auto"
-                bg={isDark ? "grey.975" : "grey.50"}
+                bg={isDark ? "grey.975" : "white"}
             >
                 <Box p={6}>
                     {selectedTab === BillingTab.OVERVIEW && (
@@ -282,6 +282,7 @@ const OverviewTab = ({
                 justify="space-between"
                 flexWrap="wrap"
                 gap={4}
+                boxShadow="0 1px 4px rgba(0,0,0,0.1)"
             >
                 <HStack spacing={4}>
                     <Box
@@ -292,6 +293,7 @@ const OverviewTab = ({
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
+                        boxShadow="0 1px 4px rgba(0,0,0,0.1)"
                     >
                         <CoinsIcon color={isDark ? "#34D3A9" : "#12B98C"} />
                     </Box>

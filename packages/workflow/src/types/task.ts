@@ -25,15 +25,12 @@ export interface TaskSettingParam {
     position: { x: number; y: number };
 }
 
-// ── Chain connection (outputs optionnels dans la chaîne principale) ────────────
-// Référence uniquement un TaskType — pas de duplication d'infos
 export interface TaskChainOutput {
-    nodeType: TaskType; // référence au TaskRegistry — pas de redéfinition
-    optional: boolean; // true = le node peut être absent de la chaîne
-    position: { x: number; y: number }; // position relative si auto-placé
+    nodeType: TaskType;
+    optional: boolean;
+    position: { x: number; y: number };
 }
 
-// ── Task definition ────────────────────────────────────────────────────────────
 export interface Task {
     type: TaskType;
     label: string;
@@ -53,8 +50,6 @@ export interface Task {
     chainOutputs?: TaskChainOutput[];
 }
 
-// ── Backward compat ────────────────────────────────────────────────────────────
-// Pour ne pas casser le code existant qui utilise TaskParam
 export type TaskParam = TaskSettingParam;
 
 export enum TaskType {

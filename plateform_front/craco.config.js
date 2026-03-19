@@ -1,19 +1,16 @@
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
-const __dirname =
-  typeof __dirname !== "undefined"
-    ? __dirname
-    : dirname(fileURLToPath(import.meta.url));
+const currentDir = dirname(fileURLToPath(import.meta.url));
 
-const workflowSrc = resolve(__dirname, "../packages/workflow/src");
+const workflowSrc = resolve(currentDir, "../packages/workflow/src");
 
 export const webpack = {
   alias: {
-    "@genrag/workflow": resolve(__dirname, "../packages/workflow/src/index.ts"),
-    react: resolve(__dirname, "node_modules/react"),
-    "react-dom": resolve(__dirname, "node_modules/react-dom"),
-    "@xyflow/react": resolve(__dirname, "node_modules/@xyflow/react"),
+    "@genrag/workflow": resolve(currentDir, "../packages/workflow/src/index.ts"),
+    react: resolve(currentDir, "node_modules/react"),
+    "react-dom": resolve(currentDir, "node_modules/react-dom"),
+    "@xyflow/react": resolve(currentDir, "node_modules/@xyflow/react"),
   },
   configure: (webpackConfig) => {
     webpackConfig.resolve.plugins = (

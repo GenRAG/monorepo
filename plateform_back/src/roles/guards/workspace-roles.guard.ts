@@ -22,17 +22,15 @@ export class WorkspaceRolesGuard implements CanActivate {
             [context.getHandler(), context.getClass()],
         );
 
-        if (!roles || roles.length === 0) {
-            return true;
-        }
-
         const request = context.switchToHttp().getRequest();
-        const { user } = request;
-        const { id: workspaceId } = request.params;
+        const { user, params } = request;
+
+        const workspaceId =
+            params?.workspaceId ?? params?.id ?? request.body?.workspaceId;
 
         if (!user || !workspaceId) return false;
 
-        const userWorkspace = await this.prisma.userWorkspace.findUnique({
+        const membership = await this.prisma.userWorkspace.findUnique({
             where: {
                 userId_workspaceId: {
                     userId: user.userId,
@@ -41,9 +39,19 @@ export class WorkspaceRolesGuard implements CanActivate {
             },
         });
 
-        if (!userWorkspace || !roles.includes(userWorkspace.role)) {
+        if (!membership) {
             throw new ForbiddenException(
-                `Access denied: Requires role ${roles.join(' or ')}`,
+                'Access denied: not a workspace member',
+            );
+        }
+
+        request.workspaceMember = membership;
+
+        if (!roles || roles.length === 0) return true;
+
+        if (!roles.includes(membership.role)) {
+            throw new ForbiddenException(
+                `Access denied: requires role ${roles.join(' or ')}`,
             );
         }
 

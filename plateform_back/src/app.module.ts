@@ -4,7 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
 import { WorkspaceModule } from './workspace/workspace.module';
-import { ProjectModule } from './project/project.module';
+import { AgentModule } from './agent/agent.module';
+import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
     imports: [
@@ -38,7 +39,8 @@ import { ProjectModule } from './project/project.module';
         UsersModule,
         AuthModule,
         WorkspaceModule,
-        ProjectModule,
+        AgentModule,
+        WorkflowModule,
     ],
     controllers: [],
     providers: [],

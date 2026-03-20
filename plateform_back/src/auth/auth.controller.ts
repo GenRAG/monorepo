@@ -11,6 +11,7 @@ import {
     VerifyTokenRequest,
 } from 'src/users/dto/verify-token.request';
 import { TokenService } from 'src/auth/token.service';
+import { LoginRequest } from 'src/auth/dto/login.request';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,7 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @Post('login')
     login(
+        @Body() _loginRequest: LoginRequest,
         @CurrentUser() user: User,
         @Res({ passthrough: true }) response: Response,
     ) {
@@ -39,7 +41,7 @@ export class AuthController {
         @Res({ passthrough: true }) response: Response,
     ) {
         const user = await this.tokenService.verifyEmailToken(verifyTokenBody);
-        return this.login(user, response);
+        return this.authService.login(user, response);
     }
 
     @Post('resend-verification-token')
@@ -51,10 +53,6 @@ export class AuthController {
 
     @Post('reset-password')
     resetPassword(@Body() resetPasswordBody: ResendVerifyTokenRequest) {
-        console.log(
-            'Received reset password request for email:',
-            resetPasswordBody.email,
-        );
         return this.authService.initiatePasswordReset(resetPasswordBody.email);
     }
 

@@ -27,7 +27,6 @@ export class AuthService {
                 'JWT_EXPIRATION',
             ) as ms.StringValue,
         );
-        console.log('Token validity in ms:', tokenValidityMs);
 
         if (typeof tokenValidityMs !== 'number') {
             throw new Error('Invalid JWT_EXPIRATION format');
@@ -63,38 +62,53 @@ export class AuthService {
             isEmailVerified: false,
         });
 
-        /*await this.tokenService.generateAndSendVerificationToken(
-            createdUser.email,
-        );*/
+        if (this.configService.get('SEND_EMAILS') === 'true') {
+            await this.tokenService.generateAndSendVerificationToken(
+                createdUser.email,
+            );
+        }
     }
 
     async verifyUser(email: string, password: string) {
-        const user = await this.usersService.getUser({ email });
-        console.log('Verifying user:', user);
+        const user = await this.usersService.getUserWithCredentials({ email });
+
         if (!user || !user.password || typeof user.password !== 'string') {
             throw new UnauthorizedException('Credentials are not valid.');
         }
 
         const authenticated = await bcrypt.compare(password, user.password);
-
-        const not_verified = !user.isEmailVerified;
-
         if (!authenticated) {
             throw new UnauthorizedException('Credentials are not valid.');
-        } /*else if (not_verified) {
+        }
+
+        if (
+            this.configService.get('SEND_EMAILS') === 'true' &&
+            !user.isEmailVerified
+        ) {
             throw new UnauthorizedException('Account not verified');
-        }*/
+        }
+
+        if (user.passwordResetToken) {
+            await this.usersService.updateUser({
+                where: { email },
+                data: {
+                    passwordResetToken: null,
+                    passwordResetLastSentAt: null,
+                },
+            });
+        }
+
         return user;
     }
 
     async initiatePasswordReset(email: string): Promise<void> {
-        const user = await this.usersService.getUser({ email });
+        const user = await this.usersService.getUserWithCredentials({ email });
         if (!user) {
             throw new UnauthorizedException(
                 'No user found with the provided email.',
             );
         }
-        console.log('Initiating password reset for user:', user);
+
         await this.tokenService.generateAndSendPasswordResetToken(user);
     }
 
@@ -102,7 +116,7 @@ export class AuthService {
         verifyTokenBody: NewPasswordRequest,
     ): Promise<void> {
         const { email, token, password } = verifyTokenBody;
-        const user = await this.usersService.getUser({ email });
+        const user = await this.usersService.getUserWithCredentials({ email });
 
         if (!user || user.passwordResetToken !== token) {
             throw new UnauthorizedException('Invalid credentials.');

@@ -4,6 +4,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomInt } from 'crypto';
 import { User } from 'generated/prisma';
 import ms from 'ms';
 import { BrevoService } from 'src/auth/brevo.service';
@@ -15,12 +16,8 @@ export class TokenService {
     constructor(
         private readonly usersService: UsersService,
         private readonly configService: ConfigService,
-    ) {
-        console.log(
-            'User service injected into TokenService:',
-            !!this.usersService,
-        );
-    }
+        private readonly brevoService: BrevoService,
+    ) {}
 
     async generateAndSendVerificationToken(email: string): Promise<void> {
         const now = Date.now();
@@ -31,7 +28,7 @@ export class TokenService {
             ) as ms.StringValue,
         );
 
-        const user = await this.usersService.getUser({ email });
+        const user = await this.usersService.getUserWithCredentials({ email });
         if (!user) {
             throw new BadRequestException('User not found.');
         }
@@ -51,8 +48,7 @@ export class TokenService {
             );
         }
 
-        const emailVerificationToken =
-            Math.floor(Math.random() * 900000) + 100000;
+        const emailVerificationToken = randomInt(100000, 999999);
 
         await this.usersService.updateUser({
             where: { email: user.email },
@@ -62,19 +58,19 @@ export class TokenService {
             },
         });
 
-        console.log(emailVerificationToken);
-
-        /*await this.brevoService.sendConfirmationEmail(
-            user.email,
-            emailVerificationToken,
-        );*/
+        if (this.configService.get('SEND_EMAILS') === 'true') {
+            await this.brevoService.sendConfirmationEmail(
+                user.email,
+                emailVerificationToken,
+            );
+        }
     }
 
     async verifyEmailToken(
         emailVerificationToken: VerifyTokenRequest,
     ): Promise<User> {
         const { email, token } = emailVerificationToken;
-        const user = await this.usersService.getUser({ email });
+        const user = await this.usersService.getUserWithCredentials({ email });
 
         if (!user) {
             throw new UnauthorizedException('User not found.');
@@ -144,11 +140,12 @@ export class TokenService {
                 passwordResetLastSentAt: new Date(),
             },
         });
-        /*
-        await this.brevoService.sendPasswordResetEmail(
-            user.email,
-            passwordResetToken,
-        );*/
-        console.log('Password token:', passwordResetToken);
+
+        if (this.configService.get('SEND_EMAILS') === 'true') {
+            await this.brevoService.sendPasswordResetEmail(
+                user.email,
+                passwordResetToken,
+            );
+        }
     }
 }

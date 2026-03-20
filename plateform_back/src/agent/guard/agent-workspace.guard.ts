@@ -14,14 +14,16 @@ export class AgentBelongsToWorkspaceGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const { workspaceId, agentId } = request.params;
 
-        if (!agentId || !workspaceId) return true;
+        if (!agentId || !workspaceId) {
+            return true;
+        }
 
         const agent = await this.prisma.agent.findFirst({
             where: { id: agentId, workspaceId },
         });
 
         if (!agent) {
-            throw new NotFoundException('Agent not found');
+            throw new NotFoundException('Agent pas trouvé');
         }
 
         return true;

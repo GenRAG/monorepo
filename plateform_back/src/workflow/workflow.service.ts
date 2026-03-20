@@ -75,9 +75,9 @@ export class WorkflowService {
         return workflows;
     }
 
-    async findOne(id: string) {
+    async findOne(id: string, agentId: string) {
         const workflow = await this.prismaService.workflow.findUnique({
-            where: { id },
+            where: { id, agentId },
         });
 
         if (!workflow) {

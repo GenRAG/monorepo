@@ -131,7 +131,7 @@ export class TokenService {
             );
         }
 
-        const passwordResetToken = Math.floor(Math.random() * 900000) + 100000;
+        const passwordResetToken = randomInt(100000, 1000000);
 
         await this.usersService.update({
             where: { email: user.email },

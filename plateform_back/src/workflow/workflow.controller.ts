@@ -50,7 +50,7 @@ export class WorkflowController {
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.workflowService.findOne(id);
+    findOne(@Param('id') id: string, @Param('agentId') agentId: string) {
+        return this.workflowService.findOne(id, agentId);
     }
 }

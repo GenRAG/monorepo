@@ -49,6 +49,7 @@ export class AgentService {
         id: string,
         workspaceId: string,
         updateAgentDto: UpdateAgentRequest,
+        userId: string,
     ): Promise<Agent> {
         const agent = await this.prismaService.agent.findFirst({
             where: { id, workspaceId },
@@ -60,7 +61,10 @@ export class AgentService {
 
         return this.prismaService.agent.update({
             where: { id },
-            data: updateAgentDto,
+            data: {
+                ...updateAgentDto,
+                updatedBy: userId,
+            },
         });
     }
 

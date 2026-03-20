@@ -57,8 +57,14 @@ export class AgentController {
         @Param('id') id: string,
         @Param('workspaceId') workspaceId: string,
         @Body() updateAgentRequest: UpdateAgentRequest,
+        @CurrentUser(CurrentUserPipe) user: UserSafe,
     ): Promise<Agent> {
-        return this.agentService.update(id, workspaceId, updateAgentRequest);
+        return this.agentService.update(
+            id,
+            workspaceId,
+            updateAgentRequest,
+            user.id,
+        );
     }
 
     @Delete(':id')

@@ -23,7 +23,13 @@ export class UsersController {
 
     @Delete('delete')
     @UseGuards(JwtAuthGuard)
-    deleteUser(@Body() body: DeleteUserRequest) {
-        return this.usersService.deleteUser(body.id);
+    delete(@Body() body: DeleteUserRequest) {
+        return this.usersService.delete(body.id);
+    }
+
+    @Delete('delete/me')
+    @UseGuards(JwtAuthGuard)
+    deleteCurrentUser(@CurrentUser(CurrentUserPipe) user: UserSafe) {
+        return this.usersService.delete(user.id);
     }
 }

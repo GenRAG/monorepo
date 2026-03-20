@@ -8,17 +8,19 @@ import {
     Post,
     UseGuards,
 } from '@nestjs/common';
-import { Workspace } from 'generated/prisma';
+import { UserRole, Workspace } from 'generated/prisma';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/roles/guards/workspace-roles.guard';
+import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorateur';
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
 import { WorkspaceService } from 'src/workspace/workspace.service';
+import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
 @Controller('workspaces')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, AgentBelongsToWorkspaceGuard)
 export class WorkspaceController {
     constructor(private readonly workspaceService: WorkspaceService) {}
 
@@ -45,6 +47,7 @@ export class WorkspaceController {
 
     @Delete(':id')
     @UseGuards(WorkspaceRolesGuard)
+    @RolesInWorkspace(UserRole.ADMIN)
     @HttpCode(204)
     deleteWorkspace(@Param('id') workspaceId: string): Promise<void> {
         return this.workspaceService.delete(workspaceId);

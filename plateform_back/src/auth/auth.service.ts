@@ -50,14 +50,14 @@ export class AuthService {
     async register(registerBody: CreateUserRequest): Promise<void> {
         const { email } = registerBody;
 
-        const existingUser = await this.usersService.getUser({ email });
+        const existingUser = await this.usersService.findOne({ email });
         if (existingUser) {
             throw new UnauthorizedException(
                 'User with this email already exists.',
             );
         }
 
-        const createdUser = await this.usersService.createUser({
+        const createdUser = await this.usersService.create({
             ...registerBody,
             isEmailVerified: false,
         });
@@ -70,7 +70,7 @@ export class AuthService {
     }
 
     async verifyUser(email: string, password: string) {
-        const user = await this.usersService.getUserWithCredentials({ email });
+        const user = await this.usersService.findOneWithCredentials({ email });
 
         if (!user || !user.password || typeof user.password !== 'string') {
             throw new UnauthorizedException('Credentials are not valid.');
@@ -89,7 +89,7 @@ export class AuthService {
         }
 
         if (user.passwordResetToken) {
-            await this.usersService.updateUser({
+            await this.usersService.update({
                 where: { email },
                 data: {
                     passwordResetToken: null,
@@ -102,7 +102,7 @@ export class AuthService {
     }
 
     async initiatePasswordReset(email: string): Promise<void> {
-        const user = await this.usersService.getUserWithCredentials({ email });
+        const user = await this.usersService.findOneWithCredentials({ email });
         if (!user) {
             throw new UnauthorizedException(
                 'No user found with the provided email.',
@@ -116,7 +116,7 @@ export class AuthService {
         verifyTokenBody: NewPasswordRequest,
     ): Promise<void> {
         const { email, token, password } = verifyTokenBody;
-        const user = await this.usersService.getUserWithCredentials({ email });
+        const user = await this.usersService.findOneWithCredentials({ email });
 
         if (!user || user.passwordResetToken !== token) {
             throw new UnauthorizedException('Invalid credentials.');
@@ -144,7 +144,7 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await this.usersService.updateUser({
+        await this.usersService.update({
             where: { email },
             data: {
                 password: hashedPassword,

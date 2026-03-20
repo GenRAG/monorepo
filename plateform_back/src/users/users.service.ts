@@ -16,7 +16,7 @@ export class UsersService {
         updatedAt: true,
     } satisfies Prisma.UserSelect;
 
-    async createUser(
+    async create(
         request: CreateUserRequest & {
             emailVerificationToken?: number;
             emailVerificationLastSentAt?: Date;
@@ -32,7 +32,7 @@ export class UsersService {
         });
     }
 
-    async getUserWithCredentials(
+    async findOneWithCredentials(
         filter: Prisma.UserWhereUniqueInput,
     ): Promise<User | null> {
         return this.prismaService.user.findUnique({
@@ -40,7 +40,7 @@ export class UsersService {
         });
     }
 
-    async getUser(
+    async findOne(
         filter: Prisma.UserWhereUniqueInput,
     ): Promise<UserSafe | null> {
         return this.prismaService.user.findUnique({
@@ -55,7 +55,7 @@ export class UsersService {
         });
     }
 
-    async updateUser(params: {
+    async update(params: {
         where: Prisma.UserWhereUniqueInput;
         data: Prisma.UserUpdateInput;
     }): Promise<UserSafe> {
@@ -67,7 +67,7 @@ export class UsersService {
         });
     }
 
-    async deleteUser(id: string): Promise<UserSafe> {
+    async delete(id: string): Promise<UserSafe> {
         return this.prismaService.user.delete({
             where: { id },
             select: this.userSafeSelect,

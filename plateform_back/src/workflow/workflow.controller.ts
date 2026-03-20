@@ -8,7 +8,7 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/roles/guards/workspace-roles.guard';
+import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
 import { CreateWorkflowRequest } from 'src/workflow/dto/create-workflow.request';
 import { UpdateWorkflowRequest } from 'src/workflow/dto/update-workflow.request';
 import { WorkflowService } from 'src/workflow/workflow.service';

@@ -28,7 +28,7 @@ export class TokenService {
             ) as ms.StringValue,
         );
 
-        const user = await this.usersService.getUserWithCredentials({ email });
+        const user = await this.usersService.findOneWithCredentials({ email });
         if (!user) {
             throw new BadRequestException('User not found.');
         }
@@ -50,7 +50,7 @@ export class TokenService {
 
         const emailVerificationToken = randomInt(100000, 999999);
 
-        await this.usersService.updateUser({
+        await this.usersService.update({
             where: { email: user.email },
             data: {
                 emailVerificationToken,
@@ -70,7 +70,7 @@ export class TokenService {
         emailVerificationToken: VerifyTokenRequest,
     ): Promise<User> {
         const { email, token } = emailVerificationToken;
-        const user = await this.usersService.getUserWithCredentials({ email });
+        const user = await this.usersService.findOneWithCredentials({ email });
 
         if (!user) {
             throw new UnauthorizedException('User not found.');
@@ -95,7 +95,7 @@ export class TokenService {
             }
         }
 
-        await this.usersService.updateUser({
+        await this.usersService.update({
             where: { email },
             data: {
                 isEmailVerified: true,
@@ -133,7 +133,7 @@ export class TokenService {
 
         const passwordResetToken = Math.floor(Math.random() * 900000) + 100000;
 
-        await this.usersService.updateUser({
+        await this.usersService.update({
             where: { email: user.email },
             data: {
                 passwordResetToken,

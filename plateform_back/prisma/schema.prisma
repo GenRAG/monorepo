@@ -71,7 +71,7 @@ model Agent {
 }
 
 enum AgentStatus {
-  DEVELOPEMENT
+  DEVELOPMENT
   STAGING
   PRODUCTION
 }
@@ -84,5 +84,5 @@ model Workflow {
   version Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  agent Agent @relation(fields: [agentId], references: [id])
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
 }

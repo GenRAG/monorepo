@@ -74,6 +74,7 @@ services:
     sh -c "yarn start:dev"
    volumes:
     - ./plateform_back:/usr/src/app
+    - /usr/src/app/node_modules
 
 volumes:
   postgres_data:

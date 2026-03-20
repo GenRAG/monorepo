@@ -12,9 +12,12 @@ import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.
 import { CreateWorkflowRequest } from 'src/workflow/dto/create-workflow.request';
 import { UpdateWorkflowRequest } from 'src/workflow/dto/update-workflow.request';
 import { WorkflowService } from 'src/workflow/workflow.service';
+import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorateur';
+import { UserRole } from 'generated/prisma';
+import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
 @Controller('workspaces/:workspaceId/agents/:agentId/workflow')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
+@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
 export class WorkflowController {
     constructor(private readonly workflowService: WorkflowService) {}
 
@@ -29,6 +32,7 @@ export class WorkflowController {
     }
 
     @Patch()
+    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     update(
         @Param('agentId') agentId: string,
         @Body() updateWorkflowRequest: UpdateWorkflowRequest,
@@ -37,6 +41,7 @@ export class WorkflowController {
     }
 
     @Post()
+    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     deploy(
         @Param('agentId') agentId: string,
         @Body() createWorkflowRequest: CreateWorkflowRequest,

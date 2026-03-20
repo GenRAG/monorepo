@@ -85,4 +85,6 @@ model Workflow {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, version])
 }

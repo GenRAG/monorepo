@@ -11,20 +11,22 @@ export class WorkflowService {
         agentId: string,
         createWorkflowRequest: CreateWorkflowRequest,
     ) {
-        const lastWorkflow = await this.prismaService.workflow.findFirst({
-            where: { agentId },
-            orderBy: { version: 'desc' },
-        });
+        return this.prismaService.$transaction(async (tx) => {
+            const lastWorkflow = await tx.workflow.findFirst({
+                where: { agentId },
+                orderBy: { version: 'desc' },
+            });
 
-        const nextVersion = lastWorkflow ? lastWorkflow.version + 1 : 1;
+            const nextVersion = lastWorkflow ? lastWorkflow.version + 1 : 1;
 
-        return this.prismaService.workflow.create({
-            data: {
-                agentId,
-                name: createWorkflowRequest.name,
-                definition: createWorkflowRequest.definition,
-                version: nextVersion,
-            },
+            return tx.workflow.create({
+                data: {
+                    agentId,
+                    name: createWorkflowRequest.name,
+                    definition: createWorkflowRequest.definition,
+                    version: nextVersion,
+                },
+            });
         });
     }
 
@@ -56,7 +58,7 @@ export class WorkflowService {
 
         return this.prismaService.workflow.update({
             where: { id: workflow.id },
-            data: { definition: updateWorkflowRequest.definition },
+            data: { ...updateWorkflowRequest },
         });
     }
 

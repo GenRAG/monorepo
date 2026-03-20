@@ -18,9 +18,10 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { Agent, UserRole } from 'generated/prisma';
+import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
 @Controller('workspaces/:workspaceId/agents')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
+@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
 export class AgentController {
     constructor(private readonly agentService: AgentService) {}
 

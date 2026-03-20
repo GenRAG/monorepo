@@ -48,7 +48,7 @@ export class TokenService {
             );
         }
 
-        const emailVerificationToken = randomInt(100000, 999999);
+        const emailVerificationToken = randomInt(100000, 1000000);
 
         await this.usersService.update({
             where: { email: user.email },

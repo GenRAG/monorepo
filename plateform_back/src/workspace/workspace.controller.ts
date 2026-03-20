@@ -17,10 +17,9 @@ import { UserSafe } from 'src/users/dto/create-user.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
 import { WorkspaceService } from 'src/workspace/workspace.service';
-import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
-@Controller('workspaces')
-@UseGuards(JwtAuthGuard, AgentBelongsToWorkspaceGuard)
+@Controller('workspace')
+@UseGuards(JwtAuthGuard)
 export class WorkspaceController {
     constructor(private readonly workspaceService: WorkspaceService) {}
 

@@ -41,7 +41,7 @@ export class WorkspaceRolesGuard implements CanActivate {
 
         if (!membership) {
             throw new ForbiddenException(
-                'Access denied: not a workspace member',
+                "Acces refusé : l'utilisateur n'est pas membre de cet espace de travail",
             );
         }
 

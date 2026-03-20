@@ -71,10 +71,9 @@ services:
    env_file:
      - ./plateform_back/.env
    command: >
-     sh -c "yarn start:dev"
+    sh -c "yarn start:dev"
    volumes:
-     - ./plateform_back:/usr/src/app
-     - /app/node_modules
+    - ./plateform_back:/usr/src/app
 
 volumes:
   postgres_data:

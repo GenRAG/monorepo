@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ROLES_IN_WORKSPACE_KEY } from 'src/roles/roles-workspace.decorateur';
+import { ROLES_IN_WORKSPACE_KEY } from 'src/workspace/roles/roles-workspace.decorateur';
 import { UserRole } from 'generated/prisma';
 
 @Injectable()

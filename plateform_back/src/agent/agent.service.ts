@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAgentRequest } from './dto/create-agent.request';
-import { UpdateAgentDto } from './dto/update-agent.dto';
+import { UpdateAgentRequest } from './dto/update-agent.request';
 import { Agent, AgentStatus } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -11,8 +11,9 @@ export class AgentService {
     async insertOne(
         createAgentRequest: CreateAgentRequest,
         userId: string,
+        workspaceId: string,
     ): Promise<Agent> {
-        const { name, description, workspaceId } = createAgentRequest;
+        const { name, description } = createAgentRequest;
 
         return this.prismaService.agent.create({
             data: {
@@ -21,7 +22,7 @@ export class AgentService {
                 workspaceId,
                 createdBy: userId,
                 updatedBy: userId,
-                status: AgentStatus.DEVELOPEMENT,
+                status: AgentStatus.DEVELOPMENT,
             },
         });
     }
@@ -32,7 +33,7 @@ export class AgentService {
         });
     }
 
-    async findOneById(id: string, workspaceId: string): Promise<Agent> {
+    async findOne(id: string, workspaceId: string): Promise<Agent> {
         const agent = await this.prismaService.agent.findFirst({
             where: { id, workspaceId },
         });
@@ -47,7 +48,7 @@ export class AgentService {
     async update(
         id: string,
         workspaceId: string,
-        updateAgentDto: UpdateAgentDto,
+        updateAgentDto: UpdateAgentRequest,
     ): Promise<Agent> {
         const agent = await this.prismaService.agent.findFirst({
             where: { id, workspaceId },

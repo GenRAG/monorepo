@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AgentService } from './agent.service';
 import { CreateAgentRequest } from './dto/create-agent.request';
-import { UpdateAgentDto } from './dto/update-agent.dto';
+import { UpdateAgentRequest } from './dto/update-agent.request';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceRolesGuard } from 'src/roles/guards/workspace-roles.guard';
 import { RolesInWorkspace } from 'src/roles/roles-workspace.decorateur';
@@ -32,8 +32,9 @@ export class AgentController {
         @Body() createAgentRequest: CreateAgentRequest,
     ): Promise<Agent> {
         return this.agentService.insertOne(
-            { ...createAgentRequest, workspaceId },
+            createAgentRequest,
             user.id,
+            workspaceId,
         );
     }
 
@@ -47,7 +48,7 @@ export class AgentController {
         @Param('workspaceId') workspaceId: string,
         @Param('id') id: string,
     ): Promise<Agent> {
-        return this.agentService.findOneById(id, workspaceId);
+        return this.agentService.findOne(id, workspaceId);
     }
 
     @Patch(':id')
@@ -55,9 +56,9 @@ export class AgentController {
     update(
         @Param('id') id: string,
         @Param('workspaceId') workspaceId: string,
-        @Body() updateAgentDto: UpdateAgentDto,
+        @Body() updateAgentRequest: UpdateAgentRequest,
     ): Promise<Agent> {
-        return this.agentService.update(id, workspaceId, updateAgentDto);
+        return this.agentService.update(id, workspaceId, updateAgentRequest);
     }
 
     @Delete(':id')

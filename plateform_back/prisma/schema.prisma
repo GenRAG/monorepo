@@ -36,11 +36,11 @@ enum UserRole {
 }
 
 model UserWorkspace {
-  userId     String
+  userId      String
   workspaceId String
-  role       UserRole
-  user       User     @relation(fields: [userId], references: [id])
-  workspace  Workspace @relation(fields: [workspaceId], references: [id])
+  role        UserRole
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@id([userId, workspaceId])
 }
@@ -56,27 +56,35 @@ model Workspace {
   agents Agent[]
 }
 
-/*model Project {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
-}*/
-
 model Agent {
   id String   @id @default(cuid())
   name String
   description String?
-  workflow Json
+  status AgentStatus
   createdAt DateTime @default(now())
+  createdBy String
   updatedAt DateTime @updatedAt
+  updatedBy String
   workspaceId String
-  workspace  Workspace @relation(fields: [workspaceId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workflows Workflow[]
 }
 
-model FolderSystem {
-  
+enum AgentStatus {
+  DEVELOPMENT
+  STAGING
+  PRODUCTION
+}
+
+model Workflow {
+  id String @id @default(cuid())
+  name String?
+  agentId String
+  definition Json
+  version Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, version])
 }

@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "dotenv -e .env.test -- jest --config ./test/jest-e2e.json --runInBand",
+    "migrate:test": "dotenv -e .env.test -- npx prisma migrate deploy"
   },
   "dependencies": {
     "@getbrevo/brevo": "2.1.1",
@@ -25,9 +26,13 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.0",
+    "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.2.6",
+    "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "6.9.0",
+    "@scalar/nestjs-api-reference": "^1.1.4",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^3.0.0",
     "bcrypt": "^6.0.0",
@@ -60,6 +65,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/supertest": "^6.0.2",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -86,7 +92,11 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1",
+      "^generated/(.*)$": "<rootDir>/../generated/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

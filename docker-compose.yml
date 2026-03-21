@@ -46,6 +46,23 @@ services:
       interval: 10s
       timeout: 5s
   
+  postgres_test:
+    image: postgres:15.3
+    container_name: postgres_test
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database_test
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d database_test"]
+      interval: 10s
+      timeout: 5s
+
+  
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -71,11 +88,12 @@ services:
    env_file:
      - ./plateform_back/.env
    command: >
-     sh -c "yarn start:dev"
+    sh -c "yarn start:dev"
    volumes:
-     - ./plateform_back:/usr/src/app
-     - /app/node_modules
+    - ./plateform_back:/usr/src/app
+    - /usr/src/app/node_modules
 
 volumes:
   postgres_data:
   pgadmin_data:
+  postgres_test_data:

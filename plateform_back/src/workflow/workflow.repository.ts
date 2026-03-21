@@ -1,0 +1,42 @@
+import { Injectable } from '@nestjs/common';
+import { Prisma, Workflow } from 'generated/prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+@Injectable()
+export class WorkflowRepository {
+    constructor(private readonly prisma: PrismaService) {}
+
+    findActive(agentId: string): Promise<Workflow | null> {
+        return this.prisma.workflow.findFirst({
+            where: { agentId },
+            orderBy: { version: 'desc' },
+        });
+    }
+
+    findAll(agentId: string): Promise<Workflow[]> {
+        return this.prisma.workflow.findMany({
+            where: { agentId },
+            orderBy: { version: 'desc' },
+        });
+    }
+
+    findOne(id: string, agentId: string): Promise<Workflow | null> {
+        return this.prisma.workflow.findFirst({
+            where: { id, agentId },
+        });
+    }
+
+    create(data: Prisma.WorkflowCreateInput): Promise<Workflow> {
+        return this.prisma.workflow.create({ data });
+    }
+
+    update(id: string, data: Prisma.WorkflowUpdateInput): Promise<Workflow> {
+        return this.prisma.workflow.update({ where: { id }, data });
+    }
+
+    transaction<T>(
+        fn: (tx: Prisma.TransactionClient) => Promise<T>,
+    ): Promise<T> {
+        return this.prisma.$transaction(fn);
+    }
+}

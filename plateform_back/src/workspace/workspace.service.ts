@@ -1,81 +1,43 @@
-import { Injectable } from '@nestjs/common';
-import { UserRole, Workspace } from 'generated/prisma';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
+import {
+    WorkspaceRepository,
+    WorkspaceWithUsers,
+} from 'src/workspace/workspace.repository';
 
 @Injectable()
 export class WorkspaceService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly workspaceRepository: WorkspaceRepository) {}
 
-    async createWorkspace(
+    async create(
         workspaceData: CreateWorkspaceRequest,
         userId: string,
-    ): Promise<Workspace> {
+    ): Promise<WorkspaceWithUsers> {
         const { name, description } = workspaceData;
 
-        const workspace = await this.prismaService.workspace.create({
-            data: {
-                name,
-                description,
-                users: {
-                    create: {
-                        userId,
-                        role: UserRole.ADMIN,
-                    },
-                },
-            },
-            include: { users: true },
-        });
+        return this.workspaceRepository.create({ name, description, userId });
+    }
 
+    async findAll(userId: string): Promise<WorkspaceWithUsers[]> {
+        return this.workspaceRepository.findAll(userId);
+    }
+
+    async findOne(workspaceId: string): Promise<WorkspaceWithUsers> {
+        const workspace = await this.workspaceRepository.findOne(workspaceId);
         if (!workspace) {
-            throw new Error('Failed to create workspace');
+            throw new NotFoundException('Workspace not found');
         }
 
         return workspace;
     }
 
-    async getAllWorkspacesForUser(userId: string): Promise<
-        {
-            id: string;
-            name: string;
-            updatedAt: Date;
-        }[]
-    > {
-        return this.prismaService.workspace.findMany({
-            where: {
-                users: {
-                    some: { userId },
-                },
-            },
-            select: {
-                id: true,
-                name: true,
-                updatedAt: true,
-            },
-        });
-    }
-
-    async getWorkspaceById(
-        workspaceId: string,
-        userId: string,
-    ): Promise<Workspace> {
-        const workspace = await this.prismaService.workspace.findUnique({
-            where: { id: workspaceId },
-            include: { users: true },
-        });
+    async delete(workspaceId: string): Promise<void> {
+        const workspace = await this.workspaceRepository.findOne(workspaceId);
 
         if (!workspace) {
-            throw new Error('Workspace not found');
+            throw new NotFoundException('Workspace not found');
         }
 
-        const userInWorkspace = workspace.users.find(
-            (user) => user.userId === userId,
-        );
-
-        if (!userInWorkspace) {
-            throw new Error('User does not belong to this workspace');
-        }
-
-        return workspace;
+        await this.workspaceRepository.delete(workspaceId);
     }
 }

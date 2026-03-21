@@ -3,10 +3,7 @@ import { useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { Flex, Text, VStack, Box, HStack, Icon } from "@chakra-ui/react";
 import { FileText, ScanSearch, ArrowUpDown, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Task } from "lib/type/task";
-import * as WorkflowPackage from "@genrag/workflow";
-
-import type { AppNodeData } from "@genrag/workflow";
+import type { AppNodeData, Task } from "@genrag/workflow";
 
 
 const RerankerNodeModal = ({

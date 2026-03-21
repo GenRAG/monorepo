@@ -96,7 +96,12 @@ describe('WorkflowService', () => {
 
             const result = await service.findActive('agent-1');
 
-            expect(result.version).toBe(2);
+            if (result) {
+                expect(result.version).toBe(2);
+            } else {
+                fail('Expected a workflow, but got null');
+            }
+
             expect(mockWorkflowRepository.findActive).toHaveBeenCalledWith(
                 'agent-1',
             );

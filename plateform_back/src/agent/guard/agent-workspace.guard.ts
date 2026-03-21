@@ -12,14 +12,16 @@ export class AgentBelongsToWorkspaceGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        const { workspaceId, agentId } = request.params;
 
-        if (!agentId || !workspaceId) {
+        const { workspaceId, agentId, id } = request.params;
+
+        const effectiveAgentId = agentId ?? id;
+
+        if (!effectiveAgentId || !workspaceId) {
             return true;
         }
-
         const agent = await this.prisma.agent.findFirst({
-            where: { id: agentId, workspaceId },
+            where: { id: effectiveAgentId, workspaceId },
         });
 
         if (!agent) {

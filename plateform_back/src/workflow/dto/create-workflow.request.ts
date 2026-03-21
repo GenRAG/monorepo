@@ -26,5 +26,5 @@ export class CreateWorkflowRequest {
         },
     })
     @IsObject()
-    definition: object;
+    definition: Record<string, unknown>;
 }

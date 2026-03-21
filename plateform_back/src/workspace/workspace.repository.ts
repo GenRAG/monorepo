@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserRole, Prisma } from 'generated/prisma';
+import { UserRole, Prisma, Workspace } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 export type WorkspaceWithUsers = Prisma.WorkspaceGetPayload<{
@@ -10,14 +10,14 @@ export type WorkspaceWithUsers = Prisma.WorkspaceGetPayload<{
 export class WorkspaceRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findOne(id: string) {
+    async findOne(id: string): Promise<WorkspaceWithUsers | null> {
         return this.prisma.workspace.findUnique({
             where: { id },
             include: { users: true },
         });
     }
 
-    async findAll(userId: string) {
+    async findAll(userId: string): Promise<WorkspaceWithUsers[]> {
         return this.prisma.workspace.findMany({
             where: {
                 users: { some: { userId } },
@@ -26,7 +26,11 @@ export class WorkspaceRepository {
         });
     }
 
-    async create(data: { name: string; description?: string; userId: string }) {
+    async create(data: {
+        name: string;
+        description?: string;
+        userId: string;
+    }): Promise<WorkspaceWithUsers> {
         const { name, description, userId } = data;
 
         return this.prisma.workspace.create({
@@ -44,7 +48,7 @@ export class WorkspaceRepository {
         });
     }
 
-    async delete(id: string) {
+    async delete(id: string): Promise<Workspace> {
         return this.prisma.workspace.delete({
             where: { id },
         });

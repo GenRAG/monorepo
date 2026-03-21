@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateWorkspaceRequest {
     @ApiProperty({
@@ -14,5 +14,6 @@ export class CreateWorkspaceRequest {
         description: 'Workspace description',
     })
     @IsString()
+    @IsOptional()
     description: string;
 }

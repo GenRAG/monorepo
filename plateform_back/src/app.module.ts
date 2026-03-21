@@ -14,8 +14,10 @@ import { WorkflowModule } from './workflow/workflow.module';
             useFactory: (configService: ConfigService) => {
                 const isProduction =
                     configService.get('NODE_ENV') === 'production';
+                const isTest = configService.get('NODE_ENV') === 'test';
                 return {
                     pinoHttp: {
+                        autoLogging: !isTest,
                         transport: isProduction
                             ? undefined
                             : {
@@ -27,7 +29,11 @@ import { WorkflowModule } from './workflow/workflow.module';
                                       translateTime: 'SYS:standard',
                                   },
                               },
-                        level: isProduction ? 'info' : 'debug',
+                        level: isTest
+                            ? 'silent'
+                            : isProduction
+                              ? 'info'
+                              : 'debug',
                     },
                 };
             },

@@ -18,7 +18,7 @@ import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
 import { WorkspaceService } from 'src/workspace/workspace.service';
 
-@Controller('workspace')
+@Controller('workspaces')
 @UseGuards(JwtAuthGuard)
 export class WorkspaceController {
     constructor(private readonly workspaceService: WorkspaceService) {}

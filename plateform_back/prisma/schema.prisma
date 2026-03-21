@@ -36,11 +36,11 @@ enum UserRole {
 }
 
 model UserWorkspace {
-  userId     String
+  userId      String
   workspaceId String
-  role       UserRole
-  user       User     @relation(fields: [userId], references: [id])
-  workspace  Workspace @relation(fields: [workspaceId], references: [id])
+  role        UserRole
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@id([userId, workspaceId])
 }
@@ -66,7 +66,7 @@ model Agent {
   updatedAt DateTime @updatedAt
   updatedBy String
   workspaceId String
-  workspace  Workspace @relation(fields: [workspaceId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workflows Workflow[]
 }
 

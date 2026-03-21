@@ -22,7 +22,6 @@ export class WorkspaceService {
 
     async findOne(workspaceId: string): Promise<Workspace> {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
-
         if (!workspace) {
             throw new NotFoundException('Workspace not found');
         }
@@ -32,9 +31,11 @@ export class WorkspaceService {
 
     async delete(workspaceId: string): Promise<void> {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
+
         if (!workspace) {
             throw new NotFoundException('Workspace not found');
         }
+
         await this.workspaceRepository.delete(workspaceId);
     }
 }

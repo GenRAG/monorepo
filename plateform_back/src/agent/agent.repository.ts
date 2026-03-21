@@ -18,7 +18,7 @@ export class AgentRepository {
         });
     }
 
-    create(data: Prisma.AgentCreateInput): Promise<Agent | null> {
+    create(data: Prisma.AgentCreateInput): Promise<Agent> {
         return this.prisma.agent.create({ data });
     }
 

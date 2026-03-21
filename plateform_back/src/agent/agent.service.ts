@@ -22,10 +22,6 @@ export class AgentService {
             workspace: { connect: { id: workspaceId } },
         });
 
-        if (!agent) {
-            throw new NotFoundException('Failed to create agent');
-        }
-
         return agent;
     }
 

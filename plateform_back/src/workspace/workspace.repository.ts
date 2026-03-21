@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { UserRole, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
+
+export type WorkspaceWithUsers = Prisma.WorkspaceGetPayload<{
+    include: { users: true };
+}>;
 
 @Injectable()
 export class WorkspaceRepository {
@@ -17,6 +22,7 @@ export class WorkspaceRepository {
             where: {
                 users: { some: { userId } },
             },
+            include: { users: true },
         });
     }
 
@@ -30,7 +36,7 @@ export class WorkspaceRepository {
                 users: {
                     create: {
                         userId,
-                        role: 'ADMIN',
+                        role: UserRole.ADMIN,
                     },
                 },
             },

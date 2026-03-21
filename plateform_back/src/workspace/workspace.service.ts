@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Workspace } from 'generated/prisma';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
-import { WorkspaceRepository } from 'src/workspace/workspace.repository';
+import {
+    WorkspaceRepository,
+    WorkspaceWithUsers,
+} from 'src/workspace/workspace.repository';
 
 @Injectable()
 export class WorkspaceService {
@@ -10,17 +12,17 @@ export class WorkspaceService {
     async create(
         workspaceData: CreateWorkspaceRequest,
         userId: string,
-    ): Promise<Workspace> {
+    ): Promise<WorkspaceWithUsers> {
         const { name, description } = workspaceData;
 
         return this.workspaceRepository.create({ name, description, userId });
     }
 
-    async findAll(userId: string): Promise<Workspace[]> {
+    async findAll(userId: string): Promise<WorkspaceWithUsers[]> {
         return this.workspaceRepository.findAll(userId);
     }
 
-    async findOne(workspaceId: string): Promise<Workspace> {
+    async findOne(workspaceId: string): Promise<WorkspaceWithUsers> {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
         if (!workspace) {
             throw new NotFoundException('Workspace not found');

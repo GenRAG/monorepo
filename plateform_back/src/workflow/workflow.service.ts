@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateWorkflowRequest } from 'src/workflow/dto/create-workflow.request';
 import { UpdateWorkflowRequest } from 'src/workflow/dto/update-workflow.request';
+import { WorkflowRepository } from 'src/workflow/workflow.repository';
 
 @Injectable()
 export class WorkflowService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly workflowRepository: WorkflowRepository) {}
 
     async create(
         agentId: string,
         createWorkflowRequest: CreateWorkflowRequest,
     ) {
-        return this.prismaService.$transaction(async (tx) => {
+        return this.workflowRepository.transaction(async (tx) => {
             const lastWorkflow = await tx.workflow.findFirst({
                 where: { agentId },
                 orderBy: { version: 'desc' },
@@ -31,10 +31,7 @@ export class WorkflowService {
     }
 
     async findActive(agentId: string) {
-        const workflow = await this.prismaService.workflow.findFirst({
-            where: { agentId },
-            orderBy: { version: 'desc' },
-        });
+        const workflow = await this.workflowRepository.findActive(agentId);
 
         if (!workflow) {
             throw new NotFoundException('Workflow not found');
@@ -47,38 +44,24 @@ export class WorkflowService {
         agentId: string,
         updateWorkflowRequest: UpdateWorkflowRequest,
     ) {
-        const workflow = await this.prismaService.workflow.findFirst({
-            where: { agentId },
-            orderBy: { version: 'desc' },
-        });
+        const workflow = await this.workflowRepository.findActive(agentId);
 
         if (!workflow) {
             throw new NotFoundException('Workflow not found');
         }
 
-        return this.prismaService.workflow.update({
-            where: { id: workflow.id },
-            data: { ...updateWorkflowRequest },
-        });
+        return this.workflowRepository.update(
+            workflow.id,
+            updateWorkflowRequest,
+        );
     }
 
     async findAll(agentId: string) {
-        const workflows = await this.prismaService.workflow.findMany({
-            where: { agentId },
-            orderBy: { version: 'desc' },
-        });
-
-        if (workflows.length === 0) {
-            throw new NotFoundException('Workflows not found');
-        }
-
-        return workflows;
+        return this.workflowRepository.findAll(agentId);
     }
 
     async findOne(id: string, agentId: string) {
-        const workflow = await this.prismaService.workflow.findUnique({
-            where: { id, agentId },
-        });
+        const workflow = await this.workflowRepository.findOne(id, agentId);
 
         if (!workflow) {
             throw new NotFoundException('Workflow not found');

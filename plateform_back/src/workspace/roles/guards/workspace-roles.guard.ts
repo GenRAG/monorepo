@@ -51,7 +51,7 @@ export class WorkspaceRolesGuard implements CanActivate {
 
         if (!roles.includes(membership.role)) {
             throw new ForbiddenException(
-                `Access denied: requires role ${roles.join(' or ')}`,
+                `Acces refusé : l'utilisateur doit avoir l'un des roles suivants pour accéder à cette ressource : ${roles.join(', ')}`,
             );
         }
 

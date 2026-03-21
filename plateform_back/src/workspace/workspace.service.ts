@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserRole, Workspace } from 'generated/prisma';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Workspace } from 'generated/prisma';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
+import { WorkspaceRepository } from 'src/workspace/workspace.repository';
 
 @Injectable()
 export class WorkspaceService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly workspaceRepository: WorkspaceRepository) {}
 
     async create(
         workspaceData: CreateWorkspaceRequest,
@@ -13,34 +13,15 @@ export class WorkspaceService {
     ): Promise<Workspace> {
         const { name, description } = workspaceData;
 
-        return this.prismaService.workspace.create({
-            data: {
-                name,
-                description,
-                users: {
-                    create: {
-                        userId,
-                        role: UserRole.ADMIN,
-                    },
-                },
-            },
-            include: { users: true },
-        });
+        return this.workspaceRepository.create({ name, description, userId });
     }
 
     async findAll(userId: string): Promise<Workspace[]> {
-        return this.prismaService.workspace.findMany({
-            where: {
-                users: { some: { userId } },
-            },
-        });
+        return this.workspaceRepository.findAll(userId);
     }
 
     async findOne(workspaceId: string): Promise<Workspace> {
-        const workspace = await this.prismaService.workspace.findUnique({
-            where: { id: workspaceId },
-            include: { users: true },
-        });
+        const workspace = await this.workspaceRepository.findOne(workspaceId);
 
         if (!workspace) {
             throw new NotFoundException('Workspace not found');
@@ -50,16 +31,10 @@ export class WorkspaceService {
     }
 
     async delete(workspaceId: string): Promise<void> {
-        const workspace = await this.prismaService.workspace.findUnique({
-            where: { id: workspaceId },
-        });
-
+        const workspace = await this.workspaceRepository.findOne(workspaceId);
         if (!workspace) {
             throw new NotFoundException('Workspace not found');
         }
-
-        await this.prismaService.workspace.delete({
-            where: { id: workspaceId },
-        });
+        await this.workspaceRepository.delete(workspaceId);
     }
 }

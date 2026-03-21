@@ -2,41 +2,39 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAgentRequest } from './dto/create-agent.request';
 import { UpdateAgentRequest } from './dto/update-agent.request';
 import { Agent, AgentStatus } from 'generated/prisma';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { AgentRepository } from 'src/agent/agent.repository';
 
 @Injectable()
 export class AgentService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly agentRepository: AgentRepository) {}
 
     async insertOne(
         createAgentRequest: CreateAgentRequest,
         userId: string,
         workspaceId: string,
     ): Promise<Agent> {
-        const { name, description } = createAgentRequest;
-
-        return this.prismaService.agent.create({
-            data: {
-                name,
-                description: description ?? '',
-                workspaceId,
-                createdBy: userId,
-                updatedBy: userId,
-                status: AgentStatus.DEVELOPMENT,
-            },
+        const agent = await this.agentRepository.create({
+            name: createAgentRequest.name,
+            description: createAgentRequest.description ?? '',
+            createdBy: userId,
+            updatedBy: userId,
+            status: AgentStatus.DEVELOPMENT,
+            workspace: { connect: { id: workspaceId } },
         });
+
+        if (!agent) {
+            throw new NotFoundException('Failed to create agent');
+        }
+
+        return agent;
     }
 
     async findAll(workspaceId: string): Promise<Agent[]> {
-        return this.prismaService.agent.findMany({
-            where: { workspaceId },
-        });
+        return this.agentRepository.findAll(workspaceId);
     }
 
     async findOne(id: string, workspaceId: string): Promise<Agent> {
-        const agent = await this.prismaService.agent.findFirst({
-            where: { id, workspaceId },
-        });
+        const agent = await this.agentRepository.findOne(id, workspaceId);
 
         if (!agent) {
             throw new NotFoundException('Agent not found');
@@ -51,34 +49,25 @@ export class AgentService {
         updateAgentDto: UpdateAgentRequest,
         userId: string,
     ): Promise<Agent> {
-        const agent = await this.prismaService.agent.findFirst({
-            where: { id, workspaceId },
-        });
+        const agent = await this.agentRepository.findOne(id, workspaceId);
 
         if (!agent) {
             throw new NotFoundException('Agent not found');
         }
 
-        return this.prismaService.agent.update({
-            where: { id },
-            data: {
-                ...updateAgentDto,
-                updatedBy: userId,
-            },
+        return this.agentRepository.update(id, {
+            ...updateAgentDto,
+            updatedBy: userId,
         });
     }
 
     async remove(id: string, workspaceId: string): Promise<Agent> {
-        const agent = await this.prismaService.agent.findFirst({
-            where: { id, workspaceId },
-        });
+        const agent = await this.agentRepository.findOne(id, workspaceId);
 
         if (!agent) {
             throw new NotFoundException('Agent not found');
         }
 
-        return this.prismaService.agent.delete({
-            where: { id },
-        });
+        return this.agentRepository.delete(id);
     }
 }

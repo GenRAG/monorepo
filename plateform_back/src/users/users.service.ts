@@ -1,20 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from 'generated/prisma';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserRequest, UserSafe } from 'src/users/dto/create-user.request';
 import * as bcrypt from 'bcryptjs';
+import { UserRepository } from 'src/users/user.repository';
 
 @Injectable()
 export class UsersService {
-    constructor(private readonly prismaService: PrismaService) {}
-
-    private readonly userSafeSelect = {
-        id: true,
-        email: true,
-        name: true,
-        createdAt: true,
-        updatedAt: true,
-    } satisfies Prisma.UserSelect;
+    constructor(private readonly userRepository: UserRepository) {}
 
     async create(
         request: CreateUserRequest & {
@@ -23,36 +15,32 @@ export class UsersService {
             isEmailVerified?: boolean;
         },
     ): Promise<UserSafe> {
-        return this.prismaService.user.create({
-            data: {
-                ...request,
-                password: await bcrypt.hash(request.password, 10),
-            },
-            select: this.userSafeSelect,
+        const user = await this.userRepository.create({
+            ...request,
+            password: await bcrypt.hash(request.password, 10),
         });
+
+        if (!user) {
+            throw new Error('Failed to create user');
+        }
+
+        return user;
     }
 
     async findOneWithCredentials(
         filter: Prisma.UserWhereUniqueInput,
     ): Promise<User | null> {
-        return this.prismaService.user.findUnique({
-            where: filter,
-        });
+        return this.userRepository.findOneWithCredentials(filter);
     }
 
     async findOne(
         filter: Prisma.UserWhereUniqueInput,
     ): Promise<UserSafe | null> {
-        return this.prismaService.user.findUnique({
-            where: filter,
-            select: this.userSafeSelect,
-        });
+        return this.userRepository.findOne(filter);
     }
 
     async getUsers(): Promise<UserSafe[]> {
-        return this.prismaService.user.findMany({
-            select: this.userSafeSelect,
-        });
+        return this.userRepository.findAll();
     }
 
     async update(params: {
@@ -60,17 +48,11 @@ export class UsersService {
         data: Prisma.UserUpdateInput;
     }): Promise<UserSafe> {
         const { where, data } = params;
-        return this.prismaService.user.update({
-            data,
-            where,
-            select: this.userSafeSelect,
-        });
+
+        return this.userRepository.update(where, data);
     }
 
     async delete(id: string): Promise<UserSafe> {
-        return this.prismaService.user.delete({
-            where: { id },
-            select: this.userSafeSelect,
-        });
+        return this.userRepository.delete(id);
     }
 }

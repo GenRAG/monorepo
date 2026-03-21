@@ -1,0 +1,84 @@
+---
+config:
+  layout: elk
+---
+sequenceDiagram
+    autonumber
+
+    actor User
+    participant DC as DocumentController
+    participant DS as DocumentService
+    participant S3 as AWS S3
+    participant DB as Postgres (Prisma)
+    participant Producer as DocumentQueueProducer
+    participant Redis as Redis (BullMQ Queue)
+    participant Worker as DocumentProcessor
+    participant API as Rag Engine 
+
+    rect rgb(230, 241, 251)
+        note over User, DB: Flow 1 — Upload & indexing (immediate response)
+        User->>DC: POST /documents (file)
+        DC->>DS: uploadDocument(file, agentId)
+
+        DS->>S3: putObject(file.buffer, s3Key)
+        S3-->>DS: ✓ stored
+
+        DS->>DB: document.create({ status: UPLOADED })
+        DB-->>DS: document { id, storageKey }
+
+        DS->>Producer: addIndexingJob(documentId, buffer, mimeType)
+        Producer->>Redis: queue.add('index-document', payload : { attempts: 5, backoff: exponential })
+        Redis-->>Producer: ✓ job registered
+
+        DS-->>DC: document { id, status: UPLOADED }
+        DC-->>User: 201 — { id, status: "UPLOADED" }
+    end
+
+    rect rgb(234, 243, 222)
+        note over Redis, API: Flow 2 — Background processing (worker)
+
+        Redis->>Worker: job available → process()
+        Worker->>DB: document.update({ status: PROCESSING })
+
+        alt File < 5 MB (buffer in job payload)
+            Worker->>API: POST /index multipart/form-data (buffer)
+        else File > 5 MB (s3Key in job payload)
+            Worker->>S3: getObject(s3Key)
+            S3-->>Worker: file buffer
+            Worker->>API: POST /index multipart/form-data (buffer)
+        end
+
+        alt Success
+            API-->>Worker: 200 OK
+            Worker->>DB: document.update({ status: INDEXED, indexVersion: +1 })
+        else Failure (API down / timeout / 429)
+            API-->>Worker: error
+            Worker->>DB: if last attempt → document.update({ status: FAILED })
+            Worker->>Redis: throw error → retry (attempt 1→2→3→4→5 with backoff 3s→6s→12s→24s→48s)
+        end
+    end
+
+    rect rgb(250, 236, 231)
+        note over User, S3: Flow 3 — Status polling (optional)
+
+        User->>DC: GET /documents/:id
+        DC->>DS: getDocument(id)
+        DS->>DB: document.findUnique({ status })
+        DB-->>DS: { status: "PROCESSING" | "INDEXED" | "FAILED" }
+        DS-->>DC: document
+        DC-->>User: { id, status }
+    end
+
+    rect rgb(238, 237, 254)
+        note over User, S3: Flow 4 — Document display (presigned URL)
+
+        User->>DC: GET /documents/:id/url
+        DC->>DS: getDocumentUrl(id)
+        DS->>DB: document.findUnique({ storageKey })
+        DS->>S3: getSignedUrl(storageKey, expiresIn: 900)
+        S3-->>DS: presigned URL (15 min)
+        DS-->>DC: { url }
+        DC-->>User: { url }
+        User->>S3: GET presigned URL (direct, bypasses NestJS)
+        S3-->>User: file
+    end

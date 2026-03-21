@@ -1,0 +1,72 @@
+---
+config:
+  layout: elk
+---
+sequenceDiagram
+    autonumber
+
+    actor User
+    participant ARC as AgentRuntimeController
+    participant AO as AgentOrchestrator
+    participant CG as CreditGuard
+    participant CB as ContextBuilder
+    participant UT as UsageTracker
+    participant CS as CreditService
+    participant AS as AgentService
+    participant DB as Postgres (Prisma)
+    participant RE as RagEngineService
+    participant API as RAG Engine
+
+    rect rgb(230, 241, 251)
+        note over User, DB: Step 1 — Credit check
+
+        User->>ARC: POST /agent-runtime/:agentId/query -> body { query }
+        ARC->>AO: execute(query, agentId, workspaceId)
+        AO->>CG: checkOrThrow(workspaceId)
+        CG->>CS: checkCredits(workspaceId)
+        CS->>DB: creditBalance.findUnique({ workspaceId })
+        DB-->>CS: { balance }
+        CS-->>CG: true / false
+        alt Insufficient credits
+            CG-->>ARC: throw ForbiddenException
+            ARC-->>User: 403 Insufficient credits
+        else Credits OK
+            CG-->>AO: ok
+        end
+    end
+
+    rect rgb(234, 243, 222)
+        note over AO, DB: Step 2 — Build pipeline from workflow
+
+        AO->>CB: buildPipeline(agentId)
+        CB->>AS: getAgent(agentId)
+        AS->>DB: agent.findUnique({ include: workflows })
+        DB-->>AS: agent { workflows[0].definition }
+        AS-->>CB: agent
+        CB-->>AO: pipeline JSON -> { pipeline_name, blocks: [query, retrieve, answer] }
+    end
+
+    rect rgb(238, 237, 254)
+        note over AO, API: Step 3 — RAG execution (external API handles everything)
+
+        AO->>RE: sendQuery({ pipeline, query })
+        RE->>API: POST /rag/stream -> body { pipeline: { blocks: [...], pipeline_name },  query: "..." } X-API-Key: ***
+        note over API: API RAG handle : - retrieval (vector store) - LLM (model in the pipeline) - answer generation
+        API-->>RE: stream SSE / text answer
+        RE-->>AO: { answer }
+    end
+
+    rect rgb(250, 236, 231)
+        note over AO, DB: Step 4 — Usage tracking & credit deduction
+
+        AO->>UT: record(workspaceId, agentId)
+        UT->>CS: deductCredits(workspaceId, amount)
+        CS->>DB: creditBalance.update({ balance: balance - amount })
+        UT->>DB: creditTransaction.create { type: USAGE, metadata: { agentId } }
+        DB-->>UT: ok
+        UT-->>AO: ok
+    end
+
+    AO-->>ARC: { answer }
+// [MermaidChart: 172d6d9e-74e0-4995-bf95-079ad20b840b]
+    ARC-->>User: 200 { answer }

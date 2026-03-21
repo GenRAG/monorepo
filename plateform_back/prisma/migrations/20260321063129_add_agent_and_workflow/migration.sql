@@ -5,10 +5,13 @@
 
 */
 -- CreateEnum
-CREATE TYPE "AgentStatus" AS ENUM ('DEVELOPEMENT', 'STAGING', 'PRODUCTION');
+CREATE TYPE "AgentStatus" AS ENUM ('DEVELOPMENT', 'STAGING', 'PRODUCTION');
 
 -- DropForeignKey
 ALTER TABLE "Project" DROP CONSTRAINT "Project_workspaceId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "UserWorkspace" DROP CONSTRAINT "UserWorkspace_workspaceId_fkey";
 
 -- DropTable
 DROP TABLE "Project";
@@ -41,8 +44,14 @@ CREATE TABLE "Workflow" (
     CONSTRAINT "Workflow_pkey" PRIMARY KEY ("id")
 );
 
--- AddForeignKey
-ALTER TABLE "Agent" ADD CONSTRAINT "Agent_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Workflow_agentId_version_key" ON "Workflow"("agentId", "version");
 
 -- AddForeignKey
-ALTER TABLE "Workflow" ADD CONSTRAINT "Workflow_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES "Agent"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserWorkspace" ADD CONSTRAINT "UserWorkspace_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Agent" ADD CONSTRAINT "Agent_workspaceId_fkey" FOREIGN KEY ("workspaceId") REFERENCES "Workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Workflow" ADD CONSTRAINT "Workflow_agentId_fkey" FOREIGN KEY ("agentId") REFERENCES "Agent"("id") ON DELETE CASCADE ON UPDATE CASCADE;

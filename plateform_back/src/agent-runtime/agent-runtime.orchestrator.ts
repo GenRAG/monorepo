@@ -32,6 +32,10 @@ export class AgentRuntimeOrchestrator {
             query,
         });
 
+        if (!answer) {
+            throw new Error('Failed to get an answer from the RAG engine.');
+        }
+
         await this.usageTracker.record({
             workspaceId,
             agentId,

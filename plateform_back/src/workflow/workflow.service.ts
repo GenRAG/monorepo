@@ -38,7 +38,7 @@ export class WorkflowService {
         });
     }
 
-    async findActive(agentId: string): Promise<Workflow | null> {
+    async findActive(agentId: string): Promise<Workflow> {
         const workflow = await this.workflowRepository.findActive(agentId);
 
         if (!workflow) {

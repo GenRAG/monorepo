@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreditBalanceRepository } from 'src/credit/credit-balance.repository';
 
 export type UpdateCreditBalance = {

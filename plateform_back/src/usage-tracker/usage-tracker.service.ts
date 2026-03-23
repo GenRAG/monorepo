@@ -1,36 +1,40 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { CreditTransactionType } from 'generated/prisma';
 import { CreditBalanceService } from 'src/credit/credit-balance.service';
-import { CreditTransactionService } from 'src/transaction/credit-transaction.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsageTrackerService {
     constructor(
         private readonly creditService: CreditBalanceService,
-        private readonly creditTransactionService: CreditTransactionService,
+        private readonly prisma: PrismaService,
     ) {}
 
-    async record({
-        workspaceId,
-        agentId,
-        tokensUsed,
-    }: {
-        workspaceId: string;
-        agentId: string;
-        tokensUsed?: number;
-    }): Promise<void> {
+    async record({ workspaceId, agentId, tokensUsed }) {
         const COST_PER_QUERY = 1;
 
-        await this.creditService.deduct({
-            workspaceId,
-            amount: COST_PER_QUERY,
-        });
+        await this.prisma.$transaction(async (tx) => {
+            const balance = await tx.creditBalance.findUnique({
+                where: { workspaceId },
+            });
 
-        await this.creditTransactionService.create({
-            workspaceId,
-            amount: COST_PER_QUERY,
-            type: CreditTransactionType.USAGE,
-            metadata: { agentId, tokensUsed: tokensUsed ?? null },
+            if (!balance || balance.balance < COST_PER_QUERY) {
+                throw new ForbiddenException('Insufficient credits');
+            }
+
+            await tx.creditBalance.update({
+                where: { workspaceId },
+                data: { balance: { decrement: COST_PER_QUERY } },
+            });
+
+            await tx.creditTransaction.create({
+                data: {
+                    workspaceId,
+                    amount: COST_PER_QUERY,
+                    type: CreditTransactionType.USAGE,
+                    metadata: { agentId, tokensUsed: tokensUsed ?? null },
+                },
+            });
         });
     }
 

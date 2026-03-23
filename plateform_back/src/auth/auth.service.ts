@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcryptjs from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { User } from 'generated/prisma';
 import { Response } from 'express';
@@ -76,7 +76,7 @@ export class AuthService {
             throw new UnauthorizedException('Credentials are not valid.');
         }
 
-        const authenticated = await bcrypt.compare(password, user.password);
+        const authenticated = await bcryptjs.compare(password, user.password);
         if (!authenticated) {
             throw new UnauthorizedException('Credentials are not valid.');
         }
@@ -142,7 +142,7 @@ export class AuthService {
             }
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcryptjs.hash(password, 10);
 
         await this.usersService.update({
             where: { email },

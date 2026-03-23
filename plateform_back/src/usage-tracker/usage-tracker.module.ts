@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { CreditBalanceModule } from 'src/credit/credit-balance.module';
-import { CreditTransactionService } from 'src/transaction/credit-transaction.service';
+import { CreditTransactionModule } from 'src/transaction/credit-transaction.module';
 import { UsageTrackerService } from 'src/usage-tracker/usage-tracker.service';
 
 @Module({
     controllers: [],
-    providers: [UsageTrackerService, CreditTransactionService],
-    imports: [CreditBalanceModule],
+    providers: [UsageTrackerService],
+    imports: [CreditBalanceModule, CreditTransactionModule],
     exports: [UsageTrackerService],
 })
 export class UsageTrackerModule {}

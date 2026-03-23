@@ -1,11 +1,12 @@
-// src/credit/credit-transaction.service.ts
 import { Injectable } from '@nestjs/common';
-import { CreditTransactionType, Prisma } from 'generated/prisma';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { CreditTransactionType } from 'generated/prisma';
+import { CreditTransactionRepository } from 'src/transaction/credit-transaction.repository';
 
 @Injectable()
 export class CreditTransactionService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly creditTransactionRepository: CreditTransactionRepository,
+    ) {}
 
     async create({
         workspaceId,
@@ -18,20 +19,15 @@ export class CreditTransactionService {
         type: CreditTransactionType;
         metadata?: Record<string, unknown>;
     }) {
-        return this.prisma.creditTransaction.create({
-            data: {
-                workspaceId,
-                amount,
-                type,
-                metadata: (metadata ?? {}) as Prisma.JsonObject,
-            },
+        return this.creditTransactionRepository.create({
+            workspaceId,
+            amount,
+            type,
+            metadata,
         });
     }
 
     async findAll(workspaceId: string) {
-        return this.prisma.creditTransaction.findMany({
-            where: { workspaceId },
-            orderBy: { createdAt: 'desc' },
-        });
+        return this.creditTransactionRepository.findAll(workspaceId);
     }
 }

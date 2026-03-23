@@ -8,8 +8,7 @@ export class WorkflowRepository {
 
     findActive(agentId: string): Promise<Workflow | null> {
         return this.prisma.workflow.findFirst({
-            where: { agentId },
-            orderBy: { version: 'desc' },
+            where: { agentId, isActive: true },
         });
     }
 

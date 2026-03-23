@@ -11,8 +11,13 @@ export class WorkflowService {
     async create(
         agentId: string,
         createWorkflowRequest: CreateWorkflowRequest,
-    ): Promise<Workflow> {
+    ) {
         return this.workflowRepository.transaction(async (tx) => {
+            await tx.workflow.updateMany({
+                where: { agentId, isActive: true },
+                data: { isActive: false },
+            });
+
             const lastWorkflow = await tx.workflow.findFirst({
                 where: { agentId },
                 orderBy: { version: 'desc' },
@@ -27,6 +32,7 @@ export class WorkflowService {
                     definition:
                         createWorkflowRequest.definition as Prisma.InputJsonValue,
                     version: nextVersion,
+                    isActive: true,
                 },
             });
         });

@@ -10,6 +10,7 @@ import { AgentModule } from 'src/agent/agent.module';
 import { WorkflowModule } from 'src/workflow/workflow.module';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
+import { CreditTransactionModule } from 'src/transaction/credit-transaction.module';
 
 @Module({
     controllers: [AgentRuntimeController],
@@ -22,6 +23,7 @@ import { ConfigModule } from '@nestjs/config';
     imports: [
         PrismaModule,
         UsageTrackerModule,
+        CreditTransactionModule,
         AgentModule,
         WorkflowModule,
         HttpModule,

@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AgentModule } from './agent/agent.module';
 import { WorkflowModule } from './workflow/workflow.module';
+import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
 
 @Module({
     imports: [
@@ -47,6 +48,7 @@ import { WorkflowModule } from './workflow/workflow.module';
         WorkspaceModule,
         AgentModule,
         WorkflowModule,
+        AgentRuntimeModule,
     ],
     controllers: [],
     providers: [],

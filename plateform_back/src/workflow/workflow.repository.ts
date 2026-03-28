@@ -33,6 +33,20 @@ export class WorkflowRepository {
         return this.prisma.workflow.update({ where: { id }, data });
     }
 
+    activate(id: string, agentId: string): Promise<Workflow> {
+        return this.prisma.$transaction(async (tx) => {
+            await tx.workflow.updateMany({
+                where: { agentId, isActive: true },
+                data: { isActive: false },
+            });
+
+            return tx.workflow.update({
+                where: { id },
+                data: { isActive: true },
+            });
+        });
+    }
+
     transaction<T>(
         fn: (tx: Prisma.TransactionClient) => Promise<T>,
     ): Promise<T> {

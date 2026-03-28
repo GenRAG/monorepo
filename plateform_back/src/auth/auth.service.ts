@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import * as bcryptjs from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { User } from 'generated/prisma';
 import { Response } from 'express';

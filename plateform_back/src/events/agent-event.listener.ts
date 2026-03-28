@@ -17,9 +17,10 @@ export function registerAgentListeners(usageTracker: UsageTrackerService) {
                     agentId: event.agentId,
                     tokensUsed: event.tokensUsed,
                 })
-                .catch((err) =>
-                    console.error('[UsageTracker] record failed:', err),
-                );
+                .catch((err) => {
+                    console.error('[UsageTracker] record failed:', err);
+                    throw err;
+                });
         },
     );
 

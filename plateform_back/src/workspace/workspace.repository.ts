@@ -69,23 +69,15 @@ export class WorkspaceRepository {
                         role: UserRole.ADMIN,
                     },
                 },
+                creditBalance: {
+                    create: {
+                        balance: 0,
+                    },
+                },
             },
-            include: { users: true },
-        });
-
-        await this.prisma.creditBalance.create({
-            data: {
-                workspaceId: workspace.id,
-                balance: 0,
-            },
-        });
-
-        await this.prisma.creditBalance.upsert({
-            where: { workspaceId: workspace.id },
-            update: {},
-            create: {
-                workspaceId: workspace.id,
-                balance: 0,
+            include: {
+                users: true,
+                creditBalance: true,
             },
         });
 

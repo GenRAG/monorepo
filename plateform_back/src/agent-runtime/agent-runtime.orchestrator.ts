@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import EventBus from 'src/lib/event-bus';
 import { ContextBuilder } from 'src/agent-runtime/agent-runtime.builder';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 import { UsageTrackerService } from 'src/usage-tracker/usage-tracker.service';
+import { AgentQueryCompletedEvent } from 'src/events/agent-events';
+import { AgentEventType } from 'src/events/agent-events.type';
 
 @Injectable()
 export class AgentRuntimeOrchestrator {
@@ -36,11 +39,10 @@ export class AgentRuntimeOrchestrator {
             throw new Error('Failed to get an answer from the RAG engine.');
         }
 
-        await this.usageTracker.record({
-            workspaceId,
-            agentId,
-            tokensUsed: undefined,
-        });
+        EventBus.emit(
+            AgentEventType.AGENT_QUERY_COMPLETED,
+            new AgentQueryCompletedEvent(workspaceId, agentId, undefined),
+        );
 
         return { answer };
     }

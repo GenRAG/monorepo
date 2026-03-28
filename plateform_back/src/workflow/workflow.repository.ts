@@ -8,8 +8,7 @@ export class WorkflowRepository {
 
     findActive(agentId: string): Promise<Workflow | null> {
         return this.prisma.workflow.findFirst({
-            where: { agentId },
-            orderBy: { version: 'desc' },
+            where: { agentId, isActive: true },
         });
     }
 
@@ -32,6 +31,20 @@ export class WorkflowRepository {
 
     update(id: string, data: Prisma.WorkflowUpdateInput): Promise<Workflow> {
         return this.prisma.workflow.update({ where: { id }, data });
+    }
+
+    activate(id: string, agentId: string): Promise<Workflow> {
+        return this.prisma.$transaction(async (tx) => {
+            await tx.workflow.updateMany({
+                where: { agentId, isActive: true },
+                data: { isActive: false },
+            });
+
+            return tx.workflow.update({
+                where: { id },
+                data: { isActive: true },
+            });
+        });
     }
 
     transaction<T>(

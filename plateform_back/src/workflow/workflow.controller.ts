@@ -40,6 +40,12 @@ export class WorkflowController {
         return this.workflowService.update(agentId, updateWorkflowRequest);
     }
 
+    @Patch('activate')
+    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
+    activate(@Param('agentId') agentId: string, @Body('id') id: string) {
+        return this.workflowService.activate(id, agentId);
+    }
+
     @Post()
     @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     deploy(

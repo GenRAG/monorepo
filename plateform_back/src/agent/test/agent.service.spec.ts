@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AgentStatus } from 'generated/prisma';
 import { AgentRepository } from 'src/agent/agent.repository';
@@ -157,6 +157,69 @@ describe('AgentService', () => {
                     updatedBy: 'user-1',
                 }),
             );
+        });
+
+        it('should allow status transition from DEVELOPMENT to STAGING', async () => {
+            const updatedAgent = { ...fakeAgent, status: AgentStatus.STAGING };
+            mockAgentRepository.findOne.mockResolvedValue(fakeAgent);
+            mockAgentRepository.update.mockResolvedValue(updatedAgent);
+
+            const result = await service.update(
+                'agent-1',
+                'workspace-1',
+                { status: AgentStatus.STAGING },
+                'user-1',
+            );
+
+            expect(result.status).toBe(AgentStatus.STAGING);
+            expect(mockAgentRepository.update).toHaveBeenCalledWith(
+                'agent-1',
+                expect.objectContaining({
+                    status: AgentStatus.STAGING,
+                    updatedBy: 'user-1',
+                }),
+            );
+        });
+
+        it('should allow status transition from STAGING to PRODUCTION', async () => {
+            const stagingAgent = { ...fakeAgent, status: AgentStatus.STAGING };
+            const updatedAgent = {
+                ...stagingAgent,
+                status: AgentStatus.PRODUCTION,
+            };
+            mockAgentRepository.findOne.mockResolvedValue(stagingAgent);
+            mockAgentRepository.update.mockResolvedValue(updatedAgent);
+
+            const result = await service.update(
+                'agent-1',
+                'workspace-1',
+                { status: AgentStatus.PRODUCTION },
+                'user-1',
+            );
+
+            expect(result.status).toBe(AgentStatus.PRODUCTION);
+            expect(mockAgentRepository.update).toHaveBeenCalledWith(
+                'agent-1',
+                expect.objectContaining({
+                    status: AgentStatus.PRODUCTION,
+                    updatedBy: 'user-1',
+                }),
+            );
+        });
+
+        it('should reject status transition from DEVELOPMENT to PRODUCTION', async () => {
+            mockAgentRepository.findOne.mockResolvedValue(fakeAgent);
+
+            await expect(
+                service.update(
+                    'agent-1',
+                    'workspace-1',
+                    { status: AgentStatus.PRODUCTION },
+                    'user-1',
+                ),
+            ).rejects.toThrow(ForbiddenException);
+
+            expect(mockAgentRepository.update).not.toHaveBeenCalled();
         });
 
         it('should throw NotFoundException when agent not found', async () => {

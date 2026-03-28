@@ -50,6 +50,7 @@ describe('WorkflowService', () => {
             mockWorkflowRepository.transaction.mockImplementation((fn: any) => {
                 const fakeTx = {
                     workflow: {
+                        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
                         findFirst: jest.fn().mockResolvedValue(null),
                         create: jest.fn().mockResolvedValue({
                             ...fakeWorkflow,
@@ -71,6 +72,7 @@ describe('WorkflowService', () => {
             mockWorkflowRepository.transaction.mockImplementation((fn: any) => {
                 const fakeTx = {
                     workflow: {
+                        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
                         findFirst: jest.fn().mockResolvedValue(fakeWorkflow), // version 1 existante
                         create: jest.fn().mockResolvedValue({
                             ...fakeWorkflow,

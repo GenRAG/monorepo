@@ -3,6 +3,7 @@ import { CreateAgentRequest } from './dto/create-agent.request';
 import { UpdateAgentRequest } from './dto/update-agent.request';
 import { Agent, AgentStatus } from 'generated/prisma';
 import { AgentRepository } from 'src/agent/agent.repository';
+import { AgentStateMachine } from 'src/agent/agent.state-machine';
 
 @Injectable()
 export class AgentService {
@@ -49,6 +50,24 @@ export class AgentService {
 
         if (!agent) {
             throw new NotFoundException('Agent not found');
+        }
+
+        if (updateAgentDto.status && updateAgentDto.status !== agent.status) {
+            const machine = new AgentStateMachine(agent.status);
+
+            switch (updateAgentDto.status) {
+                case AgentStatus.STAGING:
+                    machine.toStaging();
+                    break;
+                case AgentStatus.PRODUCTION:
+                    machine.toProduction();
+                    break;
+                case AgentStatus.DEVELOPMENT:
+                    machine.toDevelopment();
+                    break;
+                default:
+                    throw new NotFoundException('Invalid status');
+            }
         }
 
         return this.agentRepository.update(id, {

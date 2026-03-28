@@ -109,7 +109,6 @@ export class TokenService {
 
     async generateAndSendPasswordResetToken(user: User): Promise<void> {
         const now = Date.now();
-        console.log('Generating password reset token for email:', user.email);
 
         const tokenResendIntervalMs = ms(
             this.configService.getOrThrow<string>(

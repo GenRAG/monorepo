@@ -8,5 +8,6 @@ import { WorkflowRepository } from 'src/workflow/workflow.repository';
     controllers: [WorkflowController],
     providers: [WorkflowService, WorkflowRepository],
     imports: [PrismaModule],
+    exports: [WorkflowService],
 })
 export class WorkflowModule {}

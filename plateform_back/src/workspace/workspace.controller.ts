@@ -17,7 +17,10 @@ import { UserSafe } from 'src/users/dto/create-user.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
 import { WorkspaceService } from 'src/workspace/workspace.service';
-import { WorkspaceWithUsers } from 'src/workspace/workspace.repository';
+import {
+    WorkspaceWithUsers,
+    WorkspaceWithUsersAndCreditBalance,
+} from 'src/workspace/workspace.repository';
 
 @Controller('workspaces')
 @UseGuards(JwtAuthGuard)
@@ -43,7 +46,7 @@ export class WorkspaceController {
     @UseGuards(WorkspaceRolesGuard)
     getWorkspaceById(
         @Param('id') workspaceId: string,
-    ): Promise<WorkspaceWithUsers> {
+    ): Promise<WorkspaceWithUsersAndCreditBalance> {
         return this.workspaceService.findOne(workspaceId);
     }
 

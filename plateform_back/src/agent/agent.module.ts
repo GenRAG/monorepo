@@ -8,5 +8,6 @@ import { AgentRepository } from 'src/agent/agent.repository';
     controllers: [AgentController],
     providers: [AgentService, AgentRepository],
     imports: [PrismaModule],
+    exports: [AgentService],
 })
 export class AgentModule {}

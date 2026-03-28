@@ -11,8 +11,13 @@ export class WorkflowService {
     async create(
         agentId: string,
         createWorkflowRequest: CreateWorkflowRequest,
-    ): Promise<Workflow> {
+    ) {
         return this.workflowRepository.transaction(async (tx) => {
+            await tx.workflow.updateMany({
+                where: { agentId, isActive: true },
+                data: { isActive: false },
+            });
+
             const lastWorkflow = await tx.workflow.findFirst({
                 where: { agentId },
                 orderBy: { version: 'desc' },
@@ -27,12 +32,13 @@ export class WorkflowService {
                     definition:
                         createWorkflowRequest.definition as Prisma.InputJsonValue,
                     version: nextVersion,
+                    isActive: true,
                 },
             });
         });
     }
 
-    async findActive(agentId: string): Promise<Workflow | null> {
+    async findActive(agentId: string): Promise<Workflow> {
         const workflow = await this.workflowRepository.findActive(agentId);
 
         if (!workflow) {
@@ -40,6 +46,16 @@ export class WorkflowService {
         }
 
         return workflow;
+    }
+
+    async activate(id: string, agentId: string): Promise<Workflow> {
+        const workflow = await this.workflowRepository.findOne(id, agentId);
+
+        if (!workflow) {
+            throw new NotFoundException('Workflow not found');
+        }
+
+        return this.workflowRepository.activate(id, agentId);
     }
 
     async update(

@@ -58,6 +58,8 @@ jobs:
       BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
       TOKEN_VALIDITY: ${{ secrets.TOKEN_VALIDITY }}
       TOKEN_RESEND_INTERVAL: ${{ secrets.TOKEN_RESEND_INTERVAL }}
+      RAGENGINE_URL: ${{ secrets.RAGENGINE_URL }}
+      RAGENGINE_API_KEY: ${{ secrets.RAGENGINE_API_KEY }}
       SEND_EMAILS: "false"
       NODE_ENV: test
       PORT: 8081

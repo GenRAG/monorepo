@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CreditTransactionModule } from 'src/transaction/credit-transaction.module';
 import { UsageTrackerService } from 'src/usage-tracker/usage-tracker.service';
 import { registerAgentListeners } from 'src/events/agent-event.listener';
+import { Logger } from 'nestjs-pino';
 
 @Module({
     controllers: [AgentRuntimeController],
@@ -33,9 +34,12 @@ import { registerAgentListeners } from 'src/events/agent-event.listener';
     ],
 })
 export class AgentRuntimeModule implements OnModuleInit {
-    constructor(private readonly usageTracker: UsageTrackerService) {}
+    constructor(
+        private readonly usageTracker: UsageTrackerService,
+        private readonly logger: Logger,
+    ) {}
 
     onModuleInit() {
-        registerAgentListeners(this.usageTracker);
+        registerAgentListeners(this.usageTracker, this.logger);
     }
 }

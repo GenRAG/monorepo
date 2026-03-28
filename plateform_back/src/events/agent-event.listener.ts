@@ -6,8 +6,12 @@ import {
     AgentStatusChangedEvent,
 } from './agent-events';
 import { AgentEventType } from 'src/events/agent-events.type';
+import { Logger } from 'nestjs-pino';
 
-export function registerAgentListeners(usageTracker: UsageTrackerService) {
+export function registerAgentListeners(
+    usageTracker: UsageTrackerService,
+    logger: Logger,
+) {
     EventBus.on(
         AgentEventType.AGENT_QUERY_COMPLETED,
         (event: AgentQueryCompletedEvent) => {
@@ -18,14 +22,14 @@ export function registerAgentListeners(usageTracker: UsageTrackerService) {
                     tokensUsed: event.tokensUsed,
                 })
                 .catch((err) => {
-                    console.error('[UsageTracker] record failed:', err);
+                    logger.error('[UsageTracker] record failed', err);
                     throw err;
                 });
         },
     );
 
     EventBus.on(AgentEventType.AGENT_DEPLOYED, (event: AgentDeployedEvent) => {
-        console.log(
+        logger.log(
             `[AgentListener] agent=${event.agentId} deployed v${event.version}`,
         );
     });
@@ -33,7 +37,7 @@ export function registerAgentListeners(usageTracker: UsageTrackerService) {
     EventBus.on(
         AgentEventType.STATUS_CHANGED,
         (event: AgentStatusChangedEvent) => {
-            console.log(
+            logger.log(
                 `[AgentListener] ${event.agentId}: ${event.fromStatus} → ${event.toStatus}`,
             );
         },

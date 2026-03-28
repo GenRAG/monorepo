@@ -49,6 +49,14 @@ export default tseslint.config(
             '@typescript-eslint/no-unsafe-return': 'off',
             indent: ['off'],
             '@typescript-eslint/no-unsafe-call': 'off',
+            '@typescript-eslint/no-unused-vars': [
+                'warn',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
+                },
+            ],
             'prettier/prettier': ['warn', { tabWidth: 4, useTabs: false }],
         },
     },

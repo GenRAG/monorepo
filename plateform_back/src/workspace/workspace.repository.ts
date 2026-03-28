@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { UserRole, Prisma, Workspace } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+export type WorkspaceWithUsersAndCreditBalance = Prisma.WorkspaceGetPayload<{
+    include: {
+        users: { select: { role: true } };
+        creditBalance: { select: { balance: true } };
+    };
+}>;
+
 export type WorkspaceWithUsers = Prisma.WorkspaceGetPayload<{
     include: { users: true };
 }>;
@@ -10,10 +17,29 @@ export type WorkspaceWithUsers = Prisma.WorkspaceGetPayload<{
 export class WorkspaceRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findOne(id: string): Promise<WorkspaceWithUsers | null> {
+    async findOne(
+        id: string,
+    ): Promise<WorkspaceWithUsersAndCreditBalance | null> {
         return this.prisma.workspace.findUnique({
             where: { id },
-            include: { users: true },
+            include: {
+                users: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
+                    },
+                },
+                creditBalance: {
+                    select: {
+                        balance: true,
+                    },
+                },
+            },
         });
     }
 
@@ -33,7 +59,7 @@ export class WorkspaceRepository {
     }): Promise<WorkspaceWithUsers> {
         const { name, description, userId } = data;
 
-        return this.prisma.workspace.create({
+        const workspace = await this.prisma.workspace.create({
             data: {
                 name,
                 description,
@@ -46,6 +72,24 @@ export class WorkspaceRepository {
             },
             include: { users: true },
         });
+
+        await this.prisma.creditBalance.create({
+            data: {
+                workspaceId: workspace.id,
+                balance: 0,
+            },
+        });
+
+        await this.prisma.creditBalance.upsert({
+            where: { workspaceId: workspace.id },
+            update: {},
+            create: {
+                workspaceId: workspace.id,
+                balance: 0,
+            },
+        });
+
+        return workspace;
     }
 
     async delete(id: string): Promise<Workspace> {

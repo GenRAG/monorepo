@@ -65,6 +65,8 @@ export class AgentService {
                 case AgentStatus.DEVELOPMENT:
                     machine.toDevelopment();
                     break;
+                default:
+                    throw new NotFoundException('Invalid status');
             }
         }
 

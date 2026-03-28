@@ -7,6 +7,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { AgentModule } from './agent/agent.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
+import { CreditBalanceModule } from 'src/credit/credit-balance.module';
 
 @Module({
     imports: [
@@ -49,6 +50,7 @@ import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
         AgentModule,
         WorkflowModule,
         AgentRuntimeModule,
+        CreditBalanceModule,
     ],
     controllers: [],
     providers: [],

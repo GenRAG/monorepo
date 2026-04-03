@@ -5,7 +5,7 @@ import {
     AgentDeployedEvent,
     AgentStatusChangedEvent,
 } from './agent-events';
-import { AgentEventType } from 'src/events/agent-events.type';
+import { AgentEventType } from 'src/events/agent/agent-events.type';
 import { Logger } from 'nestjs-pino';
 
 export function registerAgentListeners(

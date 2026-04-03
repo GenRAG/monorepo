@@ -12,7 +12,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { CreditTransactionModule } from 'src/transaction/credit-transaction.module';
 import { UsageTrackerService } from 'src/usage-tracker/usage-tracker.service';
-import { registerAgentListeners } from 'src/events/agent-event.listener';
+import { registerAgentListeners } from 'src/events/agent/agent-event.listener';
 import { Logger } from 'nestjs-pino';
 
 @Module({

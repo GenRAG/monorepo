@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { JsonValue } from 'generated/prisma/runtime/library';
+import { Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
 
@@ -16,7 +16,7 @@ export class ContextBuilder {
     }: {
         agentId: string;
         workspaceId: string;
-    }): Promise<JsonValue> {
+    }): Promise<Prisma.JsonValue> {
         const agent = await this.agentService.findOne(agentId, workspaceId);
         const workflow = await this.workflowService.findActive(agent.id);
 

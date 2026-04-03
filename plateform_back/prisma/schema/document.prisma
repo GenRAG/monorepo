@@ -1,0 +1,19 @@
+enum DocumentStatus {
+    UPLOADED
+    PROCESSING
+    INDEXED
+    FAILED
+}
+
+model Document {
+    id         String         @id @default(cuid())
+    agentId    String
+    storageKey String
+    mimeType   String
+    status     DocumentStatus @default(UPLOADED)
+    indexedAt  DateTime?
+    failedAt   DateTime?
+    createdAt  DateTime       @default(now())
+    updatedAt  DateTime       @updatedAt
+    agent      Agent          @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}

@@ -19,7 +19,7 @@ import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.reque
 import { WorkspaceService } from 'src/workspace/workspace.service';
 import {
     WorkspaceWithUsers,
-    WorkspaceWithUsersAndCreditBalance,
+    WorkspacePayload,
 } from 'src/workspace/workspace.repository';
 
 @Controller('workspaces')
@@ -46,7 +46,7 @@ export class WorkspaceController {
     @UseGuards(WorkspaceRolesGuard)
     getWorkspaceById(
         @Param('id') workspaceId: string,
-    ): Promise<WorkspaceWithUsersAndCreditBalance> {
+    ): Promise<WorkspacePayload | null> {
         return this.workspaceService.findOne(workspaceId);
     }
 

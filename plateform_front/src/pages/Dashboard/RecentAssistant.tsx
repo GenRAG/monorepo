@@ -16,7 +16,7 @@ import {
     useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
-import Button from "components/Atoms/Button";
+import Button from "components/System/Atoms/Button";
 import { useAppResponsive } from "hooks/useAppResponsive";
 
 const CONVERSATIONS = [

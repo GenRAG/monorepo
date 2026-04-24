@@ -1,4 +1,5 @@
 import { backendApi } from "services/api";
+import { Tag } from "services/tags/tag";
 
 export interface ChatResponse {
     response: string[];
@@ -105,7 +106,7 @@ export const extendedChatApi = backendApi.injectEndpoints({
                 method: "GET",
             }),
             transformResponse: (response: ChatMetadata | null) => response,
-            providesTags: (_result, _error, id) => [{ type: "Chat", id }],
+            providesTags: (_result, _error, id) => [{ type: Tag.Chat, id }],
         }),
 
         getAssistantMetadata: builder.query<ChatMetadata | null, string>({
@@ -115,7 +116,7 @@ export const extendedChatApi = backendApi.injectEndpoints({
             }),
             transformResponse: (response: ChatMetadata | null) => response,
             providesTags: (_result, _error, assistantId) => [
-                { type: "Chat", id: assistantId },
+                { type: Tag.Chat, id: assistantId },
             ],
         }),
 
@@ -132,7 +133,7 @@ export const extendedChatApi = backendApi.injectEndpoints({
                 if (Array.isArray(response)) return response;
                 return response.assistants ?? [];
             },
-            providesTags: [{ type: "Chat", id: "ASSISTANTS" }],
+            providesTags: [{ type: Tag.Chat, id: "ASSISTANTS" }],
         }),
 
         getConversationsForAssistant: builder.query<
@@ -152,7 +153,7 @@ export const extendedChatApi = backendApi.injectEndpoints({
                 return response.conversations ?? [];
             },
             providesTags: (_result, _error, assistantId) => [
-                { type: "Chat", id: `${assistantId}-conversations` },
+                { type: Tag.Chat, id: `${assistantId}-conversations` },
             ],
         }),
 
@@ -178,7 +179,7 @@ export const extendedChatApi = backendApi.injectEndpoints({
                 { assistantId, conversationId },
             ) => [
                 {
-                    type: "Chat",
+                    type: Tag.Chat,
                     id: `${assistantId}-${conversationId}-messages`,
                 },
             ],

@@ -1,34 +1,94 @@
 import { backendApi } from "services/api";
-import { AgentPreview } from "types/agent";
+import { Tag } from "services/tags/tag";
+import {
+    Agent,
+    AgentApiResponse,
+    AgentByIdParams,
+    CreateAgentParams,
+    UpdateAgentParams,
+} from "types/agent/agent";
+import { AgentPreview } from "types/agent/agent";
 
-interface AgentApiResponse {
-    id: string;
-    name: string;
-    updatedAt?: string;
-}
+const getWorkspaceAgentsTagId = (workspaceId: string) =>
+    `workspace-${workspaceId}`;
 
 export const extendedAgentApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
-        getWorkspaceAgents: builder.query<AgentPreview[], string | void>({
-            query: (_workspaceId) => ({
-                url: "/workspace/all",
+        getWorkspaceAgents: builder.query<AgentPreview[], string>({
+            query: (workspaceId) => ({
+                url: `/workspaces/${workspaceId}/agents`,
                 method: "GET",
             }),
-            transformResponse: (
-                response: AgentApiResponse[],
-                _meta,
-                workspaceId,
-            ) =>
-                response.map((w) => ({
-                    id: w.id,
-                    name: w.name,
-                    workspaceId: workspaceId ?? "default",
-                    documentsCount: 0,
-                    updatedAt: w.updatedAt,
-                })),
+            providesTags: (result, _error, workspaceId) => {
+                const listTag = {
+                    type: Tag.Agents as const,
+                    id: getWorkspaceAgentsTagId(workspaceId),
+                };
+
+                if (!result) {
+                    return [listTag];
+                }
+
+                return [
+                    ...result.map((agent) => ({
+                        type: Tag.Agents as const,
+                        id: agent.id,
+                    })),
+                    listTag,
+                ];
+            },
+        }),
+
+        getAgentById: builder.query<Agent, AgentByIdParams>({
+            query: ({ workspaceId, id }) => ({
+                url: `/workspaces/${workspaceId}/agents/${id}`,
+                method: "GET",
+            }),
+            providesTags: (_result, _error, { id }) => [
+                { type: Tag.Agents, id },
+            ],
+        }),
+
+        createAgent: builder.mutation<Agent, CreateAgentParams>({
+            query: ({ workspaceId, ...body }) => ({
+                url: `/workspaces/${workspaceId}/agents`,
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: (_result, _error, { workspaceId }) => [
+                { type: Tag.Agents, id: getWorkspaceAgentsTagId(workspaceId) },
+            ],
+        }),
+
+        updateAgent: builder.mutation<Agent, UpdateAgentParams>({
+            query: ({ workspaceId, id, ...body }) => ({
+                url: `/workspaces/${workspaceId}/agents/${id}`,
+                method: "PATCH",
+                body,
+            }),
+            invalidatesTags: (_result, _error, { workspaceId, id }) => [
+                { type: Tag.Agents, id },
+                { type: Tag.Agents, id: getWorkspaceAgentsTagId(workspaceId) },
+            ],
+        }),
+
+        deleteAgent: builder.mutation<void, AgentByIdParams>({
+            query: ({ workspaceId, id }) => ({
+                url: `/workspaces/${workspaceId}/agents/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (_result, _error, { workspaceId, id }) => [
+                { type: Tag.Agents, id },
+                { type: Tag.Agents, id: getWorkspaceAgentsTagId(workspaceId) },
+            ],
         }),
     }),
 });
 
-export const { useGetWorkspaceAgentsQuery } = extendedAgentApi;
-export const useGetOrganisationAgentsQuery = useGetWorkspaceAgentsQuery;
+export const {
+    useGetWorkspaceAgentsQuery,
+    useGetAgentByIdQuery,
+    useCreateAgentMutation,
+    useUpdateAgentMutation,
+    useDeleteAgentMutation,
+} = extendedAgentApi;

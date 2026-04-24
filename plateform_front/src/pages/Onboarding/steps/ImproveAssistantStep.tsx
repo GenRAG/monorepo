@@ -36,8 +36,8 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useChat } from "../../../hooks/useChat";
-import { ChatInterface } from "../../../components/Molecules/ChatInterface";
-import StepLevel from "components/Molecules/StepLevel";
+import { ChatInterface } from "components/System/Molecules/ChatInterface";
+import StepLevel from "components/System/Molecules/StepLevel";
 import "../onboardingAnimations.css";
 import useUploadDocuments from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";

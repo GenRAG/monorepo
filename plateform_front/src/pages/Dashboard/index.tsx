@@ -11,7 +11,7 @@ import { useUserInfo } from "hooks/useUserInfo";
 
 import RecentAssistant from "pages/Dashboard/RecentAssistant";
 import { Metrics } from "pages/Dashboard/Metrics";
-import { WorkflowPreview } from "components/Molecules/WorkflowPreview";
+import { WorkflowPreview } from "components/System/Molecules/WorkflowPreview";
 
 const Dashboard = () => {
     const { colorMode } = useColorMode();

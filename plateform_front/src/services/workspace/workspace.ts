@@ -1,28 +1,65 @@
 import { backendApi } from "services/api";
-import { WorkspacePreview } from "types/workspace";
+import { Tag } from "services/tags/tag";
+import {
+    Workspace,
+    WorkspaceCreateRequest,
+    WorkspaceDetail,
+} from "types/workspace";
 
-interface WorkspaceApiResponse {
-    id: string;
-    name: string;
-    updatedAt?: string;
-}
-
-export const extendedUserApi = backendApi.injectEndpoints({
+export const workspaceApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
-        getUserWorkspaces: builder.query<WorkspacePreview[], void>({
+        getUserWorkspaces: builder.query<Workspace[], void>({
             query: () => ({
-                url: "/workspace/all",
+                url: "/workspaces",
                 method: "GET",
             }),
-            transformResponse: (response: WorkspaceApiResponse[]) =>
-                response.map((w) => ({
-                    id: w.id,
-                    name: w.name,
-                    documentsCount: 0,
-                    updatedAt: w.updatedAt,
-                })),
+            providesTags: (result) =>
+                result
+                    ? [
+                          ...result.map(({ id }) => ({
+                              type: Tag.Workspaces,
+                              id,
+                          })),
+                          { type: Tag.Workspaces, id: "LIST" },
+                      ]
+                    : [{ type: Tag.Workspaces, id: "LIST" }],
+        }),
+
+        getWorkspaceById: builder.query<WorkspaceDetail, string>({
+            query: (workspaceId) => ({
+                url: `/workspaces/${workspaceId}`,
+                method: "GET",
+            }),
+            providesTags: (_result, _error, workspaceId) => [
+                { type: Tag.Workspaces, id: workspaceId },
+            ],
+        }),
+
+        createWorkspace: builder.mutation<Workspace, WorkspaceCreateRequest>({
+            query: (data) => ({
+                url: "/workspaces",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: [{ type: Tag.Workspaces, id: "LIST" }],
+        }),
+
+        deleteWorkspace: builder.mutation<void, string>({
+            query: (workspaceId) => ({
+                url: `/workspaces/${workspaceId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (_result, _error, workspaceId) => [
+                { type: Tag.Workspaces, id: "LIST" },
+                { type: Tag.Workspaces, id: workspaceId },
+            ],
         }),
     }),
 });
 
-export const { useGetUserWorkspacesQuery } = extendedUserApi;
+export const {
+    useGetUserWorkspacesQuery,
+    useGetWorkspaceByIdQuery,
+    useCreateWorkspaceMutation,
+    useDeleteWorkspaceMutation,
+} = workspaceApi;

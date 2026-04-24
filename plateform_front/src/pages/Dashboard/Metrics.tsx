@@ -1,5 +1,5 @@
 import { Grid } from "@chakra-ui/react";
-import { StatCard } from "pages/Workspace/Documents/SimpleDocumentWorkspace";
+import { StatCard } from "components/Document/StatCard";
 
 const METRICS = [
     { value: "1.4s", label: "Avg Response Time" },

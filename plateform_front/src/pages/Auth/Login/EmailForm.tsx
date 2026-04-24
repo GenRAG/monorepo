@@ -14,18 +14,15 @@ import {
     VStack,
     Image,
     useColorModeValue,
-    useColorMode,
 } from "@chakra-ui/react";
 import { AuthHeader } from "pages/Auth/AuthHeader";
 import { AuthStepType } from "pages/Auth/Layout/AuthLayout";
 import { LocalStorageKeys } from "types/localStorage";
 import { useLocalStorage } from "usehooks-ts";
 
-import Button from "components/Atoms/Button";
+import Button from "components/System/Atoms/Button";
 import { validateEmail } from "utils/validateEmail";
 import Google from "assets/icons/google.svg";
-import Microsoft from "assets/icons/microsoft.png";
-//import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 
 type EmailFormType = {
     email: string;
@@ -52,6 +49,7 @@ export const EmailForm: FC<{
             rememberEmail: !!rememberedEmail,
         },
     });
+    const textColor = useColorModeValue("grey.900", "white");
 
     const onSubmit = handleSubmit((data: EmailFormType) => {
         if (data.rememberEmail) remember(data.email);
@@ -59,7 +57,7 @@ export const EmailForm: FC<{
         setEmail(data.email);
     });
 
-    const { colorMode } = useColorMode();
+    const buttonType = useColorModeValue("superSecondary", "superPrimary");
 
     return (
         <VStack gap="32px" w="100%">
@@ -67,24 +65,14 @@ export const EmailForm: FC<{
                 <AuthHeader currentStep={currentStep} />
 
                 <HStack wrap="wrap" justify="flex-start" w="100%" gap="0">
-                    <Text
-                        variant="body-sm"
-                        color={useColorModeValue("grey.900", "whites.offwhite")}
-                        mr={2}
-                    >
+                    <Text variant="body-sm" color={textColor} mr={2}>
                         You don&apos;t have an account yet ?
                     </Text>
                     <Link
                         as={ReachLink}
                         to={{ pathname: "/register", search: location.search }}
                     >
-                        <Text
-                            color={useColorModeValue(
-                                "grey.900",
-                                "whites.offwhite",
-                            )}
-                            variant="body-sm-semibold"
-                        >
+                        <Text color={textColor} variant="body-sm-semibold">
                             Create an account
                         </Text>
                     </Link>
@@ -94,14 +82,7 @@ export const EmailForm: FC<{
             <chakra.form w="100%" onSubmit={onSubmit}>
                 <VStack align="start" gap="32px">
                     <FormControl isInvalid={!!errors.email}>
-                        <FormLabel
-                            color={useColorModeValue(
-                                "grey.900",
-                                "whites.offwhite",
-                            )}
-                        >
-                            Email address
-                        </FormLabel>
+                        <FormLabel color={textColor}>Email address</FormLabel>
                         <Controller
                             name="email"
                             control={control}
@@ -126,7 +107,7 @@ export const EmailForm: FC<{
 
                     <VStack gap="sm" w="100%">
                         <Button
-                            variant="superSecondary"
+                            variant={buttonType}
                             w="100%"
                             size="lg"
                             type="submit"
@@ -156,21 +137,19 @@ export const EmailForm: FC<{
                                 or
                             </Text>
                             <Divider
-                                borderColor={
-                                    colorMode === "dark"
-                                        ? "grey.300"
-                                        : "grey.100"
-                                }
+                                borderColor={useColorModeValue(
+                                    "grey.300",
+                                    "grey.100",
+                                )}
                             />
                         </HStack>
                         <VStack w="100%">
                             <Button
                                 w="100%"
-                                bg={
-                                    colorMode === "dark"
-                                        ? "grey.800 !important"
-                                        : "white"
-                                }
+                                bg={useColorModeValue(
+                                    "white",
+                                    "grey.800 !important",
+                                )}
                                 border="1px solid"
                                 borderColor="grey.200"
                                 _hover={{
@@ -182,41 +161,12 @@ export const EmailForm: FC<{
                                 <HStack justify="center" spacing="8px">
                                     <Image src={Google} boxSize="24px" />
                                     <Text
-                                        color={
-                                            colorMode === "dark"
-                                                ? "white"
-                                                : "black"
-                                        }
+                                        color={useColorModeValue(
+                                            "black",
+                                            "white",
+                                        )}
                                     >
                                         Continue with Google
-                                    </Text>
-                                </HStack>
-                            </Button>
-                            <Button
-                                w="100%"
-                                bg={
-                                    colorMode === "dark"
-                                        ? "grey.800 !important"
-                                        : "white"
-                                }
-                                border="1px solid"
-                                borderColor="grey.200"
-                                _hover={{
-                                    borderColor: "grey.300",
-                                    bg: "grey.50",
-                                }}
-                                size="lg"
-                            >
-                                <HStack justify="center" spacing="8px">
-                                    <Image src={Microsoft} boxSize="24px" />
-                                    <Text
-                                        color={
-                                            colorMode === "dark"
-                                                ? "white"
-                                                : "black"
-                                        }
-                                    >
-                                        Continue with Microsoft
                                     </Text>
                                 </HStack>
                             </Button>

@@ -1,6 +1,7 @@
 import { verify } from "crypto";
 import ResetPassword from "pages/Auth/Password";
 import { backendApi } from "services/api";
+import { Tag } from "services/tags/tag";
 import {
     AuthResponse,
     LoginParams,
@@ -20,7 +21,7 @@ export const extendedUserApi = backendApi.injectEndpoints({
                 method: "POST",
                 body,
             }),
-            invalidatesTags: ["User"],
+            invalidatesTags: [Tag.Users],
         }),
 
         register: builder.mutation<void, RegisterParams>({
@@ -68,7 +69,7 @@ export const extendedUserApi = backendApi.injectEndpoints({
                 url: "/users/me",
                 method: "GET",
             }),
-            providesTags: ["User"],
+            providesTags: [Tag.Users],
         }),
     }),
 });

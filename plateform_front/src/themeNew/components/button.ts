@@ -9,7 +9,6 @@ import { textStyles } from "themeNew/foundations/typography";
 const Button = {
     baseStyle: {
         borderRadius: borderRadius.xs,
-        // Prevent default chakra ui setting opacity to 0.4 when disabled
         _disabled: {
             opacity: "1",
         },
@@ -49,30 +48,41 @@ const Button = {
                 props.isDisabled || props.disabled || props.isLoading;
 
             return {
-                color: disabled ? colors.grey[300] : colors.font.white,
+                color: disabled ? colors.grey[300] : colors.whites.white,
                 cursor: disabled ? "not-allowed" : "pointer",
 
                 background: disabled
-                    ? `radial-gradient(100% 141.54% at 100% 0%, rgba(211, 212, 212, 0.1) 0%, rgba(121, 123, 123, 0.1) 100%),radial-gradient(19.03% 80.19% at 45.64% 100%, rgba(205, 184, 140, 0.31) 0%, rgba(151, 102, 0, 0) 100%),linear-gradient(0deg, var(--Color-Neutral-Grey-50, #F6F6F6), var(--Color-Neutral-Grey-50, #F6F6F6))`
-                    : `radial-gradient(15.03% 60.19% at 45.64% 100%, rgba(205, 184, 140, 0.6) 0%, rgba(151, 102, 0, 0) 100%), radial-gradient(100% 141.54% at 100% 0%, rgba(176, 177, 177, 0.3) 0%, rgba(55, 58, 58, 0.3) 100%), linear-gradient(0deg, #1E1E1E, #1E1E1E)`,
-                backgroundSize: "200% 200%",
-                backgroundPosition: "0% 100%",
+                    ? "linear-gradient(130deg, rgba(209, 209, 209, 0.9) 0%, rgba(176, 176, 176, 0.9) 100%)"
+                    : "radial-gradient(120% 120% at 100% 0%, rgba(110, 231, 199, 0.4) 0%, rgba(110, 231, 199, 0) 48%), linear-gradient(130deg, #12B98C 0%, #07966F 55%, #047859 100%)",
+                border: disabled
+                    ? "1px solid rgba(209, 209, 209, 0.95)"
+                    : "1px solid rgba(168, 243, 223, 0.7)",
+                boxShadow: disabled
+                    ? "none"
+                    : "0 6px 20px rgba(7, 150, 111, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                backgroundSize: "180% 180%",
+                backgroundPosition: "0% 50%",
                 transition: disabled
                     ? "none"
-                    : "background-position 2s ease-in-out",
+                    : "background-position 0.45s ease, transform 0.2s ease, box-shadow 0.2s ease",
 
                 _hover: disabled
                     ? {}
                     : {
-                          backgroundPosition: "90% 100%",
-                          transition:
-                              "background-position 2s ease-in-out, transform 0.2s ease-out",
+                          backgroundPosition: "100% 50%",
+                          transform: "translateY(-1px)",
+                          boxShadow:
+                              "0 10px 24px rgba(7, 150, 111, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22)",
                       },
 
                 _active: disabled
                     ? {}
                     : {
-                          background: colors.font.primary,
+                          transform: "translateY(0)",
+                          background:
+                              "radial-gradient(120% 120% at 100% 0%, rgba(52, 211, 169, 0.28) 0%, rgba(52, 211, 169, 0) 48%), linear-gradient(130deg, #07966F 0%, #076048 100%)",
+                          boxShadow:
+                              "0 4px 12px rgba(7, 150, 111, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14)",
                       },
 
                 _focus: {
@@ -160,9 +170,7 @@ const Button = {
             return {
                 color: disabled ? colors.grey[300] : colors.font.primary,
                 background: disabled ? colors.grey[100] : colors.font.white,
-                border: disabled
-                    ? `none`
-                    : "1px solid rgba(120, 241, 201, 0.67)",
+                border: disabled ? `none` : "1px solid rgba(1, 134, 90, 0.67)",
                 _dark: {
                     background: disabled ? colors.grey[700] : colors.grey[800],
                     _hover: {

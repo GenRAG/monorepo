@@ -16,8 +16,8 @@ import {
     useHandleMessageUpdate,
     useStreamingQuery,
 } from "../../../hooks/useChat";
-import { ChatInterface } from "../../../components/Molecules/ChatInterface";
-import StepLevel from "components/Molecules/StepLevel";
+import { ChatInterface } from "components/System/Molecules/ChatInterface";
+import StepLevel from "components/System/Molecules/StepLevel";
 import { useAppResponsive } from "hooks/useAppResponsive";
 
 interface TestAssistantFormData {

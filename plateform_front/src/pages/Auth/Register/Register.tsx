@@ -25,11 +25,10 @@ import {
     RegisterFormSteps,
 } from "pages/Auth/Layout/AuthLayout";
 
-import Button from "components/Atoms/Button";
+import Button from "components/System/Atoms/Button";
 import colors from "themeNew/foundations/colors";
 import { validateEmail } from "utils/validateEmail";
 import Google from "assets/icons/google.svg";
-import Microsoft from "assets/icons/microsoft.png";
 
 import CreateAccountForm from "./CreateAccountForm";
 
@@ -58,6 +57,8 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
         formState: { errors },
     } = useForm({ defaultValues: { email: searchParams.get("email") } });
     const enteredEmail = watch("email");
+    const buttonType = useColorModeValue("superSecondary", "superPrimary");
+    const labelColor = useColorModeValue("grey.900", "whites.offwhite");
 
     return (
         <VStack w="100%" gap="32px">
@@ -89,11 +90,7 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
                 {step === RegisterFormSteps.REGISTER_EMAIL ? (
                     <>
                         <FormControl isInvalid={!!errors.email}>
-                            <FormLabel
-                                color={
-                                    colorMode === "dark" ? "white" : "grey.900"
-                                }
-                            >
+                            <FormLabel color={labelColor}>
                                 Email address
                             </FormLabel>
                             <Input
@@ -120,7 +117,7 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
                             }
                             h="48px"
                             w="100%"
-                            variant="superSecondary"
+                            variant={buttonType}
                         >
                             <Text
                                 color={colors.whites.white}
@@ -162,12 +159,6 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
                                     <HStack justify="center" spacing="8px">
                                         <Image src={Google} boxSize="24px" />
                                         <Text>Continue with Google</Text>
-                                    </HStack>
-                                </Button>
-                                <Button w="100%" variant="secondary" size="lg">
-                                    <HStack justify="center" spacing="8px">
-                                        <Image src={Microsoft} boxSize="24px" />
-                                        <Text>Continue with Microsoft</Text>
                                     </HStack>
                                 </Button>
                             </VStack>

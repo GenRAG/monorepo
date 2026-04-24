@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { AuthHeader } from "pages/Auth/AuthHeader";
 import { LoginFormSteps } from "pages/Auth/Layout/AuthLayout";
-import { ShowHidePasswordInput } from "components/Molecules/Inputs/ShowHidePasswordInput";
+import { ShowHidePasswordInput } from "components/System/Molecules/Inputs/ShowHidePasswordInput";
 import colors from "themeNew/foundations/colors";
 import { useLoginMutation, useGetMeQuery } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
@@ -30,13 +30,13 @@ export const PasswordForm: FC<{
     email: string;
     currentStep: LoginFormSteps;
 }> = ({ email, currentStep }) => {
-
     const location = useLocation();
     const toast = useThemedToast();
     const [login, { isLoading: isLoggingIn }] = useLoginMutation();
     const navigate = useNavigate();
     const { login: setLoggedIn } = useAuth();
     const { refetch: refetchMe } = useGetMeQuery();
+    const fieldTextColor = useColorModeValue("grey.800", "grey.100");
 
     const {
         formState: { errors },
@@ -47,6 +47,8 @@ export const PasswordForm: FC<{
             stayConnected: false,
         },
     });
+
+    const buttonType = useColorModeValue("superSecondary", "superPrimary");
 
     const onSubmit = handleSubmit(async (data: PasswordFormType) => {
         try {
@@ -68,7 +70,7 @@ export const PasswordForm: FC<{
             });
 
             setTimeout(async () => {
-                await navigate("/onboarding");
+                await navigate("/");
             }, 100);
         } catch (err: any) {
             const message = "Please try again later.";
@@ -120,10 +122,7 @@ export const PasswordForm: FC<{
                                 })}
                                 placeholder="Minimum 8 characters"
                                 autoComplete="new-password"
-                                color={useColorModeValue(
-                                    "black",
-                                    "whites.offwhite",
-                                )}
+                                color={fieldTextColor}
                             />
                             {!!errors.password && (
                                 <FormErrorMessage>
@@ -134,7 +133,7 @@ export const PasswordForm: FC<{
                     </VStack>
                     <Button
                         color={useColorModeValue("white", "whites")}
-                        variant="superSecondary"
+                        variant={buttonType}
                         w="100%"
                         size="lg"
                         isLoading={isLoggingIn}

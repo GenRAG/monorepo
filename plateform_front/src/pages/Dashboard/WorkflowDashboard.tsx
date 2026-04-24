@@ -1,105 +1,28 @@
 import { Box, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Background, BackgroundVariant } from "@xyflow/react";
 import {
-    Background,
-    BackgroundVariant,
-    Edge,
-    ReactFlow,
-    useEdgesState,
-    useNodesState,
-} from "@xyflow/react";
-import * as WorkflowPackage from "@genrag/workflow";
-import { TaskType } from "@genrag/workflow";
+    WorkflowCanvas,
+    NodeComponent,
+    makeFlowNode,
+    linkNodes,
+    withAutoSettings,
+    TaskType,
+} from "@genrag/workflow";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import { useMemo } from "react";
-import NodeComponent from "components/Molecules/Nodes/NodeComponent";
 
-import type { AppNode } from "@genrag/workflow";
-
-const { GenEdge, SettingsEdge, CreateFlowNode, linkNodes } =
-    WorkflowPackage as any;
+const { nodes: DEFAULT_NODES, edges: DEFAULT_EDGES } = withAutoSettings(
+    [
+        makeFlowNode("__q", TaskType.QUERY, 0, 0),
+        makeFlowNode("__r", TaskType.RETRIEVER, 0, 200),
+        makeFlowNode("__s", TaskType.RESPONSE, 0, 400),
+    ],
+    [linkNodes("__q", "__r"), linkNodes("__r", "__s")],
+);
 
 export const WorkflowDashboard = () => {
     const { colorMode } = useColorMode();
     const borderColor = useColorModeValue("grey.100", "grey.800");
     const isMobile = useAppResponsive({ base: true, lg: false });
-
-    const initialState = useMemo(() => {
-        const n1 = CreateFlowNode(
-            TaskType.QUERY,
-            { x: isMobile ? 0 : -200, y: isMobile ? -200 : 0 },
-            undefined,
-            false,
-        );
-        const n2 = CreateFlowNode(
-            TaskType.RETRIEVER,
-            { x: isMobile ? 0 : 0, y: isMobile ? 0 : 0 },
-            undefined,
-            false,
-        );
-        const n3 = CreateFlowNode(
-            TaskType.RESPONSE,
-            { x: isMobile ? 0 : 200, y: isMobile ? 200 : 0 },
-            undefined,
-            false,
-        );
-
-        const mainNodes = [n1.node, n2.node, n3.node];
-        const mainEdges: Edge[] = [
-            linkNodes(n1.node.id, n2.node.id),
-            linkNodes(n2.node.id, n3.node.id),
-        ];
-
-        const extraNodes: AppNode[] = [];
-        const extraEdges: Edge[] = [];
-
-        /*mainNodes.forEach((node) => {
-            const cfgInputs = getConfigInputs(node.data.type);
-            if (cfgInputs.length > 0) {
-                const { nodes: pn, edges: pe } = createSettingPlaceholders(
-                    node,
-                    cfgInputs,
-                );
-                extraNodes.push(...pn);
-                extraEdges.push(...pe);
-            }
-        });*/
-
-        return {
-            nodes: [...mainNodes, ...extraNodes],
-            edges: [...mainEdges, ...extraEdges],
-        };
-    }, [isMobile]);
-
-    const [nodes, , onNodesChange] = useNodesState<AppNode>(initialState.nodes);
-    const [edges, , onEdgesChange] = useEdgesState<Edge>(initialState.edges);
-
-    const snapGrid: [number, number] = [50, 50];
-    const fitViewOptions = { padding: 0.1, minZoom: 0.5, maxZoom: 1 };
-
-    const edgeTypes = useMemo(
-        () => ({
-            default: (props: any) => (
-                <GenEdge
-                    {...props}
-                    //onToggle={isMenuOpen ? onMenuClose : onMenuOpen}
-                />
-            ),
-            settings: (props: any) => <SettingsEdge {...props} />,
-        }),
-        [],
-    );
-
-    const nodeTypes = useMemo(
-        () => ({
-            GenNode: (props: any) => (
-                <NodeComponent
-                    {...props}
-                    isVertical={isMobile} /*onNodeClick={handleNodeClick}*/
-                />
-            ),
-        }),
-        [isMobile],
-    );
 
     return (
         <Box
@@ -116,21 +39,17 @@ export const WorkflowDashboard = () => {
                 borderRadius="16px"
                 overflow="hidden"
             >
-                <ReactFlow
+                <WorkflowCanvas
+                    nodeComponent={NodeComponent as any}
+                    initialVertical={isMobile}
+                    readonly
+                    initialNodes={DEFAULT_NODES}
+                    initialEdges={DEFAULT_EDGES}
+                    fitViewOptions={{ padding: 0.1, minZoom: 0.5, maxZoom: 1 }}
                     colorMode={colorMode === "dark" ? "dark" : "light"}
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    nodeTypes={nodeTypes}
-                    edgeTypes={edgeTypes}
-                    snapGrid={snapGrid}
-                    fitViewOptions={fitViewOptions}
-                    snapToGrid={true}
-                    fitView
                 >
                     <Background variant={BackgroundVariant.Dots} gap={16} />
-                </ReactFlow>
+                </WorkflowCanvas>
             </Box>
         </Box>
     );

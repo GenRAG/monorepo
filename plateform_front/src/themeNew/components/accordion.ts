@@ -8,7 +8,6 @@ const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
 const accordionVariant = defineMultiStyleConfig({
     baseStyle: {
         button: {
-            // bg: 'transparent',
             _hover: {
                 bg: "grey.50",
             },

@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useRegisterMutation } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
-import { ShowHidePasswordInput } from "components/Molecules/Inputs/ShowHidePasswordInput";
+import { ShowHidePasswordInput } from "components/System/Molecules/Inputs/ShowHidePasswordInput";
 import { validateEmail } from "utils/validateEmail";
 
 type RegisterFormType = {
@@ -37,17 +37,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
 
     const [registerUser, { isLoading }] = useRegisterMutation();
 
-    /*const partner = usePartnerParams();
-	const { data: corporateData } = useGetCorporateCompanyByIdQuery(searchParams.get('corporate')!, {
-		skip: !searchParams.has('corporate'),
-	});
-	const { redeemToken } = useTokenManager();*/
-
-    const [invalidSyntax, setInvalidSyntax] = useState<string>();
-    const [promoMessage, setPromoMessage] = useState<string>();
-    const [promoChecked, setPromoChecked] = useState<boolean>(
-        searchParams.has("promo"),
-    );
+    const buttonType = useColorModeValue("superSecondary", "superPrimary");
     //const { handleFcmToken } = useFcmTokenManager();
 
     const {
@@ -71,6 +61,8 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                 : [],
         [errors.password?.types],
     );
+    const labelColor = useColorModeValue("grey.900", "whites.offwhite");
+    const fieldTextColor = useColorModeValue("black", "whites.offwhite");
 
     const onSubmit = handleSubmit((data: RegisterFormType) => {
         registerUser({
@@ -102,13 +94,13 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
         <chakra.form w="100%" onSubmit={onSubmit}>
             <VStack align="center" gap="24px" w="100%">
                 <FormControl isInvalid={!!errors.email}>
-                    <FormLabel color="whites.offwhite">Email Address</FormLabel>
+                    <FormLabel color={labelColor}>Email Address</FormLabel>
                     <Input
                         {...register("email", { validate: validateEmail })}
                         placeholder="john.smith@gmail.com"
                         autoComplete="email"
                         disabled={!!email}
-                        color={useColorModeValue("black", "whites.offwhite")}
+                        color={fieldTextColor}
                     />
                     {errors.email && (
                         <FormErrorMessage>
@@ -117,15 +109,15 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                     )}
                 </FormControl>
                 <FormControl>
-                    <FormLabel color="whites.offwhite">Name</FormLabel>
+                    <FormLabel color={labelColor}>Name</FormLabel>
                     <Input
                         placeholder="John Smith"
                         autoComplete="name"
-                        color={useColorModeValue("black", "whites.offwhite")}
+                        color={fieldTextColor}
                     />
                 </FormControl>
                 <FormControl isInvalid={!!errors.password}>
-                    <FormLabel color="whites.offwhite">Password</FormLabel>
+                    <FormLabel color={labelColor}>Password</FormLabel>
                     <ShowHidePasswordInput
                         {...register("password", {
                             required: true,
@@ -140,7 +132,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                         })}
                         placeholder="Minimum 8 characters"
                         autoComplete="new-password"
-                        color={useColorModeValue("black", "whites.offwhite")}
+                        color={fieldTextColor}
                     />
                     {errors.password?.type === "required" && (
                         <FormErrorMessage>
@@ -187,9 +179,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                     )}
                 </FormControl>
                 <FormControl isInvalid={!!errors.confirmPassword}>
-                    <FormLabel color="whites.offwhite">
-                        Confirm Password
-                    </FormLabel>
+                    <FormLabel color={labelColor}>Confirm Password</FormLabel>
                     <ShowHidePasswordInput
                         {...register("confirmPassword", {
                             required: true,
@@ -201,7 +191,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                         })}
                         placeholder="Minimum 8 characters"
                         autoComplete="new-password"
-                        color={useColorModeValue("black", "whites.offwhite")}
+                        color={fieldTextColor}
                     />
                     {errors.confirmPassword?.type === "required" && (
                         <FormErrorMessage>
@@ -225,7 +215,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                     )}
                 </FormControl>
                 <Button
-                    variant="superSecondary"
+                    variant={buttonType}
                     size="lg"
                     w="100%"
                     isLoading={isLoading}

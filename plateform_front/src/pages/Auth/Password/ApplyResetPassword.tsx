@@ -19,7 +19,7 @@ import {
     VStack,
 } from "@chakra-ui/react";
 
-import { ShowHidePasswordInput } from "components/Molecules/Inputs/ShowHidePasswordInput";
+import { ShowHidePasswordInput } from "components/System/Molecules/Inputs/ShowHidePasswordInput";
 
 import useThemedToast from "hooks/useThemedToast";
 import { useApplyResetPasswordMutation } from "services/auth/auth";
@@ -33,6 +33,9 @@ const ApplyResetPassword: FC = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const toast = useThemedToast();
+    const buttonType = useColorModeValue("superSecondary", "superPrimary");
+    const labelColor = useColorModeValue("grey.900", "whites.offwhite");
+    const fieldTextColor = useColorModeValue("black", "whites.offwhite");
     const token = searchParams.get("token");
     const email = searchParams.get("email");
     const [applyResetPassword, { isLoading }] = useApplyResetPasswordMutation();
@@ -91,9 +94,7 @@ const ApplyResetPassword: FC = () => {
                 <VStack align="start" gap="16px" w="100%">
                     <VStack align="left" gap="8px" w="100%">
                         <FormControl isInvalid={!!errors.password}>
-                            <FormLabel color="whites.offwhite">
-                                Password
-                            </FormLabel>
+                            <FormLabel color={labelColor}>Password</FormLabel>
                             <ShowHidePasswordInput
                                 {...register("password", {
                                     required: true,
@@ -103,10 +104,7 @@ const ApplyResetPassword: FC = () => {
                                 placeholder="Minimum 8 characters"
                                 autoComplete="new-password"
                                 type="password"
-                                color={useColorModeValue(
-                                    "black",
-                                    "whites.offwhite",
-                                )}
+                                color={fieldTextColor}
                             />
                             {errors.password?.type === "required" && (
                                 <FormErrorMessage>
@@ -129,7 +127,7 @@ const ApplyResetPassword: FC = () => {
 
                     <VStack align="left" gap="8px" w="100%">
                         <FormControl isInvalid={!!errors.confirmPassword}>
-                            <FormLabel color="whites.offwhite">
+                            <FormLabel color={labelColor}>
                                 Confirm Password
                             </FormLabel>
                             <ShowHidePasswordInput
@@ -141,10 +139,7 @@ const ApplyResetPassword: FC = () => {
                                 placeholder="Minimum 8 characters"
                                 type="password"
                                 autoComplete="new-password"
-                                color={useColorModeValue(
-                                    "black",
-                                    "whites.offwhite",
-                                )}
+                                color={fieldTextColor}
                             />
                             {errors.confirmPassword?.type === "required" && (
                                 <FormErrorMessage>
@@ -166,7 +161,7 @@ const ApplyResetPassword: FC = () => {
                     </VStack>
 
                     <Button
-                        variant="superSecondary"
+                        variant={buttonType}
                         size="lg"
                         w="100%"
                         isLoading={isLoading}

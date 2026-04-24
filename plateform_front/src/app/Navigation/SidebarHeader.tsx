@@ -22,11 +22,12 @@ export const SidebarHeader = ({
     isOpen,
     onToggle,
     title,
-    titleColor = "grey.100",
-    iconColor = "grey.100",
+    titleColor = "grey.900",
+    iconColor = "grey.900",
     onMobileClose,
 }: SidebarHeaderProps) => {
     const iconColorValue = useColorModeValue(iconColor, "grey.300");
+    const titleColorValue = useColorModeValue(titleColor, "white");
     const hoverBg = useColorModeValue(
         currentDarkTheme.rgba.primary20,
         currentDarkTheme.rgba.primary20,
@@ -35,7 +36,7 @@ export const SidebarHeader = ({
     return (
         <HStack justify="space-between" align="center" p={3}>
             {isOpen && (
-                <Text fontWeight="bold" fontSize="xl" color={titleColor}>
+                <Text fontWeight="bold" fontSize="xl" color={titleColorValue}>
                     {title}
                 </Text>
             )}

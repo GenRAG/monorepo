@@ -9,6 +9,7 @@ import {
     useDisclosure,
     Stack,
     Divider,
+    useColorMode,
 } from "@chakra-ui/react";
 import { LayoutDashboard, Menu } from "lucide-react";
 import {
@@ -21,21 +22,26 @@ import { SidebarItem } from "app/Navigation/SidebarItem";
 import { SidebarSection } from "app/Navigation/SidebarSection";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { useNavigate, useParams } from "react-router-dom";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
+import { SidebarFooter } from "app/Navigation/SidebarFooter";
 
 const AgentSidebar = () => {
     const navigate = useNavigate();
+
     const { workspaceId, agentId } = useParams<{
         workspaceId: string;
         agentId: string;
     }>();
+
     const isMobile = useAppResponsive({ base: true, lg: false });
+
     const activePath = useActiveSidebarItem([
         ...agentMenu.map((i) => i.id),
         ...agentFeaturesMenu.map((i) => i.id),
         ...agentSettingsMenu.map((i) => i.id),
     ]);
+
+    const { colorMode, toggleColorMode } = useColorMode();
 
     const bg = useColorModeValue(
         "white",
@@ -45,10 +51,7 @@ const AgentSidebar = () => {
         "white",
         "linear-gradient(135deg,rgb(44, 44, 44) 0%,rgb(69, 69, 69) 100%)",
     );
-    const border = useColorModeValue(
-        "grey.100",
-        currentDarkTheme.rgba.primary20,
-    );
+    const border = useColorModeValue("grey.100", "grey.800");
     const color = useColorModeValue("grey.900", "white");
 
     const { isOpen, onToggle } = useDisclosure({
@@ -65,7 +68,7 @@ const AgentSidebar = () => {
     };
 
     const handleDashboardClick = async () => {
-        await navigate("/dashboard");
+        await navigate(`/workspaces/${workspaceId}/dashboard`);
         if (isMobile) onToggle();
     };
 
@@ -82,10 +85,10 @@ const AgentSidebar = () => {
             />
 
             <Stack gap={0} flex={1}>
-                <SidebarSection title="Quick Access" isOpen={isOpen}>
+                <SidebarSection title="Accès rapide" isOpen={isOpen}>
                     <SidebarItem
                         icon={LayoutDashboard}
-                        label="Dashboard"
+                        label="Tableau de bord"
                         active={false}
                         onClick={handleDashboardClick}
                         open={isOpen}
@@ -111,7 +114,7 @@ const AgentSidebar = () => {
                 </SidebarSection>
                 <Divider w="100%" borderColor={border} borderWidth="1px" />
 
-                <SidebarSection title="Features" isOpen={isOpen}>
+                <SidebarSection title="Fonctionnalités" isOpen={isOpen}>
                     {agentFeaturesMenu.map(({ id, icon, label }) => (
                         <SidebarItem
                             key={id}
@@ -126,21 +129,13 @@ const AgentSidebar = () => {
                     ))}
                 </SidebarSection>
             </Stack>
-
-            <SidebarSection title="Settings" isOpen={isOpen}>
-                {agentSettingsMenu.map(({ id, icon, label }) => (
-                    <SidebarItem
-                        key={id}
-                        active={activePath === id}
-                        onClick={() => handleItemClick(id)}
-                        icon={icon}
-                        label={label}
-                        open={isOpen}
-                        textColor="grey.900"
-                        iconColor="grey.900"
-                    />
-                ))}
-            </SidebarSection>
+            <SidebarFooter
+                isOpen={isOpen}
+                colorMode={colorMode}
+                toggleColorMode={toggleColorMode}
+                activeItem={activePath ?? "dashboard"}
+                supportMenu={agentSettingsMenu}
+            />
         </Stack>
     );
 
@@ -161,7 +156,7 @@ const AgentSidebar = () => {
                     flexShrink={0}
                 >
                     <IconButton
-                        aria-label="Open agent menu"
+                        aria-label="Ouvrir le menu agent"
                         icon={<Menu size={20} />}
                         variant="ghost"
                         color={color}

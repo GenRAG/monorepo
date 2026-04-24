@@ -215,7 +215,14 @@ export const SidebarItem = ({
     return open ? (
         content
     ) : (
-        <Tooltip bg={tooltipBg} color="white" borderRadius="4px" label={label}>
+        <Tooltip
+            placement="right"
+            color="white"
+            borderRadius="8px"
+            hasArrow
+            bg={tooltipBg}
+            label={label}
+        >
             {content}
         </Tooltip>
     );

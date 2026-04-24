@@ -30,17 +30,15 @@ export const SidebarFooter = ({
     email,
     supportMenu,
 }: SidebarFooterProps) => {
-    const color = useColorModeValue("grey.300", "white");
+    const color = useColorModeValue("grey.900", "white");
     const dividerColor = useColorModeValue(
         "grey.100",
         currentDarkTheme.rgba.primary20,
     );
 
-    if (!name && !email) return null;
-
     return (
         <VStack align="stretch" gap={0}>
-            <SidebarSection title="Support" isOpen={isOpen}>
+            <SidebarSection title="Assistance" isOpen={isOpen}>
                 {supportMenu.map(({ id, icon, label }) => (
                     <SidebarItem
                         key={id}
@@ -48,19 +46,21 @@ export const SidebarFooter = ({
                         icon={icon}
                         label={label}
                         open={isOpen}
+                        iconColor="grey.900"
+                        textColor="gray.900"
                     />
                 ))}
+                <SidebarItem
+                    textColor="gray.900"
+                    iconColor="grey.900"
+                    icon={colorMode === "light" ? Moon : Sun}
+                    label={colorMode === "light" ? "Mode sombre" : "Mode clair"}
+                    open={isOpen}
+                    onClick={toggleColorMode}
+                />
             </SidebarSection>
             {(name || email) && (
                 <VStack align="stretch" gap={0}>
-                    <SidebarItem
-                        icon={colorMode === "light" ? Moon : Sun}
-                        label={
-                            colorMode === "light" ? "Dark mode" : "Light mode"
-                        }
-                        open={isOpen}
-                        onClick={toggleColorMode}
-                    />
                     <Divider
                         w="100%"
                         borderColor={dividerColor}

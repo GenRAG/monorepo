@@ -27,7 +27,7 @@ export const AddRewriter = {
             hideHandle: false,
             items: LLMSRewriter,
             id: "tooltip-workflow-rewriter-llm",
-            position: { x: 300, y: 50 },
+            position: { x: 300, y: -30 },
         },
     ],
 

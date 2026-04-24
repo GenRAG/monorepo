@@ -1,3 +1,4 @@
 export * from './nodes';
 export * from './edges';
-export { WorkflowBuilder } from './WorkflowBuilder';
+export { WorkflowCanvas } from './WorkflowCanvas';
+export type { WorkflowCanvasProps } from './WorkflowCanvas';

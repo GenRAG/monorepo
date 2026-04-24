@@ -1,13 +1,13 @@
-// src/document/document.service.ts
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from './document.repository';
+import { IndexDocumentCommandProps } from './commands/index-document.command';
 import { File } from 'multer';
 
 const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024;
-const documentQueueName = 'index-document';
+const INDEX_DOCUMENT_JOB = 'index-document';
 
 @Injectable()
 export class DocumentService {
@@ -18,10 +18,10 @@ export class DocumentService {
         private readonly documentRepository: DocumentRepository,
 
         @InjectQueue('documents')
-        private readonly documentQueue: Queue,
+        private readonly documentQueue: Queue<IndexDocumentCommandProps>,
     ) {}
 
-    async uploadDocument(file: File, agentId: string) {
+    async upload(file: File, agentId: string) {
         const s3Key = `agents/${agentId}/${Date.now()}-${file.originalname}`;
 
         await this.storage.put(s3Key, file.buffer, file.mimetype);
@@ -30,31 +30,32 @@ export class DocumentService {
             agentId,
             storageKey: s3Key,
             mimeType: file.mimetype,
+            name: file.originalname,
+            size: file.size,
         });
 
-        const isSmall = file.size < SMALL_FILE_THRESHOLD;
-        await this.documentQueue.add(
-            documentQueueName,
-            {
-                documentId: document.id,
-                agentId,
-                storageKey: s3Key,
-                mimeType: file.mimetype,
-                size: file.size,
-                buffer: isSmall ? file.buffer.toString('base64') : null,
-            },
-            {
-                attempts: 5,
-                backoff: { type: 'exponential', delay: 3000 },
-                removeOnComplete: true,
-                removeOnFail: false,
-            },
-        );
+        const payload: IndexDocumentCommandProps = {
+            documentId: document.id,
+            agentId,
+            storageKey: s3Key,
+            mimeType: file.mimetype,
+            buffer:
+                file.size < SMALL_FILE_THRESHOLD
+                    ? file.buffer.toString('base64')
+                    : null,
+        };
+
+        await this.documentQueue.add(INDEX_DOCUMENT_JOB, payload, {
+            attempts: 5,
+            backoff: { type: 'exponential', delay: 3000 },
+            removeOnComplete: true,
+            removeOnFail: false,
+        });
 
         return document;
     }
 
-    async getDocument(id: string) {
+    async get(id: string) {
         const doc = await this.documentRepository.findById(id);
 
         if (!doc) {
@@ -64,7 +65,7 @@ export class DocumentService {
         return doc;
     }
 
-    async getDocumentUrl(id: string) {
+    async getUrl(id: string) {
         const doc = await this.documentRepository.findById(id);
 
         if (!doc) {
@@ -76,7 +77,30 @@ export class DocumentService {
         return { url };
     }
 
-    getDocumentsByAgent(agentId: string) {
+    getByAgent(agentId: string) {
         return this.documentRepository.findByAgent(agentId);
+    }
+
+    getStats(agentId: string) {
+        return this.documentRepository.getStats(agentId);
+    }
+
+    getByAgentPaginated(agentId: string, page: number, limit: number) {
+        return this.documentRepository.findByAgentPaginated(
+            agentId,
+            page,
+            limit,
+        );
+    }
+
+    async delete(id: string) {
+        const doc = await this.documentRepository.findById(id);
+
+        if (!doc) {
+            throw new NotFoundException(`Document ${id} not found`);
+        }
+
+        await this.storage.delete(doc.storageKey);
+        return this.documentRepository.delete(id);
     }
 }

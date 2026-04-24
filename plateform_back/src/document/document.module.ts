@@ -11,6 +11,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { registerDocumentListeners } from 'src/events/document/document-event.listener';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 import { Logger } from 'nestjs-pino';
+import { IndexDocumentHandler } from './handlers/index-document.handler';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { Logger } from 'nestjs-pino';
     providers: [
         DocumentService,
         DocumentProcessor,
+        IndexDocumentHandler,
         DocumentRepository,
         RagEngineService,
     ],

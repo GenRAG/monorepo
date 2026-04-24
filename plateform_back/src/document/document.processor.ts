@@ -1,84 +1,59 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { DocumentStatus } from 'generated/prisma';
-import { IStorageStrategy } from 'src/storage/storage.strategy';
-import { DocumentRepository } from './document.repository';
-import EventBus from 'src/lib/event-bus';
-import {
-    DocumentIndexedEvent,
-    DocumentFailedEvent,
-} from 'src/events/document/document-event';
-import { RagEngineService } from 'src/rag-engine/rag-execution.service';
-import { DocumentEventType } from 'src/events/document/document-event.type';
+import { AxiosError } from 'axios';
+import { IndexDocumentCommandProps } from './commands/index-document.command';
+import { IndexDocumentHandler } from './handlers/index-document.handler';
+import { mapIndexDocumentJobToCommand } from './mappers/index-document-job.mapper';
 
-interface IndexingJobPayload {
-    documentId: string;
-    agentId: string;
-    storageKey: string;
-    mimeType: string;
-    size: number;
-    buffer: string | null;
-}
-
+@Injectable()
 @Processor('documents')
 export class DocumentProcessor extends WorkerHost {
-    constructor(
-        private readonly documentRepository: DocumentRepository,
-        private readonly ragEngineService: RagEngineService,
+    private readonly logger = new Logger(DocumentProcessor.name);
 
-        @Inject('STORAGE_STRATEGY')
-        private readonly storage: IStorageStrategy,
-    ) {
+    constructor(private readonly indexDocumentHandler: IndexDocumentHandler) {
         super();
     }
 
-    async process(job: Job<IndexingJobPayload>): Promise<void> {
-        const { documentId, agentId, storageKey, mimeType, buffer } = job.data;
-
-        await this.documentRepository.updateStatus(
-            documentId,
-            DocumentStatus.PROCESSING,
-        );
+    async process(job: Job<IndexDocumentCommandProps>): Promise<void> {
+        const command = mapIndexDocumentJobToCommand(job.data);
 
         try {
-            const fileBuffer = buffer
-                ? Buffer.from(buffer, 'base64')
-                : await this.storage.get(storageKey);
+            await this.indexDocumentHandler.execute(command);
+        } catch (error) {
+            const attemptNumber = job.attemptsMade + 1;
+            const maxAttempts = job.opts.attempts ?? 1;
 
-            await this.ragEngineService.indexDocument(
-                documentId,
-                fileBuffer,
-                mimeType,
+            this.logger.error(
+                `Job ${job.id} failed for document ${command.documentId} (${attemptNumber}/${maxAttempts})`,
+                error instanceof Error ? error.stack : undefined,
             );
 
-            await this.documentRepository.updateStatus(
-                documentId,
-                DocumentStatus.INDEXED,
-                { indexedAt: new Date() },
-            );
-
-            EventBus.emit(
-                DocumentEventType.DOCUMENT_INDEXED,
-                new DocumentIndexedEvent(documentId, agentId),
-            );
-        } catch (err) {
-            const isLastAttempt =
-                job.attemptsMade + 1 >= (job.opts.attempts ?? 5);
-
-            if (isLastAttempt) {
-                await this.documentRepository.updateStatus(
-                    documentId,
-                    DocumentStatus.FAILED,
-                    { failedAt: new Date() },
+            if (attemptNumber >= maxAttempts) {
+                await this.indexDocumentHandler.failed(
+                    command,
+                    this.extractErrorMessage(error),
                 );
-                EventBus.emit(
-                    DocumentEventType.DOCUMENT_FAILED,
-                    new DocumentFailedEvent(documentId, agentId),
-                );
+            } else {
+                await this.indexDocumentHandler.retrying(command, attemptNumber);
             }
 
-            throw err;
+            throw error;
         }
+    }
+
+    private extractErrorMessage(error: unknown): string {
+        if (error instanceof AxiosError) {
+            return (
+                error.response?.data?.detail ??
+                error.response?.data?.message ??
+                error.message ??
+                'Erreur inconnue'
+            );
+        }
+        if (error instanceof Error) {
+            return error.message;
+        }
+        return 'Erreur inconnue';
     }
 }

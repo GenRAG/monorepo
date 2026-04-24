@@ -24,6 +24,9 @@ export class ContextBuilder {
             throw new Error('No active workflow found for this agent');
         }
 
-        return workflow.definition;
+        const def = workflow.definition as Record<string, unknown>;
+        // New format: { nodes, edges, blocks } — return only the blocks array for the RAG API.
+        // Fall back to the full definition for legacy workflows stored in the old pipeline format.
+        return (def.blocks as Prisma.JsonValue) ?? workflow.definition;
     }
 }

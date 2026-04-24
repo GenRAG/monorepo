@@ -7,13 +7,17 @@ enum DocumentStatus {
 
 model Document {
     id         String         @id @default(cuid())
+    name       String
     agentId    String
+    size       Float
     storageKey String
     mimeType   String
     status     DocumentStatus @default(UPLOADED)
     indexedAt  DateTime?
     failedAt   DateTime?
-    createdAt  DateTime       @default(now())
+    indexError  String?
+    retryCount  Int            @default(0)
+    createdAt   DateTime       @default(now())
     updatedAt  DateTime       @updatedAt
     agent      Agent          @relation(fields: [agentId], references: [id], onDelete: Cascade)
 }

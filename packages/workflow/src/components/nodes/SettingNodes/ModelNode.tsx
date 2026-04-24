@@ -31,15 +31,16 @@ const ModelCard = ({
     isSelected: boolean;
     onCardClick: () => void;
 }) => {
-    const bg = useColorModeValue("white", "grey.800");
-    const bgHover = useColorModeValue("green.50", "grey.750");
-    const borderColor = useColorModeValue("green.200", "grey.700");
-    const borderActive = useColorModeValue("green.400", "green.500");
-    const accentBg = useColorModeValue("green.50", "green.900");
-    const accentColor = useColorModeValue("green.500", "green.300");
-    const labelColor = useColorModeValue("grey.800", "grey.100");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const arrowColor = useColorModeValue("green.300", "green.500");
+    const bg = useColorModeValue("#FFFFFF", "#3D3D3D");
+    const bgHover = useColorModeValue("#ECFDF9", "#464646");
+    const borderColor = useColorModeValue("#A8F3DF", "#4F4F4F");
+    const borderActive = useColorModeValue("#34D3A9", "#12B98C");
+    const accentBg = useColorModeValue("#ECFDF9", "#064E3B");
+    const accentBorder = useColorModeValue("#D1FAEF", "#076048");
+    const accentColor = useColorModeValue("#12B98C", "#6EE7C7");
+    const labelColor = useColorModeValue("#3D3D3D", "#E7E7E7");
+    const subColor = useColorModeValue("#6D6D6D", "#8F8F8F");
+    const arrowColor = useColorModeValue("#6EE7C7", "#12B98C");
 
     return (
         <Box
@@ -55,14 +56,14 @@ const ModelCard = ({
             transition="all 0.15s"
             boxShadow={
                 isSelected
-                    ? "0 0 0 2px var(--chakra-colors-green-300), 0 4px 12px rgba(139,92,246,0.12)"
+                    ? "0 0 0 2px #34D3A9, 0 4px 12px rgba(139,92,246,0.12)"
                     : "0 2px 8px rgba(0,0,0,0.06)"
             }
             _hover={{ bg: bgHover, borderColor: borderActive }}
         >
             <Box
                 h="3px"
-                bgGradient="linear(to-r, green.400, green.600)"
+                style={{ background: "linear-gradient(to right, #34D3A9, #07966F)" }}
                 borderTopRadius="12px"
             />
 
@@ -73,7 +74,7 @@ const ModelCard = ({
                     borderRadius="8px"
                     bg={accentBg}
                     border="1px solid"
-                    borderColor={useColorModeValue("green.100", "green.800")}
+                    borderColor={accentBorder}
                     align="center"
                     justify="center"
                     flexShrink={0}
@@ -124,10 +125,11 @@ const ModelPlaceholder = ({
 }: {
     onClick: (e: React.MouseEvent) => void;
 }) => {
-    const borderColor = useColorModeValue("green.200", "grey.600");
-    const bgHover = useColorModeValue("green.50", "grey.700");
-    const iconColor = useColorModeValue("green.400", "green.400");
-    const textColor = useColorModeValue("grey.500", "grey.400");
+    const borderColor = useColorModeValue("#A8F3DF", "#5D5D5D");
+    const bgHover = useColorModeValue("#ECFDF9", "#4F4F4F");
+    const bg = useColorModeValue("#FFFFFF", "#3D3D3D");
+    const iconColor = useColorModeValue("#34D3A9", "#34D3A9");
+    const textColor = useColorModeValue("#6D6D6D", "#8F8F8F");
 
     return (
         <Flex
@@ -139,6 +141,7 @@ const ModelPlaceholder = ({
             h="52px"
             border="1.5px dashed"
             borderColor={borderColor}
+            bg={bg}
             borderRadius="10px"
             cursor="pointer"
             transition="all 0.15s"

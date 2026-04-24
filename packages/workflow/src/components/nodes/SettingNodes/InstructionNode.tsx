@@ -35,16 +35,18 @@ const InstructionCard = ({
     onCardClick: () => void;
     onEditClick: (e: React.MouseEvent) => void;
 }) => {
-    const bg = useColorModeValue("white", "grey.800");
-    const bgHover = useColorModeValue("green.50", "grey.750");
-    const borderColor = useColorModeValue("green.200", "grey.700");
-    const borderActive = useColorModeValue("green.400", "green.500");
-    const textColor = useColorModeValue("grey.800", "grey.100");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const iconBg = useColorModeValue("green.50", "grey.700");
-    const iconColor = useColorModeValue("green.500", "green.400");
-    const editBg = useColorModeValue("grey.100", "grey.700");
-    const editColor = useColorModeValue("grey.500", "grey.400");
+    const bg = useColorModeValue("#FFFFFF", "#3D3D3D");
+    const bgHover = useColorModeValue("#ECFDF9", "#464646");
+    const borderColor = useColorModeValue("#A8F3DF", "#4F4F4F");
+    const borderActive = useColorModeValue("#34D3A9", "#12B98C");
+    const textColor = useColorModeValue("#3D3D3D", "#E7E7E7");
+    const subColor = useColorModeValue("#6D6D6D", "#8F8F8F");
+    const iconBg = useColorModeValue("#ECFDF9", "#4F4F4F");
+    const iconColor = useColorModeValue("#12B98C", "#34D3A9");
+    const editBg = useColorModeValue("#E7E7E7", "#4F4F4F");
+    const editColor = useColorModeValue("#6D6D6D", "#8F8F8F");
+    const headerBorder = useColorModeValue("#D1FAEF", "#4F4F4F");
+    const editHoverBg = useColorModeValue("#D1D1D1", "#5D5D5D");
 
     return (
         <Box
@@ -60,7 +62,7 @@ const InstructionCard = ({
             transition="all 0.15s"
             boxShadow={
                 isSelected
-                    ? "0 0 0 2px var(--chakra-colors-green-300), 0 4px 12px rgba(0,0,0,0.08)"
+                    ? "0 0 0 2px #34D3A9, 0 4px 12px rgba(0,0,0,0.08)"
                     : "0 2px 8px rgba(0,0,0,0.06)"
             }
             _hover={{ bg: bgHover, borderColor: borderActive }}
@@ -71,7 +73,7 @@ const InstructionCard = ({
                 px={3}
                 py={2}
                 borderBottom="1px solid"
-                borderColor={useColorModeValue("green.100", "grey.700")}
+                borderColor={headerBorder}
             >
                 <HStack spacing={2}>
                     <Flex
@@ -105,7 +107,7 @@ const InstructionCard = ({
                     h="20px"
                     minW="20px"
                     borderRadius="5px"
-                    _hover={{ bg: useColorModeValue("grey.200", "grey.600") }}
+                    _hover={{ bg: editHoverBg }}
                     onClick={onEditClick}
                 />
             </Flex>
@@ -162,8 +164,8 @@ export const InstructionNode = ({
         setDraft(e.target.value);
     };
 
-    const bgTextarea = useColorModeValue("white", "grey.800");
-    const borderColor = useColorModeValue("green.200", "grey.700");
+    const bgTextarea = useColorModeValue("#FFFFFF", "#3D3D3D");
+    const borderColor = useColorModeValue("#A8F3DF", "#4F4F4F");
 
     return (
         <Box
@@ -242,13 +244,12 @@ export const InstructionNode = ({
                                 minH="80px"
                                 maxH="160px"
                                 resize="vertical"
-                                borderColor="green.300"
+                                borderColor="#34D3A9"
                                 borderTopRadius="8px"
                                 fontSize="xs"
                                 _focus={{
-                                    borderColor: "green.400",
-                                    boxShadow:
-                                        "0 0 0 1px var(--chakra-colors-green-400)",
+                                    borderColor: "#34D3A9",
+                                    boxShadow: "0 0 0 1px #34D3A9",
                                 }}
                                 onClick={(e) => e.stopPropagation()}
                             />

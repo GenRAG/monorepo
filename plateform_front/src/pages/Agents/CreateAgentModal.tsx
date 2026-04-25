@@ -76,7 +76,7 @@ const { nodes: _faqNodes, edges: _faqEdges } = withAutoSettings(
         k: { ReRanking: "BGE" },
         s: {
             "Large Language Model": "GPT-4o",
-            Instructions: "You are a helpful assistant.",
+            "Instruction Prompt": "You are a helpful assistant.",
         },
     },
 );

@@ -5,6 +5,8 @@ import { TaskRegistry as LegacyTaskRegistry } from "./task/registry";
 import { Edge } from "@xyflow/react";
 import { getConfigInputs } from "./task-utils";
 
+declare const process: { env: { NODE_ENV?: string } };
+
 export function CreateFlowNode(
     nodeType: TaskType,
     position?: { x: number; y: number },
@@ -161,6 +163,20 @@ export function withAutoSettings(
 
     nodes.forEach((node) => {
         const cfgInputs = getConfigInputs(node.data.type);
+
+        if (process.env.NODE_ENV !== "production" && settingValues?.[node.id]) {
+            const validNames = new Set(cfgInputs.map((i) => i.name));
+            for (const key of Object.keys(settingValues[node.id])) {
+                if (!validNames.has(key)) {
+                    console.warn(
+                        `[withAutoSettings] Node "${node.id}" (${node.data.type}): ` +
+                        `unrecognized setting key "${key}". ` +
+                        `Valid keys: ${Array.from(validNames).map((n) => `"${n}"`).join(", ") || "(none)"}`,
+                    );
+                }
+            }
+        }
+
         cfgInputs.forEach((input) => {
             const alreadyConnected = edges.some(
                 (e) =>
@@ -217,4 +233,72 @@ export function withAutoSettings(
         nodes: [...nodes, ...extraNodes],
         edges: [...edges, ...extraEdges],
     };
+}
+
+/**
+ * Repairs a workflow loaded from storage whose settings-edge sourceHandles no
+ * longer match the current task-definition input names (e.g. after a rename).
+ *
+ * For each stale settings edge, the correct input is identified by matching the
+ * target settings-node's type (MODEL / INSTRUCTION) against the source node's
+ * current configInputs.  Nodes whose edges cannot be remapped are dropped.
+ */
+export function sanitizeWorkflowEdges(
+    nodes: AppNode[],
+    edges: Edge[],
+): { nodes: AppNode[]; edges: Edge[] } {
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+    const orphanedNodeIds = new Set<string>();
+
+    const sanitizedEdges = edges.flatMap((edge) => {
+        if (edge.type !== "settings" || !edge.sourceHandle) return [edge];
+
+        const sourceNode = nodeMap.get(edge.source);
+        if (!sourceNode) {
+            orphanedNodeIds.add(edge.target);
+            return [];
+        }
+
+        const configInputs = getConfigInputs(sourceNode.data.type);
+        const handleName = edge.sourceHandle.replace("setting-source-", "");
+
+        if (configInputs.some((i) => i.name === handleName)) return [edge];
+
+        // Stale handle — remap by matching the target settings node's nodeType
+        const targetNode = nodeMap.get(edge.target);
+        if (!targetNode) return [];
+
+        const correctInput = configInputs.find(
+            (i) => i.nodeType === targetNode.data.type,
+        );
+        if (!correctInput) {
+            orphanedNodeIds.add(edge.target);
+            return [];
+        }
+
+        // Patch the settings node so its label and configItems stay consistent
+        nodeMap.set(targetNode.id, {
+            ...targetNode,
+            data: {
+                ...targetNode.data,
+                settingLabel: correctInput.name,
+                configItems: correctInput.items ?? [],
+            },
+        });
+
+        return [
+            {
+                ...edge,
+                id: `${edge.source}-setting-${correctInput.name}`,
+                sourceHandle: `setting-source-${correctInput.name}`,
+                data: { ...edge.data, label: correctInput.name },
+            },
+        ];
+    });
+
+    const sanitizedNodes = Array.from(nodeMap.values()).filter(
+        (n) => !orphanedNodeIds.has(n.id),
+    );
+
+    return { nodes: sanitizedNodes, edges: sanitizedEdges };
 }

@@ -20,6 +20,7 @@ import {
 import {
     useNodeSelection,
     useWorkflowCanvas,
+    sanitizeWorkflowEdges,
     TaskType,
     type AppNode,
 } from "@genrag/workflow";
@@ -152,7 +153,7 @@ const WorkflowInner = ({
             display="flex"
         >
             <MenuNodeModal
-                usedNodes={nodes as any}
+                usedNodes={nodes}
                 isOpen={isMenuOpen}
                 addNode={handleAddChainNode}
                 onClose={onMenuClose}
@@ -250,8 +251,10 @@ const WorkflowWorkspace = () => {
     );
 
     const canvas = workflow?.definition as WorkflowDefinition | undefined;
-    const initialNodes = canvas?.nodes;
-    const initialEdges = canvas?.edges;
+    const { nodes: initialNodes, edges: initialEdges } =
+        canvas?.nodes && canvas?.edges
+            ? sanitizeWorkflowEdges(canvas.nodes, canvas.edges)
+            : { nodes: canvas?.nodes, edges: canvas?.edges };
 
     return (
         <VStack

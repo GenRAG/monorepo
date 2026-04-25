@@ -134,7 +134,7 @@ export const InstructionNode = ({
     const { updateNodeData } = useReactFlow();
     const nodeData = data as AppNodeData;
 
-    const stringValue = (nodeData.stringValue as string) || "";
+    const stringValue = nodeData.stringValue ?? "";
     const isValidated = stringValue.trim().length > 0 && !nodeData.isEditing;
     const [draft, setDraft] = useState(stringValue);
 

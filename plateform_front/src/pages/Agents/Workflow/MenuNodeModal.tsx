@@ -23,7 +23,7 @@ import RerankerInformation from "pages/Agents/Workflow/NodeInformation/Reranker"
 import { NodeShape } from "@genrag/workflow";
 import StyledKbd from "components/System/Atoms/KdbStyles";
 
-import type { AppNodeData } from "@genrag/workflow";
+import type { AppNode } from "@genrag/workflow";
 import {
     Task,
     TaskType,
@@ -32,7 +32,7 @@ import {
 } from "@genrag/workflow";
 
 interface MenuNodeModalProps {
-    usedNodes: AppNodeData[];
+    usedNodes: AppNode[];
     isOpen: boolean;
     onClose: () => void;
     onToggle: () => void;

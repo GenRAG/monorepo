@@ -165,7 +165,7 @@ export const ModelNode = ({
     const nodeData = data as AppNodeData;
     const task = TaskRegistry[TaskType.MODEL] as Task;
     const isPlaceholder = nodeData.isPlaceholder;
-    const displayLabel = (nodeData.modelName as string) || task.label;
+    const displayLabel = nodeData.modelName ?? task.label;
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -219,9 +219,7 @@ export const ModelNode = ({
                     >
                         <ModelCard
                             label={displayLabel}
-                            settingLabel={
-                                nodeData.settingLabel as string | undefined
-                            }
+                            settingLabel={nodeData.settingLabel}
                             isSelected={selected}
                             onCardClick={() => onNodeClick?.(id)}
                         />

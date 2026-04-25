@@ -1,12 +1,5 @@
-export interface ModelOption {
-    id: string;
-    label: string;
-    provider: string;
-    description: string;
-    priceInput: number;
-    priceOutput: number;
-    badge?: "fast" | "smart" | "balanced" | "cheap";
-}
+export type { ModelOption } from '../../types/model-option';
+import type { ModelOption } from '../../types/model-option';
 
 export const LLMS: ModelOption[] = [
     {

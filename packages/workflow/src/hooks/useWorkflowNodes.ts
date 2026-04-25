@@ -55,6 +55,14 @@ export const useWorkflowNodes = (
         addEdges,
     } = useReactFlow();
 
+    // Refs so handleAddChainNode can read the latest nodes/edges without
+    // capturing them as useCallback deps (which would recreate the function
+    // on every position update, causing unnecessary downstream re-renders).
+    const nodesRef = useRef(nodes);
+    nodesRef.current = nodes;
+    const edgesRef = useRef(edges);
+    edgesRef.current = edges;
+
     const handleSettingSelect = useCallback(
         (nodeId: string, item: string) => {
             if (readonlyMode) return;
@@ -128,6 +136,9 @@ export const useWorkflowNodes = (
         (nodeType: TaskType) => {
             
             if (readonlyMode) return;
+
+            const nodes = nodesRef.current;
+            const edges = edgesRef.current;
 
             const parentNode = nodes.find((n) => {
                 const task = LegacyTaskRegistry[n.data.type] as Task;
@@ -226,7 +237,7 @@ export const useWorkflowNodes = (
 
             pendingCollisionRef.current = true;
         },
-        [nodes, edges, setNodes, setEdges, readonlyMode, layout],
+        [setNodes, setEdges, readonlyMode, layout],
     );
 
     const onDragOver = useCallback((event: React.DragEvent) => {

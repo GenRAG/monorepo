@@ -17,11 +17,17 @@ export interface WorkflowDefinition {
     blocks: PipelineBlock[];
 }
 
-export function serializeWorkflow(nodes: AppNode[], edges: Edge[]): WorkflowDefinition {
+export function serializeWorkflow(
+    nodes: AppNode[],
+    edges: Edge[],
+): WorkflowDefinition {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
-    // For each main node, collect model name and instruction from its settings edges
-    const settingsMap = new Map<string, { model?: string; instruction?: string }>();
+    const settingsMap = new Map<
+        string,
+        { model?: string; instruction?: string }
+    >();
+
     edges
         .filter((e) => e.type === "settings")
         .forEach((e) => {
@@ -31,17 +37,16 @@ export function serializeWorkflow(nodes: AppNode[], edges: Edge[]): WorkflowDefi
             if (settingsNode.data.type === TaskType.MODEL) {
                 settingsMap.set(e.source, {
                     ...current,
-                    model: settingsNode.data.modelName as string | undefined,
+                    model: settingsNode.data.modelName,
                 });
             } else if (settingsNode.data.type === TaskType.INSTRUCTION) {
                 settingsMap.set(e.source, {
                     ...current,
-                    instruction: settingsNode.data.stringValue as string | undefined,
+                    instruction: settingsNode.data.stringValue,
                 });
             }
         });
 
-    // Traverse the main chain starting from QUERY
     const mainEdges = edges.filter((e) => e.type !== "settings");
     const entryNode = nodes.find((n) => n.data.type === TaskType.QUERY);
     const orderedNodes: AppNode[] = [];
@@ -58,7 +63,9 @@ export function serializeWorkflow(nodes: AppNode[], edges: Edge[]): WorkflowDefi
                 orderedNodes.push(current);
             }
             const nextEdge = mainEdges.find(
-                (e) => e.source === current!.id && e.sourceHandle === "main-source",
+                (e) =>
+                    e.source === current!.id &&
+                    e.sourceHandle === "main-source",
             );
             current = nextEdge ? nodeMap.get(nextEdge.target) : undefined;
         }
@@ -71,7 +78,11 @@ export function serializeWorkflow(nodes: AppNode[], edges: Edge[]): WorkflowDefi
                 case TaskType.QUERY:
                     return { name: "query", type: "query" };
                 case TaskType.REWRITER:
-                    return { name: "rewrite", type: "rewrite", model: s.model ?? "gpt-4o" };
+                    return {
+                        name: "rewrite",
+                        type: "rewrite",
+                        model: s.model ?? "gpt-4o",
+                    };
                 case TaskType.RETRIEVER:
                     return {
                         name: "retrieve",
@@ -80,13 +91,19 @@ export function serializeWorkflow(nodes: AppNode[], edges: Edge[]): WorkflowDefi
                         top_k: 5,
                     };
                 case TaskType.RERANKER:
-                    return { name: "rerank", type: "rerank", model: s.model ?? "bge" };
+                    return {
+                        name: "rerank",
+                        type: "rerank",
+                        model: s.model ?? "bge",
+                    };
                 case TaskType.RESPONSE:
                     return {
                         name: "answer",
                         type: "answer",
                         model: s.model ?? "gpt-4o",
-                        ...(s.instruction ? { system_prompt: s.instruction } : {}),
+                        ...(s.instruction
+                            ? { system_prompt: s.instruction }
+                            : {}),
                     };
                 default:
                     return null;

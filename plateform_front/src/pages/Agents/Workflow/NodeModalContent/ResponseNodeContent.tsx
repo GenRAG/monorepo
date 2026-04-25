@@ -60,14 +60,9 @@ const ResponseNodeModal = ({
     );
 };
 
-const SettingsTab = ({
-    nodeData,
-}: {
-    task: Task;
-    nodeData: AppNodeData;
-}) => {
-    const { control, watch, reset } = useForm({
-        defaultValues: nodeData || {},
+const SettingsTab = ({ nodeData }: { task: Task; nodeData: AppNodeData }) => {
+    const { control, watch, reset } = useForm<Record<string, string>>({
+        defaultValues: nodeData.inputs ?? {},
     });
 
     const navigate = useNavigate();
@@ -78,7 +73,7 @@ const SettingsTab = ({
 
     useEffect(() => {
         if (nodeData) {
-            reset(nodeData);
+            reset(nodeData.inputs ?? {});
         }
     }, [nodeData, reset]);
 
@@ -98,7 +93,8 @@ const SettingsTab = ({
     const renderParamInput = (param: TaskParam) => {
         const options = getOptionsForParam(param);
         const fieldName = param.name;
-        const currentValue = watch(fieldName) || nodeData?.[fieldName];
+        const currentValue =
+            watch(fieldName) || (nodeData?.inputs?.[fieldName] ?? "");
 
         switch (param.type) {
             case "STRING":

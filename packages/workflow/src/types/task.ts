@@ -1,5 +1,6 @@
 import { Position } from "@xyflow/react";
 import { ShapeType } from "../components/nodes/NodeShape";
+import type { ModelOption } from "./model-option";
 
 // ── Param types ────────────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ export interface TaskSettingParam {
     helperText?: string;
     required?: boolean;
     hideHandle?: boolean;
-    items?: string[];
+    items?: ModelOption[];
     id?: string;
     position: { x: number; y: number };
 }

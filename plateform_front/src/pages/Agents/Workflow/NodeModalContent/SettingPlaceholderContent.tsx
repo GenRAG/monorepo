@@ -174,8 +174,8 @@ export default function SettingPlaceholderContent({
     nodeData,
     onSelect,
 }: SettingPlaceholderContentProps) {
-    const configItems = (nodeData.configItems as ModelOption[]) || [];
-    const settingLabel = (nodeData.settingLabel as string) || "Setting";
+    const configItems = nodeData.configItems ?? [];
+    const settingLabel = nodeData.settingLabel ?? "Setting";
     const { colorMode } = useColorMode();
     const labelColor = useColorModeValue("grey.500", "grey.400");
     const dividerColor = useColorModeValue("grey.100", "grey.700");
@@ -233,7 +233,7 @@ export default function SettingPlaceholderContent({
                               {item}
                           </Box>
                       ))
-                    : (configItems as ModelOption[]).map((model) => (
+                    : configItems.map((model) => (
                           <ModelCard
                               key={model.id}
                               model={model}

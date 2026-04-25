@@ -1,13 +1,22 @@
 import type { ComponentType } from "react";
 import { Node, NodeProps } from "@xyflow/react";
-import { TaskType } from "./task";
-import { TaskParam } from "./task";
+import { TaskType, TaskParamType, TaskParam } from "./task";
+import type { ModelOption } from "./model-option";
 
-export interface AppNodeData {
+export interface AppNodeData extends Record<string, unknown> {
     type: TaskType;
     inputs: Record<string, string>;
     outputs: string[];
-    [key: string]: any;
+    isPlaceholder?: boolean;
+    isEditing?: boolean;
+    isChainPlaceholder?: boolean;
+    firstTime?: boolean;
+    modelName?: string;
+    stringValue?: string;
+    settingLabel?: string;
+    parentNodeId?: string;
+    configItems?: ModelOption[];
+    inputType?: TaskParamType;
 }
 
 export interface AppNode extends Node {

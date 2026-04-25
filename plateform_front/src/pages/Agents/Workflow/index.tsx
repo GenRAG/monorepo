@@ -23,6 +23,7 @@ import {
     sanitizeWorkflowEdges,
     TaskType,
     type AppNode,
+    type AppNodeData,
 } from "@genrag/workflow";
 import type { Edge } from "@xyflow/react";
 import { NodeModal } from "pages/Agents/Workflow/NodeModal";
@@ -179,9 +180,9 @@ const WorkflowInner = ({
                         nodeBorderRadius={12}
                         nodeStrokeWidth={6}
                         nodeColor={(node) => {
-                            if ((node.data as any)?.isPlaceholder)
+                            if ((node.data as AppNodeData).isPlaceholder)
                                 return "transparent";
-                            switch ((node.data as any)?.type) {
+                            switch ((node.data as AppNodeData).type) {
                                 case TaskType.QUERY:
                                 case TaskType.RESPONSE:
                                 case TaskType.INSTRUCTION:
@@ -193,9 +194,10 @@ const WorkflowInner = ({
                             }
                         }}
                         nodeStrokeColor={(node) => {
-                            if ((node.data as any)?.isPlaceholder)
+                            if ((node.data as AppNodeData).isPlaceholder)
                                 return "transparent";
-                            return (node.data as any)?.type === TaskType.MODEL
+                            return (node.data as AppNodeData).type ===
+                                TaskType.MODEL
                                 ? "#8b5cf6"
                                 : "#34D3A9";
                         }}
@@ -228,7 +230,7 @@ const WorkflowInner = ({
             </Box>
 
             <NodeModal
-                task={task as any}
+                task={task}
                 nodeData={nodeData}
                 isOpen={isModalOpen}
                 onClose={handleModalClose}

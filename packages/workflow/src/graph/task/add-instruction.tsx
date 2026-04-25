@@ -1,6 +1,6 @@
 import { Position } from "@xyflow/react";
 import { TaskType } from "../../types/task";
-import { Brain, LucideIcon } from "lucide-react";
+import { FileText, LucideIcon } from "lucide-react";
 import { ShapeType } from "../../components/nodes";
 
 export const AddInstruction = {
@@ -9,7 +9,7 @@ export const AddInstruction = {
     shape: ShapeType.CIRCLE,
     description: "LLM instruction configuration",
     icon: (props: React.ComponentProps<LucideIcon>) => {
-        return <Brain {...props} className="stroke-blue-500" />;
+        return <FileText {...props} className="stroke-blue-500" />;
     },
     isEntryPoint: false,
     isEndPoint: false,

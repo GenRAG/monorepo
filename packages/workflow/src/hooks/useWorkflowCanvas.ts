@@ -5,7 +5,7 @@ import { useWorkflowNodes, UseWorkflowNodesOptions } from "./useWorkflowNodes";
 import NodeComponent from "../components/nodes/NodeComponent";
 import { type WorkflowRegistry } from "../graph/registry";
 import { type LayoutStrategy } from "../layout";
-import type { AppNode } from "../types/app-node";
+import type { AppNode, NodeComponentType } from "../types/app-node";
 
 export interface UseWorkflowCanvasOptions {
     initialNodes?: AppNode[];
@@ -15,7 +15,7 @@ export interface UseWorkflowCanvasOptions {
     readonly?: boolean;
     layout?: LayoutStrategy;
 
-    nodeComponent?: React.ComponentType<any>;
+    nodeComponent?: NodeComponentType;
 
     onNodeClick?: (nodeId: string) => void;
     isMenuOpen?: boolean;

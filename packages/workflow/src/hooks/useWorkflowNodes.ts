@@ -28,17 +28,14 @@ export interface UseWorkflowNodesOptions {
 }
 
 export const useWorkflowNodes = (
-    options: boolean | UseWorkflowNodesOptions = true,
+    options: UseWorkflowNodesOptions = {},
 ) => {
-    const layout: LayoutStrategy = (typeof options === "object" && options.layout) ? options.layout : DEFAULT_LAYOUT;
-    const initialVertical =
-        typeof options === "boolean"
-            ? options
-            : (options.initialVertical ?? layout.isVertical);
-    const customInitialNodes = typeof options === "object" ? options.initialNodes : undefined;
-    const customInitialEdges = typeof options === "object" ? options.initialEdges : undefined;
-    const registry: WorkflowRegistry = (typeof options === "object" && options.registry) ? options.registry : DEFAULT_TASK_REGISTRY;
-    const readonlyMode: boolean = (typeof options === "object" && options.readonly) ? options.readonly : false;
+    const layout: LayoutStrategy = options.layout ?? DEFAULT_LAYOUT;
+    const initialVertical = options.initialVertical ?? layout.isVertical;
+    const customInitialNodes = options.initialNodes;
+    const customInitialEdges = options.initialEdges;
+    const registry: WorkflowRegistry = options.registry ?? DEFAULT_TASK_REGISTRY;
+    const readonlyMode: boolean = options.readonly ?? false;
 
     const [isVertical, setIsVertical] = useState(initialVertical);
     const initialStateRef = useRef({

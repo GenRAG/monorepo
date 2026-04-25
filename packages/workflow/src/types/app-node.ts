@@ -1,4 +1,5 @@
-import { Node } from "@xyflow/react";
+import type { ComponentType } from "react";
+import { Node, NodeProps } from "@xyflow/react";
 import { TaskType } from "./task";
 import { TaskParam } from "./task";
 
@@ -18,3 +19,11 @@ export interface ParamProps {
     value: string;
     updateNodeParamValue: (value: string) => void;
 }
+
+export type WorkflowNodeProps = NodeProps & {
+    onNodeClick?: (nodeId: string) => void;
+    onRemoveNode?: (nodeId: string) => Promise<void> | void;
+    isVertical?: boolean;
+};
+
+export type NodeComponentType = ComponentType<WorkflowNodeProps>;

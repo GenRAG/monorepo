@@ -168,7 +168,6 @@ export function withAutoSettings(
                     e.sourceHandle === `setting-source-${input.name}`,
             );
             if (alreadyConnected) return;
-            console.log(settingValues)
             const value = settingValues?.[node.id]?.[input.name];
             if (value !== undefined) {
                 const settingId = uuidv4();

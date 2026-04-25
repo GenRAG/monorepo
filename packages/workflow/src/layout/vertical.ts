@@ -5,6 +5,8 @@ import type { LayoutStrategy, NodePlacement } from './types'
 const VERTICAL_GAP = 140
 const INITIAL_X = 100
 const INITIAL_Y = 80
+const SETTING_X = 280
+const SETTING_Y_SPACING = 130
 
 export class VerticalLayoutStrategy implements LayoutStrategy {
     readonly name = 'vertical'
@@ -12,6 +14,13 @@ export class VerticalLayoutStrategy implements LayoutStrategy {
 
     getInitialPosition(): { x: number; y: number } {
         return { x: INITIAL_X, y: INITIAL_Y }
+    }
+
+    getSettingOffset(settingIndex: number, total: number): { x: number; y: number } {
+        return {
+            x: SETTING_X,
+            y: Math.round((settingIndex - (total - 1) / 2) * SETTING_Y_SPACING),
+        }
     }
 
     computePlacements(

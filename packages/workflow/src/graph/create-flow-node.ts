@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import { AppNode } from "../types/app-node";
-import { TaskType, TaskParam, TaskChainOutput } from "../types/task";
-import { TaskRegistry as LegacyTaskRegistry } from "./task/registry";
+import { TaskType, TaskParam } from "../types/task";
 import { Edge } from "@xyflow/react";
 import { getConfigInputs } from "./task-utils";
+import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 
 declare const process: { env: { NODE_ENV?: string } };
 
@@ -52,12 +52,15 @@ export function linkNodes(sourceNode: string, targetNode: string) {
 export function createSettingPlaceholders(
     parentNode: AppNode,
     configInputs: TaskParam[],
+    layout: LayoutStrategy = DEFAULT_LAYOUT,
 ): { nodes: AppNode[]; edges: Edge[] } {
     const nodes: AppNode[] = [];
     const edges: Edge[] = [];
+    const total = configInputs.length;
 
-    configInputs.forEach((input) => {
+    configInputs.forEach((input, index) => {
         const placeholderId = uuidv4();
+        const offset = layout.getSettingOffset(index, total);
 
         nodes.push({
             id: placeholderId,
@@ -75,8 +78,8 @@ export function createSettingPlaceholders(
             },
             deletable: true,
             position: {
-                x: parentNode.position.x + input.position.x,
-                y: parentNode.position.y + input.position.y,
+                x: parentNode.position.x + offset.x,
+                y: parentNode.position.y + offset.y,
             },
         });
 
@@ -95,52 +98,6 @@ export function createSettingPlaceholders(
     return { nodes, edges };
 }
 
-export function createChainOutputPlaceholders(
-    parentNode: AppNode,
-    chainOutputs: TaskChainOutput[],
-): { nodes: AppNode[]; edges: Edge[] } {
-    const nodes: AppNode[] = [];
-    const edges: Edge[] = [];
-
-    chainOutputs.forEach((output) => {
-        const taskDef = LegacyTaskRegistry[output.nodeType];
-        if (!taskDef) return;
-
-        const placeholderId = uuidv4();
-
-        nodes.push({
-            id: placeholderId,
-            type: "GenNode",
-            dragHandle: ".drag-handle",
-            data: {
-                type: output.nodeType,
-                inputs: {},
-                outputs: [],
-                isPlaceholder: true,
-                isChainPlaceholder: true,
-                parentNodeId: parentNode.id,
-            },
-            deletable: output.optional,
-            position: {
-                x: parentNode.position.x + output.position.x,
-                y: parentNode.position.y + output.position.y,
-            },
-        });
-
-        edges.push({
-            id: `${parentNode.id}-chain-${output.nodeType}`,
-            source: parentNode.id,
-            target: placeholderId,
-            sourceHandle: "main-source",
-            targetHandle: "main-target",
-            animated: true,
-            type: "default",
-            data: { label: taskDef.label, optional: output.optional },
-        });
-    });
-
-    return { nodes, edges };
-}
 
 export function makeFlowNode(id: string, type: TaskType, x: number, y: number): AppNode {
     return {
@@ -157,12 +114,14 @@ export function withAutoSettings(
     nodes: AppNode[],
     edges: Edge[],
     settingValues?: Record<string, Record<string, string>>,
+    layout: LayoutStrategy = DEFAULT_LAYOUT,
 ): { nodes: AppNode[]; edges: Edge[] } {
     const extraNodes: AppNode[] = [];
     const extraEdges: Edge[] = [];
 
     nodes.forEach((node) => {
         const cfgInputs = getConfigInputs(node.data.type);
+        const total = cfgInputs.length;
 
         if (process.env.NODE_ENV !== "production" && settingValues?.[node.id]) {
             const validNames = new Set(cfgInputs.map((i) => i.name));
@@ -177,7 +136,7 @@ export function withAutoSettings(
             }
         }
 
-        cfgInputs.forEach((input) => {
+        cfgInputs.forEach((input, index) => {
             const alreadyConnected = edges.some(
                 (e) =>
                     e.source === node.id &&
@@ -185,6 +144,7 @@ export function withAutoSettings(
             );
             if (alreadyConnected) return;
             const value = settingValues?.[node.id]?.[input.name];
+            const offset = layout.getSettingOffset(index, total);
             if (value !== undefined) {
                 const settingId = uuidv4();
                 extraNodes.push({
@@ -207,8 +167,8 @@ export function withAutoSettings(
                     },
                     deletable: true,
                     position: {
-                        x: node.position.x + input.position.x,
-                        y: node.position.y + input.position.y,
+                        x: node.position.x + offset.x,
+                        y: node.position.y + offset.y,
                     },
                 });
                 extraEdges.push({
@@ -222,7 +182,7 @@ export function withAutoSettings(
                     data: { label: input.name },
                 });
             } else {
-                const { nodes: pn, edges: pe } = createSettingPlaceholders(node, [input]);
+                const { nodes: pn, edges: pe } = createSettingPlaceholders(node, [input], layout);
                 extraNodes.push(...pn);
                 extraEdges.push(...pe);
             }

@@ -26,10 +26,6 @@ export const AddResponse = {
             hideHandle: false,
             items: LLMS,
             id: "tooltip-workflow-5",
-            position: {
-                x: 300,
-                y: -50,
-            },
         },
         {
             name: "Instruction Prompt",
@@ -40,10 +36,6 @@ export const AddResponse = {
             hideHandle: false,
             items: [],
             id: "tooltip-workflow-6",
-            position: {
-                x: 350,
-                y: 80,
-            },
         },
     ],
     outputs: [],

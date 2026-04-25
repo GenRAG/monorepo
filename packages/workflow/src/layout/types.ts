@@ -15,4 +15,5 @@ export interface LayoutStrategy {
         newNodeId: string,
     ): NodePlacement[]
     getInitialPosition(): { x: number; y: number }
+    getSettingOffset(settingIndex: number, total: number): { x: number; y: number }
 }

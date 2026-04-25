@@ -5,6 +5,8 @@ import type { LayoutStrategy, NodePlacement } from './types'
 const HORIZONTAL_GAP = 280
 const INITIAL_Y = 200
 const INITIAL_X = 80
+const SETTING_Y = 150
+const SETTING_X_SPACING = 180
 
 export class HorizontalLayoutStrategy implements LayoutStrategy {
     readonly name = 'horizontal'
@@ -12,6 +14,13 @@ export class HorizontalLayoutStrategy implements LayoutStrategy {
 
     getInitialPosition(): { x: number; y: number } {
         return { x: INITIAL_X, y: INITIAL_Y }
+    }
+
+    getSettingOffset(settingIndex: number, total: number): { x: number; y: number } {
+        return {
+            x: Math.round((settingIndex - (total - 1) / 2) * SETTING_X_SPACING),
+            y: SETTING_Y,
+        }
     }
 
     computePlacements(

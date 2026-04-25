@@ -2,6 +2,7 @@ import { Position } from "@xyflow/react";
 import { TaskType } from "../../types/task";
 import { FileText, LucideIcon } from "lucide-react";
 import { ShapeType } from "../../components/nodes";
+import { InstructionNode } from "../../components/nodes/SettingNodes/InstructionNode";
 
 export const AddInstruction = {
     type: TaskType.INSTRUCTION,
@@ -23,4 +24,5 @@ export const AddInstruction = {
     id: "tooltip-workflow-instruction",
     inputs: [],
     outputs: [],
+    component: InstructionNode,
 };

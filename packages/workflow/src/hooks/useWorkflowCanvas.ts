@@ -3,7 +3,6 @@ import { type Edge } from "@xyflow/react";
 import { useFlowTypes } from "./useFlowTypes";
 import { useWorkflowNodes, UseWorkflowNodesOptions } from "./useWorkflowNodes";
 import NodeComponent from "../components/nodes/NodeComponent";
-import { type WorkflowRegistry } from "../graph/registry";
 import { type LayoutStrategy } from "../layout";
 import type { AppNode, NodeComponentType } from "../types/app-node";
 
@@ -11,7 +10,6 @@ export interface UseWorkflowCanvasOptions {
     initialNodes?: AppNode[];
     initialEdges?: Edge[];
     initialVertical?: boolean;
-    registry?: WorkflowRegistry;
     readonly?: boolean;
     layout?: LayoutStrategy;
 
@@ -33,7 +31,6 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         initialNodes,
         initialEdges,
         initialVertical,
-        registry,
         readonly,
         layout,
     } = options;
@@ -42,7 +39,6 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         initialNodes,
         initialEdges,
         initialVertical,
-        registry,
         readonly,
         layout,
     };
@@ -50,7 +46,6 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
     const workflow = useWorkflowNodes(workflowNodesOptions);
 
     const { edgeTypes, nodeTypes } = useFlowTypes({
-        registry: workflow.registry,
         isVertical: workflow.isVertical,
         onNodeClick,
         isMenuOpen,

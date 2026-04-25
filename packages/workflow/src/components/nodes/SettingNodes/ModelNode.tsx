@@ -7,18 +7,9 @@ import {
     Icon,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { AppNodeData } from "../../../types/app-node";
-import { TaskRegistry } from "../../../graph/task/registry";
-import { Task, TaskType } from "../../../types/task";
+import type { AppNodeData, WorkflowNodeProps } from "../../../types/app-node";
 import { Cpu, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-interface ModelNodeProps {
-    id: string;
-    data: AppNodeData;
-    selected: boolean;
-    onNodeClick?: (nodeId: string) => void;
-}
 
 const ModelCard = ({
     label,
@@ -156,16 +147,10 @@ const ModelPlaceholder = ({
     );
 };
 
-export const ModelNode = ({
-    id,
-    data,
-    selected,
-    onNodeClick,
-}: ModelNodeProps) => {
+export const ModelNode = ({ id, data, selected, onNodeClick }: WorkflowNodeProps) => {
     const nodeData = data as AppNodeData;
-    const task = TaskRegistry[TaskType.MODEL] as Task;
     const isPlaceholder = nodeData.isPlaceholder;
-    const displayLabel = nodeData.modelName ?? task.label;
+    const displayLabel = nodeData.modelName ?? "Model";
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -181,18 +166,13 @@ export const ModelNode = ({
             alignItems="center"
             position="relative"
         >
-            {/* Handle */}
             <Handle
                 id="setting-target"
                 type="target"
-                position={task.sourcePosition ?? Position.Left}
+                position={Position.Left}
                 style={{
                     backgroundColor: "#8b5cf6",
                     border: "2px solid #E7E7E7",
-                    top:
-                        task.sourcePosition === Position.Top
-                            ? "-8px"
-                            : undefined,
                     width: "8px",
                     height: "8px",
                 }}

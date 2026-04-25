@@ -12,17 +12,11 @@ import {
     Button,
     useColorModeValue,
 } from "@chakra-ui/react";
-import { AppNodeData } from "../../../types/app-node";
+import type { AppNodeData, WorkflowNodeProps } from "../../../types/app-node";
 import { FileText, Pencil, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 
-interface InstructionNodeProps {
-    id: string;
-    data: AppNodeData;
-    selected: boolean;
-    onNodeClick?: (nodeId: string) => void;
-}
 
 const InstructionCard = ({
     text,
@@ -125,12 +119,7 @@ const InstructionCard = ({
     );
 };
 
-export const InstructionNode = ({
-    id,
-    data,
-    selected,
-    onNodeClick,
-}: InstructionNodeProps) => {
+export const InstructionNode = ({ id, data, selected, onNodeClick }: WorkflowNodeProps) => {
     const { updateNodeData } = useReactFlow();
     const nodeData = data as AppNodeData;
 

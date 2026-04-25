@@ -11,7 +11,6 @@ import {
 } from "../graph/create-flow-node";
 import { TaskType, Task } from "../types/task";
 import { TaskRegistry as LegacyTaskRegistry } from "../graph/task/registry";
-import { type WorkflowRegistry, DEFAULT_TASK_REGISTRY } from "../graph/registry";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 import { getConfigInputs, getChainOutputs } from "../graph/task-utils";
@@ -22,7 +21,6 @@ export interface UseWorkflowNodesOptions {
     initialVertical?: boolean;
     initialNodes?: AppNode[];
     initialEdges?: Edge[];
-    registry?: WorkflowRegistry;
     readonly?: boolean;
     layout?: LayoutStrategy;
 }
@@ -34,7 +32,6 @@ export const useWorkflowNodes = (
     const initialVertical = options.initialVertical ?? layout.isVertical;
     const customInitialNodes = options.initialNodes;
     const customInitialEdges = options.initialEdges;
-    const registry: WorkflowRegistry = options.registry ?? DEFAULT_TASK_REGISTRY;
     const readonlyMode: boolean = options.readonly ?? false;
 
     const [isVertical, setIsVertical] = useState(initialVertical);
@@ -92,8 +89,6 @@ export const useWorkflowNodes = (
         },
         [setNodes, readonlyMode],
     );
-
-    const pendingCollisionRef = useRef(false);
 
     const handleRemoveChainNode = useCallback(
         async (nodeId: string) => {
@@ -173,7 +168,7 @@ export const useWorkflowNodes = (
 
             const cfgInputs = getConfigInputs(newNode.data.type);
             const { nodes: settingNodes, edges: settingEdges } =
-                createSettingPlaceholders(newNode, cfgInputs);
+                createSettingPlaceholders(newNode, cfgInputs, layout);
 
             const incomingEdge = {
                 id: `${parentNode.id}-chain-to-${newNode.id}`,
@@ -234,8 +229,6 @@ export const useWorkflowNodes = (
                 }),
             );
             setEdges(allNewEdges);
-
-            pendingCollisionRef.current = true;
         },
         [setNodes, setEdges, readonlyMode, layout],
     );
@@ -257,6 +250,5 @@ export const useWorkflowNodes = (
         handleSettingSelect,
         handleAddChainNode,
         handleRemoveChainNode,
-        registry,
     };
 };

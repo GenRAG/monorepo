@@ -51,6 +51,15 @@ export default function GenEdge(props: GenEdgeProps) {
                 }}
             />
 
+            <path
+                d={edgePath}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={20}
+                style={{ cursor: "pointer", pointerEvents: "all" }}
+                onClick={props.onToggle}
+            />
+
             <g>
                 <path
                     id={`motion-path-${props.id}`}

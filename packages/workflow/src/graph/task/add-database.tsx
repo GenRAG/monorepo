@@ -21,7 +21,6 @@ export const AddDatabase = {
         {
             nodeType: TaskType.RERANKER,
             optional: true,
-            position: { x: 0, y: 100 },
         },
     ],
 };

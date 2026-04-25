@@ -25,10 +25,10 @@ import StyledKbd from "components/System/Atoms/KdbStyles";
 
 import type { AppNode } from "@genrag/workflow";
 import {
-    Task,
     TaskType,
     getTaskDef,
-    listAddableTaskTypes,
+    getNonSettingsTaskTypes,
+    getAddableTaskTypes,
 } from "@genrag/workflow";
 
 interface MenuNodeModalProps {
@@ -190,26 +190,21 @@ const MenuNodeModal = ({
     const overlayBg = useColorModeValue("blackAlpha.500", "blackAlpha.700");
     const kbdBg = useColorModeValue("grey.50", "grey.700");
 
-    const nodes = useMemo(() => listAddableTaskTypes(), []);
-
-    const alreadyUsedNodes = useMemo(
-        () => nodes.filter((nt) => usedNodes.some((n) => n.data.type === nt)),
-        [nodes, usedNodes],
+    const presentTypes = useMemo(
+        () => usedNodes.map((n) => n.data.type),
+        [usedNodes],
     );
 
-    const availableNodes = useMemo(() => {
-        const chainOutputTypes = new Set<TaskType>();
-        usedNodes.forEach((n) => {
-            const task = getTaskDef(n.data.type) as Task | undefined;
-            task?.chainOutputs?.forEach((o) => {
-                if (!usedNodes.some((used) => used.data.type === o.nodeType)) {
-                    chainOutputTypes.add(o.nodeType);
-                }
-            });
-        });
+    const alreadyUsedNodes = useMemo(
+        () =>
+            getNonSettingsTaskTypes().filter((nt) => presentTypes.includes(nt)),
+        [presentTypes],
+    );
 
-        return Array.from(chainOutputTypes);
-    }, [usedNodes]);
+    const availableNodes = useMemo(
+        () => getAddableTaskTypes(presentTypes),
+        [presentTypes],
+    );
 
     const filteredAvailable = useMemo(() => {
         if (!query) return availableNodes;

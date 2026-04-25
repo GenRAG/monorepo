@@ -22,6 +22,10 @@ export class DagreLayoutStrategy implements LayoutStrategy {
         return { x: 100, y: 80 }
     }
 
+    getSettingOffset(settingIndex: number, total: number): { x: number; y: number } {
+        return new VerticalLayoutStrategy().getSettingOffset(settingIndex, total)
+    }
+
     computePlacements(
         existingNodes: AppNode[],
         edges: Edge[],

@@ -6,7 +6,7 @@ import {
 } from "@chakra-ui/react";
 import { Background, BackgroundVariant, Edge } from "@xyflow/react";
 import { HorizontalLayoutStrategy, WorkflowCanvas } from "@genrag/workflow";
-import type { AppNode } from "@genrag/workflow";
+import type { AppNode, NodeComponentType } from "@genrag/workflow";
 import { NodeComponent } from "@genrag/workflow";
 
 export const applyAlphaToColor = (color: string, alpha: number): string => {
@@ -79,7 +79,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
             overflow="hidden"
         >
             <WorkflowCanvas
-                nodeComponent={NodeComponent as any}
+                nodeComponent={NodeComponent as NodeComponentType}
                 readonly
                 layout={new HorizontalLayoutStrategy()}
                 initialNodes={propNodes}

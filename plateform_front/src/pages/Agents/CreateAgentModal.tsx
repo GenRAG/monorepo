@@ -27,8 +27,8 @@ import {
     makeFlowNode,
     linkNodes,
     withAutoSettings,
+    TaskType,
     type AppNode,
-    type TaskType,
 } from "@genrag/workflow";
 import type { Edge } from "@xyflow/react";
 
@@ -42,9 +42,9 @@ interface Template {
 
 const _blankMain = {
     nodes: [
-        makeFlowNode("q", "QUERY" as TaskType, 0, -50),
-        makeFlowNode("r", "RETRIEVER" as TaskType, 260, 0),
-        makeFlowNode("s", "RESPONSE" as TaskType, 520, 100),
+        makeFlowNode("q", TaskType.QUERY, 0, -50),
+        makeFlowNode("r", TaskType.RETRIEVER, 260, 0),
+        makeFlowNode("s", TaskType.RESPONSE, 520, 100),
     ],
     edges: [linkNodes("q", "r"), linkNodes("r", "s")],
 };
@@ -55,11 +55,11 @@ const { nodes: BLANK_NODES, edges: BLANK_EDGES } = withAutoSettings(
 
 const _faqMain = {
     nodes: [
-        makeFlowNode("q", "QUERY" as TaskType, 0, 0),
-        makeFlowNode("w", "REWRITER" as TaskType, 0, 180),
-        makeFlowNode("r", "RETRIEVER" as TaskType, 400, 280),
-        makeFlowNode("k", "RERANKER" as TaskType, 0, 450),
-        makeFlowNode("s", "RESPONSE" as TaskType, 360, 550),
+        makeFlowNode("q", TaskType.QUERY, 0, 0),
+        makeFlowNode("w", TaskType.REWRITER, 0, 180),
+        makeFlowNode("r", TaskType.RETRIEVER, 400, 280),
+        makeFlowNode("k", TaskType.RERANKER, 0, 450),
+        makeFlowNode("s", TaskType.RESPONSE, 360, 550),
     ],
     edges: [
         linkNodes("q", "w"),

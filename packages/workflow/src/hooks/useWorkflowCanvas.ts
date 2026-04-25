@@ -16,18 +16,14 @@ export interface UseWorkflowCanvasOptions {
     nodeComponent?: NodeComponentType;
 
     onNodeClick?: (nodeId: string) => void;
-    isMenuOpen?: boolean;
-    onMenuOpen?: () => void;
-    onMenuClose?: () => void;
+    onEdgeClick?: () => void;
 }
 
 export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
     const {
         nodeComponent,
         onNodeClick,
-        isMenuOpen,
-        onMenuOpen,
-        onMenuClose,
+        onEdgeClick,
         initialNodes,
         initialEdges,
         initialVertical,
@@ -45,7 +41,7 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
 
     const workflow = useWorkflowNodes(workflowNodesOptions);
 
-    const { edgeTypes } = useFlowTypes({ isMenuOpen, onMenuOpen, onMenuClose });
+    const { edgeTypes } = useFlowTypes({ onEdgeClick });
 
     const nodeTypes = useMemo(() => {
         const Renderer = nodeComponent ?? NodeComponent;

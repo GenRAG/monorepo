@@ -3,27 +3,18 @@ import GenEdge from "../components/edges/GenEdge";
 import SettingsEdge from "../components/edges/SettingsEdge";
 
 interface UseFlowTypesParams {
-    isMenuOpen?: boolean;
-    onMenuOpen?: () => void;
-    onMenuClose?: () => void;
+    onEdgeClick?: () => void;
 }
 
-export const useFlowTypes = ({
-    isMenuOpen,
-    onMenuOpen,
-    onMenuClose,
-}: UseFlowTypesParams = {}) => {
+export const useFlowTypes = ({ onEdgeClick }: UseFlowTypesParams = {}) => {
     const edgeTypes = useMemo(
         () => ({
             default: (props: any) => (
-                <GenEdge
-                    {...props}
-                    onToggle={isMenuOpen ? onMenuClose : onMenuOpen}
-                />
+                <GenEdge {...props} onToggle={onEdgeClick} />
             ),
             settings: (props: any) => <SettingsEdge {...props} />,
         }),
-        [isMenuOpen, onMenuClose, onMenuOpen],
+        [onEdgeClick],
     );
 
     return { edgeTypes };

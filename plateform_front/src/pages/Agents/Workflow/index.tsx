@@ -88,9 +88,7 @@ const WorkflowInner = ({
     } = useWorkflowCanvas({
         nodeComponent: NodeComponent,
         onNodeClick: handleNodeClick,
-        isMenuOpen,
-        onMenuOpen,
-        onMenuClose,
+        onEdgeClick: isMenuOpen ? onMenuClose : onMenuOpen,
         initialNodes,
         initialEdges,
     });

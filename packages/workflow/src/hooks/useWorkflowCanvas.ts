@@ -45,29 +45,24 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
 
     const workflow = useWorkflowNodes(workflowNodesOptions);
 
-    const { edgeTypes, nodeTypes } = useFlowTypes({
-        isVertical: workflow.isVertical,
-        onNodeClick,
-        isMenuOpen,
-        onMenuOpen,
-        onMenuClose,
-    });
+    const { edgeTypes } = useFlowTypes({ isMenuOpen, onMenuOpen, onMenuClose });
 
-    const resolvedNodeTypes = useMemo(() => {
+    const nodeTypes = useMemo(() => {
         const Renderer = nodeComponent ?? NodeComponent;
-        const GenNode = (props: any) =>
-            React.createElement(Renderer, {
-                ...props,
-                isVertical: workflow.isVertical,
-                onNodeClick,
-                onRemoveNode: workflow.handleRemoveChainNode,
-            });
-        return { ...nodeTypes, GenNode };
-    }, [nodeTypes, nodeComponent, workflow.isVertical, onNodeClick, workflow.handleRemoveChainNode]);
+        return {
+            GenNode: (props: any) =>
+                React.createElement(Renderer, {
+                    ...props,
+                    isVertical: workflow.isVertical,
+                    onNodeClick,
+                    onRemoveNode: workflow.handleRemoveChainNode,
+                }),
+        };
+    }, [nodeComponent, workflow.isVertical, onNodeClick, workflow.handleRemoveChainNode]);
 
     return {
         ...workflow,
-        nodeTypes: resolvedNodeTypes,
+        nodeTypes,
         edgeTypes,
     };
 }

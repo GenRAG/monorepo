@@ -9,7 +9,7 @@ import {
     CreateFlowNode,
     createSettingPlaceholders,
 } from "../graph/create-flow-node";
-import { TaskType, Task } from "../types/task";
+import { TaskType } from "../types/task";
 import { TaskRegistry as LegacyTaskRegistry } from "../graph/task/registry";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
@@ -60,23 +60,17 @@ export const useWorkflowNodes = (
     const edgesRef = useRef(edges);
     edgesRef.current = edges;
 
+    // Trigger when selecting an option in the setting modal, right now
+    // only used for the model selector in MODEL nodes, maybe need a 
+    // refactor later if we have more settings that require this kind of callback
     const handleSettingSelect = useCallback(
         (nodeId: string, item: string) => {
             if (readonlyMode) return;
-            const task = LegacyTaskRegistry[TaskType.MODEL] as Task;
-            const offset = task?.position ?? { x: 0, y: 0 };
-
             setNodes((prev: AppNode[]) =>
                 prev.map((n) => {
                     if (n.id !== nodeId) return n;
-                    const pos = n.position ?? { x: 0, y: 0 };
-                    const hasAlreadySelected = n.data.firstTime === false;
                     return {
                         ...n,
-                        position: {
-                            x: hasAlreadySelected ? pos.x : pos.x + offset.x,
-                            y: hasAlreadySelected ? pos.y : pos.y + offset.y,
-                        },
                         data: {
                             ...n.data,
                             isPlaceholder: false,
@@ -135,14 +129,15 @@ export const useWorkflowNodes = (
             const nodes = nodesRef.current;
             const edges = edgesRef.current;
 
-            const parentNode = nodes.find((n) => {
-                const task = LegacyTaskRegistry[n.data.type] as Task;
-                return task?.chainOutputs?.some((o) => o.nodeType === nodeType);
-            });
+            const parentNode = nodes.find((n) =>
+                LegacyTaskRegistry[n.data.type]?.chainOutputs?.some(
+                    (o) => o.nodeType === nodeType,
+                ),
+            );
 
             if (!parentNode) return;
 
-            const parentTask = LegacyTaskRegistry[parentNode.data.type] as Task;
+            const parentTask = LegacyTaskRegistry[parentNode.data.type];
             const outputDef = parentTask.chainOutputs?.find(
                 (o) => o.nodeType === nodeType,
             );

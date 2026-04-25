@@ -8,7 +8,7 @@ const useNodeInformation = (selectedNodeId: string | null) => {
 
     const selectedNode = selectedNodeId ? getNode(selectedNodeId) : null;
     const nodeData = selectedNode?.data as AppNodeData;
-    const task = nodeData ? (TaskRegistry[nodeData.type] as Task) : null;
+    const task = nodeData ? TaskRegistry[nodeData.type] : null;
 
     return {
         task,

@@ -17,7 +17,7 @@ export enum TaskParamType {
 // Inchangé par rapport à l'existant
 export interface TaskSettingParam {
     name: string;
-    type: TaskParamType.SELECT | TaskParamType.STRING | TaskParamType.NUMBER;
+    type: TaskParamType;
     nodeType: TaskType;
     helperText?: string;
     required?: boolean;

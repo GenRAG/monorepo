@@ -2,7 +2,7 @@ import { TaskRegistry } from "./task/registry";
 import { Task, TaskParam, TaskType } from "../types/task";
 
 export function getTaskDef(type: string): Task | undefined {
-    return TaskRegistry[type] as Task | undefined;
+    return TaskRegistry[type as TaskType];
 }
 
 export function getNonSettingsTaskTypes(): TaskType[] {
@@ -14,7 +14,7 @@ export function getNonSettingsTaskTypes(): TaskType[] {
 export function getAddableTaskTypes(presentTypes: TaskType[]): TaskType[] {
     const addable = new Set<TaskType>();
     presentTypes.forEach((type) => {
-        const task = TaskRegistry[type] as Task | undefined;
+        const task = TaskRegistry[type];
         task?.chainOutputs?.forEach((o) => {
             if (!presentTypes.includes(o.nodeType)) {
                 addable.add(o.nodeType);
@@ -25,13 +25,11 @@ export function getAddableTaskTypes(presentTypes: TaskType[]): TaskType[] {
 }
 
 export function getConfigInputs(taskType: TaskType): TaskParam[] {
-    const task = TaskRegistry[taskType] as Task;
-    return task.inputs.filter(
-        (i: TaskParam) => !i.hideHandle && taskType === task.type,
-    );
+    const task = TaskRegistry[taskType];
+    return task.inputs.filter((i: TaskParam) => !i.hideHandle);
 }
 
 export function getChainOutputs(taskType: TaskType) {
-    const task = TaskRegistry[taskType] as Task;
+    const task = TaskRegistry[taskType];
     return task.chainOutputs ?? [];
 }

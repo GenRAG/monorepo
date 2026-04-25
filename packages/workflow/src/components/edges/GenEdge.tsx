@@ -71,21 +71,6 @@ export default function GenEdge(props: GenEdgeProps) {
                     />
                 </circle>
             </g>
-            <style>{`
-            @keyframes flowEdge {
-            0% {
-                stroke-dashoffset: 0;
-                opacity: 0.6;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                stroke-dashoffset: -35;
-                opacity: 0.6;
-            }
-        }
-      `}</style>
         </>
     );
 }

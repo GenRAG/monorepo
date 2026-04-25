@@ -5,6 +5,7 @@ import {
     getBezierPath,
 } from "@xyflow/react";
 import { useMemo } from "react";
+import "./edge-animations.css";
 
 export default function SettingsEdge(props: EdgeProps) {
     const [edgePath] = getBezierPath(props);
@@ -24,12 +25,6 @@ export default function SettingsEdge(props: EdgeProps) {
                     animation: "settingsEdgeFlow 1.5s linear infinite",
                 }}
             />
-            <style>{`
-                @keyframes settingsEdgeFlow {
-                    0% { stroke-dashoffset: -16; }
-                    100% { stroke-dashoffset: 0; }
-                }
-            `}</style>
         </>
     );
 }

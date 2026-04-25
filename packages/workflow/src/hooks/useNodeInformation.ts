@@ -1,6 +1,5 @@
 import { useReactFlow } from "@xyflow/react";
 import { AppNodeData } from "../types/app-node";
-import { Task } from "../types/task";
 import { TaskRegistry } from "../graph/task/registry";
 
 const useNodeInformation = (selectedNodeId: string | null) => {

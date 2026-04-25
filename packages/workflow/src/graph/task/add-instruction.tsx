@@ -1,4 +1,3 @@
-import { Position } from "@xyflow/react";
 import { TaskType } from "../../types/task";
 import { FileText, LucideIcon } from "lucide-react";
 import { ShapeType } from "../../components/nodes";
@@ -16,11 +15,6 @@ export const AddInstruction = {
     isEndPoint: false,
     isDeletable: false,
     isDraggable: true,
-    sourcePosition: Position.Left,
-    position: {
-        x: 0,
-        y: -100,
-    },
     id: "tooltip-workflow-instruction",
     inputs: [],
     outputs: [],

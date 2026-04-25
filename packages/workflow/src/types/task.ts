@@ -1,4 +1,3 @@
-import { Position } from "@xyflow/react";
 import { ShapeType } from "../components/nodes/NodeShape";
 import type { ModelOption } from "./model-option";
 import type { WorkflowNodeProps } from "./app-node";
@@ -41,8 +40,6 @@ export interface Task {
     isEndPoint: boolean;
     isDeletable: boolean;
     isDraggable: boolean;
-    sourcePosition?: Position;
-    position?: { x: number; y: number };
     id?: string;
 
     inputs: TaskSettingParam[];

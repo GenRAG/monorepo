@@ -9,7 +9,6 @@ export interface AppNodeData extends Record<string, unknown> {
     outputs: string[];
     isPlaceholder?: boolean;
     isEditing?: boolean;
-    isChainPlaceholder?: boolean;
     firstTime?: boolean;
     modelName?: string;
     stringValue?: string;

@@ -21,9 +21,11 @@ import {
     useNodeSelection,
     useWorkflowCanvas,
     sanitizeWorkflowEdges,
+    serializeWorkflow,
     TaskType,
     type AppNode,
     type AppNodeData,
+    type WorkflowDefinition,
 } from "@genrag/workflow";
 import type { Edge } from "@xyflow/react";
 import { NodeModal } from "pages/Agents/Workflow/NodeModal";
@@ -37,8 +39,6 @@ import {
     useUpdateWorkflowMutation,
     useCreateWorkflowMutation,
 } from "services/workflow/workflow";
-import { serializeWorkflow } from "utils/workflowSerializer";
-import type { WorkflowDefinition } from "utils/workflowSerializer";
 import useThemedToast from "hooks/useThemedToast";
 
 interface WorkflowInnerProps {

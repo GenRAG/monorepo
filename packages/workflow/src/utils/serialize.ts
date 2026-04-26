@@ -1,6 +1,6 @@
-import type { AppNode } from "@genrag/workflow";
-import { TaskType } from "@genrag/workflow";
 import type { Edge } from "@xyflow/react";
+import type { AppNode } from "../types/app-node";
+import { TaskType } from "../types/task";
 
 export interface PipelineBlock {
     name: string;
@@ -37,12 +37,12 @@ export function serializeWorkflow(
             if (settingsNode.data.type === TaskType.MODEL) {
                 settingsMap.set(e.source, {
                     ...current,
-                    model: settingsNode.data.modelName,
+                    model: settingsNode.data.modelName as string | undefined,
                 });
             } else if (settingsNode.data.type === TaskType.INSTRUCTION) {
                 settingsMap.set(e.source, {
                     ...current,
-                    instruction: settingsNode.data.stringValue,
+                    instruction: settingsNode.data.stringValue as string | undefined,
                 });
             }
         });

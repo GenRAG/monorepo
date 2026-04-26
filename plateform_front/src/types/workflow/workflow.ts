@@ -1,4 +1,4 @@
-import type { WorkflowDefinition } from "utils/workflowSerializer";
+import type { WorkflowDefinition } from "@genrag/workflow";
 
 export type { WorkflowDefinition as WorkflowCanvas };
 

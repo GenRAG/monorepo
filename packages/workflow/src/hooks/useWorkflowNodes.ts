@@ -9,7 +9,7 @@ import {
     CreateFlowNode,
     createSettingPlaceholders,
 } from "../graph/create-flow-node";
-import { TaskType } from "../types/task";
+import { TaskType, TaskParamType } from "../types/task";
 import { TaskRegistry as LegacyTaskRegistry } from "../graph/task/registry";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
@@ -60,21 +60,22 @@ export const useWorkflowNodes = (
     const edgesRef = useRef(edges);
     edgesRef.current = edges;
 
-    // Trigger when selecting an option in the setting modal, right now
-    // only used for the model selector in MODEL nodes, maybe need a 
-    // refactor later if we have more settings that require this kind of callback
     const handleSettingSelect = useCallback(
         (nodeId: string, item: string) => {
             if (readonlyMode) return;
             setNodes((prev: AppNode[]) =>
                 prev.map((n) => {
                     if (n.id !== nodeId) return n;
+                    const fieldUpdate =
+                        n.data.inputType === TaskParamType.STRING
+                            ? { stringValue: item, isEditing: false }
+                            : { modelName: item };
                     return {
                         ...n,
                         data: {
                             ...n.data,
+                            ...fieldUpdate,
                             isPlaceholder: false,
-                            modelName: item,
                             firstTime: false,
                         },
                     };

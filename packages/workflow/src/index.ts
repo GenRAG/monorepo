@@ -5,6 +5,7 @@ export * from "./hooks/index";
 export * from "./types/index";
 export * from "./graph/index";
 export * from "./utils/serialize";
+export * from "./utils/sanitize";
 export type { UseWorkflowNodesOptions } from "./hooks/useWorkflowNodes";
 export type { LayoutStrategy, NodePlacement } from "./layout";
 export { VerticalLayoutStrategy, HorizontalLayoutStrategy, DagreLayoutStrategy, DEFAULT_LAYOUT } from "./layout";

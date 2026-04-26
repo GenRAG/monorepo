@@ -14,15 +14,13 @@ import RerankerNodeModal from "pages/Agents/Workflow/NodeModalContent/ReRankerNo
 import QueryNodeModal from "pages/Agents/Workflow/NodeModalContent/QueryNodeContent";
 import ResponseNodeModal from "pages/Agents/Workflow/NodeModalContent/ResponseNodeContent";
 import SettingPlaceholderContent from "pages/Agents/Workflow/NodeModalContent/SettingPlaceholderContent";
-import { NodeShape } from "@genrag/workflow";
-
-import { Task, TaskType } from "@genrag/workflow";
+import { Task, TaskType, type AppNodeData } from "@genrag/workflow";
 
 interface NodeModalProps {
     task: Task | null;
     isOpen: boolean;
     onClose: () => void;
-    nodeData?: any;
+    nodeData?: AppNodeData;
     selectedNodeId?: string | null;
     onSettingSelect?: (nodeId: string, item: string) => void;
 }
@@ -113,31 +111,31 @@ export const NodeModal = ({
                             {task.type === TaskType.RETRIEVER && (
                                 <DatabaseNodeModal
                                     task={task}
-                                    nodeData={nodeData}
+                                    nodeData={nodeData!}
                                 />
                             )}
                             {task.type === TaskType.RERANKER && (
                                 <RerankerNodeModal
                                     task={task}
-                                    nodeData={nodeData}
+                                    nodeData={nodeData!}
                                 />
                             )}
                             {task.type === TaskType.QUERY && (
                                 <QueryNodeModal
                                     task={task}
-                                    nodeData={nodeData}
+                                    nodeData={nodeData!}
                                 />
                             )}
                             {task.type === TaskType.RESPONSE && (
                                 <ResponseNodeModal
                                     task={task}
-                                    nodeData={nodeData}
+                                    nodeData={nodeData!}
                                 />
                             )}
                             {task.type === TaskType.MODEL && (
                                 <SettingPlaceholderContent
                                     task={task}
-                                    nodeData={nodeData}
+                                    nodeData={nodeData!}
                                     onSelect={(item) => {
                                         onSettingSelect?.(
                                             selectedNodeId ?? "",

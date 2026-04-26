@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect } from "react";
-import { useDisclosure } from "@chakra-ui/react";
 import useNodeInformation from "./useNodeInformation";
 import useFixNodePosition from "./useFixNodePosition";
 
 export const useNodeSelection = () => {
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [isOpen, setIsOpen] = useState(false);
+    const onOpen = () => setIsOpen(true);
+    const onClose = () => setIsOpen(false);
     const { task, nodeData } = useNodeInformation(selectedNodeId);
     const fixPosition = useFixNodePosition(selectedNodeId ?? "");
 

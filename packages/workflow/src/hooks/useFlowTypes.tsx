@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import GenEdge from "../components/edges/GenEdge";
 import SettingsEdge from "../components/edges/SettingsEdge";
+import { EdgeType } from "../types/edge";
 
 interface UseFlowTypesParams {
     onEdgeClick?: () => void;
@@ -9,10 +10,10 @@ interface UseFlowTypesParams {
 export const useFlowTypes = ({ onEdgeClick }: UseFlowTypesParams = {}) => {
     const edgeTypes = useMemo(
         () => ({
-            default: (props: any) => (
+            [EdgeType.Main]: (props: any) => (
                 <GenEdge {...props} onToggle={onEdgeClick} />
             ),
-            settings: (props: any) => <SettingsEdge {...props} />,
+            [EdgeType.Settings]: (props: any) => <SettingsEdge {...props} />,
         }),
         [onEdgeClick],
     );

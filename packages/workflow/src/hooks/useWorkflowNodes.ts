@@ -9,8 +9,8 @@ import {
     CreateFlowNode,
     createSettingPlaceholders,
 } from "../graph/create-flow-node";
-import { TaskType, TaskParamType } from "../types/task";
-import { TaskRegistry as LegacyTaskRegistry } from "../graph/task/registry";
+import { TaskType, TaskParamType, type WorkflowRegistry, TaskChainOutput } from "../types/task";
+import { EdgeType } from "../types/edge";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 import { getConfigInputs, getChainOutputs } from "../graph/task-utils";
@@ -23,12 +23,14 @@ export interface UseWorkflowNodesOptions {
     initialEdges?: Edge[];
     readonly?: boolean;
     layout?: LayoutStrategy;
+    registry?: WorkflowRegistry;
 }
 
 export const useWorkflowNodes = (
     options: UseWorkflowNodesOptions = {},
 ) => {
     const layout: LayoutStrategy = options.layout ?? DEFAULT_LAYOUT;
+    const registry = options.registry;
     const initialVertical = options.initialVertical ?? layout.isVertical;
     const customInitialNodes = options.initialNodes;
     const customInitialEdges = options.initialEdges;
@@ -91,7 +93,7 @@ export const useWorkflowNodes = (
             const allEdges = getEdges();
 
             const settingEdges = allEdges.filter(
-                (e) => e.source === nodeId && e.type === "settings",
+                (e) => e.source === nodeId && e.type === EdgeType.Settings,
             );
             const settingNodeIds = settingEdges.map((e) => e.target);
 
@@ -114,7 +116,7 @@ export const useWorkflowNodes = (
                         sourceHandle: "main-source",
                         targetHandle: "main-target",
                         animated: true,
-                        type: "default",
+                        type: EdgeType.Main,
                     },
                 ]);
             }
@@ -124,23 +126,22 @@ export const useWorkflowNodes = (
 
     const handleAddChainNode = useCallback(
         (nodeType: TaskType) => {
-            
-            if (readonlyMode) return;
+            if (readonlyMode || !registry) return;
 
             const nodes = nodesRef.current;
             const edges = edgesRef.current;
 
             const parentNode = nodes.find((n) =>
-                LegacyTaskRegistry[n.data.type]?.chainOutputs?.some(
-                    (o) => o.nodeType === nodeType,
+                registry[n.data.type]?.chainOutputs?.some(
+                    (o: TaskChainOutput) => o.nodeType === nodeType,
                 ),
             );
 
             if (!parentNode) return;
 
-            const parentTask = LegacyTaskRegistry[parentNode.data.type];
+            const parentTask = registry[parentNode.data.type];
             const outputDef = parentTask.chainOutputs?.find(
-                (o) => o.nodeType === nodeType,
+                (o: TaskChainOutput) => o.nodeType === nodeType,
             );
 
             if (!outputDef) return;
@@ -173,7 +174,7 @@ export const useWorkflowNodes = (
                 sourceHandle: "main-source",
                 targetHandle: "main-target",
                 animated: true,
-                type: "default",
+                type: EdgeType.Main,
             };
 
             const newOutgoingEdge = nextNode
@@ -184,7 +185,7 @@ export const useWorkflowNodes = (
                     sourceHandle: "main-source",
                     targetHandle: "main-target",
                     animated: true,
-                    type: "default",
+                    type: EdgeType.Main,
                 }
                 : null;
 
@@ -204,7 +205,7 @@ export const useWorkflowNodes = (
             const settingPlacementMap = new Map<string, { x: number; y: number }>();
 
             allNewEdges
-                .filter(e => e.type === 'settings')
+                .filter(e => e.type === EdgeType.Settings)
                 .forEach(e => {
                     const newParentPos = placementMap.get(e.source);
                     if (!newParentPos) return;

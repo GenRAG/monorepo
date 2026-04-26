@@ -5,6 +5,7 @@ import { useWorkflowNodes, UseWorkflowNodesOptions } from "./useWorkflowNodes";
 import NodeComponent from "../components/nodes/NodeComponent";
 import { type LayoutStrategy } from "../layout";
 import type { AppNode, NodeComponentType } from "../types/app-node";
+import { TaskRegistry } from "../graph/task/registry";
 
 export interface UseWorkflowCanvasOptions {
     initialNodes?: AppNode[];
@@ -37,6 +38,7 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         initialVertical,
         readonly,
         layout,
+        registry: TaskRegistry,
     };
 
     const workflow = useWorkflowNodes(workflowNodesOptions);

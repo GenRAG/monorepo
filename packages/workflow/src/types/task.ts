@@ -49,6 +49,8 @@ export interface Task {
 
 export type TaskParam = TaskSettingParam;
 
+export type WorkflowRegistry = Record<TaskType, Task>;
+
 export enum TaskType {
     QUERY = "QUERY",
     REWRITER = "REWRITER",

@@ -1,6 +1,7 @@
 import type { Edge } from "@xyflow/react";
 import type { AppNode } from "../types/app-node";
 import { TaskType } from "../types/task";
+import { EdgeType } from "../types/edge";
 
 export interface PipelineBlock {
     name: string;
@@ -29,7 +30,7 @@ export function serializeWorkflow(
     >();
 
     edges
-        .filter((e) => e.type === "settings")
+        .filter((e) => e.type === EdgeType.Settings)
         .forEach((e) => {
             const settingsNode = nodeMap.get(e.target);
             if (!settingsNode) return;
@@ -47,7 +48,7 @@ export function serializeWorkflow(
             }
         });
 
-    const mainEdges = edges.filter((e) => e.type !== "settings");
+    const mainEdges = edges.filter((e) => e.type !== EdgeType.Settings);
     const entryNode = nodes.find((n) => n.data.type === TaskType.QUERY);
     const orderedNodes: AppNode[] = [];
 

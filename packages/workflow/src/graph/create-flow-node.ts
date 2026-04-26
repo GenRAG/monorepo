@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { AppNode } from "../types/app-node";
 import { TaskType, TaskParam } from "../types/task";
+import { EdgeType } from "../types/edge";
 import { Edge } from "@xyflow/react";
 import { getConfigInputs } from "./task-utils";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
@@ -46,6 +47,7 @@ export function linkNodes(sourceNode: string, targetNode: string) {
         sourceHandle: "main-source",
         targetHandle: "main-target",
         animated: true,
+        type: EdgeType.Main,
     };
 }
 
@@ -89,7 +91,7 @@ export function createSettingPlaceholders(
             target: placeholderId,
             sourceHandle: `setting-source-${input.name}`,
             targetHandle: "setting-target",
-            type: "settings",
+            type: EdgeType.Settings,
             animated: false,
             data: { label: input.name },
         });
@@ -177,7 +179,7 @@ export function withAutoSettings(
                     target: settingId,
                     sourceHandle: `setting-source-${input.name}`,
                     targetHandle: "setting-target",
-                    type: "settings",
+                    type: EdgeType.Settings,
                     animated: false,
                     data: { label: input.name },
                 });
@@ -211,7 +213,7 @@ export function sanitizeWorkflowEdges(
     const orphanedNodeIds = new Set<string>();
 
     const sanitizedEdges = edges.flatMap((edge) => {
-        if (edge.type !== "settings" || !edge.sourceHandle) return [edge];
+        if (edge.type !== EdgeType.Settings || !edge.sourceHandle) return [edge];
 
         const sourceNode = nodeMap.get(edge.source);
         if (!sourceNode) {

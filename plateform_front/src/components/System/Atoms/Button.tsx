@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React from "react";
 import {
     Button as ChakraButton,
     ButtonProps,
@@ -7,8 +7,11 @@ import {
 } from "@chakra-ui/react";
 import { LucideIcon } from "lucide-react";
 
-export interface GenragButtonProps
-    extends Omit<ButtonProps, "leftIcon" | "rightIcon"> {
+export interface GenragButtonProps extends Omit<
+    ButtonProps,
+    "leftIcon" | "rightIcon"
+> {
+    variant?: ButtonProps["variant"];
     leftIcon?: LucideIcon;
     rightIcon?: LucideIcon;
     icon?: LucideIcon;
@@ -32,7 +35,7 @@ const iconSizes: Record<string, number | string> = {
     xs: "16px",
 };
 
-const Button: FC<GenragButtonProps> = React.forwardRef(
+const Button = React.forwardRef<HTMLButtonElement, GenragButtonProps>(
     (
         {
             icon,
@@ -92,5 +95,7 @@ const Button: FC<GenragButtonProps> = React.forwardRef(
         );
     },
 );
+
+Button.displayName = "GenragButton";
 
 export default Button;

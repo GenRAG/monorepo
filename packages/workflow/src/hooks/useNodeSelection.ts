@@ -3,10 +3,11 @@ import useNodeInformation from "./useNodeInformation";
 import useFixNodePosition from "./useFixNodePosition";
 
 export const useNodeSelection = () => {
+
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const onOpen = () => setIsOpen(true);
-    const onClose = () => setIsOpen(false);
+    const onOpen = useCallback(() => setIsOpen(true), []);
+    const onClose = useCallback(() => setIsOpen(false), []);
     const { task, nodeData } = useNodeInformation(selectedNodeId);
     const fixPosition = useFixNodePosition(selectedNodeId ?? "");
 

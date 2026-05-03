@@ -34,7 +34,7 @@ const getColorScheme = (
             color: mode("grey.950", "grey.100")(props),
         },
         orange: {
-            bg: mode("orange.50", "orange.700")(props),
+            bg: mode("orange.200", "orange.700")(props),
             color: mode("grey.950", "orange.500")(props),
         },
         green: {

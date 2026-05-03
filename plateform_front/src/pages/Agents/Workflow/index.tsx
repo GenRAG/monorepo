@@ -31,7 +31,6 @@ import type { Edge } from "@xyflow/react";
 import { NodeModal } from "pages/Agents/Workflow/NodeModal";
 import MenuNodeModal from "pages/Agents/Workflow/MenuNodeModal";
 import CustomControls from "pages/Agents/Workflow/CustomControls";
-import { NodeComponent } from "@genrag/workflow";
 import { applyAlphaToColor } from "components/System/Molecules/WorkflowPreview/WorkflowPreview";
 import { useParams } from "react-router-dom";
 import {
@@ -86,7 +85,6 @@ const WorkflowInner = ({
         handleSettingSelect,
         handleAddChainNode,
     } = useWorkflowCanvas({
-        nodeComponent: NodeComponent,
         onNodeClick: handleNodeClick,
         onEdgeClick: isMenuOpen ? onMenuClose : onMenuOpen,
         initialNodes,

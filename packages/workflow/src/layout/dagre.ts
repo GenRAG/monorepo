@@ -33,7 +33,7 @@ export class DagreLayoutStrategy implements LayoutStrategy {
     ): NodePlacement[] {
         let dagre: any
         try {
-            dagre = require!('dagre')
+            dagre = require!('./dagre')
         } catch {
             return new VerticalLayoutStrategy().computePlacements(existingNodes, edges, newNodeId)
         }

@@ -11,6 +11,7 @@ model User {
   passwordResetToken          Int?
   passwordResetLastSentAt     DateTime?
   workspaces                  UserWorkspace[]
+  agentVersions               AgentVersion[]
 }
 
 enum UserRole {

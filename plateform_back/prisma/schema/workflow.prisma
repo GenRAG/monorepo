@@ -1,6 +1,5 @@
 model Workflow {
   id         String   @id @default(cuid())
-  name       String?
   agentId    String
   definition Json
   version    Int

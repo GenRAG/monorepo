@@ -9,6 +9,7 @@ import { WorkflowModule } from './workflow/workflow.module';
 import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
 import { CreditBalanceModule } from 'src/credit/credit-balance.module';
 import { DocumentModule } from './document/document.module';
+import { DeploymentModule } from './deployment/deployment.module';
 import { BullModule } from '@nestjs/bullmq';
 
 @Module({
@@ -61,6 +62,7 @@ import { BullModule } from '@nestjs/bullmq';
         AgentRuntimeModule,
         CreditBalanceModule,
         DocumentModule,
+        DeploymentModule,
     ],
     controllers: [],
     providers: [],

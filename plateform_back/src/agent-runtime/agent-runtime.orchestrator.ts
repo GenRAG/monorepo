@@ -27,7 +27,6 @@ export class AgentRuntimeOrchestrator {
 
         const pipeline = await this.contextBuilder.buildPipeline({
             agentId,
-            workspaceId,
         });
 
         const answer = await this.ragEngineService.sendQuery({

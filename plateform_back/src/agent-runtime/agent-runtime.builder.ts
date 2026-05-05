@@ -12,21 +12,28 @@ export class ContextBuilder {
 
     async buildPipeline({
         agentId,
-        workspaceId,
     }: {
         agentId: string;
-        workspaceId: string;
     }): Promise<Prisma.JsonValue> {
-        const agent = await this.agentService.findOne(agentId, workspaceId);
-        const workflow = await this.workflowService.findActive(agent.id);
+        const prodVersion =
+            await this.agentService.findProductionWorkflowVersion(agentId);
+
+        if (!prodVersion) {
+            throw new Error(
+                'No production workflow version found for this agent',
+            );
+        }
+
+        const workflow = await this.workflowService.findByVersion(
+            agentId,
+            prodVersion,
+        );
 
         if (!workflow) {
             throw new Error('No active workflow found for this agent');
         }
 
         const def = workflow.definition as Record<string, unknown>;
-        // New format: { nodes, edges, blocks } — return only the blocks array for the RAG API.
-        // Fall back to the full definition for legacy workflows stored in the old pipeline format.
-        return (def.blocks as Prisma.JsonValue) ?? workflow.definition;
+        return def.blocks as Prisma.JsonValue;
     }
 }

@@ -11,13 +11,21 @@ export type FindAllAgentResult = Prisma.AgentGetPayload<{
     };
 }>;
 
-export type FindOneWithWorkflowsResult = Prisma.AgentGetPayload<{
+type AgentWithWorkflows = Prisma.AgentGetPayload<{
     include: {
         workflows: {
+            where: { isActive: true };
             select: { id: true; definition: true };
         };
     };
 }>;
+
+export type FindOneWithActiveWorkflowResult = Omit<
+    AgentWithWorkflows,
+    'workflows'
+> & {
+    workflow: AgentWithWorkflows['workflows'][number] | null;
+};
 
 export type FindProductionDeployedWorkflowVersionResult = {
     workflowVersion: number | null;
@@ -33,14 +41,27 @@ export class AgentRepository {
         });
     }
 
-    findOneWithWorkflows(
+    async findOneWithActiveWorkflow(
         id: string,
         workspaceId: string,
-    ): Promise<FindOneWithWorkflowsResult | null> {
-        return this.prisma.agent.findFirst({
+    ): Promise<FindOneWithActiveWorkflowResult | null> {
+        const agent = await this.prisma.agent.findFirst({
             where: { id, workspaceId },
-            include: { workflows: { where: { isActive: true } } },
+            include: {
+                workflows: {
+                    where: { isActive: true },
+                    select: { id: true, definition: true },
+                },
+            },
         });
+
+        if (!agent) return null;
+
+        const { workflows, ...rest } = agent;
+
+        if (workflows.length === 0) return { ...rest, workflow: null };
+
+        return { ...rest, workflow: workflows[0] };
     }
 
     findAll(workspaceId: string): Promise<FindAllAgentResult[]> {

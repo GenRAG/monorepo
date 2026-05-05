@@ -152,9 +152,10 @@ export class DeploymentService {
         );
         if (!agent) throw new NotFoundException('Agent not found');
 
+        const { workflow } = agent;
+
         const latestDeployment =
             await this.deploymentRepository.findLatest(agentId);
-        const { workflow } = agent;
 
         return {
             deploymentStatus:

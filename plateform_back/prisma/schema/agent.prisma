@@ -16,7 +16,7 @@ model Agent {
 model AgentVersion {
   id              String      @id @default(cuid())
   version         Int
-  name            String?
+  name            String
   changelog       String?
   fromStatus      AgentStatus
   toStatus        AgentStatus

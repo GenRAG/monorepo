@@ -28,11 +28,32 @@ export class WorkflowService {
             return tx.workflow.create({
                 data: {
                     agentId,
-                    name: createWorkflowRequest.name,
                     definition:
                         createWorkflowRequest.definition as Prisma.InputJsonValue,
                     version: nextVersion,
                     isActive: true,
+                },
+            });
+        });
+    }
+
+    async createSnapshot(
+        agentId: string,
+        createWorkflowRequest: CreateWorkflowRequest,
+    ): Promise<Workflow> {
+        return this.workflowRepository.transaction(async (tx) => {
+            const lastWorkflow = await tx.workflow.findFirst({
+                where: { agentId },
+                orderBy: { version: 'desc' },
+            });
+            const nextVersion = lastWorkflow ? lastWorkflow.version + 1 : 1;
+            return tx.workflow.create({
+                data: {
+                    agentId,
+                    definition:
+                        createWorkflowRequest.definition as Prisma.InputJsonValue,
+                    version: nextVersion,
+                    isActive: false,
                 },
             });
         });
@@ -69,18 +90,26 @@ export class WorkflowService {
         }
 
         return this.workflowRepository.update(workflow.id, {
-            ...(updateWorkflowRequest.name !== undefined && {
-                name: updateWorkflowRequest.name,
-            }),
-            ...(updateWorkflowRequest.definition !== undefined && {
+            ...{
                 definition:
                     updateWorkflowRequest.definition as Prisma.InputJsonValue,
-            }),
+            },
         });
     }
 
     async findAll(agentId: string): Promise<Workflow[]> {
         return this.workflowRepository.findAll(agentId);
+    }
+
+    async findByVersion(agentId: string, version: number): Promise<Workflow> {
+        const workflow = await this.workflowRepository.findByVersion(
+            agentId,
+            version,
+        );
+
+        if (!workflow)
+            throw new NotFoundException('Workflow version not found');
+        return workflow;
     }
 
     async findOne(id: string, agentId: string): Promise<Workflow> {

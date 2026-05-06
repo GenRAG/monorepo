@@ -36,7 +36,7 @@ export class DeploymentService {
         workspaceId: string;
         workflowVersion: number;
         userId: string;
-        name?: string;
+        name: string;
         changelog?: string;
     }) {
         const latestDeployment =

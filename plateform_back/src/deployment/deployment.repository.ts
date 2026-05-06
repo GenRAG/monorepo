@@ -37,7 +37,7 @@ export class DeploymentRepository {
         agentId: string;
         fromStatus: AgentStatus;
         toStatus: AgentStatus;
-        name?: string;
+        name: string;
         changelog?: string;
         workflowVersion?: number;
         userId: string;
@@ -45,7 +45,7 @@ export class DeploymentRepository {
         return this.prisma.$transaction(async (tx) => {
             await tx.agent.update({
                 where: { id: data.agentId },
-                data: { updatedBy: data.userId },
+                data: { updatedBy: data.userId, status: data.toStatus },
             });
 
             const last = await tx.agentVersion.findFirst({
@@ -57,7 +57,7 @@ export class DeploymentRepository {
                 data: {
                     agentId: data.agentId,
                     version: last ? last.version + 1 : 1,
-                    name: data.name ?? null,
+                    name: data.name,
                     changelog: data.changelog ?? null,
                     fromStatus: data.fromStatus,
                     toStatus: data.toStatus,

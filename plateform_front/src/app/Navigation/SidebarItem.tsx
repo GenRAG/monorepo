@@ -20,8 +20,6 @@ interface SidebarItemProps {
     tag?: string;
     active?: boolean;
     open: boolean;
-    textColor?: string;
-    iconColor?: string;
     childrenItems?: { label: string; icon?: any; onClick?: () => void }[];
     badgeColor?: string;
     onClick?: () => void;
@@ -34,12 +32,8 @@ export const SidebarItem = ({
     tag,
     active,
     open,
-    textColor = "white",
-    iconColor = "grey.200",
     childrenItems,
     onClick,
-    //expandedItem,
-    //setExpandedItem,
 }: SidebarItemProps) => {
     const activeBg = useColorModeValue(
         currentDarkTheme.rgba.primary20,
@@ -49,7 +43,7 @@ export const SidebarItem = ({
         currentDarkTheme.rgba.primary20,
         currentDarkTheme.rgba.primary30,
     );
-    const color = useColorModeValue(textColor, "white");
+    const color = useColorModeValue("grey.900", "white");
     const activeColor = currentDarkTheme.primary500;
     const beforeColor = currentDarkTheme.primary;
     const badgeColorValue = useColorModeValue("grey.500", "grey.300");
@@ -58,7 +52,7 @@ export const SidebarItem = ({
     const tooltipBg = useColorModeValue("grey.700", "green.600");
     const chevronColor = useColorModeValue("grey.500", "grey.300");
     const iconColorValue = useColorModeValue(
-        iconColor,
+        "grey.900",
         active ? currentDarkTheme.primary : "grey.300",
     );
 

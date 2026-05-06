@@ -92,8 +92,6 @@ const AgentSidebar = () => {
                         active={false}
                         onClick={handleDashboardClick}
                         open={isOpen}
-                        textColor="grey.900"
-                        iconColor="grey.900"
                     />
                 </SidebarSection>
                 <Divider w="100%" borderColor={border} borderWidth="1px" />
@@ -107,8 +105,6 @@ const AgentSidebar = () => {
                             icon={icon}
                             label={label}
                             open={isOpen}
-                            textColor="grey.900"
-                            iconColor="grey.900"
                         />
                     ))}
                 </SidebarSection>
@@ -123,8 +119,6 @@ const AgentSidebar = () => {
                             icon={icon}
                             label={label}
                             open={isOpen}
-                            textColor="grey.900"
-                            iconColor="grey.900"
                         />
                     ))}
                 </SidebarSection>
@@ -170,7 +164,7 @@ const AgentSidebar = () => {
                     size="xs"
                 >
                     <DrawerOverlay />
-                    <DrawerContent bg={bgMobile} maxW="280px">
+                    <DrawerContent bg={bgMobile} maxW="280px" borderRadius={0}>
                         <DrawerBody p={0} display="flex" flexDirection="column">
                             {sidebarContent}
                         </DrawerBody>
@@ -185,7 +179,6 @@ const AgentSidebar = () => {
             h="100vh"
             w={isOpen ? "200px" : "60px"}
             bg={bg}
-            borderRadius="0"
             borderRight="1px solid"
             borderColor={border}
             display="flex"

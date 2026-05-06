@@ -11,13 +11,13 @@ export default function Router() {
     return (
         <BrowserRouter>
             <Routes>
-                <AuthRoutes />
+                {AuthRoutes()}
 
                 <Route element={<PrivateRoute />}>
                     <Route path="/" element={<DefaultRedirect />} />
                     <Route path="/onboarding" element={<OnBoarding />} />
-                    <AppRoutes />
-                    <AgentRoutes />
+                    {AppRoutes()}
+                    {AgentRoutes()}
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

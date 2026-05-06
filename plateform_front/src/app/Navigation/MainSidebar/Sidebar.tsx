@@ -10,7 +10,7 @@ import {
     useColorMode,
     Stack,
 } from "@chakra-ui/react";
-import { Menu, NetworkIcon } from "lucide-react";
+import { Menu } from "lucide-react";
 import WorkspaceDropdown from "app/Navigation/MainSidebar/WorkspaceDropdown";
 import { mainMenu, supportMenu } from "app/Navigation/sidebarConfig";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
@@ -56,7 +56,7 @@ const Sidebar = () => {
     const border = useColorModeValue("grey.100", "grey.800");
 
     const bgMobile = useColorModeValue(
-        "black",
+        "white",
         "linear-gradient(135deg,rgb(5, 5, 5) 0%, #363636ff 100%)",
     );
 
@@ -96,22 +96,6 @@ const Sidebar = () => {
         await handleItemClick(`/workspaces/${workspaceId}/dashboard`);
     };
 
-    const mockAgents = [
-        { id: "1", name: "Agent 1" },
-        { id: "2", name: "Agent 2" },
-    ];
-
-    const mockAssistants = [
-        {
-            id: "1",
-            name: "Assistant 1",
-        },
-        {
-            id: "2",
-            name: "Assistant 2",
-        },
-    ];
-
     const sidebarContent = (
         <Stack gap={8} h="100vh" flex={1} overflow="hidden">
             <SidebarHeader
@@ -136,8 +120,6 @@ const Sidebar = () => {
                 <SidebarSection title="Menu" isOpen={isOpen}>
                     {mainMenu.map(({ id, icon, label }) => (
                         <SidebarItem
-                            textColor="gray.900"
-                            iconColor="grey.900"
                             key={id}
                             active={activePath === id}
                             onClick={async () => {
@@ -199,7 +181,7 @@ const Sidebar = () => {
                     size="xs"
                 >
                     <DrawerOverlay />
-                    <DrawerContent bg={bgMobile} maxW="280px">
+                    <DrawerContent bg={bgMobile} maxW="280px" borderRadius={0}>
                         <DrawerBody p={0} display="flex" flexDirection="column">
                             {sidebarContent}
                         </DrawerBody>

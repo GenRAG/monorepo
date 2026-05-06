@@ -9,6 +9,7 @@ import {
     Settings,
     CreditCard,
     Cloud,
+    Lock,
 } from "lucide-react";
 
 export const mainMenu = [
@@ -31,6 +32,7 @@ export const agentFeaturesMenu = [
     { id: "workflow", icon: GitGraph, label: "Flux de travail" },
     { id: "documents", icon: FileText, label: "Documents" },
     { id: "deploy", icon: Cloud, label: "Déploiement" },
+    { id: "access-control", icon: Lock, label: "Contrôle d'accès" },
 ];
 
 export const agentSettingsMenu = [

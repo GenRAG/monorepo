@@ -2,6 +2,7 @@ import { Box, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AgentPreview } from "types/agent/agent";
+import { AgentStatus } from "types/deployment/deployment";
 
 interface AgentCardProps {
     agent: AgentPreview;
@@ -17,12 +18,6 @@ const STATUS_CONFIG: Record<
         color: "#F59E0B",
         bg: "#FEF3C7",
         textColor: "#92400E",
-    },
-    staging: {
-        label: "Staging",
-        color: "#3B82F6",
-        bg: "#DBEAFE",
-        textColor: "#1E40AF",
     },
     production: {
         label: "Production",
@@ -50,7 +45,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
     const navigate = useNavigate();
 
     const cardBg = useColorModeValue("white", "grey.900");
-    const borderColor = useColorModeValue("grey.150", "grey.700");
+    const borderColor = useColorModeValue("grey.100", "grey.700");
     const titleColor = useColorModeValue("grey.900", "grey.50");
     const descColor = useColorModeValue("grey.500", "grey.400");
     const dividerColor = useColorModeValue("grey.100", "grey.700");
@@ -58,12 +53,14 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
         "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
         "0 1px 3px rgba(0,0,0,0.3)",
     );
-
-    const status = (agent as any).status ?? "development";
-    const description = (agent as any).description ?? "";
-    const statusStyle = STATUS_CONFIG[status] ?? STATUS_CONFIG.development;
-    const avatarStyle = getAvatarColor(agent.name);
     console.log(agent);
+    const deploymentStatus = (
+        agent.deploymentStatus ?? AgentStatus.DEVELOPMENT
+    ).toLowerCase();
+    const description = agent.description ?? "";
+    const statusStyle =
+        STATUS_CONFIG[deploymentStatus] ?? STATUS_CONFIG.development;
+    const avatarStyle = getAvatarColor(agent.name);
 
     return (
         <Box
@@ -89,34 +86,24 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
                 <VStack align="start" spacing={3} p={4} flex="1" w="100%">
                     <HStack spacing={3}>
                         <Box
-                            w="36px"
-                            h="36px"
-                            borderRadius="9px"
+                            w="32px"
+                            h="32px"
+                            borderRadius="8px"
                             bg={avatarStyle.bg}
                             color={avatarStyle.color}
                             display="flex"
                             alignItems="center"
                             justifyContent="center"
-                            fontSize="14px"
-                            fontWeight="700"
-                            flexShrink={0}
+                            fontWeight="600"
                         >
                             {agent.name.charAt(0).toUpperCase()}
                         </Box>
-                        <Text
-                            fontSize="14px"
-                            fontWeight="600"
-                            color={titleColor}
-                            lineHeight="1.3"
-                            noOfLines={1}
-                        >
+                        <Text fontSize="sm" fontWeight="600" color={titleColor}>
                             {agent.name}
                         </Text>
                     </HStack>
-
-                    {/* Description */}
                     <Text
-                        fontSize="13px"
+                        fontSize="sm"
                         color={descColor}
                         lineHeight="1.5"
                         noOfLines={3}
@@ -125,11 +112,9 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
                     </Text>
                 </VStack>
 
-                {/* Footer */}
                 <HStack
                     w="100%"
-                    px={4}
-                    py={3}
+                    p={4}
                     borderTop="1px solid"
                     borderColor={dividerColor}
                     justify="space-between"
@@ -142,19 +127,10 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
                             bg={statusStyle.color}
                             flexShrink={0}
                         />
-                        <Text
-                            fontSize="11px"
-                            fontWeight="500"
-                            color={descColor}
-                        >
+                        <Text fontSize="xs" fontWeight="500" color={descColor}>
                             {statusStyle.label}
                         </Text>
                     </HStack>
-
-                    <Text fontSize="11px" color={descColor}>
-                        {agent.documentsCount ?? 0} doc
-                        {(agent.documentsCount ?? 0) > 1 ? "s" : ""}
-                    </Text>
                 </HStack>
             </VStack>
         </Box>

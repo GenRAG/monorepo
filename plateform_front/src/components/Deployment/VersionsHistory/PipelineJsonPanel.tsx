@@ -87,14 +87,16 @@ export const PipelineJsonPanel = ({
                         </Box>
                     )}
                 </Text>
-                <HStack spacing={2}>
-                    <Button size="sm" variant="outline" leftIcon={Download}>
-                        Télécharger
-                    </Button>
-                    <Button size="sm" variant="outline" leftIcon={Copy}>
-                        Copier
-                    </Button>
-                </HStack>
+                {pipeline && (
+                    <HStack spacing={2}>
+                        <Button size="sm" variant="outline" leftIcon={Download}>
+                            Télécharger
+                        </Button>
+                        <Button size="sm" variant="outline" leftIcon={Copy}>
+                            Copier
+                        </Button>
+                    </HStack>
+                )}
             </HStack>
             <Box
                 p={5}

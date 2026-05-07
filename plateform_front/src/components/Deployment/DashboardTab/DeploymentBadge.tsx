@@ -3,7 +3,7 @@ import { LiveDot } from "components/Deployment/LiveDot";
 import { AgentStatus } from "types/deployment/deployment";
 
 const STATUS_LABEL: Record<AgentStatus, string> = {
-    [AgentStatus.DEVELOPMENT]: "Development",
+    [AgentStatus.DEVELOPMENT]: "Developpement",
     [AgentStatus.PRODUCTION]: "Production",
 };
 

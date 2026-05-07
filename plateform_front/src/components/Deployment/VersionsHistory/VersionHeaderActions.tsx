@@ -50,7 +50,12 @@ export const VersionHeaderActions = ({
     const dateColor = useColorModeValue("grey.300", "grey.500");
     const buttonType = isDark ? "superPrimary" : "primary";
 
-    if (!deployment) return <Box p={6} />;
+    if (!deployment)
+        return (
+            <Box p={4}>
+                Pas de déploiement en production trouvé pour cet agent.
+            </Box>
+        );
 
     const env = getDeploymentEnv(deployment);
     const badge = ENV_BADGE[env];

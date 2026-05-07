@@ -46,7 +46,9 @@ export const VersionsSidebar = ({
             bg={bgColor}
             borderRight="1px solid"
             borderRightColor={borderColor}
-            overflowY="auto"
+            h="100%"
+            display="flex"
+            flexDirection="column"
         >
             <VStack align="stretch" spacing={0}>
                 <Box
@@ -60,7 +62,13 @@ export const VersionsSidebar = ({
                     </Text>
                 </Box>
 
-                <VStack spacing={0} align="stretch">
+                <VStack
+                    spacing={0}
+                    align="stretch"
+                    overflowY="auto"
+                    flex={1}
+                    maxH="calc(100vh - 200px)"
+                >
                     {isLoading
                         ? Array.from({ length: 4 }).map((_, i) => (
                               <Skeleton

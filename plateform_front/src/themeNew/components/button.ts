@@ -170,16 +170,21 @@ const Button = {
             return {
                 color: disabled ? colors.grey[300] : colors.font.primary,
                 background: disabled ? colors.grey[100] : colors.font.white,
-                border: disabled ? `none` : "1px solid rgba(1, 134, 90, 0.67)",
+                border: disabled
+                    ? `none`
+                    : "1px solid rgba(214, 214, 214, 0.67)",
                 _dark: {
-                    background: disabled ? colors.grey[700] : colors.grey[800],
+                    border: disabled
+                        ? `none`
+                        : "1px solid rgba(92, 92, 92, 0.67)",
+                    background: disabled ? colors.grey[700] : colors.grey[900],
                     _hover: {
                         bg: disabled
                             ? `${colors.grey[900]} !important`
                             : colors.grey[700],
                     },
                     _active: {
-                        bg: disabled ? colors.grey[800] : colors.grey[700],
+                        bg: disabled ? colors.grey[800] : colors.green[700],
                     },
                 },
                 _hover: {

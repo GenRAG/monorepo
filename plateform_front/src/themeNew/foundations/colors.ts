@@ -26,6 +26,7 @@ const baseColors = {
     },
 
     grey: {
+        25: "#fafafa79",
         50: "#F6F6F6",
         100: "#E7E7E7",
         200: "#D1D1D1",

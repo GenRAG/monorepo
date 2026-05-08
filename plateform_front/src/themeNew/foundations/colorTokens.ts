@@ -8,15 +8,19 @@ const colorTokens = {
     },
     inputBorder: {
         default: "grey.100",
-        _dark: "grey.400",
+        _dark: "grey.700",
     },
     inputPlaceholder: {
         default: "grey.500",
         _dark: "grey.400",
     },
     inputActiveBorder: {
-        default: "grey.900",
-        _dark: "white",
+        default: "grey.300",
+        _dark: "grey.500",
+    },
+    inputBg: {
+        default: "white",
+        _dark: "grey.950",
     },
 
     // Text
@@ -57,8 +61,8 @@ const colorTokens = {
         _dark: "grey.700",
     },
     borderDefault: {
-        default: "grey.200",
-        _dark: "grey.700",
+        default: "grey.100",
+        _dark: "grey.800",
     },
 
     // Accents

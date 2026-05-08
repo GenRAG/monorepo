@@ -5,4 +5,5 @@ export enum Tag {
     Agents = "Agents",
     Chat = "Chat",
     Workflow = "Workflow",
+    Deployments = "Deployments",
 }

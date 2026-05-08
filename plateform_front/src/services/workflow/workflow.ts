@@ -6,7 +6,7 @@ import {
     SaveWorkflowParams,
 } from "types/workflow/workflow";
 
-const workflowTag = (agentId: string) => ({
+export const workflowTag = (agentId: string) => ({
     type: Tag.Workflow as const,
     id: agentId,
 });
@@ -44,6 +44,19 @@ export const extendedWorkflowApi = backendApi.injectEndpoints({
                 workflowTag(agentId),
             ],
         }),
+
+        getWorkflowByVersion: builder.query<
+            WorkflowEntity,
+            WorkflowRouteParams & { version: number }
+        >({
+            query: ({ workspaceId, agentId, version }) => ({
+                url: `/workspaces/${workspaceId}/agents/${agentId}/workflow/version/${version}`,
+                method: "GET",
+            }),
+            providesTags: (_result, _error, { agentId, version }) => [
+                { type: Tag.Workflow, id: `${agentId}-v${version}` },
+            ],
+        }),
     }),
 });
 
@@ -51,4 +64,5 @@ export const {
     useGetActiveWorkflowQuery,
     useUpdateWorkflowMutation,
     useCreateWorkflowMutation,
+    useGetWorkflowByVersionQuery,
 } = extendedWorkflowApi;

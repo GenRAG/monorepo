@@ -11,14 +11,14 @@ import {
 import { Bot, Zap } from "lucide-react";
 import { AGENTS, type AgentEntry } from "pages/Dashboard/data";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
-import { AgentDeploymentStatus } from "types/agent/agent";
+import { AgentStatus } from "types/deployment/deployment";
 
-const STATUS_DOT: Record<AgentDeploymentStatus, string> = {
+const STATUS_DOT: Record<AgentStatus, string> = {
     PRODUCTION: "#12B98C",
     DEVELOPMENT: "#6B7280",
 };
 
-const STATUS_LABEL: Record<AgentDeploymentStatus, string> = {
+const STATUS_LABEL: Record<AgentStatus, string> = {
     PRODUCTION: "Production",
     DEVELOPMENT: "Dev",
 };
@@ -133,8 +133,8 @@ export const AgentsCard = ({
 
     const activeCount = AGENTS.filter(
         (a) =>
-            a.status === AgentDeploymentStatus.PRODUCTION ||
-            a.status === AgentDeploymentStatus.DEVELOPMENT,
+            a.status === AgentStatus.PRODUCTION ||
+            a.status === AgentStatus.DEVELOPMENT,
     ).length;
 
     if (isLoading) {

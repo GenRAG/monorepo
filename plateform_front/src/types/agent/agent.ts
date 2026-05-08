@@ -1,3 +1,14 @@
+import { AgentStatus } from "types/deployment/deployment";
+
+export const VisibilityStatus = {
+    PUBLIC: "public",
+    PRIVATE: "private",
+    API: "api",
+} as const;
+
+export type VisibilityMode =
+    (typeof VisibilityStatus)[keyof typeof VisibilityStatus];
+
 export interface AgentPreview {
     id: string;
     name: string;
@@ -5,7 +16,7 @@ export interface AgentPreview {
     documentsCount?: number;
     updatedAt?: string;
     description?: string;
-    status?: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
+    deploymentStatus?: AgentStatus;
 }
 
 export interface Agent {
@@ -25,6 +36,7 @@ export interface AgentApiResponse {
     createdAt?: string;
     updatedAt?: string;
     documentsCount?: number;
+    deploymentStatus?: AgentStatus;
     _count?: {
         documents?: number;
     };
@@ -42,10 +54,13 @@ export interface CreateAgentParams {
     workspaceId: string;
     name: string;
     description?: string;
+    workflow?: {
+        name?: string;
+        definition: object;
+    };
 }
 
 export interface UpdateAgentParams extends AgentByIdParams {
     name?: string;
     description?: string;
-    status?: "DEVELOPMENT" | "STAGING" | "PRODUCTION";
 }

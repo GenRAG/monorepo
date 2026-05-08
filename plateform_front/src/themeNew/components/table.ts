@@ -38,8 +38,8 @@ const simple = definePartsStyle({
             letterSpacing: "0px",
             textTransform: "none",
             _dark: {
-                borderColor: "grey.500",
-                color: "grey.100",
+                borderColor: "grey.800",
+                color: "grey.300",
             },
             _light: {
                 borderColor: "grey.100",

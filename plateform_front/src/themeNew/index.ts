@@ -44,15 +44,7 @@ import { shadow } from "./foundations/shadow";
 
 import "./index.scss";
 import colorTokens from "themeNew/foundations/colorTokens";
-
-// import Textarea from './components/textarea';
-// import Tooltip from './components/tooltip';
-// import { borderRadius, borders } from './foundations/borders';
-// import fonts from './foundations/fonts';
-// import shadows from './foundations/shadows';
-
-// If you update breakpoints values, make sure to update breakpoints in css too
-// file : src/theme/index.css
+import Textarea from "themeNew/components/textarea";
 
 const config: ThemeConfig = {
     initialColorMode: "dark",
@@ -120,7 +112,7 @@ const overrides = {
         Divider,
         Stepper,
         // Tooltip,
-        // Textarea,
+        Textarea,
     },
 };
 

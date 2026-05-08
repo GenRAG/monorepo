@@ -1,4 +1,4 @@
-import { AgentDeploymentStatus } from "types/agent/agent";
+import { AgentStatus } from "types/deployment/deployment";
 
 export type Period = "24h" | "7j" | "30j";
 
@@ -88,7 +88,7 @@ export const ACTIVITY_DATA: Record<
 export interface AgentEntry {
     initials: string;
     name: string;
-    status: AgentDeploymentStatus;
+    status: AgentStatus;
     version: string;
     conv: string;
     p95: string;

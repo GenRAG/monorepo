@@ -98,12 +98,6 @@ export const VersionHeaderActions = ({
                 </Text>
             </VStack>
             <HStack flexWrap="wrap">
-                <Button size="sm" variant="outline">
-                    Comparer
-                </Button>
-                <Button size="sm" variant="outline">
-                    Dupliquer
-                </Button>
                 {canRestore && (
                     <Button
                         size="sm"

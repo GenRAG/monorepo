@@ -1,82 +1,86 @@
 import {
     Box,
-    Grid,
-    GridItem,
     HStack,
+    Icon,
     Text,
+    Tooltip,
+    VStack,
     useColorModeValue,
 } from "@chakra-ui/react";
-import {
-    Activity,
-    AlertTriangle,
-    Clock,
-    Coins,
-    ExternalLink,
-    MessageSquare,
-    ThumbsUp,
-} from "lucide-react";
-import { LucideIcon } from "lucide-react";
-import { Sparkline } from "components/Deployment/Sparkline";
-import Button from "components/System/Atoms/Button";
+import { Activity } from "lucide-react";
 
-export interface HealthStat {
-    label: string;
-    value: string;
-    sub: string;
-    data: number[];
-    icon: LucideIcon;
+type DayStatus = "operational" | "degraded" | "incident" | "maintenance";
+
+interface DayHealth {
+    date: Date;
+    status: DayStatus;
 }
 
-const HEALTH_STATS: HealthStat[] = [
-    {
-        label: "DISPONIBILITÉ",
-        value: "99.98%",
-        sub: "30 derniers jours",
-        data: [98.1, 99.0, 99.4, 99.6, 99.7, 99.9, 99.98],
-        icon: Activity,
-    },
-    {
-        label: "LATENCE P95",
-        value: "1.2s",
-        sub: "stable",
-        data: [1.7, 1.5, 1.4, 1.3, 1.4, 1.2, 1.2],
-        icon: Clock,
-    },
-    {
-        label: "CONVERSATIONS/24H",
-        value: "1 842",
-        sub: "+12% vs hier",
-        data: [1180, 1390, 1540, 1680, 1740, 1820, 1842],
-        icon: MessageSquare,
-    },
-    {
-        label: "COÛT QUOTIDIEN",
-        value: "€47.20",
-        sub: "0.0023 €/req",
-        data: [34, 38, 41, 44, 45.5, 46.8, 47.2],
-        icon: Coins,
-    },
-    {
-        label: "SATISFACTION",
-        value: "94%",
-        sub: "2 pts",
-        data: [87, 89, 90, 91, 92, 93, 94],
-        icon: ThumbsUp,
-    },
-    {
-        label: "TAUX D'ERREUR",
-        value: "0.2%",
-        sub: "sain",
-        data: [0.9, 0.7, 0.5, 0.4, 0.3, 0.25, 0.2],
-        icon: AlertTriangle,
-    },
-];
+const STATUS_COLOR: Record<DayStatus, string> = {
+    operational: "#12B98C",
+    degraded: "#F59E0B",
+    incident: "#EF4444",
+    maintenance: "#6B7280",
+};
 
-const COLUMNS = 3;
-const rows = [HEALTH_STATS.slice(0, COLUMNS), HEALTH_STATS.slice(COLUMNS)];
+const STATUS_LABEL: Record<DayStatus, string> = {
+    operational: "Opérationnel",
+    degraded: "Dégradé",
+    incident: "Incident",
+    maintenance: "Maintenance",
+};
+
+const DAYS = 90;
+
+const INCIDENT_DAYS = new Set([12, 13, 47, 72]);
+const DEGRADED_DAYS = new Set([5, 11, 14, 46, 48, 71, 73, 80]);
+const MAINTENANCE_DAYS = new Set([30, 60]);
+
+const HEALTH_DATA: DayHealth[] = Array.from({ length: DAYS }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (DAYS - 1 - i));
+
+    let status: DayStatus = "operational";
+    if (INCIDENT_DAYS.has(i)) status = "incident";
+    else if (DEGRADED_DAYS.has(i)) status = "degraded";
+    else if (MAINTENANCE_DAYS.has(i)) status = "maintenance";
+
+    return { date, status };
+});
+
+const uptime = (
+    (HEALTH_DATA.filter((d) => d.status === "operational").length / DAYS) *
+    100
+).toFixed(2);
+
+const incidentCount = HEALTH_DATA.filter((d) => d.status === "incident").length;
+
+const currentStatus = HEALTH_DATA[HEALTH_DATA.length - 1].status;
+
+const formatDate = (date: Date) =>
+    date.toLocaleDateString("fr-FR", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+    });
 
 export const HealthSection = () => {
     const bgContainer = useColorModeValue("white", "grey.900");
+    const textPrimary = useColorModeValue("grey.900", "grey.50");
+
+    const statusColor = STATUS_COLOR[currentStatus];
+    const statusBg =
+        currentStatus === "operational"
+            ? "rgba(18,185,140,0.1)"
+            : currentStatus === "incident"
+              ? "rgba(239,68,68,0.1)"
+              : "rgba(245,158,11,0.1)";
+    const statusBorder =
+        currentStatus === "operational"
+            ? "rgba(18,185,140,0.25)"
+            : currentStatus === "incident"
+              ? "rgba(239,68,68,0.25)"
+              : "rgba(245,158,11,0.25)";
 
     return (
         <Box
@@ -92,83 +96,123 @@ export const HealthSection = () => {
                 borderBottom="0.5px solid"
                 borderColor="borderDefault"
             >
-                <Text
-                    fontWeight="medium"
-                    fontSize="sm"
-                    color="textMuted"
-                    letterSpacing="0.08em"
-                    textTransform="uppercase"
-                >
-                    Santé · 7 derniers jours
-                </Text>
-                <Button
-                    size="sm"
-                    variant="outline"
-                    leftIcon={ExternalLink}
-                    onClick={() => alert("Voir le rapport complet")}
-                >
-                    Voir le rapport
-                </Button>
-            </HStack>
-            {rows.map((row, rowIndex) => (
-                <Grid
-                    key={rowIndex}
-                    templateColumns={`repeat(${COLUMNS}, 1fr)`}
-                    borderBottom={
-                        rowIndex < rows.length - 1 ? "0.5px solid" : undefined
-                    }
-                    borderColor="borderDefault"
-                >
-                    {row.map((stat, colIndex) => (
-                        <GridItem
-                            key={stat.label}
-                            p={4}
-                            borderRight={
-                                colIndex < row.length - 1
-                                    ? "0.5px solid"
-                                    : undefined
-                            }
-                            borderColor="borderDefault"
-                            position="relative"
-                            overflow="hidden"
+                <HStack spacing={3}>
+                    <HStack spacing={2}>
+                        <Icon as={Activity} boxSize={3.5} color="textMuted" />
+                        <Text
+                            fontWeight="600"
+                            fontSize="sm"
+                            color={textPrimary}
                         >
-                            <Text
-                                fontSize="sm"
-                                color="textMuted"
-                                fontWeight="medium"
-                                textTransform="uppercase"
-                                mb={1}
+                            Disponibilité
+                        </Text>
+                    </HStack>
+                    <HStack
+                        spacing={1.5}
+                        px={2}
+                        py={0.5}
+                        borderRadius="full"
+                        bg={statusBg}
+                        border="1px solid"
+                        borderColor={statusBorder}
+                    >
+                        <Box
+                            w="6px"
+                            h="6px"
+                            borderRadius="full"
+                            bg={statusColor}
+                            flexShrink={0}
+                        />
+                        <Text
+                            fontSize="11px"
+                            fontWeight="600"
+                            color={statusColor}
+                            lineHeight="1"
+                        >
+                            {STATUS_LABEL[currentStatus]}
+                        </Text>
+                    </HStack>
+                </HStack>
+            </HStack>
+
+            <VStack p={4} spacing={3} align="stretch">
+                <HStack justify="space-between" align="baseline">
+                    <HStack spacing={1.5} align="baseline">
+                        <Text
+                            fontSize="2xl"
+                            fontWeight="700"
+                            color={textPrimary}
+                            lineHeight="1"
+                        >
+                            {uptime}%
+                        </Text>
+                        <Text fontSize="sm" color="textMuted">
+                            uptime · {DAYS} derniers jours
+                        </Text>
+                    </HStack>
+                    {incidentCount > 0 && (
+                        <Text fontSize="xs" color="textMuted">
+                            {incidentCount} incident
+                            {incidentCount > 1 ? "s" : ""}
+                        </Text>
+                    )}
+                </HStack>
+
+                <Box>
+                    <HStack spacing="2px" align="stretch" h="32px">
+                        {HEALTH_DATA.map((day, i) => (
+                            <Tooltip
+                                key={i}
+                                label={`${formatDate(day.date)} — ${STATUS_LABEL[day.status]}`}
+                                color="white"
+                                bg={STATUS_COLOR[day.status]}
+                                borderRadius="8px"
+                                hasArrow
                             >
-                                {stat.label}
-                            </Text>
-                            <HStack spacing={2}>
                                 <Box
-                                    as={stat.icon}
-                                    size={14}
-                                    color="gray.400"
+                                    flex={1}
+                                    h="100%"
+                                    borderRadius="2px"
+                                    bg={STATUS_COLOR[day.status]}
+                                    opacity={
+                                        day.status === "operational" ? 0.65 : 1
+                                    }
+                                    cursor="default"
+                                    transition="opacity 0.1s"
+                                    _hover={{ opacity: 1 }}
                                 />
-                                <Text fontSize="sm" fontWeight="medium">
-                                    {stat.value}
+                            </Tooltip>
+                        ))}
+                    </HStack>
+                    <HStack justify="space-between" mt={1.5}>
+                        <Text fontSize="11px" color="textMuted">
+                            Il y a {DAYS} jours
+                        </Text>
+                        <Text fontSize="11px" color="textMuted">
+                            Aujourd&apos;hui
+                        </Text>
+                    </HStack>
+                </Box>
+
+                <HStack spacing={4} flexWrap="wrap">
+                    {(Object.keys(STATUS_COLOR) as DayStatus[]).map(
+                        (status) => (
+                            <HStack key={status} spacing={1.5}>
+                                <Box
+                                    w="8px"
+                                    h="8px"
+                                    borderRadius="2px"
+                                    bg={STATUS_COLOR[status]}
+                                    flexShrink={0}
+                                />
+                                <Text fontSize="11px" color="textMuted">
+                                    {STATUS_LABEL[status]}
                                 </Text>
                             </HStack>
-                            <Text fontSize="xs" color="textMuted" mt={1}>
-                                {stat.sub}
-                            </Text>
-                            <Box
-                                position="absolute"
-                                right={0}
-                                bottom={-2}
-                                opacity={0.55}
-                            >
-                                <Sparkline
-                                    data={[...stat.data]}
-                                    id={stat.label}
-                                />
-                            </Box>
-                        </GridItem>
-                    ))}
-                </Grid>
-            ))}
+                        ),
+                    )}
+                </HStack>
+            </VStack>
         </Box>
     );
 };

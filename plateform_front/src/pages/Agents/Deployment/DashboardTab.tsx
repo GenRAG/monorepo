@@ -1,5 +1,4 @@
 import { Box, Skeleton, useColorModeValue, VStack } from "@chakra-ui/react";
-import ChangesSection from "components/Deployment/DashboardTab/ChangesSection";
 import DistributionSection from "components/Deployment/DashboardTab/DistributionSection";
 import HeaderCard from "components/Deployment/DashboardTab/HeaderCard/HeaderCard";
 import HealthSection from "components/Deployment/DashboardTab/HealthSection";
@@ -12,6 +11,7 @@ export const DashboardTab = () => {
         workspaceId: string;
         agentId: string;
     }>();
+
     const { data, isLoading } = useGetCurrentDeploymentQuery({
         workspaceId,
         agentId,
@@ -32,7 +32,7 @@ export const DashboardTab = () => {
                 {data.deploymentStatus === AgentStatus.PRODUCTION && (
                     <>
                         <HealthSection />
-                        <ChangesSection />
+                        {/* <ChangesSection /> */}
                         <DistributionSection />
                     </>
                 )}

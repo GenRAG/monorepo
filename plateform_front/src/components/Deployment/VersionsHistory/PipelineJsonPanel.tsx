@@ -5,9 +5,7 @@ import {
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
-import Button from "components/System/Atoms/Button";
 import { useIsDark } from "hooks/useIsDark";
-import { Copy, Download } from "lucide-react";
 import { useGetWorkflowByVersionQuery } from "services/workflow/workflow";
 
 interface PipelineJsonPanelProps {
@@ -87,16 +85,6 @@ export const PipelineJsonPanel = ({
                         </Box>
                     )}
                 </Text>
-                {pipeline && (
-                    <HStack spacing={2}>
-                        <Button size="sm" variant="outline" leftIcon={Download}>
-                            Télécharger
-                        </Button>
-                        <Button size="sm" variant="outline" leftIcon={Copy}>
-                            Copier
-                        </Button>
-                    </HStack>
-                )}
             </HStack>
             <Box
                 p={5}

@@ -1,5 +1,17 @@
 import useThemedToast from "hooks/useThemedToast";
-import React, { createContext, useState, useEffect, ReactNode } from "react";
+import React, {
+    createContext,
+    useState,
+    useEffect,
+    ReactNode,
+    useRef,
+} from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+    useStartOnboardingMutation,
+    useUpdateOnboardingStepMutation,
+    useCompleteOnboardingMutation,
+} from "services/onboarding/onboarding";
 
 export interface StepData {
     [key: string]: any;
@@ -44,49 +56,74 @@ interface OnboardingContextType {
     isStepCompleted: (stepIndex: number) => boolean;
     canNavigateToStep: (stepIndex: number) => boolean;
     resetOnboarding: () => void;
+    workspaceId: string | null;
+    agentId: string | null;
+    sessionId: string | null;
+    isSessionLoading: boolean;
 }
 
 export const OnboardingContext = createContext<
     OnboardingContextType | undefined
 >(undefined);
 
-const STORAGE_KEY = "onboarding_state";
-
 export const OnboardingProvider: React.FC<{
     children: ReactNode;
     steps: StepConfig[];
 }> = ({ children, steps }) => {
     const toast = useThemedToast();
-    const [state, setState] = useState<OnboardingState>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        console.log(saved);
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                console.error("Failed to parse saved state:", e);
-            }
-        }
-        return {
-            currentStep: 0,
-            completedSteps: [],
-            stepsData: {},
-        };
+    const navigate = useNavigate();
+    const { workspaceId: workspaceIdParam } = useParams<{
+        workspaceId: string;
+    }>();
+
+    const [state, setState] = useState<OnboardingState>({
+        currentStep: 0,
+        completedSteps: [],
+        stepsData: {},
     });
 
+    const [workspaceId, setWorkspaceId] = useState<string | null>(
+        workspaceIdParam ?? null,
+    );
+    const [agentId, setAgentId] = useState<string | null>(null);
+    const [sessionId, setSessionId] = useState<string | null>(null);
+    const [isSessionLoading, setIsSessionLoading] = useState(true);
+    const sessionInitialized = useRef(false);
+
+    const [startOnboarding] = useStartOnboardingMutation();
+    const [updateOnboardingStep] = useUpdateOnboardingStepMutation();
+    const [completeOnboarding] = useCompleteOnboardingMutation();
+
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }, [state]);
+        if (!workspaceIdParam || sessionInitialized.current) return;
+
+        sessionInitialized.current = true;
+        setWorkspaceId(workspaceIdParam);
+
+        startOnboarding({ workspaceId: workspaceIdParam })
+            .unwrap()
+            .then((session) => {
+                setAgentId(session.agentId);
+                setSessionId(session.sessionId);
+                setState((prev) => ({
+                    ...prev,
+                    currentStep: Math.max(prev.currentStep, session.step - 1),
+                }));
+            })
+            .catch((err) => {
+                console.error("Failed to initialize onboarding session:", err);
+            })
+            .finally(() => {
+                setIsSessionLoading(false);
+            });
+    }, [workspaceIdParam, startOnboarding]);
 
     const updateStepData = (stepId: string, data: Partial<StepData>) => {
         setState((prev) => ({
             ...prev,
             stepsData: {
                 ...prev.stepsData,
-                [stepId]: {
-                    ...prev.stepsData[stepId],
-                    ...data,
-                },
+                [stepId]: { ...prev.stepsData[stepId], ...data },
             },
         }));
     };
@@ -98,13 +135,8 @@ export const OnboardingProvider: React.FC<{
     const isStepValid = (stepIndex: number): boolean => {
         const step = steps[stepIndex];
         if (!step.validate) return true;
-
-        const stepData = getStepData(step.id);
-        const result = step.validate(stepData);
-
-        if (result instanceof Promise) {
-            return false;
-        }
+        const result = step.validate(getStepData(step.id));
+        if (result instanceof Promise) return false;
         return result;
     };
 
@@ -114,7 +146,6 @@ export const OnboardingProvider: React.FC<{
 
     const canNavigateToStep = (stepIndex: number): boolean => {
         if (stepIndex === 0) return true;
-
         for (let i = 0; i < stepIndex; i++) {
             if (!isStepCompleted(i)) return false;
         }
@@ -122,12 +153,7 @@ export const OnboardingProvider: React.FC<{
     };
 
     const goToStep = (stepIndex: number) => {
-        if (!canNavigateToStep(stepIndex)) {
-            console.warn(
-                `Cannot navigate to step ${stepIndex}. Previous steps not completed.`,
-            );
-            return;
-        }
+        if (!canNavigateToStep(stepIndex)) return;
         setState((prev) => ({ ...prev, currentStep: stepIndex }));
     };
 
@@ -135,9 +161,9 @@ export const OnboardingProvider: React.FC<{
         const currentStepConfig = steps[state.currentStep];
 
         if (currentStepConfig.validate) {
-            const stepData = getStepData(currentStepConfig.id);
-            const isValid = await currentStepConfig.validate(stepData);
-
+            const isValid = await currentStepConfig.validate(
+                getStepData(currentStepConfig.id),
+            );
             if (!isValid) {
                 toast({
                     title: "An error occurred.",
@@ -151,6 +177,41 @@ export const OnboardingProvider: React.FC<{
             }
         }
 
+        const isLastStep = state.currentStep === steps.length - 1;
+
+        if (workspaceId) {
+            if (isLastStep) {
+                const style = getStepData("compare-intelligence")
+                    .selectedLLM as
+                    | "standard"
+                    | "precise"
+                    | "creative"
+                    | undefined;
+                if (style) {
+                    try {
+                        await completeOnboarding({
+                            workspaceId,
+                            style,
+                        }).unwrap();
+                    } catch (err) {
+                        console.error("Failed to complete onboarding:", err);
+                    }
+                }
+                await navigate("/dashboard");
+                return;
+            }
+
+            // Sync step with backend (fire-and-forget)
+            updateOnboardingStep({
+                workspaceId,
+                step: state.currentStep + 2,
+            })
+                .unwrap()
+                .catch((err) =>
+                    console.error("Failed to sync onboarding step:", err),
+                );
+        }
+
         setState((prev) => {
             const completedSteps = [...prev.completedSteps];
             if (!completedSteps.includes(prev.currentStep)) {
@@ -158,7 +219,7 @@ export const OnboardingProvider: React.FC<{
             }
 
             if (currentStepConfig.onComplete) {
-                currentStepConfig.onComplete(
+                void currentStepConfig.onComplete(
                     prev.stepsData[currentStepConfig.id] || {},
                 );
             }
@@ -179,12 +240,7 @@ export const OnboardingProvider: React.FC<{
     };
 
     const resetOnboarding = () => {
-        setState({
-            currentStep: 0,
-            completedSteps: [],
-            stepsData: {},
-        });
-        localStorage.removeItem(STORAGE_KEY);
+        setState({ currentStep: 0, completedSteps: [], stepsData: {} });
     };
 
     return (
@@ -203,6 +259,10 @@ export const OnboardingProvider: React.FC<{
                 isStepCompleted,
                 canNavigateToStep,
                 resetOnboarding,
+                workspaceId,
+                agentId,
+                sessionId,
+                isSessionLoading,
             }}
         >
             {children}

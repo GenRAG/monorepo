@@ -6,4 +6,5 @@ export enum Tag {
     Chat = "Chat",
     Workflow = "Workflow",
     Deployments = "Deployments",
+    Onboarding = "Onboarding",
 }

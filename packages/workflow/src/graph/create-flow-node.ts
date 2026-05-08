@@ -55,14 +55,15 @@ export function createSettingPlaceholders(
     parentNode: AppNode,
     configInputs: TaskParam[],
     layout: LayoutStrategy = DEFAULT_LAYOUT,
+    startIndex: number = 0,
+    totalCount: number = configInputs.length,
 ): { nodes: AppNode[]; edges: Edge[] } {
     const nodes: AppNode[] = [];
     const edges: Edge[] = [];
-    const total = configInputs.length;
 
     configInputs.forEach((input, index) => {
         const placeholderId = uuidv4();
-        const offset = layout.getSettingOffset(index, total);
+        const offset = layout.getSettingOffset(startIndex + index, totalCount);
 
         nodes.push({
             id: placeholderId,
@@ -184,7 +185,7 @@ export function withAutoSettings(
                     data: { label: input.name },
                 });
             } else {
-                const { nodes: pn, edges: pe } = createSettingPlaceholders(node, [input], layout);
+                const { nodes: pn, edges: pe } = createSettingPlaceholders(node, [input], layout, index, total);
                 extraNodes.push(...pn);
                 extraEdges.push(...pe);
             }

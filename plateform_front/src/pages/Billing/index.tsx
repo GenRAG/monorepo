@@ -187,19 +187,6 @@ export const BillingWorkspace = () => {
         >
             <VStack align="stretch">
                 <Heading
-                    variant="heading-md"
-                    color={colorMode === "dark" ? "grey.400" : "grey.400"}
-                    fontWeight="md"
-                    fontSize={{ base: "sm", md: "md" }}
-                >
-                    {new Date().toLocaleDateString("en-US", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                    })}
-                </Heading>
-                <Heading
                     variant="heading-3xl"
                     color={textPrimary}
                     fontWeight="semibold"
@@ -860,7 +847,6 @@ import {
     useElements,
     Elements,
 } from "@stripe/react-stripe-js";
-import { useUserInfo } from "hooks/useUserInfo";
 
 const PaymentMethodsTab = ({
     isDark,

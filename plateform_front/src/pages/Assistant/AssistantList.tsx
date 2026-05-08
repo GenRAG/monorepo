@@ -44,20 +44,6 @@ export const AssistantsList = () => {
         <Stack p={6} gap={8} overflow="auto" maxH="100vh">
             <VStack align="stretch" spacing={2}>
                 <Heading
-                    variant="heading-md"
-                    color={colorMode === "dark" ? "grey.400" : "grey.400"}
-                    fontWeight="md"
-                    fontSize={{ base: "sm", md: "md" }}
-                >
-                    {new Date().toLocaleDateString("en-US", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                    })}
-                </Heading>
-
-                <Heading
                     variant="heading-3xl"
                     color={textPrimary}
                     fontWeight="semibold"

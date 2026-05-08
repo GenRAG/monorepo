@@ -1,16 +1,13 @@
 import React from "react";
 import {
-    Badge,
     Box,
     Button,
     HStack,
-    IconButton,
     Text,
     useColorModeValue,
-    useToken,
     VStack,
 } from "@chakra-ui/react";
-import { FolderTree, Upload } from "lucide-react";
+import { CloudUpload, Upload } from "lucide-react";
 
 interface DocumentEmptyStateProps {
     folderId: string | null;
@@ -20,98 +17,102 @@ interface DocumentEmptyStateProps {
     isMobile?: boolean;
 }
 
+const FORMAT_BADGES = ["PDF", "DOCX", "TXT", "MD"];
+
 export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
     folderId,
     folderName,
     onUploadClick,
-    onOpenFolderDrawer,
     isMobile = false,
 }) => {
-    const uploadIconColorToken = useColorModeValue("green.500", "green.400");
-    const [uploadIconColor] = useToken("colors", [uploadIconColorToken]);
+    const bg = useColorModeValue("white", "grey.950");
+    const textColor = useColorModeValue("grey.900", "white");
+    const mutedColor = useColorModeValue("grey.500", "grey.400");
+    const badgeBg = useColorModeValue("grey.100", "grey.800");
+    const badgeColor = useColorModeValue("grey.600", "grey.300");
+    const labelColor = useColorModeValue("grey.400", "grey.500");
+    const borderColor = useColorModeValue("grey.200", "grey.700");
 
     return (
         <VStack
-            h="100%"
             justify="center"
             align="center"
-            spacing={3}
-            w="100%"
-            borderRadius="8px"
-            border="1px solid"
-            borderColor={useColorModeValue("grey.200", "grey.700")}
-            px={{ base: 4, md: 8 }}
+            spacing={5}
+            borderRadius="12px"
+            border="2px dashed"
+            borderColor={borderColor}
+            bg={bg}
+            px={{ base: 6, md: 10 }}
+            py={12}
             textAlign="center"
-            bg={useColorModeValue("white", "grey.975")}
         >
-            <VStack spacing={1}>
-                {onOpenFolderDrawer && (
-                    <IconButton
-                        aria-label="Open folders"
-                        icon={<FolderTree size={20} />}
-                        size="sm"
-                        variant="secondary"
-                        onClick={onOpenFolderDrawer}
-                    />
-                )}
-                <Box
-                    w="60px"
-                    h="60px"
-                    borderRadius="full"
-                    bg={useColorModeValue(
-                        "rgba(152, 255, 216, 0.38)",
-                        "rgba(152, 255, 216, 0.1)",
-                    )}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                >
-                    <Upload size={28} color={uploadIconColor} />
-                </Box>
-            </VStack>
+            <Box
+                w="64px"
+                h="64px"
+                borderRadius="16px"
+                bg="green.600"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+            >
+                <CloudUpload size={28} color="white" />
+            </Box>
 
-            <VStack spacing={2}>
+            <VStack spacing={2} maxW="360px">
                 <Text
-                    fontSize={{ base: "lg", md: "xl" }}
-                    fontWeight="semibold"
-                    color="textPrimary"
+                    fontSize="xl"
+                    fontWeight="700"
+                    color={textColor}
+                    lineHeight="1.2"
                 >
                     {folderId
-                        ? `No documents in ${folderName}`
-                        : "No documents yet"}
+                        ? `Aucun document dans ${folderName ?? "ce dossier"}`
+                        : "Aucun document indexé"}
                 </Text>
-                <Text
-                    fontSize="sm"
-                    color="textSecondary"
-                    maxW={{ base: "100%", md: "400px" }}
-                >
-                    Téléversez vos documents pour commencer. Votre assistant IA
-                    utilisera ces documents pour fournir des réponses précises
-                    et contextualisées à vos questions.
+                <Text fontSize="sm" color={mutedColor} lineHeight="1.6">
+                    Glissez-déposez vos fichiers ici, ou téléversez-les
+                    manuellement. Votre agent utilisera ces documents comme base
+                    de connaissance pour répondre aux questions.
                 </Text>
             </VStack>
 
             <Button
-                leftIcon={<Upload size={18} />}
-                colorScheme="blue"
-                variant="secondary"
-                size={isMobile ? "md" : "lg"}
+                leftIcon={<Upload size={15} />}
                 onClick={onUploadClick}
+                size={isMobile ? "md" : "md"}
+                variant="primary"
             >
-                Ajouter vos premiers documents
+                Téléverser vos premiers documents
             </Button>
 
-            <Box mt={4}>
-                <Text fontSize="xs" color="textSecondary" mb={2}>
-                    Formats pris en charge
+            <VStack spacing={2}>
+                <Text
+                    fontSize="10px"
+                    fontWeight="700"
+                    letterSpacing="0.12em"
+                    textTransform="uppercase"
+                    color={labelColor}
+                >
+                    Formats
                 </Text>
-                <HStack spacing={2} flexWrap="wrap" justify="center">
-                    <Badge colorScheme="gray">PDF</Badge>
-                    <Badge colorScheme="gray">DOCX</Badge>
-                    <Badge colorScheme="gray">TXT</Badge>
-                    <Badge colorScheme="gray">MD</Badge>
+                <HStack spacing={2}>
+                    {FORMAT_BADGES.map((fmt) => (
+                        <Box
+                            key={fmt}
+                            bg={badgeBg}
+                            color={badgeColor}
+                            fontSize="11px"
+                            fontWeight="600"
+                            px={3}
+                            py="4px"
+                            borderRadius="full"
+                        >
+                            {fmt}
+                        </Box>
+                    ))}
                 </HStack>
-            </Box>
+            </VStack>
         </VStack>
     );
 };

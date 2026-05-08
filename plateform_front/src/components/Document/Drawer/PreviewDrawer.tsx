@@ -10,16 +10,13 @@ import {
     HStack,
     Text,
     Box,
-    Divider,
-    Button,
     useColorModeValue,
     Grid,
     GridItem,
 } from "@chakra-ui/react";
-import { Download, File, Clock, Database } from "lucide-react";
+import { File, Clock, Database } from "lucide-react";
 import Banner from "components/System/Atoms/Banner";
 import { DocumentStatusBadge } from "components/System/Atoms/DocumentStatusBadge";
-import { PreviewInfoRow } from "../PreviewInfoRow";
 import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { useGetDocumentUrlQuery } from "services/document/document";
 import { useParams } from "react-router-dom";
@@ -29,7 +26,6 @@ import {
     getFileTypeLabel,
     getPreviewUrl,
 } from "utils/documentFormatters";
-import useDownloadFile from "hooks/useDownloadFile";
 
 interface PreviewDrawerProps {
     isOpen: boolean;
@@ -62,11 +58,6 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({
         },
         { skip: !shouldFetchUrl },
     );
-
-    const { download } = useDownloadFile({
-        url: documentUrl?.url ?? "",
-        filename: document?.name ?? "",
-    });
 
     if (!document) return null;
 
@@ -270,7 +261,6 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({
                             </Box>
                         </VStack>
 
-                        <Divider />
                         <VStack align="stretch" spacing={4}>
                             <Text
                                 fontWeight="semibold"
@@ -348,11 +338,12 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({
 
                             <Box
                                 h={{ base: "250px", md: "400px" }}
-                                bg="surfaceSubtle"
+                                bg={bgInformations}
                                 borderRadius="12px"
                                 border="1px solid"
                                 borderColor="borderDefault"
                                 overflow="hidden"
+                                p={3}
                             >
                                 {isDocumentUrlLoading && (
                                     <VStack
@@ -375,6 +366,7 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({
                                         w="100%"
                                         h="100%"
                                         border="0"
+                                        borderRadius="8px"
                                     />
                                 )}
 

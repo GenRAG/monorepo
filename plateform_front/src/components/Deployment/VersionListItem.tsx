@@ -19,7 +19,6 @@ interface VersionListItemProps {
     badge: EnvBadge;
     description: string;
     date: string;
-    author: string;
     isSelected: boolean;
     onClick: () => void;
 }
@@ -30,7 +29,6 @@ export const VersionListItem = ({
     badge,
     description,
     date,
-    author,
     isSelected,
     onClick,
 }: VersionListItemProps) => {
@@ -40,7 +38,6 @@ export const VersionListItem = ({
     const idColor = useColorModeValue("grey.900", "grey.50");
     const dateColor = useColorModeValue("grey.300", "grey.600");
     const descriptionColor = useColorModeValue("grey.500", "grey.400");
-    const authorColor = useColorModeValue("grey.300", "grey.600");
 
     return (
         <Box
@@ -97,10 +94,6 @@ export const VersionListItem = ({
 
                 <Text fontSize="sm" color={descriptionColor} noOfLines={1}>
                     {description}
-                </Text>
-
-                <Text fontSize="xs" color={authorColor}>
-                    {author}
                 </Text>
             </VStack>
         </Box>

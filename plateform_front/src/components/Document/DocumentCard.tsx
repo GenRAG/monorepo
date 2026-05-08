@@ -1,19 +1,11 @@
 import React from "react";
-import {
-    Box,
-    HStack,
-    Icon,
-    Text,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Copy } from "lucide-react";
 import { DocumentStatusBadge } from "components/System/Atoms/DocumentStatusBadge";
 import { DocumentEntity } from "types/document/document";
 import {
     formatFileSize,
-    formatDate,
-    getFileTypeLabel,
-    getFileIcon,
+    getFileTypeBadgeConfig,
 } from "utils/documentFormatters";
 import { DocumentActionsMenu } from "./DocumentActionsMenu";
 
@@ -32,75 +24,86 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     onRetry,
     onDownload,
 }) => {
-    const FileIconComponent = getFileIcon(document.mimeType);
+    const borderColor = useColorModeValue("grey.100", "grey.800");
+    const cardBg = useColorModeValue("white", "grey.950");
+    const hoverBg = useColorModeValue("grey.50", "grey.900");
+    const thumbnailBg = useColorModeValue("grey.100", "grey.850");
     const textColor = useColorModeValue("grey.800", "grey.100");
-    const borderColor = useColorModeValue("grey.200", "grey.600");
-    const bgColor = useColorModeValue("white", "grey.800");
-    const hoverBg = useColorModeValue("grey.50", "grey.700");
+    const mutedColor = useColorModeValue("grey.400", "grey.500");
+    const iconColor = useColorModeValue("grey.300", "grey.600");
+
+    const badge = getFileTypeBadgeConfig(document.mimeType);
 
     return (
         <Box
-            p={4}
-            borderRadius="12px"
+            bg={cardBg}
             border="1px solid"
             borderColor={borderColor}
-            bg={bgColor}
+            borderRadius="12px"
+            overflow="hidden"
             cursor="pointer"
             onClick={onPreview}
             _hover={{ bg: hoverBg }}
-            transition="background 0.2s"
+            transition="background 0.15s"
         >
-            <HStack justify="space-between" align="flex-start" spacing={3}>
-                <HStack spacing={3} flex={1} minW={0}>
-                    <Icon
-                        as={FileIconComponent as React.ElementType}
-                        color={textColor}
-                        fontSize="20px"
-                        flexShrink={0}
+            <Box
+                bg={thumbnailBg}
+                h="140px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                position="relative"
+            >
+                <Box
+                    as="span"
+                    bg={badge.bg}
+                    color={badge.color}
+                    fontSize="13px"
+                    fontWeight="700"
+                    letterSpacing="0.06em"
+                    px={3}
+                    py="6px"
+                    borderRadius="6px"
+                >
+                    {badge.label}
+                </Box>
+                <Box position="absolute" top={2} right={2} color={iconColor}>
+                    <Copy size={13} />
+                </Box>
+            </Box>
+
+            <Box px={3} pt={2} pb={3}>
+                <Text
+                    fontSize="13px"
+                    fontWeight="500"
+                    color={textColor}
+                    noOfLines={2}
+                    lineHeight="1.4"
+                    mb={2}
+                >
+                    {document.name}
+                </Text>
+
+                <HStack justify="space-between" align="center">
+                    <DocumentStatusBadge
+                        status={document.status}
+                        retryCount={document.retryCount}
                     />
-                    <VStack align="stretch" spacing={0} flex={1} minW={0}>
-                        <Text
-                            fontWeight="medium"
-                            fontSize="sm"
-                            color={textColor}
-                            noOfLines={2}
-                        >
-                            {document.name}
+                    <HStack spacing={1} align="center">
+                        <Text fontSize="11px" color={mutedColor}>
+                            {formatFileSize(document.size)}
                         </Text>
-                        <HStack spacing={2} mt={1} flexWrap="wrap">
-                            <Text fontSize="xs" color="grey.500">
-                                {getFileTypeLabel(document.mimeType)}
-                            </Text>
-                            <Text fontSize="xs" color="grey.500">
-                                •
-                            </Text>
-                            <Text fontSize="xs" color="grey.500">
-                                {formatFileSize(document.size)}
-                            </Text>
-                            <Text fontSize="xs" color="grey.500">
-                                •
-                            </Text>
-                            <Text fontSize="xs" color="grey.500">
-                                {formatDate(document.createdAt)}
-                            </Text>
-                        </HStack>
-                        <Box mt={2}>
-                            <DocumentStatusBadge
+                        <Box onClick={(e) => e.stopPropagation()}>
+                            <DocumentActionsMenu
                                 status={document.status}
-                                retryCount={document.retryCount}
+                                onDelete={onDelete}
+                                onRetry={onRetry}
+                                onDownload={onDownload}
                             />
                         </Box>
-                    </VStack>
+                    </HStack>
                 </HStack>
-                <Box onClick={(e) => e.stopPropagation()}>
-                    <DocumentActionsMenu
-                        status={document.status}
-                        onDelete={onDelete}
-                        onRetry={onRetry}
-                        onDownload={onDownload}
-                    />
-                </Box>
-            </HStack>
+            </Box>
         </Box>
     );
 };

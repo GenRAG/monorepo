@@ -83,6 +83,7 @@ const Button = React.forwardRef<HTMLButtonElement, GenragButtonProps>(
                 variant={variant}
                 leftIcon={iconLeft}
                 rightIcon={iconRight}
+                cursor="pointer"
                 {...props}
                 ref={ref}
                 onClick={(e) => {

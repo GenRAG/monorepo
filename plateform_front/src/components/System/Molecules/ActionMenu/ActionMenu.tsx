@@ -33,12 +33,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
     trigger,
 }) => {
     const tooltipBg = useColorModeValue("grey.700", "green.600");
-    const bg = useColorModeValue("white", "grey.800");
+    const bg = useColorModeValue("white", "grey.900");
 
     const visibleItems = items.filter((item) => !item.isHidden);
 
     const menuButton = trigger ? (
         <MenuButton
+            cursor="pointer"
             as={Box}
             display="inline-block"
             onClick={(e: React.MouseEvent) => e.stopPropagation()}

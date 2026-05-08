@@ -65,6 +65,8 @@ export const ActivityChart = ({
                 borderColor: "#12B98C",
                 borderWidth: 2,
                 pointRadius: 0,
+                pointStyle: "circle",
+                pointBackgroundColor: "#12B98C",
                 pointHoverRadius: 5,
                 pointHoverBackgroundColor: "#12B98C",
                 pointHoverBorderColor: isDark ? "#2E2E2E" : "#fff",
@@ -91,6 +93,10 @@ export const ActivityChart = ({
         plugins: {
             legend: { display: false },
             tooltip: {
+                usePointStyle: true,
+                displayColors: true,
+                boxWidth: 6,
+                boxHeight: 6,
                 backgroundColor: isDark ? "#262626" : "#fff",
                 titleColor: isDark ? "#F6F6F6" : "#262626",
                 bodyColor: isDark ? "#8F8F8F" : "#6D6D6D",
@@ -100,6 +106,10 @@ export const ActivityChart = ({
                 callbacks: {
                     label: (ctx) =>
                         ` ${(ctx.parsed.y ?? 0).toLocaleString("fr-FR")} conversations`,
+                    labelPointStyle: () => ({
+                        pointStyle: "circle",
+                        rotation: 0,
+                    }),
                 },
             },
         },

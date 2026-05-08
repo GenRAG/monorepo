@@ -1,7 +1,7 @@
 import React from "react";
 import {
+    Badge,
     HStack,
-    Icon,
     Td,
     Text,
     Tr,
@@ -13,7 +13,7 @@ import {
     formatFileSize,
     formatDate,
     getFileTypeLabel,
-    getFileIcon,
+    getFileTypeBadgeConfig,
 } from "utils/documentFormatters";
 import { DocumentActionsMenu } from "./DocumentActionsMenu";
 
@@ -32,35 +32,40 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
     onRetry,
     onDownload,
 }) => {
-    const FileIcon = getFileIcon(document.mimeType);
+    const hoverBg = useColorModeValue("grey.50", "grey.800");
     const textColor = useColorModeValue("grey.800", "grey.100");
-    const hoverColor = useColorModeValue("grey.50", "grey.700");
+    const mutedColor = useColorModeValue("grey.500", "grey.400");
+    const badge = getFileTypeBadgeConfig(document.mimeType);
 
     return (
-        <Tr
-            _hover={{ bg: hoverColor }}
-            onClick={onPreview}
-            style={{ cursor: "pointer" }}
-        >
+        <Tr _hover={{ bg: hoverBg }} onClick={onPreview} cursor="pointer">
             <Td>
                 <HStack spacing={3}>
-                    <Icon
-                        as={FileIcon as React.ElementType}
+                    <Badge
+                        colorScheme={badge.bg}
+                        variant="subtle"
+                        fontSize="xs"
+                        borderRadius="8px"
+                    >
+                        {badge.label}
+                    </Badge>
+                    <Text
+                        fontWeight="500"
+                        fontSize="sm"
                         color={textColor}
-                        fontSize="18px"
-                    />
-                    <Text fontWeight="medium" fontSize="sm" color={textColor}>
+                        noOfLines={1}
+                    >
                         {document.name}
                     </Text>
                 </HStack>
             </Td>
             <Td>
-                <Text fontSize="sm" color={textColor}>
+                <Text fontSize="sm" color={mutedColor}>
                     {getFileTypeLabel(document.mimeType)}
                 </Text>
             </Td>
             <Td>
-                <Text fontSize="sm" color={textColor}>
+                <Text fontSize="sm" color={mutedColor}>
                     {formatFileSize(document.size)}
                 </Text>
             </Td>
@@ -71,17 +76,19 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
                 />
             </Td>
             <Td>
-                <Text fontSize="sm" color={textColor}>
+                <Text fontSize="sm" color={mutedColor}>
                     {formatDate(document.createdAt)}
                 </Text>
             </Td>
             <Td onClick={(e) => e.stopPropagation()}>
-                <DocumentActionsMenu
-                    status={document.status}
-                    onDelete={onDelete}
-                    onRetry={onRetry}
-                    onDownload={onDownload}
-                />
+                <HStack spacing={1} justify="flex-end">
+                    <DocumentActionsMenu
+                        status={document.status}
+                        onDelete={onDelete}
+                        onRetry={onRetry}
+                        onDownload={onDownload}
+                    />
+                </HStack>
             </Td>
         </Tr>
     );

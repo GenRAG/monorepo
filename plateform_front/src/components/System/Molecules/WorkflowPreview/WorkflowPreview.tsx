@@ -57,7 +57,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
     border: _border = true,
 }: WorkflowPreviewProps) => {
     const { colorMode } = useColorMode();
-    const borderColor = useColorModeValue("grey.100", "grey.700");
+    const borderColor = useColorModeValue("grey.50", "grey.700");
 
     const [gridLineLight, gridLineDark] = useToken("colors", [
         "grey.50",
@@ -77,6 +77,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
             border={_border ? "1px solid" : undefined}
             borderColor={borderColor}
             overflow="hidden"
+            bg={useColorModeValue("white", "grey.900")}
         >
             <WorkflowCanvas
                 nodeComponent={NodeComponent as NodeComponentType}

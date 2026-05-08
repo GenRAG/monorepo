@@ -1,22 +1,21 @@
-import { VStack, Box } from "@chakra-ui/react";
+import { VStack, Box, useColorModeValue } from "@chakra-ui/react";
 import { useState } from "react";
-import { useIsDark } from "hooks/useIsDark";
 import { motion, AnimatePresence } from "framer-motion";
 import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
 import { DashboardTab } from "./DashboardTab";
 import { VersionsHistory } from "./VersionsHistory";
-import { AccessControl } from "./AccessControl";
-import { Settings } from "./Settings";
 import {
     DeploymentTab,
     DeploymentTabs,
 } from "components/Deployment/DeploymentTabs";
 
 const DeploymentWorkspace = () => {
-    const isDark = useIsDark();
     const [activeTab, setActiveTab] = useState<DeploymentTab>(
         DeploymentTab.Dashboard,
     );
+
+    const bgColor = useColorModeValue("white", "grey.975");
+    const borderColor = useColorModeValue("grey.100", "grey.800");
 
     const renderContent = () => {
         switch (activeTab) {
@@ -24,10 +23,6 @@ const DeploymentWorkspace = () => {
                 return <DashboardTab />;
             case DeploymentTab.Versions:
                 return <VersionsHistory />;
-            case DeploymentTab.Access:
-                return <AccessControl />;
-            case DeploymentTab.Settings:
-                return <Settings />;
         }
     };
 
@@ -37,7 +32,7 @@ const DeploymentWorkspace = () => {
             align="stretch"
             spacing={0}
             overflow="hidden"
-            bg={isDark ? "grey.975" : "grey.50"}
+            bg={bgColor}
         >
             <WorkspaceHeader
                 title="Déploiement"
@@ -45,9 +40,9 @@ const DeploymentWorkspace = () => {
             />
 
             <Box
-                bg={isDark ? "grey.975" : "white"}
+                bg={bgColor}
                 borderBottom="1px solid"
-                borderBottomColor={isDark ? "grey.800" : "grey.100"}
+                borderBottomColor={borderColor}
                 flexShrink={0}
             >
                 <DeploymentTabs activeTab={activeTab} onChange={setActiveTab} />

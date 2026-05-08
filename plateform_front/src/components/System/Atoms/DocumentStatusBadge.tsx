@@ -1,11 +1,5 @@
 import React from "react";
-import {
-    Badge,
-    HStack,
-    Spinner,
-    Text,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Badge, Box, HStack, Spinner } from "@chakra-ui/react";
 import { DocumentEntity } from "types/document/document";
 
 interface DocumentStatusBadgeProps {
@@ -14,38 +8,27 @@ interface DocumentStatusBadgeProps {
 }
 
 const STATUS_CONFIG = {
-    uploaded: { label: "Téléversé", colorScheme: "gray", spinner: false },
-    processing: {
-        label: "En traitement",
-        colorScheme: "orange",
-        spinner: true,
-    },
-    indexed: { label: "Prêt", colorScheme: "green", spinner: false },
-    failed: { label: "Échec", colorScheme: "red", spinner: false },
+    UPLOADED: { label: "TÉLÉVERSÉ", bg: "grey", spinner: false },
+    PROCESSING: { label: "EN COURS", bg: "orange", spinner: true },
+    INDEXED: { label: "INDEXÉ", bg: "green", spinner: false },
+    FAILED: { label: "ÉCHEC", bg: "red", spinner: false },
 } as const;
 
 export const DocumentStatusBadge: React.FC<DocumentStatusBadgeProps> = ({
     status,
     retryCount,
 }) => {
-    const textColor = useColorModeValue("grey.800", "grey.100");
-    const normalized = String(
-        status,
-    ).toLowerCase() as keyof typeof STATUS_CONFIG;
-    const config = STATUS_CONFIG[normalized] ?? STATUS_CONFIG.uploaded;
-
+    const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.UPLOADED;
     const label =
         config.spinner && retryCount && retryCount > 0
             ? `${config.label} (${retryCount}/5)`
             : config.label;
 
     return (
-        <Badge colorScheme={config.colorScheme} fontSize="xs" px={2} py={1}>
+        <Badge colorScheme={config.bg} size="sm">
             <HStack spacing={1}>
-                {config.spinner && <Spinner size="xs" />}
-                <Text fontSize="xs" color={textColor}>
-                    {label}
-                </Text>
+                {config.spinner && <Spinner size="xs" color="white" />}
+                <span>{label}</span>
             </HStack>
         </Badge>
     );

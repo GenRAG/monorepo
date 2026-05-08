@@ -61,7 +61,7 @@ export const PipelineJsonPanel = ({
     const jsonBgColor = useColorModeValue("grey.25", "grey.975");
     const fallbackTextColor = useColorModeValue("grey.300", "grey.600");
 
-    const pipeline = workflow?.definition ?? null;
+    const pipeline = workflow?.definition.blocks ?? null;
 
     return (
         <Box

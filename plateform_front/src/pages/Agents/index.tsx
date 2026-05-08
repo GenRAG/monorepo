@@ -12,15 +12,15 @@ import {
     useColorMode,
     useColorModeValue,
     VStack,
-    Button,
 } from "@chakra-ui/react";
 import { ActionMenu } from "components/System/Molecules/ActionMenu/ActionMenu";
-import { ArrowUpDown, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AgentCard } from "pages/Agents/AgentCard";
 import { CreateAgentModal } from "pages/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
+import Button from "components/System/Atoms/Button";
 
 export const AgentsList = () => {
     const { workspaceId = "default" } = useParams<{ workspaceId: string }>();
@@ -37,10 +37,8 @@ export const AgentsList = () => {
     const textPrimary = useColorModeValue("grey.900", "grey.50");
     const textSecondary = useColorModeValue("grey.500", "grey.400");
     const borderColor = useColorModeValue("grey.200", "grey.700");
-    const searchBarBg = useColorModeValue("grey.50", "grey.800");
     const toolbarBorder = useColorModeValue("grey.100", "grey.400");
     const filterBtnColor = useColorModeValue("grey.600", "grey.200");
-    const categoryPillBg = useColorModeValue("grey.100", "#1f1f1d");
 
     const sortLabel: Record<typeof sortBy, string> = {
         lastEdited: "Dernière modification",
@@ -71,19 +69,6 @@ export const AgentsList = () => {
         <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto">
             <VStack align="stretch">
                 <Heading
-                    variant="heading-md"
-                    color="grey.400"
-                    fontWeight="md"
-                    fontSize={{ base: "sm", md: "md" }}
-                >
-                    {new Date().toLocaleDateString("fr-FR", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                    })}
-                </Heading>
-                <Heading
                     variant="heading-3xl"
                     color={textPrimary}
                     fontWeight="semibold"
@@ -106,12 +91,6 @@ export const AgentsList = () => {
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
                         placeholder="Rechercher des agents..."
-                        bg={searchBarBg}
-                        fontSize="13px"
-                        borderRadius="4px"
-                        borderColor="transparent"
-                        color={textPrimary}
-                        _placeholder={{ color: textSecondary }}
                     />
                 </InputGroup>
 
@@ -137,20 +116,7 @@ export const AgentsList = () => {
                         },
                     ]}
                     trigger={
-                        <Button
-                            size="md"
-                            variant="ghost"
-                            rightIcon={<ArrowUpDown size={12} />}
-                            color={filterBtnColor}
-                            fontWeight="400"
-                            fontSize="13px"
-                            bg={searchBarBg}
-                            borderRadius="4px"
-                            border="0.5px solid"
-                            borderColor="transparent"
-                            px={3}
-                            _hover={{ bg: categoryPillBg }}
-                        >
+                        <Button variant="secondary" color={filterBtnColor}>
                             {sortLabel[sortBy]}
                         </Button>
                     }
@@ -208,12 +174,6 @@ export const AgentsList = () => {
                             workspaceId={workspaceId}
                         />
                     ))}
-
-                    {visibleAgents.length === 0 && (
-                        <Text color={textSecondary} fontSize="13px">
-                            Aucun agent ne correspond à votre recherche.
-                        </Text>
-                    )}
                 </SimpleGrid>
             )}
 

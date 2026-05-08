@@ -1,6 +1,8 @@
+import { VersionStatus } from "types/deployment/deployment";
+
 export interface Version {
     id: string;
-    env: "staging" | "prod" | "archived";
+    env: VersionStatus;
     description: string;
     date: string;
     author: string;
@@ -15,12 +17,6 @@ export const ENV_BADGE: Record<
     Version["env"],
     { label: string; color: string; bg: string; borderToken: string }
 > = {
-    staging: {
-        label: "STAGING",
-        color: "orange",
-        bg: "#2A1800",
-        borderToken: "#FF8C00",
-    },
     prod: {
         label: "PROD",
         color: "green",
@@ -38,7 +34,7 @@ export const ENV_BADGE: Record<
 export const VERSIONS: Version[] = [
     {
         id: "v12",
-        env: "staging",
+        env: "archived",
         description: "Mise à jour modèle et prompt système",
         date: "12 fév 2026",
         author: "Q. Bollore",

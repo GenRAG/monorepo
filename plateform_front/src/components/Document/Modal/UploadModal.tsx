@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import {
     Modal,
     ModalOverlay,
@@ -12,15 +12,15 @@ import {
     HStack,
     Text,
     Box,
-    Progress,
-    List,
-    ListItem,
+    Spinner,
     useColorModeValue,
-    useToken,
 } from "@chakra-ui/react";
-import { CheckCircle, FileWarning, Upload, File } from "lucide-react";
+import { Check, CheckCircle, CloudUpload, X } from "lucide-react";
 import { UploadProgress } from "pages/Agents/Documents/types";
-import { formatFileSize } from "utils/documentFormatters";
+import {
+    formatFileSize,
+    getFileTypeBadgeConfig,
+} from "utils/documentFormatters";
 import { useUploadDocumentMutation } from "services/document/document";
 import { DocumentEntity, DocumentStatus } from "types/document/document";
 import useThemedToast from "hooks/useThemedToast";
@@ -46,13 +46,20 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         useUploadDocumentMutation();
     const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
     const [isDragging, setIsDragging] = useState(false);
+    const [isDone, setIsDone] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
     const toast = useThemedToast();
-    const uploadIconColorToken = useColorModeValue("green.500", "green.400");
-    const [uploadIconColor] = useToken("colors", [uploadIconColorToken]);
-    const bgIconContainer = useColorModeValue(
-        "rgba(152, 255, 216, 0.38)",
-        "rgba(152, 255, 216, 0.1)",
-    );
+
+    const borderColor = useColorModeValue("grey.200", "grey.700");
+    const dragBorderColor = useColorModeValue("green.400", "green.500");
+    const dropBg = useColorModeValue("grey.50", "grey.900");
+    const dragBg = useColorModeValue("green.50", "rgba(6,78,59,0.15)");
+    const mutedColor = useColorModeValue("grey.500", "grey.400");
+    const textColor = useColorModeValue("grey.800", "grey.100");
+    const fileBg = useColorModeValue("grey.50", "grey.900");
+    const fileItemBg = useColorModeValue("white", "grey.850");
+    const fileItemBorder = useColorModeValue("grey.150", "grey.750");
+    const trackColor = useColorModeValue("grey.200", "grey.700");
 
     const acceptedTypes = useMemo(
         () => [
@@ -68,8 +75,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     const handleFileSelect = useCallback(
         (files: FileList | null) => {
             if (!files) return;
-
-            const validFiles = Array.from(files).filter((file) => {
+            const valid = Array.from(files).filter((file) => {
                 if (!acceptedTypes.includes(file.type)) {
                     toast({
                         title: `${file.name} n'est pas pris en charge`,
@@ -82,8 +88,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 }
                 return true;
             });
-
-            setSelectedFiles((prev) => [...prev, ...validFiles]);
+            setSelectedFiles((prev) => [...prev, ...valid]);
         },
         [toast, acceptedTypes],
     );
@@ -107,10 +112,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         setIsDragging(false);
     }, []);
 
-    const removeFile = (index: number) => {
-        setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-    };
-
     const uploadOneFile = async (
         file: File,
         documentId: string,
@@ -130,17 +131,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 file,
             }).unwrap();
 
-            const document: DocumentEntity = {
-                id: uploaded.id,
-                agentId,
-                name: file.name,
-                mimeType: file.type,
-                size: file.size,
-                status: DocumentStatus.UPLOADED,
-                createdAt: new Date(uploaded.createdAt ?? Date.now()),
-                storageKey: uploaded.storageKey,
-            };
-
             setUploadProgress((prev) =>
                 prev.map((p) =>
                     p.documentId === documentId
@@ -153,8 +143,17 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 ),
             );
 
-            return document;
-        } catch (error) {
+            return {
+                id: uploaded.id,
+                agentId,
+                name: file.name,
+                mimeType: file.type,
+                size: file.size,
+                status: DocumentStatus.UPLOADED,
+                createdAt: new Date(uploaded.createdAt ?? Date.now()),
+                storageKey: uploaded.storageKey,
+            };
+        } catch {
             setUploadProgress((prev) =>
                 prev.map((p) =>
                     p.documentId === documentId
@@ -166,319 +165,338 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                         : p,
                 ),
             );
-            throw error;
+            throw new Error("Upload failed");
         }
     };
 
     const handleUpload = async () => {
         if (selectedFiles.length === 0) return;
+        if (!workspaceId || !agentId) return;
 
-        if (!workspaceId || !agentId) {
-            toast({
-                title: "Paramètres de route manquants",
-                description:
-                    "L'identifiant du workspace ou de l'agent est manquant.",
-                status: "error",
-                duration: 4000,
-            });
-            return;
-        }
-
-        const initialProgress: UploadProgress[] = selectedFiles.map((file) => ({
+        const initial: UploadProgress[] = selectedFiles.map((file) => ({
             documentId: `doc-${Date.now()}-${Math.random()}`,
             fileName: file.name,
             progress: 0,
             status: DocumentStatus.PROCESSING,
         }));
-        setUploadProgress(initialProgress);
+        setUploadProgress(initial);
+        setSelectedFiles([]);
 
         try {
-            const uploadedDocuments = await Promise.all(
-                selectedFiles.map((file, index) =>
-                    uploadOneFile(file, initialProgress[index].documentId),
+            const docs = await Promise.all(
+                selectedFiles.map((file, i) =>
+                    uploadOneFile(file, initial[i].documentId),
                 ),
             );
-
-            onUploadComplete(uploadedDocuments);
-
-            toast({
-                title: "Téléversement réussi",
-                description: `${selectedFiles.length} ${selectedFiles.length === 1 ? "document" : "documents"} téléversé(s) et en cours de traitement`,
-                status: "success",
-                duration: 3000,
-            });
-
-            setTimeout(() => {
-                setSelectedFiles([]);
-                setUploadProgress([]);
-                onClose();
-            }, 1500);
-        } catch (_error) {
+            onUploadComplete(docs);
+            setIsDone(true);
+        } catch {
             toast({
                 title: "Échec du téléversement",
                 description: "Veuillez réessayer",
                 status: "error",
                 duration: 4000,
             });
-            setIsDragging(false);
         }
     };
 
     const handleClose = () => {
-        if (!isUploading) {
-            setSelectedFiles([]);
-            setUploadProgress([]);
-            onClose();
-        }
+        if (isUploading) return;
+        setSelectedFiles([]);
+        setUploadProgress([]);
+        setIsDone(false);
+        onClose();
     };
+
+    const allDone =
+        uploadProgress.length > 0 &&
+        uploadProgress.every(
+            (p) =>
+                p.status === DocumentStatus.UPLOADED ||
+                p.status === DocumentStatus.FAILED,
+        );
 
     return (
         <Modal isOpen={isOpen} onClose={handleClose} scrollBehavior="inside">
-            <ModalOverlay />
-            <ModalContent bg="surfaceModal">
-                <ModalHeader>Téléverser des documents</ModalHeader>
+            <ModalOverlay backdropFilter="blur(2px)" />
+            <ModalContent
+                bg={useColorModeValue("white", "grey.950")}
+                borderRadius="16px"
+            >
+                <ModalHeader fontSize="16px" fontWeight="600" color={textColor}>
+                    Téléverser des documents
+                </ModalHeader>
                 <ModalCloseButton isDisabled={isUploading} />
 
-                <ModalBody>
-                    <VStack spacing={6} align="stretch">
-                        {!isUploading && (
+                <ModalBody pb={4}>
+                    <VStack spacing={4} align="stretch">
+                        {/* Drop zone */}
+                        {!isUploading && !isDone && (
                             <Box
                                 border="2px dashed"
                                 borderColor={
-                                    isDragging ? "green.600" : "grey.200"
+                                    isDragging ? dragBorderColor : borderColor
                                 }
-                                borderRadius="24px"
-                                p={{ base: 6, md: 8 }}
+                                borderRadius="14px"
+                                bg={isDragging ? dragBg : dropBg}
+                                py={10}
+                                px={6}
                                 textAlign="center"
-                                bg="surfacePrimary"
-                                transition="all 0.2s"
+                                transition="all 0.15s"
+                                cursor="pointer"
                                 onDrop={handleDrop}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
+                                onClick={() => inputRef.current?.click()}
                             >
-                                <VStack spacing={3}>
-                                    <Box
-                                        w="60px"
-                                        h="60px"
-                                        borderRadius="full"
-                                        bg={bgIconContainer}
-                                        display="flex"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                    >
-                                        <Upload
-                                            size={28}
-                                            color={uploadIconColor}
-                                        />
-                                    </Box>
-
-                                    <Text
-                                        fontWeight="medium"
-                                        color="textPrimary"
-                                    >
-                                        Déposez vos fichiers ici ou cliquez pour
-                                        parcourir
-                                    </Text>
-
-                                    <Text fontSize="sm" color="textSecondary">
-                                        PDF, DOCX, TXT, MD • 50MB max par
-                                        fichier
-                                    </Text>
-
-                                    <Button
-                                        size="sm"
-                                        variant="primary"
-                                        onClick={() =>
-                                            document
-                                                .getElementById("file-input")
-                                                ?.click()
-                                        }
-                                    >
-                                        Sélectionner des fichiers
-                                    </Button>
-
-                                    <input
-                                        id="file-input"
-                                        type="file"
-                                        multiple
-                                        accept={acceptedTypes.join(",")}
-                                        style={{ display: "none" }}
-                                        onChange={(e) =>
-                                            handleFileSelect(e.target.files)
+                                <VStack spacing={2}>
+                                    <CloudUpload
+                                        size={36}
+                                        color={
+                                            isDragging ? "#10B981" : "#6B7280"
                                         }
                                     />
+                                    <Text
+                                        fontWeight="600"
+                                        fontSize="15px"
+                                        color={textColor}
+                                    >
+                                        Glissez vos fichiers ici
+                                    </Text>
+                                    <Text fontSize="13px" color={mutedColor}>
+                                        ou{" "}
+                                        <Box
+                                            as="span"
+                                            color="green.500"
+                                            textDecoration="underline"
+                                            fontWeight="500"
+                                        >
+                                            parcourez votre ordinateur
+                                        </Box>
+                                    </Text>
+                                    <Text fontSize="12px" color={mutedColor}>
+                                        PDF, DOCX, TXT, MD · max 50 Mo / fichier
+                                    </Text>
                                 </VStack>
+                                <input
+                                    ref={inputRef}
+                                    type="file"
+                                    multiple
+                                    accept={acceptedTypes.join(",")}
+                                    style={{ display: "none" }}
+                                    onChange={(e) =>
+                                        handleFileSelect(e.target.files)
+                                    }
+                                />
                             </Box>
                         )}
 
+                        {/* Selected files (pre-upload) */}
                         {selectedFiles.length > 0 && !isUploading && (
-                            <VStack align="stretch" spacing={2}>
-                                <Text
-                                    fontSize="sm"
-                                    fontWeight="medium"
-                                    color="textPrimary"
-                                >
-                                    {selectedFiles.length}{" "}
-                                    {selectedFiles.length === 1
-                                        ? "fichier"
-                                        : "fichiers"}{" "}
-                                    sélectionné(s)
-                                </Text>
-                                <List spacing={2}>
-                                    {selectedFiles.map((file, index) => (
-                                        <ListItem
+                            <Box
+                                bg={fileBg}
+                                border="1px solid"
+                                borderColor={borderColor}
+                                borderRadius="12px"
+                                overflow="hidden"
+                            >
+                                {selectedFiles.map((file, index) => {
+                                    const badge = getFileTypeBadgeConfig(
+                                        file.type,
+                                    );
+                                    return (
+                                        <HStack
                                             key={index}
-                                            p={{ base: 2, md: 3 }}
-                                            bg="surfacePrimary"
-                                            borderColor="borderDefault"
-                                            borderWidth="1px"
-                                            borderRadius="12px"
+                                            px={3}
+                                            py={2.5}
+                                            bg={fileItemBg}
+                                            borderBottom={
+                                                index < selectedFiles.length - 1
+                                                    ? "1px solid"
+                                                    : "none"
+                                            }
+                                            borderColor={fileItemBorder}
+                                            spacing={3}
                                         >
-                                            <HStack
-                                                justify="space-between"
-                                                flexWrap="wrap"
-                                                gap={2}
+                                            <Box
+                                                bg={badge.bg}
+                                                color={badge.color}
+                                                fontSize="9px"
+                                                fontWeight="700"
+                                                px="5px"
+                                                py="3px"
+                                                borderRadius="4px"
+                                                flexShrink={0}
                                             >
-                                                <HStack spacing={3}>
-                                                    <File color="grey" />
-                                                    <VStack
-                                                        align="start"
-                                                        spacing={0}
-                                                        minW={0}
-                                                        flex={1}
-                                                    >
-                                                        <Text
-                                                            fontSize="sm"
-                                                            fontWeight="medium"
-                                                            noOfLines={2}
-                                                        >
-                                                            {file.name}
-                                                        </Text>
-                                                        <Text
-                                                            fontSize="xs"
-                                                            color="textSecondary"
-                                                        >
-                                                            {formatFileSize(
-                                                                file.size,
-                                                            )}
-                                                        </Text>
-                                                    </VStack>
-                                                </HStack>
-                                                <Button
-                                                    size="xs"
-                                                    variant="ghost"
-                                                    colorScheme="red"
-                                                    onClick={() =>
-                                                        removeFile(index)
-                                                    }
-                                                >
-                                                    Supprimer
-                                                </Button>
-                                            </HStack>
-                                        </ListItem>
-                                    ))}
-                                </List>
-                            </VStack>
+                                                {badge.label}
+                                            </Box>
+                                            <Text
+                                                fontSize="13px"
+                                                color={textColor}
+                                                flex={1}
+                                                noOfLines={1}
+                                            >
+                                                {file.name}
+                                            </Text>
+                                            <Text
+                                                fontSize="11px"
+                                                color={mutedColor}
+                                            >
+                                                {formatFileSize(file.size)}
+                                            </Text>
+                                            <Box
+                                                as="button"
+                                                onClick={() =>
+                                                    setSelectedFiles((prev) =>
+                                                        prev.filter(
+                                                            (_, i) =>
+                                                                i !== index,
+                                                        ),
+                                                    )
+                                                }
+                                                color={mutedColor}
+                                                _hover={{ color: textColor }}
+                                            >
+                                                <X size={13} />
+                                            </Box>
+                                        </HStack>
+                                    );
+                                })}
+                            </Box>
                         )}
 
-                        {isUploading && (
-                            <VStack align="stretch" spacing={3}>
-                                {uploadProgress.map((progress) => (
-                                    <Box key={progress.documentId}>
-                                        <HStack justify="space-between" mb={2}>
-                                            <HStack spacing={2}>
-                                                <File
-                                                    color="#718096"
-                                                    size={16}
-                                                />
-                                                <Text
-                                                    fontSize="sm"
-                                                    fontWeight="medium"
-                                                >
-                                                    {progress.fileName}
-                                                </Text>
-                                            </HStack>
-                                            {progress.status ===
-                                                DocumentStatus.UPLOADED && (
-                                                <CheckCircle color="green.500" />
-                                            )}
-                                            {progress.status ===
-                                                DocumentStatus.FAILED && (
-                                                <FileWarning color="red.500" />
-                                            )}
-                                        </HStack>
+                        {uploadProgress.length > 0 && (
+                            <VStack align="stretch" spacing={1}>
+                                {uploadProgress.map((p) => {
+                                    const done =
+                                        p.status === DocumentStatus.UPLOADED;
+                                    const failed =
+                                        p.status === DocumentStatus.FAILED;
+                                    const pct = done ? 100 : p.progress;
 
-                                        {progress.status ===
-                                            DocumentStatus.PROCESSING && (
-                                            <HStack spacing={2}>
-                                                <Progress
-                                                    size="sm"
-                                                    isIndeterminate
-                                                    colorScheme="blue"
-                                                    borderRadius="full"
-                                                    flex={1}
-                                                />
-                                                <Text
-                                                    fontSize="xs"
-                                                    color="gray.500"
-                                                >
-                                                    Téléversement...
-                                                </Text>
-                                            </HStack>
-                                        )}
-
-                                        {progress.status ===
-                                            DocumentStatus.UPLOADED && (
-                                            <Progress
-                                                value={progress.progress}
-                                                size="sm"
-                                                colorScheme="blue"
-                                                borderRadius="full"
-                                            />
-                                        )}
-
-                                        {progress.status ===
-                                            DocumentStatus.UPLOADED && (
-                                            <Text
-                                                fontSize="xs"
-                                                color="green.600"
+                                    return (
+                                        <HStack
+                                            key={p.documentId}
+                                            px={1}
+                                            py={2}
+                                            spacing={3}
+                                            align="center"
+                                        >
+                                            <Box
+                                                flexShrink={0}
+                                                w="16px"
+                                                h="16px"
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="center"
                                             >
-                                                Téléversement terminé
+                                                {done ? (
+                                                    <CheckCircle
+                                                        size={16}
+                                                        color="#10B981"
+                                                    />
+                                                ) : failed ? (
+                                                    <X
+                                                        size={16}
+                                                        color="#EF4444"
+                                                    />
+                                                ) : (
+                                                    <Spinner
+                                                        size="xs"
+                                                        color="grey.400"
+                                                    />
+                                                )}
+                                            </Box>
+                                            <Text
+                                                fontSize="13px"
+                                                color={textColor}
+                                                flex={1}
+                                                noOfLines={1}
+                                            >
+                                                {p.fileName}
                                             </Text>
-                                        )}
-                                    </Box>
-                                ))}
+                                            <Box flex={2} position="relative">
+                                                <Box
+                                                    h="4px"
+                                                    borderRadius="full"
+                                                    bg={trackColor}
+                                                    overflow="hidden"
+                                                >
+                                                    <Box
+                                                        h="100%"
+                                                        w={`${pct}%`}
+                                                        bg={
+                                                            failed
+                                                                ? "red.500"
+                                                                : "green.500"
+                                                        }
+                                                        transition="width 0.3s ease"
+                                                        borderRadius="full"
+                                                    />
+                                                </Box>
+                                            </Box>
+                                            <Text
+                                                fontSize="12px"
+                                                color={
+                                                    done
+                                                        ? "green.500"
+                                                        : failed
+                                                          ? "red.400"
+                                                          : mutedColor
+                                                }
+                                                fontWeight="500"
+                                                w="36px"
+                                                textAlign="right"
+                                            >
+                                                {pct}%
+                                            </Text>
+                                        </HStack>
+                                    );
+                                })}
                             </VStack>
                         )}
                     </VStack>
                 </ModalBody>
 
-                <ModalFooter flexDir={{ base: "column-reverse", sm: "row" }}>
-                    <HStack
-                        spacing={3}
-                        w={{ base: "100%", sm: "auto" }}
-                        justify={{ base: "stretch", sm: "flex-end" }}
-                    >
+                <ModalFooter pt={2}>
+                    <HStack spacing={3} justify="flex-end">
                         <Button
                             variant="ghost"
                             onClick={handleClose}
                             isDisabled={isUploading}
+                            fontSize="14px"
                         >
-                            Annuler
+                            Fermer
                         </Button>
-                        <Button
-                            variant="primary"
-                            onClick={handleUpload}
-                            isDisabled={
-                                selectedFiles.length === 0 || isUploading
-                            }
-                            isLoading={isUploading}
-                            loadingText="Téléversement..."
-                        >
-                            Téléverser{" "}
-                            {selectedFiles.length > 0 &&
-                                `(${selectedFiles.length})`}
-                        </Button>
+
+                        {!isUploading && !isDone && (
+                            <Button
+                                variant="primary"
+                                onClick={handleUpload}
+                                isDisabled={selectedFiles.length === 0}
+                                fontSize="14px"
+                            >
+                                Téléverser{" "}
+                                {selectedFiles.length > 0 &&
+                                    `(${selectedFiles.length})`}
+                            </Button>
+                        )}
+
+                        {(isUploading || isDone) && (
+                            <Button
+                                variant="primary"
+                                onClick={handleClose}
+                                isDisabled={!allDone}
+                                isLoading={isUploading && !allDone}
+                                loadingText="En cours..."
+                                leftIcon={
+                                    allDone ? <Check size={14} /> : undefined
+                                }
+                                fontSize="14px"
+                            >
+                                Terminer
+                            </Button>
+                        )}
                     </HStack>
                 </ModalFooter>
             </ModalContent>

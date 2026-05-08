@@ -90,9 +90,6 @@ export const VersionsSidebar = ({
                                           d.changelog ?? "Aucune description"
                                       }
                                       date={formatDate(d.createdAt)}
-                                      author={
-                                          d.createdByUser?.name ?? d.createdBy
-                                      }
                                       isSelected={d.id === selectedId}
                                       onClick={() => onSelect(d.id)}
                                   />

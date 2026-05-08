@@ -25,7 +25,7 @@ export const QuickActionCard = ({
     const border = useColorModeValue("grey.100", "grey.800");
     const hoverBorder = useColorModeValue("grey.200", "grey.700");
     const hoverBg = useColorModeValue("grey.50", "grey.800");
-    const iconBg = useColorModeValue("grey.100", "grey.800");
+    const iconBg = useColorModeValue("grey.50", "grey.800");
     const titleCol = useColorModeValue("grey.900", "grey.100");
     const subCol = useColorModeValue("grey.500", "grey.400");
 

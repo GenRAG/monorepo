@@ -2,13 +2,18 @@ export const Sparkline = ({
     data,
     color = "var(--chakra-colors-green-500)",
     id,
+    width = 290,
+    height = 70,
 }: {
     data: number[];
     color?: string;
     id: string;
+    width?: number | "full";
+    height?: number;
 }) => {
-    const W = 290;
-    const H = 70;
+    const isFull = width === "full";
+    const W = isFull ? 290 : width;
+    const H = height;
     const min = Math.min(...data);
     const max = Math.max(...data);
     const range = max - min || 1;
@@ -28,7 +33,13 @@ export const Sparkline = ({
     const hasOffset = min > 0;
 
     return (
-        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+        <svg
+            width={isFull ? "100%" : W}
+            height={H}
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio={isFull ? "none" : undefined}
+            style={isFull ? { display: "block" } : undefined}
+        >
             <defs>
                 <linearGradient
                     id={gid}

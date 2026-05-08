@@ -1,4 +1,12 @@
-import { Box, HStack, Icon, Text, useColorModeValue } from "@chakra-ui/react";
+import {
+    Box,
+    HStack,
+    Icon,
+    Skeleton,
+    Stack,
+    Text,
+    useColorModeValue,
+} from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Sparkline } from "components/Deployment/Sparkline";
@@ -12,6 +20,7 @@ interface MetricCardProps {
     trendNeutral?: boolean;
     sparkData: number[];
     sparkColor?: string;
+    isLoading?: boolean;
 }
 
 export const MetricCard = ({
@@ -23,6 +32,7 @@ export const MetricCard = ({
     trendNeutral,
     sparkData,
     sparkColor,
+    isLoading = false,
 }: MetricCardProps) => {
     const cardBg = useColorModeValue("white", "grey.850");
     const border = useColorModeValue("grey.100", "grey.800");
@@ -31,11 +41,61 @@ export const MetricCard = ({
     const trendGreen = useColorModeValue("green.600", "green.400");
     const trendOrange = useColorModeValue("orange.500", "orange.300");
     const trendRed = useColorModeValue("red.500", "red.400");
+    const skeletonStart = useColorModeValue("grey.100", "grey.800");
+    const skeletonEnd = useColorModeValue("grey.200", "grey.700");
     const trendCol = trendNeutral
         ? trendOrange
         : trendPositive
           ? trendGreen
           : trendRed;
+
+    const skeletonProps = { startColor: skeletonStart, endColor: skeletonEnd };
+
+    if (isLoading) {
+        return (
+            <Box
+                bg={cardBg}
+                border="1px solid"
+                borderColor={border}
+                borderRadius="12px"
+                overflow="hidden"
+                display="flex"
+                flexDirection="column"
+                gap={3}
+                minH="140px"
+            >
+                <Stack p={4} spacing={2}>
+                    <Skeleton
+                        {...skeletonProps}
+                        h="10px"
+                        w="110px"
+                        borderRadius="4px"
+                    />
+                    <Skeleton
+                        {...skeletonProps}
+                        p={4}
+                        h="28px"
+                        w="80px"
+                        borderRadius="6px"
+                    />
+                    <Skeleton
+                        {...skeletonProps}
+                        h="10px"
+                        w="60px"
+                        borderRadius="4px"
+                    />
+                </Stack>
+                <Box mt="auto" mx={-4}>
+                    <Skeleton
+                        {...skeletonProps}
+                        h="70px"
+                        w="100%"
+                        borderRadius="0"
+                    />
+                </Box>
+            </Box>
+        );
+    }
 
     return (
         <Box

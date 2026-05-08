@@ -10,6 +10,7 @@ import {
     Input,
     Divider,
     Circle,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
 import { Send, Sparkles, CheckCircle2 } from "lucide-react";
@@ -60,6 +61,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const isMobile = useAppResponsive({ base: true, lg: false });
+    const borderColor = useColorModeValue("grey.300", "grey.600");
 
     const scrollToBottom = () => {
         if (messagesContainerRef.current) {
@@ -100,9 +102,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             w="100%"
             h={fullHeight ? "100%" : height}
             minH={fullHeight && !compact ? "600px" : undefined}
-            border={`1px solid ${colorMode === "dark" ? "grey" : "#E7E7E7"}`}
+            border="1px solid"
+            borderColor={borderColor}
             borderRadius="12px"
-            bg={colorMode === "dark" ? "grey.800" : "white"}
+            bg={colorMode === "dark" ? "grey.900" : "white"}
             display="flex"
             flexDirection="column"
         >

@@ -1,13 +1,5 @@
-import {
-    Box,
-    Circle,
-    HStack,
-    Text,
-    useColorMode,
-    VStack,
-} from "@chakra-ui/react";
+import { Box, HStack, Text, useColorMode, VStack } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface StepLevelProps {
     level: number;
@@ -32,23 +24,6 @@ const StepLevel: React.FC<StepLevelProps> = ({
             border={`1px solid ${colorMode === "dark" ? "grey.600" : "grey.200"}`}
         >
             <HStack spacing={3}>
-                <Circle
-                    size={isMobile ? "30px" : "40px"}
-                    alignItems="center"
-                    justifyContent="center"
-                    display="flex"
-                    bg={currentDarkTheme.primary}
-                    color="white"
-                >
-                    <Text
-                        fontSize={isMobile ? "md" : "lg"}
-                        fontWeight="bold"
-                        color="white"
-                        textAlign="center"
-                    >
-                        {level}
-                    </Text>
-                </Circle>
                 <VStack align="start" spacing={0} flex={1}>
                     <Text
                         fontWeight="semibold"

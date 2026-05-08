@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { Status } from "pages/Onboarding/steps/ImproveAssistantStep";
+import { useUploadDocumentMutation } from "services/document/document";
 
 export interface UploadedSource {
-    /**
-     * Stable identifier for this source. Optional at the type level to avoid
-     * breaking existing usages, but always set when created by this hook.
-     */
     id?: string;
     type: "file";
     name: string;
@@ -18,24 +15,16 @@ export interface UploadedSource {
     };
 }
 
-const useUploadDocuments = () => {
+const useUploadDocuments = (
+    workspaceId?: string | null,
+    agentId?: string | null,
+) => {
     const [sources, setSources] = useState<UploadedSource[]>([]);
+    const [uploadDocument] = useUploadDocumentMutation();
 
-    /**
-     * Uploads a list of files to the backend.
-     * 1. Creates a source entry in PROCESSING state for each file immediately (optimistic update)
-     * 2. Sends the files to the API via FormData
-     * 3. Updates each source to COMPLETED once the upload is done
-     * 4. On error, marks the source as ERROR
-     *
-     * @param files - The FileList from an input or drag & drop event
-     * @returns The initial list of sources in PROCESSING state (for immediate UI feedback)
-     */
     const uploadDocuments = async (
         files: FileList,
     ): Promise<UploadedSource[]> => {
-        // Create a source in PROCESSING state for each file immediately
-        // so the UI can show a loading state right away
         const timestamp = Date.now();
         const newSources: UploadedSource[] = Array.from(files).map(
             (file, index) => ({
@@ -54,67 +43,40 @@ const useUploadDocuments = () => {
 
         setSources((prev) => [...prev, ...newSources]);
 
-        // Upload each file independently so they can resolve at different times
         Array.from(files).forEach(async (file, index) => {
             const sourceId = newSources[index]?.id;
             try {
-                const formData = new FormData();
-                formData.append("file", file);
+                if (workspaceId && agentId) {
+                    await uploadDocument({
+                        workspaceId,
+                        agentId,
+                        file,
+                    }).unwrap();
+                } else {
+                    // Pas de session encore — simuler un délai
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                }
 
-                const timeout = new Promise((resolve) => {
-                    setTimeout(() => {
-                        resolve({
-                            ok: true,
-                            json: async () => ({
-                                pages: 1,
-                                estimatedTime: "2-3 min",
-                            }),
-                        } as unknown as Response);
-                    }, 2000);
-                });
-
-                const response = (await timeout) as Response;
-
-                //Call Backend
-                if (!response.ok) throw new Error("Upload failed");
-
-                const data = await response.json();
-                // Expected response shape: { pages: number, estimatedTime: string }
-
-                // Update the specific source to COMPLETED with real metadata from the API
                 setSources((prev) => {
                     const updated = [...prev];
-                    if (!sourceId) {
-                        return updated;
-                    }
-                    const sourceIndex = updated.findIndex(
-                        (source) => source.id === sourceId,
-                    );
-                    if (sourceIndex === -1) {
-                        // The source may have been removed while the upload was in progress.
-                        return updated;
-                    }
-                    updated[sourceIndex] = {
-                        ...updated[sourceIndex],
+                    if (!sourceId) return updated;
+                    const idx = updated.findIndex((s) => s.id === sourceId);
+                    if (idx === -1) return updated;
+                    updated[idx] = {
+                        ...updated[idx],
                         status: Status.COMPLETED,
                         progress: 100,
-                        metadata: {
-                            pages: data.pages,
-                            documents: 1,
-                            estimatedTime: data.estimatedTime,
-                        },
                     };
                     return updated;
                 });
             } catch (error) {
                 console.error(`Failed to upload file: ${file.name}`, error);
-
-                // Mark the source as ERROR so the UI can reflect it
                 setSources((prev) => {
                     const updated = [...prev];
-                    const sourceIndex = updated.length - files.length + index;
-                    updated[sourceIndex] = {
-                        ...updated[sourceIndex],
+                    const idx = updated.findIndex((s) => s.id === sourceId);
+                    if (idx === -1) return updated;
+                    updated[idx] = {
+                        ...updated[idx],
                         status: Status.ERROR,
                         progress: 0,
                     };
@@ -123,8 +85,6 @@ const useUploadDocuments = () => {
             }
         });
 
-        // Return the initial sources in PROCESSING state immediately
-        // so the component can add them to its own list right away
         return newSources;
     };
 
@@ -136,12 +96,7 @@ const useUploadDocuments = () => {
         setSources([]);
     };
 
-    return {
-        sources,
-        uploadDocuments,
-        removeSource,
-        clearSources,
-    };
+    return { sources, uploadDocuments, removeSource, clearSources };
 };
 
 export default useUploadDocuments;

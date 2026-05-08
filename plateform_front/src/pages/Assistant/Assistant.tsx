@@ -103,43 +103,10 @@ export const Assistant = () => {
         [assistantId, currentConversationId, sendChatMessage],
     );
 
-    const {
-        messages,
-        sendMessage,
-        isLoading,
-        addMessages,
-        updateMessage,
-        clearMessages,
-    } = useChat({
+    const { messages, sendMessage, isLoading } = useChat({
         getResponse,
         initialMessages: [],
     });
-
-    const handleUpdateMessage = useCallback(
-        (
-            messageId: string,
-            updates: { question?: string; response?: string[] },
-        ) => {
-            updateMessage(messageId, updates);
-        },
-        [updateMessage],
-    );
-
-    const handleConversationSelect = useCallback(
-        (conversationId: string) => {
-            setCurrentConversationId(conversationId);
-            clearMessages();
-            hasAddedHistory.current = false;
-        },
-        [clearMessages],
-    );
-
-    const handleNewConversation = useCallback(() => {
-        setCurrentConversationId(null);
-        clearMessages();
-        hasAddedHistory.current = false;
-    }, [clearMessages]);
-
     useEffect(() => {
         if (
             currentConversationId &&
@@ -148,17 +115,8 @@ export const Assistant = () => {
             !hasAddedHistory.current
         ) {
             hasAddedHistory.current = true;
-            addMessages(
-                historyData.map((msg) => ({
-                    id: msg.id,
-                    question: msg.question,
-                    response: msg.response,
-                    timestamp: msg.timestamp,
-                    isImproved: msg.isImproved,
-                })),
-            );
         }
-    }, [currentConversationId, historyData, addMessages]);
+    }, [currentConversationId, historyData]);
 
     if (!assistantId) {
         return (
@@ -209,10 +167,10 @@ export const Assistant = () => {
                         }
                         conversations={conversations}
                         currentConversationId={currentConversationId}
-                        onConversationSelect={handleConversationSelect}
-                        onNewConversation={handleNewConversation}
+                        onConversationSelect={(id) =>
+                            setCurrentConversationId(id)
+                        }
                         onSendMessage={sendMessage}
-                        onUpdateMessage={handleUpdateMessage}
                         isLoading={isLoading}
                         placeholder="Ask me anything..."
                         welcomeMessage={

@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsObject } from 'class-validator';
 
 export class CreateWorkflowRequest {
-    @ApiProperty({ example: 'Mon workflow v1', required: false })
-    @IsString()
-    @IsOptional()
-    name?: string;
-
     @ApiProperty({
         example: {
             blocks: [

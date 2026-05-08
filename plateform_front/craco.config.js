@@ -11,6 +11,10 @@ export const webpack = {
     react: resolve(currentDir, "node_modules/react"),
     "react-dom": resolve(currentDir, "node_modules/react-dom"),
     "@xyflow/react": resolve(currentDir, "node_modules/@xyflow/react"),
+    "@chakra-ui/react": resolve(currentDir, "node_modules/@chakra-ui/react"),
+    "@emotion/react": resolve(currentDir, "node_modules/@emotion/react"),
+    "@emotion/styled": resolve(currentDir, "node_modules/@emotion/styled"),
+    "framer-motion": resolve(currentDir, "node_modules/framer-motion"),
   },
   configure: (webpackConfig) => {
     webpackConfig.resolve.plugins = (

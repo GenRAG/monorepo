@@ -1,0 +1,4 @@
+export enum DocumentEventType {
+    DOCUMENT_INDEXED = 'DOCUMENT_INDEXED',
+    DOCUMENT_FAILED = 'DOCUMENT_FAILED',
+}

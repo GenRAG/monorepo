@@ -1,3 +1,2 @@
-export * from './create-flow-node';
-export * from './resolve-collisions';
-export * from './task/registry';
+export { linkNodes, makeFlowNode, withAutoSettings } from './create-flow-node';
+export { getTaskDef, getNonSettingsTaskTypes, getAddableTaskTypes, getConfigInputs, getChainOutputs } from './task-utils';

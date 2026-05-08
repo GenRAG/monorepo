@@ -1,7 +1,7 @@
-import { Position } from "@xyflow/react";
 import { TaskType } from "../../types/task";
 import { type LucideIcon, Brain } from "lucide-react";
 import { ShapeType } from "../../components/nodes";
+import { ModelNode } from "../../components/nodes/SettingNodes/ModelNode";
 
 export const AddModel = {
     type: TaskType.MODEL,
@@ -15,12 +15,8 @@ export const AddModel = {
     isEndPoint: false,
     isDeletable: false,
     isDraggable: true,
-    sourcePosition: Position.Left,
-    position: {
-        x: 0,
-        y: 0,
-    },
     id: "tooltip-workflow-model",
     inputs: [],
     outputs: [],
+    component: ModelNode,
 };

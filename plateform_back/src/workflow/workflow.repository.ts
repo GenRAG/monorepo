@@ -25,6 +25,12 @@ export class WorkflowRepository {
         });
     }
 
+    findByVersion(agentId: string, version: number): Promise<Workflow | null> {
+        return this.prisma.workflow.findFirst({
+            where: { agentId, version },
+        });
+    }
+
     create(data: Prisma.WorkflowCreateInput): Promise<Workflow> {
         return this.prisma.workflow.create({ data });
     }

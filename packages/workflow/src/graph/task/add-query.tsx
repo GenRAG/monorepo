@@ -22,7 +22,6 @@ export const AddQuery = {
         {
             nodeType: TaskType.REWRITER,
             optional: true,
-            position: { x: 0, y: 100 },
         },
     ],
 };

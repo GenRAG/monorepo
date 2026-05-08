@@ -2,10 +2,40 @@ import { Injectable } from '@nestjs/common';
 import { UserRole, Prisma, Workspace } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-export type WorkspaceWithUsersAndCreditBalance = Prisma.WorkspaceGetPayload<{
+export type WorkspacePayload = Prisma.WorkspaceGetPayload<{
     include: {
-        users: { select: { role: true } };
+        users: {
+            include: {
+                user: {
+                    select: {
+                        id: true;
+                        name: true;
+                        email: true;
+                    };
+                };
+            };
+        };
         creditBalance: { select: { balance: true } };
+        agents: {
+            select: {
+                id: true;
+                name: true;
+                description: true;
+                createdAt: true;
+                workflows: {
+                    select: {
+                        id: true;
+                        definition: true;
+                        isActive: true;
+                    };
+                };
+                documents: {
+                    select: {
+                        id: true;
+                    };
+                };
+            };
+        };
     };
 }>;
 
@@ -17,9 +47,7 @@ export type WorkspaceWithUsers = Prisma.WorkspaceGetPayload<{
 export class WorkspaceRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findOne(
-        id: string,
-    ): Promise<WorkspaceWithUsersAndCreditBalance | null> {
+    async findOne(id: string): Promise<WorkspacePayload | null> {
         return this.prisma.workspace.findUnique({
             where: { id },
             include: {
@@ -37,6 +65,26 @@ export class WorkspaceRepository {
                 creditBalance: {
                     select: {
                         balance: true,
+                    },
+                },
+                agents: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        createdAt: true,
+                        workflows: {
+                            select: {
+                                id: true,
+                                definition: true,
+                                isActive: true,
+                            },
+                        },
+                        documents: {
+                            select: {
+                                id: true,
+                            },
+                        },
                     },
                 },
             },

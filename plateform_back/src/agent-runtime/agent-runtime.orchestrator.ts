@@ -3,8 +3,8 @@ import EventBus from 'src/lib/event-bus';
 import { ContextBuilder } from 'src/agent-runtime/agent-runtime.builder';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 import { UsageTrackerService } from 'src/usage-tracker/usage-tracker.service';
-import { AgentQueryCompletedEvent } from 'src/events/agent-events';
-import { AgentEventType } from 'src/events/agent-events.type';
+import { AgentQueryCompletedEvent } from 'src/events/agent/agent-events';
+import { AgentEventType } from 'src/events/agent/agent-events.type';
 
 @Injectable()
 export class AgentRuntimeOrchestrator {
@@ -27,7 +27,6 @@ export class AgentRuntimeOrchestrator {
 
         const pipeline = await this.contextBuilder.buildPipeline({
             agentId,
-            workspaceId,
         });
 
         const answer = await this.ragEngineService.sendQuery({

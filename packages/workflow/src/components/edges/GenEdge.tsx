@@ -51,6 +51,15 @@ export default function GenEdge(props: GenEdgeProps) {
                 }}
             />
 
+            <path
+                d={edgePath}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={20}
+                style={{ cursor: "pointer", pointerEvents: "all" }}
+                onClick={props.onToggle}
+            />
+
             <g>
                 <path
                     id={`motion-path-${props.id}`}
@@ -71,21 +80,6 @@ export default function GenEdge(props: GenEdgeProps) {
                     />
                 </circle>
             </g>
-            <style>{`
-            @keyframes flowEdge {
-            0% {
-                stroke-dashoffset: 0;
-                opacity: 0.6;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                stroke-dashoffset: -35;
-                opacity: 0.6;
-            }
-        }
-      `}</style>
         </>
     );
 }

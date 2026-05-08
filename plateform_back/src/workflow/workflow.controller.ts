@@ -55,6 +55,11 @@ export class WorkflowController {
         return this.workflowService.create(agentId, createWorkflowRequest);
     }
 
+    @Get('version/:v')
+    findByVersion(@Param('agentId') agentId: string, @Param('v') v: string) {
+        return this.workflowService.findByVersion(agentId, parseInt(v, 10));
+    }
+
     @Get(':id')
     findOne(@Param('id') id: string, @Param('agentId') agentId: string) {
         return this.workflowService.findOne(id, agentId);

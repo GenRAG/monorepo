@@ -1,0 +1,31 @@
+model User {
+  id                          String          @id @default(cuid())
+  email                       String          @unique
+  name                        String?
+  password                    String?
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime        @updatedAt
+  emailVerificationToken      Int?
+  isEmailVerified             Boolean         @default(false)
+  emailVerificationLastSentAt DateTime?
+  passwordResetToken          Int?
+  passwordResetLastSentAt     DateTime?
+  workspaces                  UserWorkspace[]
+  agentVersions               AgentVersion[]
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model UserWorkspace {
+  userId      String
+  workspaceId String
+  role        UserRole
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, workspaceId])
+}

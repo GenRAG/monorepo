@@ -8,6 +8,9 @@ import { AgentModule } from './agent/agent.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
 import { CreditBalanceModule } from 'src/credit/credit-balance.module';
+import { DocumentModule } from './document/document.module';
+import { DeploymentModule } from './deployment/deployment.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
     imports: [
@@ -41,16 +44,25 @@ import { CreditBalanceModule } from 'src/credit/credit-balance.module';
             },
             inject: [ConfigService],
         }),
+        BullModule.forRoot({
+            connection: {
+                host: process.env.REDIS_HOST ?? 'localhost',
+                port: Number(process.env.REDIS_PORT) ?? 6379,
+            },
+        }),
         ConfigModule.forRoot({
             isGlobal: true,
         }),
         UsersModule,
         AuthModule,
         WorkspaceModule,
+        DocumentModule,
         AgentModule,
         WorkflowModule,
         AgentRuntimeModule,
         CreditBalanceModule,
+        DocumentModule,
+        DeploymentModule,
     ],
     controllers: [],
     providers: [],

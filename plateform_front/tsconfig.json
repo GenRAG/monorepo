@@ -21,6 +21,9 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
     "paths": {
+      "@genrag/workflow": [
+        "../../packages/workflow/src/index.ts"
+      ],
       "themeNew/*": [
         "themeNew/*"
       ],

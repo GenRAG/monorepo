@@ -3,7 +3,7 @@ import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.reque
 import {
     WorkspaceRepository,
     WorkspaceWithUsers,
-    WorkspaceWithUsersAndCreditBalance,
+    WorkspacePayload,
 } from 'src/workspace/workspace.repository';
 
 @Injectable()
@@ -23,9 +23,7 @@ export class WorkspaceService {
         return this.workspaceRepository.findAll(userId);
     }
 
-    async findOne(
-        workspaceId: string,
-    ): Promise<WorkspaceWithUsersAndCreditBalance> {
+    async findOne(workspaceId: string): Promise<WorkspacePayload | null> {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
         if (!workspace) {
             throw new NotFoundException('Workspace not found');

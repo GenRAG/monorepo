@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { Home, ArrowLeft } from "lucide-react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import Button from "components/Atoms/Button";
+import Button from "components/System/Atoms/Button";
 import "../Onboarding/onboardingAnimations.css";
 
 const NotFound: React.FC = () => {

@@ -27,6 +27,9 @@ type ResetPasswordFormType = {
 const ResetPasswordForm: FC = () => {
     const toast = useThemedToast();
     const [resetPasswordQuery, { isLoading }] = useResetPasswordMutation();
+    const buttonType = useColorModeValue("superSecondary", "superPrimary");
+    const labelColor = useColorModeValue("grey.900", "whites.offwhite");
+    const fieldTextColor = useColorModeValue("black", "whites.offwhite");
 
     const {
         formState: { errors },
@@ -77,17 +80,14 @@ const ResetPasswordForm: FC = () => {
             <chakra.form w="100%" onSubmit={onSubmit}>
                 <VStack gap={6}>
                     <FormControl isInvalid={!!errors.email}>
-                        <FormLabel color="whites.offwhite">
+                        <FormLabel color={labelColor}>
                             Email address of the lost account
                         </FormLabel>
                         <Input
                             {...register("email", { validate: validateEmail })}
                             placeholder="john.smith@gmail.com"
                             autoComplete="email"
-                            color={useColorModeValue(
-                                "black",
-                                "whites.offwhite",
-                            )}
+                            color={fieldTextColor}
                         />
                         {errors.email && (
                             <FormErrorMessage>
@@ -97,7 +97,7 @@ const ResetPasswordForm: FC = () => {
                     </FormControl>
 
                     <Button
-                        variant="superSecondary"
+                        variant={buttonType}
                         size="lg"
                         w="100%"
                         isLoading={isLoading}

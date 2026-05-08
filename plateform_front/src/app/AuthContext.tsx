@@ -6,7 +6,7 @@ import React, {
     ReactNode,
 } from "react";
 import useAuthentification from "hooks/useAuthentification";
-import { AppLoader } from "components/Molecules/AppLoader";
+import { AppLoader } from "components/System/Molecules/AppLoader";
 
 interface AuthContextType {
     isLoggedIn: boolean;

@@ -10,6 +10,7 @@ import { Moon, Sun } from "lucide-react";
 import { SidebarItem } from "./SidebarItem";
 import { SidebarSection } from "./SidebarSection";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface SidebarFooterProps {
     isOpen: boolean;
@@ -30,37 +31,50 @@ export const SidebarFooter = ({
     email,
     supportMenu,
 }: SidebarFooterProps) => {
-    const color = useColorModeValue("grey.300", "white");
+    const navigate = useNavigate();
+    const { workspaceId, agentId } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
+    const color = useColorModeValue("grey.900", "white");
     const dividerColor = useColorModeValue(
         "grey.100",
         currentDarkTheme.rgba.primary20,
     );
-
-    if (!name && !email) return null;
+    const handleFooterItemClick = (id: string) => {
+        if (id === "settings" && workspaceId && agentId) {
+            void navigate(
+                `/workspaces/${workspaceId}/agents/${agentId}/settings`,
+            );
+        } else if (id === "help") {
+            void navigate("/help");
+        } else if (id === "notifications") {
+            void navigate("/docs");
+        }
+    };
 
     return (
         <VStack align="stretch" gap={0}>
-            <SidebarSection title="Support" isOpen={isOpen}>
+            <SidebarSection title="Assistance" isOpen={isOpen}>
                 {supportMenu.map(({ id, icon, label }) => (
                     <SidebarItem
                         key={id}
                         active={activeItem === id}
+                        onClick={() => handleFooterItemClick(id)}
                         icon={icon}
                         label={label}
                         open={isOpen}
                     />
                 ))}
+                <SidebarItem
+                    icon={colorMode === "light" ? Moon : Sun}
+                    label={colorMode === "light" ? "Mode sombre" : "Mode clair"}
+                    open={isOpen}
+                    onClick={toggleColorMode}
+                />
             </SidebarSection>
             {(name || email) && (
                 <VStack align="stretch" gap={0}>
-                    <SidebarItem
-                        icon={colorMode === "light" ? Moon : Sun}
-                        label={
-                            colorMode === "light" ? "Dark mode" : "Light mode"
-                        }
-                        open={isOpen}
-                        onClick={toggleColorMode}
-                    />
                     <Divider
                         w="100%"
                         borderColor={dividerColor}

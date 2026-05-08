@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreditTransactionType } from 'generated/prisma';
-import { JsonObject } from 'generated/prisma/runtime/library';
+import { CreditTransactionType, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -18,7 +17,7 @@ export class CreditTransactionRepository {
                 workspaceId: data.workspaceId,
                 amount: data.amount,
                 type: data.type,
-                metadata: (data.metadata ?? {}) as JsonObject,
+                metadata: (data.metadata ?? {}) as Prisma.InputJsonObject,
             },
         });
     }

@@ -10,7 +10,7 @@ import {
     useColorMode,
     Stack,
 } from "@chakra-ui/react";
-import { Menu, NetworkIcon } from "lucide-react";
+import { Menu } from "lucide-react";
 import WorkspaceDropdown from "app/Navigation/MainSidebar/WorkspaceDropdown";
 import { mainMenu, supportMenu } from "app/Navigation/sidebarConfig";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
@@ -21,59 +21,49 @@ import { useUserInfo } from "hooks/useUserInfo";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
 import { useGetUserWorkspacesQuery } from "services/workspace/workspace";
-import { WorkspacePreview } from "types/workspace";
-
-const MOCK_WORKSPACES: WorkspacePreview[] = [
-    {
-        id: "mock-workspace-1",
-        name: "Workspace Demo",
-        documentsCount: 12,
-        updatedAt: new Date().toISOString(),
-    },
-];
 
 const Sidebar = () => {
     const location = useLocation();
+
     const navigate = useNavigate();
+
     const { name, email } = useUserInfo();
     const { data: workspaces = [] } = useGetUserWorkspacesQuery();
+
     const isMobile = useAppResponsive({ base: true, lg: false });
+
     const defaultActivePath = useActiveSidebarItem([
         ...mainMenu.map((i) => i.id),
     ]);
 
-    const displayedWorkspaces =
-        workspaces.length > 0 ? workspaces : MOCK_WORKSPACES;
     const currentWorkspaceIdFromPath = useMemo(() => {
         const match = location.pathname.match(/^\/workspaces\/([^/]+)/);
         return match?.[1];
     }, [location.pathname]);
+
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>(
-        currentWorkspaceIdFromPath ?? displayedWorkspaces[0]?.id ?? "",
+        currentWorkspaceIdFromPath ?? workspaces[0]?.id ?? "",
     );
 
     const { colorMode, toggleColorMode } = useColorMode();
     const color = useColorModeValue("grey.300", "white");
     const bg = useColorModeValue(
-        "black",
+        "white",
         "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)",
     );
-    const border = useColorModeValue(
-        "green.100",
-        currentDarkTheme.rgba.primary20,
-    );
+    const border = useColorModeValue("grey.100", "grey.800");
 
     const bgMobile = useColorModeValue(
-        "black",
+        "white",
         "linear-gradient(135deg,rgb(5, 5, 5) 0%, #363636ff 100%)",
     );
 
-    const activePath = location.pathname.startsWith("/workspaces")
-        ? "workspaces"
-        : defaultActivePath;
+    const activePath = useMemo(() => {
+        const match = location.pathname.match(/^\/workspaces\/[^/]+\/([^/]+)/);
+        return match?.[1] ?? defaultActivePath;
+    }, [location.pathname, defaultActivePath]);
 
     const { isOpen, onToggle, onClose } = useDisclosure({
         defaultIsOpen: false,
@@ -91,10 +81,10 @@ const Sidebar = () => {
             return;
         }
 
-        if (!selectedWorkspaceId && displayedWorkspaces.length > 0) {
-            setSelectedWorkspaceId(displayedWorkspaces[0].id);
+        if (!selectedWorkspaceId && workspaces.length > 0) {
+            setSelectedWorkspaceId(workspaces[0].id);
         }
-    }, [currentWorkspaceIdFromPath, displayedWorkspaces, selectedWorkspaceId]);
+    }, [currentWorkspaceIdFromPath, workspaces, selectedWorkspaceId]);
 
     const handleItemClick = async (pathname: string) => {
         await navigate(pathname);
@@ -103,24 +93,8 @@ const Sidebar = () => {
 
     const handleWorkspaceChange = async (workspaceId: string) => {
         setSelectedWorkspaceId(workspaceId);
-        await handleItemClick(`/workspaces/${workspaceId}/agents`);
+        await handleItemClick(`/workspaces/${workspaceId}/dashboard`);
     };
-
-    const mockAgents = [
-        { id: "1", name: "Agent 1" },
-        { id: "2", name: "Agent 2" },
-    ];
-
-    const mockAssistants = [
-        {
-            id: "1",
-            name: "Assistant 1",
-        },
-        {
-            id: "2",
-            name: "Assistant 2",
-        },
-    ];
 
     const sidebarContent = (
         <Stack gap={8} h="100vh" flex={1} overflow="hidden">
@@ -133,10 +107,10 @@ const Sidebar = () => {
             />
 
             <Stack gap={0} flex={1} overflowY="auto">
-                {isOpen && displayedWorkspaces.length > 0 && (
+                {isOpen && workspaces.length > 0 && (
                     <Stack spacing={1}>
                         <WorkspaceDropdown
-                            workspaces={displayedWorkspaces}
+                            workspaces={workspaces}
                             selectedId={selectedWorkspaceId}
                             onSelect={handleWorkspaceChange}
                         />
@@ -149,41 +123,17 @@ const Sidebar = () => {
                             key={id}
                             active={activePath === id}
                             onClick={async () => {
-                                if (id === "workspaces") {
-                                    await handleItemClick(
-                                        `/workspaces/${selectedWorkspaceId}/agents`,
-                                    );
+                                if (!selectedWorkspaceId) {
                                     return;
                                 }
 
-                                await navigate(`/${id}`);
+                                await handleItemClick(
+                                    `/workspaces/${selectedWorkspaceId}/${id}`,
+                                );
                             }}
                             icon={icon}
                             label={label}
                             open={isOpen}
-                            {...(id === "workspaces" && {
-                                badge: `${mockAgents.length}`,
-                                childrenItems: mockAgents?.map((a) => ({
-                                    icon: NetworkIcon,
-                                    label: a.name,
-                                    onClick: async () => {
-                                        await handleItemClick(
-                                            `/workspaces/${selectedWorkspaceId}/agents/${a.id}/playground`,
-                                        );
-                                    },
-                                })),
-                            })}
-                            {...(id === "assistants" && {
-                                badge: `${mockAssistants.length}`,
-                                childrenItems: mockAssistants.map((a) => ({
-                                    label: a.name,
-                                    onClick: async () => {
-                                        await handleItemClick(
-                                            `/assistants/${a.id}`,
-                                        );
-                                    },
-                                })),
-                            })}
                         />
                     ))}
                 </SidebarSection>
@@ -231,7 +181,7 @@ const Sidebar = () => {
                     size="xs"
                 >
                     <DrawerOverlay />
-                    <DrawerContent bg={bgMobile} maxW="280px">
+                    <DrawerContent bg={bgMobile} maxW="280px" borderRadius={0}>
                         <DrawerBody p={0} display="flex" flexDirection="column">
                             {sidebarContent}
                         </DrawerBody>

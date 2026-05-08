@@ -26,6 +26,9 @@ const ValidateAccountForm: FC = () => {
         useResendEmailTokenMutation();
     const [pin, setPin] = useState("");
     const toast = useThemedToast();
+    const buttonType = useColorModeValue("superSecondary", "superPrimary");
+    const textColor = useColorModeValue("whites.offwhite", "whites.offwhite");
+    const iconColor = useColorModeValue("white", "white");
 
     const email = searchParams.get("email");
 
@@ -168,7 +171,7 @@ const ValidateAccountForm: FC = () => {
                 disabled={isLoading || pin.length !== 6}
                 isLoading={isLoading}
                 w="100%"
-                variant="superSecondary"
+                variant={buttonType}
             >
                 Valider
             </Button>

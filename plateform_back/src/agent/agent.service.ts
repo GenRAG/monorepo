@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAgentRequest } from './dto/create-agent.request';
 import { UpdateAgentRequest } from './dto/update-agent.request';
-import { Agent, AgentStatus } from 'generated/prisma';
-import { AgentRepository } from 'src/agent/agent.repository';
-import { AgentStateMachine } from 'src/agent/agent.state-machine';
+import { Agent, Prisma } from 'generated/prisma';
+import {
+    AgentRepository,
+    FindAllAgentResult,
+} from 'src/agent/agent.repository';
 
 @Injectable()
 export class AgentService {
@@ -14,19 +16,36 @@ export class AgentService {
         userId: string,
         workspaceId: string,
     ): Promise<Agent> {
-        const agent = await this.agentRepository.create({
-            name: createAgentRequest.name,
-            description: createAgentRequest.description ?? '',
-            createdBy: userId,
-            updatedBy: userId,
-            status: AgentStatus.DEVELOPMENT,
-            workspace: { connect: { id: workspaceId } },
-        });
+        return this.agentRepository.transaction(async (tx) => {
+            const agent = await tx.agent.create({
+                data: {
+                    name: createAgentRequest.name,
+                    description:
+                        createAgentRequest.description ??
+                        'Pas de description pour le moment',
+                    createdBy: userId,
+                    updatedBy: userId,
+                    workspace: { connect: { id: workspaceId } },
+                },
+            });
 
-        return agent;
+            if (createAgentRequest.workflow) {
+                await tx.workflow.create({
+                    data: {
+                        agentId: agent.id,
+                        definition: createAgentRequest.workflow
+                            .definition as Prisma.InputJsonValue,
+                        version: 1,
+                        isActive: true,
+                    },
+                });
+            }
+
+            return agent;
+        });
     }
 
-    async findAll(workspaceId: string): Promise<Agent[]> {
+    async findAll(workspaceId: string): Promise<FindAllAgentResult[]> {
         return this.agentRepository.findAll(workspaceId);
     }
 
@@ -52,24 +71,6 @@ export class AgentService {
             throw new NotFoundException('Agent not found');
         }
 
-        if (updateAgentDto.status && updateAgentDto.status !== agent.status) {
-            const machine = new AgentStateMachine(agent.status);
-
-            switch (updateAgentDto.status) {
-                case AgentStatus.STAGING:
-                    machine.toStaging();
-                    break;
-                case AgentStatus.PRODUCTION:
-                    machine.toProduction();
-                    break;
-                case AgentStatus.DEVELOPMENT:
-                    machine.toDevelopment();
-                    break;
-                default:
-                    throw new NotFoundException('Invalid status');
-            }
-        }
-
         return this.agentRepository.update(id, {
             ...updateAgentDto,
             updatedBy: userId,
@@ -84,5 +85,16 @@ export class AgentService {
         }
 
         return this.agentRepository.delete(id);
+    }
+
+    async findProductionWorkflowVersion(
+        agentId: string,
+    ): Promise<number | null> {
+        const deployment =
+            await this.agentRepository.findProductionDeployedWorkflowVersion(
+                agentId,
+            );
+
+        return deployment?.workflowVersion ?? null;
     }
 }

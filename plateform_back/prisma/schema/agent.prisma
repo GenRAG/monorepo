@@ -1,0 +1,37 @@
+model Agent {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  status      AgentStatus    @default(DEVELOPMENT)
+  createdAt   DateTime       @default(now())
+  createdBy   String
+  updatedAt   DateTime       @updatedAt
+  updatedBy   String
+  workspaceId String
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workflows   Workflow[]
+  documents   Document[]
+  deployments AgentVersion[]
+}
+
+model AgentVersion {
+  id              String      @id @default(cuid())
+  version         Int
+  name            String
+  changelog       String?
+  fromStatus      AgentStatus
+  toStatus        AgentStatus
+  workflowVersion Int?
+  agentId         String
+  agent           Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  createdBy       String
+  createdByUser   User        @relation(fields: [createdBy], references: [id])  // 👈
+
+  @@unique([agentId, version])
+}
+
+enum AgentStatus {
+  DEVELOPMENT
+  PRODUCTION
+}

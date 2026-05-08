@@ -1,8 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 import { AppNode } from "../types/app-node";
-import { TaskType, TaskParam, TaskChainOutput } from "../types/task";
-import { TaskRegistry } from "./task/registry";
+import { TaskType, TaskParam } from "../types/task";
+import { EdgeType } from "../types/edge";
 import { Edge } from "@xyflow/react";
+import { getConfigInputs } from "./task-utils";
+import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
+
+declare const process: { env: { NODE_ENV?: string } };
 
 export function CreateFlowNode(
     nodeType: TaskType,
@@ -35,7 +39,6 @@ export function CreateFlowNode(
     return { node: newNode, edge: newEdge };
 }
 
-// ── linkNodes — inchangé ───────────────────────────────────────────────────────
 export function linkNodes(sourceNode: string, targetNode: string) {
     return {
         id: `${sourceNode}-to-${targetNode}`,
@@ -44,19 +47,23 @@ export function linkNodes(sourceNode: string, targetNode: string) {
         sourceHandle: "main-source",
         targetHandle: "main-target",
         animated: true,
+        type: EdgeType.Main,
     };
 }
 
-// ── createSettingPlaceholders — inchangé ──────────────────────────────────────
 export function createSettingPlaceholders(
     parentNode: AppNode,
     configInputs: TaskParam[],
+    layout: LayoutStrategy = DEFAULT_LAYOUT,
+    startIndex: number = 0,
+    totalCount: number = configInputs.length,
 ): { nodes: AppNode[]; edges: Edge[] } {
     const nodes: AppNode[] = [];
     const edges: Edge[] = [];
 
-    configInputs.forEach((input) => {
+    configInputs.forEach((input, index) => {
         const placeholderId = uuidv4();
+        const offset = layout.getSettingOffset(startIndex + index, totalCount);
 
         nodes.push({
             id: placeholderId,
@@ -74,8 +81,8 @@ export function createSettingPlaceholders(
             },
             deletable: true,
             position: {
-                x: parentNode.position.x + input.position.x,
-                y: parentNode.position.y + input.position.y,
+                x: parentNode.position.x + offset.x,
+                y: parentNode.position.y + offset.y,
             },
         });
 
@@ -85,7 +92,7 @@ export function createSettingPlaceholders(
             target: placeholderId,
             sourceHandle: `setting-source-${input.name}`,
             targetHandle: "setting-target",
-            type: "settings",
+            type: EdgeType.Settings,
             animated: false,
             data: { label: input.name },
         });
@@ -94,55 +101,100 @@ export function createSettingPlaceholders(
     return { nodes, edges };
 }
 
-// ── createChainOutputPlaceholders — NOUVEAU ────────────────────────────────────
-// Crée des placeholders pour les nodes optionnels de la chaîne principale.
-// Contrairement aux settings, ces nodes sont des vrais nodes de la chaîne
-// qui s'insèrent entre deux nodes existants.
-export function createChainOutputPlaceholders(
-    parentNode: AppNode,
-    chainOutputs: TaskChainOutput[],
+
+export function makeFlowNode(id: string, type: TaskType, x: number, y: number): AppNode {
+    return {
+        id,
+        type: "GenNode",
+        dragHandle: ".drag-handle",
+        data: { type, inputs: {}, outputs: [] },
+        position: { x, y },
+        deletable: false,
+    };
+}
+
+export function withAutoSettings(
+    nodes: AppNode[],
+    edges: Edge[],
+    settingValues?: Record<string, Record<string, string>>,
+    layout: LayoutStrategy = DEFAULT_LAYOUT,
 ): { nodes: AppNode[]; edges: Edge[] } {
-    const nodes: AppNode[] = [];
-    const edges: Edge[] = [];
+    const extraNodes: AppNode[] = [];
+    const extraEdges: Edge[] = [];
 
-    chainOutputs.forEach((output) => {
-        // On récupère les infos depuis le TaskRegistry — pas de duplication
-        const taskDef = TaskRegistry[output.nodeType];
-        if (!taskDef) return;
+    nodes.forEach((node) => {
+        const cfgInputs = getConfigInputs(node.data.type);
+        const total = cfgInputs.length;
 
-        const placeholderId = uuidv4();
+        if (process.env.NODE_ENV !== "production" && settingValues?.[node.id]) {
+            const validNames = new Set(cfgInputs.map((i) => i.name));
+            for (const key of Object.keys(settingValues[node.id])) {
+                if (!validNames.has(key)) {
+                    console.warn(
+                        `[withAutoSettings] Node "${node.id}" (${node.data.type}): ` +
+                        `unrecognized setting key "${key}". ` +
+                        `Valid keys: ${Array.from(validNames).map((n) => `"${n}"`).join(", ") || "(none)"}`,
+                    );
+                }
+            }
+        }
 
-        nodes.push({
-            id: placeholderId,
-            type: "GenNode",
-            dragHandle: ".drag-handle",
-            data: {
-                type: output.nodeType,
-                inputs: {},
-                outputs: [],
-                isPlaceholder: true, // commence en placeholder "+"
-                isChainPlaceholder: true, // distingue des settings placeholders
-                parentNodeId: parentNode.id,
-            },
-            deletable: output.optional, // supprimable seulement si optionnel
-            position: {
-                x: parentNode.position.x + output.position.x,
-                y: parentNode.position.y + output.position.y,
-            },
-        });
-
-        // Edge de la chaîne principale (pas settings)
-        edges.push({
-            id: `${parentNode.id}-chain-${output.nodeType}`,
-            source: parentNode.id,
-            target: placeholderId,
-            sourceHandle: "main-source",
-            targetHandle: "main-target",
-            animated: true,
-            type: "default",
-            data: { label: taskDef.label, optional: output.optional },
+        cfgInputs.forEach((input, index) => {
+            const alreadyConnected = edges.some(
+                (e) =>
+                    e.source === node.id &&
+                    e.sourceHandle === `setting-source-${input.name}`,
+            );
+            if (alreadyConnected) return;
+            const value = settingValues?.[node.id]?.[input.name];
+            const offset = layout.getSettingOffset(index, total);
+            if (value !== undefined) {
+                const settingId = uuidv4();
+                extraNodes.push({
+                    id: settingId,
+                    type: "GenNode",
+                    dragHandle: ".drag-handle",
+                    data: {
+                        type: input.nodeType,
+                        inputs: {},
+                        outputs: [],
+                        isPlaceholder: false,
+                        firstTime: false,
+                        isEditing: false,
+                        configItems: input.items || [],
+                        settingLabel: input.name,
+                        inputType: input.type,
+                        parentNodeId: node.id,
+                        modelName: value,
+                        stringValue: value,
+                    },
+                    deletable: true,
+                    position: {
+                        x: node.position.x + offset.x,
+                        y: node.position.y + offset.y,
+                    },
+                });
+                extraEdges.push({
+                    id: `${node.id}-setting-${input.name}`,
+                    source: node.id,
+                    target: settingId,
+                    sourceHandle: `setting-source-${input.name}`,
+                    targetHandle: "setting-target",
+                    type: EdgeType.Settings,
+                    animated: false,
+                    data: { label: input.name },
+                });
+            } else {
+                const { nodes: pn, edges: pe } = createSettingPlaceholders(node, [input], layout, index, total);
+                extraNodes.push(...pn);
+                extraEdges.push(...pe);
+            }
         });
     });
 
-    return { nodes, edges };
+    return {
+        nodes: [...nodes, ...extraNodes],
+        edges: [...edges, ...extraEdges],
+    };
 }
+

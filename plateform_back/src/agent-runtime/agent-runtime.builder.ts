@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { JsonValue } from 'generated/prisma/runtime/library';
+import { Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
 
@@ -12,18 +12,28 @@ export class ContextBuilder {
 
     async buildPipeline({
         agentId,
-        workspaceId,
     }: {
         agentId: string;
-        workspaceId: string;
-    }): Promise<JsonValue> {
-        const agent = await this.agentService.findOne(agentId, workspaceId);
-        const workflow = await this.workflowService.findActive(agent.id);
+    }): Promise<Prisma.JsonValue> {
+        const prodVersion =
+            await this.agentService.findProductionWorkflowVersion(agentId);
+
+        if (!prodVersion) {
+            throw new Error(
+                'No production workflow version found for this agent',
+            );
+        }
+
+        const workflow = await this.workflowService.findByVersion(
+            agentId,
+            prodVersion,
+        );
 
         if (!workflow) {
             throw new Error('No active workflow found for this agent');
         }
 
-        return workflow.definition;
+        const def = workflow.definition as Record<string, unknown>;
+        return def.blocks as Prisma.JsonValue;
     }
 }

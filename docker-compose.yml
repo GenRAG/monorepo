@@ -83,8 +83,13 @@ services:
    ports:
      - "8080:8080"
    depends_on:
+     redis:
+       condition: service_healthy
      postgres:
        condition: service_healthy
+   environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
    env_file:
      - ./plateform_back/.env
    command: >
@@ -92,6 +97,18 @@ services:
    volumes:
     - ./plateform_back:/usr/src/app
     - /usr/src/app/node_modules
+
+  
+  redis:
+    image: redis:7.0-alpine
+    container_name: genrag-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+    restart: unless-stopped
 
 volumes:
   postgres_data:

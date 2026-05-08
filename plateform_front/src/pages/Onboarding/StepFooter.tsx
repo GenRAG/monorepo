@@ -1,5 +1,5 @@
 import { HStack, Text, VStack } from "@chakra-ui/react";
-import Button from "components/Atoms/Button";
+import Button from "components/System/Atoms/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface StepFooterProps {

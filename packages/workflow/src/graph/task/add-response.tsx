@@ -18,7 +18,7 @@ export const AddResponse = {
     id: "tooltip-workflow-4",
     inputs: [
         {
-            name: "LLM Model",
+            name: "Large Language Model",
             type: TaskParamType.SELECT,
             nodeType: TaskType.MODEL,
             helperText: "Choose a LLM model for your response",
@@ -26,10 +26,6 @@ export const AddResponse = {
             hideHandle: false,
             items: LLMS,
             id: "tooltip-workflow-5",
-            position: {
-                x: 300,
-                y: -50,
-            },
         },
         {
             name: "Instruction Prompt",
@@ -40,10 +36,6 @@ export const AddResponse = {
             hideHandle: false,
             items: [],
             id: "tooltip-workflow-6",
-            position: {
-                x: 350,
-                y: 60,
-            },
         },
     ],
     outputs: [],

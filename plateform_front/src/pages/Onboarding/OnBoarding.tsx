@@ -28,10 +28,10 @@ import {
 import { Check, Menu as MenuIcon } from "lucide-react";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
-import UserProfileDropdown from "components/Molecules/UserDropdownProfile";
+import UserProfileDropdown from "components/System/Molecules/UserDropdownProfile";
 import StepFooter from "pages/Onboarding/StepFooter";
-import OnBoardingBackground from "assetsNew/backgroundOnBoarding.png";
-import OnBoardingBackgroundBlack from "assetsNew/backgroundOnBoardingBlack.png";
+import OnBoardingBackground from "assets/backgroundOnBoarding.png";
+import OnBoardingBackgroundBlack from "assets/backgroundOnBoardingBlack.png";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import "./onboardingAnimations.css";
 

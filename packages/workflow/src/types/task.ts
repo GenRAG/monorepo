@@ -1,5 +1,6 @@
-import { Position } from "@xyflow/react";
 import { ShapeType } from "../components/nodes/NodeShape";
+import type { ModelOption } from "./model-option";
+import type { WorkflowNodeProps } from "./app-node";
 
 // ── Param types ────────────────────────────────────────────────────────────────
 
@@ -15,20 +16,18 @@ export enum TaskParamType {
 // Inchangé par rapport à l'existant
 export interface TaskSettingParam {
     name: string;
-    type: TaskParamType.SELECT | TaskParamType.STRING | TaskParamType.NUMBER;
-    nodeType: TaskType; // type du placeholder à créer (MODEL, INSTRUCTION…)
+    type: TaskParamType;
+    nodeType: TaskType;
     helperText?: string;
     required?: boolean;
     hideHandle?: boolean;
-    items?: string[];
+    items?: ModelOption[];
     id?: string;
-    position: { x: number; y: number };
 }
 
 export interface TaskChainOutput {
     nodeType: TaskType;
     optional: boolean;
-    position: { x: number; y: number };
 }
 
 export interface Task {
@@ -41,16 +40,16 @@ export interface Task {
     isEndPoint: boolean;
     isDeletable: boolean;
     isDraggable: boolean;
-    sourcePosition?: Position;
-    position?: { x: number; y: number };
     id?: string;
 
     inputs: TaskSettingParam[];
-
     chainOutputs?: TaskChainOutput[];
+    component?: React.ComponentType<WorkflowNodeProps>;
 }
 
 export type TaskParam = TaskSettingParam;
+
+export type WorkflowRegistry = Record<TaskType, Task>;
 
 export enum TaskType {
     QUERY = "QUERY",

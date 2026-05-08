@@ -1,5 +1,5 @@
 const fonts = {
-    display: "PP Fragment Serif",
+    display: "Hanken Grotesk",
     heading: "Hanken Grotesk",
     body: "Hanken Grotesk",
     number: "PP Fragment Sans",

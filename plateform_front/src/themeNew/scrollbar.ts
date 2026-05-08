@@ -1,3 +1,13 @@
+export const grayScrollbar = {
+    "&::-webkit-scrollbar": { width: "6px" },
+    "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
+    "&::-webkit-scrollbar-thumb": {
+        backgroundColor: "grey.300",
+        borderRadius: "3px",
+    },
+    "&::-webkit-scrollbar-button": { display: "none" },
+};
+
 export const thinScrollbar = {
     /* scrollbar container */
     "&::-webkit-scrollbar": {

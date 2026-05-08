@@ -1,184 +1,46 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
     useNodesState,
     useEdgesState,
     useReactFlow,
-    addEdge,
-    Connection,
     Edge,
 } from "@xyflow/react";
 import {
     CreateFlowNode,
-    linkNodes,
     createSettingPlaceholders,
 } from "../graph/create-flow-node";
-import { TaskType, Task, TaskParam } from "../types/task";
-import { TaskRegistry } from "../graph/task/registry";
+import { TaskType, TaskParamType, type WorkflowRegistry, TaskChainOutput } from "../types/task";
+import { EdgeType } from "../types/edge";
 import { AppNode } from "../types/app-node";
-import { resolveCollisions } from "../graph/resolve-collisions";
+import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
+import { getConfigInputs, getChainOutputs } from "../graph/task-utils";
 
-export type WorkflowPreset = "default" | "showcase";
+export { getConfigInputs, getChainOutputs };
 
-export function getConfigInputs(taskType: TaskType): TaskParam[] {
-    const task = TaskRegistry[taskType] as Task;
-    return task.inputs.filter(
-        (i: TaskParam) => !i.hideHandle && taskType === task.type,
-    );
-}
-
-export function getChainOutputs(taskType: TaskType) {
-    const task = TaskRegistry[taskType] as Task;
-    return task.chainOutputs ?? [];
-}
-
-const applyShowcaseDefaults = (nodes: AppNode[], edges: Edge[]): AppNode[] => {
-    return nodes.map((node) => {
-        if (node.data.type !== TaskType.MODEL && node.data.type !== TaskType.INSTRUCTION) {
-            return node;
-        }
-
-        const parentEdge = edges.find(
-            (e) => e.type === "settings" && e.target === node.id,
-        );
-        if (!parentEdge) return node;
-
-        const parentNode = nodes.find((n) => n.id === parentEdge.source);
-        const parentType = parentNode?.data.type;
-
-        if (node.data.type === TaskType.MODEL) {
-            let modelName = "GPT-4o";
-
-            if (parentType === TaskType.REWRITER) modelName = "Mistral";
-            if (parentType === TaskType.RERANKER) modelName = "BGE";
-            if (
-                typeof node.data.settingLabel === "string" &&
-                /rerank/i.test(node.data.settingLabel)
-            ) {
-                modelName = "BGE";
-            }
-
-            return {
-                ...node,
-                data: {
-                    ...node.data,
-                    isPlaceholder: false,
-                    firstTime: false,
-                    modelName,
-                },
-            };
-        }
-
-        return {
-            ...node,
-            data: {
-                ...node.data,
-                isPlaceholder: false,
-                isEditing: false,
-                stringValue:
-                    "Answer only with retrieved HR context, cite policy sections, and ask for clarification when information is missing.",
-            },
-        };
-    });
-};
-
-const buildInitialState = (
-    isVertical: boolean = true,
-    preset: WorkflowPreset = "default",
-) => {
-    const n1 = CreateFlowNode(TaskType.QUERY, { x: 0, y: 0 }, undefined, false);
-    const n2 = CreateFlowNode(
-        TaskType.RETRIEVER,
-        isVertical ? { x: 0, y: 200 } : { x: 300, y: 0 },
-        undefined,
-        false,
-    );
-    const n3 = CreateFlowNode(
-        TaskType.RESPONSE,
-        isVertical ? { x: 0, y: 400 } : { x: 600, y: 0 },
-        undefined,
-        false,
-    );
-
-    const mainNodes = [n1.node, n2.node, n3.node];
-    const mainEdges: Edge[] = [];
-
-    if (preset === "showcase") {
-        if (isVertical) {
-            n1.node.position = { x: 0, y: 0 };
-            n2.node.position = { x: 400, y: 280 };
-            n3.node.position = { x: 360, y: 550 };
-        } else {
-            n1.node.position = { x: 0, y: 0 };
-            n2.node.position = { x: 360, y: 0 };
-            n3.node.position = { x: 720, y: 0 };
-        }
-
-        const rewriter = CreateFlowNode(
-            TaskType.REWRITER,
-            isVertical ? { x: 0, y: 200 } : { x: 180, y: 0 },
-            undefined,
-            true,
-        );
-        const reranker = CreateFlowNode(
-            TaskType.RERANKER,
-            isVertical ? { x: 0, y: 450 } : { x: 540, y: 0 },
-            undefined,
-            true,
-        );
-
-        mainNodes.splice(1, 0, rewriter.node);
-        mainNodes.splice(3, 0, reranker.node);
-
-        mainEdges.push(
-            linkNodes(n1.node.id, rewriter.node.id),
-            linkNodes(rewriter.node.id, n2.node.id),
-            linkNodes(n2.node.id, reranker.node.id),
-            linkNodes(reranker.node.id, n3.node.id),
-        );
-    } else {
-        mainEdges.push(linkNodes(n1.node.id, n2.node.id), linkNodes(n2.node.id, n3.node.id));
-    }
-
-    const extraNodes: AppNode[] = [];
-    const extraEdges: Edge[] = [];
-
-    mainNodes.forEach((node) => {
-        const cfgInputs = getConfigInputs(node.data.type);
-        if (cfgInputs.length > 0) {
-            const { nodes: pn, edges: pe } = createSettingPlaceholders(
-                node,
-                cfgInputs,
-            );
-            extraNodes.push(...pn);
-            extraEdges.push(...pe);
-        }
-    });
-
-    const allNodes = [...mainNodes, ...extraNodes];
-    const allEdges = [...mainEdges, ...extraEdges];
-
-    return {
-        nodes: preset === "showcase" ? applyShowcaseDefaults(allNodes, allEdges) : allNodes,
-        edges: allEdges,
-    };
-};
-
-type UseWorkflowNodesOptions = {
+export interface UseWorkflowNodesOptions {
     initialVertical?: boolean;
-    preset?: WorkflowPreset;
-};
+    initialNodes?: AppNode[];
+    initialEdges?: Edge[];
+    readonly?: boolean;
+    layout?: LayoutStrategy;
+    registry?: WorkflowRegistry;
+}
 
 export const useWorkflowNodes = (
-    options: boolean | UseWorkflowNodesOptions = true,
+    options: UseWorkflowNodesOptions = {},
 ) => {
-    const initialVertical =
-        typeof options === "boolean"
-            ? options
-            : (options.initialVertical ?? true);
-    const preset = typeof options === "boolean" ? "default" : (options.preset ?? "default");
+    const layout: LayoutStrategy = options.layout ?? DEFAULT_LAYOUT;
+    const registry = options.registry;
+    const initialVertical = options.initialVertical ?? layout.isVertical;
+    const customInitialNodes = options.initialNodes;
+    const customInitialEdges = options.initialEdges;
+    const readonlyMode: boolean = options.readonly ?? false;
 
     const [isVertical, setIsVertical] = useState(initialVertical);
-    const initialStateRef = useRef(buildInitialState(initialVertical, preset));
+    const initialStateRef = useRef({
+        nodes: customInitialNodes ?? [] as AppNode[],
+        edges: customInitialEdges ?? [] as Edge[],
+    });
 
     const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>(
         initialStateRef.current.nodes,
@@ -187,66 +49,51 @@ export const useWorkflowNodes = (
         initialStateRef.current.edges,
     );
     const {
-        screenToFlowPosition,
-        updateNodeData,
         getEdges,
         deleteElements,
         addEdges,
     } = useReactFlow();
 
+    // Refs so handleAddChainNode can read the latest nodes/edges without
+    // capturing them as useCallback deps (which would recreate the function
+    // on every position update, causing unnecessary downstream re-renders).
+    const nodesRef = useRef(nodes);
+    nodesRef.current = nodes;
+    const edgesRef = useRef(edges);
+    edgesRef.current = edges;
+
     const handleSettingSelect = useCallback(
         (nodeId: string, item: string) => {
-            const task = TaskRegistry[TaskType.MODEL] as Task;
-            const offset = task?.position ?? { x: 0, y: 0 };
-
+            if (readonlyMode) return;
             setNodes((prev: AppNode[]) =>
                 prev.map((n) => {
                     if (n.id !== nodeId) return n;
-                    const pos = n.position ?? { x: 0, y: 0 };
-                    const hasAlreadySelected = n.data.firstTime === false;
+                    const fieldUpdate =
+                        n.data.inputType === TaskParamType.STRING
+                            ? { stringValue: item, isEditing: false }
+                            : { modelName: item };
                     return {
                         ...n,
-                        position: {
-                            x: hasAlreadySelected ? pos.x : pos.x + offset.x,
-                            y: hasAlreadySelected ? pos.y : pos.y + offset.y,
-                        },
                         data: {
                             ...n.data,
+                            ...fieldUpdate,
                             isPlaceholder: false,
-                            modelName: item,
                             firstTime: false,
                         },
                     };
                 }),
             );
         },
-        [setNodes],
+        [setNodes, readonlyMode],
     );
-
-    const pendingCollisionRef = useRef(false);
-
-    useEffect(() => {
-        if (!pendingCollisionRef.current) return;
-        const allMeasured = nodes.every((n) => n.measured?.width !== undefined);
-        if (!allMeasured) return;
-
-        pendingCollisionRef.current = false;
-        setNodes(
-            (prev: AppNode[]) =>
-                resolveCollisions(prev, {
-                    maxIterations: Infinity,
-                    overlapThreshold: 0.5,
-                    margin: 15,
-                }) as AppNode[],
-        );
-    }, [nodes, setNodes]);
 
     const handleRemoveChainNode = useCallback(
         async (nodeId: string) => {
+            if (readonlyMode) return;
             const allEdges = getEdges();
 
             const settingEdges = allEdges.filter(
-                (e) => e.source === nodeId && e.type === "settings",
+                (e) => e.source === nodeId && e.type === EdgeType.Settings,
             );
             const settingNodeIds = settingEdges.map((e) => e.target);
 
@@ -269,26 +116,34 @@ export const useWorkflowNodes = (
                         sourceHandle: "main-source",
                         targetHandle: "main-target",
                         animated: true,
-                        type: "default",
+                        type: EdgeType.Main,
                     },
                 ]);
             }
         },
-        [getEdges, deleteElements, addEdges],
+        [getEdges, deleteElements, addEdges, readonlyMode],
     );
 
     const handleAddChainNode = useCallback(
         (nodeType: TaskType) => {
-            const parentNode = nodes.find((n) => {
-                const task = TaskRegistry[n.data.type] as Task;
-                return task.chainOutputs?.some((o) => o.nodeType === nodeType);
-            });
+            if (readonlyMode || !registry) return;
+
+            const nodes = nodesRef.current;
+            const edges = edgesRef.current;
+
+            const parentNode = nodes.find((n) =>
+                registry[n.data.type]?.chainOutputs?.some(
+                    (o: TaskChainOutput) => o.nodeType === nodeType,
+                ),
+            );
+
             if (!parentNode) return;
 
-            const parentTask = TaskRegistry[parentNode.data.type] as Task;
+            const parentTask = registry[parentNode.data.type];
             const outputDef = parentTask.chainOutputs?.find(
-                (o) => o.nodeType === nodeType,
+                (o: TaskChainOutput) => o.nodeType === nodeType,
             );
+
             if (!outputDef) return;
 
             const outgoingEdge = edges.find(
@@ -296,35 +151,21 @@ export const useWorkflowNodes = (
                     e.source === parentNode.id &&
                     e.sourceHandle === "main-source",
             );
+
             const nextNode = outgoingEdge
                 ? nodes.find((n) => n.id === outgoingEdge.target)
                 : null;
 
-            const isVert = nextNode
-                ? Math.abs(nextNode.position.y - parentNode.position.y) >
-                  Math.abs(nextNode.position.x - parentNode.position.x)
-                : true;
-
-            const position = nextNode
-                ? {
-                      x: (parentNode.position.x + 50 + nextNode.position.x) / 2,
-                      y: (parentNode.position.y + 50 + nextNode.position.y) / 2,
-                  }
-                : {
-                      x: parentNode.position.x + (outputDef.position.x ?? 0),
-                      y: parentNode.position.y + (outputDef.position.y ?? 0),
-                  };
-
             const newNode = CreateFlowNode(
                 nodeType,
-                position,
+                layout.getInitialPosition(),
                 undefined,
                 outputDef.optional,
             ).node;
 
-            const cfgInputs = getConfigInputs(nodeType);
+            const cfgInputs = getConfigInputs(newNode.data.type);
             const { nodes: settingNodes, edges: settingEdges } =
-                createSettingPlaceholders(newNode, cfgInputs);
+                createSettingPlaceholders(newNode, cfgInputs, layout);
 
             const incomingEdge = {
                 id: `${parentNode.id}-chain-to-${newNode.id}`,
@@ -333,86 +174,60 @@ export const useWorkflowNodes = (
                 sourceHandle: "main-source",
                 targetHandle: "main-target",
                 animated: true,
-                type: "default",
+                type: EdgeType.Main,
             };
 
             const newOutgoingEdge = nextNode
                 ? {
-                      id: `${newNode.id}-chain-to-${nextNode.id}`,
-                      source: newNode.id,
-                      target: nextNode.id,
-                      sourceHandle: "main-source",
-                      targetHandle: "main-target",
-                      animated: true,
-                      type: "default",
-                  }
+                    id: `${newNode.id}-chain-to-${nextNode.id}`,
+                    source: newNode.id,
+                    target: nextNode.id,
+                    sourceHandle: "main-source",
+                    targetHandle: "main-target",
+                    animated: true,
+                    type: EdgeType.Main,
+                }
                 : null;
 
-            const getDownstreamNodes = (startNodeId: string): string[] => {
-                const downstream: string[] = [];
-                const visited = new Set<string>();
-                const queue = [startNodeId];
-                while (queue.length > 0) {
-                    const currentId = queue.shift()!;
-                    if (visited.has(currentId)) continue;
-                    visited.add(currentId);
-                    downstream.push(currentId);
-                    const mainEdge = edges.find(
-                        (e) =>
-                            e.source === currentId &&
-                            e.sourceHandle === "main-source",
-                    );
-                    if (mainEdge) queue.push(mainEdge.target);
-                    edges
-                        .filter(
-                            (e) =>
-                                e.source === currentId && e.type === "settings",
-                        )
-                        .forEach((e) => queue.push(e.target));
-                }
-                return downstream;
-            };
+            const allNewEdges: Edge[] = [
+                ...edges.filter(e => e.id !== outgoingEdge?.id),
+                incomingEdge,
+                ...(newOutgoingEdge ? [newOutgoingEdge] : []),
+                ...settingEdges,
+            ];
 
-            if (nextNode) {
-                const downstreamIds = getDownstreamNodes(nextNode.id);
-                const OFFSET_X = isVert
-                    ? 0
-                    : (nextNode.position.x - parentNode.position.x) / 2;
-                const OFFSET_Y = isVert
-                    ? (nextNode.position.y - parentNode.position.y) / 2
-                    : 0;
+            const allNewNodes: AppNode[] = [...nodes, newNode, ...settingNodes];
 
-                setNodes((prev: AppNode[]) => [
-                    ...prev.map((n) => {
-                        if (!downstreamIds.includes(n.id)) return n;
-                        return {
-                            ...n,
-                            position: {
-                                x: n.position.x + OFFSET_X,
-                                y: n.position.y + OFFSET_Y,
-                            },
-                        };
-                    }),
-                    newNode,
-                    ...settingNodes,
-                ]);
-            } else {
-                setNodes((prev: AppNode[]) => [...prev, newNode, ...settingNodes]);
-            }
+            const placements = layout.computePlacements(allNewNodes, allNewEdges, newNode.id);
+            const placementMap = new Map(placements.map(p => [p.id, p.position]));
 
-            setEdges((prev: Edge[]) => {
-                const filtered = outgoingEdge
-                    ? prev.filter((e) => e.id !== outgoingEdge.id)
-                    : prev;
-                return [
-                    ...filtered,
-                    incomingEdge,
-                    ...(newOutgoingEdge ? [newOutgoingEdge] : []),
-                    ...settingEdges,
-                ];
-            });
+            const oldPositionMap = new Map(allNewNodes.map(n => [n.id, n.position]));
+            const settingPlacementMap = new Map<string, { x: number; y: number }>();
+
+            allNewEdges
+                .filter(e => e.type === EdgeType.Settings)
+                .forEach(e => {
+                    const newParentPos = placementMap.get(e.source);
+                    if (!newParentPos) return;
+                    const oldParentPos = oldPositionMap.get(e.source);
+                    const settingNode = allNewNodes.find(n => n.id === e.target);
+                    if (!oldParentPos || !settingNode) return;
+                    settingPlacementMap.set(e.target, {
+                        x: newParentPos.x + (settingNode.position.x - oldParentPos.x),
+                        y: newParentPos.y + (settingNode.position.y - oldParentPos.y),
+                    });
+                });
+
+            setNodes(
+                allNewNodes.map(n => {
+                    if (placementMap.has(n.id)) return { ...n, position: placementMap.get(n.id)! };
+                    if (settingPlacementMap.has(n.id)) return { ...n, position: settingPlacementMap.get(n.id)! };
+                    return n;
+                }),
+            );
+            setEdges(allNewEdges);
         },
-        [nodes, edges, setNodes, setEdges],
+        [setNodes, setEdges, readonlyMode, layout],
     );
 
     const onDragOver = useCallback((event: React.DragEvent) => {
@@ -420,61 +235,15 @@ export const useWorkflowNodes = (
         event.dataTransfer.dropEffect = "move";
     }, []);
 
-    const onDrop = useCallback(
-        (event: React.DragEvent) => {
-            event.preventDefault();
-            const taskType = event.dataTransfer.getData(
-                "application/reactflow",
-            );
-            if (!taskType) return;
-
-            const position = screenToFlowPosition({
-                x: event.clientX,
-                y: event.clientY,
-            });
-
-            const newNode = CreateFlowNode(taskType as TaskType, position).node;
-            const cfgInputs = getConfigInputs(taskType as TaskType);
-            const { nodes: pNodes, edges: pEdges } = createSettingPlaceholders(
-                newNode,
-                cfgInputs,
-            );
-
-            setNodes((prev: AppNode[]) => [...prev, newNode, ...pNodes]);
-            if (pEdges.length > 0) {
-                setEdges((prev: Edge[]) => [...prev, ...pEdges]);
-            }
-        },
-        [screenToFlowPosition, setNodes, setEdges],
-    );
-
-    const onConnect = useCallback(
-        (connection: Connection) => {
-            setEdges((edges: Edge[]) =>
-                addEdge({ ...connection, animated: true }, edges),
-            );
-            if (!connection.targetHandle) return;
-
-            const node = nodes.find((n) => n.id === connection.target);
-            if (!node) return;
-
-            updateNodeData(node.id, {
-                inputs: { ...node.data.inputs, [connection.targetHandle]: "" },
-            });
-        },
-        [setEdges, updateNodeData, nodes],
-    );
-
     return {
         nodes,
         edges,
         isVertical,
+        readonly: readonlyMode,
         setIsVertical,
         onNodesChange,
         onEdgesChange,
         onDragOver,
-        onDrop,
-        onConnect,
         handleSettingSelect,
         handleAddChainNode,
         handleRemoveChainNode,

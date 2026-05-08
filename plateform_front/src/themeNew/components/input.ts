@@ -11,6 +11,7 @@ const { definePartsStyle, defineMultiStyleConfig } =
 const baseStyle = definePartsStyle({
     field: {
         ...textStyles?.["body-md"],
+        bg: "inputBg",
         borderWidth: "1px",
         borderStyle: "solid",
         borderRadius: borderRadius.xs,
@@ -26,7 +27,7 @@ const baseStyle = definePartsStyle({
         _placeholder: {
             color: "inputPlaceholder",
         },
-        _active : {
+        _active: {
             borderColor: "inputActiveBorder",
         },
         _focus: {

@@ -9,32 +9,34 @@ import {
     Settings,
     CreditCard,
     Cloud,
+    Lock,
 } from "lucide-react";
 
 export const mainMenu = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { id: "workspaces", icon: Folder, label: "Agents" },
+    { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
+    { id: "agents", icon: Folder, label: "Agents" },
     { id: "assistants", icon: MessageCircle, label: "Assistants" },
-    { id: "billing", icon: CreditCard, label: "Billing" },
+    { id: "billing", icon: CreditCard, label: "Facturation" },
 ];
 
 export const supportMenu = [
-    { id: "help", icon: HelpCircle, label: "Help center" },
+    { id: "help", icon: HelpCircle, label: "Centre d'aide" },
     { id: "notifications", icon: Bell, label: "Documentation" },
 ];
 
 export const agentMenu = [
-    { id: "playground", icon: MessageCircle, label: "Playground" },
+    { id: "playground", icon: MessageCircle, label: "Bac à sable" },
 ];
 
 export const agentFeaturesMenu = [
-    { id: "workflow", icon: GitGraph, label: "Workflow" },
+    { id: "workflow", icon: GitGraph, label: "Flux de travail" },
     { id: "documents", icon: FileText, label: "Documents" },
-    { id: "deploy", icon: Cloud, label: "Deployment" },
+    { id: "deploy", icon: Cloud, label: "Déploiement" },
+    { id: "access-control", icon: Lock, label: "Contrôle d'accès" },
 ];
 
 export const agentSettingsMenu = [
-    { id: "settings", icon: Settings, label: "Settings" },
+    { id: "settings", icon: Settings, label: "Paramètres" },
 ];
 
 export const workspaceMenu = agentMenu;

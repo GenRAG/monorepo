@@ -9,4 +9,6 @@ RUN yarn install
 
 COPY . .
 
+RUN yarn prisma generate
+
 CMD ["yarn", "start:dev"]

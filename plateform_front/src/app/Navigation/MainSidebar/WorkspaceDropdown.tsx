@@ -20,8 +20,8 @@ import {
     Settings,
     UserPlus,
 } from "lucide-react";
-import Button from "components/Atoms/Button";
-import { WorkspacePreview } from "types/workspace";
+import Button from "components/System/Atoms/Button";
+import { Workspace } from "types/workspace";
 
 const AVATAR_COLORS = [
     "#E85D75",
@@ -72,7 +72,7 @@ const WorkspaceAvatar = ({ name, size = "md" }: WorkspaceAvatarProps) => {
 };
 
 interface WorkspaceDropdownProps {
-    workspaces: WorkspacePreview[];
+    workspaces: Workspace[];
     selectedId: string;
     onSelect: (id: string) => void;
 }
@@ -96,7 +96,7 @@ const WorkspaceDropdown = ({
     const popoverBorder = useColorModeValue("grey.100", "#333");
     const headingColor = useColorModeValue("grey.400", "grey.500");
     const nameColor = useColorModeValue("grey.900", "white");
-    const titleColor = useColorModeValue("white", "white");
+    const titleColor = useColorModeValue("grey.900", "white");
     const subColor = useColorModeValue("grey.500", "grey.400");
     const itemHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
     const dividerColor = useColorModeValue("grey.100", "#2a2a2a");
@@ -185,12 +185,12 @@ const WorkspaceDropdown = ({
                                             {selectedWorkspace.name}
                                         </Text>
                                         <Text fontSize="11px" color={subColor}>
-                                            {selectedWorkspace.agentsCount ?? 0}{" "}
+                                            {/*selectedWorkspace.agentsCount ?? 0}{" "}
                                             agent
                                             {(selectedWorkspace.agentsCount ??
                                                 0) !== 1
                                                 ? "s"
-                                                : ""}
+                                                : ""*/}
                                         </Text>
                                     </VStack>
                                 </HStack>

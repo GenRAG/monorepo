@@ -34,7 +34,7 @@ const getColorScheme = (
             color: mode("grey.950", "grey.100")(props),
         },
         orange: {
-            bg: mode("orange.50", "orange.700")(props),
+            bg: mode("orange.200", "orange.700")(props),
             color: mode("grey.950", "orange.500")(props),
         },
         green: {
@@ -98,15 +98,12 @@ const Badge = {
     },
 
     variants: {
-        // We are forced to set colorScheme in variants, due to the way Chakra V2 handle colorScheme
-        // (It's not overriden if set in baseStyle)
         base: (props: BadgeProps) => ({
             borderRadius: "4px",
             borderWidth: "0px",
             ...getColorScheme(props.colorScheme ?? "gold", props as any),
         }),
 
-        // Used for performances for example
         numberRounded: (props: BadgeProps) => ({
             borderRadius: "full",
             padding: "0px 8px",

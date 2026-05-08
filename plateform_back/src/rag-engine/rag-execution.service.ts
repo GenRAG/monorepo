@@ -1,8 +1,9 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JsonValue } from 'generated/prisma/runtime/library';
+import { Prisma } from 'generated/prisma';
 import { firstValueFrom } from 'rxjs';
+import FormData from 'form-data';
 
 @Injectable()
 export class RagEngineService {
@@ -23,7 +24,7 @@ export class RagEngineService {
         pipeline,
         query,
     }: {
-        pipeline: JsonValue;
+        pipeline: Prisma.JsonValue;
         query: string;
     }) {
         const response = await firstValueFrom(
@@ -40,5 +41,26 @@ export class RagEngineService {
         );
 
         return response.data;
+    }
+
+    async indexDocument(
+        documentId: string,
+        buffer: Buffer,
+        mimeType: string,
+    ): Promise<void> {
+        const form = new FormData();
+
+        form.append('file', buffer, {
+            filename: documentId,
+            contentType: mimeType,
+        });
+        form.append('document_id', documentId);
+
+        await firstValueFrom(
+            this.httpService.post(`${this.ragEngineUrl}/rag/index`, form, {
+                headers: form.getHeaders(),
+                timeout: 60_000,
+            }),
+        );
     }
 }

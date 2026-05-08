@@ -1,7 +1,7 @@
 import { Box, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DeployedChatInterface } from "components/Molecules/DeployedChatInterface";
+import { DeployedChatInterface } from "components/System/Molecules/DeployedChatInterface";
 import { useChat } from "hooks/useChat";
 import { useUserInfo } from "hooks/useUserInfo";
 import {

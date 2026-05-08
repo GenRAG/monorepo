@@ -19,6 +19,7 @@ import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { Agent, UserRole } from 'generated/prisma';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
+import { FindAllAgentResult } from 'src/agent/agent.repository';
 
 @Controller('workspaces/:workspaceId/agents')
 @UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
@@ -40,7 +41,9 @@ export class AgentController {
     }
 
     @Get()
-    getAll(@Param('workspaceId') workspaceId: string): Promise<Agent[]> {
+    getAll(
+        @Param('workspaceId') workspaceId: string,
+    ): Promise<FindAllAgentResult[]> {
         return this.agentService.findAll(workspaceId);
     }
 

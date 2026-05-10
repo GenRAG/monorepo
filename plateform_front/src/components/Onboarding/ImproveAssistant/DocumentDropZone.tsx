@@ -24,10 +24,17 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
     return (
         <Box
             w="100%"
-            border={`2px dashed ${isDragging ? currentDarkTheme.primary : colorMode === "dark" ? "grey" : "grey"}`}
+            border={`1px dashed`}
+            borderColor={
+                isDragging
+                    ? currentDarkTheme.primary
+                    : colorMode === "dark"
+                      ? "grey.500"
+                      : "grey.300"
+            }
             borderRadius="12px"
             p={8}
-            bg={colorMode === "dark" ? "grey.700" : "grey.50"}
+            bg={colorMode === "dark" ? "grey.900" : "white"}
             textAlign="center"
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}
@@ -36,7 +43,7 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
             cursor="pointer"
             _hover={{
                 borderColor: currentDarkTheme.primary,
-                bg: colorMode === "dark" ? "grey.600" : "grey.100",
+                bg: colorMode === "dark" ? "green.800" : "green.50",
             }}
             transition="all 0.2s"
         >

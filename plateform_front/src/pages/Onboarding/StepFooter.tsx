@@ -1,4 +1,4 @@
-import { HStack, Text, VStack } from "@chakra-ui/react";
+import { HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import Button from "components/System/Atoms/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -17,6 +17,7 @@ const StepFooter = ({
     onValidateAndGoNext,
     showReassuringMessage,
 }: StepFooterProps) => {
+    const borderColor = useColorModeValue("grey.200", "grey.700");
     const handleNext = async () => {
         if (onValidateAndGoNext) {
             await onValidateAndGoNext();
@@ -26,7 +27,15 @@ const StepFooter = ({
     };
 
     return (
-        <VStack w="100%" spacing={3} align="stretch" pb="24px">
+        <VStack
+            w="100%"
+            spacing={3}
+            align="stretch"
+            pb="24px"
+            borderTop="1px solid"
+            borderColor={borderColor}
+            p={{ base: "8px", md: "12px" }}
+        >
             {showReassuringMessage && (
                 <Text
                     fontSize="xs"

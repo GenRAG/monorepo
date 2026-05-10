@@ -96,10 +96,8 @@ const OnboardingContent: React.FC = () => {
                 />
 
                 <VStack
-                    flex={{ base: 1, md: 3 }}
+                    flex={{ base: 1, md: 4 }}
                     align="start"
-                    p={responsivePadding}
-                    pb={0}
                     spacing={{ base: 4, md: 8 }}
                     borderRadius="12px"
                     roundedLeft={{ xl: 0 }}
@@ -125,6 +123,8 @@ const OnboardingContent: React.FC = () => {
                             flex={1}
                             minH={0}
                             overflow="hidden"
+                            px={responsivePadding}
+                            pt={responsivePadding}
                         >
                             <Text
                                 fontSize="2xl"

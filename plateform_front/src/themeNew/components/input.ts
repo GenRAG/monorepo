@@ -2,7 +2,6 @@ import { inputAnatomy } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 
 import borderRadius from "themeNew/foundations/borderRadius";
-import colors from "themeNew/foundations/colors";
 import { textStyles } from "themeNew/foundations/typography";
 
 const { definePartsStyle, defineMultiStyleConfig } =
@@ -21,7 +20,7 @@ const baseStyle = definePartsStyle({
             borderColor: "inputBorder",
         },
         _disabled: {
-            bg: colors.grey[50],
+            bg: "inputDisabledBg",
             color: "inputPlaceholder",
         },
         _placeholder: {

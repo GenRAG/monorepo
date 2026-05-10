@@ -31,14 +31,14 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
     const steps = useMemo(
         () => [
             {
-                title: "Add your documents",
-                description: "Your documents are being processed and indexed.",
+                title: "Ajouter vos documents",
+                description: "PDF, Markdow, Txt.",
                 icon: FileText,
             },
             {
-                title: "Documents are being processed",
+                title: "Traitement en cours...",
                 description:
-                    "Your assistant is now using your documents to answer questions.",
+                    "Votre assistant utilise maintenant vos documents pour répondre aux questions.",
                 icon: Sparkles,
             },
         ],
@@ -54,18 +54,20 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
     return (
         <Box
             w="100%"
+            h="100%"
             p={4}
-            bg={colorMode === "dark" ? "grey.700" : "white"}
+            bg={colorMode === "dark" ? "grey.900" : "white"}
             borderRadius="12px"
             mb="4px"
-            border={`1px solid ${colorMode === "dark" ? "grey.600" : "#E7E7E7"}`}
+            border="1px solid"
+            borderColor={colorMode === "dark" ? "grey.700" : "grey.200"}
         >
             <Stepper
                 index={activeStepIndex}
                 orientation="vertical"
                 gap={0}
                 w="100%"
-                h="120px"
+                h="100%"
                 colorScheme={currentDarkTheme.colorScheme}
                 variant="solid"
             >

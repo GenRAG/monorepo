@@ -5,17 +5,10 @@ import React, {
     useCallback,
     useMemo,
 } from "react";
-import {
-    HStack,
-    Stack,
-    Heading,
-    VStack,
-    useColorMode,
-    chakra,
-} from "@chakra-ui/react";
+import { HStack, Stack, VStack, chakra } from "@chakra-ui/react";
+import { Upload } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { useForm } from "react-hook-form";
-import { useChat } from "hooks/useChat";
 import { ChatInterface } from "components/System/Molecules/ChatInterface";
 import StepLevel from "components/System/Molecules/StepLevel";
 import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
@@ -25,7 +18,6 @@ import { useAppResponsive } from "hooks/useAppResponsive";
 import UploadProgressStepper from "components/Onboarding/ImproveAssistant/UploadProgressStepper";
 import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
-import "../onboardingAnimations.css";
 
 interface ImproveAssistantFormData {
     documentsUploaded: boolean;
@@ -37,7 +29,6 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     registerValidateAndGoNext,
     goNext,
 }) => {
-    const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId, agentId } = useOnboarding();
 
@@ -68,17 +59,14 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     );
 
     const getResponse = useCallback(
-        (): string[] | { response: string[]; isImproved?: boolean } => ({
+        () => ({
             response:
                 showComparison && completedFiles.length > 0
                     ? afterResponse
                     : beforeResponse,
-            isImproved: showComparison && completedFiles.length > 0,
         }),
         [showComparison, completedFiles.length, afterResponse, beforeResponse],
     );
-
-    const { messages, sendMessage, isLoading } = useChat({ getResponse });
 
     const { trigger, setValue } = useForm<ImproveAssistantFormData>({
         defaultValues: {
@@ -119,16 +107,6 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     return (
         <chakra.form w="100%" h="100%">
             <Stack w="100%" h="100%" spacing={8}>
-                <VStack align="start" spacing={2} w="100%">
-                    <Heading
-                        variant={isMobile ? "heading-lg" : "heading-2xl"}
-                        fontWeight="bold"
-                        color={colorMode === "dark" ? "white" : "grey.900"}
-                    >
-                        Improve your assistant with your documents
-                    </Heading>
-                </VStack>
-
                 <StepLevel
                     level={showComparison ? 3 : 2}
                     title={
@@ -146,12 +124,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                     spacing={8}
                     align="start"
                 >
-                    <VStack flex={1} w="100%" spacing={4}>
-                        <UploadProgressStepper
-                            completedFilesCount={completedFiles.length}
-                            isProcessing={processingFiles.length > 0}
-                            showComparison={showComparison}
-                        />
+                    <VStack flex={1} w="100%" h="100%" spacing={4}>
                         <DocumentDropZone
                             isDragging={isDragging}
                             onFileSelect={handleFileUpload}
@@ -159,11 +132,16 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                         />
+                        <UploadProgressStepper
+                            completedFilesCount={completedFiles.length}
+                            isProcessing={processingFiles.length > 0}
+                            showComparison={showComparison}
+                        />
                         <DocumentFileList sources={sources} />
                     </VStack>
 
                     <Stack
-                        flex={1}
+                        flex={2}
                         minH={0}
                         display="flex"
                         flexDirection="column"
@@ -172,14 +150,22 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                         <ChatInterface
                             fullHeight={!isMobile}
                             compact={!isMobile}
-                            messages={messages}
-                            onSendMessage={sendMessage}
-                            isLoading={isLoading}
-                            placeholder="Ask your question..."
+                            getResponse={getResponse}
+                            title={
+                                showComparison
+                                    ? "Assistant personnalisé prêt"
+                                    : "Ajoute tes documents d'abord"
+                            }
                             welcomeMessage={
                                 showComparison
-                                    ? "Hello! I now have access to your personalized documents. Ask me a question to see the difference!"
-                                    : "Add your documents to improve your assistant"
+                                    ? "Pose une question pour voir la différence avec tes documents."
+                                    : "Uploade tes fichiers RH à gauche pour activer les réponses personnalisées."
+                            }
+                            icon={showComparison ? undefined : Upload}
+                            placeholder={
+                                showComparison
+                                    ? "Pose ta question..."
+                                    : "Ajoutez des documents pour activer le chat"
                             }
                             disabled={!showComparison}
                         />

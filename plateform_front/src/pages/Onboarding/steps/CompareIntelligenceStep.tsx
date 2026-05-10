@@ -1,68 +1,61 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
     Box,
-    Heading,
     Stack,
     Text,
     VStack,
     useColorMode,
     chakra,
 } from "@chakra-ui/react";
+import { MessageCircle, RotateCcw, Search, Zap } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { useForm } from "react-hook-form";
 import StepLevel from "components/System/Molecules/StepLevel";
-import { ChatInterface } from "components/System/Molecules/ChatInterface";
-import { useChat } from "hooks/useChat";
+import ChatInput from "components/System/Molecules/Chat/ChatInput";
+import Button from "components/System/Atoms/Button";
+import ResponseCard from "components/Onboarding/CompareIntelligence/ResponseDetailPanel";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import ResponseDetailPanel from "components/Onboarding/CompareIntelligence/ResponseDetailPanel";
-import "../onboardingAnimations.css";
 
 interface CompareIntelligenceFormData {
     selectedLLM: string;
-    question: string;
 }
 
-const RESPONSES = [
-    "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year.",
-    "According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company.",
-    "Great question! Your company grants you 27 paid vacation days per year, which is above the legal minimum. This includes 25 days according to the Syntec agreement, plus 2 additional days that your company has chosen to add to improve your work-life balance.",
-];
-
-const RESPONSE_LABELS = ["Standard (fast)", "More precise", "More creative"];
-
-const RESPONSE_DESCRIPTIONS = [
-    "Quick and efficient responses",
-    "In-depth document analysis",
-    "More detailed and contextual responses",
-];
-
-const RESPONSE_ADVANTAGES = [
+const RESPONSE_DATA = [
     {
-        title: "Standard (fast)",
-        advantages: [
-            "Fast response time for quick queries",
-            "Efficient resource usage",
-            "Perfect for simple questions",
-            "Lower computational cost",
-        ],
+        title: "STANDARD",
+        badge: "Rapide",
+        isRecommended: false,
+        icon: Zap,
+        responseText:
+            "Selon la convention Syntec, vous avez droit à 25 jours de congés payés par an.",
+        advantages: ["Réponse Instantanée", "Idéal pour les questions simples"],
+        llmId: "standard",
     },
     {
-        title: "More precise",
+        title: "PRÉCIS",
+        badge: "Recommandé",
+        isRecommended: true,
+        icon: Search,
+        responseText:
+            "Selon votre convention collective (Art. 23) et votre règlement intérieur (§4.2), vous bénéficiez de 27 jours de congés payés par an, dont 2 jours supplémentaires accordés par votre entreprise.",
         advantages: [
-            "Detailed document references",
-            "Accurate citations and article numbers",
-            "In-depth analysis of your documents",
-            "Higher accuracy for complex questions",
+            "Citations et articles précis",
+            "Analyse approfondie des documents",
         ],
+        llmId: "precise",
     },
     {
-        title: "More creative",
+        title: "CRÉATIF",
+        badge: "Convivial",
+        isRecommended: false,
+        icon: MessageCircle,
+        responseText:
+            "Bonne nouvelle ! Votre entreprise vous offre 27 jours de congés payés — c'est au-dessus du minimum légal. Vous avez 25 jours Syntec + 2 jours bonus. Vous pouvez les poser via MyHR en suivant la procédure habituelle.",
         advantages: [
-            "Contextual and friendly responses",
-            "Better user experience",
-            "More engaging explanations",
-            "Human-like conversation style",
+            "Ton chaleureux et engageant",
+            "Meilleure expérience utilisateur",
         ],
+        llmId: "creative",
     },
 ];
 
@@ -75,18 +68,19 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
     const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
 
+    const [question, setQuestion] = useState<string | null>(
+        data.testQuestion || null,
+    );
     const [selectedResponseIndex, setSelectedResponseIndex] = useState<
         number | null
-    >(null);
-    const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
-        null,
+    >(
+        data.selectedLLM
+            ? RESPONSE_DATA.findIndex((r) => r.llmId === data.selectedLLM)
+            : null,
     );
 
     const { trigger, setValue } = useForm<CompareIntelligenceFormData>({
-        defaultValues: {
-            selectedLLM: data.selectedLLM || "",
-            question: data.testQuestion || data.question || "",
-        },
+        defaultValues: { selectedLLM: data.selectedLLM || "" },
         mode: "onChange",
     });
 
@@ -102,102 +96,129 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
         });
     }, [registerValidateAndGoNext]);
 
-    const getResponse = useCallback((): string[] => RESPONSES, []);
+    const handleQuestionSend = (q: string) => {
+        setQuestion(q);
+    };
 
-    const { messages, sendMessage } = useChat({ getResponse });
-
-    const handleResponseSelect = async (
-        responseIndex: number,
-        messageId: string,
-    ) => {
-        setSelectedResponseIndex(responseIndex);
-        setSelectedMessageId(messageId);
-        const llmId = ["standard", "precise", "creative"][responseIndex];
+    const handleResponseSelect = async (index: number) => {
+        setSelectedResponseIndex(index);
+        const llmId = RESPONSE_DATA[index].llmId;
         setValue("selectedLLM", llmId);
         updateData({ selectedLLM: llmId });
         await trigger();
     };
 
+    const handleReset = () => {
+        setQuestion(null);
+        setSelectedResponseIndex(null);
+        setValue("selectedLLM", "");
+    };
+
     return (
         <chakra.form w="100%" h="100%">
-            <Stack w="100%" h="100%" spacing={6} flexDirection="column">
+            <Stack w="100%" h="100%" spacing={4} flexDirection="column">
                 <VStack align="start" spacing={4} w="100%">
-                    <VStack align="start" spacing={2} w="100%">
-                        <Heading
-                            variant={isMobile ? "heading-lg" : "heading-2xl"}
-                            fontWeight="bold"
-                            color={colorMode === "dark" ? "white" : "grey.900"}
-                        >
-                            Compare your assistant&apos;s intelligence
-                        </Heading>
-                        {!isMobile && (
-                            <Text
-                                color={
-                                    colorMode === "dark"
-                                        ? "grey.400"
-                                        : "grey.600"
-                                }
-                                variant="body-xl"
-                            >
-                                Compare the quality of responses
-                            </Text>
-                        )}
-                    </VStack>
                     <StepLevel
                         level={4}
                         title="Optimized"
                         description="You can change intelligence at any time. Nothing is final."
                     />
-                    {!isMobile && (
-                        <Text
-                            fontSize="sm"
-                            color={
-                                colorMode === "dark" ? "grey.400" : "grey.600"
-                            }
-                        >
-                            Select the response you prefer to improve your
-                            assistant.
-                        </Text>
-                    )}
                 </VStack>
 
-                <Stack
-                    flex={1}
-                    minH={0}
-                    direction={{ base: "column", lg: "row" }}
-                    align="stretch"
-                    spacing={6}
-                    w="100%"
-                    borderRadius="12px"
-                >
-                    {selectedResponseIndex !== null && selectedMessageId && (
-                        <ResponseDetailPanel
-                            selectedIndex={selectedResponseIndex}
-                            responseText={RESPONSES[selectedResponseIndex]}
-                            responseAdvantages={RESPONSE_ADVANTAGES}
-                            responseDescriptions={RESPONSE_DESCRIPTIONS}
+                <Box flex={1} minH={0} overflowY="auto">
+                    {!question ? (
+                        <ChatInput
+                            placeholder="Pose une question pour voir les différences..."
+                            onSend={handleQuestionSend}
                         />
+                    ) : (
+                        <VStack spacing={4} align="stretch">
+                            <VStack
+                                align="flex-end"
+                                spacing={1}
+                                alignSelf="flex-end"
+                                maxW="80%"
+                            >
+                                <Text
+                                    fontSize="xs"
+                                    color={
+                                        colorMode === "dark"
+                                            ? "grey.500"
+                                            : "grey.400"
+                                    }
+                                >
+                                    Vous
+                                </Text>
+                                <Box
+                                    p={3}
+                                    bg={
+                                        colorMode === "dark"
+                                            ? "green.700"
+                                            : "green.100"
+                                    }
+                                    borderRadius="12px"
+                                    borderBottomRightRadius="2px"
+                                >
+                                    <Text
+                                        fontSize="sm"
+                                        color={
+                                            colorMode === "dark"
+                                                ? "grey.100"
+                                                : "green.800"
+                                        }
+                                    >
+                                        {question}
+                                    </Text>
+                                </Box>
+                            </VStack>
+
+                            <Text
+                                fontSize="sm"
+                                color={
+                                    colorMode === "dark"
+                                        ? "grey.400"
+                                        : "grey.600"
+                                }
+                            >
+                                Sélectionne la réponse que tu préfères :
+                            </Text>
+
+                            <Stack
+                                direction={isMobile ? "column" : "row"}
+                                spacing={4}
+                                align="stretch"
+                            >
+                                {RESPONSE_DATA.map((card, index) => (
+                                    <ResponseCard
+                                        key={index}
+                                        title={card.title}
+                                        badge={card.badge}
+                                        isRecommended={card.isRecommended}
+                                        icon={card.icon}
+                                        responseText={card.responseText}
+                                        advantages={card.advantages}
+                                        isSelected={
+                                            selectedResponseIndex === index
+                                        }
+                                        onClick={() =>
+                                            handleResponseSelect(index)
+                                        }
+                                    />
+                                ))}
+                            </Stack>
+
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                leftIcon={RotateCcw}
+                                onClick={handleReset}
+                                w="fit-content"
+                            >
+                                Poser une autre question
+                            </Button>
+                        </VStack>
                     )}
-                    <Box
-                        flex={1}
-                        minW={0}
-                        minH={0}
-                        display="flex"
-                        flexDirection="column"
-                    >
-                        <ChatInterface
-                            fullHeight
-                            compact
-                            messages={messages}
-                            onSendMessage={sendMessage}
-                            onResponseSelect={handleResponseSelect}
-                            selectedResponseIndex={selectedResponseIndex}
-                            selectedMessageId={selectedMessageId}
-                            responseLabels={RESPONSE_LABELS}
-                            responseDescriptions={RESPONSE_DESCRIPTIONS}
-                        />
-                    </Box>
-                </Stack>
+                </Box>
             </Stack>
         </chakra.form>
     );

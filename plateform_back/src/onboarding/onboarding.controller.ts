@@ -8,6 +8,11 @@ import { OnboardingService } from './onboarding.service';
 import { UpdateStepRequest } from './dto/update-step.request';
 import { CompleteOnboardingRequest } from './dto/complete-onboarding.request';
 import { OnboardingSessionResponse } from './dto/onboarding-session.response';
+import {
+    CompareOnboardingRequest,
+    CompareOnboardingResponse,
+} from './dto/compare-onboarding.request';
+import { UpdateStepsDataRequest } from './dto/update-steps-data.request';
 
 @Controller('workspaces/:workspaceId/onboarding')
 @UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
@@ -41,6 +46,29 @@ export class OnboardingController {
             workspaceId,
             body.step,
         );
+    }
+
+    @Post('steps-data')
+    updateStepsData(
+        @Param('workspaceId') workspaceId: string,
+        @CurrentUser(CurrentUserPipe) user: UserSafe,
+        @Body() body: UpdateStepsDataRequest,
+    ): Promise<void> {
+        return this.onboardingService.updateStepsData(
+            user.id,
+            workspaceId,
+            body.stepId,
+            body.data,
+        );
+    }
+
+    @Post('compare')
+    compare(
+        @Param('workspaceId') workspaceId: string,
+        @CurrentUser(CurrentUserPipe) user: UserSafe,
+        @Body() body: CompareOnboardingRequest,
+    ): Promise<CompareOnboardingResponse> {
+        return this.onboardingService.compare(user.id, workspaceId, body.query);
     }
 
     @Post('complete')

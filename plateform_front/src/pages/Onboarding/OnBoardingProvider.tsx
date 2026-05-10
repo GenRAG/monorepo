@@ -25,6 +25,7 @@ export interface StepConfig {
     component: React.ComponentType<StepComponentProps>;
     validate?: (data: StepData) => boolean | Promise<boolean>;
     onComplete?: (data: StepData) => void | Promise<void>;
+    errorMessage?: string;
 }
 
 export interface StepComponentProps {
@@ -106,6 +107,7 @@ export const OnboardingProvider: React.FC<{
                 setState((prev) => ({
                     ...prev,
                     currentStep: Math.max(prev.currentStep, session.step - 1),
+                    stepsData: session.stepsData ?? prev.stepsData,
                 }));
             })
             .catch((err) => {
@@ -164,9 +166,8 @@ export const OnboardingProvider: React.FC<{
             );
             if (!isValid) {
                 toast({
-                    title: "An error occurred.",
-                    description:
-                        "Please complete the required fields before proceeding.",
+                    title: "Une erreur est survenue",
+                    description: currentStepConfig.errorMessage,
                     status: "error",
                     duration: 9000,
                     isClosable: true,

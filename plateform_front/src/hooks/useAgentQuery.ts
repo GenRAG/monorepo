@@ -2,10 +2,18 @@ import { useState, useCallback } from "react";
 import { useExecuteAgentRuntimeMutation } from "services/agentRuntime/agentRuntime";
 import { useSendMockQueryMutation } from "services/chat/chat";
 
+export class InsufficientCreditsError extends Error {
+    constructor() {
+        super("Pas de crédits disponibles.");
+        this.name = "InsufficientCreditsError";
+    }
+}
+
 interface AgentQueryState {
     text: string;
     isStreaming: boolean;
     error: string | null;
+    isOutOfCredits: boolean;
 }
 
 export const useAgentQuery = (
@@ -17,6 +25,7 @@ export const useAgentQuery = (
         text: "",
         isStreaming: false,
         error: null,
+        isOutOfCredits: false,
     });
 
     const [executeRuntime] = useExecuteAgentRuntimeMutation();
@@ -24,7 +33,12 @@ export const useAgentQuery = (
 
     const sendQuery = useCallback(
         async (query: string): Promise<string> => {
-            setState({ text: "", isStreaming: true, error: null });
+            setState({
+                text: "",
+                isStreaming: true,
+                error: null,
+                isOutOfCredits: false,
+            });
 
             try {
                 let answer: string;
@@ -43,7 +57,17 @@ export const useAgentQuery = (
 
                 setState((prev) => ({ ...prev, text: answer }));
                 return answer;
-            } catch (err) {
+            } catch (err: any) {
+                const status = err?.status ?? err?.originalStatus;
+                if (status === 403 || status === 402) {
+                    const creditsError = new InsufficientCreditsError();
+                    setState((prev) => ({
+                        ...prev,
+                        error: creditsError.message,
+                        isOutOfCredits: true,
+                    }));
+                    throw creditsError;
+                }
                 setState((prev) => ({ ...prev, error: String(err) }));
                 throw err;
             } finally {

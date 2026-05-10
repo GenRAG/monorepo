@@ -1,14 +1,8 @@
-import React, {
-    useState,
-    useRef,
-    useEffect,
-    useCallback,
-    useMemo,
-} from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { ChatMessage } from "hooks/useChat";
 import { HStack, Stack, VStack, chakra } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import { useForm } from "react-hook-form";
 import { ChatInterface } from "components/System/Molecules/ChatInterface";
 import StepLevel from "components/System/Molecules/StepLevel";
 import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
@@ -19,84 +13,75 @@ import UploadProgressStepper from "components/Onboarding/ImproveAssistant/Upload
 import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
 
-interface ImproveAssistantFormData {
-    documentsUploaded: boolean;
-    improvedResponse: string[];
-}
+const MAX_FILES = 3;
 
 export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     data,
+    updateData,
     registerValidateAndGoNext,
     goNext,
 }) => {
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId, agentId } = useOnboarding();
 
-    const [showComparison, setShowComparison] = useState(
-        data.documentsUploaded || false,
-    );
-    const { uploadDocuments, sources } = useUploadDocuments(
+    const savedMessages: ChatMessage[] = data.messages ?? [];
+
+    const { uploadDocuments, sources, isAtMaxFiles } = useUploadDocuments(
         workspaceId,
         agentId,
+        MAX_FILES,
     );
+
+    const completedFiles = sources.filter((s) => s.status === Status.COMPLETED);
+    const processingFiles = sources.filter(
+        (s) => s.status === Status.PROCESSING || s.status === Status.UPLOADING,
+    );
+
+    // Chat is enabled only when at least one file is fully indexed
+    const showComparison = completedFiles.length > 0;
 
     const beforeResponse = useMemo(
         () => [
-            "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year.",
+            "Selon la convention Syntec, vous avez droit à 25 jours de congés payés par an.",
         ],
         [],
     );
     const afterResponse = useMemo(
         () => [
-            "According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company.",
+            "Selon votre convention collective et votre règlement intérieur, vous bénéficiez de 27 jours de congés payés par an, dont 2 jours supplémentaires accordés par votre entreprise.",
         ],
         [],
     );
 
-    const completedFiles = sources.filter((s) => s.status === Status.COMPLETED);
-    const processingFiles = sources.filter(
-        (s) => s.status === Status.PROCESSING,
-    );
-
     const getResponse = useCallback(
         () => ({
-            response:
-                showComparison && completedFiles.length > 0
-                    ? afterResponse
-                    : beforeResponse,
+            response: showComparison ? afterResponse : beforeResponse,
         }),
-        [showComparison, completedFiles.length, afterResponse, beforeResponse],
+        [showComparison, afterResponse, beforeResponse],
     );
 
-    const { trigger, setValue } = useForm<ImproveAssistantFormData>({
-        defaultValues: {
-            documentsUploaded: data.documentsUploaded || false,
-            improvedResponse: data.improvedResponse || "",
-        },
-        mode: "onChange",
-    });
-
-    const goNextRef = useRef(goNext);
-    goNextRef.current = goNext;
-    const triggerRef = useRef(trigger);
-    triggerRef.current = trigger;
+    // Keep validation data in sync
+    useEffect(() => {
+        updateData({
+            fileCount: completedFiles.length,
+        });
+    }, [completedFiles.length, updateData]);
 
     useEffect(() => {
         if (!registerValidateAndGoNext) return;
-        registerValidateAndGoNext(async () => {
-            if (await triggerRef.current()) goNextRef.current();
-        });
-    }, [registerValidateAndGoNext]);
+        registerValidateAndGoNext(async () => goNext());
+    }, [registerValidateAndGoNext, goNext]);
+
+    const handleMessagesChange = useCallback(
+        (msgs: ChatMessage[]) => {
+            updateData({ messages: msgs, messageCount: msgs.length });
+        },
+        [updateData],
+    );
 
     const handleFileUpload = async (files: FileList | null) => {
-        if (!files) return;
+        if (!files || isAtMaxFiles) return;
         await uploadDocuments(files);
-        setTimeout(async () => {
-            setShowComparison(true);
-            setValue("documentsUploaded", true);
-            setValue("improvedResponse", afterResponse);
-            await trigger();
-        }, 0);
     };
 
     const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
@@ -111,7 +96,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                     level={showComparison ? 3 : 2}
                     title={
                         showComparison
-                            ? "Personalized"
+                            ? "Personnalisé"
                             : "En cours de personnalisation"
                     }
                     description="Ton assistant est en train d'être personnalisé avec les documents que tu as ajoutés"
@@ -127,10 +112,18 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                     <VStack flex={1} w="100%" h="100%" spacing={4}>
                         <DocumentDropZone
                             isDragging={isDragging}
-                            onFileSelect={handleFileUpload}
+                            onFileSelect={
+                                isAtMaxFiles ? undefined : handleFileUpload
+                            }
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
+                            disabled={isAtMaxFiles}
+                            maxFiles={MAX_FILES}
+                            currentCount={
+                                sources.filter((s) => s.status !== Status.ERROR)
+                                    .length
+                            }
                         />
                         <UploadProgressStepper
                             completedFilesCount={completedFiles.length}
@@ -151,6 +144,8 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                             fullHeight={!isMobile}
                             compact={!isMobile}
                             getResponse={getResponse}
+                            onMessagesChange={handleMessagesChange}
+                            initialMessages={savedMessages}
                             title={
                                 showComparison
                                     ? "Assistant personnalisé prêt"
@@ -165,7 +160,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                             placeholder={
                                 showComparison
                                     ? "Pose ta question..."
-                                    : "Ajoutez des documents pour activer le chat"
+                                    : "Indexation en cours..."
                             }
                             disabled={!showComparison}
                         />

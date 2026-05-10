@@ -12,8 +12,10 @@ export class ContextBuilder {
 
     async buildPipeline({
         agentId,
+        instructionOverride,
     }: {
         agentId: string;
+        instructionOverride?: string;
     }): Promise<Prisma.JsonValue> {
         const prodVersion =
             await this.agentService.findProductionWorkflowVersion(agentId);
@@ -34,6 +36,15 @@ export class ContextBuilder {
         }
 
         const def = workflow.definition as Record<string, unknown>;
-        return def.blocks as Prisma.JsonValue;
+        const blocks = (def.blocks ?? []) as Record<string, unknown>[];
+
+        if (instructionOverride) {
+            const answerBlock = blocks.find((b) => b['type'] === 'answer');
+            if (answerBlock) {
+                answerBlock['instruction'] = instructionOverride;
+            }
+        }
+
+        return blocks as unknown as Prisma.JsonValue;
     }
 }

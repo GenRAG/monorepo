@@ -1,6 +1,7 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
+    Skeleton,
     Stack,
     Text,
     VStack,
@@ -9,53 +10,47 @@ import {
 } from "@chakra-ui/react";
 import { MessageCircle, RotateCcw, Search, Zap } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import { useForm } from "react-hook-form";
 import StepLevel from "components/System/Molecules/StepLevel";
 import ChatInput from "components/System/Molecules/Chat/ChatInput";
 import Button from "components/System/Atoms/Button";
 import ResponseCard from "components/Onboarding/CompareIntelligence/ResponseDetailPanel";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { useOnboarding } from "hooks/useOnBoarding";
+import {
+    CompareOnboardingResponse,
+    useCompareOnboardingMutation,
+} from "services/onboarding/onboarding";
 
-interface CompareIntelligenceFormData {
-    selectedLLM: string;
-}
-
-const RESPONSE_DATA = [
+const CARD_META = [
     {
+        key: "standard" as const,
         title: "STANDARD",
         badge: "Rapide",
         isRecommended: false,
         icon: Zap,
-        responseText:
-            "Selon la convention Syntec, vous avez droit à 25 jours de congés payés par an.",
-        advantages: ["Réponse Instantanée", "Idéal pour les questions simples"],
-        llmId: "standard",
+        advantages: ["Réponse instantanée", "Idéal pour les questions simples"],
     },
     {
+        key: "precise" as const,
         title: "PRÉCIS",
         badge: "Recommandé",
         isRecommended: true,
         icon: Search,
-        responseText:
-            "Selon votre convention collective (Art. 23) et votre règlement intérieur (§4.2), vous bénéficiez de 27 jours de congés payés par an, dont 2 jours supplémentaires accordés par votre entreprise.",
         advantages: [
             "Citations et articles précis",
             "Analyse approfondie des documents",
         ],
-        llmId: "precise",
     },
     {
+        key: "creative" as const,
         title: "CRÉATIF",
         badge: "Convivial",
         isRecommended: false,
         icon: MessageCircle,
-        responseText:
-            "Bonne nouvelle ! Votre entreprise vous offre 27 jours de congés payés — c'est au-dessus du minimum légal. Vous avez 25 jours Syntec + 2 jours bonus. Vous pouvez les poser via MyHR en suivant la procédure habituelle.",
         advantages: [
             "Ton chaleureux et engageant",
             "Meilleure expérience utilisateur",
         ],
-        llmId: "creative",
     },
 ];
 
@@ -67,51 +62,53 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
 }) => {
     const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
+    const { workspaceId } = useOnboarding();
 
     const [question, setQuestion] = useState<string | null>(
-        data.testQuestion || null,
+        data.testQuestion ?? null,
     );
-    const [selectedResponseIndex, setSelectedResponseIndex] = useState<
-        number | null
-    >(
-        data.selectedLLM
-            ? RESPONSE_DATA.findIndex((r) => r.llmId === data.selectedLLM)
-            : null,
+    const [responses, setResponses] =
+        useState<CompareOnboardingResponse | null>(null);
+    const [selectedLLM, setSelectedLLM] = useState<string | null>(
+        data.selectedLLM ?? null,
     );
 
-    const { trigger, setValue } = useForm<CompareIntelligenceFormData>({
-        defaultValues: { selectedLLM: data.selectedLLM || "" },
-        mode: "onChange",
-    });
-
-    const goNextRef = useRef(goNext);
-    goNextRef.current = goNext;
-    const triggerRef = useRef(trigger);
-    triggerRef.current = trigger;
+    const [compareOnboarding, { isLoading }] = useCompareOnboardingMutation();
 
     useEffect(() => {
         if (!registerValidateAndGoNext) return;
-        registerValidateAndGoNext(async () => {
-            if (await triggerRef.current()) goNextRef.current();
-        });
-    }, [registerValidateAndGoNext]);
+        registerValidateAndGoNext(async () => goNext());
+    }, [registerValidateAndGoNext, goNext]);
 
-    const handleQuestionSend = (q: string) => {
+    const handleQuestionSend = async (q: string) => {
+        if (!workspaceId) return;
         setQuestion(q);
+        setResponses(null);
+        setSelectedLLM(null);
+        updateData({ messageSent: false, selectedLLM: undefined });
+
+        try {
+            const result = await compareOnboarding({
+                workspaceId,
+                query: q,
+            }).unwrap();
+            setResponses(result);
+            updateData({ messageSent: true });
+        } catch {
+            setQuestion(null);
+        }
     };
 
-    const handleResponseSelect = async (index: number) => {
-        setSelectedResponseIndex(index);
-        const llmId = RESPONSE_DATA[index].llmId;
-        setValue("selectedLLM", llmId);
+    const handleResponseSelect = (llmId: string) => {
+        setSelectedLLM(llmId);
         updateData({ selectedLLM: llmId });
-        await trigger();
     };
 
     const handleReset = () => {
         setQuestion(null);
-        setSelectedResponseIndex(null);
-        setValue("selectedLLM", "");
+        setResponses(null);
+        setSelectedLLM(null);
+        updateData({ messageSent: false, selectedLLM: undefined });
     };
 
     return (
@@ -120,8 +117,8 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                 <VStack align="start" spacing={4} w="100%">
                     <StepLevel
                         level={4}
-                        title="Optimized"
-                        description="You can change intelligence at any time. Nothing is final."
+                        title="Optimisé"
+                        description="Compare les différents styles de réponse et choisis celui qui correspond le mieux à ton usage."
                     />
                 </VStack>
 
@@ -172,50 +169,87 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                                 </Box>
                             </VStack>
 
-                            <Text
-                                fontSize="sm"
-                                color={
-                                    colorMode === "dark"
-                                        ? "grey.400"
-                                        : "grey.600"
-                                }
-                            >
-                                Sélectionne la réponse que tu préfères :
-                            </Text>
-
-                            <Stack
-                                direction={isMobile ? "column" : "row"}
-                                spacing={4}
-                                align="stretch"
-                            >
-                                {RESPONSE_DATA.map((card, index) => (
-                                    <ResponseCard
-                                        key={index}
-                                        title={card.title}
-                                        badge={card.badge}
-                                        isRecommended={card.isRecommended}
-                                        icon={card.icon}
-                                        responseText={card.responseText}
-                                        advantages={card.advantages}
-                                        isSelected={
-                                            selectedResponseIndex === index
+                            {isLoading || !responses ? (
+                                <Stack
+                                    direction={isMobile ? "column" : "row"}
+                                    spacing={4}
+                                    align="stretch"
+                                >
+                                    {CARD_META.map((card) => (
+                                        <Skeleton
+                                            key={card.key}
+                                            flex={1}
+                                            height="200px"
+                                            borderRadius="12px"
+                                            startColor={
+                                                colorMode === "dark"
+                                                    ? "grey.800"
+                                                    : "grey.100"
+                                            }
+                                            endColor={
+                                                colorMode === "dark"
+                                                    ? "grey.700"
+                                                    : "grey.200"
+                                            }
+                                        />
+                                    ))}
+                                </Stack>
+                            ) : (
+                                <>
+                                    <Text
+                                        fontSize="sm"
+                                        color={
+                                            colorMode === "dark"
+                                                ? "grey.400"
+                                                : "grey.600"
                                         }
-                                        onClick={() =>
-                                            handleResponseSelect(index)
-                                        }
-                                    />
-                                ))}
-                            </Stack>
+                                    >
+                                        Sélectionne la réponse que tu préfères :
+                                    </Text>
 
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                leftIcon={RotateCcw}
-                                onClick={handleReset}
-                                w="fit-content"
-                            >
-                                Poser une autre question
-                            </Button>
+                                    <Stack
+                                        direction={isMobile ? "column" : "row"}
+                                        spacing={4}
+                                        align="stretch"
+                                    >
+                                        {CARD_META.map((card) => (
+                                            <ResponseCard
+                                                key={card.key}
+                                                title={card.title}
+                                                badge={card.badge}
+                                                isRecommended={
+                                                    card.isRecommended
+                                                }
+                                                icon={card.icon}
+                                                responseText={
+                                                    responses[card.key]
+                                                }
+                                                advantages={card.advantages}
+                                                isSelected={
+                                                    selectedLLM === card.key
+                                                }
+                                                onClick={() =>
+                                                    handleResponseSelect(
+                                                        card.key,
+                                                    )
+                                                }
+                                            />
+                                        ))}
+                                    </Stack>
+                                </>
+                            )}
+
+                            {!isLoading && (
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    leftIcon={RotateCcw}
+                                    onClick={handleReset}
+                                    w="fit-content"
+                                >
+                                    Poser une autre question
+                                </Button>
+                            )}
                         </VStack>
                     )}
                 </Box>

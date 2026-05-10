@@ -25,7 +25,10 @@ interface ChatInterfaceProps {
     fullHeight?: boolean;
     compact?: boolean;
     disabled?: boolean;
+    disabledMessage?: string;
     icon?: LucideIcon;
+    initialMessages?: ChatMessage[];
+    maxMessages?: number;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -40,13 +43,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     fullHeight = false,
     compact = false,
     disabled = false,
+    disabledMessage,
     icon: IconComponent = Bot,
+    initialMessages,
+    maxMessages,
 }) => {
     const { colorMode } = useColorMode();
     const borderColor = useColorModeValue("grey.200", "grey.700");
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-    const { messages, sendMessage, isLoading } = useChat({ getResponse });
+    const { messages, sendMessage, isLoading } = useChat({
+        getResponse,
+        initialMessages,
+    });
+
+    const limitReached =
+        maxMessages !== undefined && messages.length >= maxMessages;
+    const isDisabled = disabled || limitReached;
 
     useEffect(() => {
         onMessagesChange?.(messages);
@@ -175,9 +188,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 borderColor={colorMode === "dark" ? "grey.700" : "grey.100"}
             />
             <ChatInput
-                placeholder={placeholder}
+                placeholder={
+                    isDisabled && disabledMessage
+                        ? disabledMessage
+                        : placeholder
+                }
                 isLoading={isLoading}
-                disabled={disabled}
+                disabled={isDisabled}
                 onSend={sendMessage}
             />
         </Box>

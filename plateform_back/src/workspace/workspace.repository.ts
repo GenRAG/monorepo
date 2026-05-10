@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { UserRole, Prisma, Workspace } from 'generated/prisma';
+import {
+    UserRole,
+    Prisma,
+    Workspace,
+    PlanTier,
+    CreditTransactionType,
+} from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { getPlanConfig } from 'src/plans/plans.config';
 
 export type WorkspacePayload = Prisma.WorkspaceGetPayload<{
     include: {
@@ -104,32 +111,48 @@ export class WorkspaceRepository {
         name: string;
         description?: string;
         userId: string;
+        plan?: PlanTier;
     }): Promise<WorkspaceWithUsers> {
-        const { name, description, userId } = data;
+        const { name, description, userId, plan = PlanTier.FREE } = data;
+        const { initialCredits } = getPlanConfig(plan);
 
-        const workspace = await this.prisma.workspace.create({
-            data: {
-                name,
-                description,
-                users: {
-                    create: {
-                        userId,
-                        role: UserRole.ADMIN,
+        return this.prisma.$transaction(async (tx) => {
+            const workspace = await tx.workspace.create({
+                data: {
+                    name,
+                    description,
+                    plan,
+                    users: {
+                        create: {
+                            userId,
+                            role: UserRole.ADMIN,
+                        },
+                    },
+                    creditBalance: {
+                        create: {
+                            balance: initialCredits,
+                        },
                     },
                 },
-                creditBalance: {
-                    create: {
-                        balance: 0,
+                include: { users: true },
+            });
+
+            if (initialCredits > 0) {
+                await tx.creditTransaction.create({
+                    data: {
+                        workspaceId: workspace.id,
+                        amount: initialCredits,
+                        type: CreditTransactionType.SUBSCRIPTION,
+                        metadata: {
+                            plan,
+                            reason: 'initial_plan_credits',
+                        },
                     },
-                },
-            },
-            include: {
-                users: true,
-                creditBalance: true,
-            },
+                });
+            }
+
+            return workspace;
         });
-
-        return workspace;
     }
 
     async delete(id: string): Promise<Workspace> {

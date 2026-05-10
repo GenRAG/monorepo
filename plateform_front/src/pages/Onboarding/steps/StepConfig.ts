@@ -4,7 +4,6 @@ import { TestAssistantStepComponent } from "pages/Onboarding/steps/TestAssistant
 import { ImproveAssistantStepComponent } from "pages/Onboarding/steps/ImproveAssistantStep";
 import { CompareIntelligenceStepComponent } from "pages/Onboarding/steps/CompareIntelligenceStep";
 
-
 export const stepsConfig: StepConfig[] = [
     {
         id: "test-assistant",
@@ -13,11 +12,13 @@ export const stepsConfig: StepConfig[] = [
         icon: Sparkles,
         component: TestAssistantStepComponent,
         validate: (data) => {
-            return !!(data.testQuestion && data.testResponse);
+            return (data.messageCount ?? 0) >= 1;
         },
         onComplete: async (data) => {
             console.log("Test completed:", data);
         },
+        errorMessage:
+            "Pose au moins une question à ton assistant pour continuer",
     },
     {
         id: "improve-assistant",
@@ -26,23 +27,27 @@ export const stepsConfig: StepConfig[] = [
         icon: FileText,
         component: ImproveAssistantStepComponent,
         validate: (data) => {
-            return !!(data.documentsUploaded && data.improvedResponse);
+            return (data.fileCount ?? 0) >= 1 && (data.messageCount ?? 0) >= 1;
         },
         onComplete: async (data) => {
             console.log("Documents uploaded:", data);
         },
+        errorMessage:
+            "Ajoute au moins un document et pose une question pour continuer",
     },
     {
         id: "compare-intelligence",
-        title: "Compare l'intelligence de ton assistant",
-        description: "Compare la qualité des réponses",
+        title: "Compare le style des réponses de ton assistant",
+        description: "Compare le style des réponses",
         icon: Zap,
         component: CompareIntelligenceStepComponent,
         validate: (data) => {
-            return !!data.selectedLLM;
+            return data.messageSent === true && !!data.selectedLLM;
         },
         onComplete: async (data) => {
             console.log("LLM selected:", data);
         },
+        errorMessage:
+            "Envoie un message et sélectionne un type de réponse pour continuer",
     },
 ];

@@ -7,6 +7,13 @@ export interface OnboardingSession {
     step: number;
     completed: boolean;
     instruction: string | null;
+    stepsData: Record<string, Record<string, unknown>>;
+}
+
+export interface CompareOnboardingResponse {
+    standard: string;
+    precise: string;
+    creative: string;
 }
 
 interface StartOnboardingParams {
@@ -16,6 +23,17 @@ interface StartOnboardingParams {
 interface UpdateStepParams {
     workspaceId: string;
     step: number;
+}
+
+interface UpdateStepsDataParams {
+    workspaceId: string;
+    stepId: string;
+    data: Record<string, unknown>;
+}
+
+interface CompareOnboardingParams {
+    workspaceId: string;
+    query: string;
 }
 
 interface CompleteOnboardingParams {
@@ -72,6 +90,28 @@ export const onboardingApi = backendApi.injectEndpoints({
             ],
         }),
 
+        updateOnboardingStepsData: builder.mutation<
+            void,
+            UpdateStepsDataParams
+        >({
+            query: ({ workspaceId, stepId, data }) => ({
+                url: `/workspaces/${workspaceId}/onboarding/steps-data`,
+                method: "POST",
+                body: { stepId, data },
+            }),
+        }),
+
+        compareOnboarding: builder.mutation<
+            CompareOnboardingResponse,
+            CompareOnboardingParams
+        >({
+            query: ({ workspaceId, query }) => ({
+                url: `/workspaces/${workspaceId}/onboarding/compare`,
+                method: "POST",
+                body: { query },
+            }),
+        }),
+
         completeOnboarding: builder.mutation<
             CompleteOnboardingResponse,
             CompleteOnboardingParams
@@ -92,5 +132,7 @@ export const {
     useStartOnboardingMutation,
     useGetOnboardingSessionQuery,
     useUpdateOnboardingStepMutation,
+    useUpdateOnboardingStepsDataMutation,
+    useCompareOnboardingMutation,
     useCompleteOnboardingMutation,
 } = onboardingApi;

@@ -18,15 +18,18 @@ export class AgentRuntimeOrchestrator {
         query,
         agentId,
         workspaceId,
+        instructionOverride,
     }: {
         query: string;
         agentId: string;
         workspaceId: string;
+        instructionOverride?: string;
     }) {
         await this.usageTracker.checkOrThrow(workspaceId);
 
         const pipeline = await this.contextBuilder.buildPipeline({
             agentId,
+            instructionOverride,
         });
 
         const answer = await this.ragEngineService.sendQuery({

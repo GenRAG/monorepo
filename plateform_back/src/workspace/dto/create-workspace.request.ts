@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { PlanTier } from 'generated/prisma';
 
 export class CreateWorkspaceRequest {
     @ApiProperty({
@@ -9,11 +10,20 @@ export class CreateWorkspaceRequest {
     @IsString()
     name: string;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         example: 'Dedicated workspace for product squad',
         description: 'Workspace description',
     })
     @IsString()
     @IsOptional()
-    description: string;
+    description?: string;
+
+    @ApiPropertyOptional({
+        enum: PlanTier,
+        default: PlanTier.FREE,
+        description: 'Plan tier — defaults to FREE',
+    })
+    @IsEnum(PlanTier)
+    @IsOptional()
+    plan?: PlanTier;
 }

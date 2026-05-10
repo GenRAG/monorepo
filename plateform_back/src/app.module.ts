@@ -10,6 +10,7 @@ import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
 import { CreditBalanceModule } from 'src/credit/credit-balance.module';
 import { DocumentModule } from './document/document.module';
 import { DeploymentModule } from './deployment/deployment.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
 import { BullModule } from '@nestjs/bullmq';
 
 @Module({
@@ -63,6 +64,7 @@ import { BullModule } from '@nestjs/bullmq';
         CreditBalanceModule,
         DocumentModule,
         DeploymentModule,
+        OnboardingModule,
     ],
     controllers: [],
     providers: [],

@@ -8,4 +8,5 @@ model Workspace {
   agents             Agent[]
   creditBalance      CreditBalance?
   creditTransactions CreditTransaction[]
+  onboardingSessions OnboardingSession[]
 }

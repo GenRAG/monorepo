@@ -12,6 +12,7 @@ model User {
   passwordResetLastSentAt     DateTime?
   workspaces                  UserWorkspace[]
   agentVersions               AgentVersion[]
+  onboardingSessions          OnboardingSession[]
 }
 
 enum UserRole {

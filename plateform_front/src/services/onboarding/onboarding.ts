@@ -41,11 +41,6 @@ interface CompleteOnboardingParams {
     style: "standard" | "precise" | "creative";
 }
 
-interface CompleteOnboardingResponse {
-    success: boolean;
-    instruction: string;
-}
-
 const onboardingTag = (workspaceId: string) => ({
     type: Tag.Onboarding as const,
     id: workspaceId,
@@ -112,10 +107,7 @@ export const onboardingApi = backendApi.injectEndpoints({
             }),
         }),
 
-        completeOnboarding: builder.mutation<
-            CompleteOnboardingResponse,
-            CompleteOnboardingParams
-        >({
+        completeOnboarding: builder.mutation<void, CompleteOnboardingParams>({
             query: ({ workspaceId, style }) => ({
                 url: `/workspaces/${workspaceId}/onboarding/complete`,
                 method: "POST",

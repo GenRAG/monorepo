@@ -87,7 +87,10 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
                 multiple
                 accept=".pdf,.docx,.txt,.png"
                 style={{ display: "none" }}
-                onChange={(e) => onFileSelect?.(e.target.files)}
+                onChange={(e) => {
+                    onFileSelect?.(e.target.files);
+                    e.target.value = "";
+                }}
                 disabled={disabled}
             />
             <VStack spacing={3}>

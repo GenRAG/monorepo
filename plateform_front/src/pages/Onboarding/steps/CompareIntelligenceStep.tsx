@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Box,
     Skeleton,
@@ -57,28 +57,21 @@ const CARD_META = [
 export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
     data,
     updateData,
-    goNext,
-    registerValidateAndGoNext,
 }) => {
     const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId } = useOnboarding();
 
     const [question, setQuestion] = useState<string | null>(
-        data.testQuestion ?? null,
+        (data.testQuestion as string) ?? null,
     );
     const [responses, setResponses] =
         useState<CompareOnboardingResponse | null>(null);
     const [selectedLLM, setSelectedLLM] = useState<string | null>(
-        data.selectedLLM ?? null,
+        (data.selectedLLM as string) ?? null,
     );
 
     const [compareOnboarding, { isLoading }] = useCompareOnboardingMutation();
-
-    useEffect(() => {
-        if (!registerValidateAndGoNext) return;
-        registerValidateAndGoNext(async () => goNext());
-    }, [registerValidateAndGoNext, goNext]);
 
     const handleQuestionSend = async (q: string) => {
         if (!workspaceId) return;
@@ -169,7 +162,7 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                                 </Box>
                             </VStack>
 
-                            {isLoading || !responses ? (
+                            {isLoading ? (
                                 <Stack
                                     direction={isMobile ? "column" : "row"}
                                     spacing={4}
@@ -194,7 +187,7 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                                         />
                                     ))}
                                 </Stack>
-                            ) : (
+                            ) : responses ? (
                                 <>
                                     <Text
                                         fontSize="sm"
@@ -237,7 +230,7 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                                         ))}
                                     </Stack>
                                 </>
-                            )}
+                            ) : null}
 
                             {!isLoading && (
                                 <Button

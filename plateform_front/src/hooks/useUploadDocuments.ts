@@ -20,7 +20,7 @@ export interface UploadedSource {
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLLS = 40; // 2 minutes max
 
-const pollDocumentStatus = async (
+const pollDocumentStatus = (
     documentId: string,
     sourceId: string,
     workspaceId: string,
@@ -78,18 +78,21 @@ const useUploadDocuments = (
     workspaceId?: string | null,
     agentId?: string | null,
     maxFiles = 3,
+    initialCount = 0,
 ) => {
     const [sources, setSources] = useState<UploadedSource[]>([]);
     const [uploadDocument] = useUploadDocumentMutation();
 
-    const isAtMaxFiles =
-        sources.filter((s) => s.status !== Status.ERROR).length >= maxFiles;
+    const sessionValidCount = sources.filter(
+        (s) => s.status !== Status.ERROR,
+    ).length;
+    const isAtMaxFiles = initialCount + sessionValidCount >= maxFiles;
 
     const uploadDocuments = async (
         files: FileList,
     ): Promise<UploadedSource[]> => {
         const validSources = sources.filter((s) => s.status !== Status.ERROR);
-        const remaining = maxFiles - validSources.length;
+        const remaining = maxFiles - initialCount - validSources.length;
         const filesToUpload = Array.from(files).slice(0, remaining);
 
         if (filesToUpload.length === 0) return [];
@@ -107,89 +110,58 @@ const useUploadDocuments = (
 
         setSources((prev) => [...prev, ...newSources]);
 
-        filesToUpload.forEach(async (file, index) => {
-            const sourceId = newSources[index].id;
-            try {
-                if (workspaceId && agentId) {
-                    const doc = await uploadDocument({
-                        workspaceId,
-                        agentId,
-                        file,
-                    }).unwrap();
+        void Promise.allSettled(
+            filesToUpload.map(async (file, index) => {
+                const sourceId = newSources[index].id;
+                try {
+                    if (workspaceId && agentId) {
+                        const doc = await uploadDocument({
+                            workspaceId,
+                            agentId,
+                            file,
+                        }).unwrap();
 
-                    setSources((prev) =>
-                        prev.map((s) =>
-                            s.id === sourceId
-                                ? {
-                                      ...s,
-                                      status: Status.PROCESSING,
-                                      progress: 50,
-                                      documentId: doc.id,
-                                  }
-                                : s,
-                        ),
-                    );
+                        setSources((prev) =>
+                            prev.map((s) =>
+                                s.id === sourceId
+                                    ? {
+                                          ...s,
+                                          status: Status.PROCESSING,
+                                          progress: 50,
+                                          documentId: doc.id,
+                                      }
+                                    : s,
+                            ),
+                        );
 
-                    await pollDocumentStatus(
-                        doc.id,
-                        sourceId,
-                        workspaceId,
-                        agentId,
-                        setSources,
-                    );
-                } else {
-                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                        pollDocumentStatus(
+                            doc.id,
+                            sourceId,
+                            workspaceId,
+                            agentId,
+                            setSources,
+                        );
+                    }
+                } catch {
                     setSources((prev) =>
                         prev.map((s) =>
                             s.id === sourceId
-                                ? {
-                                      ...s,
-                                      status: Status.PROCESSING,
-                                      progress: 50,
-                                  }
-                                : s,
-                        ),
-                    );
-                    await new Promise((resolve) => setTimeout(resolve, 2000));
-                    setSources((prev) =>
-                        prev.map((s) =>
-                            s.id === sourceId
-                                ? {
-                                      ...s,
-                                      status: Status.COMPLETED,
-                                      progress: 100,
-                                  }
+                                ? { ...s, status: Status.ERROR }
                                 : s,
                         ),
                     );
                 }
-            } catch {
-                setSources((prev) =>
-                    prev.map((s) =>
-                        s.id === sourceId ? { ...s, status: Status.ERROR } : s,
-                    ),
-                );
-            }
-        });
+            }),
+        );
 
         return newSources;
     };
 
-    const removeSource = (index: number) => {
-        setSources((prev) => prev.filter((_, i) => i !== index));
+    const removeSource = (id: string) => {
+        setSources((prev) => prev.filter((s) => s.id !== id));
     };
 
-    const clearSources = () => {
-        setSources([]);
-    };
-
-    return {
-        sources,
-        uploadDocuments,
-        removeSource,
-        clearSources,
-        isAtMaxFiles,
-    };
+    return { sources, uploadDocuments, removeSource, isAtMaxFiles };
 };
 
 export default useUploadDocuments;

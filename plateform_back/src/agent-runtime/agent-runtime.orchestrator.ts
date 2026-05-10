@@ -19,13 +19,17 @@ export class AgentRuntimeOrchestrator {
         agentId,
         workspaceId,
         instructionOverride,
+        skipUsageTracking = false,
     }: {
         query: string;
         agentId: string;
         workspaceId: string;
         instructionOverride?: string;
+        skipUsageTracking?: boolean;
     }) {
-        await this.usageTracker.checkOrThrow(workspaceId);
+        if (!skipUsageTracking) {
+            await this.usageTracker.checkOrThrow(workspaceId);
+        }
 
         const pipeline = await this.contextBuilder.buildPipeline({
             agentId,
@@ -41,10 +45,12 @@ export class AgentRuntimeOrchestrator {
             throw new Error('Failed to get an answer from the RAG engine.');
         }
 
-        EventBus.emit(
-            AgentEventType.AGENT_QUERY_COMPLETED,
-            new AgentQueryCompletedEvent(workspaceId, agentId, undefined),
-        );
+        if (!skipUsageTracking) {
+            EventBus.emit(
+                AgentEventType.AGENT_QUERY_COMPLETED,
+                new AgentQueryCompletedEvent(workspaceId, agentId, undefined),
+            );
+        }
 
         return { answer };
     }

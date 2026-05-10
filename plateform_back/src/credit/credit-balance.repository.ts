@@ -33,4 +33,15 @@ export class CreditBalanceRepository {
             create: { workspaceId, balance: amount },
         });
     }
+
+    async incrementOrCreate(
+        workspaceId: string,
+        amount: number,
+    ): Promise<void> {
+        await this.prisma.creditBalance.upsert({
+            where: { workspaceId },
+            update: { balance: { increment: amount } },
+            create: { workspaceId, balance: amount },
+        });
+    }
 }

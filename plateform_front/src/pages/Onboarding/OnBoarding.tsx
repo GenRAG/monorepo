@@ -1,12 +1,17 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Box,
+    Button,
     HStack,
+    Spinner,
     Stack,
     Text,
     VStack,
+    useColorModeValue,
     useDisclosure,
 } from "@chakra-ui/react";
+import { AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
@@ -16,6 +21,24 @@ import OnboardingSidebar from "components/Onboarding/Stepper/OnboardingSidebar";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { useIsDark } from "hooks/useIsDark";
 
+const SESSION_ERROR_MESSAGES = {
+    not_found: {
+        title: "Workspace introuvable",
+        description:
+            "Ce workspace n'existe pas ou a été supprimé. Vérifiez l'URL ou retournez au tableau de bord.",
+    },
+    unauthorized: {
+        title: "Accès non autorisé",
+        description:
+            "Vous n'avez pas accès à ce workspace. Contactez un administrateur.",
+    },
+    unknown: {
+        title: "Une erreur est survenue",
+        description:
+            "Impossible de charger la session d'onboarding. Réessayez plus tard.",
+    },
+};
+
 const OnboardingContent: React.FC = () => {
     const {
         currentStep,
@@ -24,10 +47,15 @@ const OnboardingContent: React.FC = () => {
         updateStepData,
         getStepData,
         isStepValid,
+        isSessionLoading,
+        sessionError,
     } = useOnboarding();
 
+    const navigate = useNavigate();
     const isDark = useIsDark();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const errorBg = useColorModeValue("white", "grey.900");
+    const errorBorder = useColorModeValue("grey.200", "grey.700");
 
     const containerStyles = {
         bg: isDark ? "grey.950" : "white",
@@ -39,21 +67,6 @@ const OnboardingContent: React.FC = () => {
         null,
     );
     const prevStepRef = useRef(currentStep);
-    const validateAndGoNextRef = useRef<(() => Promise<void>) | undefined>(
-        undefined,
-    );
-
-    const registerValidateAndGoNext = useCallback((fn: () => Promise<void>) => {
-        validateAndGoNextRef.current = fn;
-    }, []);
-
-    const handleValidateAndGoNext = useCallback(async () => {
-        if (validateAndGoNextRef.current) {
-            await validateAndGoNextRef.current();
-        } else {
-            goNext();
-        }
-    }, [goNext]);
 
     useEffect(() => {
         const prevStep = prevStepRef.current;
@@ -71,9 +84,71 @@ const OnboardingContent: React.FC = () => {
 
         const timer = setTimeout(() => setJustCompletedStep(null), 1000);
         prevStepRef.current = currentStep;
-        validateAndGoNextRef.current = undefined;
         return () => clearTimeout(timer);
     }, [currentStep]);
+
+    if (isSessionLoading) {
+        return (
+            <Stack h="100vh" align="center" justify="center" spacing={4}>
+                <Spinner size="lg" color={currentDarkTheme.primary} />
+                <Text color={isDark ? "grey.400" : "grey.600"} fontSize="sm">
+                    Chargement de votre session...
+                </Text>
+            </Stack>
+        );
+    }
+
+    if (sessionError) {
+        const { title, description } = SESSION_ERROR_MESSAGES[sessionError];
+        return (
+            <Stack h="100vh" align="center" justify="center" p={8}>
+                <VStack
+                    spacing={6}
+                    maxW="480px"
+                    w="100%"
+                    p={8}
+                    bg={errorBg}
+                    border="1px solid"
+                    borderColor={errorBorder}
+                    borderRadius="16px"
+                    align="center"
+                    textAlign="center"
+                >
+                    <Box
+                        p={4}
+                        bg={isDark ? "grey.800" : "grey.100"}
+                        borderRadius="12px"
+                    >
+                        <AlertTriangle
+                            size={32}
+                            color={isDark ? "#f87171" : "#ef4444"}
+                        />
+                    </Box>
+                    <VStack spacing={2}>
+                        <Text
+                            fontSize="xl"
+                            fontWeight="semibold"
+                            color={isDark ? "white" : "grey.900"}
+                        >
+                            {title}
+                        </Text>
+                        <Text
+                            fontSize="sm"
+                            color={isDark ? "grey.400" : "grey.600"}
+                        >
+                            {description}
+                        </Text>
+                    </VStack>
+                    <Button
+                        colorScheme={currentDarkTheme.colorScheme}
+                        onClick={() => void navigate("/dashboard")}
+                    >
+                        Retour au tableau de bord
+                    </Button>
+                </VStack>
+            </Stack>
+        );
+    }
 
     const currentStepConfig = stepsConfig[currentStep];
     const CurrentStepComponent = currentStepConfig.component;
@@ -156,9 +231,6 @@ const OnboardingContent: React.FC = () => {
                                     goNext={goNext}
                                     goPrevious={goPrevious}
                                     isValid={isStepValid(currentStep)}
-                                    registerValidateAndGoNext={
-                                        registerValidateAndGoNext
-                                    }
                                 />
                             </Box>
                         </Stack>
@@ -166,7 +238,7 @@ const OnboardingContent: React.FC = () => {
                             currentStep={currentStep}
                             goNext={goNext}
                             goPrevious={goPrevious}
-                            onValidateAndGoNext={handleValidateAndGoNext}
+                            onValidateAndGoNext={async () => goNext()}
                         />
                     </VStack>
                 </VStack>

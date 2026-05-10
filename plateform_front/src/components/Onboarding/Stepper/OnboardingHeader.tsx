@@ -1,9 +1,9 @@
 import React from "react";
-import { HStack, Text, Box, useColorMode } from "@chakra-ui/react";
+import { Box, HStack, Text, useColorMode } from "@chakra-ui/react";
 import { Moon, Sun } from "lucide-react";
 import Button from "components/System/Atoms/Button";
-import { useBreakpointValue } from "@chakra-ui/react";
 import { IconButton } from "@chakra-ui/react";
+import { useAppResponsive } from "hooks/useAppResponsive";
 import { Menu as MenuIcon } from "lucide-react";
 
 interface OnboardingHeaderProps {
@@ -14,7 +14,7 @@ const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
     onOpenDrawer,
 }) => {
     const { colorMode, toggleColorMode } = useColorMode();
-    const isMobile = useBreakpointValue({ base: true, lg: false });
+    const isMobile = useAppResponsive({ base: true, lg: false });
 
     return (
         <HStack

@@ -1,7 +1,7 @@
 import React from "react";
 import {
     Box,
-    Text,
+    Circle,
     Icon,
     Step,
     StepDescription,
@@ -9,10 +9,10 @@ import {
     StepStatus,
     StepTitle,
     Stepper,
-    Circle,
+    Text,
     useColorMode,
-    useBreakpointValue,
 } from "@chakra-ui/react";
+import { useAppResponsive } from "hooks/useAppResponsive";
 import { Check } from "lucide-react";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -28,7 +28,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({
     onStepClick,
 }) => {
     const { colorMode } = useColorMode();
-    const isMobile = useBreakpointValue({ base: true, lg: false });
+    const isMobile = useAppResponsive({ base: true, lg: false });
     const { currentStep, goToStep } = useOnboarding();
 
     return (

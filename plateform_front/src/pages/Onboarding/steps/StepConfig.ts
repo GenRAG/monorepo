@@ -1,4 +1,4 @@
-import { Sparkles, FileText, Zap } from "lucide-react";
+import { LucideIcon, Sparkles, FileText, Zap } from "lucide-react";
 import { StepConfig } from "pages/Onboarding/OnBoardingProvider";
 import { TestAssistantStepComponent } from "pages/Onboarding/steps/TestAssistantStep";
 import { ImproveAssistantStepComponent } from "pages/Onboarding/steps/ImproveAssistantStep";
@@ -8,30 +8,22 @@ export const stepsConfig: StepConfig[] = [
     {
         id: "test-assistant",
         title: "Essaye ton assistant RH en 30 secondes",
-        description: "Voici ton assistant RG prêt à être utilisé",
-        icon: Sparkles,
+        description: "Voici ton assistant RH prêt à être utilisé",
+        icon: Sparkles as LucideIcon,
         component: TestAssistantStepComponent,
-        validate: (data) => {
-            return (data.messageCount ?? 0) >= 1;
-        },
-        onComplete: async (data) => {
-            console.log("Test completed:", data);
-        },
+        validate: (data) => Number(data.messageCount ?? 0) >= 1,
         errorMessage:
             "Pose au moins une question à ton assistant pour continuer",
     },
     {
         id: "improve-assistant",
         title: "Améliore ton assistant en ajoutant tes documents",
-        description: "Maintenant, adaptez-le vraiment à ton entreprise",
-        icon: FileText,
+        description: "Maintenant, adapte-le vraiment à ton entreprise",
+        icon: FileText as LucideIcon,
         component: ImproveAssistantStepComponent,
-        validate: (data) => {
-            return (data.fileCount ?? 0) >= 1 && (data.messageCount ?? 0) >= 1;
-        },
-        onComplete: async (data) => {
-            console.log("Documents uploaded:", data);
-        },
+        validate: (data) =>
+            Number(data.fileCount ?? 0) >= 1 &&
+            Number(data.messageCount ?? 0) >= 1,
         errorMessage:
             "Ajoute au moins un document et pose une question pour continuer",
     },
@@ -39,14 +31,9 @@ export const stepsConfig: StepConfig[] = [
         id: "compare-intelligence",
         title: "Compare le style des réponses de ton assistant",
         description: "Compare le style des réponses",
-        icon: Zap,
+        icon: Zap as LucideIcon,
         component: CompareIntelligenceStepComponent,
-        validate: (data) => {
-            return data.messageSent === true && !!data.selectedLLM;
-        },
-        onComplete: async (data) => {
-            console.log("LLM selected:", data);
-        },
+        validate: (data) => data.messageSent === true && !!data.selectedLLM,
         errorMessage:
             "Envoie un message et sélectionne un type de réponse pour continuer",
     },

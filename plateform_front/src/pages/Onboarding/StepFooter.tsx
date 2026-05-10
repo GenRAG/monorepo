@@ -1,4 +1,4 @@
-import { HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { HStack, useColorModeValue, VStack } from "@chakra-ui/react";
 import Button from "components/System/Atoms/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -7,7 +7,6 @@ interface StepFooterProps {
     goNext: () => void;
     goPrevious: () => void;
     onValidateAndGoNext?: () => Promise<void>;
-    showReassuringMessage?: boolean;
 }
 
 const StepFooter = ({
@@ -15,7 +14,6 @@ const StepFooter = ({
     goNext,
     goPrevious,
     onValidateAndGoNext,
-    showReassuringMessage,
 }: StepFooterProps) => {
     const borderColor = useColorModeValue("grey.200", "grey.700");
     const handleNext = async () => {
@@ -36,17 +34,6 @@ const StepFooter = ({
             borderColor={borderColor}
             p={{ base: "8px", md: "12px" }}
         >
-            {showReassuringMessage && (
-                <Text
-                    fontSize="xs"
-                    color="grey.500"
-                    textAlign="center"
-                    fontStyle="italic"
-                >
-                    Vous pouvez continuer avec votre configuration actuelle et
-                    ajouter d&apos;autres sources ultérieurement.
-                </Text>
-            )}
             <HStack w="100%" justify="space-between">
                 <Button
                     variant="ghost"

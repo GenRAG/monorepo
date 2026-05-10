@@ -3,13 +3,17 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { OnboardingSession, Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import { OnboardingRepository } from './onboarding.repository';
 import { OnboardingSessionResponse } from './dto/onboarding-session.response';
 import { CompareOnboardingResponse } from './dto/compare-onboarding.request';
+import { InstructionStyle } from './dto/complete-onboarding.request';
+import { CreditBalanceService } from 'src/credit/credit-balance.service';
+
+const ONBOARDING_INITIAL_CREDITS = 20;
 
 const DEMO_WORKFLOW_DEFINITION = {
     blocks: [
@@ -29,7 +33,7 @@ const DEMO_WORKFLOW_DEFINITION = {
     ],
 };
 
-const STYLE_TO_INSTRUCTION: Record<string, string> = {
+const STYLE_TO_INSTRUCTION: Record<InstructionStyle, string> = {
     standard:
         'Répondre de façon concise et directe en se basant exclusivement sur les documents fournis.',
     precise:
@@ -45,6 +49,7 @@ export class OnboardingService {
         private readonly agentService: AgentService,
         private readonly workflowService: WorkflowService,
         private readonly orchestrator: AgentRuntimeOrchestrator,
+        private readonly creditBalanceService: CreditBalanceService,
     ) {}
 
     async start(
@@ -76,6 +81,18 @@ export class OnboardingService {
             workspace: { connect: { id: workspaceId } },
             agent: { connect: { id: agent.id } },
         });
+
+        try {
+            await this.creditBalanceService.grantInitial({
+                workspaceId,
+                amount: ONBOARDING_INITIAL_CREDITS,
+            });
+        } catch (err) {
+            console.error(
+                `[Onboarding] Failed to grant initial credits for workspace ${workspaceId}:`,
+                err,
+            );
+        }
 
         return this.toResponse(session);
     }
@@ -170,18 +187,21 @@ export class OnboardingService {
                 agentId: session.agentId,
                 workspaceId,
                 instructionOverride: STYLE_TO_INSTRUCTION.standard,
+                skipUsageTracking: true,
             }),
             this.orchestrator.execute({
                 query,
                 agentId: session.agentId,
                 workspaceId,
                 instructionOverride: STYLE_TO_INSTRUCTION.precise,
+                skipUsageTracking: true,
             }),
             this.orchestrator.execute({
                 query,
                 agentId: session.agentId,
                 workspaceId,
                 instructionOverride: STYLE_TO_INSTRUCTION.creative,
+                skipUsageTracking: true,
             }),
         ]);
 
@@ -195,8 +215,8 @@ export class OnboardingService {
     async complete(
         userId: string,
         workspaceId: string,
-        style: string,
-    ): Promise<{ success: boolean; instruction: string }> {
+        style: InstructionStyle,
+    ): Promise<void> {
         const session = await this.onboardingRepository.findByUserAndWorkspace(
             userId,
             workspaceId,
@@ -222,11 +242,6 @@ export class OnboardingService {
 
         if (answerBlock) {
             answerBlock['instruction'] = instruction;
-            answerBlock['nodeSettings'] = {
-                ...((answerBlock['nodeSettings'] as Record<string, unknown>) ??
-                    {}),
-                'Instruction Prompt': instruction,
-            };
         }
 
         await this.workflowService.update(session.agentId, {
@@ -237,18 +252,9 @@ export class OnboardingService {
             instruction,
             completed: true,
         });
-
-        return { success: true, instruction };
     }
 
-    private toResponse(session: {
-        id: string;
-        agentId: string;
-        step: number;
-        completed: boolean;
-        instruction: string | null;
-        stepsData?: unknown;
-    }): OnboardingSessionResponse {
+    private toResponse(session: OnboardingSession): OnboardingSessionResponse {
         return {
             sessionId: session.id,
             agentId: session.agentId,

@@ -6,6 +6,7 @@ import React, {
     ReactNode,
     useRef,
 } from "react";
+import { LucideIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     useStartOnboardingMutation,
@@ -14,17 +15,16 @@ import {
 } from "services/onboarding/onboarding";
 
 export interface StepData {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface StepConfig {
     id: string;
     title: string;
     description: string;
-    icon: any;
+    icon: LucideIcon;
     component: React.ComponentType<StepComponentProps>;
     validate?: (data: StepData) => boolean | Promise<boolean>;
-    onComplete?: (data: StepData) => void | Promise<void>;
     errorMessage?: string;
 }
 
@@ -34,7 +34,6 @@ export interface StepComponentProps {
     goNext: () => void;
     goPrevious: () => void;
     isValid: boolean;
-    registerValidateAndGoNext?: (fn: () => Promise<void>) => void;
 }
 
 export interface OnboardingState {
@@ -42,6 +41,8 @@ export interface OnboardingState {
     completedSteps: number[];
     stepsData: Record<string, StepData>;
 }
+
+export type SessionError = "not_found" | "unauthorized" | "unknown";
 
 interface OnboardingContextType {
     currentStep: number;
@@ -61,6 +62,7 @@ interface OnboardingContextType {
     agentId: string;
     sessionId: string | null;
     isSessionLoading: boolean;
+    sessionError: SessionError | null;
 }
 
 export const OnboardingContext = createContext<
@@ -73,9 +75,7 @@ export const OnboardingProvider: React.FC<{
 }> = ({ children, steps }) => {
     const toast = useThemedToast();
     const navigate = useNavigate();
-    const { workspaceId: workspaceIdParam = "" } = useParams<{
-        workspaceId: string;
-    }>();
+    const { workspaceId = "" } = useParams<{ workspaceId: string }>();
 
     const [state, setState] = useState<OnboardingState>({
         currentStep: 0,
@@ -83,10 +83,10 @@ export const OnboardingProvider: React.FC<{
         stepsData: {},
     });
 
-    const [workspaceId, setWorkspaceId] = useState<string>(workspaceIdParam);
     const [agentId, setAgentId] = useState<string>("");
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [isSessionLoading, setIsSessionLoading] = useState(true);
+    const [sessionError, setSessionError] = useState<SessionError | null>(null);
     const sessionInitialized = useRef(false);
 
     const [startOnboarding] = useStartOnboardingMutation();
@@ -94,29 +94,38 @@ export const OnboardingProvider: React.FC<{
     const [completeOnboarding] = useCompleteOnboardingMutation();
 
     useEffect(() => {
-        if (!workspaceIdParam || sessionInitialized.current) return;
+        if (!workspaceId || sessionInitialized.current) return;
 
         sessionInitialized.current = true;
-        setWorkspaceId(workspaceIdParam);
 
-        startOnboarding({ workspaceId: workspaceIdParam })
+        startOnboarding({ workspaceId })
             .unwrap()
             .then((session) => {
                 setAgentId(session.agentId);
                 setSessionId(session.sessionId);
                 setState((prev) => ({
                     ...prev,
-                    currentStep: Math.max(prev.currentStep, session.step - 1),
+                    currentStep: Math.min(
+                        Math.max(prev.currentStep, session.step - 1),
+                        steps.length - 1,
+                    ),
                     stepsData: session.stepsData ?? prev.stepsData,
                 }));
             })
             .catch((err) => {
-                console.error("Failed to initialize onboarding session:", err);
+                const status = err?.status ?? err?.originalStatus;
+                if (status === 404) {
+                    setSessionError("not_found");
+                } else if (status === 403 || status === 401) {
+                    setSessionError("unauthorized");
+                } else {
+                    setSessionError("unknown");
+                }
             })
             .finally(() => {
                 setIsSessionLoading(false);
             });
-    }, [workspaceIdParam, startOnboarding]);
+    }, [workspaceId, startOnboarding, navigate, steps.length]);
 
     const updateStepData = (stepId: string, data: Partial<StepData>) => {
         setState((prev) => ({
@@ -180,8 +189,8 @@ export const OnboardingProvider: React.FC<{
 
         if (workspaceId) {
             if (isLastStep) {
-                const style = getStepData("compare-intelligence")
-                    .selectedLLM as
+                const lastStepId = steps[steps.length - 1].id;
+                const style = getStepData(lastStepId).selectedLLM as
                     | "standard"
                     | "precise"
                     | "creative"
@@ -200,7 +209,6 @@ export const OnboardingProvider: React.FC<{
                 return;
             }
 
-            // Sync step with backend (fire-and-forget)
             updateOnboardingStep({
                 workspaceId,
                 step: state.currentStep + 2,
@@ -216,13 +224,6 @@ export const OnboardingProvider: React.FC<{
             if (!completedSteps.includes(prev.currentStep)) {
                 completedSteps.push(prev.currentStep);
             }
-
-            if (currentStepConfig.onComplete) {
-                void currentStepConfig.onComplete(
-                    prev.stepsData[currentStepConfig.id] || {},
-                );
-            }
-
             return {
                 ...prev,
                 completedSteps,
@@ -262,6 +263,7 @@ export const OnboardingProvider: React.FC<{
                 agentId,
                 sessionId,
                 isSessionLoading,
+                sessionError,
             }}
         >
             {children}

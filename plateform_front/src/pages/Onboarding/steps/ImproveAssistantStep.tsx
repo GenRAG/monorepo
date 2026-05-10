@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+    useRef,
+    useEffect,
+    useCallback,
+    useState,
+    useMemo,
+} from "react";
 import { ChatMessage } from "hooks/useChat";
 import { HStack, Stack, VStack, chakra } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
@@ -9,74 +15,95 @@ import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { useAgentQuery } from "hooks/useAgentQuery";
 import UploadProgressStepper from "components/Onboarding/ImproveAssistant/UploadProgressStepper";
 import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
+import { useGetAgentDocumentStatsQuery } from "services/document/document";
+import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 
 const MAX_FILES = 3;
+const STEP_ID = "improve-assistant";
 
 export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     data,
     updateData,
-    registerValidateAndGoNext,
-    goNext,
 }) => {
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId, agentId } = useOnboarding();
+    const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
+    const { sendQuery } = useAgentQuery(workspaceId, agentId);
 
-    const savedMessages: ChatMessage[] = data.messages ?? [];
+    const savedMessages: ChatMessage[] = (data.messages as ChatMessage[]) ?? [];
+    const persistedMessageCount: number =
+        (data.messageCount as number) ?? savedMessages.length;
+
+    const { data: documentStats } = useGetAgentDocumentStatsQuery(
+        { workspaceId: workspaceId!, agentId: agentId! },
+        { skip: !workspaceId || !agentId },
+    );
+    const [persistedIndexedCount, setPersistedIndexedCount] = useState(0);
+    const hasInitialized = useRef(false);
+    useEffect(() => {
+        if (!hasInitialized.current && documentStats !== undefined) {
+            hasInitialized.current = true;
+            setPersistedIndexedCount(documentStats.indexed);
+        }
+    }, [documentStats]);
 
     const { uploadDocuments, sources, isAtMaxFiles } = useUploadDocuments(
         workspaceId,
         agentId,
         MAX_FILES,
+        persistedIndexedCount,
     );
 
-    const completedFiles = sources.filter((s) => s.status === Status.COMPLETED);
-    const processingFiles = sources.filter(
-        (s) => s.status === Status.PROCESSING || s.status === Status.UPLOADING,
+    const completedFiles = useMemo(
+        () => sources.filter((s) => s.status === Status.COMPLETED),
+        [sources],
+    );
+    const processingFiles = useMemo(
+        () =>
+            sources.filter(
+                (s) =>
+                    s.status === Status.PROCESSING ||
+                    s.status === Status.UPLOADING,
+            ),
+        [sources],
+    );
+    const sessionValidCount = useMemo(
+        () => sources.filter((s) => s.status !== Status.ERROR).length,
+        [sources],
     );
 
-    // Chat is enabled only when at least one file is fully indexed
-    const showComparison = completedFiles.length > 0;
-
-    const beforeResponse = useMemo(
-        () => [
-            "Selon la convention Syntec, vous avez droit à 25 jours de congés payés par an.",
-        ],
-        [],
-    );
-    const afterResponse = useMemo(
-        () => [
-            "Selon votre convention collective et votre règlement intérieur, vous bénéficiez de 27 jours de congés payés par an, dont 2 jours supplémentaires accordés par votre entreprise.",
-        ],
-        [],
-    );
+    const totalCompletedCount = persistedIndexedCount + completedFiles.length;
+    const showComparison = totalCompletedCount > 0;
 
     const getResponse = useCallback(
-        () => ({
-            response: showComparison ? afterResponse : beforeResponse,
-        }),
-        [showComparison, afterResponse, beforeResponse],
+        async (question: string) => {
+            const fullText = await sendQuery(question);
+            return { response: [fullText] };
+        },
+        [sendQuery],
     );
 
-    // Keep validation data in sync
     useEffect(() => {
-        updateData({
-            fileCount: completedFiles.length,
-        });
-    }, [completedFiles.length, updateData]);
-
-    useEffect(() => {
-        if (!registerValidateAndGoNext) return;
-        registerValidateAndGoNext(async () => goNext());
-    }, [registerValidateAndGoNext, goNext]);
+        updateData({ fileCount: totalCompletedCount });
+    }, [totalCompletedCount, updateData]);
 
     const handleMessagesChange = useCallback(
         (msgs: ChatMessage[]) => {
             updateData({ messages: msgs, messageCount: msgs.length });
+
+            if (msgs.length > persistedMessageCount) {
+                void updateStepsData({
+                    workspaceId,
+                    stepId: STEP_ID,
+                    data: { messageCount: msgs.length },
+                });
+            }
         },
-        [updateData],
+        [updateData, updateStepsData, workspaceId, persistedMessageCount],
     );
 
     const handleFileUpload = async (files: FileList | null) => {
@@ -121,12 +148,11 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                             disabled={isAtMaxFiles}
                             maxFiles={MAX_FILES}
                             currentCount={
-                                sources.filter((s) => s.status !== Status.ERROR)
-                                    .length
+                                persistedIndexedCount + sessionValidCount
                             }
                         />
                         <UploadProgressStepper
-                            completedFilesCount={completedFiles.length}
+                            completedFilesCount={totalCompletedCount}
                             isProcessing={processingFiles.length > 0}
                             showComparison={showComparison}
                         />

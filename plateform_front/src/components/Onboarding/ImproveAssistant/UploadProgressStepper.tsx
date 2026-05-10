@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import {
     Box,
     Text,
@@ -21,6 +21,20 @@ interface UploadProgressStepperProps {
     showComparison: boolean;
 }
 
+const STEPS = [
+    {
+        title: "Ajouter vos documents",
+        description: "PDF, Markdown, Txt.",
+        icon: FileText,
+    },
+    {
+        title: "Traitement en cours...",
+        description:
+            "Votre assistant utilise maintenant vos documents pour répondre aux questions.",
+        icon: Sparkles,
+    },
+];
+
 const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
     completedFilesCount,
     isProcessing,
@@ -28,28 +42,11 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
 }) => {
     const { colorMode } = useColorMode();
 
-    const steps = useMemo(
-        () => [
-            {
-                title: "Ajouter vos documents",
-                description: "PDF, Markdow, Txt.",
-                icon: FileText,
-            },
-            {
-                title: "Traitement en cours...",
-                description:
-                    "Votre assistant utilise maintenant vos documents pour répondre aux questions.",
-                icon: Sparkles,
-            },
-        ],
-        [],
-    );
-
-    const activeStepIndex = useMemo(() => {
-        if (showComparison) return 2;
-        if (completedFilesCount > 0) return 1;
-        return 0;
-    }, [showComparison, completedFilesCount]);
+    const activeStepIndex = showComparison
+        ? 2
+        : completedFilesCount > 0
+          ? 1
+          : 0;
 
     return (
         <Box
@@ -71,7 +68,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                 colorScheme={currentDarkTheme.colorScheme}
                 variant="solid"
             >
-                {steps.map((step, index) => (
+                {STEPS.map((step, index) => (
                     <Step key={index}>
                         <StepIndicator
                             flexShrink={0}
@@ -178,25 +175,25 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                     {step.title}
                                 </Text>
                             </StepTitle>
-                            <StepDescription
-                                style={{
-                                    color:
+                            <StepDescription>
+                                <Text
+                                    fontSize="xs"
+                                    color={
                                         colorMode === "dark"
                                             ? "grey.400"
-                                            : "grey.600",
-                                    fontSize: "xs",
-                                }}
-                            >
-                                {step.description}
+                                            : "grey.600"
+                                    }
+                                >
+                                    {step.description}
+                                </Text>
                             </StepDescription>
                         </Box>
                         <StepSeparator
                             style={{
                                 backgroundColor: "transparent",
-                                borderLeft:
-                                    showComparison && completedFilesCount > 0
-                                        ? `2px solid ${currentDarkTheme.primary}`
-                                        : `2px dashed ${colorMode === "dark" ? currentDarkTheme.rgba.primary30 : "#D1D5DB"}`,
+                                borderLeft: showComparison
+                                    ? `2px solid ${currentDarkTheme.primary}`
+                                    : `2px dashed ${colorMode === "dark" ? currentDarkTheme.rgba.primary30 : "#D1D5DB"}`,
                                 transition: "all 0.3s ease-in-out",
                             }}
                         />

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import { Box, Stack, VStack, chakra } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { ChatMessage } from "hooks/useChat";
@@ -19,16 +19,14 @@ const SUGGESTED_QUESTIONS = [
 export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
     data,
     updateData,
-    goNext,
-    registerValidateAndGoNext,
 }) => {
     const { workspaceId, agentId } = useOnboarding();
     const { sendQuery, isOutOfCredits } = useAgentQuery(workspaceId, agentId);
     const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
 
-    // Restored from backend on reload
-    const savedMessages: ChatMessage[] = data.messages ?? [];
-    const messageCount: number = data.messageCount ?? savedMessages.length;
+    const savedMessages: ChatMessage[] = (data.messages as ChatMessage[]) ?? [];
+    const messageCount: number =
+        (data.messageCount as number) ?? savedMessages.length;
 
     const getResponse = useCallback(
         async (question: string) => {
@@ -37,10 +35,6 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
         },
         [sendQuery],
     );
-
-    useEffect(() => {
-        registerValidateAndGoNext?.(() => Promise.resolve(goNext()));
-    }, [registerValidateAndGoNext, goNext]);
 
     const handleMessagesChange = useCallback(
         (msgs: ChatMessage[]) => {

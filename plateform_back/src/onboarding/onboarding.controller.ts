@@ -76,7 +76,7 @@ export class OnboardingController {
         @Param('workspaceId') workspaceId: string,
         @CurrentUser(CurrentUserPipe) user: UserSafe,
         @Body() body: CompleteOnboardingRequest,
-    ): Promise<{ success: boolean; instruction: string }> {
+    ): Promise<void> {
         return this.onboardingService.complete(
             user.id,
             workspaceId,

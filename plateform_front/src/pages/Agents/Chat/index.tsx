@@ -1,16 +1,27 @@
-import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
+import { Box, VStack } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-import Banner from "components/System/Atoms/Banner";
+import { useCallback } from "react";
 import { ChatInterface } from "components/System/Molecules/ChatInterface";
 import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
 import { useUserInfo } from "hooks/useUserInfo";
+import { useAgentQuery } from "hooks/useAgentQuery";
 
 const ChatWorkspace = () => {
     const { name } = useUserInfo();
-    const { workspaceId, agentId } = useParams<{
+    const { workspaceId = "", agentId = "" } = useParams<{
         workspaceId: string;
         agentId: string;
     }>();
+
+    const { sendQuery } = useAgentQuery(workspaceId, agentId);
+
+    const getResponse = useCallback(
+        async (question: string) => {
+            const fullText = await sendQuery(question);
+            return { response: [fullText] };
+        },
+        [sendQuery],
+    );
 
     return (
         <VStack
@@ -34,30 +45,11 @@ const ChatWorkspace = () => {
                 flexDirection="column"
                 overflow="hidden"
             >
-                <Banner variant="green" mb="16px" flexShrink={0} gap="0">
-                    <HStack>
-                        <Text fontSize={{ base: "xs", md: "sm" }}>
-                            Based on 12 documents, see more details in the{" "}
-                            <Link
-                                href={
-                                    workspaceId && agentId
-                                        ? `/workspaces/${workspaceId}/agents/${agentId}/documents`
-                                        : "#"
-                                }
-                                color="blue.500"
-                            >
-                                documents page
-                            </Link>
-                        </Text>
-                    </HStack>
-                </Banner>
                 <Box flex={1} minH={0} display="flex" flexDirection="column">
                     <ChatInterface
                         fullHeight
                         title="Chat"
-                        messages={[]}
-                        onSendMessage={() => {}}
-                        isLoading={false}
+                        getResponse={getResponse}
                         placeholder="Enter your question"
                         welcomeMessage={
                             name

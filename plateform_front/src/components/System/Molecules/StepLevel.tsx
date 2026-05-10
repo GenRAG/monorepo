@@ -1,4 +1,4 @@
-import { Box, HStack, Text, useColorMode, VStack } from "@chakra-ui/react";
+import { Box, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
 
 interface StepLevelProps {
@@ -12,33 +12,32 @@ const StepLevel: React.FC<StepLevelProps> = ({
     description,
     title,
 }: StepLevelProps) => {
-    const { colorMode } = useColorMode();
+    const bgColor = useColorModeValue("green.100", "green.700");
+    const borderColor = useColorModeValue("green.300", "green.600");
+    const textColor = useColorModeValue("green.800", "green.200");
+    const titleColor = useColorModeValue("grey.900", "grey.100");
     const isMobile = useAppResponsive({ base: true, lg: false });
 
     return (
         <Box
             w="100%"
             p={isMobile ? 2 : 4}
-            bg={colorMode === "dark" ? "grey.700" : "grey.50"}
+            bg={bgColor}
             borderRadius="12px"
-            border={`1px solid ${colorMode === "dark" ? "grey.600" : "grey.200"}`}
+            border="1px solid"
+            borderColor={borderColor}
         >
             <HStack spacing={3}>
                 <VStack align="start" spacing={0} flex={1}>
                     <Text
                         fontWeight="semibold"
-                        color={colorMode === "dark" ? "white" : "grey.900"}
                         fontSize={isMobile ? "sm" : "md"}
+                        color={titleColor}
                     >
                         {level} / 5 — {title}
                     </Text>
                     {!isMobile && (
-                        <Text
-                            fontSize="xs"
-                            color={
-                                colorMode === "dark" ? "grey.400" : "grey.500"
-                            }
-                        >
+                        <Text fontSize="xs" color={textColor}>
                             {description}
                         </Text>
                     )}

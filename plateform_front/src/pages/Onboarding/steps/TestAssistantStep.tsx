@@ -1,209 +1,93 @@
-import React, { useEffect, useRef, useCallback } from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useCallback, useState } from "react";
 import {
     Box,
-    Heading,
     Stack,
     Text,
+    useColorModeValue,
     VStack,
-    useColorMode,
     chakra,
-    Icon,
 } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import {
-    useChat,
-    useHandleMessageUpdate,
-    useStreamingQuery,
-} from "../../../hooks/useChat";
+import { ChatMessage } from "../../../hooks/useChat";
+import { useAgentQuery } from "../../../hooks/useAgentQuery";
+import { useOnboarding } from "hooks/useOnBoarding";
 import { ChatInterface } from "components/System/Molecules/ChatInterface";
 import StepLevel from "components/System/Molecules/StepLevel";
-import { useAppResponsive } from "hooks/useAppResponsive";
+const MAX_MESSAGES = 3;
 
-interface TestAssistantFormData {
-    testQuestion: string;
-    testResponse: string;
-}
+const SUGGESTED_QUESTIONS = [
+    "Comment puis-je poser une journée de congé ?",
+    "Quels sont les critères d'éligibilité pour les congés payés ?",
+    "Puis-je reporter mes congés non utilisés à l'année prochaine ?",
+];
 
 export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
-    data,
     updateData,
     goNext,
     registerValidateAndGoNext,
 }) => {
-    const { colorMode } = useColorMode();
-    const isMobile = useAppResponsive({ base: true, lg: false });
+    const { workspaceId, agentId } = useOnboarding();
+    const { sendQuery } = useAgentQuery(workspaceId, agentId);
+    const textColor = useColorModeValue("grey.900", "white");
 
-    const { sendQuery } = useStreamingQuery();
+    const [messagesCount, setMessagesCount] = useState(0);
+    const messagesLeft = MAX_MESSAGES - messagesCount;
 
-    const initialMessages: any = [];
-
-    const setValueRef = useRef<typeof setValue | null>(null);
-    const updateDataRef = useRef<typeof updateData | null>(null);
-
-    const { trigger, setValue } = useForm<TestAssistantFormData>({
-        defaultValues: {
-            testQuestion: data.testQuestion || "",
-            testResponse: data.testResponse || "",
+    const getResponse = useCallback(
+        async (question: string) => {
+            const fullText = await sendQuery(question);
+            return { response: [fullText] };
         },
-        mode: "onChange",
-    });
-
-    const handleMessageUpdate = useHandleMessageUpdate({
-        setValue: (name, value, options) =>
-            setValue(name as "testQuestion" | "testResponse", value, options),
-        updateData,
-        refQuestion: "testQuestion",
-        refResponse: "testResponse",
-    });
-
-    const {
-        messages,
-        sendMessage,
-        isLoading,
-        updateMessage,
-        currentMessageIdRef,
-    } = useChat({
-        getResponse: useCallback(
-            async (question: string) => {
-                const fullText = await sendQuery(
-                    question,
-                    (chunkSoFar: string) => {
-                        if (currentMessageIdRef.current) {
-                            updateMessage(currentMessageIdRef.current, {
-                                response: [chunkSoFar],
-                            });
-                        }
-                    },
-                );
-
-                return { response: [fullText], isImproved: false };
-            },
-            [sendQuery],
-        ),
-        initialMessages,
-        onMessageUpdate: handleMessageUpdate,
-    });
-
-    /*const { messages, sendMessage, isLoading } = useChat({
-        getResponse,
-        initialMessages,
-        onMessageUpdate: handleMessageUpdate,
-    });*/
-
-    setValueRef.current = setValue;
-    updateDataRef.current = updateData;
-
-    const goNextRef = useRef(goNext);
-    goNextRef.current = goNext;
-    const triggerRef = useRef(trigger);
-    triggerRef.current = trigger;
+        [sendQuery],
+    );
 
     useEffect(() => {
-        if (registerValidateAndGoNext) {
-            const validateAndGoNext = async () => {
-                const isValid = await triggerRef.current();
-                if (isValid) {
-                    goNextRef.current();
-                }
-            };
-            registerValidateAndGoNext(validateAndGoNext);
-        }
-    }, [registerValidateAndGoNext]);
+        registerValidateAndGoNext?.(() => Promise.resolve(goNext()));
+    }, [registerValidateAndGoNext, goNext]);
 
-    const suggestedQuestions = [
-        "How many paid vacation days do I have?",
-        "How do I request an RTT?",
-        "Can I carry over my vacation days?",
-    ];
-
-    const handleQuestionClick = async (suggestedQuestion: string) => {
-        await sendMessage(suggestedQuestion);
-    };
+    const handleMessagesChange = useCallback(
+        (msgs: ChatMessage[]) => {
+            setMessagesCount(msgs.length);
+            const last = msgs[msgs.length - 1];
+            if (last?.question) updateData({ testQuestion: last.question });
+        },
+        [updateData],
+    );
 
     return (
         <chakra.form w="100%" h="100%">
-            <Stack w="100%" spacing={4} h="100%">
-                <VStack align="start" spacing={4} w="100%">
-                    <VStack align="start" spacing={2} w="100%">
-                        <Heading
-                            variant={isMobile ? "heading-lg" : "heading-2xl"}
-                            fontWeight="bold"
-                            color={colorMode === "dark" ? "white" : "grey.900"}
-                        >
-                            Test your HR assistant in 30 seconds
-                        </Heading>
-                        {!isMobile && (
-                            <Text
-                                color={
-                                    colorMode === "dark"
-                                        ? "grey.400"
-                                        : "grey.600"
-                                }
-                                variant={isMobile ? "body-lg" : "body-xl"}
-                            >
-                                Here&apos;s your HR assistant ready to use
-                            </Text>
-                        )}
-                    </VStack>
+            <Stack spacing={4} h="100%">
+                <VStack align="start">
                     <StepLevel
                         level={1}
-                        title="Demo"
-                        description="This model uses only public HR documents. None of your files are used yet."
+                        title="Démo"
+                        description="Ce modèle utilise uniquement des documents RH publics. Aucun de vos fichiers n'est encore utilisé."
                     />
                 </VStack>
 
-                {/*messages.length === 0 && (
-                    <VStack align="stretch" spacing={2}>
-                        <Text
-                            fontSize="xs"
-                            color={
-                                colorMode === "dark" ? "grey.400" : "grey.500"
-                            }
-                            mb={2}
-                        >
-                            Suggested questions:
-                        </Text>
-                        {suggestedQuestions.map((suggestedQuestion, index) => (
-                            <Button
-                                key={index}
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                    handleQuestionClick(suggestedQuestion)
-                                }
-                                justifyContent="flex-start"
-                                textAlign="left"
-                                bg={colorMode === "dark" ? "grey.700" : "white"}
-                                borderColor={
-                                    colorMode === "dark"
-                                        ? "grey.600"
-                                        : "grey.300"
-                                }
-                                _hover={{
-                                    bg:
-                                        colorMode === "dark"
-                                            ? "grey.600"
-                                            : "grey.50",
-                                    borderColor: currentDarkTheme.primary,
-                                }}
-                            >
-                                <Icon as={MessageSquare} boxSize={4} mr={2} />
-                                {suggestedQuestion}
-                            </Button>
-                        ))}
-                    </VStack>
-                )*/}
+                {messagesCount > 0 && (
+                    <Text
+                        fontSize="xs"
+                        color={messagesLeft === 0 ? "orange.400" : textColor}
+                        textAlign="right"
+                    >
+                        {messagesLeft === 0
+                            ? "Limite atteinte — passez à l'étape suivante"
+                            : `${messagesLeft} message${messagesLeft > 1 ? "s" : ""} restant${messagesLeft > 1 ? "s" : ""}`}
+                    </Text>
+                )}
 
                 <Box flex={1} minH={0} display="flex" flexDirection="column">
                     <ChatInterface
                         fullHeight
                         compact
-                        messages={messages}
-                        onSendMessage={sendMessage}
-                        isLoading={isLoading}
-                        placeholder="Enter your question"
-                        welcomeMessage="Hello! I'm your HR assistant. Ask me a question about vacation, RTT, or any other HR topic."
+                        title="Ton assistant RH est prêt"
+                        getResponse={getResponse}
+                        onMessagesChange={handleMessagesChange}
+                        suggestedQuestions={SUGGESTED_QUESTIONS}
+                        disabled={messagesLeft <= 0}
+                        placeholder="Saisissez votre question"
+                        welcomeMessage="Pose-lui une question ou essaie l'une des suggestions ci-dessous."
                     />
                 </Box>
             </Stack>

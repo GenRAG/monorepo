@@ -5,7 +5,6 @@ import {
     Stack,
     Text,
     VStack,
-    useColorMode,
     useDisclosure,
 } from "@chakra-ui/react";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
@@ -15,7 +14,7 @@ import StepFooter from "pages/Onboarding/StepFooter";
 import OnboardingHeader from "components/Onboarding/Stepper/OnboardingHeader";
 import OnboardingSidebar from "components/Onboarding/Stepper/OnboardingSidebar";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import "./onboardingAnimations.css";
+import { useIsDark } from "hooks/useIsDark";
 
 const OnboardingContent: React.FC = () => {
     const {
@@ -27,8 +26,14 @@ const OnboardingContent: React.FC = () => {
         isStepValid,
     } = useOnboarding();
 
-    const { colorMode } = useColorMode();
+    const isDark = useIsDark();
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const containerStyles = {
+        bg: isDark ? "grey.950" : "white",
+        borderColor: isDark ? "grey.700" : "#acacac81",
+    };
+    const responsivePadding = { base: 4, md: 6, lg: 10 };
 
     const [justCompletedStep, setJustCompletedStep] = useState<number | null>(
         null,
@@ -74,11 +79,7 @@ const OnboardingContent: React.FC = () => {
     const CurrentStepComponent = currentStepConfig.component;
 
     return (
-        <Stack
-            h="100vh"
-            bg={colorMode === "dark" ? "grey.900" : "grey.50"}
-            spacing={0}
-        >
+        <Stack h="100vh" bg={isDark ? "grey.950" : "grey.50"} spacing={0}>
             <OnboardingHeader onOpenDrawer={onOpen} />
 
             <HStack
@@ -96,23 +97,19 @@ const OnboardingContent: React.FC = () => {
 
                 <VStack
                     flex={{ base: 1, md: 3 }}
-                    bg={colorMode === "dark" ? "grey.800" : "white"}
                     align="start"
-                    px={{ base: 4, md: 6, lg: 10 }}
-                    pt={{ base: 4, md: 6, lg: 10 }}
+                    p={responsivePadding}
+                    pb={0}
                     spacing={{ base: 4, md: 8 }}
                     borderRadius="12px"
-                    borderTopLeftRadius={{ xl: "0" }}
-                    borderBottomLeftRadius={{ xl: "0" }}
+                    roundedLeft={{ xl: 0 }}
                     border="1px solid"
-                    borderColor={
-                        colorMode === "dark" ? "grey.700" : "#acacac81"
-                    }
                     boxShadow="sm"
                     justify="space-between"
                     overflow="hidden"
                     h="100%"
                     data-onboarding-container
+                    {...containerStyles}
                 >
                     <VStack
                         h="100%"
@@ -130,13 +127,13 @@ const OnboardingContent: React.FC = () => {
                             overflow="hidden"
                         >
                             <Text
-                                fontSize="sm"
+                                fontSize="2xl"
                                 color={currentDarkTheme.primary}
                                 fontWeight="semibold"
                                 key={`step-text-${currentStep}`}
                                 className="step-text-animation"
                             >
-                                {`STEP ${currentStep + 1} OF ${stepsConfig.length}`}
+                                {`ETAPE ${currentStep + 1} / ${stepsConfig.length} — ${currentStepConfig.title}`}
                             </Text>
                             <Box
                                 key={`step-content-${currentStep}`}

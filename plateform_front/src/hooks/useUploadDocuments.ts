@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { Status } from "pages/Onboarding/steps/ImproveAssistantStep";
 import { useUploadDocumentMutation } from "services/document/document";
+
+export enum Status {
+    PROCESSING = "processing",
+    COMPLETED = "completed",
+    ERROR = "error",
+}
 
 export interface UploadedSource {
     id?: string;
@@ -53,15 +58,18 @@ const useUploadDocuments = (
                         file,
                     }).unwrap();
                 } else {
-                    // Pas de session encore — simuler un délai
                     await new Promise((resolve) => setTimeout(resolve, 2000));
                 }
 
                 setSources((prev) => {
                     const updated = [...prev];
+
                     if (!sourceId) return updated;
+
                     const idx = updated.findIndex((s) => s.id === sourceId);
+
                     if (idx === -1) return updated;
+
                     updated[idx] = {
                         ...updated[idx],
                         status: Status.COMPLETED,
@@ -73,8 +81,11 @@ const useUploadDocuments = (
                 console.error(`Failed to upload file: ${file.name}`, error);
                 setSources((prev) => {
                     const updated = [...prev];
+
                     const idx = updated.findIndex((s) => s.id === sourceId);
+
                     if (idx === -1) return updated;
+
                     updated[idx] = {
                         ...updated[idx],
                         status: Status.ERROR,

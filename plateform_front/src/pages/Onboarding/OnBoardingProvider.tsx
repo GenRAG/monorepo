@@ -56,8 +56,8 @@ interface OnboardingContextType {
     isStepCompleted: (stepIndex: number) => boolean;
     canNavigateToStep: (stepIndex: number) => boolean;
     resetOnboarding: () => void;
-    workspaceId: string | null;
-    agentId: string | null;
+    workspaceId: string;
+    agentId: string;
     sessionId: string | null;
     isSessionLoading: boolean;
 }
@@ -72,7 +72,7 @@ export const OnboardingProvider: React.FC<{
 }> = ({ children, steps }) => {
     const toast = useThemedToast();
     const navigate = useNavigate();
-    const { workspaceId: workspaceIdParam } = useParams<{
+    const { workspaceId: workspaceIdParam = "" } = useParams<{
         workspaceId: string;
     }>();
 
@@ -82,10 +82,8 @@ export const OnboardingProvider: React.FC<{
         stepsData: {},
     });
 
-    const [workspaceId, setWorkspaceId] = useState<string | null>(
-        workspaceIdParam ?? null,
-    );
-    const [agentId, setAgentId] = useState<string | null>(null);
+    const [workspaceId, setWorkspaceId] = useState<string>(workspaceIdParam);
+    const [agentId, setAgentId] = useState<string>("");
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [isSessionLoading, setIsSessionLoading] = useState(true);
     const sessionInitialized = useRef(false);

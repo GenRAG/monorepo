@@ -1,0 +1,33 @@
+export const getMarkdownStyles = (colorMode: string) => ({
+    "& p": { marginBottom: "8px" },
+    "& p:last-child": { marginBottom: 0 },
+    "& strong": { fontWeight: "bold" },
+    "& em": { fontStyle: "italic" },
+    "& ul": { paddingLeft: "20px", marginBottom: "8px" },
+    "& ol": { paddingLeft: "20px", marginBottom: "8px" },
+    "& li": { marginBottom: "4px" },
+    "& h1, & h2, & h3": { fontWeight: "bold", marginBottom: "8px" },
+    "& h1": { fontSize: "lg" },
+    "& h2": { fontSize: "md" },
+    "& h3": { fontSize: "sm" },
+    "& code": {
+        bg: colorMode === "dark" ? "grey.900" : "grey.100",
+        px: "4px",
+        borderRadius: "4px",
+        fontFamily: "mono",
+        fontSize: "xs",
+    },
+    "& pre": {
+        bg: colorMode === "dark" ? "grey.900" : "grey.100",
+        p: "12px",
+        borderRadius: "8px",
+        overflowX: "auto",
+        marginBottom: "8px",
+    },
+    "& blockquote": {
+        borderLeft: "3px solid var(--chakra-colors-primary)",
+        paddingLeft: "12px",
+        color: colorMode === "dark" ? "grey.400" : "grey.500",
+        fontStyle: "italic",
+    },
+});

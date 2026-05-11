@@ -14,10 +14,12 @@ class Loader:
         self,
         sitemaps: list[str] = [f"{BASE_SITEMAP_URL}/sitemap-cms-content.xml"],
         max_pages: int | None = None,
+        interactive: bool = True,
     ):
         """Crawling sitemap urls and saving retrived content to embedded sqlite database"""
         self.sitemaps = sitemaps
         self.max_pages = max_pages
+        self.interactive = interactive
         self.visited_sitemaps = set()
 
     def get_crawlable_urls(self, url: str):
@@ -187,6 +189,9 @@ class Loader:
 
     def prompt_for_next_sitemap(self, sitemaps: list[str]):
         """Ask user which sitemap to crawl next by index"""
+        if not self.interactive:
+            return None
+
         if not sitemaps:
             return None
 
@@ -243,13 +248,22 @@ class Loader:
     def run_loader(self):
         store = SQLiteStore()
 
-        for sitemap in self.sitemaps:
-            if sitemap in self.visited_sitemaps:
+        for url in self.sitemaps:
+            if url in self.visited_sitemaps:
                 continue
 
-            self.crawl_sitemap(sitemap, store)
+            if url.endswith(".xml"):
+                self.crawl_sitemap(url, store)
+            else:
+                print(f"Scraping single page: {url}")
+                lastmod = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                page_data = self.scrape_page(url, lastmod)
+                if page_data:
+                    self.store_data(page_data, store)
+                    self.visited_sitemaps.add(url)
 
         print("Finished loading data in database!")
+        return store
 
 
 if __name__ == "__main__":

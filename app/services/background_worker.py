@@ -2,6 +2,8 @@ import asyncio
 from typing import Dict, Any
 import traceback
 
+from app.ingestion.loader import Loader
+from app.ingestion.sqlite_store import SQLiteStore
 from app.services.job_manager import job_manager, JobStatus
 from app.services.storage import upload_file
 from app.services.ingestion import parse_pdf, chunk_text
@@ -28,6 +30,17 @@ class BackgroundWorker:
         }
         await self.job_queue.put(job_data)
         print(f"Job {job_id} added to queue")
+
+    async def add_website_job(self, job_id: str, url: str, org_id: str, max_pages: int):
+        """Add a website ingestion job to the queue."""
+        job_data = {
+            "job_id": job_id,
+            "url": url,
+            "org_id": org_id,
+            "max_pages": max_pages,
+        }
+        await self.job_queue.put(job_data)
+        print(f"Website job {job_id} added to queue")
 
     async def start_worker(self):
         """Start the background worker loop."""
@@ -57,56 +70,64 @@ class BackgroundWorker:
     async def process_job(self, job_data: Dict[str, Any]):
         """Process an ingestion job end-to-end."""
         job_id = job_data["job_id"]
-        file_bytes = job_data["file_bytes"]
-        file_obj = job_data["file_obj"]
-        filename = job_data["filename"]
         org_id = job_data["org_id"]
+        job_info = job_manager.get_job(job_id)
+        job_type = getattr(job_info, "job_type", "pdf")
 
-        print(f"Processing job {job_id} for {filename}")
+        print(f"Processing job {job_id}, type={job_type}")
 
         try:
             job_manager.update_job_status(job_id, JobStatus.PROCESSING)
 
-            # Upload to storage
-            upload_file(file_obj, f"{org_id}/{filename}")
+            if job_type == "pdf":
+                file_bytes = job_data["file_bytes"]
+                file_obj = job_data["file_obj"]
+                filename = job_data["filename"]
 
-            # Parse PDF content
-            raw_text = parse_pdf(file_bytes)
-            if not raw_text:
-                job_manager.update_job_status(
-                    job_id, JobStatus.FAILED, "PDF text extraction failed"
-                )
-                return
+                upload_file(file_obj, f"{org_id}/{filename}")
+                raw_text = parse_pdf(file_bytes)
+                if not raw_text:
+                    job_manager.update_job_status(job_id, JobStatus.FAILED, "PDF text extraction failed")
+                    return
+                chunks = chunk_text(raw_text)
+                metadata = [{"org_id": org_id, "filename": filename} for _ in chunks]
 
-            # Generate chunks
-            chunks = chunk_text(raw_text)
+            elif job_type == "website":
+                url = job_data["url"]
+                max_pages = job_data.get("max_pages", 100)
+
+                loader = Loader(sitemaps=[url], max_pages=max_pages, interactive=False)
+                store = loader.run_loader()
+                docs = store.get_documents()
+
+                chunks = []
+                metadata = []
+                for doc in docs:
+                    doc_chunks = chunk_text(doc["content_md"])
+                    chunks.extend(doc_chunks)
+                    for _ in doc_chunks:
+                        metadata.append({"org_id": org_id, "filename": doc["url"], "title": doc["title"]})
+
+            else:
+                raise ValueError(f"Unknown job type: {job_type}")
+
             total_chunks = len(chunks)
             job_manager.update_job_progress(job_id, 0, total_chunks)
-            print(f"Job {job_id}: Created {total_chunks} chunks")
 
-            # Generate embeddings
-            print(f"Job {job_id}: Processing embeddings for {total_chunks} chunks")
             vectors = self.embedder.process_chunks_in_batches(chunks)
-
-            # Update progress
             job_manager.update_job_progress(job_id, total_chunks, total_chunks)
 
-            # Insert into vector database
-            count = upsert_chunks(
+            upsert_chunks(
                 collection_name="genrag_knowledge_base",
                 chunks=chunks,
                 embeddings=vectors,
-                metadata={"org_id": org_id, "filename": filename},
+                metadata=metadata,
             )
 
-            # Finalize job
             result = {
                 "status": "success",
-                "filename": filename,
-                "chunks_processed": count,
-                "message": "Document processed and indexed",
+                "message": f"Processed {total_chunks} chunks",
             }
-
             job_manager.set_job_result(job_id, result)
             job_manager.update_job_status(job_id, JobStatus.COMPLETED)
             print(f"Job {job_id} completed successfully")

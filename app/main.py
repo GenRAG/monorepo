@@ -61,7 +61,7 @@ async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...))
 
     file_bytes = await file.read()
 
-    job_id = job_manager.create_job(file.filename, org_id)
+    job_id = job_manager.create_job(file.filename, org_id, job_type="pdf")
 
     file.file.seek(0) # Reset file pointer for background worker
     await background_worker.add_job(
@@ -77,6 +77,28 @@ async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...))
         "status": "accepted",
         "filename": file.filename,
         "message": "File upload accepted. Processing started in background.",
+        "status_url": f"/job/{job_id}/status",
+    }
+
+
+@app.post("/ingest/website", dependencies=[Depends(verify_api_key)]) # Endpoint for website/sitemap ingestion
+async def ingest_website(url: str = Form(...), org_id: str = Form(...), max_pages: int = Form(100)):
+    print(f"Starting website ingestion for: {url} for org_id: {org_id}")
+
+    job_id = job_manager.create_job(url, org_id, job_type="website")
+
+    await background_worker.add_website_job(
+        job_id=job_id,
+        url=url,
+        org_id=org_id,
+        max_pages=max_pages,
+    )
+
+    return {
+        "job_id": job_id,
+        "status": "accepted",
+        "url": url,
+        "message": "Website ingestion accepted. Processing started in background.",
         "status_url": f"/job/{job_id}/status",
     }
 

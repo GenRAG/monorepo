@@ -1,4 +1,5 @@
 import os
+import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, Distance
 
@@ -24,7 +25,7 @@ def upsert_chunks(collection_name: str, chunks: list, embeddings: list, metadata
 
         points.append(
             PointStruct(
-                id=i,  # Ideally use uuid.uuid4().hex in production
+                id=uuid.uuid4().hex,  # Use UUID to ensure uniqueness
                 vector=vector,
                 payload={
                     "text": chunk,

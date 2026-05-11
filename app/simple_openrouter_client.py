@@ -73,12 +73,15 @@ class OpenRouterClient: # Client for interacting with the OpenRouter API for cha
         messages: List[Dict[str, str]],
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        response_format: Optional[Dict[str, str]] = None,
     ) -> str:
         payload = {"model": model, "messages": messages}
         if temperature is not None:
             payload["temperature"] = temperature
         if max_tokens is not None:
             payload["max_tokens"] = max_tokens
+        if response_format is not None:
+            payload["response_format"] = response_format
 
         try:
             response = await self.client.post("/chat/completions", json=payload)

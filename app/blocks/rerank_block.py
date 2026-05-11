@@ -14,17 +14,21 @@ from .base_block import BaseBlock
 from app.config import settings
 
 
-class RerankBlock(BaseBlock): # Block for reranking retrieved documents
+class RerankBlock(BaseBlock):  # Block for reranking retrieved documents
     provider: str = Field(
         default="zeroentropy", description="Reranking provider (zeroentropy or cohere)"
-    ) # The reranking service provider
-    model: str = Field(default="zerank-2", description="Reranking model to use") # The specific reranking model
+    )  # The reranking service provider
+    model: str = Field(
+        default="zerank-2", description="Reranking model to use"
+    )  # The specific reranking model
     top_k: int = Field(
         default=5, description="Number of top documents to return after reranking"
-    ) # Number of top results to keep after reranking
+    )  # Number of top results to keep after reranking
 
     @observe(name="RerankBlock")
-    async def run(self, input_data: Union[Dict[str, Any], str]) -> Dict[str, Any]: # Executes the reranking logic using the specified provider
+    async def run(
+        self, input_data: Union[Dict[str, Any], str]
+    ) -> Dict[str, Any]:  # Executes the reranking logic using the specified provider
         # Extract query and retrieved documents from input data
         if isinstance(input_data, dict):
             query = input_data.get("query", "")
@@ -46,19 +50,20 @@ class RerankBlock(BaseBlock): # Block for reranking retrieved documents
         if not query:
             raise ValueError("Query cannot be empty")
         if not text_docs:
-            print("No documents to rerank, skipping reranking step.")
-            return input_data
+            raise ValueError("No documents to rerank")
 
         # Call the appropriate reranking provider based on configuration
         if self.provider == "zeroentropy":
-            return await self._rerank_zeroentropy(query, text_docs, documents, input_data)
+            return await self._rerank_zeroentropy(
+                query, text_docs, documents, input_data
+            )
         elif self.provider == "cohere":
             return await self._rerank_cohere(query, text_docs, documents, input_data)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
     async def _rerank_zeroentropy(
-        self, # Reranks documents using the ZeroEntropy API
+        self,  # Reranks documents using the ZeroEntropy API
         query: str,
         text_documents: List[str],
         original_documents: List[Dict[str, Any]],
@@ -75,18 +80,18 @@ class RerankBlock(BaseBlock): # Block for reranking retrieved documents
             documents=text_documents,
         )
         # Extract and sort reranked indices by relevance score
-        reranked_indices = [
-            item.index
-            for item in sorted(
-                response.results, key=lambda x: x.relevance_score, reverse=True
-            )[: self.top_k]
-        ]
-        # Return original document dictionaries that were reranked
-        reranked_dicts = [original_documents[i] for i in reranked_indices]
+        top_results = sorted(
+            response.results, key=lambda x: x.relevance_score, reverse=True
+        )[: self.top_k]
+        reranked_dicts = []
+        for item in top_results:
+            doc = dict(original_documents[item.index])
+            doc["confidence_score"] = float(item.relevance_score)
+            reranked_dicts.append(doc)
         return {**input_data, "retrieved_documents": reranked_dicts}
 
     async def _rerank_cohere(
-        self, # Reranks documents using the Cohere API
+        self,  # Reranks documents using the Cohere API
         query: str,
         text_documents: List[str],
         original_documents: List[Dict[str, Any]],
@@ -104,12 +109,12 @@ class RerankBlock(BaseBlock): # Block for reranking retrieved documents
             top_n=self.top_k,
         )
         # Extract and sort reranked indices by relevance score
-        reranked_indices = [
-            item.index
-            for item in sorted(
-                response.results, key=lambda x: x.relevance_score, reverse=True
-            )
-        ]
-        # Return original document dictionaries that were reranked
-        reranked_dicts = [original_documents[i] for i in reranked_indices]
+        top_results = sorted(
+            response.results, key=lambda x: x.relevance_score, reverse=True
+        )
+        reranked_dicts = []
+        for item in top_results:
+            doc = dict(original_documents[item.index])
+            doc["confidence_score"] = float(item.relevance_score)
+            reranked_dicts.append(doc)
         return {**input_data, "retrieved_documents": reranked_dicts}

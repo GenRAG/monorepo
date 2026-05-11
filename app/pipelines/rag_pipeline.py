@@ -1,7 +1,7 @@
 import json
 from typing import Any, AsyncGenerator, Dict, Optional, Union
 
-from langfuse import get_client, observe
+from langfuse import get_client, observe, propagate_attributes
 from pydantic import Field
 
 from app.blocks.answer_block import AnswerGenerationBlock
@@ -10,6 +10,8 @@ from app.blocks.query_block import QueryBlock
 from app.blocks.retrieve_block import RetrieveBlock
 from app.blocks.rerank_block import RerankBlock
 from app.blocks.query_rewriter_block import QueryRewriterBlock
+from app.blocks.refusal_block import RefusalBlock
+from app.blocks.verified_answer_block import VerifiedAnswerBlock
 
 from app.schemas.rag import (
     BlockConfig,
@@ -18,6 +20,8 @@ from app.schemas.rag import (
     RetrieveBlockConfig,
     RerankBlockConfig,
     AnswerGenerationBlockConfig,
+    RefusalBlockConfig,
+    VerifiedAnswerBlockConfig,
     PipelineConfig,
 )
 
@@ -138,6 +142,15 @@ def create_pipeline_from_json(pipeline_config: PipelineConfig, org_id: Optional[
                 )
             )
 
+        elif block_type == "refusal":
+            assert isinstance(block_config, RefusalBlockConfig)
+            pipeline.add_block(
+                RefusalBlock(
+                    name=block_name,
+                    model_name=block_config.model_name,
+                )
+            )
+
         elif block_type == "answer":
             assert isinstance(block_config, AnswerGenerationBlockConfig)
             answer_kwargs = {
@@ -154,6 +167,20 @@ def create_pipeline_from_json(pipeline_config: PipelineConfig, org_id: Optional[
 
             pipeline.add_block(AnswerGenerationBlock(**answer_kwargs))
 
+        elif block_type == "verified_answer":
+            assert isinstance(block_config, VerifiedAnswerBlockConfig)
+            verified_kwargs = {
+                "name": block_name,
+                "model_name": block_config.model,
+                "judge_model_name": block_config.judge_model,
+            }
+            if block_config.temperature is not None:
+                verified_kwargs["temperature"] = block_config.temperature
+            if hasattr(block_config, "max_tokens") and block_config.max_tokens is not None:
+                verified_kwargs["max_tokens"] = block_config.max_tokens
+
+            pipeline.add_block(VerifiedAnswerBlock(**verified_kwargs))
+
     return pipeline
 
 
@@ -169,7 +196,8 @@ async def execute_query_from_json( # Main entry for executing RAG pipeline from 
     org_id = config.get("org_id")
 
     # Update tracing metadata with the pipeline configuration
-    langfuse.update_current_trace(metadata={"config": config})
+    if hasattr(langfuse, "update_current_trace"):
+        langfuse.update_current_trace(metadata={"config": config})
 
     # Validate and build the pipeline
     pipeline_config = PipelineConfig.model_validate(config.get("pipeline", {}))

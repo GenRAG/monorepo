@@ -208,11 +208,7 @@ async def test_streaming_rag_query_rewrite_greeting():
             "pipeline_name": "test_rag_query_rewrite",
             "blocks": [
                 {"type": "query", "name": "query"},
-                # {
-                #     "type": "query_rewrite",
-                #     "name": "query_rewrite",
-                #     "model_name": "google/gemini-2.5-flash",
-                # },
+
                 {
                     "type": "retrieve",
                     "name": "retrieve",
@@ -255,8 +251,8 @@ async def test_streaming_rag_query_rewrite_greeting():
             print(f"An error occurred during greeting test: {e}")
 
 if __name__ == "__main__":
-    # print("Running RAG pipeline test with reranking...")
-    # asyncio.run(test_streaming_rag_rerank())
+    print("Running RAG pipeline test with reranking...")
+    asyncio.run(test_streaming_rag_rerank())
     # print("\nRunning RAG pipeline test without reranking...")
     # asyncio.run(test_streaming_rag())
     # print("\nRunning RAG pipeline test with query rewriting...")

@@ -13,6 +13,10 @@ class QueryRewriterBlockConfig(BaseBlockConfig): # Configuration for a query rew
     type: Literal["query_rewrite"] = "query_rewrite" # Literal type for Pydantic discrimination
     model_name: Optional[str] = "google/gemini-2.5-flash" # LLM model for query rewriting
 
+class RefusalBlockConfig(BaseBlockConfig):  # Configuration for a refusal block
+    type: Literal["refusal"] = "refusal"  # Literal type for Pydantic discrimination
+    model_name: Optional[str] = "google/gemini-2.5-flash"  # LLM model for routing
+
 class RetrieveBlockConfig(BaseBlockConfig): # Configuration for a retrieval block
     type: Literal["retrieve"] = "retrieve" # Literal type for Pydantic discrimination
     collection_name: Optional[str] = "genrag_knowledge_base" # Qdrant collection to query
@@ -31,6 +35,13 @@ class AnswerGenerationBlockConfig(BaseBlockConfig): # Configuration for an answe
     max_tokens: Optional[int] = None # Maximum tokens in the generated answer
     system_prompt: Optional[str] = None # Optional system prompt for the LLM
 
+class VerifiedAnswerBlockConfig(BaseBlockConfig):
+    type: Literal["verified_answer"] = "verified_answer"
+    model: Optional[str] = "google/gemini-2.5-flash"
+    judge_model: Optional[str] = "google/gemini-2.5-flash"
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
+
 BlockConfig = Annotated[ # Discriminated union of all possible block configurations
     Union[
         QueryBlockConfig,
@@ -38,6 +49,8 @@ BlockConfig = Annotated[ # Discriminated union of all possible block configurati
         RetrieveBlockConfig,
         RerankBlockConfig,
         AnswerGenerationBlockConfig,
+        RefusalBlockConfig,
+        VerifiedAnswerBlockConfig,
     ],
     Field(discriminator="type"), # Pydantic uses 'type' field to discriminate
 ]

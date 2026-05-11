@@ -34,6 +34,7 @@ export class IndexDocumentHandler {
 
         await this.ragEngineService.indexDocument(
             command.documentId,
+            command.agentId,
             fileBuffer,
             command.mimeType,
         );

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { flushSync } from "react-dom";
 
 export interface ChatMessage {
     id: string;
@@ -10,6 +11,7 @@ export interface ChatMessage {
 export interface UseChatOptions {
     getResponse: (
         question: string,
+        onChunk: (partialText: string) => void,
     ) => { response: string[] } | Promise<{ response: string[] }>;
     initialMessages?: ChatMessage[];
 }
@@ -38,7 +40,20 @@ export const useChat = ({
 
             try {
                 const { response } = await Promise.resolve(
-                    getResponse(question),
+                    getResponse(question, (partialText) => {
+                        flushSync(() => {
+                            setMessages((prev) =>
+                                prev.map((m) =>
+                                    m.id === id
+                                        ? {
+                                              ...pending,
+                                              response: [partialText],
+                                          }
+                                        : m,
+                                ),
+                            );
+                        });
+                    }),
                 );
                 setMessages((prev) =>
                     prev.map((m) =>

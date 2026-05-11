@@ -23,7 +23,7 @@ import { Logger } from 'nestjs-pino';
         ContextBuilder,
         RagEngineService,
     ],
-    exports: [AgentRuntimeOrchestrator],
+    exports: [AgentRuntimeOrchestrator, AgentRuntimeService],
     imports: [
         PrismaModule,
         UsageTrackerModule,

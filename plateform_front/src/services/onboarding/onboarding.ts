@@ -94,6 +94,9 @@ export const onboardingApi = backendApi.injectEndpoints({
                 method: "POST",
                 body: { stepId, data },
             }),
+            invalidatesTags: (_result, _error, { workspaceId }) => [
+                onboardingTag(workspaceId),
+            ],
         }),
 
         compareOnboarding: builder.mutation<

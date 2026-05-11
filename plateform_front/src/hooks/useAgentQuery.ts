@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useExecuteAgentRuntimeMutation } from "services/agentRuntime/agentRuntime";
 import { useSendMockQueryMutation } from "services/chat/chat";
 
 export class InsufficientCreditsError extends Error {
@@ -14,7 +13,10 @@ interface AgentQueryState {
     isStreaming: boolean;
     error: string | null;
     isOutOfCredits: boolean;
+    conversationId: string | null;
 }
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL ?? "";
 
 export const useAgentQuery = (
     workspaceId: string,
@@ -26,55 +28,109 @@ export const useAgentQuery = (
         isStreaming: false,
         error: null,
         isOutOfCredits: false,
+        conversationId: null,
     });
 
-    const [executeRuntime] = useExecuteAgentRuntimeMutation();
     const [sendMockQuery] = useSendMockQueryMutation();
 
     const sendQuery = useCallback(
-        async (query: string): Promise<string> => {
-            setState({
+        async (
+            query: string,
+            onChunk?: (partialText: string) => void,
+        ): Promise<string> => {
+            setState((prev) => ({
                 text: "",
                 isStreaming: true,
                 error: null,
                 isOutOfCredits: false,
-            });
+                conversationId: prev.conversationId,
+            }));
 
-            try {
-                let answer: string;
-
-                if (!useMock) {
-                    const result = await executeRuntime({
-                        workspaceId,
-                        agentId,
-                        query,
-                    }).unwrap();
-                    answer = result.answer ?? "";
-                } else {
+            if (useMock) {
+                try {
                     const result = await sendMockQuery({ query }).unwrap();
-                    answer = result.response[0] ?? "";
+                    const answer = result.response[0] ?? "";
+                    setState((prev) => ({ ...prev, text: answer }));
+                    return answer;
+                } catch (err: any) {
+                    setState((prev) => ({ ...prev, error: String(err) }));
+                    throw err;
+                } finally {
+                    setState((prev) => ({ ...prev, isStreaming: false }));
                 }
+            }
 
-                setState((prev) => ({ ...prev, text: answer }));
-                return answer;
-            } catch (err: any) {
-                const status = err?.status ?? err?.originalStatus;
-                if (status === 403 || status === 402) {
-                    const creditsError = new InsufficientCreditsError();
+            const baseUrl = `${BACKEND_URL}/workspaces/${workspaceId}/agents/${agentId}/runtime/stream`;
+            const params = new URLSearchParams({ query });
+            if (state.conversationId) {
+                params.set("conversationId", state.conversationId);
+            }
+            const url = `${baseUrl}?${params.toString()}`;
+
+            return new Promise<string>((resolve, reject) => {
+                const es = new EventSource(url, { withCredentials: true });
+                let fullText = "";
+
+                es.onmessage = (e: MessageEvent) => {
+                    try {
+                        const parsed = JSON.parse(e.data as string) as {
+                            chunk?: string;
+                            error?: string;
+                            isOutOfCredits?: boolean;
+                            done?: boolean;
+                            conversationId?: string;
+                        };
+
+                        if (parsed.done) {
+                            es.close();
+                            setState((prev) => ({
+                                ...prev,
+                                isStreaming: false,
+                                conversationId:
+                                    parsed.conversationId ??
+                                    prev.conversationId,
+                            }));
+                            resolve(fullText);
+                            return;
+                        }
+
+                        if (parsed.error) {
+                            es.close();
+                            const err = parsed.isOutOfCredits
+                                ? new InsufficientCreditsError()
+                                : new Error(parsed.error);
+                            setState((prev) => ({
+                                ...prev,
+                                error: parsed.error!,
+                                isOutOfCredits: parsed.isOutOfCredits ?? false,
+                                isStreaming: false,
+                            }));
+                            reject(err);
+                            return;
+                        }
+
+                        if (parsed.chunk) {
+                            fullText += parsed.chunk;
+                            onChunk?.(fullText);
+                            setState((prev) => ({ ...prev, text: fullText }));
+                        }
+                    } catch {
+                        // ignore parse errors for malformed SSE data
+                    }
+                };
+
+                es.onerror = () => {
+                    es.close();
                     setState((prev) => ({
                         ...prev,
-                        error: creditsError.message,
-                        isOutOfCredits: true,
+                        error: "Erreur de connexion au serveur.",
+                        isStreaming: false,
                     }));
-                    throw creditsError;
-                }
-                setState((prev) => ({ ...prev, error: String(err) }));
-                throw err;
-            } finally {
-                setState((prev) => ({ ...prev, isStreaming: false }));
-            }
+                    reject(new Error("Erreur de connexion au serveur."));
+                };
+            });
         },
-        [workspaceId, agentId, executeRuntime, sendMockQuery, useMock],
+        [workspaceId, agentId, sendMockQuery, useMock, state.conversationId],
     );
 
     return { ...state, sendQuery };

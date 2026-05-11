@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useUploadDocumentMutation } from "services/document/document";
 
 export enum Status {
@@ -20,60 +20,6 @@ export interface UploadedSource {
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLLS = 40; // 2 minutes max
 
-const pollDocumentStatus = (
-    documentId: string,
-    sourceId: string,
-    workspaceId: string,
-    agentId: string,
-    setSources: React.Dispatch<React.SetStateAction<UploadedSource[]>>,
-) => {
-    const backendUrl = process.env.REACT_APP_BACKEND_URL ?? "";
-    let polls = 0;
-
-    const check = async (): Promise<void> => {
-        if (polls >= MAX_POLLS) {
-            setSources((prev) =>
-                prev.map((s) =>
-                    s.id === sourceId ? { ...s, status: Status.ERROR } : s,
-                ),
-            );
-            return;
-        }
-        polls++;
-
-        try {
-            const response = await fetch(
-                `${backendUrl}/workspaces/${workspaceId}/agents/${agentId}/documents/${documentId}`,
-                { credentials: "include" },
-            );
-            if (!response.ok) throw new Error("Fetch failed");
-            const doc = await response.json();
-
-            if (doc.status === "INDEXED") {
-                setSources((prev) =>
-                    prev.map((s) =>
-                        s.id === sourceId
-                            ? { ...s, status: Status.COMPLETED, progress: 100 }
-                            : s,
-                    ),
-                );
-            } else if (doc.status === "FAILED") {
-                setSources((prev) =>
-                    prev.map((s) =>
-                        s.id === sourceId ? { ...s, status: Status.ERROR } : s,
-                    ),
-                );
-            } else {
-                setTimeout(check, POLL_INTERVAL_MS);
-            }
-        } catch {
-            setTimeout(check, POLL_INTERVAL_MS);
-        }
-    };
-
-    setTimeout(check, POLL_INTERVAL_MS);
-};
-
 const useUploadDocuments = (
     workspaceId?: string | null,
     agentId?: string | null,
@@ -82,11 +28,71 @@ const useUploadDocuments = (
 ) => {
     const [sources, setSources] = useState<UploadedSource[]>([]);
     const [uploadDocument] = useUploadDocumentMutation();
+    const cancelledPolls = useRef<Set<string>>(new Set());
 
     const sessionValidCount = sources.filter(
         (s) => s.status !== Status.ERROR,
     ).length;
     const isAtMaxFiles = initialCount + sessionValidCount >= maxFiles;
+
+    const pollDocumentStatus = (
+        documentId: string,
+        sourceId: string,
+    ): void => {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL ?? "";
+        let polls = 0;
+
+        const check = async (): Promise<void> => {
+            if (cancelledPolls.current.has(sourceId)) return;
+
+            if (polls >= MAX_POLLS) {
+                setSources((prev) =>
+                    prev.map((s) =>
+                        s.id === sourceId ? { ...s, status: Status.ERROR } : s,
+                    ),
+                );
+                return;
+            }
+            polls++;
+
+            try {
+                const response = await fetch(
+                    `${backendUrl}/workspaces/${workspaceId}/agents/${agentId}/documents/${documentId}`,
+                    { credentials: "include" },
+                );
+                if (!response.ok) throw new Error("Fetch failed");
+                const doc = await response.json();
+
+                if (cancelledPolls.current.has(sourceId)) return;
+
+                if (doc.status === "INDEXED") {
+                    setSources((prev) =>
+                        prev.map((s) =>
+                            s.id === sourceId
+                                ? { ...s, status: Status.COMPLETED, progress: 100 }
+                                : s,
+                        ),
+                    );
+                } else if (doc.status === "FAILED") {
+                    setSources((prev) =>
+                        prev.map((s) =>
+                            s.id === sourceId
+                                ? { ...s, status: Status.ERROR }
+                                : s,
+                        ),
+                    );
+                } else {
+                    setTimeout(check, POLL_INTERVAL_MS);
+                }
+            } catch {
+                if (!cancelledPolls.current.has(sourceId)) {
+                    setTimeout(check, POLL_INTERVAL_MS);
+                }
+            }
+        };
+
+        setTimeout(check, POLL_INTERVAL_MS);
+    };
 
     const uploadDocuments = async (
         files: FileList,
@@ -134,13 +140,7 @@ const useUploadDocuments = (
                             ),
                         );
 
-                        pollDocumentStatus(
-                            doc.id,
-                            sourceId,
-                            workspaceId,
-                            agentId,
-                            setSources,
-                        );
+                        pollDocumentStatus(doc.id, sourceId);
                     }
                 } catch {
                     setSources((prev) =>
@@ -158,6 +158,7 @@ const useUploadDocuments = (
     };
 
     const removeSource = (id: string) => {
+        cancelledPolls.current.add(id);
         setSources((prev) => prev.filter((s) => s.id !== id));
     };
 

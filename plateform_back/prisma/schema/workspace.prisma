@@ -17,4 +17,5 @@ model Workspace {
   creditBalance      CreditBalance?
   creditTransactions CreditTransaction[]
   onboardingSessions OnboardingSession[]
+  conversations      Conversation[]
 }

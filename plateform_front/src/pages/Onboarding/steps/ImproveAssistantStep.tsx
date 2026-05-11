@@ -21,6 +21,7 @@ import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDro
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
 import { useGetAgentDocumentStatsQuery } from "services/document/document";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
+import CreditConsumptionBanner from "components/System/Molecules/CreditConsumptionBanner";
 
 const MAX_FILES = 3;
 const STEP_ID = "improve-assistant";
@@ -80,8 +81,8 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
     const showComparison = totalCompletedCount > 0;
 
     const getResponse = useCallback(
-        async (question: string) => {
-            const fullText = await sendQuery(question);
+        async (question: string, onChunk: (partialText: string) => void) => {
+            const fullText = await sendQuery(question, onChunk);
             return { response: [fullText] };
         },
         [sendQuery],
@@ -137,6 +138,10 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                     align="start"
                 >
                     <VStack flex={1} w="100%" h="100%" spacing={4}>
+                        <CreditConsumptionBanner
+                            workspaceId={workspaceId}
+                            mb={0}
+                        />
                         <DocumentDropZone
                             isDragging={isDragging}
                             onFileSelect={
@@ -165,6 +170,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                         display="flex"
                         flexDirection="column"
                         h="100%"
+                        gap={2}
                     >
                         <ChatInterface
                             fullHeight={!isMobile}

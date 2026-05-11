@@ -7,4 +7,5 @@ export enum Tag {
     Workflow = "Workflow",
     Deployments = "Deployments",
     Onboarding = "Onboarding",
+    Credits = "Credits",
 }

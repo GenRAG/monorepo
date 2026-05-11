@@ -16,8 +16,8 @@ const ChatWorkspace = () => {
     const { sendQuery } = useAgentQuery(workspaceId, agentId);
 
     const getResponse = useCallback(
-        async (question: string) => {
-            const fullText = await sendQuery(question);
+        async (question: string, onChunk: (partialText: string) => void) => {
+            const fullText = await sendQuery(question, onChunk);
             return { response: [fullText] };
         },
         [sendQuery],

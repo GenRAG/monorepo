@@ -9,8 +9,8 @@ import {
     useGetAssistantMetadataQuery,
     useGetAssistantsListQuery,
     useGetConversationsForAssistantQuery,
-    useSendChatMessageMutation,
 } from "services/chat/chat";
+import { useAssistantQuery } from "hooks/useAssistantQuery";
 
 const MOCK_ASSISTANTS = [
     { id: "1", title: "Contract Risk Analysis" },
@@ -53,7 +53,7 @@ export const Assistant = () => {
         string | null
     >(null);
 
-    const [sendChatMessage] = useSendChatMessageMutation();
+    const { sendQuery } = useAssistantQuery(assistantId ?? "");
     const { data: metadata } = useGetAssistantMetadataQuery(assistantId ?? "", {
         skip: !assistantId,
     });
@@ -91,16 +91,17 @@ export const Assistant = () => {
             ? (MOCK_ASSISTANT_TITLES[assistantId] ?? "Assistant")
             : "Assistant");
     const getResponse = useCallback(
-        async (question: string) => {
+        async (question: string, onChunk: (partial: string) => void) => {
             if (!assistantId) return { response: ["Error: No assistant ID."] };
-            const result = await sendChatMessage({
-                assistantId,
-                conversationId: currentConversationId ?? undefined,
+            const { text, conversationId: newConvId } = await sendQuery(
                 question,
-            }).unwrap();
-            return result;
+                currentConversationId,
+                onChunk,
+            );
+            setCurrentConversationId(newConvId);
+            return { response: [text] };
         },
-        [assistantId, currentConversationId, sendChatMessage],
+        [assistantId, sendQuery, currentConversationId],
     );
 
     const { messages, sendMessage, isLoading } = useChat({

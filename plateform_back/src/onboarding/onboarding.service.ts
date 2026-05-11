@@ -16,6 +16,110 @@ import { CreditBalanceService } from 'src/credit/credit-balance.service';
 const ONBOARDING_INITIAL_CREDITS = 20;
 
 const DEMO_WORKFLOW_DEFINITION = {
+    nodes: [
+        {
+            id: 'demo-query',
+            type: 'GenNode',
+            dragHandle: '.drag-handle',
+            data: { type: 'QUERY', inputs: {}, outputs: [] },
+            position: { x: 100, y: 80 },
+            deletable: false,
+        },
+        {
+            id: 'demo-retriever',
+            type: 'GenNode',
+            dragHandle: '.drag-handle',
+            data: { type: 'RETRIEVER', inputs: {}, outputs: [] },
+            position: { x: 100, y: 220 },
+            deletable: false,
+        },
+        {
+            id: 'demo-response',
+            type: 'GenNode',
+            dragHandle: '.drag-handle',
+            data: { type: 'RESPONSE', inputs: {}, outputs: [] },
+            position: { x: 100, y: 360 },
+            deletable: false,
+        },
+        {
+            id: 'demo-response-model',
+            type: 'GenNode',
+            dragHandle: '.drag-handle',
+            data: {
+                type: 'MODEL',
+                inputs: {},
+                outputs: [],
+                isPlaceholder: false,
+                firstTime: false,
+                isEditing: false,
+                configItems: [],
+                settingLabel: 'Large Language Model',
+                inputType: 'SELECT',
+                parentNodeId: 'demo-response',
+                modelName: 'google/gemini-2.5-flash',
+                stringValue: 'google/gemini-2.5-flash',
+            },
+            position: { x: 380, y: 295 },
+            deletable: true,
+        },
+        {
+            id: 'demo-response-instruction',
+            type: 'GenNode',
+            dragHandle: '.drag-handle',
+            data: {
+                type: 'INSTRUCTION',
+                inputs: {},
+                outputs: [],
+                isPlaceholder: true,
+                configItems: [],
+                settingLabel: 'Instruction Prompt',
+                inputType: 'STRING',
+                parentNodeId: 'demo-response',
+            },
+            position: { x: 380, y: 425 },
+            deletable: true,
+        },
+    ],
+    edges: [
+        {
+            id: 'demo-query-to-demo-retriever',
+            source: 'demo-query',
+            target: 'demo-retriever',
+            sourceHandle: 'main-source',
+            targetHandle: 'main-target',
+            animated: true,
+            type: 'default',
+        },
+        {
+            id: 'demo-retriever-to-demo-response',
+            source: 'demo-retriever',
+            target: 'demo-response',
+            sourceHandle: 'main-source',
+            targetHandle: 'main-target',
+            animated: true,
+            type: 'default',
+        },
+        {
+            id: 'demo-response-setting-llm',
+            source: 'demo-response',
+            target: 'demo-response-model',
+            sourceHandle: 'setting-source-Large Language Model',
+            targetHandle: 'setting-target',
+            type: 'settings',
+            animated: false,
+            data: { label: 'Large Language Model' },
+        },
+        {
+            id: 'demo-response-setting-instruction',
+            source: 'demo-response',
+            target: 'demo-response-instruction',
+            sourceHandle: 'setting-source-Instruction Prompt',
+            targetHandle: 'setting-target',
+            type: 'settings',
+            animated: false,
+            data: { label: 'Instruction Prompt' },
+        },
+    ],
     blocks: [
         { name: 'query', type: 'query' },
         {
@@ -28,7 +132,6 @@ const DEMO_WORKFLOW_DEFINITION = {
             name: 'answer',
             type: 'answer',
             model: 'google/gemini-2.5-flash',
-            instruction: '',
         },
     ],
 };
@@ -76,11 +179,28 @@ export class OnboardingService {
             workspaceId,
         );
 
-        const session = await this.onboardingRepository.create({
-            user: { connect: { id: userId } },
-            workspace: { connect: { id: workspaceId } },
-            agent: { connect: { id: agent.id } },
-        });
+        let session: OnboardingSession;
+        try {
+            session = await this.onboardingRepository.create({
+                user: { connect: { id: userId } },
+                workspace: { connect: { id: workspaceId } },
+                agent: { connect: { id: agent.id } },
+            });
+        } catch (err) {
+            if (
+                err instanceof Prisma.PrismaClientKnownRequestError &&
+                err.code === 'P2002'
+            ) {
+                await this.agentService.remove(agent.id, workspaceId);
+                const winner =
+                    await this.onboardingRepository.findByUserAndWorkspace(
+                        userId,
+                        workspaceId,
+                    );
+                return this.toResponse(winner!);
+            }
+            throw err;
+        }
 
         try {
             await this.creditBalanceService.grantInitial({
@@ -181,7 +301,7 @@ export class OnboardingService {
             throw new NotFoundException('Onboarding session not found');
         }
 
-        const [standard, precise, creative] = await Promise.all([
+        const results = await Promise.allSettled([
             this.orchestrator.execute({
                 query,
                 agentId: session.agentId,
@@ -205,11 +325,11 @@ export class OnboardingService {
             }),
         ]);
 
-        return {
-            standard: standard.answer,
-            precise: precise.answer,
-            creative: creative.answer,
-        };
+        const [standard, precise, creative] = results.map((r) =>
+            r.status === 'fulfilled' ? r.value.answer : '',
+        );
+
+        return { standard, precise, creative };
     }
 
     async complete(
@@ -230,22 +350,29 @@ export class OnboardingService {
 
         const workflow = await this.workflowService.findActive(session.agentId);
 
+        if (!workflow) {
+            throw new NotFoundException(
+                'No active workflow found for this agent',
+            );
+        }
+
         const definition = workflow.definition as {
             blocks: Record<string, unknown>[];
             nodes?: unknown[];
             edges?: unknown[];
         };
 
-        const answerBlock = definition.blocks?.find(
-            (b) => b['type'] === 'answer',
-        );
+        const updatedBlocks =
+            definition.blocks?.map((b) =>
+                b['type'] === 'answer'
+                    ? { ...b, system_prompt: instruction }
+                    : b,
+            ) ?? [];
 
-        if (answerBlock) {
-            answerBlock['instruction'] = instruction;
-        }
+        const updatedDefinition = { ...definition, blocks: updatedBlocks };
 
         await this.workflowService.update(session.agentId, {
-            definition: definition as Record<string, unknown>,
+            definition: updatedDefinition as Record<string, unknown>,
         });
 
         await this.onboardingRepository.update(session.id, {

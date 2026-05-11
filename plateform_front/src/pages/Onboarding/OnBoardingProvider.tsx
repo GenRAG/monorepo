@@ -3,6 +3,7 @@ import React, {
     createContext,
     useState,
     useEffect,
+    useCallback,
     ReactNode,
     useRef,
 } from "react";
@@ -127,46 +128,64 @@ export const OnboardingProvider: React.FC<{
             });
     }, [workspaceId, startOnboarding, navigate, steps.length]);
 
-    const updateStepData = (stepId: string, data: Partial<StepData>) => {
-        setState((prev) => ({
-            ...prev,
-            stepsData: {
-                ...prev.stepsData,
-                [stepId]: { ...prev.stepsData[stepId], ...data },
-            },
-        }));
-    };
+    const updateStepData = useCallback(
+        (stepId: string, data: Partial<StepData>) => {
+            setState((prev) => ({
+                ...prev,
+                stepsData: {
+                    ...prev.stepsData,
+                    [stepId]: { ...prev.stepsData[stepId], ...data },
+                },
+            }));
+        },
+        [],
+    );
 
-    const getStepData = (stepId: string): StepData => {
-        return state.stepsData[stepId] || {};
-    };
+    const getStepData = useCallback(
+        (stepId: string): StepData => {
+            return state.stepsData[stepId] || {};
+        },
+        [state.stepsData],
+    );
 
-    const isStepValid = (stepIndex: number): boolean => {
-        const step = steps[stepIndex];
-        if (!step.validate) return true;
-        const result = step.validate(getStepData(step.id));
-        if (result instanceof Promise) return false;
-        return result;
-    };
+    const isStepCompleted = useCallback(
+        (stepIndex: number): boolean => {
+            return state.completedSteps.includes(stepIndex);
+        },
+        [state.completedSteps],
+    );
 
-    const isStepCompleted = (stepIndex: number): boolean => {
-        return state.completedSteps.includes(stepIndex);
-    };
+    const isStepValid = useCallback(
+        (stepIndex: number): boolean => {
+            const step = steps[stepIndex];
+            if (!step.validate) return true;
+            const result = step.validate(state.stepsData[step.id] || {});
+            if (result instanceof Promise) return false;
+            return result;
+        },
+        [steps, state.stepsData],
+    );
 
-    const canNavigateToStep = (stepIndex: number): boolean => {
-        if (stepIndex === 0) return true;
-        for (let i = 0; i < stepIndex; i++) {
-            if (!isStepCompleted(i)) return false;
-        }
-        return true;
-    };
+    const canNavigateToStep = useCallback(
+        (stepIndex: number): boolean => {
+            if (stepIndex === 0) return true;
+            for (let i = 0; i < stepIndex; i++) {
+                if (!state.completedSteps.includes(i)) return false;
+            }
+            return true;
+        },
+        [state.completedSteps],
+    );
 
-    const goToStep = (stepIndex: number) => {
-        if (!canNavigateToStep(stepIndex)) return;
-        setState((prev) => ({ ...prev, currentStep: stepIndex }));
-    };
+    const goToStep = useCallback(
+        (stepIndex: number) => {
+            if (!canNavigateToStep(stepIndex)) return;
+            setState((prev) => ({ ...prev, currentStep: stepIndex }));
+        },
+        [canNavigateToStep],
+    );
 
-    const goNext = async () => {
+    const goNext = useCallback(async () => {
         const currentStepConfig = steps[state.currentStep];
 
         if (currentStepConfig.validate) {
@@ -230,18 +249,27 @@ export const OnboardingProvider: React.FC<{
                 currentStep: Math.min(prev.currentStep + 1, steps.length - 1),
             };
         });
-    };
+    }, [
+        steps,
+        workspaceId,
+        getStepData,
+        completeOnboarding,
+        updateOnboardingStep,
+        navigate,
+        toast,
+        state.currentStep,
+    ]);
 
-    const goPrevious = () => {
+    const goPrevious = useCallback(() => {
         setState((prev) => ({
             ...prev,
             currentStep: Math.max(prev.currentStep - 1, 0),
         }));
-    };
+    }, []);
 
-    const resetOnboarding = () => {
+    const resetOnboarding = useCallback(() => {
         setState({ currentStep: 0, completedSteps: [], stepsData: {} });
-    };
+    }, []);
 
     return (
         <OnboardingContext.Provider

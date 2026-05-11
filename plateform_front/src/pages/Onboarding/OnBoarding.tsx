@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
     Box,
     Button,
@@ -62,6 +62,15 @@ const OnboardingContent: React.FC = () => {
         borderColor: isDark ? "grey.700" : "#acacac81",
     };
     const responsivePadding = { base: 4, md: 6, lg: 10 };
+
+    const currentStepConfig = stepsConfig[currentStep];
+    const CurrentStepComponent = currentStepConfig.component;
+
+    const handleUpdateData = useCallback(
+        (data: Parameters<typeof updateStepData>[1]) =>
+            updateStepData(currentStepConfig.id, data),
+        [updateStepData, currentStepConfig.id],
+    );
 
     const [justCompletedStep, setJustCompletedStep] = useState<number | null>(
         null,
@@ -150,9 +159,6 @@ const OnboardingContent: React.FC = () => {
         );
     }
 
-    const currentStepConfig = stepsConfig[currentStep];
-    const CurrentStepComponent = currentStepConfig.component;
-
     return (
         <Stack h="100vh" bg={isDark ? "grey.950" : "grey.50"} spacing={0}>
             <OnboardingHeader onOpenDrawer={onOpen} />
@@ -222,12 +228,7 @@ const OnboardingContent: React.FC = () => {
                             >
                                 <CurrentStepComponent
                                     data={getStepData(currentStepConfig.id)}
-                                    updateData={(data) =>
-                                        updateStepData(
-                                            currentStepConfig.id,
-                                            data,
-                                        )
-                                    }
+                                    updateData={handleUpdateData}
                                     goNext={goNext}
                                     goPrevious={goPrevious}
                                     isValid={isStepValid(currentStep)}

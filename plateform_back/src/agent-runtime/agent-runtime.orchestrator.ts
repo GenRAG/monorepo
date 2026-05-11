@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import type { IncomingMessage } from 'http';
 import EventBus from 'src/lib/event-bus';
 import { ContextBuilder } from 'src/agent-runtime/agent-runtime.builder';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 import { UsageTrackerService } from 'src/usage-tracker/usage-tracker.service';
 import { AgentQueryCompletedEvent } from 'src/events/agent/agent-events';
 import { AgentEventType } from 'src/events/agent/agent-events.type';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AgentRuntimeOrchestrator {
+    private readonly mock: boolean;
     constructor(
         private readonly contextBuilder: ContextBuilder,
         private readonly ragEngineService: RagEngineService,
         private readonly usageTracker: UsageTrackerService,
-    ) {}
+        private readonly configService: ConfigService,
+    ) {
+        this.mock = this.configService.get<string>('RAG_MOCK') === 'true';
+    }
 
     async execute({
         query,
@@ -39,6 +45,8 @@ export class AgentRuntimeOrchestrator {
         const answer = await this.ragEngineService.sendQuery({
             pipeline,
             query,
+            orgId: agentId,
+            mock: this.mock,
         });
 
         if (!answer) {
@@ -53,5 +61,35 @@ export class AgentRuntimeOrchestrator {
         }
 
         return { answer };
+    }
+
+    async stream({
+        query,
+        agentId,
+        workspaceId,
+    }: {
+        query: string;
+        agentId: string;
+        workspaceId: string;
+    }): Promise<IncomingMessage> {
+        await this.usageTracker.checkOrThrow(workspaceId);
+
+        const pipeline = await this.contextBuilder.buildPipeline({ agentId });
+
+        const ragStream = await this.ragEngineService.getQueryStream({
+            pipeline,
+            query,
+            orgId: agentId,
+            mock: this.mock,
+        });
+
+        ragStream.once('end', () => {
+            EventBus.emit(
+                AgentEventType.AGENT_QUERY_COMPLETED,
+                new AgentQueryCompletedEvent(workspaceId, agentId, undefined),
+            );
+        });
+
+        return ragStream;
     }
 }

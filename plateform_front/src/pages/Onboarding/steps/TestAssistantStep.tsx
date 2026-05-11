@@ -7,6 +7,7 @@ import { useOnboarding } from "hooks/useOnBoarding";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 import { ChatInterface } from "components/System/Molecules/ChatInterface";
 import StepLevel from "components/System/Molecules/StepLevel";
+import CreditConsumptionBanner from "components/System/Molecules/CreditConsumptionBanner";
 
 const STEP_ID = "test-assistant";
 
@@ -29,8 +30,8 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
         (data.messageCount as number) ?? savedMessages.length;
 
     const getResponse = useCallback(
-        async (question: string) => {
-            const fullText = await sendQuery(question);
+        async (question: string, onChunk: (partialText: string) => void) => {
+            const fullText = await sendQuery(question, onChunk);
             return { response: [fullText] };
         },
         [sendQuery],
@@ -64,8 +65,15 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({
                         description="Ce modèle utilise uniquement des documents RH publics. Aucun de vos fichiers n'est encore utilisé."
                     />
                 </VStack>
+                <CreditConsumptionBanner workspaceId={workspaceId} mb={0} />
 
-                <Box flex={1} minH={0} display="flex" flexDirection="column">
+                <Box
+                    flex={1}
+                    minH={0}
+                    display="flex"
+                    flexDirection="column"
+                    gap={2}
+                >
                     <ChatInterface
                         fullHeight
                         compact

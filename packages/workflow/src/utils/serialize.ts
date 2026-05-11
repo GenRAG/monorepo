@@ -81,7 +81,7 @@ export function serializeWorkflow(
                 case TaskType.REWRITER:
                     return {
                         name: "rewrite",
-                        type: "rewrite",
+                        type: "query_rewrite",
                         model: s.model ?? "gpt-4o",
                     };
                 case TaskType.RETRIEVER:

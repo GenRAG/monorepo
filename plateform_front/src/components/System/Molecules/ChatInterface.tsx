@@ -164,7 +164,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     flex={1}
                     overflowY="auto"
                     p={4}
-                    pb={0}
+                    pb={5}
                     display="flex"
                     flexDirection="column"
                 >

@@ -43,7 +43,7 @@ export class ContextBuilder {
     ): Record<string, unknown>[] {
         if (!instruction) return blocks;
         return blocks.map((b) =>
-            b['type'] === 'answer' ? { ...b, instruction } : b,
+            b['type'] === 'answer' ? { ...b, system_prompt: instruction } : b,
         );
     }
 }

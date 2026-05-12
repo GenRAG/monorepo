@@ -1,0 +1,8 @@
+{
+  "name": "genrag-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "plateform_front"
+  ]
+}

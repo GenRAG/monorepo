@@ -34,7 +34,7 @@
   },
   "js/ts.tsdk.path": "plateform_back/node_modules/typescript/lib",
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"

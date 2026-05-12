@@ -1,10 +1,12 @@
 import os
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, Distance
+import uuid
 
-# Connect to Qdrant container
-QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")
-client = QdrantClient(url=QDRANT_URL)
+from app.config import settings
+
+# Connect to Qdrant
+client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key if settings.qdrant_api_key else None)
 
 
 def ensure_collection(collection_name: str, vector_size: int = 4096): # Ensures Qdrant collection exists
@@ -16,20 +18,21 @@ def ensure_collection(collection_name: str, vector_size: int = 4096): # Ensures 
         )
 
 
-def upsert_chunks(collection_name: str, chunks: list, embeddings: list, metadata: dict):
+def upsert_chunks(collection_name: str, chunks: list, embeddings: list, metadata: list):
     points = []
-    for i, (chunk, vector) in enumerate(zip(chunks, embeddings)):
+    for i, (chunk, vector, meta) in enumerate(zip(chunks, embeddings, metadata)):
         if not vector:
             continue
 
         points.append(
             PointStruct(
-                id=i,  # Ideally use uuid.uuid4().hex in production
+                id=uuid.uuid4().hex,
                 vector=vector,
                 payload={
                     "text": chunk,
-                    "org_id": metadata["org_id"],
-                    "filename": metadata["filename"],
+                    "org_id": meta["org_id"],
+                    "filename": meta.get("filename", ""),
+                    "title": meta.get("title", ""),
                     "chunk_index": i,
                 },
             )

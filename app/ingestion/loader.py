@@ -19,6 +19,7 @@ class Loader:
         """Crawling sitemap urls and saving retrived content to embedded sqlite database"""
         self.sitemaps = sitemaps
         self.max_pages = max_pages
+        self.pages_scraped = 0
         self.interactive = interactive
         self.visited_sitemaps = set()
 
@@ -220,16 +221,16 @@ class Loader:
 
         crawlable_urls, child_sitemaps = self.get_crawlable_urls(sitemap_url)
 
-        if self.max_pages is None or self.max_pages <= 0:
-            page_iter = crawlable_urls
-        else:
-            page_iter = crawlable_urls[: self.max_pages]
+        for item in crawlable_urls:
+            if self.max_pages is not None and self.pages_scraped >= self.max_pages:
+                print("Reached max_pages limit. Stopping crawl.")
+                return
 
-        for i, item in enumerate(page_iter):
+            self.pages_scraped += 1
             url = item["url"]
             lastmod = item["lastmod"]
 
-            print(f"[{i + 1}/{len(crawlable_urls)}] Scraping: {url}")
+            print(f"[{self.pages_scraped}/{self.max_pages if self.max_pages else '∞'}] Scraping: {url}")
 
             page_data = self.scrape_page(url, lastmod)
 

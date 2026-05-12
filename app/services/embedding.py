@@ -1,122 +1,48 @@
 import os
-import requests
-import json
+import httpx
+import asyncio
 from typing import List
+from app.config import settings
 
-
-class EmbeddingService: # Manages embedding generation via OpenRouter API
-    def __init__(self): # Initializes the embedding service with API key and model config
-        self.api_key = os.getenv("OPENROUTER_API_KEY")
+class EmbeddingService:
+    def __init__(self):
+        self.api_key = settings.openrouter_api_key
         self.base_url = "https://openrouter.ai/api/v1/embeddings"
         self.model = "qwen/qwen3-embedding-8b"
-        self.batch_size = 10  # Configures batch size for embedding requests
+        self.batch_size = 100
+        self.semaphore = asyncio.Semaphore(10) # Allow 10 concurrent batch requests
 
-    def get_embedding(self, text: str): # Sends text to OpenRouter and returns a vector embedding
-        if not text or not text.strip():
+    async def get_embedding_batch(self, client: httpx.AsyncClient, texts: List[str]) -> List[List[float]]:
+        if not texts:
             return []
 
-        response = requests.post(
-            url=self.base_url,
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "genrag.com",
-                "X-Title": "GenRAG App",
-            },
-            data=json.dumps({"model": self.model, "input": text}),
-        )
+        async with self.semaphore:
+            response = await client.post(
+                self.base_url,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "genrag.com",
+                    "X-Title": "GenRAG App",
+                },
+                json={"model": self.model, "input": texts},
+                timeout=60.0,
+            )
 
         if response.status_code == 200:
-            data = response.json()
-            return data["data"][0]["embedding"]
+            data = response.json()["data"]
+            # Ensure order matches
+            return [item["embedding"] for item in sorted(data, key=lambda x: x["index"])]
         else:
             print(f"Embedding error {response.status_code}: {response.text}")
-            return []
+            return [[] for _ in texts]
 
-    def get_batch_embeddings(self, texts: List[str]) -> List[List[float]]: # Generates embeddings for multiple texts in a batch request
-        if not texts:
-            return []
-
-        valid_texts = [text for text in texts if text and text.strip()]
-        if not valid_texts:
-            return []
-
-        try:
-            response = requests.post(
-                url=self.base_url,
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "genrag.com",
-                    "X-Title": "GenRAG App",
-                },
-                data=json.dumps({"model": self.model, "input": valid_texts}),
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                embeddings = [item["embedding"] for item in data["data"]]
-                print(f"Generated {len(embeddings)} embeddings in batch")
-                return embeddings
-            else:
-                print(f"Batch embedding error {response.status_code}: {response.text}")
-                return []
-
-        except Exception as e:
-            print(f"Batch embedding exception: {e}")
-            return []
-
-    def process_chunks_in_batches(self, chunks: List[str]) -> List[List[float]]: # Orchestrates processing text chunks in optimized batches
-        if not texts:
-            return []
-
-        valid_texts = [text for text in texts if text and text.strip()]
-        if not valid_texts:
-            return []
-
-        try:
-            response = requests.post(
-                url=self.base_url,
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "genrag.com",
-                    "X-Title": "GenRAG App",
-                },
-                data=json.dumps({"model": self.model, "input": valid_texts}),
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                embeddings = [item["embedding"] for item in data["data"]]
-                print(f"Generated {len(embeddings)} embeddings in batch")
-                return embeddings
-            else:
-                print(f"Batch embedding error {response.status_code}: {response.text}")
-                return []
-
-        except Exception as e:
-            print(f"Batch embedding exception: {e}")
-            return []
-
-    def process_chunks_in_batches(self, chunks: List[str]) -> List[List[float]]:
-        """Process a list of chunks in optimized batches."""
-        all_embeddings = []
-
-        for i in range(0, len(chunks), self.batch_size):
-            batch = chunks[i : i + self.batch_size]
-            print(
-                f"Processing batch {i // self.batch_size + 1}/{(len(chunks) + self.batch_size - 1) // self.batch_size} ({len(batch)} chunks)"
-            )
-
-            batch_embeddings = self.get_batch_embeddings(batch)
-
-            if len(batch_embeddings) == len(batch):
-                all_embeddings.extend(batch_embeddings)
-            else:
-                print("Batch embedding failed, falling back to sequential processing")
-                for chunk in batch:
-                    embedding = self.get_embedding(chunk)
-                    all_embeddings.append(embedding)
-
-        return all_embeddings
+    async def process_chunks_concurrently(self, chunks: List[str]) -> List[List[float]]:
+        async with httpx.AsyncClient() as client:
+            tasks = []
+            for i in range(0, len(chunks), self.batch_size):
+                batch = chunks[i : i + self.batch_size]
+                tasks.append(self.get_embedding_batch(client, batch))
+            results = await asyncio.gather(*tasks)
+            # Flatten results
+            return [vec for batch_results in results for vec in batch_results]

@@ -38,13 +38,17 @@ async def lifespan(app: FastAPI):
         print("Collection will be created when first document is processed")
 
     # Start background worker for ingestion job processing
-    worker_task = asyncio.create_task(background_worker.start_worker())
+    await background_worker.start_workers(num_workers=3)
 
     yield # Application starts here
 
     # Stop background worker gracefully on shutdown
     await background_worker.stop_worker()
-    worker_task.cancel()
+    for task in background_worker.tasks:
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 app = FastAPI(lifespan=lifespan)

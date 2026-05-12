@@ -36,7 +36,7 @@ async def test_streaming_rag_rerank():
             ],
         },
         "query": "What is this document about? Please cite the filenames of the sources you are using.",
-        "org_id": "string",
+        "org_id": "test-tenant",
     }
 
     print(f"Sending request to {url}...")
@@ -229,8 +229,8 @@ async def test_streaming_rag_query_rewrite_greeting():
                 },
             ],
         },
-        "query": "Hello how are you?",
-        "org_id": "string",
+        "query": "Hi there! Can you give me a brief overview of what this document is about? Please cite the filenames of the sources you are using.",
+        "org_id": "test-tenant",
     }
 
     print(f"Sending greeting request to {url}...")
@@ -252,11 +252,11 @@ async def test_streaming_rag_query_rewrite_greeting():
 
 if __name__ == "__main__":
     print("Running RAG pipeline test with reranking...")
-    asyncio.run(test_streaming_rag_rerank())
+    # asyncio.run(test_streaming_rag_rerank())
     # print("\nRunning RAG pipeline test without reranking...")
     # asyncio.run(test_streaming_rag())
     # print("\nRunning RAG pipeline test with query rewriting...")
     # asyncio.run(test_streaming_rag_query_rewrite())
-    print("\nRunning RAG pipeline test with greeting...")
+    # print("\nRunning RAG pipeline test with greeting...")
     asyncio.run(test_streaming_rag_query_rewrite_greeting())
 

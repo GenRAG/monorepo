@@ -15,7 +15,7 @@ def parse_pdf(file_bytes: bytes) -> str:
         return ""
 
 
-def chunk_text(text: str, chunk_size=1000, overlap=100):
+def chunk_text(text: str, chunk_size=2000, overlap=200):
     """Split text into overlapping chunks."""
     chunks = []
     start = 0

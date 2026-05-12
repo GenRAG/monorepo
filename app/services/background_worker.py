@@ -42,14 +42,19 @@ class BackgroundWorker:
         await self.job_queue.put(job_data)
         print(f"Website job {job_id} added to queue")
 
-    async def start_worker(self):
-        """Start the background worker loop."""
+    async def start_workers(self, num_workers: int = 3):
+        """Start multiple background worker loops."""
         if self.running:
             return
 
         self.running = True
-        print("Background worker started")
+        print(f"Starting {num_workers} background workers")
 
+        # Run multiple worker tasks
+        self.tasks = [asyncio.create_task(self.worker_loop()) for _ in range(num_workers)]
+
+    async def worker_loop(self):
+        """Main worker loop."""
         while self.running:
             try:
                 # Get job from queue (wait up to 1 second)
@@ -57,7 +62,6 @@ class BackgroundWorker:
                 await self.process_job(job_data)
                 self.job_queue.task_done()
             except asyncio.TimeoutError:
-                # No jobs in queue, continue loop
                 continue
             except Exception as e:
                 print(f"Worker error: {e}")
@@ -65,7 +69,9 @@ class BackgroundWorker:
     async def stop_worker(self):
         """Stop the background worker."""
         self.running = False
-        print("Background worker stopped")
+        print("Stopping background workers")
+        for task in self.tasks:
+            task.cancel()
 
     async def process_job(self, job_data: Dict[str, Any]):
         """Process an ingestion job end-to-end."""
@@ -84,7 +90,10 @@ class BackgroundWorker:
                 file_obj = job_data["file_obj"]
                 filename = job_data["filename"]
 
-                upload_file(file_obj, f"{org_id}/{filename}")
+                # Upload to storage
+                # Create a new BytesIO object from the bytes to avoid closed file issues
+                import io
+                upload_file(io.BytesIO(file_bytes), f"{org_id}/{filename}")
                 raw_text = parse_pdf(file_bytes)
                 if not raw_text:
                     job_manager.update_job_status(job_id, JobStatus.FAILED, "PDF text extraction failed")
@@ -114,15 +123,36 @@ class BackgroundWorker:
             total_chunks = len(chunks)
             job_manager.update_job_progress(job_id, 0, total_chunks)
 
-            vectors = self.embedder.process_chunks_in_batches(chunks)
-            job_manager.update_job_progress(job_id, total_chunks, total_chunks)
+            # Generate embeddings
+            print(f"Job {job_id}: Processing embeddings for {total_chunks} chunks in batches...")
 
-            upsert_chunks(
-                collection_name="genrag_knowledge_base",
-                chunks=chunks,
-                embeddings=vectors,
-                metadata=metadata,
-            )
+            # Process in small batches and upsert to Qdrant immediately
+            final_chunks = []
+            final_vectors = []
+            final_metadata = []
+
+            for i in range(0, total_chunks, 100):
+                batch_chunks = chunks[i : i + 100]
+                batch_metadata = metadata[i : i + 100] if isinstance(metadata, list) else [metadata for _ in batch_chunks]
+
+                print(f"Job {job_id}: Processing embedding batch {i // 100 + 1}/{(total_chunks + 99) // 100}")
+                batch_vectors = await self.embedder.process_chunks_concurrently(batch_chunks)
+
+                # Filter valid
+                valid_indices = [j for j, v in enumerate(batch_vectors) if v]
+                valid_chunks = [batch_chunks[j] for j in valid_indices]
+                valid_vectors = [batch_vectors[j] for j in valid_indices]
+                valid_metadata = [batch_metadata[j] for j in valid_indices]
+
+                # Upsert immediately
+                upsert_chunks(
+                    collection_name="genrag_knowledge_base",
+                    chunks=valid_chunks,
+                    embeddings=valid_vectors,
+                    metadata=valid_metadata,
+                )
+
+                job_manager.update_job_progress(job_id, i + len(valid_chunks), total_chunks)
 
             result = {
                 "status": "success",

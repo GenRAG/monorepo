@@ -18,6 +18,9 @@ dependencies = [
     "qdrant-client>=1.16.2",
     "requests>=2.32.5",
     "zeroentropy>=0.1.0a8",
+    "beautifulsoup4>=4.12.3",
+    "lxml>=6.1.0",
+    "markdownify>=1.2.2",
 ]
 
 [dependency-groups]

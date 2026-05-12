@@ -1,8 +1,14 @@
 {
   "name": "genrag-monorepo",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "plateform_front"
-  ]
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "plateform_front"
+    ],
+    "nohoist": [
+      "plateform_front/**",
+      "plateform_front/**/**"
+    ]
+  }
 }

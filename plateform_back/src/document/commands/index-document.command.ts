@@ -4,6 +4,7 @@ export interface IndexDocumentCommandProps {
     storageKey: string;
     mimeType: string;
     buffer: string | null;
+    name: string;
 }
 
 export class IndexDocumentCommand {
@@ -12,6 +13,7 @@ export class IndexDocumentCommand {
     readonly storageKey: string;
     readonly mimeType: string;
     readonly buffer: string | null;
+    readonly name: string;
 
     constructor(props: IndexDocumentCommandProps) {
         this.documentId = props.documentId;
@@ -19,5 +21,6 @@ export class IndexDocumentCommand {
         this.storageKey = props.storageKey;
         this.mimeType = props.mimeType;
         this.buffer = props.buffer;
+        this.name = props.name;
     }
 }

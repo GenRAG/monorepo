@@ -1,8 +1,4 @@
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { OnboardingSession, Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
@@ -52,7 +48,7 @@ const DEMO_WORKFLOW_DEFINITION = {
                 isPlaceholder: false,
                 firstTime: false,
                 isEditing: false,
-                configItems: [],
+                configItems: [], //appelle API pour récupérer les modèles disponibles
                 settingLabel: 'Large Language Model',
                 inputType: 'SELECT',
                 parentNodeId: 'demo-response',
@@ -72,7 +68,7 @@ const DEMO_WORKFLOW_DEFINITION = {
                 outputs: [],
                 isPlaceholder: true,
                 configItems: [],
-                settingLabel: 'Instruction Prompt',
+                settingLabel: 'system_prompt',
                 inputType: 'STRING',
                 parentNodeId: 'demo-response',
             },
@@ -113,11 +109,11 @@ const DEMO_WORKFLOW_DEFINITION = {
             id: 'demo-response-setting-instruction',
             source: 'demo-response',
             target: 'demo-response-instruction',
-            sourceHandle: 'setting-source-Instruction Prompt',
+            sourceHandle: 'setting-source-system_prompt',
             targetHandle: 'setting-target',
             type: 'settings',
             animated: false,
-            data: { label: 'Instruction Prompt' },
+            data: { label: 'system_prompt' },
         },
     ],
     blocks: [
@@ -137,8 +133,7 @@ const DEMO_WORKFLOW_DEFINITION = {
 };
 
 const STYLE_TO_INSTRUCTION: Record<InstructionStyle, string> = {
-    standard:
-        'Répondre de façon concise et directe en se basant exclusivement sur les documents fournis.',
+    standard: 'Répondre de façon concise et directe en se basant exclusivement sur les documents fournis.',
     precise:
         "Répondre en apportant des références précises aux documents. Citez les numéros d'articles, les titres des sections et les chiffres exacts lorsque disponibles.",
     creative:
@@ -155,14 +150,8 @@ export class OnboardingService {
         private readonly creditBalanceService: CreditBalanceService,
     ) {}
 
-    async start(
-        userId: string,
-        workspaceId: string,
-    ): Promise<OnboardingSessionResponse> {
-        const existing = await this.onboardingRepository.findByUserAndWorkspace(
-            userId,
-            workspaceId,
-        );
+    async start(userId: string, workspaceId: string): Promise<OnboardingSessionResponse> {
+        const existing = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
 
         if (existing) {
             return this.toResponse(existing);
@@ -171,8 +160,7 @@ export class OnboardingService {
         const agent = await this.agentService.insertOne(
             {
                 name: 'Demo Assistant',
-                description:
-                    "Agent de démonstration créé lors de l'onboarding.",
+                description: "Agent de démonstration créé lors de l'onboarding.",
                 workflow: { definition: DEMO_WORKFLOW_DEFINITION },
             },
             userId,
@@ -187,16 +175,9 @@ export class OnboardingService {
                 agent: { connect: { id: agent.id } },
             });
         } catch (err) {
-            if (
-                err instanceof Prisma.PrismaClientKnownRequestError &&
-                err.code === 'P2002'
-            ) {
+            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
                 await this.agentService.remove(agent.id, workspaceId);
-                const winner =
-                    await this.onboardingRepository.findByUserAndWorkspace(
-                        userId,
-                        workspaceId,
-                    );
+                const winner = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
                 return this.toResponse(winner!);
             }
             throw err;
@@ -208,47 +189,29 @@ export class OnboardingService {
                 amount: ONBOARDING_INITIAL_CREDITS,
             });
         } catch (err) {
-            console.error(
-                `[Onboarding] Failed to grant initial credits for workspace ${workspaceId}:`,
-                err,
-            );
+            console.error(`[Onboarding] Failed to grant initial credits for workspace ${workspaceId}:`, err);
         }
 
         return this.toResponse(session);
     }
 
-    async getSession(
-        userId: string,
-        workspaceId: string,
-    ): Promise<OnboardingSessionResponse | null> {
-        const session = await this.onboardingRepository.findByUserAndWorkspace(
-            userId,
-            workspaceId,
-        );
+    async getSession(userId: string, workspaceId: string): Promise<OnboardingSessionResponse | null> {
+        const session = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
 
         if (!session) return null;
 
         return this.toResponse(session);
     }
 
-    async updateStep(
-        userId: string,
-        workspaceId: string,
-        step: number,
-    ): Promise<OnboardingSessionResponse> {
-        const session = await this.onboardingRepository.findByUserAndWorkspace(
-            userId,
-            workspaceId,
-        );
+    async updateStep(userId: string, workspaceId: string, step: number): Promise<OnboardingSessionResponse> {
+        const session = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
 
         if (!session) {
             throw new NotFoundException('Onboarding session not found');
         }
 
         if (step > session.step + 1) {
-            throw new BadRequestException(
-                `Cannot skip to step ${step} from step ${session.step}`,
-            );
+            throw new BadRequestException(`Cannot skip to step ${step} from step ${session.step}`);
         }
 
         const updated = await this.onboardingRepository.update(session.id, {
@@ -264,18 +227,13 @@ export class OnboardingService {
         stepId: string,
         data: Record<string, unknown>,
     ): Promise<void> {
-        const session = await this.onboardingRepository.findByUserAndWorkspace(
-            userId,
-            workspaceId,
-        );
+        const session = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
 
         if (!session) {
             throw new NotFoundException('Onboarding session not found');
         }
 
-        const current =
-            (session.stepsData as Record<string, Record<string, unknown>>) ??
-            {};
+        const current = (session.stepsData as Record<string, Record<string, unknown>>) ?? {};
 
         const updated = {
             ...current,
@@ -287,19 +245,14 @@ export class OnboardingService {
         });
     }
 
-    async compare(
-        userId: string,
-        workspaceId: string,
-        query: string,
-    ): Promise<CompareOnboardingResponse> {
-        const session = await this.onboardingRepository.findByUserAndWorkspace(
-            userId,
-            workspaceId,
-        );
+    async compare(userId: string, workspaceId: string, query: string): Promise<CompareOnboardingResponse> {
+        const session = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
 
         if (!session) {
             throw new NotFoundException('Onboarding session not found');
         }
+
+        await this._checkAndIncrementStepQueryCount(session, 'compare-intelligence');
 
         const results = await Promise.allSettled([
             this.orchestrator.execute({
@@ -325,22 +278,13 @@ export class OnboardingService {
             }),
         ]);
 
-        const [standard, precise, creative] = results.map((r) =>
-            r.status === 'fulfilled' ? r.value.answer : '',
-        );
+        const [standard, precise, creative] = results.map((r) => (r.status === 'fulfilled' ? r.value.answer : ''));
 
         return { standard, precise, creative };
     }
 
-    async complete(
-        userId: string,
-        workspaceId: string,
-        style: InstructionStyle,
-    ): Promise<void> {
-        const session = await this.onboardingRepository.findByUserAndWorkspace(
-            userId,
-            workspaceId,
-        );
+    async complete(userId: string, workspaceId: string, style: InstructionStyle): Promise<void> {
+        const session = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
 
         if (!session) {
             throw new NotFoundException('Onboarding session not found');
@@ -351,9 +295,7 @@ export class OnboardingService {
         const workflow = await this.workflowService.findActive(session.agentId);
 
         if (!workflow) {
-            throw new NotFoundException(
-                'No active workflow found for this agent',
-            );
+            throw new NotFoundException('No active workflow found for this agent');
         }
 
         const definition = workflow.definition as {
@@ -363,11 +305,7 @@ export class OnboardingService {
         };
 
         const updatedBlocks =
-            definition.blocks?.map((b) =>
-                b['type'] === 'answer'
-                    ? { ...b, system_prompt: instruction }
-                    : b,
-            ) ?? [];
+            definition.blocks?.map((b) => (b['type'] === 'answer' ? { ...b, system_prompt: instruction } : b)) ?? [];
 
         const updatedDefinition = { ...definition, blocks: updatedBlocks };
 
@@ -381,6 +319,38 @@ export class OnboardingService {
         });
     }
 
+    private static readonly QUERY_LIMITS: Record<string, number> = {
+        'test-assistant': 5,
+        'improve-assistant': 5,
+        'compare-intelligence': 2,
+    };
+
+    private async _checkAndIncrementStepQueryCount(session: OnboardingSession, stepId: string): Promise<void> {
+        const max = OnboardingService.QUERY_LIMITS[stepId];
+        if (!max) return;
+
+        const stepsData = (session.stepsData as Record<string, Record<string, unknown>>) ?? {};
+        const count = (stepsData[stepId]?.queryCount as number) ?? 0;
+
+        if (count >= max) {
+            throw new ForbiddenException(`Limite de ${max} messages atteinte pour cette étape.`);
+        }
+
+        const updated = {
+            ...stepsData,
+            [stepId]: { ...(stepsData[stepId] ?? {}), queryCount: count + 1 },
+        };
+        await this.onboardingRepository.update(session.id, {
+            stepsData: updated as Prisma.InputJsonValue,
+        });
+    }
+
+    async checkAndIncrementQueryCount(userId: string, workspaceId: string, stepId: string): Promise<void> {
+        const session = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
+        if (!session) throw new NotFoundException('Onboarding session not found');
+        await this._checkAndIncrementStepQueryCount(session, stepId);
+    }
+
     private toResponse(session: OnboardingSession): OnboardingSessionResponse {
         return {
             sessionId: session.id,
@@ -388,11 +358,7 @@ export class OnboardingService {
             step: session.step,
             completed: session.completed,
             instruction: session.instruction,
-            stepsData:
-                (session.stepsData as Record<
-                    string,
-                    Record<string, unknown>
-                >) ?? {},
+            stepsData: (session.stepsData as Record<string, Record<string, unknown>>) ?? {},
         };
     }
 }

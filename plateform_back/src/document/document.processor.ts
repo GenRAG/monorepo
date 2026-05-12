@@ -30,10 +30,7 @@ export class DocumentProcessor extends WorkerHost {
             );
 
             if (attemptNumber >= maxAttempts) {
-                await this.indexDocumentHandler.failed(
-                    command,
-                    this.extractErrorMessage(error),
-                );
+                await this.indexDocumentHandler.failed(command, this.extractErrorMessage(error));
             } else {
                 await this.indexDocumentHandler.retrying(command, attemptNumber);
             }
@@ -44,12 +41,7 @@ export class DocumentProcessor extends WorkerHost {
 
     private extractErrorMessage(error: unknown): string {
         if (error instanceof AxiosError) {
-            return (
-                error.response?.data?.detail ??
-                error.response?.data?.message ??
-                error.message ??
-                'Erreur inconnue'
-            );
+            return error.response?.data?.detail ?? error.response?.data?.message ?? error.message ?? 'Erreur inconnue';
         }
         if (error instanceof Error) {
             return error.message;

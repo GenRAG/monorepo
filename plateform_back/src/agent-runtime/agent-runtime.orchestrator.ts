@@ -25,12 +25,14 @@ export class AgentRuntimeOrchestrator {
         agentId,
         workspaceId,
         instructionOverride,
+        orgIdOverride,
         skipUsageTracking = false,
     }: {
         query: string;
         agentId: string;
         workspaceId: string;
         instructionOverride?: string;
+        orgIdOverride?: string;
         skipUsageTracking?: boolean;
     }) {
         if (!skipUsageTracking) {
@@ -45,7 +47,7 @@ export class AgentRuntimeOrchestrator {
         const answer = await this.ragEngineService.sendQuery({
             pipeline,
             query,
-            orgId: agentId,
+            orgId: orgIdOverride ?? agentId,
             mock: this.mock,
         });
 
@@ -67,28 +69,41 @@ export class AgentRuntimeOrchestrator {
         query,
         agentId,
         workspaceId,
+        orgIdOverride,
+        skipUsageTracking = false,
+        forceActiveWorkflow = false,
     }: {
         query: string;
         agentId: string;
         workspaceId: string;
+        orgIdOverride?: string;
+        skipUsageTracking?: boolean;
+        forceActiveWorkflow?: boolean;
     }): Promise<IncomingMessage> {
-        await this.usageTracker.checkOrThrow(workspaceId);
+        if (!skipUsageTracking) {
+            await this.usageTracker.checkOrThrow(workspaceId);
+        }
 
-        const pipeline = await this.contextBuilder.buildPipeline({ agentId });
+        const pipeline = await this.contextBuilder.buildPipeline({
+            agentId,
+            forceActive: forceActiveWorkflow,
+        });
 
         const ragStream = await this.ragEngineService.getQueryStream({
             pipeline,
             query,
-            orgId: agentId,
+            orgId: orgIdOverride ?? agentId,
             mock: this.mock,
         });
 
-        ragStream.once('end', () => {
-            EventBus.emit(
-                AgentEventType.AGENT_QUERY_COMPLETED,
-                new AgentQueryCompletedEvent(workspaceId, agentId, undefined),
-            );
-        });
+        if (!skipUsageTracking) {
+            ragStream.once('end', () => {
+                EventBus.emit(
+                    AgentEventType.AGENT_QUERY_COMPLETED,
+                    new AgentQueryCompletedEvent(workspaceId, agentId, undefined),
+                );
+            });
+        }
 
         return ragStream;
     }

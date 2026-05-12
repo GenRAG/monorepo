@@ -26,4 +26,21 @@ export class AgentRuntimeController {
         }
         return this.agentRuntimeService.stream(workspaceId, agentId, query);
     }
+
+    @Sse('playground')
+    playground(
+        @Param('workspaceId') workspaceId: string,
+        @Param('agentId') agentId: string,
+        @Query('query') query: string,
+    ): Observable<MessageEvent> {
+        if (!query) {
+            return new Observable((s) => {
+                s.next({
+                    data: JSON.stringify({ error: 'Query parameter required' }),
+                });
+                s.complete();
+            });
+        }
+        return this.agentRuntimeService.playgroundStream(workspaceId, agentId, query);
+    }
 }

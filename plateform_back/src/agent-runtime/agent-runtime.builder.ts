@@ -13,12 +13,13 @@ export class ContextBuilder {
     async buildPipeline({
         agentId,
         instructionOverride,
+        forceActive = false,
     }: {
         agentId: string;
         instructionOverride?: string;
+        forceActive?: boolean;
     }): Promise<Prisma.JsonValue> {
-        const prodVersion =
-            await this.agentService.findProductionWorkflowVersion(agentId);
+        const prodVersion = forceActive ? null : await this.agentService.findProductionWorkflowVersion(agentId);
 
         const workflow = prodVersion
             ? await this.workflowService.findByVersion(agentId, prodVersion)
@@ -31,10 +32,7 @@ export class ContextBuilder {
         const def = workflow.definition as Record<string, unknown>;
         const rawBlocks = (def.blocks ?? []) as Record<string, unknown>[];
 
-        return this.applyInstructionOverride(
-            rawBlocks,
-            instructionOverride,
-        ) as unknown as Prisma.JsonValue;
+        return this.applyInstructionOverride(rawBlocks, instructionOverride) as unknown as Prisma.JsonValue;
     }
 
     private applyInstructionOverride(
@@ -42,8 +40,6 @@ export class ContextBuilder {
         instruction?: string,
     ): Record<string, unknown>[] {
         if (!instruction) return blocks;
-        return blocks.map((b) =>
-            b['type'] === 'answer' ? { ...b, system_prompt: instruction } : b,
-        );
+        return blocks.map((b) => (b['type'] === 'answer' ? { ...b, system_prompt: instruction } : b));
     }
 }

@@ -12,28 +12,32 @@ export class AgentRuntimeService {
         private readonly prisma: PrismaService,
     ) {}
 
-    stream(
-        workspaceId: string,
-        agentId: string,
-        query: string,
-    ): Observable<MessageEvent> {
+    stream(workspaceId: string, agentId: string, query: string): Observable<MessageEvent> {
         return new Observable((subscriber) => {
             void this._runStream(subscriber, workspaceId, agentId, query);
         });
     }
 
-    streamWithPersistence(
+    playgroundStream(workspaceId: string, agentId: string, query: string): Observable<MessageEvent> {
+        return new Observable((subscriber) => {
+            void this._runStream(subscriber, workspaceId, agentId, query, undefined, true, true);
+        });
+    }
+
+    streamWithOrgOverride(
+        workspaceId: string,
         agentId: string,
         query: string,
-        conversationId?: string,
+        orgIdOverride: string,
     ): Observable<MessageEvent> {
         return new Observable((subscriber) => {
-            void this._runStreamWithPersistence(
-                subscriber,
-                agentId,
-                query,
-                conversationId,
-            );
+            void this._runStream(subscriber, workspaceId, agentId, query, orgIdOverride);
+        });
+    }
+
+    streamWithPersistence(agentId: string, query: string, conversationId?: string): Observable<MessageEvent> {
+        return new Observable((subscriber) => {
+            void this._runStreamWithPersistence(subscriber, agentId, query, conversationId);
         });
     }
 
@@ -42,12 +46,18 @@ export class AgentRuntimeService {
         workspaceId: string,
         agentId: string,
         query: string,
+        orgIdOverride?: string,
+        skipUsageTracking = false,
+        forceActiveWorkflow = false,
     ) {
         const ragStream = await this._startRagStream(
             subscriber,
             workspaceId,
             agentId,
             query,
+            orgIdOverride,
+            skipUsageTracking,
+            forceActiveWorkflow,
         );
         if (!ragStream) return;
         this._pipeStream(ragStream, subscriber);
@@ -62,30 +72,16 @@ export class AgentRuntimeService {
         const workspaceId = await this._resolveWorkspaceId(agentId, subscriber);
         if (!workspaceId) return;
 
-        const ragStream = await this._startRagStream(
-            subscriber,
-            workspaceId,
-            agentId,
-            query,
-        );
+        const ragStream = await this._startRagStream(subscriber, workspaceId, agentId, query);
         if (!ragStream) return;
 
-        const convId = await this._initConversation(
-            subscriber,
-            workspaceId,
-            agentId,
-            query,
-            conversationId,
-        );
+        const convId = await this._initConversation(subscriber, workspaceId, agentId, query, conversationId);
         if (!convId) return;
 
         this._pipeStreamWithPersistence(ragStream, convId, subscriber);
     }
 
-    private async _resolveWorkspaceId(
-        agentId: string,
-        subscriber: Subscriber<MessageEvent>,
-    ): Promise<string | null> {
+    private async _resolveWorkspaceId(agentId: string, subscriber: Subscriber<MessageEvent>): Promise<string | null> {
         const agent = await this.prisma.agent.findUnique({
             where: { id: agentId },
         });
@@ -111,20 +107,24 @@ export class AgentRuntimeService {
         workspaceId: string,
         agentId: string,
         query: string,
+        orgIdOverride?: string,
+        skipUsageTracking = false,
+        forceActiveWorkflow = false,
     ): Promise<Awaited<ReturnType<typeof this.orchestrator.stream>> | null> {
         try {
             return await this.orchestrator.stream({
                 query,
                 agentId,
                 workspaceId,
+                orgIdOverride,
+                skipUsageTracking,
+                forceActiveWorkflow,
             });
         } catch (err: any) {
             const isOutOfCredits = err instanceof ForbiddenException;
             subscriber.next({
                 data: JSON.stringify({
-                    error: isOutOfCredits
-                        ? 'Pas de crédits disponibles.'
-                        : (err?.message ?? 'Unknown error'),
+                    error: isOutOfCredits ? 'Pas de crédits disponibles.' : (err?.message ?? 'Unknown error'),
                     isOutOfCredits,
                 }),
             });

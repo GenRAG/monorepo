@@ -39,10 +39,8 @@ export class DocumentService {
             agentId,
             storageKey: s3Key,
             mimeType: file.mimetype,
-            buffer:
-                file.size < SMALL_FILE_THRESHOLD
-                    ? file.buffer.toString('base64')
-                    : null,
+            name: document.name,
+            buffer: file.size < SMALL_FILE_THRESHOLD ? file.buffer.toString('base64') : null,
         };
 
         await this.documentQueue.add(INDEX_DOCUMENT_JOB, payload, {
@@ -86,11 +84,7 @@ export class DocumentService {
     }
 
     getByAgentPaginated(agentId: string, page: number, limit: number) {
-        return this.documentRepository.findByAgentPaginated(
-            agentId,
-            page,
-            limit,
-        );
+        return this.documentRepository.findByAgentPaginated(agentId, page, limit);
     }
 
     async delete(id: string) {

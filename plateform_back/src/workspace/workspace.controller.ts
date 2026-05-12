@@ -1,13 +1,4 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpCode,
-    Param,
-    Post,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { UserRole } from 'generated/prisma';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -17,10 +8,7 @@ import { UserSafe } from 'src/users/dto/create-user.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
 import { WorkspaceService } from 'src/workspace/workspace.service';
-import {
-    WorkspaceWithUsers,
-    WorkspacePayload,
-} from 'src/workspace/workspace.repository';
+import { WorkspaceWithUsers, WorkspacePayload } from 'src/workspace/workspace.repository';
 
 @Controller('workspaces')
 @UseGuards(JwtAuthGuard)
@@ -36,18 +24,20 @@ export class WorkspaceController {
     }
 
     @Get()
-    getAllWorkspaces(
-        @CurrentUser(CurrentUserPipe) user: UserSafe,
-    ): Promise<WorkspaceWithUsers[]> {
+    getAllWorkspaces(@CurrentUser(CurrentUserPipe) user: UserSafe): Promise<WorkspaceWithUsers[]> {
         return this.workspaceService.findAll(user.id);
     }
 
     @Get(':id')
     @UseGuards(WorkspaceRolesGuard)
-    getWorkspaceById(
-        @Param('id') workspaceId: string,
-    ): Promise<WorkspacePayload | null> {
+    getWorkspaceById(@Param('id') workspaceId: string): Promise<WorkspacePayload | null> {
         return this.workspaceService.findOne(workspaceId);
+    }
+
+    @Get(':id/stats')
+    @UseGuards(WorkspaceRolesGuard)
+    getWorkspaceStats(@Param('id') workspaceId: string) {
+        return this.workspaceService.getStats(workspaceId);
     }
 
     @Delete(':id')

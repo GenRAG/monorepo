@@ -52,13 +52,13 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
     const borderColor = useColorModeValue("grey.200", "grey.700");
     const dragBorderColor = useColorModeValue("green.400", "green.500");
-    const dropBg = useColorModeValue("grey.50", "grey.900");
+    const dropBg = useColorModeValue("grey.25", "grey.900");
     const dragBg = useColorModeValue("green.50", "rgba(6,78,59,0.15)");
     const mutedColor = useColorModeValue("grey.500", "grey.400");
     const textColor = useColorModeValue("grey.800", "grey.100");
     const fileBg = useColorModeValue("grey.50", "grey.900");
     const fileItemBg = useColorModeValue("white", "grey.850");
-    const fileItemBorder = useColorModeValue("grey.150", "grey.750");
+    const fileItemBorder = useColorModeValue("grey.100", "grey.750");
     const trackColor = useColorModeValue("grey.200", "grey.700");
 
     const acceptedTypes = useMemo(
@@ -230,17 +230,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
                 <ModalBody pb={4}>
                     <VStack spacing={4} align="stretch">
-                        {/* Drop zone */}
                         {!isUploading && !isDone && (
                             <Box
-                                border="2px dashed"
+                                border="1.5px dashed"
                                 borderColor={
                                     isDragging ? dragBorderColor : borderColor
                                 }
                                 borderRadius="14px"
                                 bg={isDragging ? dragBg : dropBg}
-                                py={10}
-                                px={6}
+                                p={6}
                                 textAlign="center"
                                 transition="all 0.15s"
                                 cursor="pointer"
@@ -291,7 +289,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                             </Box>
                         )}
 
-                        {/* Selected files (pre-upload) */}
                         {selectedFiles.length > 0 && !isUploading && (
                             <Box
                                 bg={fileBg}

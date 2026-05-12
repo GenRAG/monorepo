@@ -1,44 +1,47 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
-import {
-    WorkspaceRepository,
-    WorkspaceWithUsers,
-    WorkspacePayload,
-} from 'src/workspace/workspace.repository';
+import { WorkspaceStatsService } from 'src/workspace/workspace-stats.service';
+import { WorkspaceRepository, WorkspaceWithUsers, WorkspacePayload } from 'src/workspace/workspace.repository';
 
 @Injectable()
 export class WorkspaceService {
-    constructor(private readonly workspaceRepository: WorkspaceRepository) {}
+    constructor(
+        private readonly workspaceRepository: WorkspaceRepository,
+        private readonly workspaceStatsService: WorkspaceStatsService,
+    ) {}
 
-    async create(
-        workspaceData: CreateWorkspaceRequest,
-        userId: string,
-    ): Promise<WorkspaceWithUsers> {
-        const { name, description } = workspaceData;
-
-        return this.workspaceRepository.create({ name, description, userId });
+    async create(workspaceData: CreateWorkspaceRequest, userId: string): Promise<WorkspaceWithUsers> {
+        const { name, description, plan } = workspaceData;
+        return this.workspaceRepository.create({
+            name,
+            description,
+            userId,
+            plan,
+        });
     }
 
     async findAll(userId: string): Promise<WorkspaceWithUsers[]> {
         return this.workspaceRepository.findAll(userId);
     }
 
-    async findOne(workspaceId: string): Promise<WorkspacePayload | null> {
+    async findOne(workspaceId: string): Promise<WorkspacePayload> {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
         if (!workspace) {
             throw new NotFoundException('Workspace not found');
         }
-
         return workspace;
     }
 
     async delete(workspaceId: string): Promise<void> {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
-
         if (!workspace) {
             throw new NotFoundException('Workspace not found');
         }
-
         await this.workspaceRepository.delete(workspaceId);
+    }
+
+    async getStats(workspaceId: string) {
+        await this.findOne(workspaceId);
+        return this.workspaceStatsService.getStats(workspaceId);
     }
 }

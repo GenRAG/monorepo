@@ -1,147 +1,168 @@
-import { useState } from "react";
-import { Status } from "pages/Onboarding/steps/ImproveAssistantStep";
+import { useRef, useState } from "react";
+import { useUploadDocumentMutation } from "services/document/document";
+
+export enum Status {
+    UPLOADING = "uploading",
+    PROCESSING = "processing",
+    COMPLETED = "completed",
+    ERROR = "error",
+}
 
 export interface UploadedSource {
-    /**
-     * Stable identifier for this source. Optional at the type level to avoid
-     * breaking existing usages, but always set when created by this hook.
-     */
-    id?: string;
+    id: string;
+    documentId?: string;
     type: "file";
     name: string;
     status: Status;
     progress: number;
-    metadata: {
-        pages: number;
-        documents: number;
-        estimatedTime: string;
-    };
 }
 
-const useUploadDocuments = () => {
-    const [sources, setSources] = useState<UploadedSource[]>([]);
+const POLL_INTERVAL_MS = 3000;
+const MAX_POLLS = 40; // 2 minutes max
 
-    /**
-     * Uploads a list of files to the backend.
-     * 1. Creates a source entry in PROCESSING state for each file immediately (optimistic update)
-     * 2. Sends the files to the API via FormData
-     * 3. Updates each source to COMPLETED once the upload is done
-     * 4. On error, marks the source as ERROR
-     *
-     * @param files - The FileList from an input or drag & drop event
-     * @returns The initial list of sources in PROCESSING state (for immediate UI feedback)
-     */
+const useUploadDocuments = (
+    workspaceId?: string | null,
+    agentId?: string | null,
+    maxFiles = 3,
+    initialCount = 0,
+) => {
+    const [sources, setSources] = useState<UploadedSource[]>([]);
+    const [uploadDocument] = useUploadDocumentMutation();
+    const cancelledPolls = useRef<Set<string>>(new Set());
+
+    const sessionValidCount = sources.filter(
+        (s) => s.status !== Status.ERROR,
+    ).length;
+    const isAtMaxFiles = initialCount + sessionValidCount >= maxFiles;
+
+    const pollDocumentStatus = (
+        documentId: string,
+        sourceId: string,
+    ): void => {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL ?? "";
+        let polls = 0;
+
+        const check = async (): Promise<void> => {
+            if (cancelledPolls.current.has(sourceId)) return;
+
+            if (polls >= MAX_POLLS) {
+                setSources((prev) =>
+                    prev.map((s) =>
+                        s.id === sourceId ? { ...s, status: Status.ERROR } : s,
+                    ),
+                );
+                return;
+            }
+            polls++;
+
+            try {
+                const response = await fetch(
+                    `${backendUrl}/workspaces/${workspaceId}/agents/${agentId}/documents/${documentId}`,
+                    { credentials: "include" },
+                );
+                if (!response.ok) throw new Error("Fetch failed");
+                const doc = await response.json();
+
+                if (cancelledPolls.current.has(sourceId)) return;
+
+                if (doc.status === "INDEXED") {
+                    setSources((prev) =>
+                        prev.map((s) =>
+                            s.id === sourceId
+                                ? { ...s, status: Status.COMPLETED, progress: 100 }
+                                : s,
+                        ),
+                    );
+                } else if (doc.status === "FAILED") {
+                    setSources((prev) =>
+                        prev.map((s) =>
+                            s.id === sourceId
+                                ? { ...s, status: Status.ERROR }
+                                : s,
+                        ),
+                    );
+                } else {
+                    setTimeout(check, POLL_INTERVAL_MS);
+                }
+            } catch {
+                if (!cancelledPolls.current.has(sourceId)) {
+                    setTimeout(check, POLL_INTERVAL_MS);
+                }
+            }
+        };
+
+        setTimeout(check, POLL_INTERVAL_MS);
+    };
+
     const uploadDocuments = async (
         files: FileList,
     ): Promise<UploadedSource[]> => {
-        // Create a source in PROCESSING state for each file immediately
-        // so the UI can show a loading state right away
+        const validSources = sources.filter((s) => s.status !== Status.ERROR);
+        const remaining = maxFiles - initialCount - validSources.length;
+        const filesToUpload = Array.from(files).slice(0, remaining);
+
+        if (filesToUpload.length === 0) return [];
+
         const timestamp = Date.now();
-        const newSources: UploadedSource[] = Array.from(files).map(
+        const newSources: UploadedSource[] = filesToUpload.map(
             (file, index) => ({
                 id: `${timestamp}-${index}-${file.name}`,
                 type: "file" as const,
                 name: file.name,
-                status: Status.PROCESSING,
+                status: Status.UPLOADING,
                 progress: 0,
-                metadata: {
-                    pages: 0,
-                    documents: 1,
-                    estimatedTime: "2-3 min",
-                },
             }),
         );
 
         setSources((prev) => [...prev, ...newSources]);
 
-        // Upload each file independently so they can resolve at different times
-        Array.from(files).forEach(async (file, index) => {
-            const sourceId = newSources[index]?.id;
-            try {
-                const formData = new FormData();
-                formData.append("file", file);
+        void Promise.allSettled(
+            filesToUpload.map(async (file, index) => {
+                const sourceId = newSources[index].id;
+                try {
+                    if (workspaceId && agentId) {
+                        const doc = await uploadDocument({
+                            workspaceId,
+                            agentId,
+                            file,
+                        }).unwrap();
 
-                const timeout = new Promise((resolve) => {
-                    setTimeout(() => {
-                        resolve({
-                            ok: true,
-                            json: async () => ({
-                                pages: 1,
-                                estimatedTime: "2-3 min",
-                            }),
-                        } as unknown as Response);
-                    }, 2000);
-                });
+                        setSources((prev) =>
+                            prev.map((s) =>
+                                s.id === sourceId
+                                    ? {
+                                          ...s,
+                                          status: Status.PROCESSING,
+                                          progress: 50,
+                                          documentId: doc.id,
+                                      }
+                                    : s,
+                            ),
+                        );
 
-                const response = (await timeout) as Response;
-
-                //Call Backend
-                if (!response.ok) throw new Error("Upload failed");
-
-                const data = await response.json();
-                // Expected response shape: { pages: number, estimatedTime: string }
-
-                // Update the specific source to COMPLETED with real metadata from the API
-                setSources((prev) => {
-                    const updated = [...prev];
-                    if (!sourceId) {
-                        return updated;
+                        pollDocumentStatus(doc.id, sourceId);
                     }
-                    const sourceIndex = updated.findIndex(
-                        (source) => source.id === sourceId,
+                } catch {
+                    setSources((prev) =>
+                        prev.map((s) =>
+                            s.id === sourceId
+                                ? { ...s, status: Status.ERROR }
+                                : s,
+                        ),
                     );
-                    if (sourceIndex === -1) {
-                        // The source may have been removed while the upload was in progress.
-                        return updated;
-                    }
-                    updated[sourceIndex] = {
-                        ...updated[sourceIndex],
-                        status: Status.COMPLETED,
-                        progress: 100,
-                        metadata: {
-                            pages: data.pages,
-                            documents: 1,
-                            estimatedTime: data.estimatedTime,
-                        },
-                    };
-                    return updated;
-                });
-            } catch (error) {
-                console.error(`Failed to upload file: ${file.name}`, error);
+                }
+            }),
+        );
 
-                // Mark the source as ERROR so the UI can reflect it
-                setSources((prev) => {
-                    const updated = [...prev];
-                    const sourceIndex = updated.length - files.length + index;
-                    updated[sourceIndex] = {
-                        ...updated[sourceIndex],
-                        status: Status.ERROR,
-                        progress: 0,
-                    };
-                    return updated;
-                });
-            }
-        });
-
-        // Return the initial sources in PROCESSING state immediately
-        // so the component can add them to its own list right away
         return newSources;
     };
 
-    const removeSource = (index: number) => {
-        setSources((prev) => prev.filter((_, i) => i !== index));
+    const removeSource = (id: string) => {
+        cancelledPolls.current.add(id);
+        setSources((prev) => prev.filter((s) => s.id !== id));
     };
 
-    const clearSources = () => {
-        setSources([]);
-    };
-
-    return {
-        sources,
-        uploadDocuments,
-        removeSource,
-        clearSources,
-    };
+    return { sources, uploadDocuments, removeSource, isAtMaxFiles };
 };
 
 export default useUploadDocuments;

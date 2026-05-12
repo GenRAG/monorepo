@@ -38,6 +38,45 @@ export type GenragBannerProps = {
 } & Omit<CardProps, "title"> &
     StyleProps;
 
+export const SizeBannerVariants: Record<string, any> = {
+    xs: {
+        padding: "8px 10px",
+        iconBoxSize: "32px",
+        iconSize: 4,
+        titleFontSize: "xs",
+        childrenFontSize: "xs",
+        spacing: "8px",
+        badgeSize: "32px",
+    },
+    sm: {
+        padding: "10px 12px",
+        iconBoxSize: "36px",
+        iconSize: 4,
+        titleFontSize: "sm",
+        childrenFontSize: "sm",
+        spacing: "10px",
+        badgeSize: "36px",
+    },
+    md: {
+        padding: "12px 14px",
+        iconBoxSize: "40px",
+        iconSize: 5,
+        titleFontSize: "sm",
+        childrenFontSize: "sm",
+        spacing: "12px",
+        badgeSize: "40px",
+    },
+    lg: {
+        padding: "16px 18px",
+        iconBoxSize: "48px",
+        iconSize: 6,
+        titleFontSize: "md",
+        childrenFontSize: "md",
+        spacing: "14px",
+        badgeSize: "48px",
+    },
+};
+
 export const StyleBannerVariants: Record<string, any> = {
     gold: {
         icon: Lightbulb,
@@ -71,9 +110,9 @@ export const StyleBannerVariants: Record<string, any> = {
     },
     blue: {
         icon: Info,
-        bg: "blue.50",
-        borderColor: "blue.100",
-        badgeBg: "blue.100",
+        bg: "blue.100",
+        borderColor: "blue.200",
+        badgeBg: "blue.200",
         iconColor: "blue.700",
         glowColor: colors.blue[100],
         _active: { bg: "blue.50" },
@@ -184,7 +223,7 @@ const Banner = ({
     onClick,
     title,
     image,
-    size = "xs",
+    size = "md" as "xs" | "sm" | "md" | "lg",
     ...props
 }: GenragBannerProps) => {
     const [coords, setCoords] = useState({ x: 0, y: 0 });
@@ -197,16 +236,18 @@ const Banner = ({
     const isVariantDark = variant === "dark";
     const isDarkMode = colorMode === "dark";
 
-    const handleCloseBanner = () => setVisible(false);
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setCoords({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-    };
-
+    const sizeStyle =
+        SizeBannerVariants[size as string] ?? SizeBannerVariants.md;
     const baseStyle = StyleBannerVariants[variant] ?? StyleBannerVariants.grey;
     const variantStyle = {
         ...baseStyle,
         ...(isDarkMode ? (baseStyle._dark ?? {}) : {}),
+    };
+
+    const handleCloseBanner = () => setVisible(false);
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCoords({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     };
 
     return (
@@ -225,8 +266,7 @@ const Banner = ({
             borderColor={variantStyle.borderColor}
             _active={onClick ? variantStyle._active : undefined}
             onClick={onClick}
-            size={size}
-            padding="12px 14px"
+            padding={sizeStyle.padding}
             {...props}
         >
             {hovered && onClick && (
@@ -246,15 +286,15 @@ const Banner = ({
 
             <HStack
                 w="100%"
-                spacing="12px"
+                spacing={sizeStyle.spacing}
                 align="center"
                 position="relative"
                 zIndex={1}
             >
                 <Box
                     flexShrink={0}
-                    w="40px"
-                    h="40px"
+                    w={sizeStyle.iconBoxSize}
+                    h={sizeStyle.iconBoxSize}
                     borderRadius="10px"
                     overflow="hidden"
                     bg={variantStyle.badgeBg}
@@ -274,7 +314,7 @@ const Banner = ({
                     ) : (
                         <Icon
                             as={variantStyle.icon || Info}
-                            boxSize={5}
+                            boxSize={sizeStyle.iconSize}
                             color={variantStyle.iconColor || "grey.700"}
                         />
                     )}
@@ -283,7 +323,7 @@ const Banner = ({
                 <Box flex="1" minW={0}>
                     {title && (
                         <Text
-                            fontSize="sm"
+                            fontSize={sizeStyle.titleFontSize}
                             fontWeight="semibold"
                             color={
                                 isVariantDark || isDarkMode
@@ -298,7 +338,7 @@ const Banner = ({
                     )}
                     {children && (
                         <Box
-                            fontSize="sm"
+                            fontSize={sizeStyle.childrenFontSize}
                             color={
                                 isVariantDark || isDarkMode
                                     ? "whiteAlpha.700"
@@ -317,7 +357,7 @@ const Banner = ({
                             <Button
                                 variant={isVariantDark ? "ghost" : "secondary"}
                                 icon={ArrowRight}
-                                size="sm"
+                                size={size === "lg" ? "md" : ("sm" as any)}
                                 btnType={isMobile ? "icon" : "default"}
                                 rightIcon={ArrowRight}
                             >

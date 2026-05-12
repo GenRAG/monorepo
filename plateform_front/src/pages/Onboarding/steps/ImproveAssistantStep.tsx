@@ -1,554 +1,163 @@
-import React, {
-    useState,
-    useRef,
-    useEffect,
-    useCallback,
-    useMemo,
-} from "react";
-import {
-    Box,
-    Heading,
-    HStack,
-    Stack,
-    Text,
-    VStack,
-    useColorMode,
-    chakra,
-    Icon,
-    Progress,
-    Stepper,
-    Step,
-    StepIndicator,
-    StepStatus,
-    StepTitle,
-    StepDescription,
-    StepSeparator,
-} from "@chakra-ui/react";
+import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import { ChatMessage } from "hooks/useChat";
+import { HStack, Stack, VStack, chakra } from "@chakra-ui/react";
+import { Upload } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import {
-    Upload,
-    CheckCircle2,
-    FileText,
-    Check,
-    Sparkles,
-    Loader2,
-} from "lucide-react";
-import { useForm } from "react-hook-form";
-import { useChat } from "../../../hooks/useChat";
 import { ChatInterface } from "components/System/Molecules/ChatInterface";
 import StepLevel from "components/System/Molecules/StepLevel";
-import "../onboardingAnimations.css";
-import useUploadDocuments from "hooks/useUploadDocuments";
+import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";
+import { useOnboarding } from "hooks/useOnBoarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { useAgentQuery } from "hooks/useAgentQuery";
+import UploadProgressStepper from "components/Onboarding/ImproveAssistant/UploadProgressStepper";
+import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
+import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
+import { useGetAgentDocumentStatsQuery } from "services/document/document";
+import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
+import OnboardingStepBanner from "components/System/Molecules/OnboardingStepBanner";
 
-interface ImproveAssistantFormData {
-    documentsUploaded: boolean;
-    improvedResponse: string[];
-}
+const MAX_FILES = 3;
+const MAX_EXCHANGES = 5;
+const STEP_ID = "improve-assistant";
 
-export enum Status {
-    PROCESSING = "processing",
-    COMPLETED = "completed",
-    ERROR = "error",
-}
-
-export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
-    data,
-    registerValidateAndGoNext,
-    goNext,
-}) => {
-    const { colorMode } = useColorMode();
+export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ data, updateData }) => {
     const isMobile = useAppResponsive({ base: true, lg: false });
-    const [showComparison, setShowComparison] = useState(
-        data.documentsUploaded || false,
+    const { workspaceId, agentId } = useOnboarding();
+    const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
+    const onboardingStreamUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/onboarding/stream`;
+    const { sendQuery } = useAgentQuery(workspaceId, agentId, false, onboardingStreamUrl, "improve-assistant");
+
+    const savedMessages: ChatMessage[] = (data.messages as ChatMessage[]) ?? [];
+    const persistedMessageCount: number = (data.messageCount as number) ?? savedMessages.length;
+    const sessionQueryCount = (data.queryCount as number) ?? 0;
+    const liveMessageCount: number = Math.max(sessionQueryCount, (data.messageCount as number) ?? savedMessages.length);
+    const isAtLimit = liveMessageCount >= MAX_EXCHANGES;
+
+    const { data: documentStats } = useGetAgentDocumentStatsQuery(
+        { workspaceId: workspaceId!, agentId: agentId! },
+        { skip: !workspaceId || !agentId },
     );
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const { uploadDocuments, sources } = useUploadDocuments();
+    const [persistedIndexedCount, setPersistedIndexedCount] = useState(0);
+    const hasInitialized = useRef(false);
+    useEffect(() => {
+        if (!hasInitialized.current && documentStats !== undefined) {
+            hasInitialized.current = true;
+            setPersistedIndexedCount(documentStats.indexed);
+        }
+    }, [documentStats]);
 
-    const beforeResponse = useMemo(
-        () => [
-            "According to the Syntec collective agreement, you are entitled to 25 paid vacation days per year.",
-        ],
-        [],
+    const { uploadDocuments, sources, isAtMaxFiles } = useUploadDocuments(
+        workspaceId,
+        agentId,
+        MAX_FILES,
+        persistedIndexedCount,
     );
-    const afterResponse = useMemo(
-        () => [
-            "According to your collective agreement and internal regulations, you are entitled to 27 paid vacation days per year, including 2 additional days granted by your company.",
-        ],
-        [],
+
+    const completedFiles = useMemo(() => sources.filter((s) => s.status === Status.COMPLETED), [sources]);
+    const processingFiles = useMemo(
+        () => sources.filter((s) => s.status === Status.PROCESSING || s.status === Status.UPLOADING),
+        [sources],
     );
+    const sessionValidCount = useMemo(() => sources.filter((s) => s.status !== Status.ERROR).length, [sources]);
 
-    const completedFiles = sources.filter((s) => s.status === Status.COMPLETED);
-    const processingFiles = sources.filter(
-        (s) => s.status === Status.PROCESSING,
-    );
-    const isProcessing = processingFiles.length > 0;
+    const totalCompletedCount = persistedIndexedCount + completedFiles.length;
+    const showComparison = totalCompletedCount > 0;
 
-    const getResponse = useCallback(():
-        | string[]
-        | { response: string[]; isImproved?: boolean } => {
-        const isImproved = showComparison && completedFiles.length > 0;
-        return {
-            response: isImproved ? afterResponse : beforeResponse,
-            isImproved,
-        };
-    }, [showComparison, completedFiles.length, afterResponse, beforeResponse]);
-
-    const { messages, sendMessage, isLoading } = useChat({
-        getResponse,
-    });
-
-    const { trigger, setValue } = useForm<ImproveAssistantFormData>({
-        defaultValues: {
-            documentsUploaded: data.documentsUploaded || false,
-            improvedResponse: data.improvedResponse || "",
+    const getResponse = useCallback(
+        async (question: string, onChunk: (partialText: string) => void) => {
+            const fullText = await sendQuery(question, onChunk);
+            return { response: [fullText] };
         },
-        mode: "onChange",
-    });
-
-    const goNextRef = useRef(goNext);
-    goNextRef.current = goNext;
-    const triggerRef = useRef(trigger);
-    triggerRef.current = trigger;
+        [sendQuery],
+    );
 
     useEffect(() => {
-        if (registerValidateAndGoNext) {
-            const validateAndGoNext = async () => {
-                const isValid = await triggerRef.current();
-                if (isValid) {
-                    goNextRef.current();
-                }
-            };
-            registerValidateAndGoNext(validateAndGoNext);
-        }
-    }, [registerValidateAndGoNext, triggerRef, goNextRef]);
+        updateData({ fileCount: totalCompletedCount });
+    }, [totalCompletedCount, updateData]);
 
-    const handleFileUpload = async (files: FileList | null) => {
-        if (!files) return;
+    const handleMessagesChange = useCallback(
+        (msgs: ChatMessage[]) => {
+            updateData({ messages: msgs, messageCount: Math.max(msgs.length, persistedMessageCount) });
 
-        await uploadDocuments(files);
-
-        setTimeout(async () => {
-            setShowComparison(true);
-            setValue("documentsUploaded", true);
-            setValue("improvedResponse", afterResponse);
-            await trigger();
-        }, 0);
-    };
-
-    const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
-        useDragDrop((e: React.DragEvent) =>
-            handleFileUpload(e.dataTransfer.files),
-        );
-
-    const steps = useMemo(
-        () => [
-            {
-                title: "Add your documents",
-                description: "Your documents are being processed and indexed.",
-                isCompleted: completedFiles.length > 0,
-                icon: FileText,
-            },
-            {
-                title: "Documents are being processed",
-                description:
-                    "Your assistant is now using your documents to answer questions.",
-                isCompleted: showComparison,
-                icon: Sparkles,
-            },
-        ],
-        [completedFiles.length, showComparison],
+            if (msgs.length > persistedMessageCount) {
+                void updateStepsData({
+                    workspaceId,
+                    stepId: STEP_ID,
+                    data: { messageCount: msgs.length },
+                });
+            }
+        },
+        [updateData, updateStepsData, workspaceId, persistedMessageCount],
     );
 
-    const activeStepIndex = useMemo(() => {
-        if (showComparison /*&& completedFiles.length > 0*/) {
-            return 2;
-        }
-        if (completedFiles.length > 0) {
-            return 1;
-        }
-        return 0;
-    }, [showComparison, completedFiles.length]);
+    const handleFileUpload = async (files: FileList | null) => {
+        if (!files || isAtMaxFiles) return;
+        await uploadDocuments(files);
+    };
+
+    const { isDragging, handleDragOver, handleDragLeave, handleDrop } = useDragDrop((e: React.DragEvent) =>
+        handleFileUpload(e.dataTransfer.files),
+    );
 
     return (
-        <chakra.form w="100%" h="100%">
-            <Stack w="100%" h="100%" spacing={8}>
-                <VStack align="start" spacing={2} w="100%">
-                    <Heading
-                        variant={isMobile ? "heading-lg" : "heading-2xl"}
-                        fontWeight="bold"
-                        color={colorMode === "dark" ? "white" : "grey.900"}
-                    >
-                        Improve your assistant with your documents
-                    </Heading>
-                    {!isMobile && (
-                        <Text
-                            color={
-                                colorMode === "dark" ? "grey.400" : "grey.600"
-                            }
-                            variant="body-xl"
-                        >
-                            Now, make it truly tailored to your company
-                        </Text>
-                    )}
-                </VStack>
+        <chakra.form w="100%" h="100%" display="flex" flexDirection="column">
+            <Stack w="100%" flex={1} minH={0} spacing={8} display="flex" flexDirection="column">
                 <StepLevel
-                    level={
-                        showComparison ? 3 : completedFiles.length > 0 ? 2 : 1
-                    }
-                    title={
-                        showComparison
-                            ? "Personalized"
-                            : completedFiles.length > 0
-                              ? "In progress"
-                              : "Demo"
-                    }
-                    description="Your assistant is now using your documents to answer questions."
+                    level={showComparison ? 3 : 2}
+                    title={showComparison ? "Personnalisé" : "En cours de personnalisation"}
+                    description="Ton assistant est en train d'être personnalisé avec les documents que tu as ajoutés"
                 />
+
                 <HStack
                     flexDirection={isMobile ? "column" : "row"}
                     w="100%"
-                    h="100%"
+                    flex={1}
+                    minH={0}
                     spacing={8}
                     align="start"
                 >
-                    <VStack flex={1} w="100%">
-                        <VStack spacing={4} w="100%">
-                            <Box
-                                w="100%"
-                                p={4}
-                                bg={colorMode === "dark" ? "grey.700" : "white"}
-                                borderRadius="12px"
-                                mb="4px"
-                                border={`1px solid ${colorMode === "dark" ? "grey.600" : "#E7E7E7"}`}
-                            >
-                                <Stepper
-                                    index={activeStepIndex}
-                                    orientation="vertical"
-                                    gap={0}
-                                    w="100%"
-                                    h="120px"
-                                    colorScheme={
-                                        colorMode === "dark"
-                                            ? currentDarkTheme.colorScheme
-                                            : currentDarkTheme.colorScheme
-                                    }
-                                    variant={
-                                        colorMode === "dark" ? "solid" : "solid"
-                                    }
-                                >
-                                    {steps.map((step, index) => (
-                                        <Step key={index}>
-                                            <StepIndicator
-                                                flexShrink={0}
-                                                border={
-                                                    index < activeStepIndex ||
-                                                    index === activeStepIndex
-                                                        ? "none"
-                                                        : "1px solid #E7E7E7"
-                                                }
-                                                bg={
-                                                    index <= activeStepIndex
-                                                        ? colorMode === "dark"
-                                                            ? currentDarkTheme.primary
-                                                            : currentDarkTheme.primary
-                                                        : colorMode === "dark"
-                                                          ? "rgba(255, 255, 255, 1)"
-                                                          : "white"
-                                                }
-                                            >
-                                                <StepStatus
-                                                    complete={
-                                                        <Box
-                                                            bg={
-                                                                currentDarkTheme.primary
-                                                            }
-                                                            borderRadius="full"
-                                                            w="28px"
-                                                            h="28px"
-                                                            display="flex"
-                                                            alignItems="center"
-                                                            justifyContent="center"
-                                                        >
-                                                            <Icon
-                                                                as={Check}
-                                                                color="white"
-                                                                boxSize={4}
-                                                            />
-                                                        </Box>
-                                                    }
-                                                    incomplete={
-                                                        index === 1 &&
-                                                        isProcessing ? (
-                                                            <Box
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                                w="28px"
-                                                                h="28px"
-                                                            >
-                                                                <Icon
-                                                                    as={Loader2}
-                                                                    color={
-                                                                        currentDarkTheme.primary
-                                                                    }
-                                                                    boxSize={4}
-                                                                    className="spinning"
-                                                                />
-                                                            </Box>
-                                                        ) : (
-                                                            <Icon
-                                                                as={step.icon}
-                                                                color={
-                                                                    colorMode ===
-                                                                    "dark"
-                                                                        ? "grey.500"
-                                                                        : "grey.400"
-                                                                }
-                                                                boxSize={4}
-                                                            />
-                                                        )
-                                                    }
-                                                    active={
-                                                        index === 1 &&
-                                                        isProcessing ? (
-                                                            <Box
-                                                                display="flex"
-                                                                alignItems="center"
-                                                                justifyContent="center"
-                                                                w="28px"
-                                                                h="28px"
-                                                            >
-                                                                <Icon
-                                                                    as={Loader2}
-                                                                    color="white"
-                                                                    boxSize={4}
-                                                                    className="spinning"
-                                                                />
-                                                            </Box>
-                                                        ) : (
-                                                            <Icon
-                                                                as={step.icon}
-                                                                color={
-                                                                    colorMode ===
-                                                                    "dark"
-                                                                        ? "white"
-                                                                        : "white"
-                                                                }
-                                                                boxSize={4}
-                                                            />
-                                                        )
-                                                    }
-                                                />
-                                            </StepIndicator>
-                                            <Box flex={1} ml={4} minW={0}>
-                                                <StepTitle>
-                                                    <Text
-                                                        fontWeight="semibold"
-                                                        color={
-                                                            index <
-                                                                activeStepIndex ||
-                                                            index ===
-                                                                activeStepIndex
-                                                                ? colorMode ===
-                                                                  "dark"
-                                                                    ? "white"
-                                                                    : "grey.900"
-                                                                : colorMode ===
-                                                                    "dark"
-                                                                  ? "grey.400"
-                                                                  : "grey.600"
-                                                        }
-                                                        fontSize="sm"
-                                                    >
-                                                        {step.title}
-                                                    </Text>
-                                                </StepTitle>
-                                                <StepDescription
-                                                    style={{
-                                                        color:
-                                                            colorMode === "dark"
-                                                                ? "grey.400"
-                                                                : "grey.600",
-                                                        fontSize: "xs",
-                                                    }}
-                                                >
-                                                    {step.description}
-                                                </StepDescription>
-                                            </Box>
-                                            <StepSeparator
-                                                style={{
-                                                    backgroundColor:
-                                                        "transparent",
-                                                    borderLeft:
-                                                        showComparison &&
-                                                        completedFiles.length >
-                                                            0
-                                                            ? `2px solid ${currentDarkTheme.primary}`
-                                                            : `2px dashed ${colorMode === "dark" ? currentDarkTheme.rgba.primary30 : "#D1D5DB"}`,
-                                                    transition:
-                                                        "all 0.3s ease-in-out",
-                                                }}
-                                            />
-                                        </Step>
-                                    ))}
-                                </Stepper>
-                            </Box>
-                        </VStack>
-                        <Box
-                            w="100%"
-                            border={`2px dashed ${isDragging ? currentDarkTheme.primary : colorMode === "dark" ? "grey" : "grey"}`}
-                            borderRadius="12px"
-                            p={8}
-                            bg={colorMode === "dark" ? "grey.700" : "grey.50"}
-                            textAlign="center"
+                    <VStack flex={1} w="100%" spacing={4} align="stretch" h="100%">
+                        <DocumentDropZone
+                            isDragging={isDragging}
+                            onFileSelect={isAtMaxFiles ? undefined : handleFileUpload}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
-                            onClick={() => fileInputRef.current?.click()}
-                            cursor="pointer"
-                            _hover={{
-                                borderColor: currentDarkTheme.primary,
-                                bg:
-                                    colorMode === "dark"
-                                        ? "grey.600"
-                                        : "grey.100",
-                            }}
-                            transition="all 0.2s"
-                        >
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                multiple
-                                accept=".pdf,.docx,.txt,.png"
-                                style={{ display: "none" }}
-                                onChange={(e) =>
-                                    handleFileUpload(e.target.files)
-                                }
-                            />
-                            <VStack spacing={3}>
-                                <Icon
-                                    as={Upload}
-                                    boxSize={10}
-                                    color={currentDarkTheme.primary}
-                                />
-                                <Text
-                                    fontWeight="semibold"
-                                    color={
-                                        colorMode === "dark"
-                                            ? "white"
-                                            : "grey.900"
-                                    }
-                                >
-                                    Add your internal regulations, collective
-                                    agreement, or HR PDF
-                                </Text>
-                                <Text
-                                    fontSize="sm"
-                                    color={
-                                        colorMode === "dark"
-                                            ? "grey.400"
-                                            : "grey.600"
-                                    }
-                                >
-                                    Drag & drop or click to select
-                                </Text>
-                            </VStack>
-                        </Box>
-
-                        {sources.length > 0 && (
-                            <VStack align="start" w="100%" spacing={2} mt="4px">
-                                <Text
-                                    fontWeight="semibold"
-                                    color={
-                                        colorMode === "dark"
-                                            ? "white"
-                                            : "grey.900"
-                                    }
-                                >
-                                    Added files
-                                </Text>
-                                {sources.map((source, index) => (
-                                    <Box
-                                        key={index}
-                                        w="100%"
-                                        p={3}
-                                        border={`1px solid ${colorMode === "dark" ? "grey.600" : "grey.300"}`}
-                                        borderRadius="8px"
-                                        bg={
-                                            colorMode === "dark"
-                                                ? "grey.700"
-                                                : "grey.50"
-                                        }
-                                    >
-                                        <HStack spacing={3}>
-                                            <Icon
-                                                as={
-                                                    source.status ===
-                                                    Status.COMPLETED
-                                                        ? CheckCircle2
-                                                        : FileText
-                                                }
-                                                boxSize={4}
-                                                color={
-                                                    source.status ===
-                                                    Status.COMPLETED
-                                                        ? "green.500"
-                                                        : currentDarkTheme.primary
-                                                }
-                                            />
-                                            <Text
-                                                fontSize="sm"
-                                                color={
-                                                    colorMode === "dark"
-                                                        ? "white"
-                                                        : "grey.900"
-                                                }
-                                            >
-                                                {source.name}
-                                            </Text>
-                                            {source.status ===
-                                                Status.PROCESSING && (
-                                                <Progress
-                                                    value={50}
-                                                    colorScheme={
-                                                        colorMode === "dark"
-                                                            ? "green"
-                                                            : "blue"
-                                                    }
-                                                    size="sm"
-                                                    borderRadius="999px"
-                                                    flex={1}
-                                                />
-                                            )}
-                                        </HStack>
-                                    </Box>
-                                ))}
-                            </VStack>
-                        )}
+                            disabled={isAtMaxFiles}
+                            maxFiles={MAX_FILES}
+                            currentCount={persistedIndexedCount + sessionValidCount}
+                        />
+                        <UploadProgressStepper
+                            completedFilesCount={totalCompletedCount}
+                            isProcessing={processingFiles.length > 0}
+                            showComparison={showComparison}
+                        />
+                        <DocumentFileList sources={sources} />
                     </VStack>
-                    <Stack
-                        flex={1}
-                        minH={0}
-                        display="flex"
-                        flexDirection="column"
-                        h="100%"
-                    >
+
+                    <Stack flex={2} minH={0} h="100%" display="flex" flexDirection="column" gap={2} overflow="hidden">
+                        <OnboardingStepBanner current={liveMessageCount} max={MAX_EXCHANGES} mb={0} />
                         <ChatInterface
                             fullHeight={!isMobile}
                             compact={!isMobile}
-                            messages={messages}
-                            onSendMessage={sendMessage}
-                            isLoading={isLoading}
-                            placeholder="Ask your question..."
+                            getResponse={getResponse}
+                            onMessagesChange={handleMessagesChange}
+                            initialMessages={savedMessages}
+                            title={showComparison ? "Assistant personnalisé prêt" : "Ajoute tes documents d'abord"}
                             welcomeMessage={
                                 showComparison
-                                    ? "Hello! I now have access to your personalized documents. Ask me a question to see the difference!"
-                                    : "Add your documents to improve your assistant"
+                                    ? "Pose une question pour voir la différence avec tes documents."
+                                    : "Uploade tes fichiers RH à gauche pour activer les réponses personnalisées."
                             }
-                            disabled={!showComparison}
+                            icon={showComparison ? undefined : Upload}
+                            placeholder={showComparison ? "Pose ta question..." : "Indexation en cours..."}
+                            disabled={!showComparison || isAtLimit}
+                            disabledMessage={
+                                isAtLimit
+                                    ? `Limite atteinte (${MAX_EXCHANGES}/${MAX_EXCHANGES}) — passez à l'étape suivante`
+                                    : undefined
+                            }
                         />
                     </Stack>
                 </HStack>

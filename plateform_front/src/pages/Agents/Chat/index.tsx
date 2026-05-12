@@ -1,28 +1,34 @@
-import { Box, HStack, Link, Text, VStack } from "@chakra-ui/react";
+import { Box, VStack } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-import Banner from "components/System/Atoms/Banner";
+import { useCallback } from "react";
 import { ChatInterface } from "components/System/Molecules/ChatInterface";
 import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
 import { useUserInfo } from "hooks/useUserInfo";
+import { useAgentQuery } from "hooks/useAgentQuery";
 
 const ChatWorkspace = () => {
     const { name } = useUserInfo();
-    const { workspaceId, agentId } = useParams<{
+    const { workspaceId = "", agentId = "" } = useParams<{
         workspaceId: string;
         agentId: string;
     }>();
 
+    const playgroundUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/agents/${agentId}/runtime/playground`;
+    const { sendQuery } = useAgentQuery(workspaceId, agentId, false, playgroundUrl);
+
+    const getResponse = useCallback(
+        async (question: string, onChunk: (partialText: string) => void) => {
+            const fullText = await sendQuery(question, onChunk);
+            return { response: [fullText] };
+        },
+        [sendQuery],
+    );
+
     return (
-        <VStack
-            w="100%"
-            h="100vh"
-            align="stretch"
-            spacing={0}
-            overflow="hidden"
-        >
+        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
             <WorkspaceHeader
-                title="Chat Assistant Playground"
-                description="This is a playground for your chat assistant. Test it before deploying it in production."
+                title="Bac à sable de l'assistant"
+                description="Ceci est un espace de test pour votre assistant de chat. Testez-le avant de le déployer en production."
             />
             <Box
                 p={4}
@@ -34,35 +40,16 @@ const ChatWorkspace = () => {
                 flexDirection="column"
                 overflow="hidden"
             >
-                <Banner variant="green" mb="16px" flexShrink={0} gap="0">
-                    <HStack>
-                        <Text fontSize={{ base: "xs", md: "sm" }}>
-                            Based on 12 documents, see more details in the{" "}
-                            <Link
-                                href={
-                                    workspaceId && agentId
-                                        ? `/workspaces/${workspaceId}/agents/${agentId}/documents`
-                                        : "#"
-                                }
-                                color="blue.500"
-                            >
-                                documents page
-                            </Link>
-                        </Text>
-                    </HStack>
-                </Banner>
                 <Box flex={1} minH={0} display="flex" flexDirection="column">
                     <ChatInterface
                         fullHeight
-                        title="Chat"
-                        messages={[]}
-                        onSendMessage={() => {}}
-                        isLoading={false}
-                        placeholder="Enter your question"
+                        title="Discussion"
+                        getResponse={getResponse}
+                        placeholder="Entrez votre question"
                         welcomeMessage={
                             name
-                                ? `Hello ${name}! I'm your assistant. Ask me a question about your documents.`
-                                : "Hello! I'm your assistant. Ask me a question about your documents."
+                                ? `Bonjour ${name} ! Je suis votre assistant. Posez-moi une question sur vos documents.`
+                                : "Bonjour ! Je suis votre assistant. Posez-moi une question sur vos documents."
                         }
                     />
                 </Box>

@@ -1,42 +1,23 @@
-import {
-    VStack,
-    HStack,
-    Text,
-    Box,
-    useColorModeValue,
-    useColorMode,
-} from "@chakra-ui/react";
+import { VStack, HStack, Text, Box, useColorModeValue, useColorMode } from "@chakra-ui/react";
 import type { ModelOption } from "@genrag/workflow";
 
 import type { AppNodeData, Task } from "@genrag/workflow";
 
-const BADGE_CONFIG: Record<
-    string,
-    { label: string; bg: string; color: string }
-> = {
+const BADGE_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
     smart: { label: "Smart", bg: "purple.50", color: "purple.600" },
     fast: { label: "Fast", bg: "blue.50", color: "blue.600" },
     balanced: { label: "Balanced", bg: "green.50", color: "green.600" },
     cheap: { label: "Cheap", bg: "orange.50", color: "orange.600" },
 };
 
-const BADGE_CONFIG_DARK: Record<
-    string,
-    { label: string; bg: string; color: string }
-> = {
+const BADGE_CONFIG_DARK: Record<string, { label: string; bg: string; color: string }> = {
     smart: { label: "Smart", bg: "purple.900", color: "purple.300" },
     fast: { label: "Fast", bg: "blue.900", color: "blue.300" },
     balanced: { label: "Balanced", bg: "green.900", color: "green.300" },
     cheap: { label: "Cheap", bg: "orange.900", color: "orange.300" },
 };
 
-const ModelCard = ({
-    model,
-    onSelect,
-}: {
-    model: ModelOption;
-    onSelect: (id: string) => void;
-}) => {
+const ModelCard = ({ model, onSelect }: { model: ModelOption; onSelect: (id: string) => void }) => {
     const bg = useColorModeValue("white", "grey.800");
     const bgHover = useColorModeValue("green.50", "grey.750");
     const border = useColorModeValue("grey.200", "grey.700");
@@ -50,14 +31,8 @@ const ModelCard = ({
 
     const badgeDark = model.badge ? BADGE_CONFIG_DARK[model.badge] : null;
     const badgeLight = model.badge ? BADGE_CONFIG[model.badge] : null;
-    const badgeBg = useColorModeValue(
-        badgeLight?.bg ?? "grey.50",
-        badgeDark?.bg ?? "grey.700",
-    );
-    const badgeColor = useColorModeValue(
-        badgeLight?.color ?? "grey.500",
-        badgeDark?.color ?? "grey.400",
-    );
+    const badgeBg = useColorModeValue(badgeLight?.bg ?? "grey.50", badgeDark?.bg ?? "grey.700");
+    const badgeColor = useColorModeValue(badgeLight?.color ?? "grey.500", badgeDark?.color ?? "grey.400");
 
     return (
         <Box
@@ -83,12 +58,7 @@ const ModelCard = ({
             <VStack align="stretch" spacing={1.5}>
                 <HStack justify="space-between" align="center">
                     <HStack spacing={1.5} align="baseline">
-                        <Text
-                            fontSize="13px"
-                            fontWeight={700}
-                            color={labelColor}
-                            letterSpacing="-0.01em"
-                        >
+                        <Text fontSize="13px" fontWeight={700} color={labelColor} letterSpacing="-0.01em">
                             {model.label}
                         </Text>
                         <Text fontSize="10px" color={providerColor}>
@@ -114,44 +84,27 @@ const ModelCard = ({
                     )}
                 </HStack>
 
-                <Text
-                    fontSize="11px"
-                    color={subColor}
-                    lineHeight={1.4}
-                    noOfLines={2}
-                >
+                <Text fontSize="11px" color={subColor} lineHeight={1.4} noOfLines={2}>
                     {model.description}
                 </Text>
 
                 <HStack spacing={3} pt={0.5}>
                     {isFree ? (
-                        <Text
-                            fontSize="10px"
-                            color="green.500"
-                            fontWeight={600}
-                        >
+                        <Text fontSize="10px" color="green.500" fontWeight={600}>
                             Free
                         </Text>
                     ) : (
                         <>
                             <Text fontSize="10px" color={priceColor}>
                                 In{" "}
-                                <Box
-                                    as="span"
-                                    fontWeight={600}
-                                    color={subColor}
-                                >
+                                <Box as="span" fontWeight={600} color={subColor}>
                                     ${model.priceInput}
                                 </Box>
                                 /1M
                             </Text>
                             <Text fontSize="10px" color={priceColor}>
                                 Out{" "}
-                                <Box
-                                    as="span"
-                                    fontWeight={600}
-                                    color={subColor}
-                                >
+                                <Box as="span" fontWeight={600} color={subColor}>
                                     ${model.priceOutput}
                                 </Box>
                                 /1M
@@ -170,18 +123,14 @@ interface SettingPlaceholderContentProps {
     onSelect: (item: string) => void;
 }
 
-export default function SettingPlaceholderContent({
-    nodeData,
-    onSelect,
-}: SettingPlaceholderContentProps) {
+export default function SettingPlaceholderContent({ nodeData, onSelect }: SettingPlaceholderContentProps) {
     const configItems = nodeData.configItems ?? [];
-    const settingLabel = nodeData.settingLabel ?? "Setting";
+    const settingLabel = nodeData.settingLabel ?? "Setting"; //Remplacer par appel API pour recuperer models dispo
     const { colorMode } = useColorMode();
     const labelColor = useColorModeValue("grey.500", "grey.400");
     const dividerColor = useColorModeValue("grey.100", "grey.700");
 
-    const isLegacy =
-        configItems.length > 0 && typeof configItems[0] === "string";
+    const isLegacy = configItems.length > 0 && typeof configItems[0] === "string";
 
     return (
         <VStack spacing={0} align="stretch">
@@ -197,12 +146,7 @@ export default function SettingPlaceholderContent({
                 </Text>
             </Box>
 
-            <Box
-                borderTop="1px solid"
-                borderColor={dividerColor}
-                mx={4}
-                mb={3}
-            />
+            <Box borderTop="1px solid" borderColor={dividerColor} mx={4} mb={3} />
 
             <VStack spacing={2} align="stretch" px={4} pb={4}>
                 {isLegacy
@@ -216,30 +160,18 @@ export default function SettingPlaceholderContent({
                               py={2}
                               borderRadius="8px"
                               border="1px solid"
-                              borderColor={
-                                  colorMode === "dark" ? "grey.200" : "grey.700"
-                              }
+                              borderColor={colorMode === "dark" ? "grey.200" : "grey.700"}
                               fontSize="13px"
                               fontWeight={600}
-                              color={
-                                  colorMode === "dark" ? "grey.200" : "grey.700"
-                              }
-                              _hover={
-                                  colorMode === "dark" ? "grey.200" : "grey.700"
-                              }
+                              color={colorMode === "dark" ? "grey.200" : "grey.700"}
+                              _hover={colorMode === "dark" ? "grey.200" : "grey.700"}
                               transition="all 0.15s"
                               onClick={() => onSelect(item)}
                           >
                               {item}
                           </Box>
                       ))
-                    : configItems.map((model) => (
-                          <ModelCard
-                              key={model.id}
-                              model={model}
-                              onSelect={onSelect}
-                          />
-                      ))}
+                    : configItems.map((model) => <ModelCard key={model.id} model={model} onSelect={onSelect} />)}
             </VStack>
         </VStack>
     );

@@ -1,22 +1,8 @@
 import { useRef } from "react";
 import "@xyflow/react/dist/style.css";
-import {
-    useColorMode,
-    VStack,
-    Box,
-    useDisclosure,
-    useToken,
-    Spinner,
-    Center,
-} from "@chakra-ui/react";
+import { useColorMode, VStack, Box, useDisclosure, useToken, Spinner, Center } from "@chakra-ui/react";
 import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
-import {
-    ReactFlow,
-    Background,
-    BackgroundVariant,
-    MiniMap,
-    ReactFlowProvider,
-} from "@xyflow/react";
+import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider } from "@xyflow/react";
 import {
     useNodeSelection,
     useWorkflowCanvas,
@@ -48,31 +34,14 @@ interface WorkflowInnerProps {
     agentId: string;
 }
 
-const WorkflowInner = ({
-    initialNodes,
-    initialEdges,
-    workflowExists,
-    workspaceId,
-    agentId,
-}: WorkflowInnerProps) => {
+const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId, agentId }: WorkflowInnerProps) => {
     const { colorMode } = useColorMode();
     const reactFlowContainerRef = useRef<HTMLDivElement>(null);
     const toast = useThemedToast();
 
-    const {
-        isOpen: isMenuOpen,
-        onOpen: onMenuOpen,
-        onClose: onMenuClose,
-    } = useDisclosure({ defaultIsOpen: false });
+    const { isOpen: isMenuOpen, onOpen: onMenuOpen, onClose: onMenuClose } = useDisclosure({ defaultIsOpen: false });
 
-    const {
-        selectedNodeId,
-        task,
-        nodeData,
-        isModalOpen,
-        handleNodeClick,
-        handleModalClose,
-    } = useNodeSelection();
+    const { selectedNodeId, task, nodeData, isModalOpen, handleNodeClick, handleModalClose } = useNodeSelection();
 
     const {
         nodes,
@@ -91,10 +60,8 @@ const WorkflowInner = ({
         initialEdges,
     });
 
-    const [updateWorkflow, { isLoading: isUpdating }] =
-        useUpdateWorkflowMutation();
-    const [createWorkflow, { isLoading: isCreating }] =
-        useCreateWorkflowMutation();
+    const [updateWorkflow, { isLoading: isUpdating }] = useUpdateWorkflowMutation();
+    const [createWorkflow, { isLoading: isCreating }] = useCreateWorkflowMutation();
     const isSaving = isUpdating || isCreating;
 
     const handleSave = async () => {
@@ -109,8 +76,7 @@ const WorkflowInner = ({
             }
             toast({
                 title: "Workflow enregistré",
-                description:
-                    "Votre workflow d'execution a été enregistré avec succès.",
+                description: "Votre workflow d'execution a été enregistré avec succès.",
                 status: "success",
                 duration: 2000,
                 isClosable: true,
@@ -119,8 +85,7 @@ const WorkflowInner = ({
         } catch {
             toast({
                 title: "Erreur lors de l'enregistrement",
-                description:
-                    "Une erreur est survenue lors de l'enregistrement de votre workflow.",
+                description: "Une erreur est survenue lors de l'enregistrement de votre workflow.",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -129,26 +94,14 @@ const WorkflowInner = ({
         }
     };
 
-    const [gridLineLight, gridLineDark] = useToken("colors", [
-        "grey.50",
-        "grey.950",
-    ]);
-    const lineColor = applyAlphaToColor(
-        colorMode === "dark" ? gridLineDark : gridLineLight,
-        0.8,
-    );
+    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.950"]);
+    const lineColor = applyAlphaToColor(colorMode === "dark" ? gridLineDark : gridLineLight, 0.8);
 
     const snapGrid: [number, number] = [50, 50];
     const fitViewOptions = { padding: 0.1, minZoom: 0.5, maxZoom: 1 };
 
     return (
-        <Box
-            ref={reactFlowContainerRef}
-            flex={1}
-            position="relative"
-            overflow="hidden"
-            display="flex"
-        >
+        <Box ref={reactFlowContainerRef} flex={1} position="relative" overflow="hidden" display="flex">
             <MenuNodeModal
                 usedNodes={nodes}
                 isOpen={isMenuOpen}
@@ -176,8 +129,7 @@ const WorkflowInner = ({
                         nodeBorderRadius={12}
                         nodeStrokeWidth={6}
                         nodeColor={(node) => {
-                            if ((node.data as AppNodeData).isPlaceholder)
-                                return "transparent";
+                            if ((node.data as AppNodeData).isPlaceholder) return "transparent";
                             switch ((node.data as AppNodeData).type) {
                                 case TaskType.QUERY:
                                 case TaskType.RESPONSE:
@@ -190,33 +142,18 @@ const WorkflowInner = ({
                             }
                         }}
                         nodeStrokeColor={(node) => {
-                            if ((node.data as AppNodeData).isPlaceholder)
-                                return "transparent";
-                            return (node.data as AppNodeData).type ===
-                                TaskType.MODEL
-                                ? "#8b5cf6"
-                                : "#34D3A9";
+                            if ((node.data as AppNodeData).isPlaceholder) return "transparent";
+                            return (node.data as AppNodeData).type === TaskType.MODEL ? "#8b5cf6" : "#34D3A9";
                         }}
-                        maskColor={
-                            colorMode === "dark"
-                                ? "rgba(74, 74, 75, 0)"
-                                : "rgba(240, 253, 250, 0)"
-                        }
+                        maskColor={colorMode === "dark" ? "rgba(74, 74, 75, 0)" : "rgba(240, 253, 250, 0)"}
                         style={{
-                            background:
-                                colorMode === "dark"
-                                    ? "rgba(74, 74, 75, 0)"
-                                    : "#f0fdf450",
+                            background: colorMode === "dark" ? "rgba(74, 74, 75, 0)" : "#f0fdf450",
                             border: `1px solid ${colorMode === "dark" ? "#353535" : "#34D3A9"}`,
                             borderRadius: "12px",
                             boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
                         }}
                     />
-                    <Background
-                        variant={BackgroundVariant.Lines}
-                        color={lineColor}
-                        gap={36}
-                    />
+                    <Background variant={BackgroundVariant.Lines} color={lineColor} gap={36} />
                     <CustomControls
                         onMenuToggle={isMenuOpen ? onMenuClose : onMenuOpen}
                         onSave={handleSave}
@@ -255,13 +192,7 @@ const WorkflowWorkspace = () => {
             : { nodes: canvas?.nodes, edges: canvas?.edges };
 
     return (
-        <VStack
-            w="100%"
-            h="100vh"
-            align="stretch"
-            spacing={0}
-            overflow="hidden"
-        >
+        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
             <WorkspaceHeader
                 title="Workflow"
                 description="Manage your rag workflow. Customize it to add new features to your assistant."

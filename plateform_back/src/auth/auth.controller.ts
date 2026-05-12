@@ -5,11 +5,7 @@ import { User } from 'generated/prisma';
 import { Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { CreateUserRequest } from 'src/users/dto/create-user.request';
-import {
-    NewPasswordRequest,
-    ResendVerifyTokenRequest,
-    VerifyTokenRequest,
-} from 'src/users/dto/verify-token.request';
+import { NewPasswordRequest, ResendVerifyTokenRequest, VerifyTokenRequest } from 'src/users/dto/verify-token.request';
 import { TokenService } from 'src/auth/token.service';
 import { LoginRequest } from 'src/auth/dto/login.request';
 
@@ -46,9 +42,7 @@ export class AuthController {
 
     @Post('resend-verification-token')
     resendVerificationToken(@Body() verifyTokenBody: ResendVerifyTokenRequest) {
-        return this.tokenService.generateAndSendVerificationToken(
-            verifyTokenBody.email,
-        );
+        return this.tokenService.generateAndSendVerificationToken(verifyTokenBody.email);
     }
 
     @Post('reset-password')

@@ -29,4 +29,14 @@ export class CreditBalanceService {
             amount,
         );
     }
+
+    async grantInitial({
+        workspaceId,
+        amount,
+    }: UpdateCreditBalance): Promise<void> {
+        await this.creditBalanceRepository.incrementOrCreate(
+            workspaceId,
+            amount,
+        );
+    }
 }

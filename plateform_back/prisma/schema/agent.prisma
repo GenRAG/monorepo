@@ -9,9 +9,11 @@ model Agent {
   updatedBy   String
   workspaceId String
   workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workflows   Workflow[]
-  documents   Document[]
-  deployments AgentVersion[]
+  workflows          Workflow[]
+  documents          Document[]
+  deployments        AgentVersion[]
+  onboardingSession  OnboardingSession?
+  conversations      Conversation[]
 }
 
 model AgentVersion {

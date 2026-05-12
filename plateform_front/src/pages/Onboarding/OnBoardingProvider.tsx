@@ -1,18 +1,25 @@
 import useThemedToast from "hooks/useThemedToast";
-import React, { createContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useState, useEffect, useCallback, ReactNode, useRef } from "react";
+import { LucideIcon } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+    useStartOnboardingMutation,
+    useUpdateOnboardingStepMutation,
+    useCompleteOnboardingMutation,
+} from "services/onboarding/onboarding";
 
 export interface StepData {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface StepConfig {
     id: string;
     title: string;
     description: string;
-    icon: any;
+    icon: LucideIcon;
     component: React.ComponentType<StepComponentProps>;
     validate?: (data: StepData) => boolean | Promise<boolean>;
-    onComplete?: (data: StepData) => void | Promise<void>;
+    errorMessage?: string;
 }
 
 export interface StepComponentProps {
@@ -21,7 +28,6 @@ export interface StepComponentProps {
     goNext: () => void;
     goPrevious: () => void;
     isValid: boolean;
-    registerValidateAndGoNext?: (fn: () => Promise<void>) => void;
 }
 
 export interface OnboardingState {
@@ -29,6 +35,8 @@ export interface OnboardingState {
     completedSteps: number[];
     stepsData: Record<string, StepData>;
 }
+
+export type SessionError = "not_found" | "unauthorized" | "unknown";
 
 interface OnboardingContextType {
     currentStep: number;
@@ -44,105 +52,133 @@ interface OnboardingContextType {
     isStepCompleted: (stepIndex: number) => boolean;
     canNavigateToStep: (stepIndex: number) => boolean;
     resetOnboarding: () => void;
+    workspaceId: string;
+    agentId: string;
+    sessionId: string | null;
+    isSessionLoading: boolean;
+    sessionError: SessionError | null;
 }
 
-export const OnboardingContext = createContext<
-    OnboardingContextType | undefined
->(undefined);
-
-const STORAGE_KEY = "onboarding_state";
+export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 export const OnboardingProvider: React.FC<{
     children: ReactNode;
     steps: StepConfig[];
 }> = ({ children, steps }) => {
     const toast = useThemedToast();
-    const [state, setState] = useState<OnboardingState>(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        console.log(saved);
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                console.error("Failed to parse saved state:", e);
-            }
-        }
-        return {
-            currentStep: 0,
-            completedSteps: [],
-            stepsData: {},
-        };
+    const navigate = useNavigate();
+    const { workspaceId = "" } = useParams<{ workspaceId: string }>();
+
+    const [state, setState] = useState<OnboardingState>({
+        currentStep: 0,
+        completedSteps: [],
+        stepsData: {},
     });
 
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }, [state]);
+    const [agentId, setAgentId] = useState<string>("");
+    const [sessionId, setSessionId] = useState<string | null>(null);
+    const [isSessionLoading, setIsSessionLoading] = useState(true);
+    const [sessionError, setSessionError] = useState<SessionError | null>(null);
+    const sessionInitialized = useRef(false);
 
-    const updateStepData = (stepId: string, data: Partial<StepData>) => {
+    const [startOnboarding] = useStartOnboardingMutation();
+    const [updateOnboardingStep] = useUpdateOnboardingStepMutation();
+    const [completeOnboarding] = useCompleteOnboardingMutation();
+
+    useEffect(() => {
+        if (!workspaceId || sessionInitialized.current) return;
+
+        sessionInitialized.current = true;
+
+        startOnboarding({ workspaceId })
+            .unwrap()
+            .then((session) => {
+                setAgentId(session.agentId);
+                setSessionId(session.sessionId);
+                setState((prev) => ({
+                    ...prev,
+                    currentStep: Math.min(Math.max(prev.currentStep, session.step - 1), steps.length - 1),
+                    stepsData: session.stepsData ?? prev.stepsData,
+                }));
+            })
+            .catch((err) => {
+                const status = err?.status ?? err?.originalStatus;
+                if (status === 404) {
+                    setSessionError("not_found");
+                } else if (status === 403 || status === 401) {
+                    setSessionError("unauthorized");
+                } else {
+                    setSessionError("unknown");
+                }
+            })
+            .finally(() => {
+                setIsSessionLoading(false);
+            });
+    }, [workspaceId, startOnboarding, navigate, steps.length]);
+
+    const updateStepData = useCallback((stepId: string, data: Partial<StepData>) => {
         setState((prev) => ({
             ...prev,
             stepsData: {
                 ...prev.stepsData,
-                [stepId]: {
-                    ...prev.stepsData[stepId],
-                    ...data,
-                },
+                [stepId]: { ...prev.stepsData[stepId], ...data },
             },
         }));
-    };
+    }, []);
 
-    const getStepData = (stepId: string): StepData => {
-        return state.stepsData[stepId] || {};
-    };
+    const getStepData = useCallback(
+        (stepId: string): StepData => {
+            return state.stepsData[stepId] || {};
+        },
+        [state.stepsData],
+    );
 
-    const isStepValid = (stepIndex: number): boolean => {
-        const step = steps[stepIndex];
-        if (!step.validate) return true;
+    const isStepCompleted = useCallback(
+        (stepIndex: number): boolean => {
+            return state.completedSteps.includes(stepIndex);
+        },
+        [state.completedSteps],
+    );
 
-        const stepData = getStepData(step.id);
-        const result = step.validate(stepData);
+    const isStepValid = useCallback(
+        (stepIndex: number): boolean => {
+            const step = steps[stepIndex];
+            if (!step.validate) return true;
+            const result = step.validate(state.stepsData[step.id] || {});
+            if (result instanceof Promise) return false;
+            return result;
+        },
+        [steps, state.stepsData],
+    );
 
-        if (result instanceof Promise) {
-            return false;
-        }
-        return result;
-    };
+    const canNavigateToStep = useCallback(
+        (stepIndex: number): boolean => {
+            if (stepIndex === 0) return true;
+            for (let i = 0; i < stepIndex; i++) {
+                if (!state.completedSteps.includes(i)) return false;
+            }
+            return true;
+        },
+        [state.completedSteps],
+    );
 
-    const isStepCompleted = (stepIndex: number): boolean => {
-        return state.completedSteps.includes(stepIndex);
-    };
+    const goToStep = useCallback(
+        (stepIndex: number) => {
+            if (!canNavigateToStep(stepIndex)) return;
+            setState((prev) => ({ ...prev, currentStep: stepIndex }));
+        },
+        [canNavigateToStep],
+    );
 
-    const canNavigateToStep = (stepIndex: number): boolean => {
-        if (stepIndex === 0) return true;
-
-        for (let i = 0; i < stepIndex; i++) {
-            if (!isStepCompleted(i)) return false;
-        }
-        return true;
-    };
-
-    const goToStep = (stepIndex: number) => {
-        if (!canNavigateToStep(stepIndex)) {
-            console.warn(
-                `Cannot navigate to step ${stepIndex}. Previous steps not completed.`,
-            );
-            return;
-        }
-        setState((prev) => ({ ...prev, currentStep: stepIndex }));
-    };
-
-    const goNext = async () => {
+    const goNext = useCallback(async () => {
         const currentStepConfig = steps[state.currentStep];
 
         if (currentStepConfig.validate) {
-            const stepData = getStepData(currentStepConfig.id);
-            const isValid = await currentStepConfig.validate(stepData);
-
+            const isValid = await currentStepConfig.validate(getStepData(currentStepConfig.id));
             if (!isValid) {
                 toast({
-                    title: "An error occurred.",
-                    description:
-                        "Please complete the required fields before proceeding.",
+                    title: "Une erreur est survenue",
+                    description: currentStepConfig.errorMessage,
                     status: "error",
                     duration: 9000,
                     isClosable: true,
@@ -151,41 +187,57 @@ export const OnboardingProvider: React.FC<{
             }
         }
 
+        const isLastStep = state.currentStep === steps.length - 1;
+
+        if (workspaceId) {
+            if (isLastStep) {
+                const lastStepId = steps[steps.length - 1].id;
+                const style = getStepData(lastStepId).selectedLLM as "standard" | "precise" | "creative" | undefined;
+                if (style) {
+                    try {
+                        await completeOnboarding({
+                            workspaceId,
+                            style,
+                        }).unwrap();
+                    } catch (err) {
+                        console.error("Failed to complete onboarding:", err);
+                    }
+                }
+                await navigate(`/workspaces/${workspaceId}/dashboard`);
+                return;
+            }
+
+            updateOnboardingStep({
+                workspaceId,
+                step: state.currentStep + 2,
+            })
+                .unwrap()
+                .catch((err) => console.error("Failed to sync onboarding step:", err));
+        }
+
         setState((prev) => {
             const completedSteps = [...prev.completedSteps];
             if (!completedSteps.includes(prev.currentStep)) {
                 completedSteps.push(prev.currentStep);
             }
-
-            if (currentStepConfig.onComplete) {
-                currentStepConfig.onComplete(
-                    prev.stepsData[currentStepConfig.id] || {},
-                );
-            }
-
             return {
                 ...prev,
                 completedSteps,
                 currentStep: Math.min(prev.currentStep + 1, steps.length - 1),
             };
         });
-    };
+    }, [steps, workspaceId, getStepData, completeOnboarding, updateOnboardingStep, navigate, toast, state.currentStep]);
 
-    const goPrevious = () => {
+    const goPrevious = useCallback(() => {
         setState((prev) => ({
             ...prev,
             currentStep: Math.max(prev.currentStep - 1, 0),
         }));
-    };
+    }, []);
 
-    const resetOnboarding = () => {
-        setState({
-            currentStep: 0,
-            completedSteps: [],
-            stepsData: {},
-        });
-        localStorage.removeItem(STORAGE_KEY);
-    };
+    const resetOnboarding = useCallback(() => {
+        setState({ currentStep: 0, completedSteps: [], stepsData: {} });
+    }, []);
 
     return (
         <OnboardingContext.Provider
@@ -203,6 +255,11 @@ export const OnboardingProvider: React.FC<{
                 isStepCompleted,
                 canNavigateToStep,
                 resetOnboarding,
+                workspaceId,
+                agentId,
+                sessionId,
+                isSessionLoading,
+                sessionError,
             }}
         >
             {children}

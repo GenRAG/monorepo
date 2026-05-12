@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Get,
     Injectable,
     Param,
     Post,
@@ -18,6 +19,11 @@ import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorateur
 @UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
 export class CreditBalanceController {
     constructor(private readonly creditBalanceService: CreditBalanceService) {}
+
+    @Get()
+    getBalance(@Param('workspaceId') workspaceId: string) {
+        return this.creditBalanceService.getBalance(workspaceId);
+    }
 
     @Post()
     @RolesInWorkspace(UserRole.ADMIN)

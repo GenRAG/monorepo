@@ -87,18 +87,12 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
             borderColor={dividerColor}
             overflowY="auto"
         >
-            <Text
-                fontSize="24px"
-                fontWeight="600"
-                color={titleColor}
-                mb={8}
-                lineHeight="1.2"
-            >
-                Create from Blank
+            <Text fontSize="24px" fontWeight="600" color={titleColor} mb={8} lineHeight="1.2">
+                Créer à partir de zéro
             </Text>
 
             <Text fontSize="13px" fontWeight="500" color={labelColor} mb={3}>
-                Choose an App Type
+                Choisir un type d&apos;application
             </Text>
 
             <Box
@@ -122,28 +116,14 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                         justifyContent="center"
                         flexShrink={0}
                     >
-                        <Icon
-                            as={MessageSquare}
-                            boxSize="16px"
-                            color="green.500"
-                        />
+                        <Icon as={MessageSquare} boxSize="16px" color="green.500" />
                     </Box>
                     <VStack align="start" spacing={0}>
-                        <Text
-                            fontSize="14px"
-                            fontWeight="600"
-                            color={titleColor}
-                            lineHeight="1.3"
-                        >
-                            Agent Chatflow
+                        <Text fontSize="14px" fontWeight="600" color={titleColor} lineHeight="1.3">
+                            Flux de conversation d&apos;agent
                         </Text>
-                        <Text
-                            fontSize="12px"
-                            color={labelColor}
-                            lineHeight="1.5"
-                            mt="2px"
-                        >
-                            Workflow enhanced for creating chat assistants
+                        <Text fontSize="12px" color={labelColor} lineHeight="1.5" mt="2px">
+                            Flux de travail optimisé pour créer des assistants de chat
                         </Text>
                     </VStack>
                 </HStack>
@@ -152,34 +132,34 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
             <Divider borderColor={dividerColor} mb={7} />
 
             <Text fontSize="13px" fontWeight="500" color={titleColor} mb={3}>
-                App Name
+                Nom de l&apos;application
             </Text>
 
             <Input
                 ref={nameInputRef}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Give your app a name"
+                placeholder="Donnez un nom à votre application"
                 mb={6}
             />
 
             <Text fontSize="sm" fontWeight="500" color={titleColor} mb={3}>
                 Description{" "}
                 <Text as="span" fontWeight="400" color={mutedColor}>
-                    (Optional)
+                    (Facultative)
                 </Text>
             </Text>
 
             <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter the description of the app"
+                placeholder="Entrez la description de l'application"
                 rows={4}
                 mb={6}
             />
 
             <Text fontSize="sm" fontWeight="500" color={labelColor} mb={3}>
-                Ou partir d&apos;un template
+                Ou partir d&apos;un modèle
             </Text>
 
             <SimpleGrid columns={3} spacing={3} mb={6}>
@@ -199,7 +179,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
             <HStack justify="flex-end" align="center" pt={4}>
                 <HStack spacing={2}>
                     <Button variant="ghost" onClick={onClose}>
-                        Cancel
+                        Annuler
                     </Button>
 
                     <Button
@@ -208,7 +188,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                         isLoading={isLoading}
                         variant="primary"
                     >
-                        Create
+                        Créer
                     </Button>
                 </HStack>
             </HStack>

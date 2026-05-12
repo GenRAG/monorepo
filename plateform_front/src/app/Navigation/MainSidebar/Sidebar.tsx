@@ -34,9 +34,7 @@ const Sidebar = () => {
 
     const isMobile = useAppResponsive({ base: true, lg: false });
 
-    const defaultActivePath = useActiveSidebarItem([
-        ...mainMenu.map((i) => i.id),
-    ]);
+    const defaultActivePath = useActiveSidebarItem([...mainMenu.map((i) => i.id)]);
 
     const currentWorkspaceIdFromPath = useMemo(() => {
         const match = location.pathname.match(/^\/workspaces\/([^/]+)/);
@@ -49,16 +47,10 @@ const Sidebar = () => {
 
     const { colorMode, toggleColorMode } = useColorMode();
     const color = useColorModeValue("grey.300", "white");
-    const bg = useColorModeValue(
-        "white",
-        "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)",
-    );
+    const bg = useColorModeValue("white", "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)");
     const border = useColorModeValue("grey.100", "grey.800");
 
-    const bgMobile = useColorModeValue(
-        "white",
-        "linear-gradient(135deg,rgb(5, 5, 5) 0%, #363636ff 100%)",
-    );
+    const bgMobile = useColorModeValue("white", "linear-gradient(135deg,rgb(5, 5, 5) 0%, #363636ff 100%)");
 
     const activePath = useMemo(() => {
         const match = location.pathname.match(/^\/workspaces\/[^/]+\/([^/]+)/);
@@ -127,9 +119,7 @@ const Sidebar = () => {
                                     return;
                                 }
 
-                                await handleItemClick(
-                                    `/workspaces/${selectedWorkspaceId}/${id}`,
-                                );
+                                await handleItemClick(`/workspaces/${selectedWorkspaceId}/${id}`);
                             }}
                             icon={icon}
                             label={label}
@@ -174,12 +164,7 @@ const Sidebar = () => {
                         onClick={onToggle}
                     />
                 </Box>
-                <Drawer
-                    isOpen={isOpen}
-                    placement="left"
-                    onClose={onToggle}
-                    size="xs"
-                >
+                <Drawer isOpen={isOpen} placement="left" onClose={onToggle} size="xs">
                     <DrawerOverlay />
                     <DrawerContent bg={bgMobile} maxW="280px" borderRadius={0}>
                         <DrawerBody p={0} display="flex" flexDirection="column">

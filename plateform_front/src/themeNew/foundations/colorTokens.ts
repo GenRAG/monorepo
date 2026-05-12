@@ -22,6 +22,10 @@ const colorTokens = {
         default: "white",
         _dark: "grey.950",
     },
+    inputDisabledBg: {
+        default: "grey.50",
+        _dark: "grey.800",
+    },
 
     // Text
     textPrimary: {

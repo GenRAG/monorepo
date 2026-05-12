@@ -1,11 +1,21 @@
+enum PlanTier {
+  FREE
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
 model Workspace {
   id                 String              @id @default(cuid())
   name               String
   description        String?
+  plan               PlanTier            @default(FREE)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   users              UserWorkspace[]
   agents             Agent[]
   creditBalance      CreditBalance?
   creditTransactions CreditTransaction[]
+  onboardingSessions OnboardingSession[]
+  conversations      Conversation[]
 }

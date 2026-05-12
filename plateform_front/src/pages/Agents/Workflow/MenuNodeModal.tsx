@@ -24,12 +24,7 @@ import { NodeShape } from "@genrag/workflow";
 import StyledKbd from "components/System/Atoms/KdbStyles";
 
 import type { AppNode } from "@genrag/workflow";
-import {
-    TaskType,
-    getTaskDef,
-    getNonSettingsTaskTypes,
-    getAddableTaskTypes,
-} from "@genrag/workflow";
+import { TaskType, getTaskDef, getNonSettingsTaskTypes, getAddableTaskTypes } from "@genrag/workflow";
 
 interface MenuNodeModalProps {
     usedNodes: AppNode[];
@@ -76,9 +71,7 @@ const NodeCard = ({
     return (
         <Box
             draggable={isDraggable}
-            onDragStart={
-                isDraggable ? (e) => onDragStart(e, nodeType) : undefined
-            }
+            onDragStart={isDraggable ? (e) => onDragStart(e, nodeType) : undefined}
             onDragEnd={isDraggable ? onDragEnd : undefined}
             onClick={isDraggable ? () => onClick(nodeType) : undefined}
             cursor={isDraggable ? "grab" : "default"}
@@ -90,11 +83,7 @@ const NodeCard = ({
             p={2}
             transition="all 0.15s"
             opacity={alreadyUsed || isDragging ? 0.5 : 1}
-            _hover={
-                isDraggable
-                    ? { bg: cardActiveBg, borderColor: borderActive }
-                    : {}
-            }
+            _hover={isDraggable ? { bg: cardActiveBg, borderColor: borderActive } : {}}
         >
             <Flex align="center" gap={3}>
                 <Box flexShrink={0}>
@@ -110,12 +99,7 @@ const NodeCard = ({
 
                 <VStack align="start" spacing={0} flex={1} minW={0}>
                     <HStack spacing={2}>
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={textColor}
-                            noOfLines={1}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color={textColor} noOfLines={1}>
                             {task.label}
                         </Text>
                         {alreadyUsed && (
@@ -166,13 +150,7 @@ const NodeCard = ({
     );
 };
 
-const MenuNodeModal = ({
-    usedNodes,
-    isOpen,
-    onClose,
-    onToggle,
-    addNode,
-}: MenuNodeModalProps) => {
+const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNodeModalProps) => {
     const [query, setQuery] = useState("");
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [draggedNode, setDraggedNode] = useState<TaskType | null>(null);
@@ -190,32 +168,21 @@ const MenuNodeModal = ({
     const overlayBg = useColorModeValue("blackAlpha.500", "blackAlpha.700");
     const kbdBg = useColorModeValue("grey.50", "grey.700");
 
-    const presentTypes = useMemo(
-        () => usedNodes.map((n) => n.data.type),
-        [usedNodes],
-    );
+    const presentTypes = useMemo(() => usedNodes.map((n) => n.data.type), [usedNodes]);
 
     const alreadyUsedNodes = useMemo(
-        () =>
-            getNonSettingsTaskTypes().filter((nt) => presentTypes.includes(nt)),
+        () => getNonSettingsTaskTypes().filter((nt) => presentTypes.includes(nt)),
         [presentTypes],
     );
 
-    const availableNodes = useMemo(
-        () => getAddableTaskTypes(presentTypes),
-        [presentTypes],
-    );
+    const availableNodes = useMemo(() => getAddableTaskTypes(presentTypes), [presentTypes]);
 
     const filteredAvailable = useMemo(() => {
         if (!query) return availableNodes;
         const q = query.toLowerCase();
         return availableNodes.filter((nt) => {
             const task = getTaskDef(nt);
-            return (
-                task &&
-                (task.label.toLowerCase().includes(q) ||
-                    task.type.toLowerCase().includes(q))
-            );
+            return task && (task.label.toLowerCase().includes(q) || task.type.toLowerCase().includes(q));
         });
     }, [query, availableNodes]);
 
@@ -265,9 +232,7 @@ const MenuNodeModal = ({
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "ArrowDown") {
             e.preventDefault();
-            setSelectedIndex((i) =>
-                Math.min(i + 1, filteredAvailable.length - 1),
-            );
+            setSelectedIndex((i) => Math.min(i + 1, filteredAvailable.length - 1));
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
             setSelectedIndex((i) => Math.max(i - 1, 0));
@@ -291,12 +256,7 @@ const MenuNodeModal = ({
 
     return (
         <Box>
-            <Modal
-                isOpen={isOpen}
-                onClose={handleClose}
-                isCentered
-                motionPreset="scale"
-            >
+            <Modal isOpen={isOpen} onClose={handleClose} isCentered motionPreset="scale">
                 <ModalOverlay bg={overlayBg} backdropFilter="blur(4px)" />
                 <ModalContent
                     bg={bgColor}
@@ -309,19 +269,8 @@ const MenuNodeModal = ({
                     maxW="480px"
                 >
                     <ModalBody p={0}>
-                        <HStack
-                            px={4}
-                            py={3}
-                            borderBottom="1px solid"
-                            borderColor={dividerColor}
-                            spacing={3}
-                        >
-                            <Icon
-                                as={Search}
-                                boxSize={4}
-                                color={iconColor}
-                                flexShrink={0}
-                            />
+                        <HStack px={4} py={3} borderBottom="1px solid" borderColor={dividerColor} spacing={3}>
+                            <Icon as={Search} boxSize={4} color={iconColor} flexShrink={0} />
                             <Input
                                 ref={inputRef}
                                 value={query}
@@ -339,12 +288,7 @@ const MenuNodeModal = ({
                                         <Icon as={CommandIcon} />
                                     </Center>
                                 </Box>
-                                <Box
-                                    bg={kbdBg}
-                                    borderRadius="4px"
-                                    px="4"
-                                    py="3"
-                                >
+                                <Box bg={kbdBg} borderRadius="4px" px="4" py="3">
                                     <Center>
                                         <Text>K</Text>
                                     </Center>
@@ -395,15 +339,11 @@ const MenuNodeModal = ({
                                             nodeType={nodeType}
                                             alreadyUsed={false}
                                             isSelected={i === selectedIndex}
-                                            isDragging={
-                                                draggedNode === nodeType
-                                            }
+                                            isDragging={draggedNode === nodeType}
                                             onDragStart={handleDragStart}
                                             onDragEnd={handleDragEnd}
                                             onClick={handleNodeClick}
-                                            tooltipContent={
-                                                tooltipContent[nodeType]
-                                            }
+                                            tooltipContent={tooltipContent[nodeType]}
                                         />
                                     ))}
                                 </>
@@ -423,11 +363,7 @@ const MenuNodeModal = ({
 
                             {alreadyUsedNodes.length > 0 && !query && (
                                 <>
-                                    <Box
-                                        borderTop="1px solid"
-                                        borderColor={dividerColor}
-                                        mt={2}
-                                    />
+                                    <Box borderTop="1px solid" borderColor={dividerColor} mt={2} />
                                     <Text
                                         fontSize="10px"
                                         fontWeight={700}
@@ -450,22 +386,14 @@ const MenuNodeModal = ({
                                             onDragStart={handleDragStart}
                                             onDragEnd={handleDragEnd}
                                             onClick={() => {}}
-                                            tooltipContent={
-                                                tooltipContent[nodeType]
-                                            }
+                                            tooltipContent={tooltipContent[nodeType]}
                                         />
                                     ))}
                                 </>
                             )}
                         </VStack>
 
-                        <HStack
-                            px={4}
-                            py={2}
-                            borderTop="1px solid"
-                            borderColor={dividerColor}
-                            spacing={4}
-                        >
+                        <HStack px={4} py={2} borderTop="1px solid" borderColor={dividerColor} spacing={4}>
                             {[
                                 { keys: ["↑", "↓"], label: "navigate" },
                                 { keys: ["↵"], label: "add" },

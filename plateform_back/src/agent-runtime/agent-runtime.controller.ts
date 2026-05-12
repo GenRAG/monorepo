@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Param, UseGuards, Sse, Query } from '@nestjs/common';
+import type { MessageEvent } from '@nestjs/common';
+import { Observable } from 'rxjs';
 import { AgentRuntimeService } from './agent-runtime.service';
-import { ExecuteAgentRuntimeRequest } from 'src/agent-runtime/dto/create-agent-runtime.request';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
 
@@ -9,16 +10,37 @@ import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.
 export class AgentRuntimeController {
     constructor(private readonly agentRuntimeService: AgentRuntimeService) {}
 
-    @Post()
-    create(
+    @Sse('stream')
+    stream(
         @Param('workspaceId') workspaceId: string,
         @Param('agentId') agentId: string,
-        @Body() createAgentRuntimeDto: ExecuteAgentRuntimeRequest,
-    ) {
-        return this.agentRuntimeService.execute(
-            createAgentRuntimeDto,
-            agentId,
-            workspaceId,
-        );
+        @Query('query') query: string,
+    ): Observable<MessageEvent> {
+        if (!query) {
+            return new Observable((s) => {
+                s.next({
+                    data: JSON.stringify({ error: 'Query parameter required' }),
+                });
+                s.complete();
+            });
+        }
+        return this.agentRuntimeService.stream(workspaceId, agentId, query);
+    }
+
+    @Sse('playground')
+    playground(
+        @Param('workspaceId') workspaceId: string,
+        @Param('agentId') agentId: string,
+        @Query('query') query: string,
+    ): Observable<MessageEvent> {
+        if (!query) {
+            return new Observable((s) => {
+                s.next({
+                    data: JSON.stringify({ error: 'Query parameter required' }),
+                });
+                s.complete();
+            });
+        }
+        return this.agentRuntimeService.playgroundStream(workspaceId, agentId, query);
     }
 }

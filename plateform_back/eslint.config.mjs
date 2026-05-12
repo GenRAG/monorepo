@@ -57,7 +57,7 @@ export default tseslint.config(
                     caughtErrorsIgnorePattern: '^_',
                 },
             ],
-            'prettier/prettier': ['warn', { tabWidth: 4, useTabs: false }],
+            'prettier/prettier': ['warn', { tabWidth: 4, useTabs: false, printWidth: 120 }],
         },
     },
 );

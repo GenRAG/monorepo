@@ -12,28 +12,34 @@ export class ContextBuilder {
 
     async buildPipeline({
         agentId,
+        instructionOverride,
+        forceActive = false,
     }: {
         agentId: string;
+        instructionOverride?: string;
+        forceActive?: boolean;
     }): Promise<Prisma.JsonValue> {
-        const prodVersion =
-            await this.agentService.findProductionWorkflowVersion(agentId);
+        const prodVersion = forceActive ? null : await this.agentService.findProductionWorkflowVersion(agentId);
 
-        if (!prodVersion) {
-            throw new Error(
-                'No production workflow version found for this agent',
-            );
-        }
-
-        const workflow = await this.workflowService.findByVersion(
-            agentId,
-            prodVersion,
-        );
+        const workflow = prodVersion
+            ? await this.workflowService.findByVersion(agentId, prodVersion)
+            : await this.workflowService.findActive(agentId);
 
         if (!workflow) {
             throw new Error('No active workflow found for this agent');
         }
 
         const def = workflow.definition as Record<string, unknown>;
-        return def.blocks as Prisma.JsonValue;
+        const rawBlocks = (def.blocks ?? []) as Record<string, unknown>[];
+
+        return this.applyInstructionOverride(rawBlocks, instructionOverride) as unknown as Prisma.JsonValue;
+    }
+
+    private applyInstructionOverride(
+        blocks: Record<string, unknown>[],
+        instruction?: string,
+    ): Record<string, unknown>[] {
+        if (!instruction) return blocks;
+        return blocks.map((b) => (b['type'] === 'answer' ? { ...b, system_prompt: instruction } : b));
     }
 }

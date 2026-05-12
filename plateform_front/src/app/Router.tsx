@@ -15,7 +15,10 @@ export default function Router() {
 
                 <Route element={<PrivateRoute />}>
                     <Route path="/" element={<DefaultRedirect />} />
-                    <Route path="/onboarding" element={<OnBoarding />} />
+                    <Route
+                        path="/onboarding/:workspaceId"
+                        element={<OnBoarding />}
+                    />
                     {AppRoutes()}
                     {AgentRoutes()}
                 </Route>

@@ -9,6 +9,8 @@ const BACKEND_TAG_TYPES = [
     Tag.Chat,
     Tag.Workflow,
     Tag.Deployments,
+    Tag.Onboarding,
+    Tag.Credits,
 ] as const;
 
 export const backendApi = createApi({

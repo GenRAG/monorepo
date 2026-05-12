@@ -4,6 +4,7 @@ A FastAPI-based RAG (Retrieval Augmented Generation) service that ingests PDF do
 
 ## Architecture
 
+
 ### Core Components
 
 - **FastAPI application** (`app/main.py`): Single `/ingest` endpoint for document processing

@@ -7,7 +7,12 @@ import { IndexDocumentHandler } from './handlers/index-document.handler';
 import { mapIndexDocumentJobToCommand } from './mappers/index-document-job.mapper';
 
 @Injectable()
-@Processor('documents')
+@Processor('documents', {
+    concurrency: 2,
+    lockDuration: 120_000,
+    stalledInterval: 120_000,
+    drainDelay: 2_000,
+})
 export class DocumentProcessor extends WorkerHost {
     private readonly logger = new Logger(DocumentProcessor.name);
 

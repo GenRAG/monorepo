@@ -55,6 +55,10 @@ import { BullModule } from '@nestjs/bullmq';
                               host: configService.get('REDIS_HOST') ?? 'localhost',
                               port: Number(configService.get('REDIS_PORT')),
                           },
+                    defaultJobOptions: {
+                        removeOnComplete: 50,
+                        removeOnFail: 100,
+                    },
                 };
             },
             inject: [ConfigService],

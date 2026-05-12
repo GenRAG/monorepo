@@ -16,11 +16,13 @@ import { BullModule } from '@nestjs/bullmq';
 
 @Module({
     imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
         LoggerModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: (configService: ConfigService) => {
-                const isProduction =
-                    configService.get('NODE_ENV') === 'production';
+                const isProduction = configService.get('NODE_ENV') === 'production';
                 const isTest = configService.get('NODE_ENV') === 'test';
                 return {
                     pinoHttp: {
@@ -36,24 +38,26 @@ import { BullModule } from '@nestjs/bullmq';
                                       translateTime: 'SYS:standard',
                                   },
                               },
-                        level: isTest
-                            ? 'silent'
-                            : isProduction
-                              ? 'info'
-                              : 'debug',
+                        level: isTest ? 'silent' : isProduction ? 'info' : 'debug',
                     },
                 };
             },
             inject: [ConfigService],
         }),
-        BullModule.forRoot({
-            connection: {
-                host: process.env.REDIS_HOST ?? 'localhost',
-                port: Number(process.env.REDIS_PORT) ?? 6379,
+        BullModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => {
+                const isProduction = configService.get('NODE_ENV') === 'production';
+                return {
+                    connection: isProduction
+                        ? { url: configService.get('REDIS_URL') }
+                        : {
+                              host: configService.get('REDIS_HOST') ?? 'localhost',
+                              port: Number(configService.get('REDIS_PORT')),
+                          },
+                };
             },
-        }),
-        ConfigModule.forRoot({
-            isGlobal: true,
+            inject: [ConfigService],
         }),
         UsersModule,
         AuthModule,

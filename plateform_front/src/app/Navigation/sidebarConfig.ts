@@ -24,9 +24,7 @@ export const supportMenu = [
     { id: "notifications", icon: Bell, label: "Documentation" },
 ];
 
-export const agentMenu = [
-    { id: "playground", icon: MessageCircle, label: "Bac à sable" },
-];
+export const agentMenu = [{ id: "playground", icon: MessageCircle, label: "Bac à sable" }];
 
 export const agentFeaturesMenu = [
     { id: "workflow", icon: GitGraph, label: "Flux de travail" },
@@ -35,9 +33,7 @@ export const agentFeaturesMenu = [
     { id: "access-control", icon: Lock, label: "Contrôle d'accès" },
 ];
 
-export const agentSettingsMenu = [
-    { id: "settings", icon: Settings, label: "Paramètres" },
-];
+export const agentSettingsMenu = [{ id: "settings", icon: Settings, label: "Paramètres" }];
 
 export const workspaceMenu = agentMenu;
 export const workspaceFeaturesMenu = agentFeaturesMenu;

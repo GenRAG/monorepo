@@ -12,11 +12,7 @@ import {
     useColorMode,
 } from "@chakra-ui/react";
 import { LayoutDashboard, Menu } from "lucide-react";
-import {
-    agentMenu,
-    agentFeaturesMenu,
-    agentSettingsMenu,
-} from "app/Navigation/sidebarConfig";
+import { agentMenu, agentFeaturesMenu, agentSettingsMenu } from "app/Navigation/sidebarConfig";
 import { SidebarHeader } from "app/Navigation/SidebarHeader";
 import { SidebarItem } from "app/Navigation/SidebarItem";
 import { SidebarSection } from "app/Navigation/SidebarSection";
@@ -43,14 +39,8 @@ const AgentSidebar = () => {
 
     const { colorMode, toggleColorMode } = useColorMode();
 
-    const bg = useColorModeValue(
-        "white",
-        "linear-gradient(135deg,rgba(44, 44, 44, 0.54) 0%,rgb(69, 69, 69) 100%)",
-    );
-    const bgMobile = useColorModeValue(
-        "white",
-        "linear-gradient(135deg,rgb(44, 44, 44) 0%,rgb(69, 69, 69) 100%)",
-    );
+    const bg = useColorModeValue("white", "linear-gradient(135deg,rgba(44, 44, 44, 0.54) 0%,rgb(69, 69, 69) 100%)");
+    const bgMobile = useColorModeValue("white", "linear-gradient(135deg,rgb(44, 44, 44) 0%,rgb(69, 69, 69) 100%)");
     const border = useColorModeValue("grey.100", "grey.800");
     const color = useColorModeValue("grey.900", "white");
 
@@ -60,9 +50,7 @@ const AgentSidebar = () => {
 
     const handleItemClick = async (id: string) => {
         if (workspaceId && agentId) {
-            await navigate(
-                `/workspaces/${workspaceId}/agents/${agentId}/${id}`,
-            );
+            await navigate(`/workspaces/${workspaceId}/agents/${agentId}/${id}`);
             if (isMobile) onToggle();
         }
     };
@@ -157,12 +145,7 @@ const AgentSidebar = () => {
                         onClick={onToggle}
                     />
                 </Box>
-                <Drawer
-                    isOpen={isOpen}
-                    placement="left"
-                    onClose={onToggle}
-                    size="xs"
-                >
+                <Drawer isOpen={isOpen} placement="left" onClose={onToggle} size="xs">
                     <DrawerOverlay />
                     <DrawerContent bg={bgMobile} maxW="280px" borderRadius={0}>
                         <DrawerBody p={0} display="flex" flexDirection="column">

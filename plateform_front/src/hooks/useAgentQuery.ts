@@ -22,6 +22,8 @@ export const useAgentQuery = (
     workspaceId: string,
     agentId: string,
     useMock = false,
+    streamUrlOverride?: string,
+    streamStepId?: string,
 ) => {
     const [state, setState] = useState<AgentQueryState>({
         text: "",
@@ -34,10 +36,7 @@ export const useAgentQuery = (
     const [sendMockQuery] = useSendMockQueryMutation();
 
     const sendQuery = useCallback(
-        async (
-            query: string,
-            onChunk?: (partialText: string) => void,
-        ): Promise<string> => {
+        async (query: string, onChunk?: (partialText: string) => void): Promise<string> => {
             setState((prev) => ({
                 text: "",
                 isStreaming: true,
@@ -60,9 +59,13 @@ export const useAgentQuery = (
                 }
             }
 
-            const baseUrl = `${BACKEND_URL}/workspaces/${workspaceId}/agents/${agentId}/runtime/stream`;
+            const baseUrl =
+                streamUrlOverride ?? `${BACKEND_URL}/workspaces/${workspaceId}/agents/${agentId}/runtime/stream`;
             const params = new URLSearchParams({ query });
-            if (state.conversationId) {
+            if (streamUrlOverride) {
+                params.set("agentId", agentId);
+                if (streamStepId) params.set("stepId", streamStepId);
+            } else if (state.conversationId) {
                 params.set("conversationId", state.conversationId);
             }
             const url = `${baseUrl}?${params.toString()}`;
@@ -86,9 +89,7 @@ export const useAgentQuery = (
                             setState((prev) => ({
                                 ...prev,
                                 isStreaming: false,
-                                conversationId:
-                                    parsed.conversationId ??
-                                    prev.conversationId,
+                                conversationId: parsed.conversationId ?? prev.conversationId,
                             }));
                             resolve(fullText);
                             return;
@@ -130,7 +131,7 @@ export const useAgentQuery = (
                 };
             });
         },
-        [workspaceId, agentId, sendMockQuery, useMock, state.conversationId],
+        [workspaceId, agentId, sendMockQuery, useMock, streamUrlOverride, streamStepId, state.conversationId],
     );
 
     return { ...state, sendQuery };

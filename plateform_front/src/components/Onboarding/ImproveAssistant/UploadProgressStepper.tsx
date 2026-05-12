@@ -29,8 +29,7 @@ const STEPS = [
     },
     {
         title: "Traitement en cours...",
-        description:
-            "Votre assistant utilise maintenant vos documents pour répondre aux questions.",
+        description: "Votre assistant utilise maintenant vos documents pour répondre aux questions.",
         icon: Sparkles,
     },
 ];
@@ -42,11 +41,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
 }) => {
     const { colorMode } = useColorMode();
 
-    const activeStepIndex = showComparison
-        ? 2
-        : completedFilesCount > 0
-          ? 1
-          : 0;
+    const activeStepIndex = showComparison ? 2 : completedFilesCount > 0 ? 1 : 0;
 
     return (
         <Box
@@ -72,11 +67,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                     <Step key={index}>
                         <StepIndicator
                             flexShrink={0}
-                            border={
-                                index <= activeStepIndex
-                                    ? "none"
-                                    : "1px solid #E7E7E7"
-                            }
+                            border={index <= activeStepIndex ? "none" : "1px solid #E7E7E7"}
                             bg={
                                 index <= activeStepIndex
                                     ? currentDarkTheme.primary
@@ -96,11 +87,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                         alignItems="center"
                                         justifyContent="center"
                                     >
-                                        <Icon
-                                            as={Check}
-                                            color="white"
-                                            boxSize={4}
-                                        />
+                                        <Icon as={Check} color="white" boxSize={4} />
                                     </Box>
                                 }
                                 incomplete={
@@ -122,11 +109,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                     ) : (
                                         <Icon
                                             as={step.icon}
-                                            color={
-                                                colorMode === "dark"
-                                                    ? "grey.500"
-                                                    : "grey.400"
-                                            }
+                                            color={colorMode === "dark" ? "grey.500" : "grey.400"}
                                             boxSize={4}
                                         />
                                     )
@@ -140,19 +123,10 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                             w="28px"
                                             h="28px"
                                         >
-                                            <Icon
-                                                as={Loader2}
-                                                color="white"
-                                                boxSize={4}
-                                                className="spinning"
-                                            />
+                                            <Icon as={Loader2} color="white" boxSize={4} className="spinning" />
                                         </Box>
                                     ) : (
-                                        <Icon
-                                            as={step.icon}
-                                            color="white"
-                                            boxSize={4}
-                                        />
+                                        <Icon as={step.icon} color="white" boxSize={4} />
                                     )
                                 }
                             />
@@ -176,14 +150,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                 </Text>
                             </StepTitle>
                             <StepDescription>
-                                <Text
-                                    fontSize="xs"
-                                    color={
-                                        colorMode === "dark"
-                                            ? "grey.400"
-                                            : "grey.600"
-                                    }
-                                >
+                                <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
                                     {step.description}
                                 </Text>
                             </StepDescription>

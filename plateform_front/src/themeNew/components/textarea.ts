@@ -13,7 +13,7 @@ const fieldStyles = {
         borderColor: "inputBorder",
     },
     _disabled: {
-        bg: "grey.50",
+        bg: "inputDisabledBg",
         color: "inputPlaceholder",
     },
     _placeholder: {

@@ -1,46 +1,39 @@
-import {
-    Box,
-    Grid,
-    Heading,
-    Stack,
-    Text,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
-import {
-    BookOpen,
-    FileUp,
-    Plus,
-    ExternalLink,
-    AlertCircle,
-    FileText,
-    MessageSquare,
-    Timer,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Grid, Heading, Stack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { BookOpen, FileUp, Plus, ExternalLink, Bot, FileText, MessageSquare, Coins } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "hooks/useUserInfo";
 import { MetricCard } from "components/Dashboard/MetricCard";
 import { QuickActionCard } from "components/Dashboard/QuickActionCard";
 import { ActivityChart } from "components/Dashboard/ActivityChart";
 import { AgentsCard } from "components/Dashboard/AgentsCard";
 import { RecentActivityCard } from "components/Dashboard/RecentActivityCard";
-import { SPARK_DATA } from "./data";
+import { CreateAgentModal } from "pages/Agents/CreateAgentModal";
+import { useState } from "react";
+import { useGetWorkspaceStatsQuery } from "services/workspace/workspace";
 
 const Dashboard = () => {
     const { name } = useUserInfo();
     const navigate = useNavigate();
+    const { workspaceId = "" } = useParams<{ workspaceId: string }>();
+
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const textPrimary = useColorModeValue("grey.900", "grey.50");
     const textSecondary = useColorModeValue("grey.500", "grey.400");
 
+    const { data: stats, isLoading: isStatsLoading } = useGetWorkspaceStatsQuery(workspaceId, { skip: !workspaceId });
+
+    const conversationsToday = stats?.conversations.today ?? 0;
+    const conversationsTodayArr = stats?.activityChart["24h"].values ?? Array(24).fill(0);
+    const agentsProd = stats?.agents.production ?? 0;
+    const agentsProdArr = Array(20).fill(agentsProd);
+    const docsIndexed = stats?.documents.indexed ?? 0;
+    const docsArr = Array(20).fill(docsIndexed);
+    const credits = stats?.credits ?? 0;
+    const creditsArr = Array(20).fill(credits);
+
     return (
-        <Stack
-            p={{ base: 4, lg: 6 }}
-            gap={4}
-            overflow="auto"
-            maxH="100vh"
-            minH="100vh"
-        >
+        <Stack p={{ base: 4, lg: 6 }} gap={4} overflow="auto" maxH="100vh" minH="100vh">
             <Stack
                 direction={{ base: "column", md: "row" }}
                 justify="space-between"
@@ -48,12 +41,7 @@ const Dashboard = () => {
                 gap={3}
             >
                 <VStack align="start" spacing={1}>
-                    <Heading
-                        variant="heading-md"
-                        color="grey.400"
-                        fontWeight="md"
-                        fontSize={{ base: "sm", md: "md" }}
-                    >
+                    <Heading variant="heading-md" color="grey.400" fontWeight="md" fontSize={{ base: "sm", md: "md" }}>
                         {new Date().toLocaleDateString("fr-FR", {
                             weekday: "long",
                             year: "numeric",
@@ -70,11 +58,9 @@ const Dashboard = () => {
                         Bonjour {name}.
                     </Heading>
                     <Text fontSize="sm" color={textSecondary}>
-                        Voici l&apos;état de vos agents aujourd&apos;hui —{" "}
-                        <Box as="span" color="orange.400" fontWeight="500">
-                            1 incident en cours
-                        </Box>{" "}
-                        et 2 promotions à examiner.
+                        {stats
+                            ? `${stats.agents.total} agent${stats.agents.total > 1 ? "s" : ""} · ${stats.agents.production} en production · ${stats.documents.indexed} document${stats.documents.indexed > 1 ? "s" : ""} indexé${stats.documents.indexed > 1 ? "s" : ""}`
+                            : "Chargement de vos données…"}
                     </Text>
                 </VStack>
             </Stack>
@@ -88,37 +74,39 @@ const Dashboard = () => {
             >
                 <MetricCard
                     icon={MessageSquare}
-                    label="Conversations / 24h"
-                    value="1 248"
-                    trend="+18%"
+                    label="Conversations aujourd'hui"
+                    value={conversationsToday.toLocaleString("fr-FR")}
+                    trend={`${stats?.conversations.total ?? 0} au total`}
                     trendPositive
-                    sparkData={SPARK_DATA.conversations}
+                    sparkData={conversationsTodayArr}
+                    isLoading={isStatsLoading}
                 />
                 <MetricCard
-                    icon={Timer}
-                    label="Latence P95"
-                    value="1,4 s"
-                    trend="-220ms"
+                    icon={Bot}
+                    label="Agents en production"
+                    value={String(agentsProd)}
+                    trend={`${stats?.agents.total ?? 0} au total`}
                     trendPositive
-                    sparkData={SPARK_DATA.latency}
-                />
-                <MetricCard
-                    icon={AlertCircle}
-                    label="Taux d'erreur"
-                    value="0,4%"
-                    trend="+0,1pt"
-                    trendPositive={false}
-                    trendNeutral
-                    sparkData={SPARK_DATA.errors}
-                    sparkColor="#F59E0B"
+                    sparkData={agentsProdArr}
+                    isLoading={isStatsLoading}
                 />
                 <MetricCard
                     icon={FileText}
                     label="Documents indexés"
-                    value="248"
-                    trend="+12 cette semaine"
+                    value={String(docsIndexed)}
+                    trend={`${stats?.documents.total ?? 0} au total`}
                     trendPositive
-                    sparkData={SPARK_DATA.documents}
+                    sparkData={docsArr}
+                    isLoading={isStatsLoading}
+                />
+                <MetricCard
+                    icon={Coins}
+                    label="Crédits restants"
+                    value={credits.toLocaleString("fr-FR")}
+                    trend="disponibles"
+                    trendPositive
+                    sparkData={creditsArr}
+                    isLoading={isStatsLoading}
                 />
             </Grid>
 
@@ -133,17 +121,14 @@ const Dashboard = () => {
                     icon={Plus}
                     title="Nouvel agent"
                     subtitle="Partez d'un template ou d'un agent existant"
-                    onClick={() => navigate("/workspaces")}
+                    onClick={() => setIsCreateModalOpen(true)}
                 />
-                <QuickActionCard
-                    icon={FileUp}
-                    title="Téléverser des docs"
-                    subtitle="Vers la base de connaissance"
-                />
+                <QuickActionCard icon={FileUp} title="Téléverser des docs" subtitle="Vers la base de connaissance" />
                 <QuickActionCard
                     icon={BookOpen}
                     title="Tester un agent"
                     subtitle="Ouvrir le playground"
+                    onClick={() => navigate(`/workspaces/${workspaceId}/agents`)}
                 />
                 <QuickActionCard
                     icon={ExternalLink}
@@ -152,20 +137,35 @@ const Dashboard = () => {
                 />
             </Grid>
 
-            <Grid
-                templateColumns={{ base: "1fr", xl: "1fr 360px" }}
-                gap={3}
-                alignItems="stretch"
-            >
+            <Grid templateColumns={{ base: "1fr", xl: "1fr 360px" }} gap={3} alignItems="stretch">
                 <VStack spacing={3} align="stretch" h="100%" minW={0}>
-                    <ActivityChart />
-                    <RecentActivityCard />
+                    <ActivityChart
+                        chartData={stats?.activityChart}
+                        totalConversations={stats?.conversations.total ?? 0}
+                        todayConversations={stats?.conversations.today ?? 0}
+                        isLoading={isStatsLoading}
+                        isEmpty={!isStatsLoading && (stats?.conversations.total ?? 0) === 0}
+                    />
+                    <RecentActivityCard
+                        items={stats?.recentActivity}
+                        isLoading={isStatsLoading}
+                        isEmpty={!isStatsLoading && (stats?.recentActivity.length ?? 0) === 0}
+                    />
                 </VStack>
                 <VStack spacing={3} align="stretch" h="100%" minW={0}>
-                    {/*<AlertsCard />*/}
-                    <AgentsCard flex={1} />
+                    <AgentsCard
+                        agents={stats?.agents.items}
+                        isLoading={isStatsLoading}
+                        isEmpty={!isStatsLoading && (stats?.agents.total ?? 0) === 0}
+                        flex={1}
+                    />
                 </VStack>
             </Grid>
+            <CreateAgentModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                workspaceId={workspaceId}
+            />
         </Stack>
     );
 };

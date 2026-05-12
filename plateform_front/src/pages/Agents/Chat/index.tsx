@@ -13,7 +13,8 @@ const ChatWorkspace = () => {
         agentId: string;
     }>();
 
-    const { sendQuery } = useAgentQuery(workspaceId, agentId);
+    const playgroundUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/agents/${agentId}/runtime/playground`;
+    const { sendQuery } = useAgentQuery(workspaceId, agentId, false, playgroundUrl);
 
     const getResponse = useCallback(
         async (question: string, onChunk: (partialText: string) => void) => {
@@ -24,16 +25,10 @@ const ChatWorkspace = () => {
     );
 
     return (
-        <VStack
-            w="100%"
-            h="100vh"
-            align="stretch"
-            spacing={0}
-            overflow="hidden"
-        >
+        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
             <WorkspaceHeader
-                title="Chat Assistant Playground"
-                description="This is a playground for your chat assistant. Test it before deploying it in production."
+                title="Bac à sable de l'assistant"
+                description="Ceci est un espace de test pour votre assistant de chat. Testez-le avant de le déployer en production."
             />
             <Box
                 p={4}
@@ -48,13 +43,13 @@ const ChatWorkspace = () => {
                 <Box flex={1} minH={0} display="flex" flexDirection="column">
                     <ChatInterface
                         fullHeight
-                        title="Chat"
+                        title="Discussion"
                         getResponse={getResponse}
-                        placeholder="Enter your question"
+                        placeholder="Entrez votre question"
                         welcomeMessage={
                             name
-                                ? `Hello ${name}! I'm your assistant. Ask me a question about your documents.`
-                                : "Hello! I'm your assistant. Ask me a question about your documents."
+                                ? `Bonjour ${name} ! Je suis votre assistant. Posez-moi une question sur vos documents.`
+                                : "Bonjour ! Je suis votre assistant. Posez-moi une question sur vos documents."
                         }
                     />
                 </Box>

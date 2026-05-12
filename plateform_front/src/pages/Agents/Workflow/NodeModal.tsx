@@ -1,11 +1,4 @@
-import {
-    Flex,
-    HStack,
-    IconButton,
-    Text,
-    useColorModeValue,
-    VStack,
-} from "@chakra-ui/react";
+import { Flex, HStack, IconButton, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,14 +18,7 @@ interface NodeModalProps {
     onSettingSelect?: (nodeId: string, item: string) => void;
 }
 
-export const NodeModal = ({
-    task,
-    isOpen,
-    onClose,
-    nodeData,
-    selectedNodeId,
-    onSettingSelect,
-}: NodeModalProps) => {
+export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onSettingSelect }: NodeModalProps) => {
     const { fitView } = useReactFlow();
 
     const bgColor = useColorModeValue("white", "grey.800");
@@ -87,10 +73,7 @@ export const NodeModal = ({
                             >
                                 <HStack spacing={6}>
                                     <VStack alignItems="start" spacing={0}>
-                                        <Text
-                                            fontWeight="semibold"
-                                            fontSize="md"
-                                        >
+                                        <Text fontWeight="semibold" fontSize="md">
                                             {task.label || task.type}
                                         </Text>
                                         <Text fontSize="xs" color={labelColor}>
@@ -108,39 +91,16 @@ export const NodeModal = ({
                                     />
                                 </HStack>
                             </Flex>
-                            {task.type === TaskType.RETRIEVER && (
-                                <DatabaseNodeModal
-                                    task={task}
-                                    nodeData={nodeData!}
-                                />
-                            )}
-                            {task.type === TaskType.RERANKER && (
-                                <RerankerNodeModal
-                                    task={task}
-                                    nodeData={nodeData!}
-                                />
-                            )}
-                            {task.type === TaskType.QUERY && (
-                                <QueryNodeModal
-                                    task={task}
-                                    nodeData={nodeData!}
-                                />
-                            )}
-                            {task.type === TaskType.RESPONSE && (
-                                <ResponseNodeModal
-                                    task={task}
-                                    nodeData={nodeData!}
-                                />
-                            )}
+                            {task.type === TaskType.RETRIEVER && <DatabaseNodeModal task={task} nodeData={nodeData!} />}
+                            {task.type === TaskType.RERANKER && <RerankerNodeModal task={task} nodeData={nodeData!} />}
+                            {task.type === TaskType.QUERY && <QueryNodeModal task={task} nodeData={nodeData!} />}
+                            {task.type === TaskType.RESPONSE && <ResponseNodeModal task={task} nodeData={nodeData!} />}
                             {task.type === TaskType.MODEL && (
                                 <SettingPlaceholderContent
                                     task={task}
                                     nodeData={nodeData!}
                                     onSelect={(item) => {
-                                        onSettingSelect?.(
-                                            selectedNodeId ?? "",
-                                            item,
-                                        );
+                                        onSettingSelect?.(selectedNodeId ?? "", item);
                                         onClose();
                                     }}
                                 />

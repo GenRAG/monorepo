@@ -1,12 +1,5 @@
 import useThemedToast from "hooks/useThemedToast";
-import React, {
-    createContext,
-    useState,
-    useEffect,
-    useCallback,
-    ReactNode,
-    useRef,
-} from "react";
+import React, { createContext, useState, useEffect, useCallback, ReactNode, useRef } from "react";
 import { LucideIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -66,9 +59,7 @@ interface OnboardingContextType {
     sessionError: SessionError | null;
 }
 
-export const OnboardingContext = createContext<
-    OnboardingContextType | undefined
->(undefined);
+export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 export const OnboardingProvider: React.FC<{
     children: ReactNode;
@@ -106,10 +97,7 @@ export const OnboardingProvider: React.FC<{
                 setSessionId(session.sessionId);
                 setState((prev) => ({
                     ...prev,
-                    currentStep: Math.min(
-                        Math.max(prev.currentStep, session.step - 1),
-                        steps.length - 1,
-                    ),
+                    currentStep: Math.min(Math.max(prev.currentStep, session.step - 1), steps.length - 1),
                     stepsData: session.stepsData ?? prev.stepsData,
                 }));
             })
@@ -128,18 +116,15 @@ export const OnboardingProvider: React.FC<{
             });
     }, [workspaceId, startOnboarding, navigate, steps.length]);
 
-    const updateStepData = useCallback(
-        (stepId: string, data: Partial<StepData>) => {
-            setState((prev) => ({
-                ...prev,
-                stepsData: {
-                    ...prev.stepsData,
-                    [stepId]: { ...prev.stepsData[stepId], ...data },
-                },
-            }));
-        },
-        [],
-    );
+    const updateStepData = useCallback((stepId: string, data: Partial<StepData>) => {
+        setState((prev) => ({
+            ...prev,
+            stepsData: {
+                ...prev.stepsData,
+                [stepId]: { ...prev.stepsData[stepId], ...data },
+            },
+        }));
+    }, []);
 
     const getStepData = useCallback(
         (stepId: string): StepData => {
@@ -189,9 +174,7 @@ export const OnboardingProvider: React.FC<{
         const currentStepConfig = steps[state.currentStep];
 
         if (currentStepConfig.validate) {
-            const isValid = await currentStepConfig.validate(
-                getStepData(currentStepConfig.id),
-            );
+            const isValid = await currentStepConfig.validate(getStepData(currentStepConfig.id));
             if (!isValid) {
                 toast({
                     title: "Une erreur est survenue",
@@ -209,11 +192,7 @@ export const OnboardingProvider: React.FC<{
         if (workspaceId) {
             if (isLastStep) {
                 const lastStepId = steps[steps.length - 1].id;
-                const style = getStepData(lastStepId).selectedLLM as
-                    | "standard"
-                    | "precise"
-                    | "creative"
-                    | undefined;
+                const style = getStepData(lastStepId).selectedLLM as "standard" | "precise" | "creative" | undefined;
                 if (style) {
                     try {
                         await completeOnboarding({
@@ -224,7 +203,7 @@ export const OnboardingProvider: React.FC<{
                         console.error("Failed to complete onboarding:", err);
                     }
                 }
-                await navigate("/dashboard");
+                await navigate(`/workspaces/${workspaceId}/dashboard`);
                 return;
             }
 
@@ -233,9 +212,7 @@ export const OnboardingProvider: React.FC<{
                 step: state.currentStep + 2,
             })
                 .unwrap()
-                .catch((err) =>
-                    console.error("Failed to sync onboarding step:", err),
-                );
+                .catch((err) => console.error("Failed to sync onboarding step:", err));
         }
 
         setState((prev) => {
@@ -249,16 +226,7 @@ export const OnboardingProvider: React.FC<{
                 currentStep: Math.min(prev.currentStep + 1, steps.length - 1),
             };
         });
-    }, [
-        steps,
-        workspaceId,
-        getStepData,
-        completeOnboarding,
-        updateOnboardingStep,
-        navigate,
-        toast,
-        state.currentStep,
-    ]);
+    }, [steps, workspaceId, getStepData, completeOnboarding, updateOnboardingStep, navigate, toast, state.currentStep]);
 
     const goPrevious = useCallback(() => {
         setState((prev) => ({

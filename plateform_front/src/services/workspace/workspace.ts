@@ -1,10 +1,6 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
-import {
-    Workspace,
-    WorkspaceCreateRequest,
-    WorkspaceDetail,
-} from "types/workspace";
+import { Workspace, WorkspaceCreateRequest, WorkspaceDetail, WorkspaceStats } from "types/workspace";
 
 export const workspaceApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -30,9 +26,7 @@ export const workspaceApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}`,
                 method: "GET",
             }),
-            providesTags: (_result, _error, workspaceId) => [
-                { type: Tag.Workspaces, id: workspaceId },
-            ],
+            providesTags: (_result, _error, workspaceId) => [{ type: Tag.Workspaces, id: workspaceId }],
         }),
 
         createWorkspace: builder.mutation<Workspace, WorkspaceCreateRequest>({
@@ -54,6 +48,14 @@ export const workspaceApi = backendApi.injectEndpoints({
                 { type: Tag.Workspaces, id: workspaceId },
             ],
         }),
+
+        getWorkspaceStats: builder.query<WorkspaceStats, string>({
+            query: (workspaceId) => ({
+                url: `/workspaces/${workspaceId}/stats`,
+                method: "GET",
+            }),
+            providesTags: (_result, _error, workspaceId) => [{ type: Tag.Workspaces, id: `${workspaceId}-stats` }],
+        }),
     }),
 });
 
@@ -62,4 +64,5 @@ export const {
     useGetWorkspaceByIdQuery,
     useCreateWorkspaceMutation,
     useDeleteWorkspaceMutation,
+    useGetWorkspaceStatsQuery,
 } = workspaceApi;

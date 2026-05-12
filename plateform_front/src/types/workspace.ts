@@ -41,3 +41,41 @@ export interface WorkspaceCreateRequest {
     name: string;
     description?: string;
 }
+
+export interface WorkspaceStatsAgentItem {
+    id: string;
+    name: string;
+    status: string;
+    conversationCount: number;
+    documentCount: number;
+    latestVersion: number | null;
+}
+
+export interface WorkspaceStatsActivity {
+    type: string;
+    title: string;
+    subtitle: string;
+    createdAt: string;
+}
+
+export interface WorkspaceStats {
+    agents: {
+        total: number;
+        production: number;
+        development: number;
+        items: WorkspaceStatsAgentItem[];
+    };
+    documents: {
+        total: number;
+        indexed: number;
+        processing: number;
+        failed: number;
+    };
+    conversations: {
+        total: number;
+        today: number;
+    };
+    credits: number;
+    recentActivity: WorkspaceStatsActivity[];
+    activityChart: Record<"24h" | "7j" | "30j", { labels: string[]; values: number[] }>;
+}

@@ -1,6 +1,5 @@
 import {
     Box,
-    Heading,
     HStack,
     Icon,
     Input,
@@ -13,114 +12,87 @@ import {
     useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
-import { ActionMenu } from "components/System/Molecules/ActionMenu/ActionMenu";
-import { Plus, Search } from "lucide-react";
+import { Clock, Plus, Search, SortAsc } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AgentCard } from "pages/Agents/AgentCard";
 import { CreateAgentModal } from "pages/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
-import Button from "components/System/Atoms/Button";
+import { useIsDark } from "hooks/useIsDark";
+import { SortButton, SortKey } from "pages/Assistant/AssistantList";
 
 export const AgentsList = () => {
     const { workspaceId = "default" } = useParams<{ workspaceId: string }>();
-    const { data: agents = [], isLoading } =
-        useGetWorkspaceAgentsQuery(workspaceId);
-    console.log(agents);
+    const { data: agents = [], isLoading } = useGetWorkspaceAgentsQuery(workspaceId);
+    const isDark = useIsDark();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
-    const [sortBy, setSortBy] = useState<
-        "lastEdited" | "nameAsc" | "nameDesc" | "documentsDesc"
-    >("lastEdited");
+    const [sort, setSort] = useState<SortKey>("recent");
     const { colorMode } = useColorMode();
 
-    const textPrimary = useColorModeValue("grey.900", "grey.50");
     const textSecondary = useColorModeValue("grey.500", "grey.400");
     const borderColor = useColorModeValue("grey.200", "grey.700");
-    const toolbarBorder = useColorModeValue("grey.100", "grey.400");
-    const filterBtnColor = useColorModeValue("grey.600", "grey.200");
-
-    const sortLabel: Record<typeof sortBy, string> = {
-        lastEdited: "Dernière modification",
-        nameAsc: "Nom (A–Z)",
-        nameDesc: "Nom (Z–A)",
-        documentsDesc: "Documents (du plus grand au plus petit)",
-    };
 
     const visibleAgents = useMemo(() => {
         const normalizedQuery = searchValue.trim().toLowerCase();
         const filtered = agents.filter(
-            (agent) =>
-                normalizedQuery.length === 0 ||
-                agent.name.toLowerCase().includes(normalizedQuery),
+            (agent) => normalizedQuery.length === 0 || agent.name.toLowerCase().includes(normalizedQuery),
         );
         return filtered.sort((a, b) => {
-            if (sortBy === "nameAsc") return a.name.localeCompare(b.name);
-            if (sortBy === "nameDesc") return b.name.localeCompare(a.name);
-            if (sortBy === "documentsDesc")
-                return (b.documentsCount ?? 0) - (a.documentsCount ?? 0);
+            if (sort === "az") return a.name.localeCompare(b.name);
             const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
             const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
             return dateB - dateA;
         });
-    }, [agents, searchValue, sortBy]);
+    }, [agents, searchValue, sort]);
+
+    const sub = useColorModeValue("grey.500", "grey.400");
+    const titleColor = useColorModeValue("grey.900", "white");
+    const border = isDark ? "grey.700" : "grey.200";
 
     return (
         <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto">
-            <VStack align="stretch">
-                <Heading
-                    variant="heading-3xl"
-                    color={textPrimary}
-                    fontWeight="semibold"
-                    fontSize={{ base: "xl", md: "3xl" }}
-                >
-                    Librarie d&apos;agents
-                </Heading>
-                <Text color={textSecondary} variant="body-md">
-                    Créez et gérez vos agents ici. Cliquez sur un agent pour le
-                    consulter et le personnaliser.
-                </Text>
-            </VStack>
+            <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
+                <VStack align="start" spacing={0.5}>
+                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={titleColor}>
+                        Agents
+                    </Text>
+                    <Text fontSize="sm" color={sub}>
+                        Creez et gérez vos agents · {agents.length} au total
+                    </Text>
+                </VStack>
 
-            <HStack spacing={2} align="center" flexWrap="wrap">
-                <InputGroup flex="1" minW="160px" size="sm" bg="transparent">
-                    <InputLeftElement pointerEvents="none">
-                        <Icon as={Search} color={textSecondary} boxSize={3.5} />
+                <InputGroup maxW="260px">
+                    <InputLeftElement pointerEvents="none" h="full">
+                        <Icon as={Search} boxSize={4} color={sub} />
                     </InputLeftElement>
                     <Input
+                        placeholder="Rechercher un assistant..."
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
-                        placeholder="Rechercher des agents..."
+                        size="sm"
+                        bg={isDark ? "grey.800" : "white"}
+                        border="1px solid"
+                        borderColor={border}
+                        borderRadius="8px"
+                        fontSize="sm"
+                        _placeholder={{ color: sub }}
+                        _focus={{ borderColor: "green.400", boxShadow: "none" }}
                     />
                 </InputGroup>
+            </HStack>
 
-                <Box w="0.5px" h="40px" bg={toolbarBorder} flexShrink={0} />
-
-                <ActionMenu
-                    items={[
-                        {
-                            label: "Dernière modification",
-                            onClick: () => setSortBy("lastEdited"),
-                        },
-                        {
-                            label: "Nom (A–Z)",
-                            onClick: () => setSortBy("nameAsc"),
-                        },
-                        {
-                            label: "Nom (Z–A)",
-                            onClick: () => setSortBy("nameDesc"),
-                        },
-                        {
-                            label: "Documents (du plus grand au plus petit)",
-                            onClick: () => setSortBy("documentsDesc"),
-                        },
-                    ]}
-                    trigger={
-                        <Button variant="secondary" color={filterBtnColor}>
-                            {sortLabel[sortBy]}
-                        </Button>
-                    }
-                />
+            <HStack
+                spacing={0}
+                bg={isDark ? "grey.900" : "grey.50"}
+                border="1px solid"
+                borderColor={border}
+                borderRadius="10px"
+                p={1}
+                w="fit-content"
+            >
+                {SortButton("recent", "Récent", Clock, sort, setSort)}
+                {SortButton("az", "A→Z", SortAsc, sort, setSort)}
             </HStack>
 
             {isLoading ? (
@@ -143,8 +115,7 @@ export const AgentsList = () => {
                         cursor="pointer"
                         onClick={() => setIsCreateModalOpen(true)}
                         _hover={{
-                            borderColor:
-                                colorMode === "dark" ? "grey.500" : "grey.400",
+                            borderColor: colorMode === "dark" ? "grey.500" : "grey.400",
                             bg: colorMode === "dark" ? "grey.900" : "grey.50",
                         }}
                         transition="all 0.15s"
@@ -168,11 +139,7 @@ export const AgentsList = () => {
                     </Box>
 
                     {visibleAgents.map((agent) => (
-                        <AgentCard
-                            key={agent.id}
-                            agent={agent}
-                            workspaceId={workspaceId}
-                        />
+                        <AgentCard key={agent.id} agent={agent} workspaceId={workspaceId} />
                     ))}
                 </SimpleGrid>
             )}

@@ -1,10 +1,4 @@
-import React, {
-    useRef,
-    useEffect,
-    useCallback,
-    useState,
-    useMemo,
-} from "react";
+import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { ChatMessage } from "hooks/useChat";
 import { HStack, Stack, VStack, chakra } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
@@ -21,23 +15,24 @@ import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDro
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
 import { useGetAgentDocumentStatsQuery } from "services/document/document";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
-import CreditConsumptionBanner from "components/System/Molecules/CreditConsumptionBanner";
+import OnboardingStepBanner from "components/System/Molecules/OnboardingStepBanner";
 
 const MAX_FILES = 3;
+const MAX_EXCHANGES = 5;
 const STEP_ID = "improve-assistant";
 
-export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
-    data,
-    updateData,
-}) => {
+export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ data, updateData }) => {
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId, agentId } = useOnboarding();
     const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
-    const { sendQuery } = useAgentQuery(workspaceId, agentId);
+    const onboardingStreamUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/onboarding/stream`;
+    const { sendQuery } = useAgentQuery(workspaceId, agentId, false, onboardingStreamUrl, "improve-assistant");
 
     const savedMessages: ChatMessage[] = (data.messages as ChatMessage[]) ?? [];
-    const persistedMessageCount: number =
-        (data.messageCount as number) ?? savedMessages.length;
+    const persistedMessageCount: number = (data.messageCount as number) ?? savedMessages.length;
+    const sessionQueryCount = (data.queryCount as number) ?? 0;
+    const liveMessageCount: number = Math.max(sessionQueryCount, (data.messageCount as number) ?? savedMessages.length);
+    const isAtLimit = liveMessageCount >= MAX_EXCHANGES;
 
     const { data: documentStats } = useGetAgentDocumentStatsQuery(
         { workspaceId: workspaceId!, agentId: agentId! },
@@ -59,23 +54,12 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
         persistedIndexedCount,
     );
 
-    const completedFiles = useMemo(
-        () => sources.filter((s) => s.status === Status.COMPLETED),
-        [sources],
-    );
+    const completedFiles = useMemo(() => sources.filter((s) => s.status === Status.COMPLETED), [sources]);
     const processingFiles = useMemo(
-        () =>
-            sources.filter(
-                (s) =>
-                    s.status === Status.PROCESSING ||
-                    s.status === Status.UPLOADING,
-            ),
+        () => sources.filter((s) => s.status === Status.PROCESSING || s.status === Status.UPLOADING),
         [sources],
     );
-    const sessionValidCount = useMemo(
-        () => sources.filter((s) => s.status !== Status.ERROR).length,
-        [sources],
-    );
+    const sessionValidCount = useMemo(() => sources.filter((s) => s.status !== Status.ERROR).length, [sources]);
 
     const totalCompletedCount = persistedIndexedCount + completedFiles.length;
     const showComparison = totalCompletedCount > 0;
@@ -94,7 +78,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
 
     const handleMessagesChange = useCallback(
         (msgs: ChatMessage[]) => {
-            updateData({ messages: msgs, messageCount: msgs.length });
+            updateData({ messages: msgs, messageCount: Math.max(msgs.length, persistedMessageCount) });
 
             if (msgs.length > persistedMessageCount) {
                 void updateStepsData({
@@ -112,49 +96,37 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
         await uploadDocuments(files);
     };
 
-    const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
-        useDragDrop((e: React.DragEvent) =>
-            handleFileUpload(e.dataTransfer.files),
-        );
+    const { isDragging, handleDragOver, handleDragLeave, handleDrop } = useDragDrop((e: React.DragEvent) =>
+        handleFileUpload(e.dataTransfer.files),
+    );
 
     return (
-        <chakra.form w="100%" h="100%">
-            <Stack w="100%" h="100%" spacing={8}>
+        <chakra.form w="100%" h="100%" display="flex" flexDirection="column">
+            <Stack w="100%" flex={1} minH={0} spacing={8} display="flex" flexDirection="column">
                 <StepLevel
                     level={showComparison ? 3 : 2}
-                    title={
-                        showComparison
-                            ? "Personnalisé"
-                            : "En cours de personnalisation"
-                    }
+                    title={showComparison ? "Personnalisé" : "En cours de personnalisation"}
                     description="Ton assistant est en train d'être personnalisé avec les documents que tu as ajoutés"
                 />
 
                 <HStack
                     flexDirection={isMobile ? "column" : "row"}
                     w="100%"
-                    h="100%"
+                    flex={1}
+                    minH={0}
                     spacing={8}
                     align="start"
                 >
-                    <VStack flex={1} w="100%" h="100%" spacing={4}>
-                        <CreditConsumptionBanner
-                            workspaceId={workspaceId}
-                            mb={0}
-                        />
+                    <VStack flex={1} w="100%" spacing={4} align="stretch" h="100%">
                         <DocumentDropZone
                             isDragging={isDragging}
-                            onFileSelect={
-                                isAtMaxFiles ? undefined : handleFileUpload
-                            }
+                            onFileSelect={isAtMaxFiles ? undefined : handleFileUpload}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                             disabled={isAtMaxFiles}
                             maxFiles={MAX_FILES}
-                            currentCount={
-                                persistedIndexedCount + sessionValidCount
-                            }
+                            currentCount={persistedIndexedCount + sessionValidCount}
                         />
                         <UploadProgressStepper
                             completedFilesCount={totalCompletedCount}
@@ -164,37 +136,28 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({
                         <DocumentFileList sources={sources} />
                     </VStack>
 
-                    <Stack
-                        flex={2}
-                        minH={0}
-                        display="flex"
-                        flexDirection="column"
-                        h="100%"
-                        gap={2}
-                    >
+                    <Stack flex={2} minH={0} h="100%" display="flex" flexDirection="column" gap={2} overflow="hidden">
+                        <OnboardingStepBanner current={liveMessageCount} max={MAX_EXCHANGES} mb={0} />
                         <ChatInterface
                             fullHeight={!isMobile}
                             compact={!isMobile}
                             getResponse={getResponse}
                             onMessagesChange={handleMessagesChange}
                             initialMessages={savedMessages}
-                            title={
-                                showComparison
-                                    ? "Assistant personnalisé prêt"
-                                    : "Ajoute tes documents d'abord"
-                            }
+                            title={showComparison ? "Assistant personnalisé prêt" : "Ajoute tes documents d'abord"}
                             welcomeMessage={
                                 showComparison
                                     ? "Pose une question pour voir la différence avec tes documents."
                                     : "Uploade tes fichiers RH à gauche pour activer les réponses personnalisées."
                             }
                             icon={showComparison ? undefined : Upload}
-                            placeholder={
-                                showComparison
-                                    ? "Pose ta question..."
-                                    : "Indexation en cours..."
+                            placeholder={showComparison ? "Pose ta question..." : "Indexation en cours..."}
+                            disabled={!showComparison || isAtLimit}
+                            disabledMessage={
+                                isAtLimit
+                                    ? `Limite atteinte (${MAX_EXCHANGES}/${MAX_EXCHANGES}) — passez à l'étape suivante`
+                                    : undefined
                             }
-                            disabled={!showComparison}
                         />
                     </Stack>
                 </HStack>

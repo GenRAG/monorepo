@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import {
-    Badge,
     Box,
     Grid,
     HStack,
@@ -8,178 +7,47 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
+    Skeleton,
     Stack,
     Text,
     VStack,
     useColorMode,
 } from "@chakra-ui/react";
-import {
-    BarChart3,
-    BookMarked,
-    BookOpen,
-    Clock,
-    MessageCircle,
-    Scale,
-    Search,
-    SortAsc,
-    TrendingUp,
-    Users,
-    type LucideIcon,
-} from "lucide-react";
+import { Bot, Clock, Search, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useGetAssistantsListQuery, AssistantPreview } from "services/chat/chat";
+import { useIsDark } from "hooks/useIsDark";
 
-type SortKey = "recent" | "az" | "unread";
-type Category =
-    | "Tous"
-    | "Juridique"
-    | "Marketing"
-    | "RH"
-    | "Tech"
-    | "Analytics";
+export type SortKey = string;
 
-const CATEGORIES: Category[] = [
-    "Tous",
-    "Juridique",
-    "Marketing",
-    "RH",
-    "Tech",
-    "Analytics",
-];
+const AVATAR_COLORS = ["#22C55E", "#3B82F6", "#8B5CF6", "#F97316", "#EC4899", "#14B8A6", "#EF4444", "#F59E0B"];
 
-interface Assistant {
-    id: string;
-    title: string;
-    lastMessage: string;
-    sharedBy: string;
-    sharedByInitial: string;
-    sharedByColor: string;
-    category: string;
-    messageCount: number;
-    unreadCount: number;
-    time: string;
-    pinned: boolean;
-    icon: LucideIcon;
-    iconBg: string;
-    iconColor: string;
-}
+const getAvatarColor = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
 
-const MOCK_ASSISTANTS: Assistant[] = [
-    {
-        id: "1",
-        title: "Contract Risk Analysis",
-        lastMessage:
-            "Here are the main clauses that require your attention in the Dupont agreement...",
-        sharedBy: "Quentin",
-        sharedByInitial: "Q",
-        sharedByColor: "#22C55E",
-        category: "Juridique",
-        messageCount: 14,
-        unreadCount: 2,
-        time: "5 h",
-        pinned: true,
-        icon: Scale,
-        iconBg: "#1E1B4B",
-        iconColor: "#818CF8",
-    },
-    {
-        id: "2",
-        title: "Marketing Strategy Q1",
-        lastMessage:
-            "We should focus on increasing inbound through SEO and LinkedIn...",
-        sharedBy: "Sophie",
-        sharedByInitial: "S",
-        sharedByColor: "#3B82F6",
-        category: "Marketing",
-        messageCount: 8,
-        unreadCount: 0,
-        time: "Hier",
-        pinned: false,
-        icon: TrendingUp,
-        iconBg: "#451A03",
-        iconColor: "#FBBF24",
-    },
-    {
-        id: "3",
-        title: "HR Policy Navigator",
-        lastMessage:
-            "According to the current policy, remote work can be requested after 6 months...",
-        sharedBy: "David",
-        sharedByInitial: "D",
-        sharedByColor: "#8B5CF6",
-        category: "RH",
-        messageCount: 5,
-        unreadCount: 1,
-        time: "6 mai",
-        pinned: false,
-        icon: Users,
-        iconBg: "#064E3B",
-        iconColor: "#34D3A9",
-    },
-    {
-        id: "4",
-        title: "Technical Documentation AI",
-        lastMessage:
-            "The API endpoint /v2/agents now accepts a filter parameter for workflow status...",
-        sharedBy: "Amara",
-        sharedByInitial: "A",
-        sharedByColor: "#F97316",
-        category: "Tech",
-        messageCount: 22,
-        unreadCount: 0,
-        time: "5 mai",
-        pinned: false,
-        icon: BookOpen,
-        iconBg: "#1A2E1A",
-        iconColor: "#4ADE80",
-    },
-    {
-        id: "5",
-        title: "Customer Insights",
-        lastMessage:
-            "Churn risk is highest in accounts with fewer than 3 active users in the last 30 days...",
-        sharedBy: "Léa",
-        sharedByInitial: "L",
-        sharedByColor: "#EC4899",
-        category: "Analytics",
-        messageCount: 11,
-        unreadCount: 3,
-        time: "4 mai",
-        pinned: false,
-        icon: BarChart3,
-        iconBg: "#3B0764",
-        iconColor: "#C084FC",
-    },
-    {
-        id: "6",
-        title: "Legal Research Assistant",
-        lastMessage:
-            "The 2024 reform introduced new compliance requirements for data processing...",
-        sharedBy: "Martin",
-        sharedByInitial: "M",
-        sharedByColor: "#14B8A6",
-        category: "Juridique",
-        messageCount: 3,
-        unreadCount: 0,
-        time: "3 mai",
-        pinned: false,
-        icon: BookMarked,
-        iconBg: "#1E3A5F",
-        iconColor: "#60A5FA",
-    },
-];
+const formatDate = (iso: string) => {
+    const date = new Date(iso);
+    const now = new Date();
+    const days = Math.floor((now.getTime() - date.getTime()) / 86400000);
+    if (days === 0) return "Aujourd'hui";
+    if (days === 1) return "Hier";
+    if (days < 7) return `Il y a ${days} j`;
+    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+};
 
 interface AssistantCardProps {
-    assistant: Assistant;
+    assistant: AssistantPreview;
     onClick: () => void;
 }
 
-const AssistantCard: React.FC<AssistantCardProps> = ({
-    assistant,
-    onClick,
-}) => {
+const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => {
     const { colorMode } = useColorMode();
     const isDark = colorMode === "dark";
     const sub = isDark ? "grey.400" : "grey.500";
+    const avatarColor = getAvatarColor(assistant.title);
 
     return (
         <Box
@@ -195,152 +63,94 @@ const AssistantCard: React.FC<AssistantCardProps> = ({
                 transform: "translateY(-1px)",
             }}
             onClick={onClick}
-            position="relative"
         >
-            {assistant.unreadCount > 0 && (
-                <Badge
-                    position="absolute"
-                    top={3}
-                    right={3}
-                    bg="green.500"
-                    color="white"
-                    borderRadius="full"
-                    fontSize="11px"
-                    fontWeight="bold"
-                    minW="20px"
-                    textAlign="center"
-                >
-                    {assistant.unreadCount}
-                </Badge>
-            )}
-
             <HStack spacing={3} align="flex-start" mb={3}>
                 <Box
                     w="44px"
                     h="44px"
                     borderRadius="10px"
-                    bg={assistant.iconBg}
+                    bg={avatarColor + "22"}
+                    border="1px solid"
+                    borderColor={avatarColor + "44"}
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
                     flexShrink={0}
                 >
-                    <Icon
-                        as={assistant.icon}
-                        boxSize={5}
-                        color={assistant.iconColor}
-                    />
+                    <Text fontSize="lg" fontWeight="bold" color={avatarColor}>
+                        {assistant.title.charAt(0).toUpperCase()}
+                    </Text>
                 </Box>
-                <VStack align="start" spacing={1} flex={1} minW={0} pr={6}>
-                    <Text
-                        fontSize="sm"
-                        fontWeight="semibold"
-                        color={isDark ? "white" : "grey.900"}
-                        noOfLines={1}
-                    >
+                <VStack align="start" spacing={1} flex={1} minW={0}>
+                    <Text fontSize="sm" fontWeight="semibold" color={isDark ? "white" : "grey.900"} noOfLines={1}>
                         {assistant.title}
                     </Text>
-                    <Text
-                        fontSize="xs"
-                        color={sub}
-                        noOfLines={2}
-                        lineHeight="1.4"
-                    >
-                        {assistant.lastMessage}
-                    </Text>
+                    {assistant.lastMessage && (
+                        <Text fontSize="xs" color={sub} noOfLines={2} lineHeight="1.4">
+                            {assistant.lastMessage}
+                        </Text>
+                    )}
                 </VStack>
             </HStack>
 
-            <HStack
-                justify="space-between"
-                mt={2}
-                pt={2}
-                borderTop="1px solid"
-                borderColor={isDark ? "grey.800" : "grey.100"}
-            >
+            <HStack justify="space-between" pt={2} borderTop="1px solid" borderColor={isDark ? "grey.800" : "grey.100"}>
                 <HStack spacing={2}>
                     <Box
-                        w="26px"
-                        h="26px"
+                        w="22px"
+                        h="22px"
                         borderRadius="full"
-                        bg={assistant.sharedByColor}
+                        bg={getAvatarColor(assistant.sharedBy ?? "") + "33"}
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                         flexShrink={0}
                     >
-                        <Text fontSize="10px" fontWeight="bold" color="white">
-                            {assistant.sharedByInitial}
+                        <Text fontSize="9px" fontWeight="bold" color={getAvatarColor(assistant.sharedBy ?? "")}>
+                            {(assistant.sharedBy ?? "?").charAt(0).toUpperCase()}
                         </Text>
                     </Box>
-                    <Text
-                        fontSize="xs"
-                        color={isDark ? "grey.300" : "grey.700"}
-                    >
+                    <Text fontSize="xs" color={isDark ? "grey.300" : "grey.700"}>
                         {assistant.sharedBy}
                     </Text>
-                    <Box
-                        px={2}
-                        py={0.5}
-                        borderRadius="full"
-                        bg={isDark ? "grey.800" : "grey.100"}
-                        border="1px solid"
-                        borderColor={isDark ? "grey.700" : "grey.200"}
-                    >
-                        <Text fontSize="10px" color={sub}>
-                            {assistant.category}
-                        </Text>
-                    </Box>
                 </HStack>
-                <HStack spacing={3}>
-                    <HStack spacing={1}>
-                        <Icon as={MessageCircle} boxSize={3} color={sub} />
-                        <Text fontSize="10px" color={sub}>
-                            {assistant.messageCount}
-                        </Text>
-                    </HStack>
+
+                {assistant.updatedAt && (
                     <HStack spacing={1}>
                         <Icon as={Clock} boxSize={3} color={sub} />
                         <Text fontSize="10px" color={sub}>
-                            {assistant.time}
+                            {formatDate(assistant.updatedAt)}
                         </Text>
                     </HStack>
-                </HStack>
+                )}
             </HStack>
         </Box>
     );
 };
 
-export const AssistantsList = () => {
+const CardSkeleton: React.FC = () => {
     const { colorMode } = useColorMode();
     const isDark = colorMode === "dark";
-    const navigate = useNavigate();
-    const [search, setSearch] = useState("");
-    const [category, setCategory] = useState<Category>("Tous");
-    const [sort, setSort] = useState<SortKey>("recent");
+    return (
+        <Skeleton
+            height="110px"
+            borderRadius="12px"
+            startColor={isDark ? "grey.800" : "grey.100"}
+            endColor={isDark ? "grey.700" : "grey.200"}
+        />
+    );
+};
+
+export const SortButton = (
+    key: SortKey,
+    label: string,
+    icon: React.ElementType,
+    sort: SortKey,
+    setSort: (key: SortKey) => void,
+) => {
+    const isDark = useIsDark();
 
     const sub = isDark ? "grey.400" : "grey.500";
-    const border = isDark ? "grey.700" : "grey.200";
-
-    const filtered = useMemo(() => {
-        let list = [...MOCK_ASSISTANTS];
-        if (search)
-            list = list.filter((a) =>
-                a.title.toLowerCase().includes(search.toLowerCase()),
-            );
-        if (category !== "Tous")
-            list = list.filter((a) => a.category === category);
-        if (sort === "az")
-            list = list.sort((a, b) => a.title.localeCompare(b.title));
-        if (sort === "unread")
-            list = list.sort((a, b) => b.unreadCount - a.unreadCount);
-        return list;
-    }, [search, category, sort]);
-
-    const pinned = filtered.filter((a) => a.pinned);
-    const regular = filtered.filter((a) => !a.pinned);
-
-    const sortButton = (key: SortKey, label: string, icon: LucideIcon) => (
+    return (
         <HStack
             as="button"
             px={3}
@@ -348,21 +158,11 @@ export const AssistantsList = () => {
             spacing={1.5}
             borderRadius="8px"
             cursor="pointer"
-            bg={
-                sort === key
-                    ? isDark
-                        ? "grey.700"
-                        : "grey.100"
-                    : "transparent"
-            }
+            bg={sort === key ? (isDark ? "grey.700" : "grey.100") : "transparent"}
             onClick={() => setSort(key)}
             transition="background 0.15s"
         >
-            <Icon
-                as={icon}
-                boxSize={3.5}
-                color={sort === key ? (isDark ? "white" : "grey.900") : sub}
-            />
+            <Icon as={icon} boxSize={3.5} color={sort === key ? (isDark ? "white" : "grey.900") : sub} />
             <Text
                 fontSize="sm"
                 fontWeight={sort === key ? "600" : "400"}
@@ -373,26 +173,36 @@ export const AssistantsList = () => {
             </Text>
         </HStack>
     );
+};
+
+export const AssistantsList = () => {
+    const { colorMode } = useColorMode();
+    const isDark = colorMode === "dark";
+    const navigate = useNavigate();
+    const [search, setSearch] = useState("");
+    const [sort, setSort] = useState<SortKey>("recent");
+
+    const sub = isDark ? "grey.400" : "grey.500";
+    const border = isDark ? "grey.700" : "grey.200";
+
+    const { data: assistants = [], isLoading } = useGetAssistantsListQuery();
+
+    const filtered = useMemo(() => {
+        let list = [...assistants];
+        if (search) list = list.filter((a) => a.title.toLowerCase().includes(search.toLowerCase()));
+        if (sort === "az") list = list.sort((a, b) => a.title.localeCompare(b.title));
+        return list;
+    }, [assistants, search, sort]);
 
     return (
         <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" maxH="100vh">
-            <HStack
-                justify="space-between"
-                align="flex-start"
-                flexWrap="wrap"
-                gap={3}
-            >
+            <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
-                    <Text
-                        fontSize={{ base: "xl", md: "2xl" }}
-                        fontWeight="bold"
-                        color={isDark ? "white" : "grey.900"}
-                    >
+                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>
                         Assistants
                     </Text>
                     <Text fontSize="sm" color={sub}>
-                        Assistants partagés avec vous · {MOCK_ASSISTANTS.length}{" "}
-                        au total
+                        Agents déployés accessibles · {assistants.length} au total
                     </Text>
                 </VStack>
                 <InputGroup maxW="260px">
@@ -415,130 +225,42 @@ export const AssistantsList = () => {
                 </InputGroup>
             </HStack>
 
-            <HStack justify="space-between" flexWrap="wrap" gap={3}>
-                <HStack
-                    spacing={1}
-                    bg={isDark ? "grey.900" : "grey.50"}
-                    border="1px solid"
-                    borderColor={border}
-                    borderRadius="10px"
-                    p={1}
-                    flexWrap="wrap"
-                >
-                    {CATEGORIES.map((c) => (
-                        <Box
-                            key={c}
-                            as="button"
-                            px={3}
-                            py={1}
-                            borderRadius="7px"
-                            cursor="pointer"
-                            bg={
-                                category === c
-                                    ? isDark
-                                        ? "grey.700"
-                                        : "white"
-                                    : "transparent"
-                            }
-                            boxShadow={
-                                category === c
-                                    ? "0 1px 4px rgba(0,0,0,0.12)"
-                                    : "none"
-                            }
-                            onClick={() => setCategory(c)}
-                            transition="all 0.15s"
-                        >
-                            <Text
-                                fontSize="sm"
-                                fontWeight={category === c ? "600" : "400"}
-                                color={
-                                    category === c
-                                        ? isDark
-                                            ? "white"
-                                            : "grey.900"
-                                        : sub
-                                }
-                            >
-                                {c}
-                            </Text>
-                        </Box>
-                    ))}
-                </HStack>
-
-                <HStack
-                    spacing={0}
-                    bg={isDark ? "grey.900" : "grey.50"}
-                    border="1px solid"
-                    borderColor={border}
-                    borderRadius="10px"
-                    p={1}
-                >
-                    {sortButton("recent", "Récent", Clock)}
-                    {sortButton("az", "A→Z", SortAsc)}
-                    {sortButton("unread", "Non lus", MessageCircle)}
-                </HStack>
+            <HStack
+                spacing={0}
+                bg={isDark ? "grey.900" : "grey.50"}
+                border="1px solid"
+                borderColor={border}
+                borderRadius="10px"
+                p={1}
+                w="fit-content"
+            >
+                {SortButton("recent", "Récent", Clock, sort, setSort)}
+                {SortButton("az", "A→Z", SortAsc, sort, setSort)}
             </HStack>
 
-            {pinned.length > 0 && (
-                <VStack align="stretch" spacing={3}>
-                    <HStack spacing={2}>
-                        <Text
-                            fontSize="10px"
-                            textTransform="uppercase"
-                            letterSpacing="wider"
-                            color={sub}
-                            fontWeight="semibold"
-                        >
-                            📌 Épinglés
-                        </Text>
-                    </HStack>
-                    <Grid
-                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                        gap={3}
-                    >
-                        {pinned.map((a) => (
-                            <AssistantCard
-                                key={a.id}
-                                assistant={a}
-                                onClick={() => navigate(`/assistants/${a.id}`)}
-                            />
-                        ))}
-                    </Grid>
-                </VStack>
-            )}
-
-            {regular.length > 0 && (
-                <VStack align="stretch" spacing={3}>
-                    <Text
-                        fontSize="10px"
-                        textTransform="uppercase"
-                        letterSpacing="wider"
-                        color={sub}
-                        fontWeight="semibold"
-                    >
-                        Tous les assistants
-                    </Text>
-                    <Grid
-                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                        gap={3}
-                    >
-                        {regular.map((a) => (
-                            <AssistantCard
-                                key={a.id}
-                                assistant={a}
-                                onClick={() => navigate(`/assistants/${a.id}`)}
-                            />
-                        ))}
-                    </Grid>
-                </VStack>
-            )}
-
-            {filtered.length === 0 && (
-                <VStack py={16} spacing={2}>
-                    <Icon as={Search} boxSize={8} color={sub} />
+            {isLoading ? (
+                <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={3}>
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <CardSkeleton key={i} />
+                    ))}
+                </Grid>
+            ) : filtered.length > 0 ? (
+                <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={3}>
+                    {filtered.map((a) => (
+                        <AssistantCard key={a.id} assistant={a} onClick={() => navigate(`/assistants/${a.id}`)} />
+                    ))}
+                </Grid>
+            ) : (
+                <VStack py={16} spacing={3}>
+                    <Icon as={search ? Search : Bot} boxSize={10} color={sub} />
                     <Text fontSize="sm" color={sub}>
-                        Aucun assistant trouvé
+                        {search ? "Aucun assistant trouvé" : "Aucun agent déployé pour l'instant"}
                     </Text>
+                    {!search && (
+                        <Text fontSize="xs" color={sub} textAlign="center" maxW="300px">
+                            Déployez un agent en production pour le voir apparaître ici
+                        </Text>
+                    )}
                 </VStack>
             )}
         </Stack>

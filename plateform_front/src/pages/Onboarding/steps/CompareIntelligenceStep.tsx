@@ -1,16 +1,9 @@
-import React, { useState } from "react";
-import {
-    Box,
-    Skeleton,
-    Stack,
-    Text,
-    VStack,
-    useColorMode,
-    chakra,
-} from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Box, Skeleton, Stack, Text, VStack, useColorMode, chakra } from "@chakra-ui/react";
 import { MessageCircle, RotateCcw, Search, Zap } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import StepLevel from "components/System/Molecules/StepLevel";
+import OnboardingStepBanner from "components/System/Molecules/OnboardingStepBanner";
 import ChatInput from "components/System/Molecules/Chat/ChatInput";
 import Button from "components/System/Atoms/Button";
 import ResponseCard from "components/Onboarding/CompareIntelligence/ResponseDetailPanel";
@@ -19,7 +12,11 @@ import { useOnboarding } from "hooks/useOnBoarding";
 import {
     CompareOnboardingResponse,
     useCompareOnboardingMutation,
+    useUpdateOnboardingStepsDataMutation,
 } from "services/onboarding/onboarding";
+
+const MAX_COMPARES = 2;
+const STEP_ID = "compare-intelligence";
 
 const CARD_META = [
     {
@@ -36,10 +33,7 @@ const CARD_META = [
         badge: "Recommandé",
         isRecommended: true,
         icon: Search,
-        advantages: [
-            "Citations et articles précis",
-            "Analyse approfondie des documents",
-        ],
+        advantages: ["Citations et articles précis", "Analyse approfondie des documents"],
     },
     {
         key: "creative" as const,
@@ -47,38 +41,47 @@ const CARD_META = [
         badge: "Convivial",
         isRecommended: false,
         icon: MessageCircle,
-        advantages: [
-            "Ton chaleureux et engageant",
-            "Meilleure expérience utilisateur",
-        ],
+        advantages: ["Ton chaleureux et engageant", "Meilleure expérience utilisateur"],
     },
 ];
 
-export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
-    data,
-    updateData,
-}) => {
+export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({ data, updateData }) => {
     const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId } = useOnboarding();
 
-    const [question, setQuestion] = useState<string | null>(
-        (data.testQuestion as string) ?? null,
+    const [question, setQuestion] = useState<string | null>((data.testQuestion as string) ?? null);
+    const [responses, setResponses] = useState<CompareOnboardingResponse | null>(null);
+    const [selectedLLM, setSelectedLLM] = useState<string | null>((data.selectedLLM as string) ?? null);
+    const sessionQueryCount = (data.queryCount as number) ?? 0;
+    const [compareCount, setCompareCount] = useState<number>(
+        Math.max(sessionQueryCount, (data.compareCount as number) ?? 0),
     );
-    const [responses, setResponses] =
-        useState<CompareOnboardingResponse | null>(null);
-    const [selectedLLM, setSelectedLLM] = useState<string | null>(
-        (data.selectedLLM as string) ?? null,
-    );
+    const isAtLimit = compareCount >= MAX_COMPARES;
 
     const [compareOnboarding, { isLoading }] = useCompareOnboardingMutation();
+    const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
+
+    useEffect(() => {
+        if (isAtLimit && !selectedLLM) {
+            const defaultLLM = "precise";
+            setSelectedLLM(defaultLLM);
+            updateData({ selectedLLM: defaultLLM });
+            void updateStepsData({ workspaceId, stepId: STEP_ID, data: { selectedLLM: defaultLLM } });
+        }
+    }, [isAtLimit, selectedLLM, workspaceId, updateData, updateStepsData]);
 
     const handleQuestionSend = async (q: string) => {
-        if (!workspaceId) return;
+        if (!workspaceId || isAtLimit) return;
         setQuestion(q);
         setResponses(null);
         setSelectedLLM(null);
         updateData({ messageSent: false, selectedLLM: undefined });
+
+        const newCount = compareCount + 1;
+        setCompareCount(newCount);
+        updateData({ compareCount: newCount });
+        void updateStepsData({ workspaceId, stepId: STEP_ID, data: { compareCount: newCount } });
 
         try {
             const result = await compareOnboarding({
@@ -87,14 +90,19 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
             }).unwrap();
             setResponses(result);
             updateData({ messageSent: true });
+            void updateStepsData({ workspaceId, stepId: STEP_ID, data: { messageSent: true } });
         } catch {
             setQuestion(null);
+            setCompareCount(compareCount);
+            updateData({ compareCount });
+            void updateStepsData({ workspaceId, stepId: STEP_ID, data: { compareCount } });
         }
     };
 
     const handleResponseSelect = (llmId: string) => {
         setSelectedLLM(llmId);
         updateData({ selectedLLM: llmId });
+        void updateStepsData({ workspaceId, stepId: STEP_ID, data: { selectedLLM: llmId } });
     };
 
     const handleReset = () => {
@@ -113,126 +121,76 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                         title="Optimisé"
                         description="Compare les différents styles de réponse et choisis celui qui correspond le mieux à ton usage."
                     />
+                    <OnboardingStepBanner current={compareCount} max={MAX_COMPARES} />
                 </VStack>
 
-                <Box flex={1} minH={0} overflowY="auto">
+                <Box flex={1} minH={0} overflowY="auto" pr={2}>
                     {!question ? (
                         <ChatInput
-                            placeholder="Pose une question pour voir les différences..."
+                            placeholder={
+                                isAtLimit
+                                    ? `Limite atteinte (${compareCount}/${MAX_COMPARES})`
+                                    : "Pose une question pour voir les différences..."
+                            }
                             onSend={handleQuestionSend}
+                            disabled={isAtLimit}
                         />
                     ) : (
                         <VStack spacing={4} align="stretch">
-                            <VStack
-                                align="flex-end"
-                                spacing={1}
-                                alignSelf="flex-end"
-                                maxW="80%"
-                            >
-                                <Text
-                                    fontSize="xs"
-                                    color={
-                                        colorMode === "dark"
-                                            ? "grey.500"
-                                            : "grey.400"
-                                    }
-                                >
+                            <VStack align="flex-end" spacing={1} alignSelf="flex-end" maxW="80%">
+                                <Text fontSize="xs" color={colorMode === "dark" ? "grey.500" : "grey.400"}>
                                     Vous
                                 </Text>
                                 <Box
                                     p={3}
-                                    bg={
-                                        colorMode === "dark"
-                                            ? "green.700"
-                                            : "green.100"
-                                    }
+                                    bg={colorMode === "dark" ? "green.700" : "green.100"}
                                     borderRadius="12px"
                                     borderBottomRightRadius="2px"
                                 >
-                                    <Text
-                                        fontSize="sm"
-                                        color={
-                                            colorMode === "dark"
-                                                ? "grey.100"
-                                                : "green.800"
-                                        }
-                                    >
+                                    <Text fontSize="sm" color={colorMode === "dark" ? "grey.100" : "green.800"}>
                                         {question}
                                     </Text>
                                 </Box>
                             </VStack>
 
                             {isLoading ? (
-                                <Stack
-                                    direction={isMobile ? "column" : "row"}
-                                    spacing={4}
-                                    align="stretch"
-                                >
+                                <Stack direction={isMobile ? "column" : "row"} spacing={4} align="stretch">
                                     {CARD_META.map((card) => (
                                         <Skeleton
                                             key={card.key}
                                             flex={1}
                                             height="200px"
                                             borderRadius="12px"
-                                            startColor={
-                                                colorMode === "dark"
-                                                    ? "grey.800"
-                                                    : "grey.100"
-                                            }
-                                            endColor={
-                                                colorMode === "dark"
-                                                    ? "grey.700"
-                                                    : "grey.200"
-                                            }
+                                            startColor={colorMode === "dark" ? "grey.800" : "grey.100"}
+                                            endColor={colorMode === "dark" ? "grey.700" : "grey.200"}
                                         />
                                     ))}
                                 </Stack>
                             ) : responses ? (
                                 <>
-                                    <Text
-                                        fontSize="sm"
-                                        color={
-                                            colorMode === "dark"
-                                                ? "grey.400"
-                                                : "grey.600"
-                                        }
-                                    >
+                                    <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
                                         Sélectionne la réponse que tu préfères :
                                     </Text>
 
-                                    <Stack
-                                        direction={isMobile ? "column" : "row"}
-                                        spacing={4}
-                                        align="stretch"
-                                    >
+                                    <Stack direction={isMobile ? "column" : "row"} spacing={4} align="stretch">
                                         {CARD_META.map((card) => (
                                             <ResponseCard
                                                 key={card.key}
                                                 title={card.title}
                                                 badge={card.badge}
-                                                isRecommended={
-                                                    card.isRecommended
-                                                }
+                                                isRecommended={card.isRecommended}
                                                 icon={card.icon}
-                                                responseText={
-                                                    responses[card.key]
-                                                }
+                                                responseText={responses[card.key]}
                                                 advantages={card.advantages}
-                                                isSelected={
-                                                    selectedLLM === card.key
-                                                }
-                                                onClick={() =>
-                                                    handleResponseSelect(
-                                                        card.key,
-                                                    )
-                                                }
+                                                isSelected={selectedLLM === card.key}
+                                                onClick={() => handleResponseSelect(card.key)}
                                             />
                                         ))}
                                     </Stack>
                                 </>
                             ) : null}
 
-                            {!isLoading && (
+                            {!isLoading && !isAtLimit && (
                                 <Button
                                     variant="secondary"
                                     size="sm"

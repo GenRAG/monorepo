@@ -16,10 +16,7 @@ export interface UseChatOptions {
     initialMessages?: ChatMessage[];
 }
 
-export const useChat = ({
-    getResponse,
-    initialMessages = [],
-}: UseChatOptions) => {
+export const useChat = ({ getResponse, initialMessages = [] }: UseChatOptions) => {
     const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -55,20 +52,14 @@ export const useChat = ({
                         });
                     }),
                 );
-                setMessages((prev) =>
-                    prev.map((m) =>
-                        m.id === id ? { ...pending, response } : m,
-                    ),
-                );
+                setMessages((prev) => prev.map((m) => (m.id === id ? { ...pending, response } : m)));
             } catch (_error) {
                 setMessages((prev) =>
                     prev.map((m) =>
                         m.id === id
                             ? {
                                   ...m,
-                                  response: [
-                                      "Désolé, une erreur est survenue lors de la récupération de la réponse.",
-                                  ],
+                                  response: ["Désolé, une erreur est survenue lors de la récupération de la réponse."],
                               }
                             : m,
                     ),
@@ -80,5 +71,5 @@ export const useChat = ({
         [getResponse],
     );
 
-    return { messages, sendMessage, isLoading };
+    return { messages, setMessages, sendMessage, isLoading };
 };

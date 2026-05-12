@@ -1,15 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-    Box,
-    Button,
-    HStack,
-    Spinner,
-    Stack,
-    Text,
-    VStack,
-    useColorModeValue,
-    useDisclosure,
-} from "@chakra-ui/react";
+import { Box, Button, HStack, Spinner, Stack, Text, VStack, useColorModeValue, useDisclosure } from "@chakra-ui/react";
 import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
@@ -24,18 +14,15 @@ import { useIsDark } from "hooks/useIsDark";
 const SESSION_ERROR_MESSAGES = {
     not_found: {
         title: "Workspace introuvable",
-        description:
-            "Ce workspace n'existe pas ou a été supprimé. Vérifiez l'URL ou retournez au tableau de bord.",
+        description: "Ce workspace n'existe pas ou a été supprimé. Vérifiez l'URL ou retournez au tableau de bord.",
     },
     unauthorized: {
         title: "Accès non autorisé",
-        description:
-            "Vous n'avez pas accès à ce workspace. Contactez un administrateur.",
+        description: "Vous n'avez pas accès à ce workspace. Contactez un administrateur.",
     },
     unknown: {
         title: "Une erreur est survenue",
-        description:
-            "Impossible de charger la session d'onboarding. Réessayez plus tard.",
+        description: "Impossible de charger la session d'onboarding. Réessayez plus tard.",
     },
 };
 
@@ -67,14 +54,11 @@ const OnboardingContent: React.FC = () => {
     const CurrentStepComponent = currentStepConfig.component;
 
     const handleUpdateData = useCallback(
-        (data: Parameters<typeof updateStepData>[1]) =>
-            updateStepData(currentStepConfig.id, data),
+        (data: Parameters<typeof updateStepData>[1]) => updateStepData(currentStepConfig.id, data),
         [updateStepData, currentStepConfig.id],
     );
 
-    const [justCompletedStep, setJustCompletedStep] = useState<number | null>(
-        null,
-    );
+    const [justCompletedStep, setJustCompletedStep] = useState<number | null>(null);
     const prevStepRef = useRef(currentStep);
 
     useEffect(() => {
@@ -83,9 +67,7 @@ const OnboardingContent: React.FC = () => {
 
         window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => {
-            const container = document.querySelector(
-                "[data-onboarding-container]",
-            ) as HTMLElement;
+            const container = document.querySelector("[data-onboarding-container]") as HTMLElement;
             container?.scrollTo({ top: 0, behavior: "smooth" });
         }, 50);
 
@@ -123,35 +105,18 @@ const OnboardingContent: React.FC = () => {
                     align="center"
                     textAlign="center"
                 >
-                    <Box
-                        p={4}
-                        bg={isDark ? "grey.800" : "grey.100"}
-                        borderRadius="12px"
-                    >
-                        <AlertTriangle
-                            size={32}
-                            color={isDark ? "#f87171" : "#ef4444"}
-                        />
+                    <Box p={4} bg={isDark ? "grey.800" : "grey.100"} borderRadius="12px">
+                        <AlertTriangle size={32} color={isDark ? "#f87171" : "#ef4444"} />
                     </Box>
                     <VStack spacing={2}>
-                        <Text
-                            fontSize="xl"
-                            fontWeight="semibold"
-                            color={isDark ? "white" : "grey.900"}
-                        >
+                        <Text fontSize="xl" fontWeight="semibold" color={isDark ? "white" : "grey.900"}>
                             {title}
                         </Text>
-                        <Text
-                            fontSize="sm"
-                            color={isDark ? "grey.400" : "grey.600"}
-                        >
+                        <Text fontSize="sm" color={isDark ? "grey.400" : "grey.600"}>
                             {description}
                         </Text>
                     </VStack>
-                    <Button
-                        colorScheme={currentDarkTheme.colorScheme}
-                        onClick={() => void navigate("/dashboard")}
-                    >
+                    <Button colorScheme={currentDarkTheme.colorScheme} onClick={() => void navigate("/dashboard")}>
                         Retour au tableau de bord
                     </Button>
                 </VStack>
@@ -163,13 +128,7 @@ const OnboardingContent: React.FC = () => {
         <Stack h="100vh" bg={isDark ? "grey.950" : "grey.50"} spacing={0}>
             <OnboardingHeader onOpenDrawer={onOpen} />
 
-            <HStack
-                w="100%"
-                h="calc(100vh - 90px)"
-                p={{ base: "12px", md: "24px" }}
-                spacing={0}
-                align="stretch"
-            >
+            <HStack w="100%" h="calc(100vh - 90px)" p={{ base: "12px", md: "24px" }} spacing={0} align="stretch">
                 <OnboardingSidebar
                     justCompletedStep={justCompletedStep}
                     isDrawerOpen={isOpen}
@@ -190,14 +149,7 @@ const OnboardingContent: React.FC = () => {
                     data-onboarding-container
                     {...containerStyles}
                 >
-                    <VStack
-                        h="100%"
-                        align="start"
-                        spacing={0}
-                        w="100%"
-                        justify="space-between"
-                        minH={0}
-                    >
+                    <VStack h="100%" align="start" spacing={0} w="100%" justify="space-between" minH={0}>
                         <Stack
                             w="100%"
                             spacing={4}

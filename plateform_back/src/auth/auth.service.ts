@@ -38,10 +38,13 @@ export class AuthService {
 
         const token = this.jwtService.sign(tokenPayload);
 
+        const isProduction = this.configService.get('NODE_ENV') === 'production';
+
         response.cookie('Authentication', token, {
-            secure: true,
+            secure: isProduction,
             httpOnly: true,
             expires: expires,
+            sameSite: isProduction ? 'none' : 'lax',
         });
 
         return { tokenPayload };

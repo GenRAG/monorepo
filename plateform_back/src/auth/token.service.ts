@@ -1,8 +1,4 @@
-import {
-    BadRequestException,
-    Injectable,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomInt } from 'crypto';
 import { User } from 'generated/prisma';
@@ -25,9 +21,7 @@ export class TokenService {
         const now = Date.now();
 
         const tokenResendIntervalMs = ms(
-            this.configService.getOrThrow<string>(
-                'TOKEN_RESEND_INTERVAL',
-            ) as ms.StringValue,
+            this.configService.getOrThrow<string>('TOKEN_RESEND_INTERVAL') as ms.StringValue,
         );
 
         const user = await this.usersService.findOneWithCredentials({ email });
@@ -37,17 +31,12 @@ export class TokenService {
 
         if (
             user.emailVerificationLastSentAt &&
-            now - user.emailVerificationLastSentAt.getTime() <
-                tokenResendIntervalMs
+            now - user.emailVerificationLastSentAt.getTime() < tokenResendIntervalMs
         ) {
             const remaining = Math.ceil(
-                (tokenResendIntervalMs -
-                    (now - user.emailVerificationLastSentAt.getTime())) /
-                    1000,
+                (tokenResendIntervalMs - (now - user.emailVerificationLastSentAt.getTime())) / 1000,
             );
-            throw new BadRequestException(
-                `Please wait ${remaining}s before requesting a new code.`,
-            );
+            throw new BadRequestException(`Please wait ${remaining}s before requesting a new code.`);
         }
 
         const emailVerificationToken = randomInt(100000, 1000000);
@@ -61,16 +50,11 @@ export class TokenService {
         });
 
         if (this.configService.get('SEND_EMAILS') === 'true') {
-            await this.brevoService.sendConfirmationEmail(
-                user.email,
-                emailVerificationToken,
-            );
+            await this.brevoService.sendConfirmationEmail(user.email, emailVerificationToken);
         }
     }
 
-    async verifyEmailToken(
-        emailVerificationToken: VerifyTokenRequest,
-    ): Promise<User> {
+    async verifyEmailToken(emailVerificationToken: VerifyTokenRequest): Promise<User> {
         const { email, token } = emailVerificationToken;
         const user = await this.usersService.findOneWithCredentials({ email });
 
@@ -83,17 +67,10 @@ export class TokenService {
         }
 
         if (user.emailVerificationLastSentAt) {
-            const tokenAgeMs =
-                Date.now() - user.emailVerificationLastSentAt.getTime();
-            const tokenValidityMs = ms(
-                this.configService.getOrThrow<string>(
-                    'TOKEN_VALIDITY',
-                ) as ms.StringValue,
-            );
+            const tokenAgeMs = Date.now() - user.emailVerificationLastSentAt.getTime();
+            const tokenValidityMs = ms(this.configService.getOrThrow<string>('TOKEN_VALIDITY') as ms.StringValue);
             if (tokenAgeMs > tokenValidityMs) {
-                throw new UnauthorizedException(
-                    'Email verification token has expired.',
-                );
+                throw new UnauthorizedException('Email verification token has expired.');
             }
         }
 
@@ -113,23 +90,14 @@ export class TokenService {
         const now = Date.now();
 
         const tokenResendIntervalMs = ms(
-            this.configService.getOrThrow<string>(
-                'TOKEN_RESEND_INTERVAL',
-            ) as ms.StringValue,
+            this.configService.getOrThrow<string>('TOKEN_RESEND_INTERVAL') as ms.StringValue,
         );
 
-        if (
-            user.passwordResetLastSentAt &&
-            now - user.passwordResetLastSentAt.getTime() < tokenResendIntervalMs
-        ) {
+        if (user.passwordResetLastSentAt && now - user.passwordResetLastSentAt.getTime() < tokenResendIntervalMs) {
             const remaining = Math.ceil(
-                (tokenResendIntervalMs -
-                    (now - user.passwordResetLastSentAt.getTime())) /
-                    1000,
+                (tokenResendIntervalMs - (now - user.passwordResetLastSentAt.getTime())) / 1000,
             );
-            throw new BadRequestException(
-                `Please wait ${remaining}s before requesting a new code.`,
-            );
+            throw new BadRequestException(`Please wait ${remaining}s before requesting a new code.`);
         }
 
         const passwordResetToken = randomInt(100000, 1000000);
@@ -143,10 +111,7 @@ export class TokenService {
         });
 
         if (this.configService.get('SEND_EMAILS') === 'true') {
-            await this.brevoService.sendPasswordResetEmail(
-                user.email,
-                passwordResetToken,
-            );
+            await this.brevoService.sendPasswordResetEmail(user.email, passwordResetToken);
         }
     }
 }

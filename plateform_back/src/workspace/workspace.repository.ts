@@ -5,6 +5,8 @@ import {
     Workspace,
     PlanTier,
     CreditTransactionType,
+    AgentStatus,
+    DocumentStatus,
 } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { getPlanConfig } from 'src/plans/plans.config';
@@ -158,6 +160,146 @@ export class WorkspaceRepository {
     async delete(id: string): Promise<Workspace> {
         return this.prisma.workspace.delete({
             where: { id },
+        });
+    }
+
+    async getAgentStats(workspaceId: string) {
+        const [production, development, items] = await this.prisma.$transaction([
+            this.prisma.agent.count({
+                where: { workspaceId, status: AgentStatus.PRODUCTION },
+            }),
+            this.prisma.agent.count({
+                where: { workspaceId, status: AgentStatus.DEVELOPMENT },
+            }),
+            this.prisma.agent.findMany({
+                where: { workspaceId },
+                select: {
+                    id: true,
+                    name: true,
+                    status: true,
+                    _count: {
+                        select: { conversations: true, documents: true },
+                    },
+                    deployments: {
+                        orderBy: { version: 'desc' },
+                        take: 1,
+                        select: { version: true },
+                    },
+                },
+                orderBy: { updatedAt: 'desc' },
+            }),
+        ]);
+        return { production, development, items };
+    }
+
+    async getDocumentStats(workspaceId: string) {
+        const [indexed, processing, failed, total] = await this.prisma.$transaction([
+            this.prisma.document.count({
+                where: {
+                    agent: { workspaceId },
+                    status: DocumentStatus.INDEXED,
+                },
+            }),
+            this.prisma.document.count({
+                where: {
+                    agent: { workspaceId },
+                    status: DocumentStatus.PROCESSING,
+                },
+            }),
+            this.prisma.document.count({
+                where: {
+                    agent: { workspaceId },
+                    status: DocumentStatus.FAILED,
+                },
+            }),
+            this.prisma.document.count({
+                where: { agent: { workspaceId } },
+            }),
+        ]);
+        return { indexed, processing, failed, total };
+    }
+
+    async getConversationStats(workspaceId: string, since24h: Date, since30d: Date) {
+        const [total, last24h, daily, hourly, recent] = await this.prisma.$transaction([
+            this.prisma.conversation.count({ where: { workspaceId } }),
+            this.prisma.conversation.count({
+                where: { workspaceId, createdAt: { gte: since24h } },
+            }),
+            this.prisma.$queryRaw<{ day: Date; count: bigint }[]>`
+            SELECT DATE_TRUNC('day', "createdAt")::date AS day, COUNT(*)::int AS count
+            FROM "Conversation"
+            WHERE "workspaceId" = ${workspaceId} AND "createdAt" >= ${since30d}
+            GROUP BY day ORDER BY day ASC
+        `,
+            this.prisma.$queryRaw<{ hour: Date; count: bigint }[]>`
+            SELECT DATE_TRUNC('hour', "createdAt") AS hour, COUNT(*)::int AS count
+            FROM "Conversation"
+            WHERE "workspaceId" = ${workspaceId} AND "createdAt" >= ${since24h}
+            GROUP BY hour ORDER BY hour ASC
+        `,
+            this.prisma.conversation.findMany({
+                where: { workspaceId },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                select: {
+                    title: true,
+                    createdAt: true,
+                    agent: { select: { name: true } },
+                },
+            }),
+        ]);
+        return { total, last24h, daily, hourly, recent };
+    }
+
+    async getRecentActivity(workspaceId: string) {
+        const [docs, deployments] = await this.prisma.$transaction([
+            this.prisma.document.findMany({
+                where: { agent: { workspaceId } },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                select: {
+                    name: true,
+                    status: true,
+                    createdAt: true,
+                    agent: { select: { name: true } },
+                },
+            }),
+            this.prisma.agentVersion.findMany({
+                where: {
+                    agent: { workspaceId },
+                    toStatus: AgentStatus.PRODUCTION,
+                },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                select: {
+                    version: true,
+                    createdAt: true,
+                    agent: { select: { name: true } },
+                },
+            }),
+        ]);
+
+        const recentActivity = [
+            ...docs.map((doc) => ({ kind: 'doc' as const, createdAt: doc.createdAt, item: doc })),
+            ...deployments.map((deployment) => ({
+                kind: 'deployment' as const,
+                createdAt: deployment.createdAt,
+                item: deployment,
+            })),
+        ]
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .slice(0, 5);
+
+        return {
+            docs: recentActivity.filter((entry) => entry.kind === 'doc').map((entry) => entry.item),
+            deployments: recentActivity.filter((entry) => entry.kind === 'deployment').map((entry) => entry.item),
+        };
+    }
+
+    async getCreditBalance(workspaceId: string) {
+        return this.prisma.creditBalance.findUnique({
+            where: { workspaceId },
+            select: { balance: true },
         });
     }
 }

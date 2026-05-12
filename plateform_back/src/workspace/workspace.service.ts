@@ -1,19 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
-import {
-    WorkspaceRepository,
-    WorkspaceWithUsers,
-    WorkspacePayload,
-} from 'src/workspace/workspace.repository';
+import { WorkspaceStatsService } from 'src/workspace/workspace-stats.service';
+import { WorkspaceRepository, WorkspaceWithUsers, WorkspacePayload } from 'src/workspace/workspace.repository';
 
 @Injectable()
 export class WorkspaceService {
-    constructor(private readonly workspaceRepository: WorkspaceRepository) {}
+    constructor(
+        private readonly workspaceRepository: WorkspaceRepository,
+        private readonly workspaceStatsService: WorkspaceStatsService,
+    ) {}
 
-    async create(
-        workspaceData: CreateWorkspaceRequest,
-        userId: string,
-    ): Promise<WorkspaceWithUsers> {
+    async create(workspaceData: CreateWorkspaceRequest, userId: string): Promise<WorkspaceWithUsers> {
         const { name, description, plan } = workspaceData;
         return this.workspaceRepository.create({
             name,
@@ -41,5 +38,10 @@ export class WorkspaceService {
             throw new NotFoundException('Workspace not found');
         }
         await this.workspaceRepository.delete(workspaceId);
+    }
+
+    async getStats(workspaceId: string) {
+        await this.findOne(workspaceId);
+        return this.workspaceStatsService.getStats(workspaceId);
     }
 }

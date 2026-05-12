@@ -17,7 +17,9 @@ export class TokenService {
         private readonly usersService: UsersService,
         private readonly configService: ConfigService,
         private readonly brevoService: BrevoService,
-    ) {}
+    ) {
+        console.log('BREVO_API_KEY:', process.env.BREVO_API_KEY?.substring(0, 5) + '...');
+    }
 
     async generateAndSendVerificationToken(email: string): Promise<void> {
         const now = Date.now();

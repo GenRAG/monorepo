@@ -28,7 +28,7 @@ export const AddResponse = {
             id: "tooltip-workflow-5",
         },
         {
-            name: "Instruction Prompt",
+            name: "system_prompt",
             type: TaskParamType.STRING,
             nodeType: TaskType.INSTRUCTION,
             helperText: "Enter the instruction prompt for the response",

@@ -38,6 +38,15 @@ export const LLMS: ModelOption[] = [
         priceOutput: 0.25,
         badge: "balanced",
     },
+    {
+        id: "google/gemini-2.5-flash",
+        label: "Gemini 2.5 Flash",
+        provider: "Google",
+        description: "Gemini 2.5 optimized for latency-sensitive applications",
+        priceInput: 1,
+        priceOutput: 4,
+        badge: "fast",
+    }
 ];
 
 export const LLMSRewriter: ModelOption[] = [
@@ -77,6 +86,15 @@ export const LLMSRewriter: ModelOption[] = [
         priceOutput: 0.25,
         badge: "balanced",
     },
+    {
+        id: "google/gemini-2.5-flash",
+        label: "Gemini 2.5 Flash",
+        provider: "Google",
+        description: "Fast rewriting with strong contextual understanding",
+        priceInput: 1,
+        priceOutput: 4,
+        badge: "fast",
+    }
 ];
 
 export const ReRanker: ModelOption[] = [
@@ -116,6 +134,15 @@ export const ReRanker: ModelOption[] = [
         priceOutput: 15,
         badge: "smart",
     },
+    {
+        id: "google/gemini-2.5-flash",
+        label: "Gemini 2.5 Flash",
+        provider: "Google",
+        description: "Fast reranking with good contextual understanding",
+        priceInput: 1,
+        priceOutput: 4,
+        badge: "fast",
+    }
 ];
 
 export const LLMS_LABELS = LLMS.map((m) => m.label);

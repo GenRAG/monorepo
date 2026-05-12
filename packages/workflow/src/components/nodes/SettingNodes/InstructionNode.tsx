@@ -23,11 +23,13 @@ const InstructionCard = ({
     isSelected,
     onCardClick,
     onEditClick,
+    settingLabel,
 }: {
     text: string;
     isSelected: boolean;
     onCardClick: () => void;
     onEditClick: (e: React.MouseEvent) => void;
+    settingLabel?: string;
 }) => {
     const bg = useColorModeValue("#FFFFFF", "#3D3D3D");
     const bgHover = useColorModeValue("#ECFDF9", "#464646");
@@ -88,7 +90,7 @@ const InstructionCard = ({
                         textTransform="uppercase"
                         color={subColor}
                     >
-                        Instruction
+                        {settingLabel ?? "Instruction"}
                     </Text>
                 </HStack>
                 <IconButton
@@ -230,9 +232,9 @@ export const InstructionNode = ({ id, data, selected, onNodeClick }: WorkflowNod
                                 onChange={handleTextareaChange}
                                 placeholder="Write your instruction…"
                                 size="sm"
-                                minH="80px"
-                                maxH="160px"
-                                resize="vertical"
+                                minH="120px"
+                                maxH="240px"
+                                resize="none"
                                 borderColor="#34D3A9"
                                 borderTopRadius="8px"
                                 fontSize="xs"
@@ -288,6 +290,7 @@ export const InstructionNode = ({ id, data, selected, onNodeClick }: WorkflowNod
                             isSelected={selected}
                             onCardClick={handleCardClick}
                             onEditClick={handleEditClick}
+                            settingLabel={nodeData.settingLabel}
                         />
                     </motion.div>
                 )}

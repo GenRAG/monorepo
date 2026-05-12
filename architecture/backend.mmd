@@ -1,0 +1,441 @@
+---
+config:
+  layout: elk
+---
+classDiagram
+direction TB
+	namespace Application {
+                class AppModule
+
+                class ConfigModule
+
+                class LoggerModule
+
+	}
+
+	namespace FeatureModules {
+
+                class UsersModule
+
+                class AuthModule
+
+                class WorkspaceModule
+
+                class AgentModule
+
+                class DocumentModule
+
+                class PrismaModule
+
+                class AgentRuntimeModule
+
+                class BillingModule
+
+                class QueueModule
+
+	}
+
+	namespace HTTPLayer {
+                class HttpTitle["HTTP LAYER"]
+
+                class UsersController
+
+                class AuthController
+
+                class WorkspaceController
+
+                class AgentController
+
+                class DocumentController
+
+                class WorkflowController
+
+                class AgentRuntimeController
+
+                class BillingController
+
+	}
+
+	namespace BusinessLayer {
+                class UsersService {
+                        +createUser(request)
+                        +getUser(filter)
+                        +getUsers()
+                        +updateUser(params)
+                        +deleteUser(id)
+                }
+
+                class AuthService {
+                        +login(user, response)
+                        +register(registerBody)
+                        +verifyUser(email, password)
+                        +initiatePasswordReset(email)
+                        +verifyPasswordResetToken(verifyTokenBody)
+                }
+
+                class TokenService {
+                        +generateAndSendVerificationToken(email)
+                        +verifyEmailToken(emailVerificationToken)
+                        +generateAndSendPasswordResetToken(user)
+                }
+
+                class WorkspaceService {
+                        +createWorkspace(workspaceData, userId)
+                        +getAllWorkspacesForUser(userId)
+                        +getWorkspaceById(workspaceId, userId)
+                }
+
+                class AgentService {
+                        +getAllAgents(allAgentQuery)
+                        +getAgent(agentID: string)
+                }
+
+                class DocumentService {
+                        +uploadDocument()
+                        +deleteDocument()
+                        +updateDocument()
+                        +getDocumentsFromAgent()
+                        +getDocument()
+                        -enqueueIndexingJob(documentId, s3Key)
+                }
+
+                class WorkflowService {
+                        +updateWorkflow()
+                }
+
+                class BillingService {
+                        +createCheckoutSession()
+                        +createCustomer()
+                        +getSubscription()
+                        +handleWebhook()
+                }
+
+                class StripeService {
+                        +callStripe()
+                }
+
+                class CreditService {
+                        +getBalance(workspaceId)
+                        +addCredits(workspaceId, amount, type)
+                        +deductCredits(workspaceId, amount)
+                        +checkCredits(workspaceId)
+                }
+
+	}
+
+	namespace DocumentQueue {
+                class DocumentQueueProducer {
+                        +addIndexingJob(documentId, s3Key)
+                }
+
+                class DocumentProcessor {
+                        +handleIndexing(job)
+                        -callParsingApi(s3Key)
+                        -updateDocumentStatus(documentId, status)
+                }
+
+                class RedisQueue {
+                        attempts: 5
+                        backoff: exponential
+                }
+	}
+
+	namespace Security {
+
+                class JwtAuthGuard
+
+                class LocalAuthGuard
+
+                class WorkspaceRolesGuard
+
+                class JwtStrategy
+
+                class LocalStrategy
+
+                class RolesInWorkspace
+
+	}
+
+	namespace Infrastructure {
+                class PrismaService
+
+                class JwtService
+
+                class ConfigService
+
+                class PrismaClient
+
+                class S3Service {
+                        +uploadFile(file, key)
+                        +getSignedUrl(key)
+                        +deleteFile(key)
+                }
+
+                class ParsingApiClient {
+                        +indexDocument(s3Key)
+                }
+
+	}
+
+	namespace Runtime {
+                class AgentOrchestrator {
+                        +execute(query, agentId, workspaceId)
+                        -sequenceSteps()
+                }
+
+                class CreditGuard {
+                        +checkOrThrow(workspaceId)
+                }
+
+                class ContextBuilder {
+                        +build(agentId, query)
+                        -loadWorkflow(agentId)
+                        -loadMemory(agentId)
+                }
+
+                class RagHandler {
+                        +query(context)
+                }
+
+                class UsageTracker {
+                        +record(workspaceId, usage)
+                }
+
+                class RagEngineService {
+                        +sendQuery()
+                }
+
+	}
+
+	namespace PrismaModels {
+                class User {
+                        id : String
+                        email : String
+                        name : String
+                        password : String
+                        isEmailVerified : Boolean
+                        emailVerificationToken : Int
+                        passwordResetToken : Int
+                        createdAt : DateTime
+                        updatedAt : DateTime
+                }
+
+                class Workspace {
+                        id : String
+                        name : String
+                        description : String
+                        createdAt : DateTime
+                        updatedAt : DateTime
+                }
+
+                class Agent {
+                        id : String
+                        name : String
+                        description : String
+                        status: AgentStatus
+                        workspaceId : String
+                        createdAt : DateTime
+                        updatedAt : DateTime
+                }
+
+                class Workflow {
+                        id: String
+                        name: String
+                        agentId: String
+                        definition: Json
+                        version: Int
+                        createdAt: DateTime
+                        updatedAt: DateTime
+                }
+
+                class Document {
+                        id: String
+                        name: String
+                        mimeType: String
+                        size: Int
+                        storageKey: String
+                        storageUrl?: String
+                        status: DocumentStatus
+                        agentId: String
+                        createdAt: DateTime
+                        updatedAt: DateTime
+                        checksum: String
+                        indexVersion: Int
+                }
+
+                class DocumentStatus {
+                        UPLOADED
+                        PROCESSING
+                        INDEXED
+                        FAILED
+                }
+
+                class UserWorkspace {
+                        userId : String
+                        workspaceId : String
+                        role : UserRole
+                }
+
+                class UserRole {
+                        ADMIN
+                        EDITOR
+                        VIEWER
+                }
+
+                class AgentStatus {
+                        DEVELOPMENT
+                        STAGING
+                        PRODUCTION
+                }
+
+                class Subscription {
+                        id : String
+                        workspaceId : String
+                        stripeCustomerId : String
+                        stripeSubscriptionId : String
+                        status : SubscriptionStatus
+                        plan : String
+                        monthlyCredits : Int
+                        currentPeriodEnd : DateTime
+                        createdAt : DateTime
+                        updatedAt : DateTime
+                }
+
+                class CreditBalance {
+                        id : String
+                        workspaceId : String
+                        balance : Int
+                        updatedAt : DateTime
+                }
+
+                class CreditTransaction {
+                        id : String
+                        workspaceId : String
+                        amount : Int
+                        type : CreditTransactionType
+                        metadata : Json
+                        createdAt : DateTime
+                }
+
+                class SubscriptionStatus {
+                        ACTIVE
+                        TRIALING
+                        PAST_DUE
+                        CANCELED
+                        INCOMPLETE
+                }
+
+                class CreditTransactionType {
+                        SUBSCRIPTION
+                        USAGE
+                        PURCHASE
+                }
+	}
+
+    <<enumeration>> DocumentStatus
+    <<enumeration>> UserRole
+    <<enumeration>> AgentStatus
+    <<enumeration>> SubscriptionStatus
+    <<enumeration>> CreditTransactionType
+
+    AppModule --> LoggerModule
+    AppModule --> ConfigModule
+    AppModule --> UsersModule
+    AppModule --> AuthModule
+    AppModule --> WorkspaceModule
+    AppModule --> AgentModule
+    AppModule --> DocumentModule
+    AppModule --> BillingModule
+    AppModule --> AgentRuntimeModule
+    AppModule --> QueueModule
+    UsersModule --> PrismaModule
+    WorkspaceModule --> PrismaModule
+    AgentModule --> PrismaModule
+    DocumentModule --> PrismaModule
+    DocumentModule --> QueueModule
+    BillingModule --> PrismaModule
+    AuthModule --> UsersModule
+    AuthModule --> ConfigModule
+
+    UsersController --> UsersService
+    AuthController --> AuthService
+    AuthController --> TokenService
+    WorkspaceController --> WorkspaceService
+    AgentController --> AgentService
+    DocumentController --> DocumentService
+    WorkflowController --> WorkflowService
+    AgentRuntimeController --> AgentOrchestrator
+    BillingController --> BillingService
+
+    PrismaService --|> PrismaClient
+    AuthService --> UsersService
+    AuthService --> TokenService
+    AuthService --> JwtService
+    AuthService --> ConfigService
+    TokenService --> UsersService
+    TokenService --> ConfigService
+    DocumentService --> ConfigService
+    DocumentService --> S3Service
+    DocumentService --> DocumentQueueProducer
+    WorkspaceService --> PrismaService
+    UsersService --> PrismaService
+    WorkspaceRolesGuard --> PrismaService
+    WorkflowService --> PrismaService
+    BillingService --> PrismaService
+    BillingService --> StripeService
+    BillingService --> CreditService
+    CreditService --> PrismaService
+
+    DocumentQueueProducer --> RedisQueue
+    RedisQueue --> DocumentProcessor
+    DocumentProcessor --> ParsingApiClient
+    DocumentProcessor --> PrismaService
+
+    AgentOrchestrator --> CreditGuard
+    AgentOrchestrator --> ContextBuilder
+    AgentOrchestrator --> RagHandler
+    AgentOrchestrator --> UsageTracker
+    CreditGuard --> CreditService
+    ContextBuilder --> AgentService
+    ContextBuilder --> WorkflowService
+    RagHandler --> RagEngineService
+    UsageTracker --> CreditService
+    UsageTracker --> PrismaService
+
+    LocalAuthGuard ..> LocalStrategy
+    JwtAuthGuard ..> JwtStrategy
+    LocalStrategy --> AuthService
+    JwtStrategy --> ConfigService
+
+    WorkspaceController ..> JwtAuthGuard
+    WorkspaceController ..> WorkspaceRolesGuard
+    WorkspaceController ..> RolesInWorkspace
+    UsersController ..> JwtAuthGuard
+    DocumentController ..> JwtAuthGuard
+    WorkflowController ..> JwtAuthGuard
+    AgentController ..> JwtAuthGuard
+    AuthController ..> LocalAuthGuard
+    AgentRuntimeController ..> JwtAuthGuard
+    BillingController ..> JwtAuthGuard
+
+    User "1" --> "0..*" UserWorkspace
+    Workspace "1" --> "0..*" UserWorkspace
+    Workspace "1" --> "0..*" Agent
+    UserWorkspace --> UserRole
+    Agent "1" --> "0..*" Document
+    Agent "1" --> "0..*" Workflow
+    Document --> DocumentStatus
+    Agent --> AgentStatus
+    Workspace "1" --> "0..1" Subscription
+    Workspace "1" --> "1" CreditBalance
+    Workspace "1" --> "0..*" CreditTransaction
+
+    style Application fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style FeatureModules fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style HTTPLayer fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style BusinessLayer fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style DocumentQueue fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style Security fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style Infrastructure fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style Runtime fill:#f3f3f3,stroke:#999,stroke-width:1px
+    style PrismaModels fill:#f3f3f3,stroke:#999,stroke-width:1px

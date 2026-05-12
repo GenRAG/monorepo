@@ -1,0 +1,172 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* ------ Fonts -------- */
+/* PP Fragment */
+@font-face {
+    font-family: 'PP Fragment Serif';
+    font-weight: 400;
+    src: url('../assets/fonts/IBMPlexSans-VariableFont_wdth,wght.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'PP Fragment Sans';
+    font-weight: 400;
+    src: url('../assets/fonts/IBMPlexSans-VariableFont_wdth,wght.ttf') format('opentype');
+}
+
+/* ------ Breakpoints -------- */
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1440px;
+$breakpoint-3xl: 1920px;
+/* --------------------------- */
+
+/* ------ paddings -------- */
+@media (max-width: $breakpoint-xl) {
+    :root {
+        --genrag-p-spacing-2xs: 4px;
+        --genrag-p-spacing-xs: 8px;
+        --genrag-p-spacing-sm: 12px;
+        --genrag-p-spacing-md: 16px;
+        --genrag-p-spacing-lg: 24px;
+        --genrag-p-spacing-xl: 32px;
+    }
+}
+@media (min-width: $breakpoint-xl) {
+    :root {
+        --genrag-p-spacing-2xs: 4px;
+        --genrag-p-spacing-xs: 8px;
+        --genrag-p-spacing-sm: 12px;
+        --genrag-p-spacing-md: 16px;
+        --genrag-p-spacing-lg: 24px;
+        --genrag-p-spacing-xl: 32px;
+    }
+}
+/* ------ paddings -------- */
+
+/* ------ horizontal spacing -------- */
+@media (max-width: $breakpoint-xl) {
+    :root {
+        --genrag-p-spacing-2xs: 4px;
+        --genrag-p-spacing-xs: 8px;
+        --genrag-p-spacing-sm: 12px;
+        --genrag-p-spacing-md: 16px;
+        --genrag-p-spacing-lg: 24px;
+        --genrag-p-spacing-xl: 32px;
+    }
+}
+@media (min-width: $breakpoint-xl) {
+    :root {
+        --genrag-h-spacing-2xs: 4px;
+        --genrag-h-spacing-xs: 8px;
+        --genrag-h-spacing-sm: 12px;
+        --genrag-h-spacing-md: 16px;
+        --genrag-h-spacing-lg: 24px;
+        --genrag-h-spacing-xl: 32px;
+    }
+}
+/* ------ horizontal spacing -------- */
+
+/* ------ vertical spacing -------- */
+@media (max-width: $breakpoint-xl) {
+    :root {
+        --genrag-v-spacing-2xs: 4px;
+        --genrag-v-spacing-xs: 8px;
+        --genrag-v-spacing-sm: 12px;
+        --genrag-v-spacing-md: 16px;
+        --genrag-v-spacing-lg: 24px;
+        --genrag-v-spacing-xl: 32px;
+    }
+}
+@media (min-width: $breakpoint-xl) {
+    :root {
+        --genrag-v-spacing-2xs: 4px;
+        --genrag-v-spacing-xs: 8px;
+        --genrag-v-spacing-sm: 12px;
+        --genrag-v-spacing-md: 16px;
+        --genrag-v-spacing-lg: 24px;
+        --genrag-v-spacing-xl: 32px;
+    }
+}
+/* ------ vertical spacing -------- */
+
+/* ------ heading size -------- */
+// // Desktop
+//     @media (min-width: $breakpoint-xl) {
+//     :root {
+//         --genrag-heading-size-xs: 14px;
+//         --genrag-heading-size-sm: 16px;
+//         --genrag-heading-size-md: 20px;
+//         --genrag-heading-size-lg: 24px;
+//         --genrag-heading-size-xl: 30px;
+//         --genrag-heading-size-2xl: 36px;
+//         --genrag-heading-size-3xl: 40px;
+//     }
+// }
+
+// // Mobile
+// @media (max-width: $breakpoint-xl) {
+//     :root {
+//         --genrag-heading-size-xs: 14px;
+//         --genrag-heading-size-sm: 16px;
+//         --genrag-heading-size-md: 20px;
+//         --genrag-heading-size-lg: 24px;
+//         --genrag-heading-size-xl: 30px;
+//         --genrag-heading-size-2xl: 36px;
+//         --genrag-heading-size-3xl: 48px;
+
+//     }
+// }
+
+:root {
+        --genrag-heading-size-xs: 14px;
+        --genrag-heading-size-sm: 16px;
+        --genrag-heading-size-md: 20px;
+        --genrag-heading-size-lg: 24px;
+        --genrag-heading-size-xl: 30px;
+        --genrag-heading-size-2xl: 36px;
+        --genrag-heading-size-3xl: 56px;
+}
+/* ------ heading size -------- */
+
+/* ------ Lucide -------- */
+.lucide {
+  stroke-width: 1.5px;
+}
+/* ------ Lucide -------- */
+
+/* ------ Scrollbar dark mode: thumb visible, track/background transparent -------- */
+[data-theme="dark"] *,
+.chakra-ui-dark * {
+  &::-webkit-scrollbar {
+    background: transparent !important;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(121, 121, 121, 0.5) !important;
+    border-radius: 4px;
+    width: 2px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7) !important;
+  }
+}
+
+[data-theme="light"] *,
+.chakra-ui-light * {
+  &::-webkit-scrollbar {
+    background: transparent !important;
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(185, 185, 185, 0.5) !important;
+    border-radius: 4px;
+    width: 2px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7) !important;
+  }
+}
+/* ------ Scrollbar dark mode -------- */

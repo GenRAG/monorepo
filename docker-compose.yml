@@ -1,81 +1,116 @@
 services:
 
-  client:
-    build: ./plateform_front
-    container_name: web
-    restart: unless-stopped
-    ports:
-      - "3003:3003"
-    env_file:
-      - ./plateform_front/.env
-    volumes:
-      - ./plateform_front:/usr/src/app
-      - /usr/src/app/node_modules
-    command: >
-      sh -c "yarn dev -- --port 3003 --hostname 0.0.0.0"
-
-
-  vitrine:
-    build: ./vitrine_front
-    container_name: vitrine
-    restart: unless-stopped
-    ports:
-      - "3004:3004"
-    env_file:
-      - ./vitrine_front/.env
-    volumes:
-      - ./vitrine_front:/usr/src/app
-      - /usr/src/app/node_modules
-    command: >
-      sh -c "yarn dev -- --port 3004 --hostname 0.0.0.0"
-
-
-  #postgres:
-  #  image: postgres:15
-  #  container_name: postgres
-  #  environment:
-  #    POSTGRES_USER: admin
-  #    POSTGRES_PASSWORD: password
-  #    POSTGRES_DB: database
-  #  ports:
-  #    - "5433:5433"
-  #  volumes:
-  #    - postgres_data:/var/lib/postgresql/data
-  #  healthcheck:
-  #    test: ["CMD-SHELL", "pg_isready -U admin -d database"]
-  #    interval: 10s
-  #    timeout: 5s
-  #
-  #pgadmin:
-  #  image: dpage/pgadmin4
-  #  container_name: pgadmin
-  #  environment:
-  #    PGADMIN_DEFAULT_EMAIL: admin@example.com
-  #    PGADMIN_DEFAULT_PASSWORD: admin
-  #  ports:
-  #    - "5050:80"
-  #  depends_on:
-  #    - postgres
-  #  volumes:
-  #    - pgadmin_data:/var/lib/pgadmin
-#
-  #server:
-  # build: ./plateform_back
-  # container_name: server
+  #client:
+  # build: ./plateform_front
+  # container_name: web
   # restart: unless-stopped
   # ports:
-  #   - "8080:8080"
-  # depends_on:
-  #   postgres:
-  #     condition: service_healthy
+  #   - "3003:3003"
   # env_file:
-  #   - ./plateform_back/.env
-  # command: >
-  #   sh -c "yarn start:dev"
+  #   - ./plateform_front/.env
   # volumes:
-  #   - ./plateform_back:/usr/src/app
+  #   - ./plateform_front:/usr/src/app
   #   - /usr/src/app/node_modules
+  # command: >
+  #   sh -c "yarn dev -- --port 3003 --hostname 0.0.0.0"
+#
+#
+  #vitrine:
+  #  build: ./vitrine_front
+  #  container_name: vitrine
+  #  restart: unless-stopped
+  #  ports:
+  #    - "3004:3004"
+  #  env_file:
+  #    - ./vitrine_front/.env
+  #  volumes:
+  #    - ./vitrine_front:/usr/src/app
+  #    - /usr/src/app/node_modules
+  #  command: >
+  #    sh -c "yarn dev -- --port 3004 --hostname 0.0.0.0"
 
-#volumes:
-#  postgres_data:
-#  pgadmin_data:
+
+  postgres:
+    image: postgres:15.3
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d database"]
+      interval: 10s
+      timeout: 5s
+  
+  postgres_test:
+    image: postgres:15.3
+    container_name: postgres_test
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database_test
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d database_test"]
+      interval: 10s
+      timeout: 5s
+
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  server:
+   build: ./plateform_back
+   container_name: server
+   restart: unless-stopped
+   ports:
+     - "8080:8080"
+   depends_on:
+     redis:
+       condition: service_healthy
+     postgres:
+       condition: service_healthy
+   environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+   env_file:
+     - ./plateform_back/.env
+   command: >
+    sh -c "yarn start:dev"
+   volumes:
+    - ./plateform_back:/usr/src/app
+    - /usr/src/app/node_modules
+
+  
+  redis:
+    image: redis:7.0-alpine
+    container_name: genrag-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  postgres_test_data:

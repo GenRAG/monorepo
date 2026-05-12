@@ -1,0 +1,27 @@
+model Conversation {
+    id String @id @default(cuid())
+    workspaceId String
+    agentId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    title String
+    messages Message[]
+    workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+    id String @id @default(cuid())
+    conversationId String
+    sender MessageSender
+    content String
+    metadata Json?
+    createdAt DateTime @default(now())
+    conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+enum MessageSender {
+    USER
+    AGENT
+    SYSTEM
+}

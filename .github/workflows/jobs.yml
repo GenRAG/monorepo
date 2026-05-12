@@ -12,6 +12,88 @@ env:
   MIRROR_SSH: "git@github.com:EpitechPromo2027/G-EIP-600-REN-6-1-eip-valentin.peron.git"
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'plateform_back/**'
+              - '.github/workflows/jobs.yml'
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15.3
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: database_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U admin -d database_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: plateform_back
+
+    env:
+      DATABASE_URL: postgres://admin:password@localhost:5432/database_test
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+      FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+      BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+      TOKEN_VALIDITY: ${{ secrets.TOKEN_VALIDITY }}
+      TOKEN_RESEND_INTERVAL: ${{ secrets.TOKEN_RESEND_INTERVAL }}
+      RAGENGINE_URL: ${{ secrets.RAGENGINE_URL }}
+      RAGENGINE_API_KEY: ${{ secrets.RAGENGINE_API_KEY }}
+      SEND_EMAILS: "false"
+      NODE_ENV: test
+      PORT: 8081
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+          cache-dependency-path: plateform_back/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: yarn prisma generate
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+
+      - name: Unit tests
+        run: yarn test --runInBand
+
+      - name: Run migrations
+        run: npx prisma migrate deploy
+
+      - name: E2E tests
+        run: yarn test:e2e
+
   mirror:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'

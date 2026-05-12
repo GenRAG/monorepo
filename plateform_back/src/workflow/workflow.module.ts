@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { WorkflowService } from './workflow.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { WorkflowController } from 'src/workflow/workflow.controller';
+import { WorkflowRepository } from 'src/workflow/workflow.repository';
+
+@Module({
+    controllers: [WorkflowController],
+    providers: [WorkflowService, WorkflowRepository],
+    imports: [PrismaModule],
+    exports: [WorkflowService],
+})
+export class WorkflowModule {}

@@ -9,37 +9,30 @@ import {
     type ChartOptions,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import {
-    Box,
-    HStack,
-    Skeleton,
-    VStack,
-    useColorMode,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Skeleton, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { BarChart2 } from "lucide-react";
 import { useState } from "react";
-import { ACTIVITY_DATA, type Period } from "pages/Dashboard/data";
+import { type Period } from "pages/Dashboard/data";
 import { ActivityMetrics } from "components/Dashboard/ActivityChart/ActivityMetrics";
 import { ActivityHeader } from "components/Dashboard/ActivityChart/ActivityHeader";
 import { ActivityLegend } from "components/Dashboard/ActivityChart/ActivityLegend";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
+import { WorkspaceStats } from "types/workspace";
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip);
 
 interface ActivityChartProps {
+    chartData?: WorkspaceStats["activityChart"];
+    totalConversations?: number;
+    todayConversations?: number;
     isEmpty?: boolean;
     isLoading?: boolean;
 }
 
 export const ActivityChart = ({
+    chartData,
+    totalConversations = 0,
+    todayConversations = 0,
     isEmpty = false,
     isLoading = false,
 }: ActivityChartProps) => {
@@ -53,9 +46,11 @@ export const ActivityChart = ({
     const skeletonProps = { startColor: skeletonStart, endColor: skeletonEnd };
 
     const [period, setPeriod] = useState<Period>("7j");
-    const { labels, values } = ACTIVITY_DATA[period];
 
-    const chartData = {
+    const periodData = chartData?.[period] ?? { labels: [], values: [] };
+    const { labels, values } = periodData;
+
+    const chartJsData = {
         labels,
         datasets: [
             {
@@ -72,12 +67,7 @@ export const ActivityChart = ({
                 pointHoverBorderColor: isDark ? "#2E2E2E" : "#fff",
                 pointHoverBorderWidth: 2,
                 backgroundColor: (ctx: { chart: ChartJS }) => {
-                    const gradient = ctx.chart.ctx.createLinearGradient(
-                        0,
-                        0,
-                        0,
-                        ctx.chart.height,
-                    );
+                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
                     gradient.addColorStop(0, "rgba(18, 185, 140, 0.28)");
                     gradient.addColorStop(1, "rgba(18, 185, 140, 0.01)");
                     return gradient;
@@ -104,120 +94,51 @@ export const ActivityChart = ({
                 borderWidth: 1,
                 padding: 8,
                 callbacks: {
-                    label: (ctx) =>
-                        ` ${(ctx.parsed.y ?? 0).toLocaleString("fr-FR")} conversations`,
-                    labelPointStyle: () => ({
-                        pointStyle: "circle",
-                        rotation: 0,
-                    }),
+                    label: (ctx) => ` ${(ctx.parsed.y ?? 0).toLocaleString("fr-FR")} conversations`,
+                    labelPointStyle: () => ({ pointStyle: "circle", rotation: 0 }),
                 },
             },
         },
         scales: {
-            x: {
-                display: false,
-                grid: { display: false },
-            },
-            y: {
-                display: false,
-                grid: { display: false },
-            },
+            x: { display: false, grid: { display: false } },
+            y: { display: false, grid: { display: false } },
         },
     };
 
     if (isLoading) {
         return (
-            <Box
-                bg={cardBg}
-                border="1px solid"
-                borderColor={border}
-                borderRadius="12px"
-                overflow="hidden"
-            >
+            <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" overflow="hidden">
                 <HStack justify="space-between" p={4}>
                     <HStack spacing={2}>
-                        <Skeleton
-                            {...skeletonProps}
-                            h="14px"
-                            w="14px"
-                            borderRadius="3px"
-                        />
-                        <Skeleton
-                            {...skeletonProps}
-                            h="14px"
-                            w="160px"
-                            borderRadius="4px"
-                        />
+                        <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
+                        <Skeleton {...skeletonProps} h="14px" w="160px" borderRadius="4px" />
                     </HStack>
                     <HStack spacing={1}>
                         {[0, 1, 2].map((i) => (
-                            <Skeleton
-                                key={i}
-                                {...skeletonProps}
-                                h="24px"
-                                w="40px"
-                                borderRadius="6px"
-                            />
+                            <Skeleton key={i} {...skeletonProps} h="24px" w="40px" borderRadius="6px" />
                         ))}
                     </HStack>
                 </HStack>
                 <HStack px={4} spacing={6} flexWrap="wrap">
                     {[0, 1, 2].map((i) => (
                         <VStack key={i} align="start" spacing={1} py={2}>
-                            <Skeleton
-                                {...skeletonProps}
-                                h="11px"
-                                w="60px"
-                                borderRadius="3px"
-                            />
-                            <Skeleton
-                                {...skeletonProps}
-                                h="24px"
-                                w="80px"
-                                borderRadius="4px"
-                            />
-                            <Skeleton
-                                {...skeletonProps}
-                                h="11px"
-                                w="50px"
-                                borderRadius="3px"
-                            />
+                            <Skeleton {...skeletonProps} h="11px" w="60px" borderRadius="3px" />
+                            <Skeleton {...skeletonProps} h="24px" w="80px" borderRadius="4px" />
+                            <Skeleton {...skeletonProps} h="11px" w="50px" borderRadius="3px" />
                         </VStack>
                     ))}
                 </HStack>
-                <Skeleton
-                    {...skeletonProps}
-                    h="200px"
-                    w="100%"
-                    borderRadius="0"
-                />
+                <Skeleton {...skeletonProps} h="200px" w="100%" borderRadius="0" />
                 <HStack p={4} spacing={4}>
-                    <Skeleton
-                        {...skeletonProps}
-                        h="12px"
-                        w="80px"
-                        borderRadius="4px"
-                    />
-                    <Skeleton
-                        {...skeletonProps}
-                        h="12px"
-                        w="60px"
-                        borderRadius="4px"
-                    />
+                    <Skeleton {...skeletonProps} h="12px" w="80px" borderRadius="4px" />
+                    <Skeleton {...skeletonProps} h="12px" w="60px" borderRadius="4px" />
                 </HStack>
             </Box>
         );
     }
 
     return (
-        <Box
-            bg={cardBg}
-            border="1px solid"
-            borderColor={border}
-            borderRadius="12px"
-            overflow="hidden"
-            minW={0}
-        >
+        <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" overflow="hidden" minW={0}>
             <Box p={4}>
                 <ActivityHeader period={period} setPeriod={setPeriod} />
             </Box>
@@ -230,9 +151,9 @@ export const ActivityChart = ({
                 />
             ) : (
                 <>
-                    <ActivityMetrics />
+                    <ActivityMetrics total={totalConversations} today={todayConversations} period={period} />
                     <Box h="200px" position="relative">
-                        <Line data={chartData} options={options} />
+                        <Line data={chartJsData} options={options} />
                     </Box>
                     <ActivityLegend />
                 </>

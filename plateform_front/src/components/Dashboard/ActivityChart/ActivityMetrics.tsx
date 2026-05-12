@@ -1,38 +1,43 @@
 import { HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 
-export const ActivityMetrics = () => {
+interface ActivityMetricsProps {
+    total: number;
+    today: number;
+    period: string;
+}
+
+export const ActivityMetrics = ({ total, today, period }: ActivityMetricsProps) => {
     const textPrimary = useColorModeValue("grey.900", "grey.50");
     const textSecondary = useColorModeValue("grey.500", "grey.400");
+
+    const avgPerDay = period === "30j" ? Math.round(total / 30) : period === "7j" ? Math.round(total / 7) : today;
 
     return (
         <HStack px={4} spacing={6} flexWrap="wrap" rowGap={3} pb={2} w="100%">
             <VStack align="start" spacing={0}>
                 <Text fontSize="sm" color={textSecondary}>
-                    Total 73
+                    Total
                 </Text>
                 <HStack spacing={2} align="baseline" flexWrap="wrap">
                     <Text fontSize="xl" fontWeight="700" color={textPrimary}>
-                        8 240
-                    </Text>
-                    <Text fontSize="xs" color="green.400" whiteSpace="nowrap">
-                        +24% vs. période précédente
+                        {total.toLocaleString("fr-FR")}
                     </Text>
                 </HStack>
             </VStack>
             <VStack align="start" spacing={0}>
                 <Text fontSize="sm" color={textSecondary}>
-                    Sessions uniques
+                    Aujourd&apos;hui
                 </Text>
                 <Text fontSize="xl" fontWeight="700" color={textPrimary}>
-                    1 320
+                    {today.toLocaleString("fr-FR")}
                 </Text>
             </VStack>
             <VStack align="start" spacing={0}>
                 <Text fontSize="sm" color={textSecondary}>
-                    Avg / jour
+                    Moy / jour
                 </Text>
                 <Text fontSize="xl" fontWeight="700" color={textPrimary}>
-                    1 177
+                    {avgPerDay.toLocaleString("fr-FR")}
                 </Text>
             </VStack>
         </HStack>

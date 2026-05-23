@@ -8,7 +8,7 @@ dotenv.load_dotenv()
 API_KEY = os.getenv("RAG_ENGINE_API_KEY")
 
 async def test_streaming_rag_rerank():
-    url = "http://localhost:8000/rag/stream"
+    url = "http://141.94.174.134:8000/rag/stream"
 
     payload = {
         "pipeline": {
@@ -36,7 +36,7 @@ async def test_streaming_rag_rerank():
             ],
         },
         "query": "What is this document about? Please cite the filenames of the sources you are using.",
-        "org_id": "test-tenant",
+        "org_id": "string",
     }
 
     print(f"Sending request to {url}...")
@@ -57,7 +57,7 @@ async def test_streaming_rag_rerank():
             print(f"An error occurred: {e}")
 
 async def test_streaming_rag():
-    url = "http://localhost:8000/rag/stream"
+    url = "http://141.94.174.134:8000/rag/stream"
 
     payload = {
         "pipeline": {
@@ -101,7 +101,7 @@ async def test_streaming_rag():
 
 
 async def test_missing_api_key():
-    url = "http://localhost:8000/ingest"
+    url = "http://141.94.174.134:8000/ingest"
     print(f"\nTesting ingest endpoint without API key to expect 401 Unauthorized for {url}...")
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
@@ -114,7 +114,7 @@ async def test_missing_api_key():
             print(f"An error occurred during missing API key test: {e}")
 
 async def test_invalid_api_key():
-    url = "http://localhost:8000/ingest"
+    url = "http://141.94.174.134:8000/ingest"
     print(f"\nTesting ingest endpoint with invalid API key to expect 401 Unauthorized for {url}...")
     headers = {"X-API-Key": "invalid_key"}
     async with httpx.AsyncClient(timeout=60.0, headers=headers) as client:
@@ -128,7 +128,7 @@ async def test_invalid_api_key():
             print(f"An error occurred during invalid API key test: {e}")
 
 async def test_streaming_rag_query_rewrite():
-    url = "http://localhost:8000/rag/stream"
+    url = "http://141.94.174.134:8000/rag/stream"
 
     payload = {
         "pipeline": {
@@ -201,7 +201,7 @@ async def test_streaming_rag_query_rewrite():
 
 
 async def test_streaming_rag_query_rewrite_greeting():
-    url = "http://localhost:8000/rag/stream"
+    url = "http://141.94.174.134:8000/rag/stream"
 
     payload = {
         "pipeline": {
@@ -230,7 +230,7 @@ async def test_streaming_rag_query_rewrite_greeting():
             ],
         },
         "query": "Hi there! Can you give me a brief overview of what this document is about? Please cite the filenames of the sources you are using.",
-        "org_id": "test-tenant",
+        "org_id": "string",
     }
 
     print(f"Sending greeting request to {url}...")

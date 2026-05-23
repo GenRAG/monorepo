@@ -120,6 +120,11 @@ class BackgroundWorker:
             else:
                 raise ValueError(f"Unknown job type: {job_type}")
 
+            if not chunks:
+                job_manager.update_job_status(job_id, JobStatus.FAILED, "No content extracted.")
+                print(f"Job {job_id} failed: No content extracted")
+                return
+
             total_chunks = len(chunks)
             job_manager.update_job_progress(job_id, 0, total_chunks)
 

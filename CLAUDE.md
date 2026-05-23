@@ -108,14 +108,17 @@ The `/retrieve` and `/rag/stream` endpoints now require an `org_id` parameter to
 3. Completed → `{"status": "completed", "result": {...}}`
 
 ## Performance Optimizations
-- **✅ Batch Embedding**: Processes 10 chunks per API call (reduces API calls by ~90%)
+- **✅ Batch Embedding**: Configurable via `EmbeddingService.batch_size`
 - **✅ Background Jobs**: Non-blocking uploads with immediate response
 - **✅ Progress Tracking**: Real-time status updates during processing
+- **✅ Trafilatura Scraping**: Efficient main-content extraction
+- **✅ Semantic Chunking**: Improved context with token-based chunking
 
-## Production Considerations
-- Point IDs in vector DB use simple incrementing integers (should use UUIDs in production)
-- Job storage is in-memory (should use Redis/database for persistence)
-- Batch size of 10 chunks (configurable via `EmbeddingService.batch_size`)
+## Future Roadmap / Planned Improvements
+- **Hybrid Search**: Implementation of Sparse Vectors (Lexical Search) using FastEmbed/SPLADE.
+    - *Plan*: Integrate `fastembed` for generating SPLADE sparse embeddings during the ingestion phase and update Qdrant upsert logic to populate the `sparse_text` vector.
+- **Contextual Ingestion**: Future move towards Contextual Chunking (prepending chunk summaries) to improve retrieval quality.
+- **Web Storage**: Migrate from local SQLite storage of scraped pages to direct MinIO bucket storage for better scalability.
 
 ### API Key Authentication
 To secure sensitive endpoints, the RAG engine uses API Key authentication.

@@ -15,13 +15,10 @@ def parse_pdf(file_bytes: bytes) -> str:
         return ""
 
 
-def chunk_text(text: str, chunk_size=2000, overlap=200):
-    """Split text into overlapping chunks."""
-    chunks = []
-    start = 0
-    while start < len(text):
-        end = start + chunk_size
-        chunks.append(text[start:end])
-        # Move forward, leaving some overlap context
-        start += chunk_size - overlap
-    return chunks
+import semchunk
+
+def chunk_text(text: str, chunk_size=1024):
+    """Split text into semantic chunks using semchunk."""
+    # semchunk.chunk requires a token counter function or expects a model.
+    # For a simple local setup, providing a basic length-based counter is best.
+    return semchunk.chunk(text, chunk_size=chunk_size, token_counter=len)

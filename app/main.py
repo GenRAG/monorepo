@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
         print("Collection will be created when first document is processed")
 
     # Start background worker for ingestion job processing
-    await background_worker.start_workers(num_workers=3)
+    await background_worker.start_workers(num_workers=5)
 
     yield # Application starts here
 
@@ -194,3 +194,14 @@ async def rag_stream(request: RagRequest): # Executes dynamic RAG pipeline and s
     return StreamingResponse(
         execute_query_from_json(json_input), media_type="text/plain"
     )
+
+@app.get("/models", dependencies=[Depends(verify_api_key)]) # Endpoint to list available models from OpenRouter
+async def list_models():
+    from app.simple_openrouter_client import OpenRouterClient
+
+    client = OpenRouterClient()
+    try:
+        models = await client.get_models()
+        return {"models": models}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

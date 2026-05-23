@@ -59,11 +59,7 @@ class OpenRouterClient: # Client for interacting with the OpenRouter API for cha
             if "data" not in data:
                 raise ValueError("Unexpected response format")
 
-            return [
-                model["id"]
-                for model in data["data"]
-                if not model["id"].endswith(":free")
-            ]
+            return data
         except Exception as e:
             raise ValueError(f"Error fetching models: {e}")
 

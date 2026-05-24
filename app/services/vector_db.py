@@ -1,3 +1,5 @@
+import os
+import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, Distance, SparseVector, SparseVectorParams, SparseIndexConfig
 import uuid

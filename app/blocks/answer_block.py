@@ -17,7 +17,7 @@ from app.simple_openrouter_client import OpenRouterClient
 class AnswerGenerationBlock(BaseBlock): # Block for generating answers using an LLM
     model_name: str # The name of the language model to use
     temperature: Optional[float] = Field(default=0.7) # Controls randomness in generation
-    max_tokens: Optional[int] = Field(default=500) # Maximum tokens for the generated answer
+    max_tokens: Optional[int] = Field(default=2048) # Maximum tokens for the generated answer
     system_prompt: str = Field(
         default=(
             "You are an expert, friendly, and highly capable AI assistant for a Retrieval-Augmented Generation (RAG) system. "

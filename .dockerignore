@@ -42,8 +42,8 @@ test_*.py
 *_test.py
 
 # --- Documentation ---
-README.md
-*.md
+# !README.md
+# Removed README.md from ignore list so it can be copied into Docker image
 docs/
 
 # --- Docker Files ---

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "")
     rag_engine_api_key: str = os.getenv("RAG_ENGINE_API_KEY", "") # New API key for RAG engine
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
+    qdrant_api_key: str = os.getenv("QDRANT_API_KEY", "")
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     s3_endpoint: str = os.getenv("S3_ENDPOINT", "")
     aws_access: str = os.getenv("MINIO_ROOT_USER", os.getenv("MINIO_USER", ""))

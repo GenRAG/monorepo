@@ -12,10 +12,11 @@ class JobStatus(str, Enum):
 
 
 class JobInfo:
-    def __init__(self, job_id: str, filename: str, org_id: str):
+    def __init__(self, job_id: str, filename: str, org_id: str, job_type: str = "pdf"):
         self.job_id = job_id
         self.filename = filename
         self.org_id = org_id
+        self.job_type = job_type
         self.status = JobStatus.PENDING
         self.created_at = datetime.now()
         self.started_at: Optional[datetime] = None
@@ -32,10 +33,10 @@ class JobManager:
         self.jobs: Dict[str, JobInfo] = {}
         self.worker_running = False
 
-    def create_job(self, filename: str, org_id: str) -> str:
+    def create_job(self, filename: str, org_id: str, job_type: str = "pdf") -> str:
         """Create a new job and return ID."""
         job_id = str(uuid.uuid4())
-        self.jobs[job_id] = JobInfo(job_id, filename, org_id)
+        self.jobs[job_id] = JobInfo(job_id, filename, org_id, job_type=job_type)
         print(f"Created job {job_id} for {filename}")
         return job_id
 

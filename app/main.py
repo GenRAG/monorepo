@@ -38,13 +38,17 @@ async def lifespan(app: FastAPI):
         print("Collection will be created when first document is processed")
 
     # Start background worker for ingestion job processing
-    worker_task = asyncio.create_task(background_worker.start_worker())
+    await background_worker.start_workers(num_workers=5)
 
     yield # Application starts here
 
     # Stop background worker gracefully on shutdown
     await background_worker.stop_worker()
-    worker_task.cancel()
+    for task in background_worker.tasks:
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 app = FastAPI(lifespan=lifespan)
@@ -61,7 +65,7 @@ async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...))
 
     file_bytes = await file.read()
 
-    job_id = job_manager.create_job(file.filename, org_id)
+    job_id = job_manager.create_job(file.filename, org_id, job_type="pdf")
 
     file.file.seek(0) # Reset file pointer for background worker
     await background_worker.add_job(
@@ -77,6 +81,28 @@ async def ingest_document(file: UploadFile = File(...), org_id: str = Form(...))
         "status": "accepted",
         "filename": file.filename,
         "message": "File upload accepted. Processing started in background.",
+        "status_url": f"/job/{job_id}/status",
+    }
+
+
+@app.post("/ingest/website", dependencies=[Depends(verify_api_key)]) # Endpoint for website/sitemap ingestion
+async def ingest_website(url: str = Form(...), org_id: str = Form(...), max_pages: int = Form(100)):
+    print(f"Starting website ingestion for: {url} for org_id: {org_id}")
+
+    job_id = job_manager.create_job(url, org_id, job_type="website")
+
+    await background_worker.add_website_job(
+        job_id=job_id,
+        url=url,
+        org_id=org_id,
+        max_pages=max_pages,
+    )
+
+    return {
+        "job_id": job_id,
+        "status": "accepted",
+        "url": url,
+        "message": "Website ingestion accepted. Processing started in background.",
         "status_url": f"/job/{job_id}/status",
     }
 
@@ -168,3 +194,14 @@ async def rag_stream(request: RagRequest): # Executes dynamic RAG pipeline and s
     return StreamingResponse(
         execute_query_from_json(json_input), media_type="text/plain"
     )
+
+@app.get("/models", dependencies=[Depends(verify_api_key)]) # Endpoint to list available models from OpenRouter
+async def list_models():
+    from app.simple_openrouter_client import OpenRouterClient
+
+    client = OpenRouterClient()
+    try:
+        models = await client.get_models()
+        return {"models": models}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

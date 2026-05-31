@@ -9,8 +9,15 @@ import {
     Settings,
     CreditCard,
     Cloud,
-    Lock,
+    BarChart2,
+    type LucideIcon,
 } from "lucide-react";
+
+export interface NavItem {
+    id: string;
+    icon: LucideIcon;
+    label: string;
+}
 
 export const mainMenu = [
     { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
@@ -24,17 +31,10 @@ export const supportMenu = [
     { id: "notifications", icon: Bell, label: "Documentation" },
 ];
 
-export const agentMenu = [{ id: "playground", icon: MessageCircle, label: "Bac à sable" }];
-
-export const agentFeaturesMenu = [
-    { id: "workflow", icon: GitGraph, label: "Flux de travail" },
+export const agentNavItems: NavItem[] = [
+    { id: "playground", icon: MessageCircle, label: "Test & chat" },
     { id: "documents", icon: FileText, label: "Documents" },
+    { id: "workflow", icon: GitGraph, label: "Architecture" },
     { id: "deploy", icon: Cloud, label: "Déploiement" },
-    { id: "access-control", icon: Lock, label: "Contrôle d'accès" },
+    { id: "settings", icon: Settings, label: "Paramètres" },
 ];
-
-export const agentSettingsMenu = [{ id: "settings", icon: Settings, label: "Paramètres" }];
-
-export const workspaceMenu = agentMenu;
-export const workspaceFeaturesMenu = agentFeaturesMenu;
-export const workspaceSettingsMenu = agentSettingsMenu;

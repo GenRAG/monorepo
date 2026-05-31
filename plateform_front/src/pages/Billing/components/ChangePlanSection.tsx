@@ -1,15 +1,5 @@
 import React from "react";
-import {
-    Badge,
-    Box,
-    Divider,
-    Grid,
-    HStack,
-    Icon,
-    Text,
-    VStack,
-    useColorMode,
-} from "@chakra-ui/react";
+import { Box, Divider, Grid, HStack, Icon, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { Building2, Check, Rocket, Sparkles, Zap } from "lucide-react";
 import Button from "components/System/Atoms/Button";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -22,12 +12,7 @@ const TIERS = [
         monthlyPrice: 0 as number | null,
         icon: Zap,
         popular: false,
-        features: [
-            "5 crédits/jour (max 30/mois)",
-            "1 assistant",
-            "Projets publics",
-            "Support communauté",
-        ],
+        features: ["5 crédits/jour (max 30/mois)", "1 assistant", "Projets publics", "Support communauté"],
         cta: "Commencer gratuitement",
     },
     {
@@ -69,13 +54,7 @@ const TIERS = [
         monthlyPrice: null,
         icon: Building2,
         popular: false,
-        features: [
-            "Support dédié",
-            "Services d'onboarding",
-            "SCIM & SAML",
-            "SLA custom",
-            "Tarification négociée",
-        ],
+        features: ["Support dédié", "Services d'onboarding", "SCIM & SAML", "SLA custom", "Tarification négociée"],
         cta: "Réserver une démo",
     },
 ];
@@ -83,16 +62,9 @@ const TIERS = [
 interface ChangePlanSectionProps {
     currentTier: string;
     onSelectTier: (tier: string) => void;
-    isAnnual: boolean;
-    onToggleAnnual: () => void;
 }
 
-const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
-    currentTier,
-    onSelectTier,
-    isAnnual,
-    onToggleAnnual,
-}) => {
+const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSelectTier }) => {
     const { colorMode } = useColorMode();
     const isDark = colorMode === "dark";
     const sub = isDark ? "grey.400" : "grey.500";
@@ -102,98 +74,13 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
         <Box>
             <HStack justify="space-between" mb={5} flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
-                    <Text
-                        fontSize="md"
-                        fontWeight="bold"
-                        color={isDark ? "white" : "grey.900"}
-                    >
+                    <Text fontSize="md" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
                         Changer de plan
                     </Text>
                     <Text fontSize="xs" color={sub}>
-                        Vous pouvez upgrader / downgrader à tout moment. La
-                        facturation est calculée au prorata.
+                        Vous pouvez upgrader / downgrader à tout moment. La facturation est calculée au prorata.
                     </Text>
                 </VStack>
-
-                <HStack
-                    bg={isDark ? "grey.800" : "grey.100"}
-                    borderRadius="8px"
-                    p={0.5}
-                    spacing={0}
-                >
-                    <Box
-                        px={3}
-                        py={1.5}
-                        borderRadius="6px"
-                        cursor="pointer"
-                        bg={
-                            !isAnnual
-                                ? isDark
-                                    ? "grey.700"
-                                    : "white"
-                                : "transparent"
-                        }
-                        onClick={() => isAnnual && onToggleAnnual()}
-                        boxShadow={
-                            !isAnnual ? "0 1px 4px rgba(0,0,0,0.1)" : "none"
-                        }
-                    >
-                        <Text
-                            fontSize="sm"
-                            fontWeight={!isAnnual ? "600" : "400"}
-                            color={
-                                !isAnnual
-                                    ? isDark
-                                        ? "white"
-                                        : "grey.900"
-                                    : sub
-                            }
-                        >
-                            Mensuel
-                        </Text>
-                    </Box>
-                    <Box
-                        px={3}
-                        py={1.5}
-                        borderRadius="6px"
-                        cursor="pointer"
-                        bg={
-                            isAnnual
-                                ? isDark
-                                    ? "grey.700"
-                                    : "white"
-                                : "transparent"
-                        }
-                        onClick={() => !isAnnual && onToggleAnnual()}
-                        boxShadow={
-                            isAnnual ? "0 1px 4px rgba(0,0,0,0.1)" : "none"
-                        }
-                    >
-                        <HStack spacing={1.5}>
-                            <Text
-                                fontSize="sm"
-                                fontWeight={isAnnual ? "600" : "400"}
-                                color={
-                                    isAnnual
-                                        ? isDark
-                                            ? "white"
-                                            : "grey.900"
-                                        : sub
-                                }
-                            >
-                                Annuel
-                            </Text>
-                            <Badge
-                                colorScheme="green"
-                                fontSize="9px"
-                                borderRadius="full"
-                                px={1.5}
-                            >
-                                -20%
-                            </Badge>
-                        </HStack>
-                    </Box>
-                </HStack>
             </HStack>
 
             <Grid
@@ -206,10 +93,7 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
             >
                 {TIERS.map((tier) => {
                     const isSelected = currentTier === tier.id;
-                    const price =
-                        isAnnual && tier.monthlyPrice
-                            ? Math.round(tier.monthlyPrice * 0.8)
-                            : tier.monthlyPrice;
+                    const price = tier.monthlyPrice;
 
                     return (
                         <Box
@@ -296,34 +180,16 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
                                         alignItems="center"
                                         justifyContent="center"
                                     >
-                                        <Icon
-                                            as={tier.icon}
-                                            boxSize={4}
-                                            color={
-                                                isDark
-                                                    ? "green.400"
-                                                    : "green.600"
-                                            }
-                                        />
+                                        <Icon as={tier.icon} boxSize={4} color={isDark ? "green.400" : "green.600"} />
                                     </Box>
-                                    <Text
-                                        fontSize="sm"
-                                        fontWeight="bold"
-                                        color={isDark ? "white" : "grey.900"}
-                                    >
+                                    <Text fontSize="sm" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
                                         {tier.name}
                                     </Text>
                                 </HStack>
 
                                 <Box>
                                     {tier.monthlyPrice === null ? (
-                                        <Text
-                                            fontSize="xl"
-                                            fontWeight="bold"
-                                            color={
-                                                isDark ? "white" : "grey.900"
-                                            }
-                                        >
+                                        <Text fontSize="xl" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
                                             Sur-mesure
                                         </Text>
                                     ) : (
@@ -331,16 +197,10 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
                                             <Text
                                                 fontSize="xl"
                                                 fontWeight="bold"
-                                                color={
-                                                    isDark
-                                                        ? "white"
-                                                        : "grey.900"
-                                                }
+                                                color={isDark ? "white" : "grey.900"}
                                                 letterSpacing="-0.02em"
                                             >
-                                                {tier.monthlyPrice === 0
-                                                    ? "Gratuit"
-                                                    : `${price} €`}
+                                                {tier.monthlyPrice === 0 ? "Gratuit" : `${price} €`}
                                             </Text>
                                             {tier.monthlyPrice > 0 && (
                                                 <Text fontSize="xs" color={sub}>
@@ -349,12 +209,7 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
                                             )}
                                         </HStack>
                                     )}
-                                    <Text
-                                        fontSize="11px"
-                                        color={sub}
-                                        mt={0.5}
-                                        lineHeight={1.4}
-                                    >
+                                    <Text fontSize="11px" color={sub} mt={0.5} lineHeight={1.4}>
                                         {tier.description}
                                     </Text>
                                 </Box>
@@ -364,9 +219,7 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
                                 <Button
                                     w="100%"
                                     size="sm"
-                                    variant={
-                                        isSelected ? undefined : "secondary"
-                                    }
+                                    variant={isSelected ? undefined : "secondary"}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onSelectTier(tier.id);
@@ -377,11 +230,7 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
 
                                 <VStack align="start" spacing={1.5} w="100%">
                                     {tier.features.map((f) => (
-                                        <HStack
-                                            key={f}
-                                            spacing={2}
-                                            align="flex-start"
-                                        >
+                                        <HStack key={f} spacing={2} align="flex-start">
                                             <Box
                                                 p={0.5}
                                                 mt="1px"
@@ -389,19 +238,9 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({
                                                 borderRadius="full"
                                                 flexShrink={0}
                                             >
-                                                <Check
-                                                    size={10}
-                                                    color={
-                                                        currentDarkTheme.primary
-                                                    }
-                                                    strokeWidth={3}
-                                                />
+                                                <Check size={10} color={currentDarkTheme.primary} strokeWidth={3} />
                                             </Box>
-                                            <Text
-                                                fontSize="11px"
-                                                color={sub}
-                                                lineHeight={1.4}
-                                            >
+                                            <Text fontSize="11px" color={sub} lineHeight={1.4}>
                                                 {f}
                                             </Text>
                                         </HStack>

@@ -45,13 +45,7 @@ export const ChangesSection = () => {
     const borderColor = useColorModeValue("grey.100", "grey.800");
 
     return (
-        <Box
-            bg={bgContainer}
-            border="0.5px solid"
-            borderColor={borderColor}
-            borderRadius="12px"
-            overflow="hidden"
-        >
+        <Box bg={bgContainer} border="0.5px solid" borderColor={borderColor} borderRadius="12px" overflow="hidden">
             <SectionHeader
                 title="Changelog"
                 subtitle="Suivez les dernières modifications apportées à votre assistant."
@@ -67,9 +61,7 @@ export const ChangesSection = () => {
                         key={change.description}
                         p={4}
                         spacing={5}
-                        borderBottom={
-                            i < CHANGES.length - 1 ? "0.5px solid" : undefined
-                        }
+                        borderBottom={i < CHANGES.length - 1 ? "0.5px solid" : undefined}
                         borderColor={borderColor}
                         align="center"
                     >
@@ -84,11 +76,7 @@ export const ChangesSection = () => {
                         >
                             <Box as={change.icon} boxSize={4} />
                         </Box>
-                        <Badge
-                            colorScheme={typeStyle.bg}
-                            fontSize="10px"
-                            fontWeight="medium"
-                        >
+                        <Badge colorScheme={typeStyle.bg} fontSize="10px" fontWeight="medium">
                             {change.type}
                         </Badge>
                         <Text fontSize="sm" fontWeight="medium" flex={1}>

@@ -1,13 +1,18 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { basename } from 'path';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import * as multer from 'multer';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from './document.repository';
 import { IndexDocumentCommandProps } from './commands/index-document.command';
-import { File } from 'multer';
 
 const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024;
+const MAX_AGENT_STORAGE = 100 * 1024 * 1024;
 const INDEX_DOCUMENT_JOB = 'index-document';
+
+const sanitizeFilename = (name: string): string => basename(name).replace(/[^\w.-]/g, '_');
 
 @Injectable()
 export class DocumentService {
@@ -21,8 +26,16 @@ export class DocumentService {
         private readonly documentQueue: Queue<IndexDocumentCommandProps>,
     ) {}
 
-    async upload(file: File, agentId: string) {
-        const s3Key = `agents/${agentId}/${Date.now()}-${file.originalname}`;
+    async upload(file: Express.Multer.File, agentId: string) {
+        const usedStorage = await this.documentRepository.getTotalSize(agentId);
+        if (usedStorage + file.size > MAX_AGENT_STORAGE) {
+            throw new BadRequestException(
+                `Storage limit reached: agent cannot exceed ${MAX_AGENT_STORAGE / 1024 / 1024} MB`,
+            );
+        }
+
+        const safeFilename = sanitizeFilename(file.originalname);
+        const s3Key = `agents/${agentId}/${Date.now()}-${safeFilename}`;
 
         await this.storage.put(s3Key, file.buffer, file.mimetype);
 
@@ -30,7 +43,7 @@ export class DocumentService {
             agentId,
             storageKey: s3Key,
             mimeType: file.mimetype,
-            name: file.originalname,
+            name: safeFilename,
             size: file.size,
         });
 
@@ -53,25 +66,16 @@ export class DocumentService {
         return document;
     }
 
-    async get(id: string) {
-        const doc = await this.documentRepository.findById(id);
-
-        if (!doc) {
-            throw new NotFoundException(`Document ${id} not found`);
-        }
-
+    async get(id: string, agentId: string) {
+        const doc = await this.documentRepository.findById(id, agentId);
+        if (!doc) throw new NotFoundException('Document not found');
         return doc;
     }
 
-    async getUrl(id: string) {
-        const doc = await this.documentRepository.findById(id);
-
-        if (!doc) {
-            throw new NotFoundException(`Document ${id} not found`);
-        }
-
+    async getUrl(id: string, agentId: string) {
+        const doc = await this.documentRepository.findById(id, agentId);
+        if (!doc) throw new NotFoundException('Document not found');
         const url = await this.storage.getSignedUrl(doc.storageKey, 900);
-
         return { url };
     }
 
@@ -87,14 +91,10 @@ export class DocumentService {
         return this.documentRepository.findByAgentPaginated(agentId, page, limit);
     }
 
-    async delete(id: string) {
-        const doc = await this.documentRepository.findById(id);
-
-        if (!doc) {
-            throw new NotFoundException(`Document ${id} not found`);
-        }
-
+    async delete(id: string, agentId: string): Promise<void> {
+        const doc = await this.documentRepository.findById(id, agentId);
+        if (!doc) throw new NotFoundException('Document not found');
         await this.storage.delete(doc.storageKey);
-        return this.documentRepository.delete(id);
+        await this.documentRepository.delete(id);
     }
 }

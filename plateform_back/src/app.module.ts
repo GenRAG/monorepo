@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './redis/redis.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AgentModule } from './agent/agent.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
-import { CreditBalanceModule } from 'src/credit/credit-balance.module';
+import { CreditModule } from 'src/credit/credit.module';
 import { DocumentModule } from './document/document.module';
 import { DeploymentModule } from './deployment/deployment.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
@@ -16,14 +18,14 @@ import { BullModule } from '@nestjs/bullmq';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-        }),
+        ConfigModule.forRoot({ isGlobal: true }),
+        ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
+        RedisModule,
         LoggerModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: (configService: ConfigService) => {
                 const isProduction = configService.get('NODE_ENV') === 'production';
-                const isTest = configService.get('NODE_ENV') === 'test';
+                const isTest = configService.get('NODE_ENV') === 'development';
                 return {
                     pinoHttp: {
                         autoLogging: !isTest,
@@ -70,7 +72,7 @@ import { BullModule } from '@nestjs/bullmq';
         AgentModule,
         WorkflowModule,
         AgentRuntimeModule,
-        CreditBalanceModule,
+        CreditModule,
         DocumentModule,
         DeploymentModule,
         OnboardingModule,

@@ -1,16 +1,12 @@
 import React from "react";
-import { Box, VStack, Text, useColorMode, Spinner } from "@chakra-ui/react";
+import { Box, VStack, Text, Spinner } from "@chakra-ui/react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface AppLoaderProps {
     message?: string;
 }
 
-export const AppLoader: React.FC<AppLoaderProps> = ({
-    message = "Loading...",
-}) => {
-    const { colorMode } = useColorMode();
-
+export const AppLoader: React.FC<AppLoaderProps> = ({ message = "Loading..." }) => {
     return (
         <Box
             position="fixed"
@@ -18,7 +14,7 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
             left={0}
             right={0}
             bottom={0}
-            bg={colorMode === "dark" ? "grey.900" : "white"}
+            bg="backgroundDefault"
             display="flex"
             alignItems="center"
             justifyContent="center"
@@ -26,35 +22,15 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
         >
             <VStack spacing={6} align="center">
                 <Box position="relative">
-                    <Box
-                        position="absolute"
-                        top="50%"
-                        left="50%"
-                        transform="translate(-50%, -50%)"
-                    >
-                        <Spinner
-                            size="xl"
-                            thickness="4px"
-                            speed="0.65s"
-                            color={currentDarkTheme.primary}
-                            emptyColor={
-                                colorMode === "dark" ? "grey.700" : "grey.200"
-                            }
-                        />
+                    <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)">
+                        <Spinner size="xl" thickness="4px" speed="0.65s" color={currentDarkTheme.primary} />
                     </Box>
                 </Box>
                 <VStack spacing={2} align="center">
-                    <Text
-                        fontSize="xl"
-                        fontWeight="semibold"
-                        color={colorMode === "dark" ? "white" : "grey.900"}
-                    >
+                    <Text fontSize="xl" fontWeight="semibold" color="textPrimary">
                         GenRAG
                     </Text>
-                    <Text
-                        fontSize="sm"
-                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
-                    >
+                    <Text fontSize="sm" color="textSecondary">
                         {message}
                     </Text>
                 </VStack>

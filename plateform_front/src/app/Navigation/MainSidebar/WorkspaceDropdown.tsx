@@ -12,64 +12,9 @@ import {
     useColorModeValue,
     useDisclosure,
 } from "@chakra-ui/react";
-import {
-    Check,
-    ChevronDown,
-    Globe,
-    Plus,
-    Settings,
-    UserPlus,
-} from "lucide-react";
-import Button from "components/System/Atoms/Button";
+import BoxIcon from "components/System/Atoms/BoxIcon";
+import { Check, ChevronDown, Plus } from "lucide-react";
 import { Workspace } from "types/workspace";
-
-const AVATAR_COLORS = [
-    "#E85D75",
-    "#6C7FD8",
-    "#F0A500",
-    "#3AAFA9",
-    "#8B5CF6",
-    "#10B981",
-    "#F97316",
-    "#EC4899",
-];
-
-function colorForString(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-interface WorkspaceAvatarProps {
-    name: string;
-    size?: "sm" | "md";
-}
-
-const WorkspaceAvatar = ({ name, size = "md" }: WorkspaceAvatarProps) => {
-    const dim = size === "sm" ? "26px" : "34px";
-    const fs = size === "sm" ? "11px" : "14px";
-    const color = colorForString(name);
-    return (
-        <Box
-            w={dim}
-            h={dim}
-            minW={dim}
-            borderRadius="8px"
-            bg={color}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            fontWeight="bold"
-            fontSize={fs}
-            color="white"
-            flexShrink={0}
-        >
-            {name.charAt(0).toUpperCase()}
-        </Box>
-    );
-};
 
 interface WorkspaceDropdownProps {
     workspaces: Workspace[];
@@ -77,21 +22,13 @@ interface WorkspaceDropdownProps {
     onSelect: (id: string) => void;
 }
 
-const WorkspaceDropdown = ({
-    workspaces,
-    selectedId,
-    onSelect,
-}: WorkspaceDropdownProps) => {
+const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdownProps) => {
     const { isOpen, onClose, onToggle } = useDisclosure();
 
-    const selectedWorkspace =
-        workspaces.find((w) => w.id === selectedId) ?? workspaces[0];
+    const selectedWorkspace = workspaces.find((w) => w.id === selectedId) ?? workspaces[0];
 
     const triggerBg = useColorModeValue("whiteAlpha.100", "whiteAlpha.50");
-    const triggerHoverBg = useColorModeValue(
-        "blackAlpha.100",
-        "whiteAlpha.100",
-    );
+    const triggerHoverBg = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
     const popoverBg = useColorModeValue("white", "#1a1a1a");
     const popoverBorder = useColorModeValue("grey.100", "#333");
     const headingColor = useColorModeValue("grey.400", "grey.500");
@@ -109,12 +46,7 @@ const WorkspaceDropdown = ({
     };
 
     return (
-        <Popover
-            isOpen={isOpen}
-            onClose={onClose}
-            placement="bottom-start"
-            gutter={4}
-        >
+        <Popover isOpen={isOpen} onClose={onClose} placement="bottom-start" gutter={4}>
             <PopoverTrigger>
                 <HStack
                     m={2}
@@ -133,19 +65,8 @@ const WorkspaceDropdown = ({
                     aria-label="Switch workspace"
                 >
                     <HStack spacing={2} minW={0}>
-                        {selectedWorkspace && (
-                            <WorkspaceAvatar
-                                name={selectedWorkspace.name}
-                                size="sm"
-                            />
-                        )}
-                        <Text
-                            fontSize="13px"
-                            fontWeight="500"
-                            color={titleColor}
-                            noOfLines={1}
-                            isTruncated
-                        >
+                        {selectedWorkspace && <BoxIcon letters={selectedWorkspace.name.slice(0, 2)} />}
+                        <Text fontSize="13px" fontWeight="500" color={titleColor} noOfLines={1} isTruncated>
                             {selectedWorkspace?.name ?? "Select workspace"}
                         </Text>
                     </HStack>
@@ -170,10 +91,7 @@ const WorkspaceDropdown = ({
                         {selectedWorkspace && (
                             <Box px={3} pt={3} pb={2}>
                                 <HStack spacing={3} mb={2}>
-                                    <WorkspaceAvatar
-                                        name={selectedWorkspace.name}
-                                        size="md"
-                                    />
+                                    <BoxIcon size="sm" letters={selectedWorkspace.name.slice(0, 2)} />
                                     <VStack align="start" spacing={0} minW={0}>
                                         <Text
                                             fontSize="13px"
@@ -184,36 +102,7 @@ const WorkspaceDropdown = ({
                                         >
                                             {selectedWorkspace.name}
                                         </Text>
-                                        <Text fontSize="11px" color={subColor}>
-                                            {/*selectedWorkspace.agentsCount ?? 0}{" "}
-                                            agent
-                                            {(selectedWorkspace.agentsCount ??
-                                                0) !== 1
-                                                ? "s"
-                                                : ""*/}
-                                        </Text>
                                     </VStack>
-                                </HStack>
-
-                                <HStack spacing={2}>
-                                    <Button
-                                        size="xs"
-                                        variant="primary"
-                                        leftIcon={Settings}
-                                        flex={1}
-                                        fontSize="11px"
-                                    >
-                                        Settings
-                                    </Button>
-                                    <Button
-                                        size="xs"
-                                        variant="primary"
-                                        leftIcon={UserPlus}
-                                        flex={1}
-                                        fontSize="11px"
-                                    >
-                                        Invite
-                                    </Button>
                                 </HStack>
                             </Box>
                         )}
@@ -249,24 +138,13 @@ const WorkspaceDropdown = ({
                                             justify="space-between"
                                         >
                                             <HStack spacing={2} minW={0}>
-                                                <WorkspaceAvatar
-                                                    name={ws.name}
-                                                    size="sm"
-                                                />
-                                                <Text
-                                                    fontSize="13px"
-                                                    color={nameColor}
-                                                    isTruncated
-                                                    noOfLines={1}
-                                                >
+                                                <BoxIcon size="sm" letters={ws.name.slice(0, 2)} />
+                                                <Text fontSize="13px" color={nameColor} isTruncated noOfLines={1}>
                                                     {ws.name}
                                                 </Text>
                                             </HStack>
                                             {isActive && (
-                                                <Box
-                                                    color={activeCheckColor}
-                                                    flexShrink={0}
-                                                >
+                                                <Box color={activeCheckColor} flexShrink={0}>
                                                     <Check size={14} />
                                                 </Box>
                                             )}
@@ -293,23 +171,6 @@ const WorkspaceDropdown = ({
                                 </Box>
                                 <Text fontSize="13px" color={actionColor}>
                                     Create new workspace
-                                </Text>
-                            </HStack>
-
-                            <HStack
-                                px={2}
-                                py="7px"
-                                borderRadius="8px"
-                                cursor="pointer"
-                                _hover={{ bg: itemHoverBg }}
-                                transition="background 0.12s"
-                                spacing={2}
-                            >
-                                <Box color={actionColor}>
-                                    <Globe size={14} />
-                                </Box>
-                                <Text fontSize="13px" color={actionColor}>
-                                    Find workspaces
                                 </Text>
                             </HStack>
                         </Box>

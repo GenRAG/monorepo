@@ -1,15 +1,10 @@
-import AuthLayout, {
-    AuthStepType,
-    RegisterFormSteps,
-} from "pages/Auth/Layout/AuthLayout";
+import { AuthStepType, RegisterFormSteps } from "pages/Auth/Layout/AuthLayout";
 import { useAuthLayout } from "pages/Auth/Layout/AuthLayoutContext";
 import ValidateAccountForm from "pages/Auth/Validate/ValidateAccountForm";
 import { FC, useEffect, useState } from "react";
 
 const Validate: FC = () => {
-    const [step, setStep] = useState<AuthStepType>(
-        RegisterFormSteps.REGISTER_EMAIL,
-    );
+    const [step, setStep] = useState<AuthStepType>(RegisterFormSteps.REGISTER_EMAIL);
     const { setConfig } = useAuthLayout();
 
     useEffect(() => {

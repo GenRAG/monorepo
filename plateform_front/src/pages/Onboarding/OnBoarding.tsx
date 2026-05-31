@@ -31,6 +31,7 @@ const OnboardingContent: React.FC = () => {
         currentStep,
         goNext,
         goPrevious,
+        skip,
         updateStepData,
         getStepData,
         isStepValid,
@@ -192,6 +193,7 @@ const OnboardingContent: React.FC = () => {
                             goNext={goNext}
                             goPrevious={goPrevious}
                             onValidateAndGoNext={async () => goNext()}
+                            onSkip={skip}
                         />
                     </VStack>
                 </VStack>

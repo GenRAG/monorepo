@@ -1,12 +1,5 @@
 import React from "react";
-import {
-    Box,
-    Button,
-    HStack,
-    Text,
-    useColorModeValue,
-    VStack,
-} from "@chakra-ui/react";
+import { Box, Button, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { CloudUpload, Upload } from "lucide-react";
 
 interface DocumentEmptyStateProps {
@@ -60,20 +53,12 @@ export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
             </Box>
 
             <VStack spacing={2} maxW="360px">
-                <Text
-                    fontSize="xl"
-                    fontWeight="700"
-                    color={textColor}
-                    lineHeight="1.2"
-                >
-                    {folderId
-                        ? `Aucun document dans ${folderName ?? "ce dossier"}`
-                        : "Aucun document indexé"}
+                <Text fontSize="xl" fontWeight="700" color={textColor} lineHeight="1.2">
+                    {folderId ? `Aucun document dans ${folderName ?? "ce dossier"}` : "Aucun document indexé"}
                 </Text>
                 <Text fontSize="sm" color={mutedColor} lineHeight="1.6">
-                    Glissez-déposez vos fichiers ici, ou téléversez-les
-                    manuellement. Votre agent utilisera ces documents comme base
-                    de connaissance pour répondre aux questions.
+                    Glissez-déposez vos fichiers ici, ou téléversez-les manuellement. Votre agent utilisera ces
+                    documents comme base de connaissance pour répondre aux questions.
                 </Text>
             </VStack>
 

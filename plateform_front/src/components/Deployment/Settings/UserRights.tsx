@@ -8,12 +8,7 @@ export const UserRights = () => {
     const bgColor = useColorModeValue("white", "grey.950");
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={borderColor}
-            bg={bgColor}
-        >
+        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={bgColor}>
             <SectionHeader
                 title="Droits d'exportation"
                 subtitle="Gérez les droits d'exportation des données de votre application"

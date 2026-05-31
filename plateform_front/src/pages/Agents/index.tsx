@@ -88,11 +88,10 @@ export const AgentsList = () => {
                 border="1px solid"
                 borderColor={border}
                 borderRadius="10px"
-                p={1}
                 w="fit-content"
             >
-                {SortButton("recent", "Récent", Clock, sort, setSort)}
-                {SortButton("az", "A→Z", SortAsc, sort, setSort)}
+                {SortButton("recent", "Récent", Clock, sort, setSort, "first")}
+                {SortButton("az", "A→Z", SortAsc, sort, setSort, "last")}
             </HStack>
 
             {isLoading ? (

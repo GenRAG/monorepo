@@ -1,10 +1,4 @@
-import {
-    Box,
-    HStack,
-    Skeleton,
-    Text,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Skeleton, Text, useColorModeValue } from "@chakra-ui/react";
 import { useIsDark } from "hooks/useIsDark";
 import { useGetWorkflowByVersionQuery } from "services/workflow/workflow";
 
@@ -15,10 +9,7 @@ interface PipelineJsonPanelProps {
 }
 
 const highlightJson = (json: object, isDark: boolean): string => {
-    const escaped = JSON.stringify(json, null, 2)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+    const escaped = JSON.stringify(json, null, 2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     return escaped.replace(
         /("(\\u[\dA-Fa-f]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
         (match) => {
@@ -26,9 +17,7 @@ const highlightJson = (json: object, isDark: boolean): string => {
                 if (/:$/.test(match)) {
                     return `<span style="color:var(--chakra-colors-green-500)">${match}</span>`;
                 }
-                const greenColor = isDark
-                    ? "var(--chakra-colors-green-200)"
-                    : "var(--chakra-colors-green-700)";
+                const greenColor = isDark ? "var(--chakra-colors-green-200)" : "var(--chakra-colors-green-700)";
                 return `<span style="color:${greenColor}">${match}</span>`;
             }
             if (/true|false/.test(match)) {
@@ -42,11 +31,7 @@ const highlightJson = (json: object, isDark: boolean): string => {
     );
 };
 
-export const PipelineJsonPanel = ({
-    workflowVersion,
-    workspaceId,
-    agentId,
-}: PipelineJsonPanelProps) => {
+export const PipelineJsonPanel = ({ workflowVersion, workspaceId, agentId }: PipelineJsonPanelProps) => {
     const { data: workflow, isLoading } = useGetWorkflowByVersionQuery(
         { workspaceId, agentId, version: workflowVersion! },
         { skip: workflowVersion === null },
@@ -62,14 +47,7 @@ export const PipelineJsonPanel = ({
     const pipeline = workflow?.definition.blocks ?? null;
 
     return (
-        <Box
-            borderBottomRadius="12px"
-            bg={bgColor}
-            overflow="hidden"
-            display="flex"
-            flexDirection="column"
-            h="full"
-        >
+        <Box borderBottomRadius="12px" bg={bgColor} overflow="hidden" display="flex" flexDirection="column" h="full">
             <HStack
                 justify="space-between"
                 p={4}
@@ -86,14 +64,7 @@ export const PipelineJsonPanel = ({
                     )}
                 </Text>
             </HStack>
-            <Box
-                p={5}
-                bg={jsonBgColor}
-                flex="1"
-                maxW="100%"
-                overflowY="scroll"
-                overflowX="hidden"
-            >
+            <Box p={5} bg={jsonBgColor} flex="1" maxW="100%" overflowY="scroll" overflowX="hidden">
                 {isLoading ? (
                     <Skeleton h="200px" borderRadius="6px" />
                 ) : pipeline ? (

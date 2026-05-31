@@ -6,20 +6,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class DocumentRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    create(data: {
-        agentId: string;
-        storageKey: string;
-        mimeType: string;
-        name: string;
-        size: number;
-    }) {
+    create(data: { agentId: string; storageKey: string; mimeType: string; name: string; size: number }) {
         return this.prisma.document.create({
             data: { ...data, status: DocumentStatus.UPLOADED },
         });
     }
 
-    findById(id: string) {
-        return this.prisma.document.findUnique({ where: { id } });
+    findById(id: string, agentId: string) {
+        return this.prisma.document.findFirst({ where: { id, agentId } });
     }
 
     findByAgent(agentId: string) {
@@ -72,27 +66,27 @@ export class DocumentRepository {
             }),
         ]);
 
-        const countByStatus = Object.fromEntries(
-            statusCounts.map((r) => [r.status, r._count as number]),
-        );
+        const countByStatus = Object.fromEntries(statusCounts.map((r) => [r.status, r._count as number]));
 
-        const sizeByMimeType = documents.reduce<Record<string, number>>(
-            (acc, { mimeType, size }) => {
-                acc[mimeType] = (acc[mimeType] ?? 0) + size;
-                return acc;
-            },
-            {},
-        );
+        const sizeByMimeType = documents.reduce<Record<string, number>>((acc, { mimeType, size }) => {
+            acc[mimeType] = (acc[mimeType] ?? 0) + size;
+            return acc;
+        }, {});
 
         return {
-            total: statusCounts.reduce(
-                (acc, r) => acc + (r._count as number),
-                0,
-            ),
+            total: statusCounts.reduce((acc, r) => acc + (r._count as number), 0),
             indexed: countByStatus[DocumentStatus.INDEXED] ?? 0,
             processing: countByStatus[DocumentStatus.PROCESSING] ?? 0,
             sizeByMimeType,
         };
+    }
+
+    async getTotalSize(agentId: string): Promise<number> {
+        const result = await this.prisma.document.aggregate({
+            where: { agentId },
+            _sum: { size: true },
+        });
+        return result._sum.size ?? 0;
     }
 
     delete(id: string) {

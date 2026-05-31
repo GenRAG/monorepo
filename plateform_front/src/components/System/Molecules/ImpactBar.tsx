@@ -10,11 +10,7 @@ export const ImpactBar = ({ label, value }: ImpactBarProps) => {
 
     return (
         <HStack spacing={3}>
-            <Text
-                fontSize="xs"
-                minW="120px"
-                color={colorMode === "dark" ? "grey.400" : "grey.600"}
-            >
+            <Text fontSize="xs" minW="120px" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
                 {label}
             </Text>
 

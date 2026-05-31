@@ -48,17 +48,12 @@ const onboardingTag = (workspaceId: string) => ({
 
 export const onboardingApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
-        startOnboarding: builder.mutation<
-            OnboardingSession,
-            StartOnboardingParams
-        >({
+        startOnboarding: builder.mutation<OnboardingSession, StartOnboardingParams>({
             query: ({ workspaceId }) => ({
                 url: `/workspaces/${workspaceId}/onboarding/start`,
                 method: "POST",
             }),
-            invalidatesTags: (_result, _error, { workspaceId }) => [
-                onboardingTag(workspaceId),
-            ],
+            invalidatesTags: (_result, _error, { workspaceId }) => [onboardingTag(workspaceId)],
         }),
 
         getOnboardingSession: builder.query<OnboardingSession | null, string>({
@@ -66,43 +61,28 @@ export const onboardingApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}/onboarding/session`,
                 method: "GET",
             }),
-            providesTags: (_result, _error, workspaceId) => [
-                onboardingTag(workspaceId),
-            ],
+            providesTags: (_result, _error, workspaceId) => [onboardingTag(workspaceId)],
         }),
 
-        updateOnboardingStep: builder.mutation<
-            OnboardingSession,
-            UpdateStepParams
-        >({
+        updateOnboardingStep: builder.mutation<OnboardingSession, UpdateStepParams>({
             query: ({ workspaceId, step }) => ({
                 url: `/workspaces/${workspaceId}/onboarding/step`,
                 method: "POST",
                 body: { step },
             }),
-            invalidatesTags: (_result, _error, { workspaceId }) => [
-                onboardingTag(workspaceId),
-            ],
+            invalidatesTags: (_result, _error, { workspaceId }) => [onboardingTag(workspaceId)],
         }),
 
-        updateOnboardingStepsData: builder.mutation<
-            void,
-            UpdateStepsDataParams
-        >({
+        updateOnboardingStepsData: builder.mutation<void, UpdateStepsDataParams>({
             query: ({ workspaceId, stepId, data }) => ({
                 url: `/workspaces/${workspaceId}/onboarding/steps-data`,
                 method: "POST",
                 body: { stepId, data },
             }),
-            invalidatesTags: (_result, _error, { workspaceId }) => [
-                onboardingTag(workspaceId),
-            ],
+            invalidatesTags: (_result, _error, { workspaceId }) => [onboardingTag(workspaceId)],
         }),
 
-        compareOnboarding: builder.mutation<
-            CompareOnboardingResponse,
-            CompareOnboardingParams
-        >({
+        compareOnboarding: builder.mutation<CompareOnboardingResponse, CompareOnboardingParams>({
             query: ({ workspaceId, query }) => ({
                 url: `/workspaces/${workspaceId}/onboarding/compare`,
                 method: "POST",
@@ -116,9 +96,15 @@ export const onboardingApi = backendApi.injectEndpoints({
                 method: "POST",
                 body: { style },
             }),
-            invalidatesTags: (_result, _error, { workspaceId }) => [
-                onboardingTag(workspaceId),
-            ],
+            invalidatesTags: (_result, _error, { workspaceId }) => [onboardingTag(workspaceId)],
+        }),
+
+        skipOnboarding: builder.mutation<void, { workspaceId: string }>({
+            query: ({ workspaceId }) => ({
+                url: `/workspaces/${workspaceId}/onboarding/skip`,
+                method: "POST",
+            }),
+            invalidatesTags: (_result, _error, { workspaceId }) => [onboardingTag(workspaceId)],
         }),
     }),
 });
@@ -130,4 +116,5 @@ export const {
     useUpdateOnboardingStepsDataMutation,
     useCompareOnboardingMutation,
     useCompleteOnboardingMutation,
+    useSkipOnboardingMutation,
 } = onboardingApi;

@@ -34,17 +34,10 @@ const VISIBILITY_OPTIONS: {
 export const VisibilitySection = () => {
     const bgColor = useColorModeValue("white", "grey.900");
     const borderColor = useColorModeValue("grey.100", "grey.800");
-    const [visibility, setVisibility] = useState<VisibilityMode>(
-        VisibilityStatus.PRIVATE,
-    );
+    const [visibility, setVisibility] = useState<VisibilityMode>(VisibilityStatus.PRIVATE);
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={borderColor}
-            bg={bgColor}
-        >
+        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={bgColor}>
             <SectionHeader title="Visibilité" />
             <VStack spacing={0} align="stretch">
                 {VISIBILITY_OPTIONS.map((opt, idx) => {

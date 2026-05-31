@@ -6,8 +6,6 @@ interface StyledKbdProps {
 
 export const StyledKbd = ({ children }: StyledKbdProps) => {
     const bg = useColorModeValue("white", "grey.750");
-    const color = useColorModeValue("grey.500", "grey.400");
-    const border = useColorModeValue("grey.200", "grey.600");
     const shadow = useColorModeValue("0 2px 0 0 #CBD5E0", "0 2px 0 0 #2D3748");
 
     return (
@@ -20,13 +18,13 @@ export const StyledKbd = ({ children }: StyledKbdProps) => {
             h="20px"
             px="6px"
             bg={bg}
-            color={color}
+            color="textLabel"
             fontSize="10px"
             fontWeight={600}
             fontFamily="mono"
             letterSpacing="0.02em"
             border="1px solid"
-            borderColor={border}
+            borderColor="borderStrong"
             borderRadius="5px"
             boxShadow={shadow}
             lineHeight={1}

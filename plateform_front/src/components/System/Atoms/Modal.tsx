@@ -58,13 +58,9 @@ const Modal: FC<CustomModalProps> = ({
                     }}
                     {...closeButtonProps}
                 />
-                {hasDividers && isNotNone(headersProps) && (
-                    <Divider borderColor="grey.100" />
-                )}
+                {hasDividers && isNotNone(headersProps) && <Divider borderColor="grey.100" />}
                 <ModalBody {...bodyProps}>{children}</ModalBody>
-                {hasDividers && isNotNone(footerProps) && (
-                    <Divider borderColor="grey.100" />
-                )}
+                {hasDividers && isNotNone(footerProps) && <Divider borderColor="grey.100" />}
                 <ModalFooter {...footerProps} />
             </ModalContent>
         </ChakraModal>

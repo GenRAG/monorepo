@@ -1,11 +1,4 @@
-import {
-    Badge,
-    BadgeProps,
-    HStack,
-    Icon,
-    IconProps,
-    Image,
-} from "@chakra-ui/react";
+import { Badge, BadgeProps, HStack, Icon, IconProps, Image } from "@chakra-ui/react";
 import { LucideIcon } from "lucide-react";
 
 import CustomTooltip from "./CustomTooltip";
@@ -17,13 +10,7 @@ export type BadgeWithIconProps = {
     iconProps?: IconProps;
 } & Omit<BadgeProps, "title">;
 
-const BadgeWithIcon = ({
-    icon,
-    title,
-    iconProps,
-    children,
-    ...props
-}: BadgeWithIconProps) => (
+const BadgeWithIcon = ({ icon, title, iconProps, children, ...props }: BadgeWithIconProps) => (
     <Badge
         _hover={
             props.onClick

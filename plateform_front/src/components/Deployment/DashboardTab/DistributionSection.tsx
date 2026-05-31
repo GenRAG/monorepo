@@ -8,12 +8,7 @@ export const DistributionSection = () => {
     const borderColor = useColorModeValue("grey.100", "grey.800");
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={borderColor}
-            bg={bgColor}
-        >
+        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={bgColor}>
             <SectionHeader
                 title="Distribution"
                 subtitle="Partagez votre assistant avec vos utilisateurs finaux via différents canaux de distribution."

@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Post, Query, Sse, UseGuards } from '@nestjs/common';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Get,
+    ForbiddenException,
+    Param,
+    Post,
+    Query,
+    Sse,
+    UseGuards,
+} from '@nestjs/common';
 import type { MessageEvent } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -66,6 +77,11 @@ export class OnboardingController {
         return this.onboardingService.compare(user.id, workspaceId, body.query);
     }
 
+    @Post('skip')
+    skip(@Param('workspaceId') workspaceId: string, @CurrentUser(CurrentUserPipe) user: UserSafe): Promise<void> {
+        return this.onboardingService.skip(user.id, workspaceId);
+    }
+
     @Post('complete')
     complete(
         @Param('workspaceId') workspaceId: string,
@@ -84,31 +100,25 @@ export class OnboardingController {
         @CurrentUser(CurrentUserPipe) user: UserSafe,
     ): Observable<MessageEvent> {
         if (!query || !agentId) {
-            return new Observable((s) => {
-                s.next({
-                    data: JSON.stringify({
-                        error: 'query and agentId parameters required',
-                    }),
-                });
-                s.complete();
-            });
+            throw new BadRequestException('query and agentId parameters required');
         }
-        const resolvedStepId = stepId || 'test-assistant';
-        const orgId = resolvedStepId === 'test-assistant' ? 'onboarding' : agentId;
+        const { resolvedStepId, orgId } = this.onboardingService.resolveStreamParams(agentId, stepId);
         return from(this.onboardingService.checkAndIncrementQueryCount(user.id, workspaceId, resolvedStepId)).pipe(
             switchMap(() => this.agentRuntimeService.streamWithOrgOverride(workspaceId, agentId, query, orgId)),
-            catchError(
-                () =>
-                    new Observable<MessageEvent>((s) => {
+            catchError((err: unknown) => {
+                if (err instanceof ForbiddenException) {
+                    return new Observable<MessageEvent>((s) => {
                         s.next({
                             data: JSON.stringify({
-                                error: 'Limite de messages atteinte pour cette étape.',
+                                error: err.message,
                                 isLimitReached: true,
                             }),
                         });
                         s.complete();
-                    }),
-            ),
+                    });
+                }
+                throw err;
+            }),
         );
     }
 }

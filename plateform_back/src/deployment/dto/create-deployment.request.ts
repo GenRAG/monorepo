@@ -5,7 +5,7 @@ export class CreateDeploymentRequest {
     @ApiPropertyOptional()
     @IsString()
     @IsOptional()
-    name: string;
+    name?: string;
 
     @ApiPropertyOptional()
     @IsString()

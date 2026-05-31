@@ -1,14 +1,9 @@
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createTestApp } from './helpers/app.helper';
 import { cleanDatabase } from './helpers/db.helper';
-import {
-    TEST_USER,
-    TEST_USER_2,
-    registerAndLogin,
-    createWorkspace,
-    createAgent,
-} from './helpers/auth.helper';
+import { TEST_USER, TEST_USER_2, registerAndLogin, createWorkspace, createAgent } from './helpers/auth.helper';
 
 const WORKFLOW_DEFINITION = {
     blocks: [
@@ -34,6 +29,8 @@ describe('Workflow (e2e)', () => {
     let workspaceId: string;
     let agentId: string;
     let workflowUrl: string;
+    let workflowV1Id: string;
+    let workflowV2Id: string;
 
     beforeAll(async () => {
         app = await createTestApp();
@@ -57,9 +54,11 @@ describe('Workflow (e2e)', () => {
                 .send({ definition: WORKFLOW_DEFINITION })
                 .expect(201);
 
+            workflowV1Id = res.body.id;
             expect(res.body.version).toBe(1);
             expect(res.body.agentId).toBe(agentId);
             expect(res.body.definition).toEqual(WORKFLOW_DEFINITION);
+            expect(res.body.isActive).toBe(true);
         });
 
         it('should increment version on second deploy', async () => {
@@ -69,14 +68,13 @@ describe('Workflow (e2e)', () => {
                 .send({ definition: { ...WORKFLOW_DEFINITION, v: 2 } })
                 .expect(201);
 
+            workflowV2Id = res.body.id;
             expect(res.body.version).toBe(2);
+            expect(res.body.isActive).toBe(true);
         });
 
         it('should fail without auth', async () => {
-            await request(app.getHttpServer())
-                .post(workflowUrl)
-                .send({ definition: WORKFLOW_DEFINITION })
-                .expect(401);
+            await request(app.getHttpServer()).post(workflowUrl).send({ definition: WORKFLOW_DEFINITION }).expect(401);
         });
 
         it('should fail for non-member', async () => {
@@ -88,22 +86,26 @@ describe('Workflow (e2e)', () => {
         });
 
         it('should fail without definition', async () => {
-            await request(app.getHttpServer())
-                .post(workflowUrl)
-                .set('Cookie', cookie)
-                .send({})
-                .expect(400);
+            await request(app.getHttpServer()).post(workflowUrl).set('Cookie', cookie).send({}).expect(400);
         });
     });
 
     describe('GET /workflow', () => {
         it('should return the latest version', async () => {
+            const res = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie).expect(200);
+
+            expect(res.body.version).toBe(2);
+            expect(res.body.id).toBe(workflowV2Id);
+        });
+
+        it('should return a specific workflow version by number', async () => {
             const res = await request(app.getHttpServer())
-                .get(workflowUrl)
+                .get(`${workflowUrl}/version/1`)
                 .set('Cookie', cookie)
                 .expect(200);
 
-            expect(res.body.version).toBe(2);
+            expect(res.body.id).toBe(workflowV1Id);
+            expect(res.body.version).toBe(1);
         });
 
         it('should return 404 if no workflow exists', async () => {
@@ -113,18 +115,13 @@ describe('Workflow (e2e)', () => {
             });
 
             await request(app.getHttpServer())
-                .get(
-                    `/workspaces/${workspaceId}/agents/${emptyAgentId}/workflow`,
-                )
+                .get(`/workspaces/${workspaceId}/agents/${emptyAgentId}/workflow`)
                 .set('Cookie', cookie)
                 .expect(404);
         });
 
         it('should return 403 for non-member', async () => {
-            await request(app.getHttpServer())
-                .get(workflowUrl)
-                .set('Cookie', cookieUser2)
-                .expect(403);
+            await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookieUser2).expect(403);
         });
     });
 
@@ -137,6 +134,7 @@ describe('Workflow (e2e)', () => {
 
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body).toHaveLength(2);
+            expect(res.body[0].id).toBe(workflowV2Id);
             expect(res.body[0].version).toBeGreaterThan(res.body[1].version);
         });
 
@@ -147,9 +145,7 @@ describe('Workflow (e2e)', () => {
             });
 
             const res = await request(app.getHttpServer())
-                .get(
-                    `/workspaces/${workspaceId}/agents/${emptyAgentId}/workflow/history`,
-                )
+                .get(`/workspaces/${workspaceId}/agents/${emptyAgentId}/workflow/history`)
                 .set('Cookie', cookie)
                 .expect(200);
 
@@ -159,9 +155,7 @@ describe('Workflow (e2e)', () => {
 
     describe('PATCH /workflow', () => {
         it('should update active workflow without incrementing version', async () => {
-            const beforeRes = await request(app.getHttpServer())
-                .get(workflowUrl)
-                .set('Cookie', cookie);
+            const beforeRes = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie);
 
             const currentVersion = beforeRes.body.version;
 
@@ -188,11 +182,43 @@ describe('Workflow (e2e)', () => {
         });
     });
 
+    describe('PATCH /workflow/activate', () => {
+        it('should reactivate version 1 and return it as active', async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`${workflowUrl}/activate`)
+                .set('Cookie', cookie)
+                .send({ id: workflowV1Id })
+                .expect(200);
+
+            expect(res.body.id).toBe(workflowV1Id);
+            expect(res.body.version).toBe(1);
+            expect(res.body.isActive).toBe(true);
+
+            const activeRes = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie).expect(200);
+
+            expect(activeRes.body.id).toBe(workflowV1Id);
+        });
+
+        it('should return 404 for unknown workflow id', async () => {
+            await request(app.getHttpServer())
+                .patch(`${workflowUrl}/activate`)
+                .set('Cookie', cookie)
+                .send({ id: 'unknown-workflow-id' })
+                .expect(404);
+        });
+
+        it('should return 403 for non-member', async () => {
+            await request(app.getHttpServer())
+                .patch(`${workflowUrl}/activate`)
+                .set('Cookie', cookieUser2)
+                .send({ id: workflowV1Id })
+                .expect(403);
+        });
+    });
+
     describe('GET /workflow/:id', () => {
         it('should return a specific workflow version by id', async () => {
-            const historyRes = await request(app.getHttpServer())
-                .get(`${workflowUrl}/history`)
-                .set('Cookie', cookie);
+            const historyRes = await request(app.getHttpServer()).get(`${workflowUrl}/history`).set('Cookie', cookie);
 
             const workflowId = historyRes.body[0].id;
 
@@ -211,9 +237,7 @@ describe('Workflow (e2e)', () => {
             });
 
             const otherWorkflowRes = await request(app.getHttpServer())
-                .post(
-                    `/workspaces/${workspaceId}/agents/${otherAgentId}/workflow`,
-                )
+                .post(`/workspaces/${workspaceId}/agents/${otherAgentId}/workflow`)
                 .set('Cookie', cookie)
                 .send({ definition: WORKFLOW_DEFINITION });
 

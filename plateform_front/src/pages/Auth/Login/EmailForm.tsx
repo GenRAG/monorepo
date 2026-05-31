@@ -34,10 +34,7 @@ export const EmailForm: FC<{
     currentStep: AuthStepType;
 }> = ({ setEmail, currentStep }) => {
     const location = useLocation();
-    const [rememberedEmail, remember, forget] = useLocalStorage(
-        LocalStorageKeys.AUTH.REMEMBERED_EMAIL,
-        "",
-    );
+    const [rememberedEmail, remember, forget] = useLocalStorage(LocalStorageKeys.AUTH.REMEMBERED_EMAIL, "");
 
     const {
         formState: { errors, isSubmitting },
@@ -57,8 +54,6 @@ export const EmailForm: FC<{
         setEmail(data.email);
     });
 
-    const buttonType = useColorModeValue("superSecondary", "superPrimary");
-
     return (
         <VStack gap="32px" w="100%">
             <VStack>
@@ -68,10 +63,7 @@ export const EmailForm: FC<{
                     <Text variant="body-sm" color={textColor} mr={2}>
                         You don&apos;t have an account yet ?
                     </Text>
-                    <Link
-                        as={ReachLink}
-                        to={{ pathname: "/register", search: location.search }}
-                    >
+                    <Link as={ReachLink} to={{ pathname: "/register", search: location.search }}>
                         <Text color={textColor} variant="body-sm-semibold">
                             Create an account
                         </Text>
@@ -89,9 +81,7 @@ export const EmailForm: FC<{
                             rules={{ validate: validateEmail }}
                             render={({ field: { onChange, ...rest } }) => (
                                 <Input
-                                    onChange={(event) =>
-                                        onChange(event.target.value.trim())
-                                    }
+                                    onChange={(event) => onChange(event.target.value.trim())}
                                     {...rest}
                                     placeholder="john.smith@example.com"
                                     autoComplete="email"
@@ -100,14 +90,12 @@ export const EmailForm: FC<{
                                 />
                             )}
                         />
-                        <FormErrorMessage>
-                            {errors.email?.message}
-                        </FormErrorMessage>
+                        <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
                     </FormControl>
 
                     <VStack gap="sm" w="100%">
                         <Button
-                            variant={buttonType}
+                            variant="superPrimary"
                             w="100%"
                             size="lg"
                             type="submit"
@@ -120,36 +108,16 @@ export const EmailForm: FC<{
                     </VStack>
                     <>
                         <HStack w="100%">
-                            <Divider
-                                borderColor={useColorModeValue(
-                                    "grey.300",
-                                    "grey.100",
-                                )}
-                            />
-                            <Text
-                                m="auto"
-                                variant="body-sm"
-                                color={useColorModeValue(
-                                    "grey.900",
-                                    "whites.offwhite",
-                                )}
-                            >
+                            <Divider borderColor={useColorModeValue("grey.300", "grey.100")} />
+                            <Text m="auto" variant="body-sm" color={useColorModeValue("grey.900", "whites.offwhite")}>
                                 or
                             </Text>
-                            <Divider
-                                borderColor={useColorModeValue(
-                                    "grey.300",
-                                    "grey.100",
-                                )}
-                            />
+                            <Divider borderColor={useColorModeValue("grey.300", "grey.100")} />
                         </HStack>
                         <VStack w="100%">
                             <Button
                                 w="100%"
-                                bg={useColorModeValue(
-                                    "white",
-                                    "grey.800 !important",
-                                )}
+                                bg={useColorModeValue("white", "grey.800 !important")}
                                 border="1px solid"
                                 borderColor="grey.200"
                                 _hover={{
@@ -160,14 +128,7 @@ export const EmailForm: FC<{
                             >
                                 <HStack justify="center" spacing="8px">
                                     <Image src={Google} boxSize="24px" />
-                                    <Text
-                                        color={useColorModeValue(
-                                            "black",
-                                            "white",
-                                        )}
-                                    >
-                                        Continue with Google
-                                    </Text>
+                                    <Text color={useColorModeValue("black", "white")}>Continue with Google</Text>
                                 </HStack>
                             </Button>
                         </VStack>

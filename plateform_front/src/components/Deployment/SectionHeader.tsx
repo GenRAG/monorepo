@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { HStack, Text, VStack } from "@chakra-ui/react";
 
 interface SectionHeaderProps {
     title: string;
@@ -7,28 +7,15 @@ interface SectionHeaderProps {
     action?: ReactNode;
 }
 
-export const SectionHeader = ({
-    title,
-    subtitle,
-    action,
-}: SectionHeaderProps) => {
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const titleColor = useColorModeValue("grey.900", "grey.50");
-    const subtitleColor = useColorModeValue("grey.300", "grey.500");
-
+export const SectionHeader = ({ title, subtitle, action }: SectionHeaderProps) => {
     return (
-        <HStack
-            justify="space-between"
-            p={4}
-            borderBottom="1px solid"
-            borderBottomColor={borderColor}
-        >
+        <HStack justify="space-between" p={4} borderBottom="1px solid" borderBottomColor="borderDefault">
             <VStack align="start" spacing={0.5}>
-                <Text fontSize="sm" fontWeight={600} color={titleColor}>
+                <Text fontSize="sm" fontWeight={600} color="textPrimary">
                     {title}
                 </Text>
                 {subtitle && (
-                    <Text fontSize="xs" color={subtitleColor}>
+                    <Text fontSize="xs" color="textSubtle">
                         {subtitle}
                     </Text>
                 )}

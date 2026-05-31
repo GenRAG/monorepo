@@ -1,9 +1,4 @@
-import {
-    Box,
-    useColorMode,
-    useColorModeValue,
-    useToken,
-} from "@chakra-ui/react";
+import { Box, useColorMode, useColorModeValue, useToken } from "@chakra-ui/react";
 import { Background, BackgroundVariant, Edge } from "@xyflow/react";
 import { HorizontalLayoutStrategy, WorkflowCanvas } from "@genrag/workflow";
 import type { AppNode, NodeComponentType } from "@genrag/workflow";
@@ -59,10 +54,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
     const { colorMode } = useColorMode();
     const borderColor = useColorModeValue("grey.50", "grey.700");
 
-    const [gridLineLight, gridLineDark] = useToken("colors", [
-        "grey.50",
-        "grey.950",
-    ]);
+    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.950"]);
     const lineColor = applyAlphaToColor(
         colorMode === "dark" ? gridLineDark : gridLineLight,
         colorMode === "dark" ? 0.6 : 1,
@@ -88,12 +80,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
                 fitViewOptions={{ padding, minZoom: zoom, maxZoom: 1 }}
                 colorMode={colorMode === "dark" ? "dark" : "light"}
             >
-                <Background
-                    variant={BackgroundVariant.Lines}
-                    gap={50}
-                    size={1}
-                    color={lineColor}
-                />
+                <Background variant={BackgroundVariant.Lines} gap={50} size={1} color={lineColor} />
             </WorkflowCanvas>
         </Box>
     );

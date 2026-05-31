@@ -20,10 +20,7 @@ type AgentWithWorkflows = Prisma.AgentGetPayload<{
     };
 }>;
 
-export type FindOneWithActiveWorkflowResult = Omit<
-    AgentWithWorkflows,
-    'workflows'
-> & {
+export type FindOneWithActiveWorkflowResult = Omit<AgentWithWorkflows, 'workflows'> & {
     workflow: AgentWithWorkflows['workflows'][number] | null;
 };
 
@@ -41,10 +38,7 @@ export class AgentRepository {
         });
     }
 
-    async findOneWithActiveWorkflow(
-        id: string,
-        workspaceId: string,
-    ): Promise<FindOneWithActiveWorkflowResult | null> {
+    async findOneWithActiveWorkflow(id: string, workspaceId: string): Promise<FindOneWithActiveWorkflowResult | null> {
         const agent = await this.prisma.agent.findFirst({
             where: { id, workspaceId },
             include: {
@@ -87,10 +81,6 @@ export class AgentRepository {
         });
     }
 
-    create(data: Prisma.AgentCreateInput): Promise<Agent> {
-        return this.prisma.agent.create({ data });
-    }
-
     update(id: string, data: Prisma.AgentUpdateInput): Promise<Agent> {
         return this.prisma.agent.update({ where: { id }, data });
     }
@@ -99,9 +89,7 @@ export class AgentRepository {
         return this.prisma.agent.delete({ where: { id } });
     }
 
-    transaction<T>(
-        fn: (tx: Prisma.TransactionClient) => Promise<T>,
-    ): Promise<T> {
+    transaction<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
         return this.prisma.$transaction(fn);
     }
 }

@@ -4,10 +4,7 @@ import AuthMobileLayout from "pages/Auth/Layout/AuthMobileLayout";
 
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { Outlet } from "react-router-dom";
-import {
-    AuthLayoutConfig,
-    AuthLayoutContext,
-} from "pages/Auth/Layout/AuthLayoutContext";
+import { AuthLayoutConfig, AuthLayoutContext } from "pages/Auth/Layout/AuthLayoutContext";
 
 export enum RegisterFormSteps {
     REGISTER_EMAIL = "REGISTER_EMAIL",
@@ -33,38 +30,30 @@ export interface AuthStepFormProps {
     currentStep: AuthStepType;
 }
 
-export const STEP_CONFIG: Record<
-    AuthStepType,
-    { title: string; subTitle: string }
-> = {
+export const STEP_CONFIG: Record<AuthStepType, { title: string; subTitle: string }> = {
     [LoginFormSteps.LOGIN_EMAIL]: {
-        title: "Welcome back !",
-        subTitle:
-            "Sign in to access your workspace and continue optimizing your RAG pipelines.",
+        title: "Bon retour parmi nous !",
+        subTitle: "Connectez-vous pour accéder à votre espace de travail et continuer à optimiser vos pipelines RAG.",
     },
     [LoginFormSteps.LOGIN_PASSWORD]: {
-        title: "Connect to your account",
-        subTitle:
-            "Sign in to access your workspace and continue optimizing your RAG pipelines.",
+        title: "Connectez-vous à votre compte",
+        subTitle: "Connectez-vous pour accéder à votre espace de travail et continuer à optimiser vos pipelines RAG.",
     },
     [LoginFormSteps.LOGIN_PASSKEY]: {
-        title: "Connect to your account",
-        subTitle:
-            "Sign in to access your workspace and continue optimizing your RAG pipelines.",
+        title: "Connectez-vous à votre compte",
+        subTitle: "Connectez-vous pour accéder à votre espace de travail et continuer à optimiser vos pipelines RAG.",
     },
     [RegisterFormSteps.REGISTER_EMAIL]: {
-        title: "Create an account",
-        subTitle:
-            "Create your account to start building and optimizing your RAG pipelines with GenRAG.",
+        title: "Créer un compte",
+        subTitle: "Créez votre compte pour commencer à construire et optimiser vos pipelines RAG avec GenRAG.",
     },
     [RegisterFormSteps.REGISTER_PASSWORD]: {
-        title: "Create an account",
-        subTitle:
-            "Create your account to start building and optimizing your RAG pipelines with GenRAG.",
+        title: "Créer un compte",
+        subTitle: "Créez votre compte pour commencer à construire et optimiser vos pipelines RAG avec GenRAG.",
     },
     [RegisterFormSteps.REGISTER_VALIDATE]: {
-        title: "Validate your account",
-        subTitle: "Check your email to verify your account before continuing.",
+        title: "Validez votre compte",
+        subTitle: "Vérifiez votre e-mail pour confirmer votre compte avant de continuer.",
     },
 };
 
@@ -89,10 +78,7 @@ const AuthLayout: FC = () => {
     if (isMobile) {
         return (
             <AuthLayoutContext.Provider value={value}>
-                <AuthMobileLayout
-                    showBackground={config.showBackground}
-                    canGoBack={config.canGoBack}
-                >
+                <AuthMobileLayout showBackground={config.showBackground} canGoBack={config.canGoBack}>
                     <Outlet />
                 </AuthMobileLayout>
             </AuthLayoutContext.Provider>

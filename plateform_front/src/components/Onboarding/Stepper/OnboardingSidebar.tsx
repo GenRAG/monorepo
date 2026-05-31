@@ -9,7 +9,7 @@ import {
     DrawerOverlay,
     DrawerContent,
     DrawerCloseButton,
-    useColorMode,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import OnBoardingBackground from "assets/backgroundOnBoarding.png";
@@ -22,25 +22,20 @@ interface OnboardingSidebarProps {
     onDrawerClose: () => void;
 }
 
-const sidebarBg = (colorMode: string) =>
-    colorMode === "dark"
-        ? "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)"
-        : "linear-gradient(135deg,rgba(250, 255, 254, 0.72) 0%,rgb(173, 252, 231) 100%)";
+const sidebarBgLight = "linear-gradient(135deg,rgba(250, 255, 254, 0.72) 0%,rgb(173, 252, 231) 100%)";
+const sidebarBgDark = "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)";
 
 const SidebarInner: React.FC<{
     justCompletedStep: number | null;
     onStepClick?: () => void;
 }> = ({ justCompletedStep, onStepClick }) => {
-    const { colorMode } = useColorMode();
+    const imageSrc = useColorModeValue(OnBoardingBackground, OnBoardingBackgroundBlack);
+    const imageOpacity = useColorModeValue(0.4, 0.1);
 
     return (
         <>
             <Image
-                src={
-                    colorMode === "dark"
-                        ? OnBoardingBackgroundBlack
-                        : OnBoardingBackground
-                }
+                src={imageSrc}
                 position="absolute"
                 bottom="0"
                 right="0"
@@ -49,31 +44,30 @@ const SidebarInner: React.FC<{
                 objectFit="contain"
                 pointerEvents="none"
                 zIndex={0}
-                opacity={colorMode === "dark" ? 0.1 : 0.4}
+                opacity={imageOpacity}
             />
             <Box h="100%" zIndex={1} p={{ base: 8, md: 10, lg: 6, xl: 16 }}>
-                <OnboardingStepper
-                    justCompletedStep={justCompletedStep}
-                    onStepClick={onStepClick}
-                />
+                <OnboardingStepper justCompletedStep={justCompletedStep} onStepClick={onStepClick} />
             </Box>
         </>
     );
 };
 
-const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({
-    justCompletedStep,
-    isDrawerOpen,
-    onDrawerClose,
-}) => {
-    const { colorMode } = useColorMode();
+const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({ justCompletedStep, isDrawerOpen, onDrawerClose }) => {
+    const bg = useColorModeValue(sidebarBgLight, sidebarBgDark);
+    const borderColor = useColorModeValue("#acacac81", currentDarkTheme.rgba.primary20);
+    const closeButtonColor = useColorModeValue("grey.900", "white");
+    const closeButtonBg = useColorModeValue("white", "grey.800");
+    const headerBg = useColorModeValue("white", "grey.800");
+    const headerBorderColor = useColorModeValue("grey.200", currentDarkTheme.rgba.primary20);
+    const headerColor = useColorModeValue("grey.900", "white");
 
     return (
         <>
             <VStack
                 display={{ base: "none", xl: "flex" }}
                 w={{ md: "350px", lg: "400px" }}
-                bg={sidebarBg(colorMode)}
+                bg={bg}
                 borderTopLeftRadius="12px"
                 borderBottomLeftRadius="12px"
                 align="stretch"
@@ -81,42 +75,24 @@ const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({
                 flex={1}
                 border="1px solid"
                 position="relative"
-                borderColor={
-                    colorMode === "dark"
-                        ? currentDarkTheme.rgba.primary20
-                        : "#acacac81"
-                }
+                borderColor={borderColor}
             >
                 <SidebarInner justCompletedStep={justCompletedStep} />
             </VStack>
-            <Drawer
-                isOpen={isDrawerOpen}
-                placement="left"
-                onClose={onDrawerClose}
-            >
+            <Drawer isOpen={isDrawerOpen} placement="left" onClose={onDrawerClose}>
                 <DrawerOverlay />
-                <DrawerContent bg={sidebarBg(colorMode)}>
-                    <DrawerCloseButton
-                        color={colorMode === "dark" ? "white" : "grey.900"}
-                        bg={colorMode === "dark" ? "grey.800" : "white"}
-                    />
+                <DrawerContent bg={bg}>
+                    <DrawerCloseButton color={closeButtonColor} bg={closeButtonBg} />
                     <DrawerHeader
                         borderBottomWidth="1px"
-                        bg={colorMode === "dark" ? "grey.800" : "white"}
-                        borderColor={
-                            colorMode === "dark"
-                                ? currentDarkTheme.rgba.primary20
-                                : "grey.200"
-                        }
-                        color={colorMode === "dark" ? "white" : "grey.900"}
+                        bg={headerBg}
+                        borderColor={headerBorderColor}
+                        color={headerColor}
                     >
                         Navigation
                     </DrawerHeader>
-                    <DrawerBody p={6} bg={sidebarBg(colorMode)}>
-                        <SidebarInner
-                            justCompletedStep={justCompletedStep}
-                            onStepClick={onDrawerClose}
-                        />
+                    <DrawerBody p={6} bg={bg}>
+                        <SidebarInner justCompletedStep={justCompletedStep} onStepClick={onDrawerClose} />
                     </DrawerBody>
                 </DrawerContent>
             </Drawer>

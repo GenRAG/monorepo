@@ -1,10 +1,4 @@
-const useDownloadFile = ({
-    url,
-    filename,
-}: {
-    url: string;
-    filename: string;
-}) => {
+const useDownloadFile = ({ url, filename }: { url: string; filename: string }) => {
     const download = () => {
         const link = document.createElement("a");
         link.href = url;

@@ -1,8 +1,10 @@
-import { Box, HStack, Icon, Skeleton, Text, VStack, useColorModeValue, type BoxProps } from "@chakra-ui/react";
+import { Box, HStack, Icon, Skeleton, Text, VStack, type BoxProps } from "@chakra-ui/react";
 import { Bot, Zap } from "lucide-react";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { AgentStatus } from "types/deployment/deployment";
 import { WorkspaceStatsAgentItem } from "types/workspace";
+import BoxIcon from "components/System/Atoms/BoxIcon";
+import RowContainer from "components/System/Atoms/RowContainer";
 
 const STATUS_DOT: Record<string, string> = {
     PRODUCTION: "#12B98C",
@@ -15,12 +17,6 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const AgentRow = ({ agent }: { agent: WorkspaceStatsAgentItem }) => {
-    const divider = useColorModeValue("grey.100", "grey.800");
-    const hoverBg = useColorModeValue("grey.50", "grey.800");
-    const avatarBg = useColorModeValue("grey.100", "grey.750");
-    const nameCol = useColorModeValue("grey.900", "grey.100");
-    const metaCol = useColorModeValue("grey.500", "grey.400");
-
     const initials = agent.name
         .split(" ")
         .map((w) => w[0])
@@ -34,31 +30,10 @@ const AgentRow = ({ agent }: { agent: WorkspaceStatsAgentItem }) => {
     ];
 
     return (
-        <HStack
-            spacing={3}
-            p={2}
-            borderBottom="1px solid"
-            borderColor={divider}
-            _hover={{ bg: hoverBg, cursor: "pointer" }}
-            borderRadius="6px"
-            transition="background 0.1s"
-        >
-            <Box
-                w="32px"
-                h="32px"
-                borderRadius="6px"
-                bg={avatarBg}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-            >
-                <Text fontSize="10px" fontWeight="700" color={nameCol} letterSpacing="0.04em">
-                    {initials}
-                </Text>
-            </Box>
+        <RowContainer>
+            <BoxIcon letters={initials} />
             <VStack align="start" spacing={0} flex={1} minW={0}>
-                <Text fontSize="13px" fontWeight="600" color={nameCol} noOfLines={1}>
+                <Text fontSize="13px" fontWeight="600" color="textPrimary" noOfLines={1}>
                     {agent.name}
                 </Text>
                 <HStack spacing={1.5}>
@@ -69,7 +44,7 @@ const AgentRow = ({ agent }: { agent: WorkspaceStatsAgentItem }) => {
                         bg={STATUS_DOT[agent.status] ?? "#6B7280"}
                         flexShrink={0}
                     />
-                    <Text fontSize="11px" color={metaCol}>
+                    <Text fontSize="11px" color="textLabel">
                         {STATUS_LABEL[agent.status] ?? agent.status}
                         {agent.latestVersion != null ? ` · v${agent.latestVersion}` : ""}
                     </Text>
@@ -77,15 +52,11 @@ const AgentRow = ({ agent }: { agent: WorkspaceStatsAgentItem }) => {
             </VStack>
             {metrics.map(({ val, label }) => (
                 <VStack key={label} align="center" spacing={0} minW="38px">
-                    <Text fontSize="13px" fontWeight="600" color={nameCol} fontFamily="mono">
-                        {val}
-                    </Text>
-                    <Text fontSize="10px" color={metaCol} textTransform="uppercase" letterSpacing="0.05em">
-                        {label}
-                    </Text>
+                    <Text variant="body-2xs">{val}</Text>
+                    <Text variant="body-2xs">{label}</Text>
                 </VStack>
             ))}
-        </HStack>
+        </RowContainer>
     );
 };
 
@@ -96,13 +67,7 @@ interface AgentsCardProps extends BoxProps {
 }
 
 export const AgentsCard = ({ agents = [], isEmpty = false, isLoading = false, ...props }: AgentsCardProps) => {
-    const cardBg = useColorModeValue("white", "grey.850");
-    const border = useColorModeValue("grey.100", "grey.800");
-    const textPrimary = useColorModeValue("grey.900", "grey.50");
-    const textSecondary = useColorModeValue("grey.500", "grey.400");
-    const skeletonStart = useColorModeValue("grey.100", "grey.800");
-    const skeletonEnd = useColorModeValue("grey.200", "grey.700");
-    const skeletonProps = { startColor: skeletonStart, endColor: skeletonEnd };
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     const activeCount = agents.filter(
         (a) => a.status === AgentStatus.PRODUCTION || a.status === AgentStatus.DEVELOPMENT,
@@ -110,8 +75,8 @@ export const AgentsCard = ({ agents = [], isEmpty = false, isLoading = false, ..
 
     if (isLoading) {
         return (
-            <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" {...props}>
-                <HStack justify="space-between" borderBottom="1px solid" borderColor={border} p={4}>
+            <Box bg="surfaceCard" border="1px solid" borderColor="borderDefault" borderRadius="12px" {...props}>
+                <HStack justify="space-between" borderBottom="1px solid" borderColor="borderDefault" p={4}>
                     <HStack spacing={2}>
                         <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
                         <Skeleton {...skeletonProps} h="14px" w="60px" borderRadius="4px" />
@@ -139,14 +104,14 @@ export const AgentsCard = ({ agents = [], isEmpty = false, isLoading = false, ..
     }
 
     return (
-        <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" {...props}>
-            <HStack justify="space-between" borderBottom="1px solid" borderColor={border} p={4}>
+        <Box bg="surfaceCard" border="1px solid" borderColor="borderDefault" borderRadius="12px" {...props}>
+            <HStack justify="space-between" borderBottom="1px solid" borderColor="borderDefault" p={4}>
                 <HStack spacing={2}>
-                    <Icon as={Zap} boxSize={3.5} color={textSecondary} />
-                    <Text fontSize="sm" fontWeight="600" color={textPrimary}>
+                    <Icon as={Zap} boxSize={3.5} color="textLabel" />
+                    <Text fontSize="sm" fontWeight="600" color="textPrimary">
                         Agents
                     </Text>
-                    <Text fontSize="sm" color={textSecondary}>
+                    <Text fontSize="sm" color="textLabel">
                         {activeCount} actifs
                     </Text>
                 </HStack>

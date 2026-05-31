@@ -23,21 +23,13 @@ interface OnboardingStepperProps {
     onStepClick?: () => void;
 }
 
-const OnboardingStepper: React.FC<OnboardingStepperProps> = ({
-    justCompletedStep,
-    onStepClick,
-}) => {
+const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ justCompletedStep, onStepClick }) => {
     const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { currentStep, goToStep } = useOnboarding();
 
     return (
-        <Stepper
-            h="100%"
-            index={currentStep}
-            orientation="vertical"
-            variant={currentDarkTheme.colorScheme}
-        >
+        <Stepper h="100%" index={currentStep} orientation="vertical" variant={currentDarkTheme.colorScheme}>
             {stepsConfig.map((step, index) => (
                 <Step
                     key={index}
@@ -50,31 +42,17 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({
                         <StepStatus
                             complete={
                                 <Circle size="45px" mr="1px">
-                                    <Icon
-                                        as={Check}
-                                        color="white"
-                                        boxSize={5}
-                                    />
+                                    <Icon as={Check} color="white" boxSize={5} />
                                 </Circle>
                             }
                             incomplete={
                                 <Icon
                                     as={step.icon}
-                                    color={
-                                        colorMode === "dark"
-                                            ? "grey.900"
-                                            : "grey.500"
-                                    }
+                                    color={colorMode === "dark" ? "grey.900" : "grey.500"}
                                     boxSize={5}
                                 />
                             }
-                            active={
-                                <Icon
-                                    as={step.icon}
-                                    color="white"
-                                    boxSize={5}
-                                />
-                            }
+                            active={<Icon as={step.icon} color="white" boxSize={5} />}
                         />
                     </StepIndicator>
                     <Box flex={1} ml={4} minW={0}>
@@ -84,11 +62,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({
                             </Text>
                         </StepTitle>
                         <StepDescription>
-                            <Text
-                                fontWeight="semibold"
-                                fontSize="xs"
-                                color="textmuted"
-                            >
+                            <Text fontWeight="semibold" fontSize="xs" color="textmuted">
                                 {step.description}
                             </Text>
                         </StepDescription>
@@ -113,8 +87,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({
                                     index >= currentStep
                                         ? `2px dashed ${colorMode === "dark" ? currentDarkTheme.rgba.primary30 : "#D1D5DB"}`
                                         : `2px solid transparent`,
-                                transition:
-                                    "border-color 0.6s ease-in-out, border-style 0.6s ease-in-out",
+                                transition: "border-color 0.6s ease-in-out, border-style 0.6s ease-in-out",
                                 zIndex: 1,
                             }}
                         />
@@ -123,8 +96,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({
                                 className="step-separator-fill step-separator-static"
                                 style={
                                     {
-                                        "--separator-fill-color":
-                                            currentDarkTheme.hex.primary,
+                                        "--separator-fill-color": currentDarkTheme.hex.primary,
                                         height: "100%",
                                         opacity: 1,
                                     } as React.CSSProperties
@@ -137,8 +109,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({
                                 className="step-separator-fill"
                                 style={
                                     {
-                                        "--separator-fill-color":
-                                            currentDarkTheme.hex.primary,
+                                        "--separator-fill-color": currentDarkTheme.hex.primary,
                                     } as React.CSSProperties
                                 }
                             />

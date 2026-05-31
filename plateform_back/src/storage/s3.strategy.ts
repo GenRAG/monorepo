@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-    S3Client,
-    PutObjectCommand,
-    GetObjectCommand,
-    DeleteObjectCommand,
-    HeadObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { IStorageStrategy } from './storage.strategy';
 
@@ -45,8 +39,10 @@ export class S3StorageStrategy implements IStorageStrategy {
             }),
         );
 
+        if (!response.Body) throw new Error(`S3 object not found: ${key}`);
+
         const chunks: Buffer[] = [];
-        for await (const chunk of response.Body as any) {
+        for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
             chunks.push(Buffer.from(chunk));
         }
 
@@ -54,11 +50,7 @@ export class S3StorageStrategy implements IStorageStrategy {
     }
 
     async getSignedUrl(key: string, expiresIn: number): Promise<string> {
-        return getSignedUrl(
-            this.client,
-            new GetObjectCommand({ Bucket: this.bucket, Key: key }),
-            { expiresIn },
-        );
+        return getSignedUrl(this.client, new GetObjectCommand({ Bucket: this.bucket, Key: key }), { expiresIn });
     }
 
     async delete(key: string): Promise<void> {

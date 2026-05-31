@@ -14,6 +14,7 @@ model Agent {
   deployments        AgentVersion[]
   onboardingSession  OnboardingSession?
   conversations      Conversation[]
+  members           AgentMember[]
 }
 
 model AgentVersion {
@@ -31,6 +32,17 @@ model AgentVersion {
   createdByUser   User        @relation(fields: [createdBy], references: [id])  // 👈
 
   @@unique([agentId, version])
+}
+
+model AgentMember {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([agentId, userId])
 }
 
 enum AgentStatus {

@@ -1,11 +1,4 @@
-import {
-    Box,
-    HStack,
-    VStack,
-    Text,
-    Skeleton,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, VStack, Text, Skeleton, useColorModeValue } from "@chakra-ui/react";
 import { ExternalLink } from "lucide-react";
 import Button from "components/System/Atoms/Button";
 import { DeploymentBadge } from "components/Deployment/DashboardTab/DeploymentBadge";
@@ -19,48 +12,24 @@ interface Props {
     deployLabel: string;
 }
 
-const daysSince = (iso: string) =>
-    Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+const daysSince = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
 
-export const HeaderCardMain: FC<Props> = ({
-    data,
-    isLoading,
-    onOpen,
-    deployLabel,
-}) => {
+export const HeaderCardMain: FC<Props> = ({ data, isLoading, onOpen, deployLabel }) => {
     const bgColor = useColorModeValue("white", "grey.950");
     const borderColor = useColorModeValue("green.300", "green.500");
     const textColor = useColorModeValue("grey.900", "grey.50");
 
-    const days = data.latestDeployment
-        ? daysSince(data.latestDeployment.createdAt)
-        : null;
+    const days = data.latestDeployment ? daysSince(data.latestDeployment.createdAt) : null;
 
     return (
-        <Box
-            borderRadius="12px"
-            border="2px solid"
-            borderColor={borderColor}
-            bg={bgColor}
-            p={4}
-        >
+        <Box borderRadius="12px" border="2px solid" borderColor={borderColor} bg={bgColor} p={4}>
             <HStack justify="space-between" align="flex-start">
                 <VStack align="start">
-                    <DeploymentBadge
-                        status={data.deploymentStatus}
-                        isLoading={isLoading}
-                    />
+                    <DeploymentBadge status={data.deploymentStatus} isLoading={isLoading} />
                     <HStack align="end">
                         <Skeleton isLoaded={!isLoading} borderRadius="4px">
-                            <Text
-                                fontSize="xl"
-                                fontWeight={700}
-                                color={textColor}
-                                fontFamily="mono"
-                            >
-                                {data?.latestDeployment
-                                    ? `v${data.latestDeployment.version}`
-                                    : "—"}
+                            <Text fontSize="xl" fontWeight={700} color={textColor} fontFamily="mono">
+                                {data?.latestDeployment ? `v${data.latestDeployment.version}` : "—"}
                             </Text>
                         </Skeleton>
                         {days !== null && (

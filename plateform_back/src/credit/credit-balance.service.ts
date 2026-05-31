@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreditBalanceRepository } from 'src/credit/credit-balance.repository';
+import { CreditBalanceRepository } from './credit-balance.repository';
 
 export type UpdateCreditBalance = {
     workspaceId: string;
@@ -8,35 +8,17 @@ export type UpdateCreditBalance = {
 
 @Injectable()
 export class CreditBalanceService {
-    constructor(
-        private readonly creditBalanceRepository: CreditBalanceRepository,
-    ) {}
+    constructor(private readonly creditBalanceRepository: CreditBalanceRepository) {}
 
-    async getBalance(workspaceId: string): Promise<number> {
+    getBalance(workspaceId: string): Promise<number> {
         return this.creditBalanceRepository.getBalance(workspaceId);
     }
 
-    async deduct({ workspaceId, amount }: UpdateCreditBalance): Promise<void> {
-        await this.creditBalanceRepository.decrementBalance(
-            workspaceId,
-            amount,
-        );
-    }
-
     async add({ workspaceId, amount }: UpdateCreditBalance): Promise<void> {
-        await this.creditBalanceRepository.incrementBalance(
-            workspaceId,
-            amount,
-        );
+        await this.creditBalanceRepository.incrementBalance(workspaceId, amount);
     }
 
-    async grantInitial({
-        workspaceId,
-        amount,
-    }: UpdateCreditBalance): Promise<void> {
-        await this.creditBalanceRepository.incrementOrCreate(
-            workspaceId,
-            amount,
-        );
+    async grantInitial({ workspaceId, amount }: UpdateCreditBalance): Promise<void> {
+        await this.creditBalanceRepository.incrementOrCreate(workspaceId, amount);
     }
 }

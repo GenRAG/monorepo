@@ -6,6 +6,7 @@ import {
     useStartOnboardingMutation,
     useUpdateOnboardingStepMutation,
     useCompleteOnboardingMutation,
+    useSkipOnboardingMutation,
 } from "services/onboarding/onboarding";
 
 export interface StepData {
@@ -52,6 +53,7 @@ interface OnboardingContextType {
     isStepCompleted: (stepIndex: number) => boolean;
     canNavigateToStep: (stepIndex: number) => boolean;
     resetOnboarding: () => void;
+    skip: () => Promise<void>;
     workspaceId: string;
     agentId: string;
     sessionId: string | null;
@@ -84,6 +86,7 @@ export const OnboardingProvider: React.FC<{
     const [startOnboarding] = useStartOnboardingMutation();
     const [updateOnboardingStep] = useUpdateOnboardingStepMutation();
     const [completeOnboarding] = useCompleteOnboardingMutation();
+    const [skipOnboarding] = useSkipOnboardingMutation();
 
     useEffect(() => {
         if (!workspaceId || sessionInitialized.current) return;
@@ -239,6 +242,16 @@ export const OnboardingProvider: React.FC<{
         setState({ currentStep: 0, completedSteps: [], stepsData: {} });
     }, []);
 
+    const skip = useCallback(async () => {
+        try {
+            await skipOnboarding({ workspaceId }).unwrap();
+            await navigate(`/workspaces/${workspaceId}/dashboard`);
+        } catch {
+            // navigate anyway — skip is best-effort
+            await navigate(`/workspaces/${workspaceId}/dashboard`);
+        }
+    }, [workspaceId, skipOnboarding, navigate]);
+
     return (
         <OnboardingContext.Provider
             value={{
@@ -255,6 +268,7 @@ export const OnboardingProvider: React.FC<{
                 isStepCompleted,
                 canNavigateToStep,
                 resetOnboarding,
+                skip,
                 workspaceId,
                 agentId,
                 sessionId,

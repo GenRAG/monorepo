@@ -1,18 +1,10 @@
 import React, { useState } from "react";
-import {
-    Box,
-    HStack,
-    IconButton,
-    Text,
-    VStack,
-    useColorMode,
-    useDisclosure,
-} from "@chakra-ui/react";
+import { Box, HStack, IconButton, Text, VStack, useColorMode, useDisclosure } from "@chakra-ui/react";
 import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
-import { DocumentList } from "components/Document/DocumentList";
+import { DocumentList } from "components/Document/Table/DocumentList";
 import { PreviewDrawer } from "components/Document/Drawer/PreviewDrawer";
 import { UploadModal } from "components/Document/Modal/UploadModal";
-import { DocumentPageHeader } from "components/Document/DocumentPageHeader";
+import { DocumentPageHeader } from "components/Document/Header/DocumentPageHeader";
 import { MoveLeft, MoveRight } from "lucide-react";
 import {
     useDeleteDocumentMutation,
@@ -43,8 +35,7 @@ export const DocumentWorkspace: React.FC = () => {
     const total = fetchedDocuments?.total ?? 0;
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-    const [selectedDocument, setSelectedDocument] =
-        useState<DocumentEntity | null>(null);
+    const [selectedDocument, setSelectedDocument] = useState<DocumentEntity | null>(null);
 
     const uploadModal = useDisclosure();
     const previewDrawer = useDisclosure();
@@ -88,14 +79,7 @@ export const DocumentWorkspace: React.FC = () => {
     const isMobile = useAppResponsive({ base: true, lg: false }) ?? false;
 
     return (
-        <VStack
-            w="100%"
-            h="100vh"
-            align="stretch"
-            spacing={0}
-            overflow="hidden"
-            position="relative"
-        >
+        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden" position="relative">
             <Box position="relative" zIndex={1}>
                 <WorkspaceHeader
                     title="Documents"
@@ -113,12 +97,7 @@ export const DocumentWorkspace: React.FC = () => {
                 zIndex={1}
                 position="relative"
             >
-                {documents.length !== 0 && (
-                    <DocumentPageHeader
-                        workspaceId={workspaceId!}
-                        agentId={agentId!}
-                    />
-                )}
+                {documents.length !== 0 && <DocumentPageHeader workspaceId={workspaceId!} agentId={agentId!} />}
 
                 <DocumentList
                     documents={documents}
@@ -139,9 +118,7 @@ export const DocumentWorkspace: React.FC = () => {
                         borderRadius="8px"
                         justify="space-between"
                         border="1px solid"
-                        borderColor={
-                            colorMode === "dark" ? "grey.700" : "grey.100"
-                        }
+                        borderColor={colorMode === "dark" ? "grey.700" : "grey.100"}
                     >
                         <Text>
                             Page {currentPage} sur {totalPages}
@@ -152,9 +129,7 @@ export const DocumentWorkspace: React.FC = () => {
                                 icon={<MoveLeft size={16} />}
                                 size="sm"
                                 variant="outline"
-                                onClick={() =>
-                                    setCurrentPage((p) => Math.max(1, p - 1))
-                                }
+                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                 isDisabled={currentPage === 1}
                             />
                             <IconButton
@@ -162,11 +137,7 @@ export const DocumentWorkspace: React.FC = () => {
                                 icon={<MoveRight size={16} />}
                                 size="sm"
                                 variant="outline"
-                                onClick={() =>
-                                    setCurrentPage((p) =>
-                                        Math.min(totalPages, p + 1),
-                                    )
-                                }
+                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                                 isDisabled={currentPage === totalPages}
                             />
                         </HStack>

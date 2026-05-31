@@ -31,7 +31,7 @@ async function bootstrap() {
 
     app.use(cookieParser());
 
-    app.use('/docs', apiReference({ spec: { content: document } }));
+    app.use('/docs', apiReference({ spec: { content: document } } as any));
 
     await app.listen(app.get(ConfigService).getOrThrow('PORT'));
 }

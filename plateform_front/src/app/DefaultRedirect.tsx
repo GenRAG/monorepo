@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import {
-    useGetUserWorkspacesQuery,
-    useCreateWorkspaceMutation,
-} from "services/workspace/workspace";
+import { useGetUserWorkspacesQuery, useCreateWorkspaceMutation } from "services/workspace/workspace";
 import { Spinner, Flex } from "@chakra-ui/react";
 
 export default function DefaultRedirect() {
@@ -18,9 +15,7 @@ export default function DefaultRedirect() {
             setIsCreating(true);
             void createWorkspace({ name: "Mon workspace" })
                 .unwrap()
-                .then((ws) =>
-                    navigate(`/onboarding/${ws.id}`, { replace: true }),
-                )
+                .then((ws) => navigate(`/onboarding/${ws.id}`, { replace: true }))
                 .catch(console.error);
         }
     }, [isLoading, workspaces, createWorkspace, navigate, isCreating]);

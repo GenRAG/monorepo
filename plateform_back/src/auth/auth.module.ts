@@ -8,6 +8,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
 import { BrevoService } from 'src/auth/brevo.service';
 import { TokenService } from 'src/auth/token.service';
+import { JwtBlacklistService } from 'src/auth/jwt-blacklist.service';
+import { LoginAttemptService } from 'src/auth/login-attempt.service';
 
 @Module({
     imports: [
@@ -31,6 +33,8 @@ import { TokenService } from 'src/auth/token.service';
         JwtStrategy,
         BrevoService,
         TokenService,
+        JwtBlacklistService,
+        LoginAttemptService,
     ],
 })
 export class AuthModule {}

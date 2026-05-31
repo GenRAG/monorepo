@@ -1,12 +1,4 @@
-import {
-    Box,
-    HStack,
-    Icon,
-    Text,
-    Tooltip,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Icon, Text, Tooltip, VStack, useColorModeValue } from "@chakra-ui/react";
 import { Activity } from "lucide-react";
 
 type DayStatus = "operational" | "degraded" | "incident" | "maintenance";
@@ -48,10 +40,7 @@ const HEALTH_DATA: DayHealth[] = Array.from({ length: DAYS }, (_, i) => {
     return { date, status };
 });
 
-const uptime = (
-    (HEALTH_DATA.filter((d) => d.status === "operational").length / DAYS) *
-    100
-).toFixed(2);
+const uptime = ((HEALTH_DATA.filter((d) => d.status === "operational").length / DAYS) * 100).toFixed(2);
 
 const incidentCount = HEALTH_DATA.filter((d) => d.status === "incident").length;
 
@@ -83,27 +72,12 @@ export const HealthSection = () => {
               : "rgba(245,158,11,0.25)";
 
     return (
-        <Box
-            bg={bgContainer}
-            border="0.5px solid"
-            borderColor="borderDefault"
-            borderRadius="12px"
-            overflow="hidden"
-        >
-            <HStack
-                justify="space-between"
-                p={4}
-                borderBottom="0.5px solid"
-                borderColor="borderDefault"
-            >
+        <Box bg={bgContainer} border="0.5px solid" borderColor="borderDefault" borderRadius="12px" overflow="hidden">
+            <HStack justify="space-between" p={4} borderBottom="0.5px solid" borderColor="borderDefault">
                 <HStack spacing={3}>
                     <HStack spacing={2}>
                         <Icon as={Activity} boxSize={3.5} color="textMuted" />
-                        <Text
-                            fontWeight="600"
-                            fontSize="sm"
-                            color={textPrimary}
-                        >
+                        <Text fontWeight="600" fontSize="sm" color={textPrimary}>
                             Disponibilité
                         </Text>
                     </HStack>
@@ -116,19 +90,8 @@ export const HealthSection = () => {
                         border="1px solid"
                         borderColor={statusBorder}
                     >
-                        <Box
-                            w="6px"
-                            h="6px"
-                            borderRadius="full"
-                            bg={statusColor}
-                            flexShrink={0}
-                        />
-                        <Text
-                            fontSize="11px"
-                            fontWeight="600"
-                            color={statusColor}
-                            lineHeight="1"
-                        >
+                        <Box w="6px" h="6px" borderRadius="full" bg={statusColor} flexShrink={0} />
+                        <Text fontSize="11px" fontWeight="600" color={statusColor} lineHeight="1">
                             {STATUS_LABEL[currentStatus]}
                         </Text>
                     </HStack>
@@ -138,12 +101,7 @@ export const HealthSection = () => {
             <VStack p={4} spacing={3} align="stretch">
                 <HStack justify="space-between" align="baseline">
                     <HStack spacing={1.5} align="baseline">
-                        <Text
-                            fontSize="2xl"
-                            fontWeight="700"
-                            color={textPrimary}
-                            lineHeight="1"
-                        >
+                        <Text fontSize="2xl" fontWeight="700" color={textPrimary} lineHeight="1">
                             {uptime}%
                         </Text>
                         <Text fontSize="sm" color="textMuted">
@@ -174,9 +132,7 @@ export const HealthSection = () => {
                                     h="100%"
                                     borderRadius="2px"
                                     bg={STATUS_COLOR[day.status]}
-                                    opacity={
-                                        day.status === "operational" ? 0.65 : 1
-                                    }
+                                    opacity={day.status === "operational" ? 0.65 : 1}
                                     cursor="default"
                                     transition="opacity 0.1s"
                                     _hover={{ opacity: 1 }}
@@ -195,22 +151,14 @@ export const HealthSection = () => {
                 </Box>
 
                 <HStack spacing={4} flexWrap="wrap">
-                    {(Object.keys(STATUS_COLOR) as DayStatus[]).map(
-                        (status) => (
-                            <HStack key={status} spacing={1.5}>
-                                <Box
-                                    w="8px"
-                                    h="8px"
-                                    borderRadius="2px"
-                                    bg={STATUS_COLOR[status]}
-                                    flexShrink={0}
-                                />
-                                <Text fontSize="11px" color="textMuted">
-                                    {STATUS_LABEL[status]}
-                                </Text>
-                            </HStack>
-                        ),
-                    )}
+                    {(Object.keys(STATUS_COLOR) as DayStatus[]).map((status) => (
+                        <HStack key={status} spacing={1.5}>
+                            <Box w="8px" h="8px" borderRadius="2px" bg={STATUS_COLOR[status]} flexShrink={0} />
+                            <Text fontSize="11px" color="textMuted">
+                                {STATUS_LABEL[status]}
+                            </Text>
+                        </HStack>
+                    ))}
                 </HStack>
             </VStack>
         </Box>

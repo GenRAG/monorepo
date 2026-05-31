@@ -1,40 +1,135 @@
 import { Injectable } from '@nestjs/common';
-import { DocumentStatus } from 'generated/*';
-import { WorkspaceRepository } from 'src/workspace/workspace.repository';
+import { AgentStatus, DocumentStatus } from 'generated/prisma';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class WorkspaceStatsService {
     private readonly DAY_NAMES = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
-    constructor(private readonly workspaceRepository: WorkspaceRepository) {}
+    constructor(private readonly prisma: PrismaService) {}
 
     async getStats(workspaceId: string) {
         const now = new Date();
         const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         const since30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-        const [agents, documents, conversations, activity, credit] = await Promise.all([
-            this.workspaceRepository.getAgentStats(workspaceId),
-            this.workspaceRepository.getDocumentStats(workspaceId),
-            this.workspaceRepository.getConversationStats(workspaceId, since24h, since30d),
-            this.workspaceRepository.getRecentActivity(workspaceId),
-            this.workspaceRepository.getCreditBalance(workspaceId),
+        const [agents, documents, conversations, recentActivity, credit] = await Promise.all([
+            this.getAgentStats(workspaceId),
+            this.getDocumentStats(workspaceId),
+            this.getConversationStats(workspaceId, since24h, since30d),
+            this.getRecentActivity(workspaceId),
+            this.prisma.creditBalance.findUnique({
+                where: { workspaceId },
+                select: { balance: true },
+            }),
         ]);
 
         return {
             agents: this.formatAgents(agents),
             documents,
-            conversations: {
-                total: conversations.total,
-                today: conversations.last24h,
-            },
+            conversations: { total: conversations.total, today: conversations.last24h },
             credits: credit?.balance ?? 0,
-            recentActivity: this.formatActivity(activity, conversations.recent),
+            recentActivity,
             activityChart: this.buildCharts(conversations, now),
         };
     }
 
-    private formatAgents(agents: Awaited<ReturnType<WorkspaceRepository['getAgentStats']>>) {
+    private async getAgentStats(workspaceId: string) {
+        const [production, development, items] = await this.prisma.$transaction([
+            this.prisma.agent.count({ where: { workspaceId, status: AgentStatus.PRODUCTION } }),
+            this.prisma.agent.count({ where: { workspaceId, status: AgentStatus.DEVELOPMENT } }),
+            this.prisma.agent.findMany({
+                where: { workspaceId },
+                select: {
+                    id: true,
+                    name: true,
+                    status: true,
+                    _count: { select: { conversations: true, documents: true } },
+                    deployments: { orderBy: { version: 'desc' }, take: 1, select: { version: true } },
+                },
+                orderBy: { updatedAt: 'desc' },
+            }),
+        ]);
+        return { production, development, items };
+    }
+
+    private async getDocumentStats(workspaceId: string) {
+        const [indexed, processing, failed, total] = await this.prisma.$transaction([
+            this.prisma.document.count({ where: { agent: { workspaceId }, status: DocumentStatus.INDEXED } }),
+            this.prisma.document.count({ where: { agent: { workspaceId }, status: DocumentStatus.PROCESSING } }),
+            this.prisma.document.count({ where: { agent: { workspaceId }, status: DocumentStatus.FAILED } }),
+            this.prisma.document.count({ where: { agent: { workspaceId } } }),
+        ]);
+        return { indexed, processing, failed, total };
+    }
+
+    private async getConversationStats(workspaceId: string, since24h: Date, since30d: Date) {
+        const [total, last24h, daily, hourly] = await this.prisma.$transaction([
+            this.prisma.conversation.count({ where: { workspaceId } }),
+            this.prisma.conversation.count({ where: { workspaceId, createdAt: { gte: since24h } } }),
+            this.prisma.$queryRaw<{ day: Date; count: number }[]>`
+                SELECT DATE_TRUNC('day', "createdAt")::date AS day, COUNT(*)::int AS count
+                FROM "Conversation"
+                WHERE "workspaceId" = ${workspaceId} AND "createdAt" >= ${since30d}
+                GROUP BY day ORDER BY day ASC
+            `,
+            this.prisma.$queryRaw<{ hour: Date; count: number }[]>`
+                SELECT DATE_TRUNC('hour', "createdAt") AS hour, COUNT(*)::int AS count
+                FROM "Conversation"
+                WHERE "workspaceId" = ${workspaceId} AND "createdAt" >= ${since24h}
+                GROUP BY hour ORDER BY hour ASC
+            `,
+        ]);
+        return { total, last24h, daily, hourly };
+    }
+
+    private async getRecentActivity(workspaceId: string) {
+        const [docs, deployments, conversations] = await this.prisma.$transaction([
+            this.prisma.document.findMany({
+                where: { agent: { workspaceId } },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                select: { name: true, status: true, createdAt: true, agent: { select: { name: true } } },
+            }),
+            this.prisma.agentVersion.findMany({
+                where: { agent: { workspaceId }, toStatus: AgentStatus.PRODUCTION },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                select: { version: true, createdAt: true, agent: { select: { name: true } } },
+            }),
+            this.prisma.conversation.findMany({
+                where: { workspaceId },
+                orderBy: { createdAt: 'desc' },
+                take: 5,
+                select: { title: true, createdAt: true, agent: { select: { name: true } } },
+            }),
+        ]);
+
+        return [
+            ...docs.map((d) => ({
+                type: 'document_upload' as const,
+                title: d.name,
+                subtitle: `${d.agent.name} · ${this.formatDocStatus(d.status)}`,
+                createdAt: d.createdAt.toISOString(),
+            })),
+            ...deployments.map((d) => ({
+                type: 'deployment' as const,
+                title: `Promotion en production · v${d.version}`,
+                subtitle: d.agent.name,
+                createdAt: d.createdAt.toISOString(),
+            })),
+            ...conversations.map((c) => ({
+                type: 'conversation' as const,
+                title: c.title,
+                subtitle: c.agent.name,
+                createdAt: c.createdAt.toISOString(),
+            })),
+        ]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 8);
+    }
+
+    private formatAgents(agents: Awaited<ReturnType<WorkspaceStatsService['getAgentStats']>>) {
         return {
             total: agents.production + agents.development,
             production: agents.production,
@@ -50,38 +145,6 @@ export class WorkspaceStatsService {
         };
     }
 
-    private formatActivity(
-        activity: Awaited<ReturnType<WorkspaceRepository['getRecentActivity']>>,
-        conversations: {
-            title: string;
-            createdAt: Date;
-            agent: { name: string };
-        }[],
-    ) {
-        const feed = [
-            ...activity.docs.map((d) => ({
-                type: 'document_upload',
-                title: d.name,
-                subtitle: `${d.agent.name} · ${this.formatDocStatus(d.status)}`,
-                createdAt: d.createdAt.toISOString(),
-            })),
-            ...activity.deployments.map((d) => ({
-                type: 'deployment',
-                title: `Promotion en production · v${d.version}`,
-                subtitle: d.agent.name,
-                createdAt: d.createdAt.toISOString(),
-            })),
-            ...conversations.map((c) => ({
-                type: 'conversation',
-                title: c.title,
-                subtitle: c.agent.name,
-                createdAt: c.createdAt.toISOString(),
-            })),
-        ];
-
-        return feed.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8);
-    }
-
     private formatDocStatus(status: DocumentStatus): string {
         const map: Record<DocumentStatus, string> = {
             [DocumentStatus.INDEXED]: 'Indexé',
@@ -92,7 +155,7 @@ export class WorkspaceStatsService {
         return map[status];
     }
 
-    private buildCharts(conversations: Awaited<ReturnType<WorkspaceRepository['getConversationStats']>>, now: Date) {
+    private buildCharts(conversations: Awaited<ReturnType<WorkspaceStatsService['getConversationStats']>>, now: Date) {
         const dayMap = new Map(
             conversations.daily.map((r) => [new Date(r.day).toISOString().slice(0, 10), Number(r.count)]),
         );

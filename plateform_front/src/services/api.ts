@@ -11,6 +11,7 @@ const BACKEND_TAG_TYPES = [
     Tag.Deployments,
     Tag.Onboarding,
     Tag.Credits,
+    Tag.AgentMembers,
 ] as const;
 
 export const backendApi = createApi({

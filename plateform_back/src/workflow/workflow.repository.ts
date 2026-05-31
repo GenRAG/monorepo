@@ -31,10 +31,6 @@ export class WorkflowRepository {
         });
     }
 
-    create(data: Prisma.WorkflowCreateInput): Promise<Workflow> {
-        return this.prisma.workflow.create({ data });
-    }
-
     update(id: string, data: Prisma.WorkflowUpdateInput): Promise<Workflow> {
         return this.prisma.workflow.update({ where: { id }, data });
     }

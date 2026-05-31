@@ -16,30 +16,18 @@ export const HeaderCard = ({ data, isLoading }: HeaderCardProps) => {
     const deployLabel = useMemo(() => {
         if (isLoading) return "—";
 
-        return data.deploymentStatus === AgentStatus.DEVELOPMENT
-            ? "Déployer en Production"
-            : "Redéployer";
+        return data.deploymentStatus === AgentStatus.DEVELOPMENT ? "Déployer en Production" : "Redéployer";
     }, [data.deploymentStatus, isLoading]);
 
     const hasBeenInProd =
-        data.deploymentStatus === AgentStatus.PRODUCTION ||
-        data.latestDeployment?.toStatus === AgentStatus.PRODUCTION;
+        data.deploymentStatus === AgentStatus.PRODUCTION || data.latestDeployment?.toStatus === AgentStatus.PRODUCTION;
 
     const renderHeader = () => {
         switch (hasBeenInProd) {
             case false:
-                return (
-                    <HeaderCardEmpty onOpen={onOpen} onGuideClick={() => {}} />
-                );
+                return <HeaderCardEmpty onOpen={onOpen} onGuideClick={() => {}} />;
             case true:
-                return (
-                    <HeaderCardMain
-                        data={data}
-                        isLoading={isLoading}
-                        onOpen={onOpen}
-                        deployLabel={deployLabel}
-                    />
-                );
+                return <HeaderCardMain data={data} isLoading={isLoading} onOpen={onOpen} deployLabel={deployLabel} />;
             default:
                 return null;
         }
@@ -49,11 +37,7 @@ export const HeaderCard = ({ data, isLoading }: HeaderCardProps) => {
         <>
             {renderHeader()}
 
-            <DeployModal
-                isOpen={isOpen}
-                onClose={onClose}
-                title={deployLabel}
-            />
+            <DeployModal isOpen={isOpen} onClose={onClose} title={deployLabel} />
         </>
     );
 };

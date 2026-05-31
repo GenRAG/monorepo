@@ -7,11 +7,7 @@ interface StepLevelProps {
     description: string;
 }
 
-const StepLevel: React.FC<StepLevelProps> = ({
-    level,
-    description,
-    title,
-}: StepLevelProps) => {
+const StepLevel: React.FC<StepLevelProps> = ({ level, description, title }: StepLevelProps) => {
     const bgColor = useColorModeValue("green.100", "green.700");
     const borderColor = useColorModeValue("green.300", "green.600");
     const textColor = useColorModeValue("green.800", "green.200");
@@ -29,11 +25,7 @@ const StepLevel: React.FC<StepLevelProps> = ({
         >
             <HStack spacing={3}>
                 <VStack align="start" spacing={0} flex={1}>
-                    <Text
-                        fontWeight="semibold"
-                        fontSize={isMobile ? "sm" : "md"}
-                        color={titleColor}
-                    >
+                    <Text fontWeight="semibold" fontSize={isMobile ? "sm" : "md"} color={titleColor}>
                         {level} / 5 — {title}
                     </Text>
                     {!isMobile && (

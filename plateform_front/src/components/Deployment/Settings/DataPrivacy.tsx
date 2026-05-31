@@ -13,12 +13,7 @@ export const DataPrivacy = () => {
     const bgColor = useColorModeValue("white", "grey.950");
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={borderColor}
-            bg={bgColor}
-        >
+        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={bgColor}>
             <SectionHeader
                 title="Confidentialité des données"
                 subtitle="Gérez les paramètres de confidentialité et de sécurité de votre application"

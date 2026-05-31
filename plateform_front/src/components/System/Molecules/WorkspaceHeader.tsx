@@ -1,12 +1,5 @@
 import React from "react";
-import {
-    Heading,
-    HStack,
-    Text,
-    useColorMode,
-    useColorModeValue,
-    VStack,
-} from "@chakra-ui/react";
+import { Heading, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
 
 interface ChatWorkspaceHeaderProps {
@@ -15,13 +8,7 @@ interface ChatWorkspaceHeaderProps {
     actions?: React.ReactNode;
 }
 
-const WorkspaceHeader = ({
-    title,
-    description,
-    actions,
-}: ChatWorkspaceHeaderProps) => {
-    const descriptionColor = useColorModeValue("grey.500", "grey.400");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
+const WorkspaceHeader = ({ title, description, actions }: ChatWorkspaceHeaderProps) => {
     const bg = useColorModeValue("white", "grey.975");
     const isMobile = useAppResponsive({ base: true, lg: false });
 
@@ -31,14 +18,14 @@ const WorkspaceHeader = ({
             p={4}
             borderBottom="1px solid"
             bg={bg}
-            borderColor={borderColor}
+            borderColor="borderDivider"
             flexShrink={0}
             justify="space-between"
         >
             <VStack align="flex-start">
                 <Heading variant="heading-2xl">{title}</Heading>
                 {!isMobile && (
-                    <Text fontSize="sm" color={descriptionColor}>
+                    <Text fontSize="sm" color="textLabel">
                         {description}
                     </Text>
                 )}

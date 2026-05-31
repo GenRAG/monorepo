@@ -61,15 +61,9 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
     const accentColor = getAccentColorFromStatus(options.status);
     const progressColor = getProgressColorFromStatus(options.status);
 
-    // Dark mode tokens
-    const bg = useColorModeValue("white", "grey.850");
-    const borderColor = useColorModeValue("grey.100", "grey.700");
     const titleColor = useColorModeValue("grey.900", "white");
     const descriptionColor = useColorModeValue("grey.600", "grey.300");
     const iconBg = useColorModeValue(`${accentColor}18`, `${accentColor}30`);
-    const progressTrackBg = useColorModeValue("grey.100", "grey.700");
-    const actionBorderColor = useColorModeValue("grey.200", "grey.600");
-    const actionBg = useColorModeValue("white", "grey.800");
     const actionColor = useColorModeValue("grey.800", "grey.100");
     const actionHoverBg = useColorModeValue("grey.50", "grey.700");
     const actionHoverBorderColor = useColorModeValue("grey.300", "grey.500");
@@ -79,14 +73,14 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
 
     return (
         <Box
-            bg={bg}
+            bg="surfaceCard"
             borderRadius="16px"
             boxShadow={useColorModeValue(
                 "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)",
                 "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)",
             )}
             border="1px solid"
-            borderColor={borderColor}
+            borderColor="borderSubtle"
             overflow="hidden"
             minW="320px"
             maxW="420px"
@@ -175,11 +169,11 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
                             py="8px"
                             borderRadius="10px"
                             border="1.5px solid"
-                            borderColor={actionBorderColor}
+                            borderColor="borderStrong"
                             fontSize="sm"
                             fontWeight="medium"
                             color={actionColor}
-                            bg={actionBg}
+                            bg="surfaceAction"
                             _hover={{ bg: actionHoverBg, borderColor: actionHoverBorderColor }}
                             transition="all 0.15s"
                             onClick={(options as any).onAction}
@@ -191,7 +185,7 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
             )}
 
             {/* Barre de progression */}
-            <Box h="3px" bg={progressTrackBg} w="100%">
+            <Box h="3px" bg="borderSubtle" w="100%">
                 <Box
                     h="100%"
                     bg={progressColor}

@@ -9,20 +9,13 @@ interface ChatHeaderProps {
     showOnlineBadge?: boolean;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({
-    title,
-    showOnlineBadge = true,
-}) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({ title, showOnlineBadge = true }) => {
     const borderColor = useColorModeValue("grey.100", "grey.600");
     const textColor = useColorModeValue("grey.900", "white");
     const isMobile = useAppResponsive({ base: true, lg: false });
 
     return (
-        <HStack
-            p={isMobile ? 2 : 4}
-            borderBottom="1px solid"
-            borderColor={borderColor}
-        >
+        <HStack p={isMobile ? 2 : 4} borderBottom="1px solid" borderColor={borderColor}>
             <Icon as={Sparkles} boxSize={5} color={currentDarkTheme.primary} />
             <Text fontWeight="semibold" color={textColor}>
                 {title}

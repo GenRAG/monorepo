@@ -20,8 +20,6 @@ const AuthMobileLayout = ({
     children: React.ReactNode;
 }) => {
     const { colorMode, toggleColorMode } = useColorMode();
-    const bgColor = useColorModeValue("white", "grey.900");
-    const headingColor = useColorModeValue("grey.900", "whites.offwhite");
     const iconColor = useColorModeValue("grey.900", "whites.offwhite");
     const toggleButtonBg = useColorModeValue("grey.100", "grey.700");
     const toggleButtonHoverBg = useColorModeValue("grey.200", "grey.600");
@@ -34,32 +32,17 @@ const AuthMobileLayout = ({
                 left="0"
                 w="100%"
                 h="100%"
-                bgColor={bgColor}
+                bgColor="backgroundDefault"
                 zIndex="1"
                 pointerEvents="none"
             />
 
-            <Stack
-                direction="row"
-                h="100%"
-                position="relative"
-                zIndex="2"
-                justify="center"
-                align="center"
-            >
+            <Stack direction="row" h="100%" position="relative" zIndex="2" justify="center" align="center">
                 <VStack w="80%" justify="center" h="100%" spacing="32px">
-                    <HStack
-                        position="absolute"
-                        top="24px"
-                        right="24px"
-                        zIndex={3}
-                        spacing={2}
-                    >
+                    <HStack position="absolute" top="24px" right="24px" zIndex={3} spacing={2}>
                         <IconButton
                             aria-label="Toggle color mode"
-                            icon={
-                                <Icon as={colorMode === "light" ? Moon : Sun} />
-                            }
+                            icon={<Icon as={colorMode === "light" ? Moon : Sun} />}
                             onClick={toggleColorMode}
                             variant="ghost"
                             bg={toggleButtonBg}
@@ -78,9 +61,7 @@ const AuthMobileLayout = ({
                             />
                         )}
                     </HStack>
-                    <Heading variant="heading-2xl" color={headingColor}>
-                        GenRAG
-                    </Heading>
+                    <Heading variant="heading-2xl">GenRAG</Heading>
                     <Box w="100%">{children}</Box>
                 </VStack>
             </Stack>

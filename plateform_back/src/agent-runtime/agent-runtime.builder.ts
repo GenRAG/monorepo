@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
+import { Pipeline, PipelineBlock, PipelineSchema } from 'src/rag-engine/pipeline.schema';
 
 @Injectable()
-export class ContextBuilder {
+export class RagPipelineBuilder {
     constructor(
         private readonly agentService: AgentService,
         private readonly workflowService: WorkflowService,
@@ -18,7 +18,7 @@ export class ContextBuilder {
         agentId: string;
         instructionOverride?: string;
         forceActive?: boolean;
-    }): Promise<Prisma.JsonValue> {
+    }): Promise<Pipeline> {
         const prodVersion = forceActive ? null : await this.agentService.findProductionWorkflowVersion(agentId);
 
         const workflow = prodVersion
@@ -26,20 +26,23 @@ export class ContextBuilder {
             : await this.workflowService.findActive(agentId);
 
         if (!workflow) {
-            throw new Error('No active workflow found for this agent');
+            throw new NotFoundException('No active workflow found for this agent');
         }
 
         const def = workflow.definition as Record<string, unknown>;
-        const rawBlocks = (def.blocks ?? []) as Record<string, unknown>[];
+        const rawBlocks = def.blocks ?? [];
 
-        return this.applyInstructionOverride(rawBlocks, instructionOverride) as unknown as Prisma.JsonValue;
+        const result = PipelineSchema.safeParse(rawBlocks);
+        if (!result.success) {
+            const details = result.error.issues.map((i) => `[${i.path.join('.')}] ${i.message}`).join('; ');
+            throw new UnprocessableEntityException(`Pipeline invalide : ${details}`);
+        }
+
+        return this.applyInstructionOverride(result.data, instructionOverride);
     }
 
-    private applyInstructionOverride(
-        blocks: Record<string, unknown>[],
-        instruction?: string,
-    ): Record<string, unknown>[] {
+    private applyInstructionOverride(blocks: Pipeline, instruction?: string): Pipeline {
         if (!instruction) return blocks;
-        return blocks.map((b) => (b['type'] === 'answer' ? { ...b, system_prompt: instruction } : b));
+        return blocks.map((b): PipelineBlock => (b.type === 'answer' ? { ...b, system_prompt: instruction } : b));
     }
 }

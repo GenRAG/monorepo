@@ -7,7 +7,6 @@ import {
     IconButton,
     useColorModeValue,
     useDisclosure,
-    useColorMode,
     Stack,
 } from "@chakra-ui/react";
 import { Menu } from "lucide-react";
@@ -45,7 +44,6 @@ const Sidebar = () => {
         currentWorkspaceIdFromPath ?? workspaces[0]?.id ?? "",
     );
 
-    const { colorMode, toggleColorMode } = useColorMode();
     const color = useColorModeValue("grey.300", "white");
     const bg = useColorModeValue("white", "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)");
     const border = useColorModeValue("grey.100", "grey.800");
@@ -131,8 +129,6 @@ const Sidebar = () => {
 
             <SidebarFooter
                 isOpen={isOpen}
-                colorMode={colorMode}
-                toggleColorMode={toggleColorMode}
                 activeItem={activePath ?? "dashboard"}
                 name={name}
                 email={email}

@@ -1,127 +1,138 @@
-import {
-    Avatar,
-    Box,
-    HStack,
-    Text,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { useState } from "react";
+import { Box, HStack, Input, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { UserPlus, Trash2 } from "lucide-react";
+import { useParams } from "react-router-dom";
 import SectionHeader from "components/Deployment/SectionHeader";
 import Button from "components/System/Atoms/Button";
-
-const MEMBERS = [
-    {
-        initials: "LM",
-        name: "Lucas Martin",
-        email: "l.martin@company.com",
-        role: "ADMIN" as const,
-        since: "il y a 2 mois",
-        color: "#6B46C1",
-    },
-    {
-        initials: "TD",
-        name: "Thomas Dupont",
-        email: "t.dupont@company.com",
-        role: "LECTEUR" as const,
-        since: "il y a 3 mois",
-        color: "#3182CE",
-    },
-    {
-        initials: "PA",
-        name: "Pierre Antoine",
-        email: "p.antoine@company.com",
-        role: "LECTEUR" as const,
-        since: "il y a 1 mois",
-        color: "#ED8936",
-    },
-    {
-        initials: "AF",
-        name: "Alice Ferrand",
-        email: "a.ferrand@company.com",
-        role: "ADMIN" as const,
-        since: "il y a 5 mois",
-        color: "#38A169",
-    },
-];
+import {
+    useGetAgentMembersQuery,
+    useAddAgentMemberMutation,
+    useRemoveAgentMemberMutation,
+} from "services/agent/agentMembers";
+import useThemedToast from "hooks/useThemedToast";
+import BoxIcon from "components/System/Atoms/BoxIcon";
 
 export const MembersSection = () => {
+    const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
+    const [email, setEmail] = useState("");
+    const [isAdding, setIsAdding] = useState(false);
+    const toast = useThemedToast();
+
+    const { data: members = [], isLoading } = useGetAgentMembersQuery(
+        { workspaceId, agentId },
+        { skip: !workspaceId || !agentId },
+    );
+    const [addMember, { isLoading: isAddingMember }] = useAddAgentMemberMutation();
+    const [removeMember] = useRemoveAgentMemberMutation();
+
     const borderColor = useColorModeValue("grey.100", "grey.800");
     const containerBg = useColorModeValue("white", "grey.950");
-    const textPrimary = useColorModeValue("grey.900", "grey.50");
-    const textMuted = useColorModeValue("grey.300", "grey.500");
-    const textHint = useColorModeValue("grey.200", "grey.700");
-    const avatarBg = useColorModeValue("grey.200", "grey.700");
+    const textMuted = useColorModeValue("grey.400", "grey.500");
+
+    const handleAdd = async () => {
+        if (!email.trim()) return;
+        try {
+            await addMember({ workspaceId, agentId, email: email.trim() }).unwrap();
+            setEmail("");
+            setIsAdding(false);
+            toast({ title: "Membre ajouté", status: "success", duration: 3000 });
+        } catch (err: any) {
+            toast({
+                title: "Impossible d'ajouter ce membre",
+                description: err?.data?.message ?? "Une erreur est survenue",
+                status: "error",
+                duration: 4000,
+            });
+        }
+    };
+
+    const handleRemove = async (memberId: string, memberEmail: string) => {
+        try {
+            await removeMember({ workspaceId, agentId, memberId }).unwrap();
+            toast({ title: `${memberEmail} retiré`, status: "success", duration: 3000 });
+        } catch {
+            toast({ title: "Erreur lors de la suppression", status: "error", duration: 3000 });
+        }
+    };
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={borderColor}
-            bg={containerBg}
-        >
+        <Box borderRadius="12px" borderWidth="1px" borderStyle="solid" borderColor={borderColor} bg={containerBg}>
             <SectionHeader
                 title="Membres autorisés"
-                subtitle={`${MEMBERS.length} membres`}
+                subtitle={`${members.length} membre${members.length !== 1 ? "s" : ""}`}
                 action={
-                    <Button
-                        leftIcon={UserPlus}
-                        size="sm"
-                        onClick={() => alert("Ajouter un membre")}
-                    >
+                    <Button leftIcon={UserPlus} size="xs" onClick={() => setIsAdding((v) => !v)}>
                         Ajouter
                     </Button>
                 }
             />
-            <VStack spacing={0} align="stretch">
-                {MEMBERS.map((m) => (
-                    <HStack
-                        key={m.email}
-                        p={3}
-                        borderTop="1px solid"
-                        borderTopColor={borderColor}
-                        justify="space-between"
-                    >
-                        <HStack spacing={3} py={2}>
-                            <Avatar
-                                size="xs"
-                                name={m.name}
-                                bg={avatarBg}
-                                color="grey.50"
-                            />
-                            <VStack align="start" spacing={0}>
-                                <Text
-                                    fontSize="sm"
-                                    fontWeight={500}
-                                    color={textPrimary}
-                                >
-                                    {m.name}
-                                </Text>
-                                <Text fontSize="sm" color={textMuted}>
-                                    {m.email}
-                                </Text>
-                            </VStack>
-                        </HStack>
 
-                        <HStack spacing={3}>
-                            <Text fontSize="11px" color={textHint}>
-                                {m.since}
-                            </Text>
+            {isAdding && (
+                <HStack p={3} borderBottom="1px solid" borderColor={borderColor} spacing={2}>
+                    <Input
+                        placeholder="Email de l'utilisateur"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+                        size="sm"
+                        autoFocus
+                    />
+                    <Button size="sm" onClick={handleAdd} isLoading={isAddingMember}>
+                        Confirmer
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                            setIsAdding(false);
+                            setEmail("");
+                        }}
+                    >
+                        Annuler
+                    </Button>
+                </HStack>
+            )}
+
+            {isLoading ? null : members.length === 0 && !isAdding ? (
+                <Text fontSize="sm" color={textMuted} p={4} textAlign="center">
+                    Aucun membre invité pour l&apos;instant.
+                </Text>
+            ) : (
+                <VStack spacing={0} align="stretch">
+                    {members.map((m) => (
+                        <HStack
+                            key={m.id}
+                            p={3}
+                            borderTop="1px solid"
+                            _first={{ borderTop: "none" }}
+                            borderTopColor={borderColor}
+                            justify="space-between"
+                        >
+                            <HStack spacing={3} py={1}>
+                                <BoxIcon letters={m.name?.slice(0, 2) || m.email.slice(0, 2)} />
+                                <VStack align="start" spacing={0}>
+                                    {m.name && (
+                                        <Text variant="body-sm" fontWeight={500}>
+                                            {m.name}
+                                        </Text>
+                                    )}
+                                    <Text variant="body-xs" color="textLabel">
+                                        {m.email}
+                                    </Text>
+                                </VStack>
+                            </HStack>
+
                             <Button
                                 icon={Trash2}
                                 btnType="icon"
                                 size="sm"
                                 variant="ghost"
-                                onClick={() =>
-                                    alert(
-                                        `Supprimer ${m.name} de la liste blanche`,
-                                    )
-                                }
+                                onClick={() => handleRemove(m.id, m.email)}
                             />
                         </HStack>
-                    </HStack>
-                ))}
-            </VStack>
+                    ))}
+                </VStack>
+            )}
         </Box>
     );
 };

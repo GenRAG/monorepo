@@ -5,14 +5,16 @@ model User {
   password                    String?
   createdAt                   DateTime        @default(now())
   updatedAt                   DateTime        @updatedAt
-  emailVerificationToken      Int?
+  emailVerificationToken      String?
   isEmailVerified             Boolean         @default(false)
   emailVerificationLastSentAt DateTime?
-  passwordResetToken          Int?
+  passwordResetToken          String?
   passwordResetLastSentAt     DateTime?
   workspaces                  UserWorkspace[]
   agentVersions               AgentVersion[]
   onboardingSessions          OnboardingSession[]
+  agentMemberships            AgentMember[]
+  conversations               Conversation[]
 }
 
 enum UserRole {

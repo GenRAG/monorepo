@@ -7,13 +7,7 @@ const AccessControlWorkspace = () => {
     const isDark = useIsDark();
 
     return (
-        <VStack
-            h="100vh"
-            align="stretch"
-            spacing={0}
-            overflow="hidden"
-            bg={isDark ? "grey.975" : "grey.50"}
-        >
+        <VStack h="100vh" align="stretch" spacing={0} overflow="hidden" bg={isDark ? "grey.975" : "grey.50"}>
             <WorkspaceHeader
                 title="Contrôle d'accès"
                 description="Gérez la visibilité, les membres et les clés d'API de votre agent."

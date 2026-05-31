@@ -1,10 +1,4 @@
-import {
-    Box,
-    Skeleton,
-    Text,
-    useColorModeValue,
-    VStack,
-} from "@chakra-ui/react";
+import { Box, Skeleton, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { VersionListItem } from "components/Deployment/VersionListItem";
 import { ENV_BADGE } from "pages/Agents/Deployment/data";
 import { useGetDeploymentsQuery } from "services/deployment/deployment";
@@ -24,12 +18,7 @@ const formatDate = (iso: string) =>
         year: "numeric",
     });
 
-export const VersionsSidebar = ({
-    selectedId,
-    onSelect,
-    workspaceId,
-    agentId,
-}: VersionsSidebarProps) => {
+export const VersionsSidebar = ({ selectedId, onSelect, workspaceId, agentId }: VersionsSidebarProps) => {
     const { data: deployments = [], isLoading } = useGetDeploymentsQuery({
         workspaceId,
         agentId,
@@ -51,32 +40,16 @@ export const VersionsSidebar = ({
             flexDirection="column"
         >
             <VStack align="stretch" spacing={0}>
-                <Box
-                    borderBottom="1px solid"
-                    borderBottomColor={borderColor}
-                    w="full"
-                    p={4}
-                >
+                <Box borderBottom="1px solid" borderBottomColor={borderColor} w="full" p={4}>
                     <Text fontSize="sm" color={textColor} px={1}>
                         {deployments.length} VERSIONS
                     </Text>
                 </Box>
 
-                <VStack
-                    spacing={0}
-                    align="stretch"
-                    overflowY="auto"
-                    flex={1}
-                    maxH="calc(100vh - 200px)"
-                >
+                <VStack spacing={0} align="stretch" overflowY="auto" flex={1} maxH="calc(100vh - 200px)">
                     {isLoading
                         ? Array.from({ length: 4 }).map((_, i) => (
-                              <Skeleton
-                                  key={i}
-                                  h="72px"
-                                  m={4}
-                                  borderRadius="6px"
-                              />
+                              <Skeleton key={i} h="72px" m={4} borderRadius="6px" />
                           ))
                         : deployments.map((d) => {
                               const env = getDeploymentEnv(d);
@@ -86,9 +59,7 @@ export const VersionsSidebar = ({
                                       id={`v${d.version}`}
                                       env={env}
                                       badge={ENV_BADGE[env]}
-                                      description={
-                                          d.changelog ?? "Aucune description"
-                                      }
+                                      description={d.changelog ?? "Aucune description"}
                                       date={formatDate(d.createdAt)}
                                       isSelected={d.id === selectedId}
                                       onClick={() => onSelect(d.id)}

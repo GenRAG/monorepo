@@ -2,12 +2,13 @@ import { Flex, HStack, IconButton, Text, useColorModeValue, VStack } from "@chak
 import { useReactFlow } from "@xyflow/react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import DatabaseNodeModal from "pages/Agents//Workflow/NodeModalContent/DocumentNodeContent";
-import RerankerNodeModal from "pages/Agents/Workflow/NodeModalContent/ReRankerNodeContent";
-import QueryNodeModal from "pages/Agents/Workflow/NodeModalContent/QueryNodeContent";
-import ResponseNodeModal from "pages/Agents/Workflow/NodeModalContent/ResponseNodeContent";
+import DatabaseNodeModal from "pages/Agents/Workflow/NodeModalContent/Document/DocumentNodeContent";
+import RerankerNodeModal from "pages/Agents/Workflow/NodeModalContent/ReRanker/ReRankerNodeContent";
+import RewriterNodeModal from "pages/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeContent";
+import QueryNodeModal from "pages/Agents/Workflow/NodeModalContent/Query/QueryNodeContent";
 import SettingPlaceholderContent from "pages/Agents/Workflow/NodeModalContent/SettingPlaceholderContent";
 import { Task, TaskType, type AppNodeData } from "@genrag/workflow";
+import ResponseNodeModal from "pages/Agents/Workflow/NodeModalContent/Response/ResponseNodeContent";
 
 interface NodeModalProps {
     task: Task | null;
@@ -35,9 +36,9 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
 
     return (
         <motion.div
-            animate={{ width: isOpen && task ? "432px" : "0px" }}
+            animate={{ width: isOpen && task ? "420px" : "0px" }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            style={{ height: "100%", overflow: "hidden" }}
+            style={{ height: "100%", overflow: "hidden", backgroundColor: "transparent" }}
         >
             <AnimatePresence>
                 {isOpen && task && (
@@ -48,25 +49,14 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                         transition={{ duration: 0.3, ease: "easeOut" }}
                         style={{
                             height: "100%",
-                            width: "432px",
-                            padding: "8px",
+                            width: "420px",
                         }}
                     >
-                        <Flex
-                            direction="column"
-                            w="420px"
-                            h="100%"
-                            bg={bgColor}
-                            boxShadow="lg"
-                            borderRadius="12px"
-                            border="1px solid"
-                            borderColor={borderColor}
-                        >
+                        <Flex direction="column" w="420px" h="100%" bg={bgColor}>
                             <Flex
                                 p={4}
                                 borderBottom="1px solid"
                                 borderColor={borderColor}
-                                borderTopRadius="12px"
                                 align="center"
                                 justify="space-between"
                                 bg={sectionBg}
@@ -92,9 +82,31 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                                 </HStack>
                             </Flex>
                             {task.type === TaskType.RETRIEVER && <DatabaseNodeModal task={task} nodeData={nodeData!} />}
-                            {task.type === TaskType.RERANKER && <RerankerNodeModal task={task} nodeData={nodeData!} />}
-                            {task.type === TaskType.QUERY && <QueryNodeModal task={task} nodeData={nodeData!} />}
-                            {task.type === TaskType.RESPONSE && <ResponseNodeModal task={task} nodeData={nodeData!} />}
+                            {task.type === TaskType.RERANKER && (
+                                <RerankerNodeModal
+                                    task={task}
+                                    nodeData={nodeData!}
+                                    mainNodeId={selectedNodeId ?? ""}
+                                    onSettingSelect={onSettingSelect ?? (() => {})}
+                                />
+                            )}
+                            {task.type === TaskType.REWRITER && (
+                                <RewriterNodeModal
+                                    task={task}
+                                    nodeData={nodeData!}
+                                    mainNodeId={selectedNodeId ?? ""}
+                                    onSettingSelect={onSettingSelect ?? (() => {})}
+                                />
+                            )}
+                            {task.type === TaskType.QUERY && <QueryNodeModal />}
+                            {task.type === TaskType.RESPONSE && (
+                                <ResponseNodeModal
+                                    task={task}
+                                    nodeData={nodeData!}
+                                    mainNodeId={selectedNodeId ?? ""}
+                                    onSettingSelect={onSettingSelect ?? (() => {})}
+                                />
+                            )}
                             {task.type === TaskType.MODEL && (
                                 <SettingPlaceholderContent
                                     task={task}

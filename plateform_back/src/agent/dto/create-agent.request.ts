@@ -1,11 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-    IsObject,
-    IsOptional,
-    IsString,
-    ValidateNested,
-} from 'class-validator';
+import { IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 class InitialWorkflowDto {
     @ApiProperty()

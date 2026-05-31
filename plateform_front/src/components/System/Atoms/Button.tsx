@@ -1,16 +1,8 @@
 import React from "react";
-import {
-    Button as ChakraButton,
-    ButtonProps,
-    Icon,
-    IconProps,
-} from "@chakra-ui/react";
+import { Button as ChakraButton, ButtonProps, Icon, IconProps } from "@chakra-ui/react";
 import { LucideIcon } from "lucide-react";
 
-export interface GenragButtonProps extends Omit<
-    ButtonProps,
-    "leftIcon" | "rightIcon"
-> {
+export interface GenragButtonProps extends Omit<ButtonProps, "leftIcon" | "rightIcon"> {
     variant?: ButtonProps["variant"];
     leftIcon?: LucideIcon;
     rightIcon?: LucideIcon;
@@ -36,19 +28,7 @@ const iconSizes: Record<string, number | string> = {
 };
 
 const Button = React.forwardRef<HTMLButtonElement, GenragButtonProps>(
-    (
-        {
-            icon,
-            variant,
-            leftIcon,
-            rightIcon,
-            iconProps,
-            btnType = "default",
-            size = "md",
-            ...props
-        },
-        ref,
-    ) => {
+    ({ icon, variant, leftIcon, rightIcon, iconProps, btnType = "default", size = "md", ...props }, ref) => {
         const validSize = typeof size === "string" ? size : "md";
         const iconSize = iconSizes[validSize] || "16px";
 
@@ -70,12 +50,8 @@ const Button = React.forwardRef<HTMLButtonElement, GenragButtonProps>(
                 </ChakraButton>
             );
         }
-        const iconLeft = leftIcon ? (
-            <Icon as={leftIcon} boxSize={iconSize} {...iconProps} />
-        ) : undefined;
-        const iconRight = rightIcon ? (
-            <Icon as={rightIcon} boxSize={iconSize} {...iconProps} />
-        ) : undefined;
+        const iconLeft = leftIcon ? <Icon as={leftIcon} boxSize={iconSize} {...iconProps} /> : undefined;
+        const iconRight = rightIcon ? <Icon as={rightIcon} boxSize={iconSize} {...iconProps} /> : undefined;
 
         return (
             <ChakraButton

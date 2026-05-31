@@ -1,12 +1,5 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import {
-    Box,
-    Divider,
-    Text,
-    VStack,
-    useColorMode,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, Divider, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { Bot, LucideIcon } from "lucide-react";
 import { ChatMessage, UseChatOptions, useChat } from "hooks/useChat";
 import ChatMessageItem from "./Chat/ChatMessageItem";
@@ -48,8 +41,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     initialMessages,
     maxMessages,
 }) => {
-    const { colorMode } = useColorMode();
-    const borderColor = useColorModeValue("grey.200", "grey.700");
+    const iconBoxBg = useColorModeValue("rgba(40, 158, 87, 0.1)", "rgba(72, 187, 120, 0.12)");
+    const iconBoxBorderColor = useColorModeValue("green.300", "green.700");
+    const iconColor = useColorModeValue("green.500", "green.400");
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const { messages, sendMessage, isLoading } = useChat({
@@ -57,8 +51,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         initialMessages,
     });
 
-    const limitReached =
-        maxMessages !== undefined && messages.length >= maxMessages;
+    const limitReached = maxMessages !== undefined && messages.length >= maxMessages;
     const isDisabled = disabled || limitReached;
 
     useEffect(() => {
@@ -87,76 +80,41 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             h={fullHeight ? "100%" : height}
             minH={fullHeight && !compact ? "600px" : undefined}
             border="1px solid"
-            borderColor={borderColor}
+            borderColor="borderDivider"
             borderRadius="12px"
-            bg={colorMode === "dark" ? "grey.900" : "white"}
+            bg="surfaceModal"
             display="flex"
             flexDirection="column"
             overflow="hidden"
         >
             {messages.length === 0 ? (
-                <VStack
-                    flex={1}
-                    justify="center"
-                    align="center"
-                    spacing={5}
-                    p={6}
-                >
+                <VStack flex={1} justify="center" align="center" spacing={5} p={6}>
                     <Box
                         p={4}
-                        bg={
-                            colorMode === "dark"
-                                ? "rgba(72, 187, 120, 0.12)"
-                                : "rgba(40, 158, 87, 0.1)"
-                        }
+                        bg={iconBoxBg}
                         border="1px solid"
                         borderRadius="8px"
-                        borderColor={
-                            colorMode === "dark" ? "green.700" : "green.300"
-                        }
+                        borderColor={iconBoxBorderColor}
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                         flexShrink={0}
                     >
-                        <Box
-                            as={IconComponent}
-                            boxSize={8}
-                            color={
-                                colorMode === "dark" ? "green.400" : "green.500"
-                            }
-                        />
+                        <Box as={IconComponent} boxSize={8} color={iconColor} />
                     </Box>
 
                     <VStack spacing={1}>
-                        <Text
-                            fontWeight="bold"
-                            fontSize="md"
-                            color={colorMode === "dark" ? "white" : "grey.900"}
-                            textAlign="center"
-                        >
+                        <Text variant="body-md-semibold" textAlign="center">
                             {title}
                         </Text>
                         {welcomeMessage && (
-                            <Text
-                                fontSize="sm"
-                                color={
-                                    colorMode === "dark"
-                                        ? "grey.400"
-                                        : "grey.500"
-                                }
-                                textAlign="center"
-                                maxW="320px"
-                            >
+                            <Text variant="body-sm" color="textLabel" textAlign="center" maxW="320px">
                                 {welcomeMessage}
                             </Text>
                         )}
                     </VStack>
 
-                    <SuggestedQuestions
-                        questions={suggestedQuestions ?? []}
-                        onQuestionClick={sendMessage}
-                    />
+                    <SuggestedQuestions questions={suggestedQuestions ?? []} onQuestionClick={sendMessage} />
                 </VStack>
             ) : (
                 <Box
@@ -173,26 +131,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                             <ChatMessageItem
                                 key={message.id}
                                 message={message}
-                                onResponseSelect={
-                                    onResponseSelect
-                                        ? handleResponseSelect
-                                        : undefined
-                                }
+                                onResponseSelect={onResponseSelect ? handleResponseSelect : undefined}
                             />
                         ))}
                     </VStack>
                 </Box>
             )}
 
-            <Divider
-                borderColor={colorMode === "dark" ? "grey.700" : "grey.100"}
-            />
+            <Divider borderColor="borderSubtle" />
             <ChatInput
-                placeholder={
-                    isDisabled && disabledMessage
-                        ? disabledMessage
-                        : placeholder
-                }
+                placeholder={isDisabled && disabledMessage ? disabledMessage : placeholder}
                 isLoading={isLoading}
                 disabled={isDisabled}
                 onSend={sendMessage}

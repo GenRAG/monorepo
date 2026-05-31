@@ -7,23 +7,11 @@ const STATUS_LABEL: Record<AgentStatus, string> = {
     [AgentStatus.PRODUCTION]: "Production",
 };
 
-export const DeploymentBadge = ({
-    status,
-    isLoading,
-}: {
-    status: AgentStatus;
-    isLoading: boolean;
-}) => {
+export const DeploymentBadge = ({ status, isLoading }: { status: AgentStatus; isLoading: boolean }) => {
     return (
         <HStack spacing={3}>
             <Skeleton isLoaded={!isLoading} borderRadius="4px">
-                <Badge
-                    colorScheme={
-                        status === AgentStatus.PRODUCTION ? "green" : "gray"
-                    }
-                >
-                    {STATUS_LABEL[status]}
-                </Badge>
+                <Badge colorScheme={status === AgentStatus.PRODUCTION ? "green" : "gray"}>{STATUS_LABEL[status]}</Badge>
             </Skeleton>
             {status === AgentStatus.PRODUCTION && (
                 <HStack align="center">

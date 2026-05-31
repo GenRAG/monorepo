@@ -1,14 +1,5 @@
 import React, { useState } from "react";
-import {
-    Box,
-    Card,
-    CardProps,
-    HStack,
-    Icon,
-    StyleProps,
-    Text,
-    useColorMode,
-} from "@chakra-ui/react";
+import { Box, Card, CardProps, HStack, Icon, StyleProps, Text, useColorMode } from "@chakra-ui/react";
 import {
     ArrowRight,
     FileWarning,
@@ -236,8 +227,7 @@ const Banner = ({
     const isVariantDark = variant === "dark";
     const isDarkMode = colorMode === "dark";
 
-    const sizeStyle =
-        SizeBannerVariants[size as string] ?? SizeBannerVariants.md;
+    const sizeStyle = SizeBannerVariants[size as string] ?? SizeBannerVariants.md;
     const baseStyle = StyleBannerVariants[variant] ?? StyleBannerVariants.grey;
     const variantStyle = {
         ...baseStyle,
@@ -284,13 +274,7 @@ const Banner = ({
                 />
             )}
 
-            <HStack
-                w="100%"
-                spacing={sizeStyle.spacing}
-                align="center"
-                position="relative"
-                zIndex={1}
-            >
+            <HStack w="100%" spacing={sizeStyle.spacing} align="center" position="relative" zIndex={1}>
                 <Box
                     flexShrink={0}
                     w={sizeStyle.iconBoxSize}
@@ -303,14 +287,7 @@ const Banner = ({
                     justifyContent="center"
                 >
                     {image ? (
-                        <Box
-                            as="img"
-                            src={image}
-                            alt=""
-                            w="100%"
-                            h="100%"
-                            objectFit="cover"
-                        />
+                        <Box as="img" src={image} alt="" w="100%" h="100%" objectFit="cover" />
                     ) : (
                         <Icon
                             as={variantStyle.icon || Info}
@@ -325,11 +302,7 @@ const Banner = ({
                         <Text
                             fontSize={sizeStyle.titleFontSize}
                             fontWeight="semibold"
-                            color={
-                                isVariantDark || isDarkMode
-                                    ? "white"
-                                    : "textPrimary"
-                            }
+                            color={isVariantDark || isDarkMode ? "white" : "textPrimary"}
                             noOfLines={1}
                             mb={children ? "2px" : 0}
                         >
@@ -339,11 +312,7 @@ const Banner = ({
                     {children && (
                         <Box
                             fontSize={sizeStyle.childrenFontSize}
-                            color={
-                                isVariantDark || isDarkMode
-                                    ? "whiteAlpha.700"
-                                    : "textSecondary"
-                            }
+                            color={isVariantDark || isDarkMode ? "whiteAlpha.700" : "textSecondary"}
                             lineHeight="1.4"
                         >
                             {children}
@@ -374,11 +343,7 @@ const Banner = ({
                                     handleCloseBanner();
                                 }}
                                 icon={X}
-                                color={
-                                    isVariantDark || isDarkMode
-                                        ? "grey.400"
-                                        : undefined
-                                }
+                                color={isVariantDark || isDarkMode ? "grey.400" : undefined}
                             />
                         )}
                     </HStack>

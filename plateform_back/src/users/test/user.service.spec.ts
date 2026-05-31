@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from 'src/users/users.service';
 import { UserRepository } from 'src/users/user.repository';
+import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 
 const fakeUserSafe = {
     id: 'user-1',
@@ -21,12 +22,11 @@ const fakeUserWithCredentials = {
 };
 
 const mockUserRepository = {
-    findOne: jest.fn(),
-    findOneWithCredentials: jest.fn(),
-    findAll: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+    findOne: jest.fn() as any,
+    findOneWithCredentials: jest.fn() as any,
+    create: jest.fn() as any,
+    update: jest.fn() as any,
+    delete: jest.fn() as any,
 };
 
 describe('UsersService', () => {
@@ -97,9 +97,7 @@ describe('UsersService', () => {
 
     describe('findOneWithCredentials', () => {
         it('should return full user with password', async () => {
-            mockUserRepository.findOneWithCredentials.mockResolvedValue(
-                fakeUserWithCredentials,
-            );
+            mockUserRepository.findOneWithCredentials.mockResolvedValue(fakeUserWithCredentials);
 
             const result = await service.findOneWithCredentials({
                 email: 'test@genrag.com',

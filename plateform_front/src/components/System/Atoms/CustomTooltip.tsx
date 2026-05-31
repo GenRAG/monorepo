@@ -42,13 +42,7 @@ const CustomTooltip: FC<
                 {(text || content) && isOpen && (
                     <Portal>
                         <Box zIndex="popover" position="relative">
-                            <PopoverContent
-                                p="16px"
-                                maxW="88vw"
-                                bg="grey.900"
-                                border="0"
-                                borderRadius="4px"
-                            >
+                            <PopoverContent p="16px" maxW="88vw" bg="grey.900" border="0" borderRadius="4px">
                                 <PopoverArrow bg="grey.900" shadow="none" />
                                 <PopoverBody p="0">
                                     <Text as="span" color="red">

@@ -1,12 +1,5 @@
 import type { ReactNode } from "react";
-import {
-    Box,
-    HStack,
-    Text,
-    VStack,
-    useColorModeValue,
-    type BoxProps,
-} from "@chakra-ui/react";
+import { Box, HStack, Text, VStack, useColorModeValue, type BoxProps } from "@chakra-ui/react";
 
 interface RadioButtonProps extends BoxProps {
     icon: ReactNode;
@@ -16,14 +9,7 @@ interface RadioButtonProps extends BoxProps {
     onClick: () => void;
 }
 
-const RadioButton = ({
-    icon,
-    title,
-    subtitle,
-    isSelected,
-    onClick,
-    ...props
-}: RadioButtonProps) => {
+const RadioButton = ({ icon, title, subtitle, isSelected, onClick, ...props }: RadioButtonProps) => {
     const selectedBg = useColorModeValue("green.50", "green.950");
     const textColor = useColorModeValue("grey.900", "grey.50");
     const subtitleColor = useColorModeValue("grey.300", "grey.600");
@@ -39,11 +25,13 @@ const RadioButton = ({
             p={4}
             bg={isSelected ? selectedBg : "transparent"}
             borderBottom="1px solid"
+            border={isSelected ? "2px solid" : "0px 0px 1px 0px solid"}
             borderBottomColor={rowBorderColor}
-            _last={{ borderBottom: "none" }}
+            _last={isSelected ? {} : { borderBottom: "none" }}
             borderRadius={0}
             cursor="pointer"
             onClick={onClick}
+            borderColor={isSelected ? "green.500" : radioBorderColor}
             _hover={{
                 bg: isSelected ? undefined : hoverBg,
             }}
@@ -65,11 +53,7 @@ const RadioButton = ({
                     </Box>
 
                     <VStack align="start" spacing={0.5}>
-                        <Text
-                            fontSize="14px"
-                            fontWeight={500}
-                            color={textColor}
-                        >
+                        <Text fontSize="14px" fontWeight={500} color={textColor}>
                             {title}
                         </Text>
                         <Text fontSize="12px" color={subtitleColor}>

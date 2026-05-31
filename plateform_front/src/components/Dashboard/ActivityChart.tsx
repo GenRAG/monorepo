@@ -139,9 +139,7 @@ export const ActivityChart = ({
 
     return (
         <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" overflow="hidden" minW={0}>
-            <Box p={4}>
-                <ActivityHeader period={period} setPeriod={setPeriod} />
-            </Box>
+            <ActivityHeader period={period} setPeriod={setPeriod} />
 
             {isEmpty ? (
                 <CardEmptyState

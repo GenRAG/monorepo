@@ -2,11 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createTestApp } from './helpers/app.helper';
 import { cleanDatabase } from './helpers/db.helper';
-import {
-    TEST_USER,
-    TEST_USER_2,
-    registerAndLogin,
-} from './helpers/auth.helper';
+import { TEST_USER, TEST_USER_2, registerAndLogin } from './helpers/auth.helper';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
 describe('Workspace (e2e)', () => {
     let app: INestApplication;
@@ -48,20 +45,13 @@ describe('Workspace (e2e)', () => {
         });
 
         it('should fail with missing fields', async () => {
-            await request(app.getHttpServer())
-                .post('/workspaces')
-                .set('Cookie', cookie)
-                .send({})
-                .expect(400);
+            await request(app.getHttpServer()).post('/workspaces').set('Cookie', cookie).send({}).expect(400);
         });
     });
 
     describe('GET /workspaces', () => {
         it('should return only workspaces of current user', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/workspaces')
-                .set('Cookie', cookie)
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/workspaces').set('Cookie', cookie).expect(200);
 
             expect(Array.isArray(res.body)).toBe(true);
             expect(res.body.length).toBeGreaterThan(0);
@@ -69,10 +59,7 @@ describe('Workspace (e2e)', () => {
         });
 
         it('should not return workspaces of another user', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/workspaces')
-                .set('Cookie', cookieUser2)
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/workspaces').set('Cookie', cookieUser2).expect(200);
 
             expect(res.body).toHaveLength(0);
         });
@@ -93,17 +80,38 @@ describe('Workspace (e2e)', () => {
         });
 
         it('should return 403 for non-member', async () => {
+            await request(app.getHttpServer()).get(`/workspaces/${workspaceId}`).set('Cookie', cookieUser2).expect(403);
+        });
+
+        it('should return 404 for unknown workspace', async () => {
+            await request(app.getHttpServer()).get('/workspaces/unknown-id').set('Cookie', cookie).expect(404);
+        });
+    });
+
+    describe('GET /workspaces/:id/stats', () => {
+        it('should return stats for member', async () => {
+            const res = await request(app.getHttpServer())
+                .get(`/workspaces/${workspaceId}/stats`)
+                .set('Cookie', cookie)
+                .expect(200);
+
+            expect(res.body).toHaveProperty('agents');
+            expect(res.body).toHaveProperty('documents');
+            expect(res.body).toHaveProperty('conversations');
+            expect(res.body).toHaveProperty('credits');
+            expect(res.body).toHaveProperty('recentActivity');
+            expect(res.body).toHaveProperty('activityChart');
+        });
+
+        it('should return 403 for non-member', async () => {
             await request(app.getHttpServer())
-                .get(`/workspaces/${workspaceId}`)
+                .get(`/workspaces/${workspaceId}/stats`)
                 .set('Cookie', cookieUser2)
                 .expect(403);
         });
 
-        it('should return 403 for unknown workspace', async () => {
-            await request(app.getHttpServer())
-                .get('/workspaces/unknown-id')
-                .set('Cookie', cookie)
-                .expect(403);
+        it('should return 404 for unknown workspace', async () => {
+            await request(app.getHttpServer()).get('/workspaces/unknown-id/stats').set('Cookie', cookie).expect(404);
         });
     });
 
@@ -115,6 +123,10 @@ describe('Workspace (e2e)', () => {
                 .expect(403);
         });
 
+        it('should return 404 for unknown workspace', async () => {
+            await request(app.getHttpServer()).delete('/workspaces/unknown-id').set('Cookie', cookie).expect(404);
+        });
+
         it('should delete workspace as ADMIN', async () => {
             const res = await request(app.getHttpServer())
                 .post('/workspaces')
@@ -123,10 +135,7 @@ describe('Workspace (e2e)', () => {
 
             const idToDelete = res.body.id;
 
-            await request(app.getHttpServer())
-                .delete(`/workspaces/${idToDelete}`)
-                .set('Cookie', cookie)
-                .expect(204);
+            await request(app.getHttpServer()).delete(`/workspaces/${idToDelete}`).set('Cookie', cookie).expect(204);
         });
     });
 });

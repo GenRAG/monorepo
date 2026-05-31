@@ -38,13 +38,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     };
 
     return (
-        <HStack
-            spacing={2}
-            as="form"
-            bg="transparent"
-            onSubmit={handleSubmit}
-            p={isMobile ? 2 : 4}
-        >
+        <HStack spacing={2} as="form" bg="transparent" onSubmit={handleSubmit} p={isMobile ? 2 : 4}>
             <Input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}

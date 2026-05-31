@@ -24,26 +24,14 @@ export const VersionsHistory = () => {
     }, [deployments, selectedId]);
 
     return (
-        <HStack
-            align="stretch"
-            h="100%"
-            spacing={0}
-            flex={1}
-            w="100%"
-            minW={0}
-            overflow="hidden"
-        >
+        <HStack align="stretch" h="100%" spacing={0} flex={1} w="100%" minW={0} overflow="hidden">
             <VersionsSidebar
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 workspaceId={workspaceId}
                 agentId={agentId}
             />
-            <VersionDetailPanel
-                selectedId={selectedId}
-                workspaceId={workspaceId}
-                agentId={agentId}
-            />
+            <VersionDetailPanel selectedId={selectedId} workspaceId={workspaceId} agentId={agentId} />
         </HStack>
     );
 };

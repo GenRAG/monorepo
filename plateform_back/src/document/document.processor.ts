@@ -2,12 +2,16 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { AxiosError } from 'axios';
-import { IndexDocumentCommandProps } from './commands/index-document.command';
+import { IndexDocumentCommandProps } from 'src/document/commands/index-document.command';
 import { IndexDocumentHandler } from './handlers/index-document.handler';
-import { mapIndexDocumentJobToCommand } from './mappers/index-document-job.mapper';
 
 @Injectable()
-@Processor('documents')
+@Processor('documents', {
+    concurrency: 2,
+    lockDuration: 120_000,
+    stalledInterval: 120_000,
+    drainDelay: 2_000,
+})
 export class DocumentProcessor extends WorkerHost {
     private readonly logger = new Logger(DocumentProcessor.name);
 
@@ -16,23 +20,21 @@ export class DocumentProcessor extends WorkerHost {
     }
 
     async process(job: Job<IndexDocumentCommandProps>): Promise<void> {
-        const command = mapIndexDocumentJobToCommand(job.data);
-
         try {
-            await this.indexDocumentHandler.execute(command);
+            await this.indexDocumentHandler.execute(job.data);
         } catch (error) {
             const attemptNumber = job.attemptsMade + 1;
             const maxAttempts = job.opts.attempts ?? 1;
 
             this.logger.error(
-                `Job ${job.id} failed for document ${command.documentId} (${attemptNumber}/${maxAttempts})`,
+                `Job ${job.id} failed for document ${job.data.documentId} (${attemptNumber}/${maxAttempts})`,
                 error instanceof Error ? error.stack : undefined,
             );
 
             if (attemptNumber >= maxAttempts) {
-                await this.indexDocumentHandler.failed(command, this.extractErrorMessage(error));
+                await this.indexDocumentHandler.failed(job.data, this.extractErrorMessage(error));
             } else {
-                await this.indexDocumentHandler.retrying(command, attemptNumber);
+                await this.indexDocumentHandler.retrying(job.data, attemptNumber);
             }
 
             throw error;

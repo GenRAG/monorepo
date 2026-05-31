@@ -11,10 +11,7 @@ import { apiReference } from '@scalar/nestjs-api-reference';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
-    const config = new DocumentBuilder()
-        .setTitle('GenRAG API')
-        .setVersion('1.0')
-        .build();
+    const config = new DocumentBuilder().setTitle('GenRAG API').setVersion('1.0').build();
     const document = SwaggerModule.createDocument(app, config);
 
     app.enableCors({
@@ -34,7 +31,7 @@ async function bootstrap() {
 
     app.use(cookieParser());
 
-    app.use('/docs', apiReference({ spec: { content: document } }));
+    app.use('/docs', apiReference({ spec: { content: document } } as any));
 
     await app.listen(app.get(ConfigService).getOrThrow('PORT'));
 }

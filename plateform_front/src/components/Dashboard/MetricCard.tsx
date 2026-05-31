@@ -1,12 +1,4 @@
-import {
-    Box,
-    HStack,
-    Icon,
-    Skeleton,
-    Stack,
-    Text,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Icon, Skeleton, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Sparkline } from "components/Deployment/Sparkline";
@@ -34,29 +26,20 @@ export const MetricCard = ({
     sparkColor,
     isLoading = false,
 }: MetricCardProps) => {
-    const cardBg = useColorModeValue("white", "grey.850");
-    const border = useColorModeValue("grey.100", "grey.800");
-    const labelCol = useColorModeValue("grey.500", "grey.400");
     const valueCol = useColorModeValue("grey.900", "grey.50");
     const trendGreen = useColorModeValue("green.600", "green.400");
     const trendOrange = useColorModeValue("orange.500", "orange.300");
     const trendRed = useColorModeValue("red.500", "red.400");
-    const skeletonStart = useColorModeValue("grey.100", "grey.800");
-    const skeletonEnd = useColorModeValue("grey.200", "grey.700");
-    const trendCol = trendNeutral
-        ? trendOrange
-        : trendPositive
-          ? trendGreen
-          : trendRed;
+    const trendCol = trendNeutral ? trendOrange : trendPositive ? trendGreen : trendRed;
 
-    const skeletonProps = { startColor: skeletonStart, endColor: skeletonEnd };
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     if (isLoading) {
         return (
             <Box
-                bg={cardBg}
+                bg="surfaceCard"
                 border="1px solid"
-                borderColor={border}
+                borderColor="borderDefault"
                 borderRadius="12px"
                 overflow="hidden"
                 display="flex"
@@ -65,33 +48,12 @@ export const MetricCard = ({
                 minH="140px"
             >
                 <Stack p={4} spacing={2}>
-                    <Skeleton
-                        {...skeletonProps}
-                        h="10px"
-                        w="110px"
-                        borderRadius="4px"
-                    />
-                    <Skeleton
-                        {...skeletonProps}
-                        p={4}
-                        h="28px"
-                        w="80px"
-                        borderRadius="6px"
-                    />
-                    <Skeleton
-                        {...skeletonProps}
-                        h="10px"
-                        w="60px"
-                        borderRadius="4px"
-                    />
+                    <Skeleton {...skeletonProps} h="10px" w="110px" borderRadius="4px" />
+                    <Skeleton {...skeletonProps} p={4} h="28px" w="80px" borderRadius="6px" />
+                    <Skeleton {...skeletonProps} h="10px" w="60px" borderRadius="4px" />
                 </Stack>
                 <Box mt="auto" mx={-4}>
-                    <Skeleton
-                        {...skeletonProps}
-                        h="70px"
-                        w="100%"
-                        borderRadius="0"
-                    />
+                    <Skeleton {...skeletonProps} h="70px" w="100%" borderRadius="0" />
                 </Box>
             </Box>
         );
@@ -99,9 +61,9 @@ export const MetricCard = ({
 
     return (
         <Box
-            bg={cardBg}
+            bg="surfaceCard"
             border="1px solid"
-            borderColor={border}
+            borderColor="borderDefault"
             borderRadius="12px"
             p={4}
             display="flex"
@@ -109,8 +71,8 @@ export const MetricCard = ({
             gap={2}
         >
             <HStack spacing={1.5}>
-                <Icon as={icon} boxSize={3} color={labelCol} />
-                <Text fontSize="sm" color={labelCol}>
+                <Icon as={icon} boxSize={3} color="textLabel" />
+                <Text fontSize="sm" color="textLabel">
                     {label}
                 </Text>
             </HStack>
@@ -121,13 +83,7 @@ export const MetricCard = ({
 
             <HStack spacing={1}>
                 <Icon
-                    as={
-                        trendPositive && !trendNeutral
-                            ? TrendingUp
-                            : trendNeutral
-                              ? TrendingUp
-                              : TrendingDown
-                    }
+                    as={trendPositive && !trendNeutral ? TrendingUp : trendNeutral ? TrendingUp : TrendingDown}
                     boxSize={3}
                     color={trendCol}
                 />

@@ -7,11 +7,7 @@ export type FooterResponsiveProps = {
 };
 
 const FooterButtonsResponsive = ({ buttons }: FooterResponsiveProps) => (
-    <HStack
-        w="100%"
-        justify={buttons?.length == 1 ? "end" : "space-between"}
-        spacing="8px"
-    >
+    <HStack w="100%" justify={buttons?.length == 1 ? "end" : "space-between"} spacing="8px">
         {buttons?.map((button, index) => (
             <Button key={index} {...button}>
                 {button.children}

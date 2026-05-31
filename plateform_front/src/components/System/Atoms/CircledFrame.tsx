@@ -1,9 +1,6 @@
 import { Circle } from "@chakra-ui/react";
 
-const CircledFrame = ({
-    children,
-    ...props
-}: { children: React.ReactNode } & React.ComponentProps<typeof Circle>) => (
+const CircledFrame = ({ children, ...props }: { children: React.ReactNode } & React.ComponentProps<typeof Circle>) => (
     <Circle
         size={{ base: "32px", xl: "40px" }}
         bg="whites.white"

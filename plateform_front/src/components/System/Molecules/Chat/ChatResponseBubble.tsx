@@ -11,12 +11,7 @@ interface ChatResponseBubbleProps {
     onSelect?: (responseIndex: number, messageId: string) => void;
 }
 
-const ChatResponseBubble: React.FC<ChatResponseBubbleProps> = ({
-    response,
-    responseIndex,
-    messageId,
-    onSelect,
-}) => {
+const ChatResponseBubble: React.FC<ChatResponseBubbleProps> = ({ response, responseIndex, messageId, onSelect }) => {
     const isDark = useIsDark();
     const colorMode = isDark ? "dark" : "light";
     const containerStyles = {
@@ -32,11 +27,7 @@ const ChatResponseBubble: React.FC<ChatResponseBubbleProps> = ({
             borderRadius="12px"
             borderBottomLeftRadius="2px"
             border="1px solid"
-            onClick={
-                isSelectable
-                    ? () => onSelect(responseIndex, messageId)
-                    : undefined
-            }
+            onClick={isSelectable ? () => onSelect(responseIndex, messageId) : undefined}
             {...containerStyles}
         >
             <VStack align="flex-start" spacing={2}>

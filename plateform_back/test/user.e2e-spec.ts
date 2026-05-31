@@ -3,6 +3,7 @@ import request from 'supertest';
 import { createTestApp } from './helpers/app.helper';
 import { cleanDatabase } from './helpers/db.helper';
 import { TEST_USER, registerAndLogin } from './helpers/auth.helper';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
 describe('Users (e2e)', () => {
     let app: INestApplication;
@@ -20,10 +21,7 @@ describe('Users (e2e)', () => {
 
     describe('GET /users/me', () => {
         it('should return current user without password', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/users/me')
-                .set('Cookie', cookie)
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/users/me').set('Cookie', cookie).expect(200);
 
             expect(res.body).toHaveProperty('id');
             expect(res.body).toHaveProperty('email', TEST_USER.email);
@@ -37,8 +35,8 @@ describe('Users (e2e)', () => {
         });
     });
 
-    describe('DELETE /users/delete/me', () => {
-        it('should delete current user', async () => {
+    describe('DELETE /users/me', () => {
+        it('should delete current user and return 204', async () => {
             const tempUser = {
                 email: 'todelete@test.com',
                 password: 'Password123!',
@@ -47,21 +45,13 @@ describe('Users (e2e)', () => {
 
             const tempCookie = await registerAndLogin(app, tempUser);
 
-            await request(app.getHttpServer())
-                .delete('/users/delete/me')
-                .set('Cookie', tempCookie)
-                .expect(200);
+            await request(app.getHttpServer()).delete('/users/me').set('Cookie', tempCookie).expect(204);
 
-            await request(app.getHttpServer())
-                .get('/users/me')
-                .set('Cookie', tempCookie)
-                .expect(404);
+            await request(app.getHttpServer()).get('/users/me').set('Cookie', tempCookie).expect(401);
         });
 
         it('should return 401 without auth', async () => {
-            await request(app.getHttpServer())
-                .delete('/users/delete/me')
-                .expect(401);
+            await request(app.getHttpServer()).delete('/users/me').expect(401);
         });
     });
 });

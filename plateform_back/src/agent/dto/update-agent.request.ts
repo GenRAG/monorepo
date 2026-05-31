@@ -1,4 +1,14 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateAgentRequest } from './create-agent.request';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
-export class UpdateAgentRequest extends PartialType(CreateAgentRequest) {}
+export class UpdateAgentRequest {
+    @ApiPropertyOptional({ example: 'Support Assistant' })
+    @IsString()
+    @IsOptional()
+    name?: string;
+
+    @ApiPropertyOptional({ example: 'AI-powered customer support assistant' })
+    @IsString()
+    @IsOptional()
+    description?: string;
+}

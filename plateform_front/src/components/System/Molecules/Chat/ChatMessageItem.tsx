@@ -8,21 +8,13 @@ interface ChatMessageItemProps {
     onResponseSelect?: (responseIndex: number, messageId: string) => void;
 }
 
-const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
-    message,
-    onResponseSelect,
-}) => {
+const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onResponseSelect }) => {
     const { colorMode } = useColorMode();
     const labelColor = colorMode === "dark" ? "grey.500" : "grey.400";
 
     return (
         <React.Fragment>
-            <VStack
-                align="flex-end"
-                spacing={1}
-                alignSelf="flex-end"
-                maxW="80%"
-            >
+            <VStack align="flex-end" spacing={1} alignSelf="flex-end" maxW="80%">
                 <Text fontSize="xs" color={labelColor}>
                     Vous
                 </Text>
@@ -32,10 +24,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     borderRadius="12px"
                     borderBottomRightRadius="2px"
                 >
-                    <Text
-                        fontSize="sm"
-                        color={colorMode === "dark" ? "grey.100" : "green.800"}
-                    >
+                    <Text fontSize="sm" color={colorMode === "dark" ? "grey.100" : "green.800"}>
                         {message.question}
                     </Text>
                 </Box>
@@ -43,8 +32,8 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
             {message.response.length > 1 && (
                 <Text fontSize="sm" color="textmuted">
-                    Choisis la réponse qui correspond le mieux à ta question
-                    pour nous aider à améliorer l&apos;assistant.
+                    Choisis la réponse qui correspond le mieux à ta question pour nous aider à améliorer
+                    l&apos;assistant.
                 </Text>
             )}
 
@@ -56,11 +45,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
                     align="flex-start"
                     w="100%"
                     spacing={2}
-                    border={
-                        message.response.length > 1
-                            ? "3px solid rgba(230, 230, 230, 0.46)"
-                            : "none"
-                    }
+                    border={message.response.length > 1 ? "3px solid rgba(230, 230, 230, 0.46)" : "none"}
                     p={message.response.length > 1 ? 2 : 0}
                     borderRadius="12px"
                 >

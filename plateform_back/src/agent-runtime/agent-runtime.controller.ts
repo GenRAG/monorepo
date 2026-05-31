@@ -1,12 +1,13 @@
-import { Controller, Param, UseGuards, Sse, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Param, UseGuards, Sse, Query } from '@nestjs/common';
 import type { MessageEvent } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { AgentRuntimeService } from './agent-runtime.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
 @Controller('workspaces/:workspaceId/agents/:agentId/runtime')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
+@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
 export class AgentRuntimeController {
     constructor(private readonly agentRuntimeService: AgentRuntimeService) {}
 
@@ -16,15 +17,8 @@ export class AgentRuntimeController {
         @Param('agentId') agentId: string,
         @Query('query') query: string,
     ): Observable<MessageEvent> {
-        if (!query) {
-            return new Observable((s) => {
-                s.next({
-                    data: JSON.stringify({ error: 'Query parameter required' }),
-                });
-                s.complete();
-            });
-        }
-        return this.agentRuntimeService.stream(workspaceId, agentId, query);
+        if (!query) throw new BadRequestException('Query parameter required');
+        return this.agentRuntimeService.streamQuery(workspaceId, agentId, query);
     }
 
     @Sse('playground')
@@ -33,14 +27,7 @@ export class AgentRuntimeController {
         @Param('agentId') agentId: string,
         @Query('query') query: string,
     ): Observable<MessageEvent> {
-        if (!query) {
-            return new Observable((s) => {
-                s.next({
-                    data: JSON.stringify({ error: 'Query parameter required' }),
-                });
-                s.complete();
-            });
-        }
+        if (!query) throw new BadRequestException('Query parameter required');
         return this.agentRuntimeService.playgroundStream(workspaceId, agentId, query);
     }
 }

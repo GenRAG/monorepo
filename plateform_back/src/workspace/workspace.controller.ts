@@ -3,7 +3,7 @@ import { UserRole } from 'generated/prisma';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
-import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorateur';
+import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator';
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
@@ -30,7 +30,7 @@ export class WorkspaceController {
 
     @Get(':id')
     @UseGuards(WorkspaceRolesGuard)
-    getWorkspaceById(@Param('id') workspaceId: string): Promise<WorkspacePayload | null> {
+    getWorkspaceById(@Param('id') workspaceId: string): Promise<WorkspacePayload> {
         return this.workspaceService.findOne(workspaceId);
     }
 

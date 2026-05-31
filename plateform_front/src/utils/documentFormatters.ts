@@ -4,8 +4,7 @@ import type { LucideIcon } from "lucide-react";
 export function formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " Ko";
-    if (bytes < 1024 * 1024 * 1024)
-        return (bytes / (1024 * 1024)).toFixed(1) + " Mo";
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + " Mo";
     return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " Go";
 }
 
@@ -29,10 +28,7 @@ export function formatDate(date: Date | string | undefined | null): string {
     return parsedDate.toLocaleDateString("fr-FR", {
         month: "short",
         day: "numeric",
-        year:
-            parsedDate.getFullYear() !== now.getFullYear()
-                ? "numeric"
-                : undefined,
+        year: parsedDate.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
     });
 }
 
@@ -43,13 +39,11 @@ export interface FileTypeBadgeConfig {
 }
 
 export function getFileTypeBadgeConfig(mimeType: string): FileTypeBadgeConfig {
-    if (mimeType.includes("pdf"))
-        return { label: "PDF", bg: "red", color: "white" };
+    if (mimeType.includes("pdf")) return { label: "PDF", bg: "red.500", color: "white" };
     if (mimeType.includes("word") || mimeType.includes("document"))
-        return { label: "DOC", bg: "blue", color: "white" };
-    if (mimeType.includes("markdown"))
-        return { label: "MD", bg: "green", color: "white" };
-    return { label: "TXT", bg: "grey", color: "white" };
+        return { label: "DOC", bg: "blue.500", color: "white" };
+    if (mimeType.includes("markdown")) return { label: "MD", bg: "green.500", color: "white" };
+    return { label: "TXT", bg: "grey.500", color: "white" };
 }
 
 export function formatDateTime(date: Date | string | undefined | null): string {
@@ -70,9 +64,6 @@ export function formatDateTime(date: Date | string | undefined | null): string {
 export function getFileTypeLabel(mimeType: string): string {
     const typeMap: Record<string, string> = {
         "application/pdf": "PDF",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            "Word",
-        "application/msword": "Word",
         "text/plain": "Texte",
         "text/markdown": "Markdown",
     };
@@ -82,19 +73,14 @@ export function getFileTypeLabel(mimeType: string): string {
 
 export function getFileIcon(mimeType: string): LucideIcon {
     if (mimeType.includes("pdf")) return File;
-    if (mimeType.includes("word") || mimeType.includes("document"))
-        return FileText;
+    if (mimeType.includes("word") || mimeType.includes("document")) return FileText;
     return File;
 }
 
 export function getPreviewUrl(mimeType: string, url: string): string {
     const lower = mimeType.toLowerCase();
 
-    if (
-        lower.includes("word") ||
-        lower.includes("document") ||
-        lower.includes("msword")
-    ) {
+    if (lower.includes("word") || lower.includes("document") || lower.includes("msword")) {
         return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
     }
 

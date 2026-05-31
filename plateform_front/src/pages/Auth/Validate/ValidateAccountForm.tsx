@@ -1,4 +1,4 @@
-import { HStack, VStack, PinInput, PinInputField, Button, Text, useColorModeValue } from "@chakra-ui/react";
+import { HStack, VStack, PinInput, PinInputField, Text, useColorModeValue } from "@chakra-ui/react";
 import useThemedToast from "hooks/useThemedToast";
 import { FileWarningIcon, MailIcon, RepeatIcon, TimerIcon } from "lucide-react";
 import { AuthHeader } from "pages/Auth/AuthHeader";
@@ -8,6 +8,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useResendEmailTokenMutation, useVerifyEmailTokenMutation, useGetMeQuery } from "services/auth/auth";
 import colors from "themeNew/foundations/colors";
 import { useAuth } from "app/AuthContext";
+import Button from "components/System/Atoms/Button";
 
 const ValidateAccountForm: FC = () => {
     const [searchParams] = useSearchParams();
@@ -18,7 +19,6 @@ const ValidateAccountForm: FC = () => {
     const { refetch: refetchMe } = useGetMeQuery();
     const [pin, setPin] = useState("");
     const toast = useThemedToast();
-    const buttonType = useColorModeValue("superSecondary", "superPrimary");
     const pinInputColor = useColorModeValue("whites.offwhite", "black");
 
     const email = searchParams.get("email");
@@ -127,7 +127,7 @@ const ValidateAccountForm: FC = () => {
                 disabled={isLoading || pin.length !== 6}
                 isLoading={isLoading}
                 w="100%"
-                variant={buttonType}
+                variant="superPrimary"
             >
                 Valider
             </Button>

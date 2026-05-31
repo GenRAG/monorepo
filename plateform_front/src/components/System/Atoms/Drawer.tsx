@@ -29,14 +29,7 @@ type DrawerPropsCustom = Override<
     }
 >;
 
-const ResponsiveDrawer = ({
-    isOpen,
-    onClose,
-    header,
-    ctas,
-    children,
-    ...props
-}: DrawerPropsCustom) => {
+const ResponsiveDrawer = ({ isOpen, onClose, header, ctas, children, ...props }: DrawerPropsCustom) => {
     const isDesktop = useAppResponsive({ base: false, md: true });
     const [isClosing, setIsClosing] = useState(false);
 
@@ -110,10 +103,7 @@ const ResponsiveDrawer = ({
                                 >
                                     {headerDrawer && headerDrawer}
 
-                                    <DrawerBody
-                                        overflowY="auto"
-                                        maxH="calc(100vh - 200px)"
-                                    >
+                                    <DrawerBody overflowY="auto" maxH="calc(100vh - 200px)">
                                         {children}
                                     </DrawerBody>
 

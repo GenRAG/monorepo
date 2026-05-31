@@ -1,24 +1,6 @@
-import {
-    Box,
-    IconButton,
-    Divider,
-    Tooltip,
-    useColorModeValue,
-    Spinner,
-} from "@chakra-ui/react";
+import { Box, IconButton, Divider, Tooltip, useColorModeValue, Spinner } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
-import {
-    Plus,
-    Minus,
-    Expand,
-    MousePointer2,
-    Hand,
-    Frame,
-    LayoutGrid,
-    Image,
-    MoreHorizontal,
-    Save,
-} from "lucide-react";
+import { Plus, Minus, Expand, MousePointer2, Hand, Frame, LayoutGrid, Image, MoreHorizontal, Save } from "lucide-react";
 import { useState } from "react";
 
 type Tool = "select" | "pan" | "frame" | null;
@@ -46,7 +28,7 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             action: () => onMenuToggle?.(),
             tool: null,
         },
-        {
+        /*{
             label: "Frame",
             icon: <Frame size={18} />,
             action: () => setActiveTool("frame"),
@@ -63,10 +45,10 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             icon: <Hand size={18} />,
             action: () => setActiveTool("pan"),
             tool: "pan" as Tool,
-        },
+        },*/
     ];
 
-    const utilityButtons = [
+    /*const utilityButtons = [
         {
             label: "Add group",
             icon: <LayoutGrid size={18} />,
@@ -77,7 +59,7 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             icon: <Image size={18} />,
             action: () => {},
         },
-    ];
+    ];*/
 
     const zoomButtons = [
         { label: "Zoom in", icon: <Plus size={18} />, action: () => zoomIn() },
@@ -95,21 +77,8 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
 
     const tooltipBg = useColorModeValue("grey.700", "green.600");
 
-    const renderButton = (
-        label: string,
-        icon: React.ReactElement,
-        action: () => void,
-        isActive = false,
-    ) => (
-        <Tooltip
-            bg={tooltipBg}
-            key={label}
-            label={label}
-            placement="right"
-            color="white"
-            borderRadius="8px"
-            hasArrow
-        >
+    const renderButton = (label: string, icon: React.ReactElement, action: () => void, isActive = false) => (
+        <Tooltip bg={tooltipBg} key={label} label={label} placement="right" color="white" borderRadius="8px" hasArrow>
             <IconButton
                 aria-label={label}
                 icon={icon}
@@ -145,27 +114,16 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                 boxShadow="lg"
             >
                 {toolButtons.map(({ label, icon, action, tool }) =>
-                    renderButton(
-                        label,
-                        icon,
-                        action,
-                        tool !== null && activeTool === tool,
-                    ),
+                    renderButton(label, icon, action, tool !== null && activeTool === tool),
                 )}
+
+                {/*<Divider borderColor={dividerColor} width="20px" my="2px" />
+
+                utilityButtons.map(({ label, icon, action }) => renderButton(label, icon, action))}
 
                 <Divider borderColor={dividerColor} width="20px" my="2px" />
 
-                {utilityButtons.map(({ label, icon, action }) =>
-                    renderButton(label, icon, action),
-                )}
-
-                <Divider borderColor={dividerColor} width="20px" my="2px" />
-
-                {renderButton(
-                    "More options",
-                    <MoreHorizontal size={18} />,
-                    () => {},
-                )}
+                {renderButton("More options", <MoreHorizontal size={18} />, () => {})*/}
 
                 <Divider borderColor={dividerColor} width="20px" my="2px" />
 
@@ -213,15 +171,7 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             >
                 {zoomButtons.map(({ label, icon, action }, i) => (
                     <>
-                        {i > 0 && (
-                            <Box
-                                key={`div-${i}`}
-                                w="0.5px"
-                                h="20px"
-                                bg={dividerColor}
-                                mx="2px"
-                            />
-                        )}
+                        {i > 0 && <Box key={`div-${i}`} w="0.5px" h="20px" bg={dividerColor} mx="2px" />}
                         <Tooltip
                             bg={tooltipBg}
                             key={label}

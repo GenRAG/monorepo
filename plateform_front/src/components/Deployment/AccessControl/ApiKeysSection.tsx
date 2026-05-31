@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-    Box,
-    HStack,
-    Stack,
-    Text,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Stack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { Eye, EyeOff, RotateCw } from "lucide-react";
 import SectionHeader from "components/Deployment/SectionHeader";
 import Button from "components/System/Atoms/Button";
@@ -25,12 +18,7 @@ export const ApiKeysSection = () => {
     const realKey = "sk_live_xK7mBp2nR4vL9qZ3a9f";
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={borderColor}
-            bg={containerBg}
-        >
+        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={containerBg}>
             <SectionHeader title="Clés API" />
             <Stack spacing={4} p={4}>
                 <HStack
@@ -45,12 +33,7 @@ export const ApiKeysSection = () => {
                         <Text fontSize="sm" fontWeight={500} color={titleColor}>
                             Clé production
                         </Text>
-                        <Text
-                            fontSize="md"
-                            fontFamily="mono"
-                            color={keyColor}
-                            letterSpacing="0.04em"
-                        >
+                        <Text fontSize="md" fontFamily="mono" color={keyColor} letterSpacing="0.04em">
                             {revealed ? realKey : maskedKey}
                         </Text>
                         <Text fontSize="xs" color={metaColor}>

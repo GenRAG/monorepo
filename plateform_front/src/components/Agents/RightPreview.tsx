@@ -10,11 +10,7 @@ interface Props {
     selectedTemplateId?: string | null;
 }
 
-export const RightPreview: FC<Props> = ({
-    nodes,
-    edges,
-    selectedTemplateId,
-}) => {
+export const RightPreview: FC<Props> = ({ nodes, edges, selectedTemplateId }) => {
     return (
         <Box flex={1} position="relative" overflow="hidden">
             <Box position="absolute" inset={0}>

@@ -1,6 +1,6 @@
-FROM node:23
+FROM node:23-alpine
 
-RUN apt-get update && apt-get install -y postgresql-client
+RUN apk add --no-cache postgresql-client
 
 WORKDIR /usr/src/app
 
@@ -10,5 +10,6 @@ RUN yarn install
 COPY . .
 
 RUN yarn prisma generate
+RUN yarn build:production
 
-CMD ["yarn", "start:dev"]
+CMD ["sh", "-c", "npx prisma migrate deploy && yarn start:prod"]

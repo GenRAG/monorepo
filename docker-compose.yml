@@ -82,7 +82,7 @@ services:
       # Override localhost URL from .env — inside Docker, services talk by name
       RAGENGINE_URL: http://rag_api:8000
     command: >
-      sh -c "yarn start:dev"
+      sh -c "yarn install --frozen-lockfile && yarn start:dev"
     volumes:
       - ./plateform_back:/usr/src/app
       - /usr/src/app/node_modules

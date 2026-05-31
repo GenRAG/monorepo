@@ -66,20 +66,34 @@ User
 
 Workspace
   ├── id, name, description
+  ├── plan : FREE | PRO | BUSINESS | ENTERPRISE (défaut FREE)
   ├── users → UserWorkspace[] (rôles : ADMIN | EDITOR | VIEWER)
   ├── agents → Agent[]
   ├── creditBalance → CreditBalance (1-to-1)
-  └── creditTransactions → CreditTransaction[]
+  ├── creditTransactions → CreditTransaction[]
+  ├── onboardingSessions → OnboardingSession[]
+  └── conversations → Conversation[]
 
 Agent
   ├── id, name, description
-  ├── status : DEVELOPMENT | STAGING | PRODUCTION
+  ├── status : DEVELOPMENT | PRODUCTION  ← STAGING supprimé (migration 20260429102244)
   ├── workspaceId
   ├── workflows → Workflow[]
-  └── documents → Document[]
+  ├── documents → Document[]
+  ├── deployments → AgentVersion[]
+  ├── onboardingSession → OnboardingSession?
+  └── conversations → Conversation[]
+
+AgentVersion  ← journal de déploiement immutable
+  ├── id, version (auto-increment par agent)
+  ├── name, changelog?
+  ├── fromStatus, toStatus (AgentStatus)
+  ├── workflowVersion (Int?) — version du snapshot de workflow associé
+  ├── agentId, createdBy (userId)
+  └── Contrainte unique : (agentId, version)
 
 Workflow
-  ├── id, name, agentId
+  ├── id, agentId
   ├── definition (JSONB) ← { nodes, edges, blocks } — nodes/edges = état ReactFlow,
   │                         blocks = pipeline envoyé à l'API RAG externe
   ├── version (Int), isActive (Bool)
@@ -91,6 +105,23 @@ Document
   ├── status : UPLOADED | PROCESSING | INDEXED | FAILED
   ├── indexedAt, failedAt, indexError, retryCount
   └── createdAt, updatedAt
+
+OnboardingSession
+  ├── id, userId, workspaceId, agentId (@unique)
+  ├── step (Int, défaut 1), completed (Bool)
+  ├── instruction?, stepsData (JSONB)?
+  └── Contrainte unique : (userId, workspaceId)
+
+Conversation
+  ├── id, workspaceId, agentId, title
+  ├── messages → Message[]
+  └── createdAt, updatedAt
+
+Message
+  ├── id, conversationId
+  ├── sender : USER | AGENT | SYSTEM
+  ├── content, metadata (JSONB)?
+  └── createdAt
 
 CreditBalance
   └── workspaceId (unique), balance (Int)
@@ -122,30 +153,48 @@ POST /documents (multipart)
 - Fichiers < 5 MB : buffer encodé en base64 dans le job BullMQ
 - Fichiers > 5 MB : seulement la clé S3, le worker récupère depuis S3
 
-### 3. Exécution d'une query RAG
+### 3. Exécution d'une query RAG (SSE)
 ```
-POST /workspaces/:workspaceId/agents/:agentId/runtime
-  → UsageTracker.checkOrThrow() [vérifie credits > 0]
+GET /workspaces/:workspaceId/agents/:agentId/runtime/stream?query=...  (SSE)
+GET /workspaces/:workspaceId/agents/:agentId/runtime/playground?query=...  (SSE, sans usage tracking)
+
+Flux interne :
+  → UsageTracker.checkOrThrow() [vérifie credits > 0 — ignoré pour playground]
   → ContextBuilder.buildPipeline() [charge le workflow actif depuis la DB]
      → extrait definition.blocks (ou definition complète si legacy)
   → POST /rag/stream (API RAG externe) avec { pipeline: blocks, query }
-  → EventBus.emit(AGENT_QUERY_COMPLETED)
+  → EventBus.emit(AGENT_QUERY_COMPLETED) [ignoré pour playground]
      → UsageTracker.record() [déduit 1 crédit en transaction Prisma atomique]
-  → return { answer }
+  → retourne un stream SSE (chunks de texte)
+```
+- `RAG_MOCK=true` dans `.env` → court-circuite l'appel à l'API RAG et retourne une réponse fictive (utile en dev)
+- Deux endpoints distincts : `stream` (prod, déduit crédits) et `playground` (test, `skipUsageTracking: true`)
+
+### 4. Transitions d'état d'un Agent (Déploiement)
+Le statut d'un agent est géré via le module `deployment` (plus de state-machine directe) :
+- `DEVELOPMENT` → `PRODUCTION` : `POST /deployments` (crée un `AgentVersion` + snapshot workflow)
+- `PRODUCTION` → rollback vers version antérieure : `POST /deployments/rollback`
+- **STAGING supprimé** — les deux seuls états possibles sont `DEVELOPMENT` et `PRODUCTION`
+
+Flux de déploiement :
+```
+POST /workspaces/:workspaceId/agents/:agentId/deployments { name, changelog? }
+  → agent.findOneWithActiveWorkflow()
+  → workflowService.createSnapshot()  ← copie isActive=false du workflow actif
+  → deploymentRepository.createWithAgentUpdate()  ← crée AgentVersion + agent.status = PRODUCTION
+  → EventBus.emit(STATUS_CHANGED) + EventBus.emit(AGENT_DEPLOYED)
+
+POST /workspaces/:workspaceId/agents/:agentId/deployments/rollback { deploymentId, changelog? }
+  → trouve l'AgentVersion cible
+  → workflowService.update()  ← recopie la définition du snapshot ciblé dans le workflow actif
+  → crée un nouvel AgentVersion (status → PRODUCTION)
 ```
 
-### 4. Transitions d'état d'un Agent
-Implémenté avec le pattern State Machine :
-- `DEVELOPMENT` → `STAGING` (uniquement)
-- `STAGING` → `PRODUCTION` ou `DEVELOPMENT`
-- `PRODUCTION` → `DEVELOPMENT` (via Staging)
-- Transition directe `DEVELOPMENT` → `PRODUCTION` : **interdite** (ForbiddenException)
-
 ### 5. Versioning des Workflows
-- Chaque `POST /workflow` crée une nouvelle version (auto-increment)
-- Une seule version `isActive: true` à la fois par agent
-- `PATCH /workflow` modifie la version active sans changer la version
-- `PATCH /workflow/activate` bascule la version active
+- `POST /workflow` : crée une nouvelle version `isActive: true`, désactive l'ancienne
+- `PATCH /workflow` : met à jour la définition du workflow actif sans changer la version
+- `PATCH /workflow/activate` : bascule la version active
+- `createSnapshot(agentId, dto)` : crée une version `isActive: false` — appel interne au déploiement, ne change pas le workflow actif
 
 ### 6. Sérialisation du Workflow
 La fonction `serializeWorkflow(nodes, edges)` (dans `utils/workflowSerializer.ts`) convertit l'état ReactFlow en `WorkflowDefinition` :
@@ -238,7 +287,7 @@ packages/workflow/src/
 │   │   └── add-instruction.tsx  # Définition du node INSTRUCTION (settings)
 │   ├── registry.ts              # WorkflowRegistry (nouveau système extensible)
 │   ├── create-flow-node.ts      # Factories : CreateFlowNode, linkNodes, withAutoSettings
-│   ├── task-utils.ts            # getTaskDef, listAddableTaskTypes, getConfigInputs, getChainOutputs
+│   ├── task-utils.ts            # getTaskDef, getAddableTaskTypes, getNonSettingsTaskTypes, getConfigInputs, getChainOutputs
 │   └── resolve-collisions.ts    # Résolution de collisions de position
 ├── hooks/
 │   ├── useWorkflowNodes.ts      # Hook principal : état nodes/edges, add/remove, settings
@@ -255,8 +304,12 @@ packages/workflow/src/
 │   ├── horizontal.ts            # Disposition horizontale
 │   ├── dagre.ts                 # Disposition automatique via dagre (optionnel)
 │   └── index.ts                 # Export + DEFAULT_LAYOUT (vertical)
+├── utils/
+│   ├── serialize.ts             # serializeWorkflow (plateform_front uniquement)
+│   └── sanitize.ts              # sanitizeWorkflowEdges — répare les edges stales chargés depuis la DB
 └── types/
     ├── app-node.ts              # AppNode, AppNodeData, ParamProps
+    ├── edge.ts                  # EdgeType enum (default | settings)
     └── task.ts                  # Task, TaskType, TaskParam, TaskParamType, TaskChainOutput
 ```
 
@@ -423,7 +476,10 @@ const { nodes, edges } = withAutoSettings(
 ```
 
 #### `serializeWorkflow(nodes, edges)` — Sérialiser pour la DB
-Retourne `{ nodes, edges, blocks }`. Uniquement dans `plateform_front`, pas dans le package.
+Retourne `{ nodes, edges, blocks }`. Dans `plateform_front` via le package (`utils/serialize`).
+
+#### `sanitizeWorkflowEdges(nodes, edges)` — Réparer les edges chargés depuis la DB
+Retourne `{ nodes, edges }` après avoir corrigé les `sourceHandle` de settings-edges qui ne correspondent plus aux noms d'inputs actuels de la task-definition (ex : après un renommage). Les nodes orphelins (settings nodes dont l'edge ne peut être remappé) sont supprimés. À appeler lors du chargement d'un workflow depuis la DB avant de l'injecter dans ReactFlow.
 
 ### Système de Layout
 
@@ -502,7 +558,7 @@ await updateWorkflow({ workspaceId, agentId, definition });
 - Pour MODEL : `SettingPlaceholderContent` → appelle `handleSettingSelect(nodeId, item)` pour mettre à jour le node
 
 **Menu d'ajout de node** (`MenuNodeModal.tsx`) :
-- Affiche les nodes disponibles filtrés par `listAddableTaskTypes()`
+- Affiche les nodes disponibles filtrés par `getAddableTaskTypes(presentTypes)`
 - Filtre selon les `chainOutputs` des nodes déjà présents dans le canvas
 - Appelle `handleAddChainNode(nodeType)` au clic ou à l'Enter
 
@@ -619,6 +675,7 @@ export function WorkflowPackagePreview({ isDark }) {
 | `services/agent/agent.ts` | getWorkspaceAgents, getAgentById, createAgent, updateAgent, deleteAgent |
 | `services/document/document.ts` | uploadDocument, getAgentDocuments (paginé), getDocumentById, getDocumentUrl, getAgentDocumentStats, deleteDocument |
 | `services/workflow/workflow.ts` | getActiveWorkflow, updateWorkflow, createWorkflow |
+| `services/deployment/deployment.ts` | getDeployments, getCurrentDeployment, getDeploymentById, createDeployment, rollbackDeployment |
 | `services/chat/chat.ts` | sendChatMessage, getChatHistory, getAssistantMetadata, getAssistantsList, getConversationsForAssistant |
 
 **Config API :** `REACT_APP_BACKEND_URL` → baseUrl, credentials: `include` (cookies cross-origin)
@@ -676,8 +733,10 @@ AWS_SECRET_ACCESS_KEY=...
 S3_BUCKET=...
 RAGENGINE_URL=http://localhost:8000
 RAGENGINE_API_KEY=...
-REDIS_HOST=localhost
+RAG_MOCK=false          # true → court-circuite l'appel RAG, retourne une réponse fictive
+REDIS_HOST=localhost    # utilisé si REDIS_URL n'est pas défini
 REDIS_PORT=6379
+REDIS_URL=              # en prod : URL complète Redis (ex: redis://user:pass@host:6379). Prend le dessus sur REDIS_HOST/PORT
 ```
 
 ### Frontend (`plateform_front/.env`)
@@ -716,7 +775,9 @@ server:      port 8080:8080   (NestJS)
 
 2. **Crédits** : le système de crédits est critique. La vérification et la déduction doivent être atomiques (transaction Prisma). Un workspace commence avec 0 crédit — il faut les ajouter manuellement via `POST /workspaces/:id/credit-balance`.
 
-3. **Workflow actif** : l'exécution RAG charge toujours `isActive: true`. Si aucun workflow actif n'existe, l'exécution throw une erreur. Toujours s'assurer qu'un workflow est actif avant de tester le playground.
+3. **Workflow actif vs snapshot** : l'exécution RAG charge toujours `isActive: true`. Les snapshots (`isActive: false`) sont créés lors du déploiement — ils sont immutables et servent uniquement au rollback. Ne jamais activer un snapshot manuellement ; utiliser `POST /deployments/rollback` qui recopie la définition dans le workflow actif.
+
+3b. **AgentStatus simplifié** : il n'y a plus que `DEVELOPMENT` et `PRODUCTION`. Le statut est dérivé du dernier `AgentVersion.toStatus`. Si aucun `AgentVersion` n'existe, l'agent est en `DEVELOPMENT`.
 
 4. **Settings nodes et isPlaceholder** : un MODEL ou INSTRUCTION node avec `isPlaceholder: true` dans `AppNodeData` signifie que l'utilisateur n'a pas encore configuré la valeur. `serializeWorkflow` ignore ces nodes lors de la construction des `blocks`, ce qui peut produire un pipeline incomplet si l'utilisateur sauvegarde sans configurer.
 
@@ -731,3 +792,9 @@ server:      port 8080:8080   (NestJS)
 9. **Prisma schema splitté** : le schema est dans plusieurs fichiers sous `plateform_back/prisma/schema/`. Il y a deux dossiers de migrations : `plateform_back/prisma/migrations/` (incrémental) et `plateform_back/prisma/schema/migrations/` (migration consolidée from scratch).
 
 10. **handleRemoveChainNode et reconnexion** : quand on supprime un node chaîné (REWRITER, RERANKER), le hook trouve l'edge entrant et l'edge sortant du node supprimé, supprime aussi tous ses settings nodes (edges `type: "settings"`), et recrée un edge direct entre le précédent et le suivant. Ne jamais supprimer un node ReactFlow manuellement sans passer par ce handler.
+
+11. **sanitizeWorkflowEdges au chargement** : appeler `sanitizeWorkflowEdges(nodes, edges)` avant d'injecter un workflow chargé depuis la DB dans ReactFlow. Cette fonction répare les `sourceHandle` de settings-edges devenus stales (ex : si le nom d'un input de task a changé). Sans ça, des edges "fantômes" peuvent rester attachés à des handles qui n'existent plus.
+
+12. **WorkspaceStatsService** : expose `GET /workspaces/:id/stats` — agrège en parallèle agents (total, prod, dev), documents, conversations (24h + 30j), crédits, activité récente (8 événements), graphes d'activité (24h, 7j, 30j). Utilise les `Conversation` du modèle de données (pas les messages de l'assistant public).
+
+13. **Runtime SSE** : les endpoints `/runtime/stream` et `/runtime/playground` utilisent `@Sse` (Server-Sent Events). Le client doit utiliser `EventSource` (ou un wrapper RTK). Contrairement à un POST, la query passe en query-string (`?query=...`).

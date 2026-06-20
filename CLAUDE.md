@@ -18,7 +18,10 @@ monorepo/
 ├── plateform_back/        # Backend NestJS
 ├── plateform_front/       # Frontend React (Vite + Chakra UI)
 ├── vitrine_front/         # Landing page Next.js
-└── docker-compose.yml
+├── architecture/          # Diagrammes Mermaid
+├── docker-compose.yml
+├── dev.sh                 # Script de démarrage dev
+└── migrate.sh             # Helper migration DB
 ```
 
 ---
@@ -26,14 +29,15 @@ monorepo/
 ## Stack technique
 
 ### Backend — `plateform_back/`
-- **Framework :** NestJS (TypeScript)
-- **ORM :** Prisma (PostgreSQL)
-- **Auth :** JWT via cookies HttpOnly + Passport (strategies Local + JWT)
+- **Framework :** NestJS 11 (TypeScript)
+- **ORM :** Prisma 6 (PostgreSQL)
+- **Auth :** JWT via cookies HttpOnly + Passport (strategies Local + JWT) + blacklist de tokens
 - **Queue :** BullMQ + Redis (traitement asynchrone des documents)
 - **Storage :** AWS S3 (stockage des fichiers uploadés)
 - **Emails :** Brevo (vérification email, reset password)
 - **API Docs :** Swagger + Scalar
 - **Logs :** nestjs-pino
+- **Monitoring :** Sentry
 
 ### Frontend — `plateform_front/`
 - **Framework :** React + Vite (TypeScript)
@@ -77,12 +81,15 @@ Workspace
 Agent
   ├── id, name, description
   ├── status : DEVELOPMENT | PRODUCTION  ← STAGING supprimé (migration 20260429102244)
+  ├── retentionDays Int?  ← rétention des query logs (null = indéfini)
   ├── workspaceId
   ├── workflows → Workflow[]
   ├── documents → Document[]
   ├── deployments → AgentVersion[]
   ├── onboardingSession → OnboardingSession?
-  └── conversations → Conversation[]
+  ├── conversations → Conversation[]
+  ├── members → AgentMember[]    ← partage de l'agent avec des utilisateurs
+  └── queryLogs → AgentQueryLog[]
 
 AgentVersion  ← journal de déploiement immutable
   ├── id, version (auto-increment par agent)
@@ -90,7 +97,21 @@ AgentVersion  ← journal de déploiement immutable
   ├── fromStatus, toStatus (AgentStatus)
   ├── workflowVersion (Int?) — version du snapshot de workflow associé
   ├── agentId, createdBy (userId)
+  ├── createdByUser User @relation(...)
   └── Contrainte unique : (agentId, version)
+
+AgentMember  ← accès d'un utilisateur à un agent spécifique
+  ├── id, agentId, userId
+  ├── createdAt
+  └── Contrainte unique : (agentId, userId)
+
+AgentQueryLog  ← log d'exécution de chaque query RAG
+  ├── id, agentId
+  ├── query (String)
+  ├── durationMs (Int)
+  ├── status : SUCCESS | ERROR | OUT_OF_CREDITS
+  ├── creditsUsed (Int, défaut 1)
+  └── createdAt
 
 Workflow
   ├── id, agentId
@@ -137,7 +158,9 @@ CreditTransaction
 ### 1. Authentification
 - Register → envoi email de vérification (token 6 chiffres via Brevo)
 - Login → JWT dans cookie HttpOnly `Authentication`
+- Logout → JWT ajouté à la blacklist (`JwtBlacklistService`) pour révocation immédiate
 - Reset password → token 6 chiffres par email
+- Protection brute-force via `LoginAttemptService` (rate limiting sur les échecs de login)
 - `SEND_EMAILS=true/false` dans `.env` pour activer/désactiver les emails
 
 ### 2. Upload de document
@@ -162,9 +185,10 @@ Flux interne :
   → UsageTracker.checkOrThrow() [vérifie credits > 0 — ignoré pour playground]
   → ContextBuilder.buildPipeline() [charge le workflow actif depuis la DB]
      → extrait definition.blocks (ou definition complète si legacy)
-  → POST /rag/stream (API RAG externe) avec { pipeline: blocks, query }
+  → RagExecutionService → POST /rag/stream (API RAG externe) avec { pipeline: blocks, query }
   → EventBus.emit(AGENT_QUERY_COMPLETED) [ignoré pour playground]
      → UsageTracker.record() [déduit 1 crédit en transaction Prisma atomique]
+     → AgentQueryLogRepository.create() [persiste le log]
   → retourne un stream SSE (chunks de texte)
 ```
 - `RAG_MOCK=true` dans `.env` → court-circuite l'appel à l'API RAG et retourne une réponse fictive (utile en dev)
@@ -197,7 +221,7 @@ POST /workspaces/:workspaceId/agents/:agentId/deployments/rollback { deploymentI
 - `createSnapshot(agentId, dto)` : crée une version `isActive: false` — appel interne au déploiement, ne change pas le workflow actif
 
 ### 6. Sérialisation du Workflow
-La fonction `serializeWorkflow(nodes, edges)` (dans `utils/workflowSerializer.ts`) convertit l'état ReactFlow en `WorkflowDefinition` :
+La fonction `serializeWorkflow(nodes, edges)` (dans `packages/workflow/src/utils/serialize.ts`) convertit l'état ReactFlow en `WorkflowDefinition` :
 ```typescript
 {
   nodes: AppNode[];   // état complet ReactFlow (persisté pour restauration de l'UI)
@@ -221,6 +245,10 @@ Les `blocks` sont construits en traversant la chaîne principale (type `main-sou
 | `POST /rag/stream` | Exécuter une query RAG. Body: `{ pipeline, query }`. Retourne le texte de la réponse. |
 | `POST /rag/index` | Indexer un document. Body: multipart/form-data avec `file` (buffer) et `document_id`. |
 
+Le module `rag-engine/` encapsule ces appels :
+- `RagExecutionService` — effectue les appels HTTP vers l'API RAG
+- `pipeline.schema.ts` — validation Zod du format du pipeline avant envoi
+
 ### Format du pipeline (blocks envoyés à l'API RAG)
 ```json
 {
@@ -238,14 +266,87 @@ Les `blocks` sont construits en traversant la chaîne principale (type `main-sou
 
 ## Sécurité & Guards
 
-| Guard | Rôle |
-|-------|------|
+| Guard / Service | Rôle |
+|-----------------|------|
 | `JwtAuthGuard` | Vérifie le JWT dans le cookie |
+| `JwtBlacklistService` | Révoque les tokens JWT au logout (liste noire en mémoire/Redis) |
+| `LoginAttemptService` | Rate limiting sur les tentatives de login (protection brute-force) |
 | `WorkspaceRolesGuard` | Vérifie que l'user est membre du workspace (extrait `workspaceId` des params) |
 | `AgentBelongsToWorkspaceGuard` | Vérifie que l'agent appartient bien au workspace |
 | `RolesInWorkspace(...)` | Décorateur pour restreindre à certains rôles (ADMIN, EDITOR, VIEWER) |
 
 **Règle générale :** toutes les routes privées ont `JwtAuthGuard` + `WorkspaceRolesGuard`.
+
+---
+
+## Architecture événementielle (EventBus)
+
+Les modules communiquent via `EventBus` (`src/lib/event-bus.ts`), un wrapper Node.js EventEmitter.
+
+### Événements agents (`src/events/agent/`)
+- `agent-events.type.ts` — constantes des noms d'événements
+- `agent-events.ts` — payloads typés
+- `agent-event.listener.ts` — listeners (ex: log déploiement, query complétée)
+
+### Événements documents (`src/events/document/`)
+- `document-event.type.ts`, `document-event.ts`, `document-event.listener.ts`
+- Émis lors de l'indexation réussie ou échouée d'un document
+
+---
+
+## Modules backend (src/)
+
+```
+src/
+├── agent/             # CRUD agents + export + membres
+│   ├── agent.controller.ts
+│   ├── agent-export.controller.ts   # Export d'agent (format JSON/config)
+│   ├── agent-member.controller.ts   # Gestion membres partagés
+│   ├── agent-member.service.ts
+│   ├── agent-member.repository.ts
+│   ├── agent.service.ts / .repository.ts
+│   └── dto/, guard/, test/
+├── agent-runtime/     # Exécution des queries RAG (SSE)
+│   ├── agent-runtime.controller.ts
+│   ├── agent-runtime.service.ts
+│   ├── agent-runtime.orchestrator.ts
+│   ├── agent-runtime.builder.ts     # Construit le pipeline depuis le workflow
+│   └── agent-query-log.repository.ts
+├── auth/              # JWT, Passport, email, sécurité
+│   ├── auth.controller.ts / .service.ts
+│   ├── token.service.ts
+│   ├── jwt-blacklist.service.ts     # Révocation tokens JWT
+│   ├── login-attempt.service.ts     # Protection brute-force
+│   ├── brevo.service.ts             # Envoi emails via Brevo
+│   └── strategies/
+├── conversation/      # Conversations et messages
+├── credit/            # Solde crédits + transactions + usage tracker
+│   ├── credit-balance.controller.ts / .service.ts / .repository.ts
+│   ├── credit-transaction.service.ts / .repository.ts
+│   └── usage-tracker.service.ts
+├── deployment/        # Versioning et rollback des agents
+├── document/          # Upload, BullMQ processing, CQRS handlers
+├── events/            # Listeners EventBus (agent + document)
+├── onboarding/        # Session d'onboarding 3 étapes
+├── plans/             # plans.config.ts — limites par tier (FREE/PRO/BUSINESS/ENTERPRISE)
+├── rag-engine/        # Client HTTP vers l'API RAG externe
+│   ├── rag-execution.service.ts
+│   ├── rag-engine.controller.ts
+│   └── pipeline.schema.ts           # Validation Zod du pipeline
+├── redis/             # Connexion Redis
+├── retention/         # Nettoyage planifié des query logs
+│   └── retention-cleanup.service.ts
+├── sentry/            # Intégration monitoring d'erreurs
+├── storage/           # Abstraction S3 (StorageStrategy)
+├── users/             # Profil utilisateur (séparé de auth/)
+├── workflow/          # CRUD workflows + snapshots
+├── workspace/         # Workspaces + stats
+│   └── workspace-stats.service.ts   # GET /workspaces/:id/stats
+├── lib/
+│   └── event-bus.ts                 # Wrapper EventEmitter
+├── prisma/            # PrismaService
+└── exeptions/         # Filtres d'exception globaux (note: typo dans le nom du dossier)
+```
 
 ---
 
@@ -285,10 +386,8 @@ packages/workflow/src/
 │   │   ├── add-response.tsx     # Définition du node RESPONSE (isEndPoint)
 │   │   ├── add-model.tsx        # Définition du node MODEL (settings)
 │   │   └── add-instruction.tsx  # Définition du node INSTRUCTION (settings)
-│   ├── registry.ts              # WorkflowRegistry (nouveau système extensible)
-│   ├── create-flow-node.ts      # Factories : CreateFlowNode, linkNodes, withAutoSettings
-│   ├── task-utils.ts            # getTaskDef, getAddableTaskTypes, getNonSettingsTaskTypes, getConfigInputs, getChainOutputs
-│   └── resolve-collisions.ts    # Résolution de collisions de position
+│   ├── create-flow-node.ts      # Factories : makeFlowNode, linkNodes, withAutoSettings
+│   └── task-utils.ts            # getTaskDef, getAddableTaskTypes, getNonSettingsTaskTypes, getConfigInputs, getChainOutputs
 ├── hooks/
 │   ├── useWorkflowNodes.ts      # Hook principal : état nodes/edges, add/remove, settings
 │   ├── useWorkflowCanvas.ts     # Composition : useWorkflowNodes + useFlowTypes
@@ -310,7 +409,8 @@ packages/workflow/src/
 └── types/
     ├── app-node.ts              # AppNode, AppNodeData, ParamProps
     ├── edge.ts                  # EdgeType enum (default | settings)
-    └── task.ts                  # Task, TaskType, TaskParam, TaskParamType, TaskChainOutput
+    ├── task.ts                  # Task, TaskType, TaskParam, TaskParamType, TaskChainOutput
+    └── model-option.ts          # ModelOption interface
 ```
 
 ### Types fondamentaux
@@ -476,7 +576,7 @@ const { nodes, edges } = withAutoSettings(
 ```
 
 #### `serializeWorkflow(nodes, edges)` — Sérialiser pour la DB
-Retourne `{ nodes, edges, blocks }`. Dans `plateform_front` via le package (`utils/serialize`).
+Retourne `{ nodes, edges, blocks }`. Importé dans `plateform_front` via `@genrag/workflow` (`utils/serialize`).
 
 #### `sanitizeWorkflowEdges(nodes, edges)` — Réparer les edges chargés depuis la DB
 Retourne `{ nodes, edges }` après avoir corrigé les `sourceHandle` de settings-edges qui ne correspondent plus aux noms d'inputs actuels de la task-definition (ex : après un renommage). Les nodes orphelins (settings nodes dont l'edge ne peut être remappé) sont supprimés. À appeler lors du chargement d'un workflow depuis la DB avant de l'injecter dans ReactFlow.
@@ -673,10 +773,14 @@ export function WorkflowPackagePreview({ isDark }) {
 | `services/auth/auth.ts` | login, register, verifyEmailToken, resendEmailToken, resetPassword, applyResetPassword, getMe |
 | `services/workspace/workspace.ts` | getUserWorkspaces, getWorkspaceById, createWorkspace, deleteWorkspace |
 | `services/agent/agent.ts` | getWorkspaceAgents, getAgentById, createAgent, updateAgent, deleteAgent |
+| `services/agent/agentMembers.ts` | getAgentMembers, addAgentMember, removeAgentMember |
 | `services/document/document.ts` | uploadDocument, getAgentDocuments (paginé), getDocumentById, getDocumentUrl, getAgentDocumentStats, deleteDocument |
 | `services/workflow/workflow.ts` | getActiveWorkflow, updateWorkflow, createWorkflow |
 | `services/deployment/deployment.ts` | getDeployments, getCurrentDeployment, getDeploymentById, createDeployment, rollbackDeployment |
 | `services/chat/chat.ts` | sendChatMessage, getChatHistory, getAssistantMetadata, getAssistantsList, getConversationsForAssistant |
+| `services/models/models.ts` | Récupère les modèles LLM / rerankers disponibles |
+| `services/credit/credit.ts` | getBalance, getTransactions |
+| `services/onboarding/onboarding.ts` | getSession, updateStep, complete |
 
 **Config API :** `REACT_APP_BACKEND_URL` → baseUrl, credentials: `include` (cookies cross-origin)
 
@@ -737,6 +841,7 @@ RAG_MOCK=false          # true → court-circuite l'appel RAG, retourne une rép
 REDIS_HOST=localhost    # utilisé si REDIS_URL n'est pas défini
 REDIS_PORT=6379
 REDIS_URL=              # en prod : URL complète Redis (ex: redis://user:pass@host:6379). Prend le dessus sur REDIS_HOST/PORT
+SENTRY_DSN=             # optionnel — monitoring d'erreurs Sentry
 ```
 
 ### Frontend (`plateform_front/.env`)
@@ -762,8 +867,8 @@ server:      port 8080:8080   (NestJS)
 ## Tests
 
 - **Backend :** Jest, tests unitaires sur les Services (mocks des Repositories)
-- Fichiers de test : `src/**/*.spec.ts`
-- Tests existants : `AgentService`, `WorkflowService`, `WorkspaceService`, `UsersService`
+- Fichiers de test : `src/**/*.spec.ts` et `src/**/test/*.spec.ts`
+- Couverture actuelle : `AgentService`, `AgentMemberService`, `WorkflowService`, `WorkspaceService`, `UsersService`, `AuthService`, `CreditService`, `DeploymentService`, `ConversationService`, `OnboardingService`, `AgentRuntimeService`, `AgentRuntimeOrchestrator`, `JwtBlacklistService`, `LoginAttemptService`
 - Pattern : mock du Repository → tester uniquement la logique du Service
 - Commande : `yarn test` dans `plateform_back/`
 
@@ -798,3 +903,9 @@ server:      port 8080:8080   (NestJS)
 12. **WorkspaceStatsService** : expose `GET /workspaces/:id/stats` — agrège en parallèle agents (total, prod, dev), documents, conversations (24h + 30j), crédits, activité récente (8 événements), graphes d'activité (24h, 7j, 30j). Utilise les `Conversation` du modèle de données (pas les messages de l'assistant public).
 
 13. **Runtime SSE** : les endpoints `/runtime/stream` et `/runtime/playground` utilisent `@Sse` (Server-Sent Events). Le client doit utiliser `EventSource` (ou un wrapper RTK). Contrairement à un POST, la query passe en query-string (`?query=...`).
+
+14. **JWT Blacklist** : `JwtBlacklistService` maintient une liste des tokens révoqués. Le `JwtStrategy` vérifie que le token n'est pas blacklisté à chaque requête. Cela implique une vérification en mémoire (ou Redis) — s'assurer que la blacklist est persistée si le process redémarre.
+
+15. **AgentQueryLog et rétention** : `retentionDays` sur `Agent` contrôle combien de jours les `AgentQueryLog` sont conservés. `RetentionCleanupService` tourne sur un schedule pour supprimer les logs expirés. Un agent avec `retentionDays: null` conserve les logs indéfiniment.
+
+16. **Typo dans le nom du dossier** : `plateform_back/src/exeptions/` (manque un 'c'). Ne pas renommer sans vérifier tous les imports.

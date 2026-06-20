@@ -47,6 +47,8 @@ export interface ParamProps {
 export type WorkflowNodeProps = NodeProps & {
     onNodeClick?: (nodeId: string) => void;
     onRemoveNode?: (nodeId: string) => Promise<void> | void;
+    onInstructionSave?: (nodeId: string) => void;
+    onMutation?: () => void;
     isVertical?: boolean;
 };
 

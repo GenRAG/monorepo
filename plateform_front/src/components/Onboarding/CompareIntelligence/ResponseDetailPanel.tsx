@@ -2,7 +2,7 @@ import React from "react";
 import { Badge, Box, HStack, Icon, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { Check, LucideIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { getMarkdownStyles } from "components/System/Molecules/Chat/markdownStyles";
+import { getMarkdownStyles } from "components/ui/chat/markdownStyles";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface ResponseCardProps {

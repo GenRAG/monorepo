@@ -1,14 +1,27 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import type { MessageEvent } from '@nestjs/common';
-import { AgentStatus, MessageSender } from 'generated/prisma';
+import type { IncomingMessage } from 'http';
+import { AgentStatus, MessageSender, QueryLogStatus } from 'generated/prisma';
 import { Observable, Subscriber } from 'rxjs';
+import * as Sentry from '@sentry/nestjs';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
+import { UsageTrackerService } from 'src/credit/usage-tracker.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+
+type RagStream = IncomingMessage;
+type StartRagResult = { ok: true; stream: RagStream } | { ok: false; isOutOfCredits: boolean; error: string };
 
 interface StreamOptions {
     orgIdOverride?: string;
     skipUsageTracking?: boolean;
     forceActiveWorkflow?: boolean;
+}
+
+interface LogCtx {
+    workspaceId: string;
+    agentId: string;
+    query: string;
+    startedAt: number;
 }
 
 @Injectable()
@@ -18,20 +31,12 @@ export class AgentRuntimeService {
     constructor(
         private readonly orchestrator: AgentRuntimeOrchestrator,
         private readonly prisma: PrismaService,
+        private readonly usageTracker: UsageTrackerService,
     ) {}
-
-    streamQuery(workspaceId: string, agentId: string, query: string): Observable<MessageEvent> {
-        return new Observable((subscriber) => {
-            void this._dispatchStream(subscriber, workspaceId, agentId, query);
-        });
-    }
 
     playgroundStream(workspaceId: string, agentId: string, query: string): Observable<MessageEvent> {
         return new Observable((subscriber) => {
-            void this._dispatchStream(subscriber, workspaceId, agentId, query, {
-                skipUsageTracking: true,
-                forceActiveWorkflow: true,
-            });
+            void this._dispatchStream(subscriber, workspaceId, agentId, query, { forceActiveWorkflow: true });
         });
     }
 
@@ -42,7 +47,10 @@ export class AgentRuntimeService {
         orgIdOverride: string,
     ): Observable<MessageEvent> {
         return new Observable((subscriber) => {
-            void this._dispatchStream(subscriber, workspaceId, agentId, query, { orgIdOverride });
+            void this._dispatchStream(subscriber, workspaceId, agentId, query, {
+                orgIdOverride,
+                skipUsageTracking: true,
+            });
         });
     }
 
@@ -64,9 +72,32 @@ export class AgentRuntimeService {
         query: string,
         options: StreamOptions = {},
     ) {
-        const ragStream = await this._startRagStream(subscriber, workspaceId, agentId, query, options);
-        if (!ragStream) return;
-        this._forwardStream(ragStream, subscriber);
+        const startedAt = Date.now();
+        const result = await this._startRagStream(workspaceId, agentId, query, options);
+        if (!result.ok) {
+            subscriber.next({ data: JSON.stringify({ error: result.error, isOutOfCredits: result.isOutOfCredits }) });
+            subscriber.complete();
+            if (!options.skipUsageTracking) {
+                void this.usageTracker
+                    .recordQuery({
+                        workspaceId,
+                        agentId,
+                        query: query.slice(0, 500),
+                        durationMs: Date.now() - startedAt,
+                        status: result.isOutOfCredits ? QueryLogStatus.OUT_OF_CREDITS : QueryLogStatus.ERROR,
+                    })
+                    .catch((e: Error) => {
+                        this.logger.error(`Failed to log query: ${e.message}`);
+                        Sentry.captureException(e);
+                    });
+            }
+            return;
+        }
+        if (!options.skipUsageTracking) {
+            this._forwardStream(result.stream, subscriber, { workspaceId, agentId, query, startedAt });
+        } else {
+            this._forwardStream(result.stream, subscriber);
+        }
     }
 
     private async _dispatchStreamWithPersistence(
@@ -76,11 +107,17 @@ export class AgentRuntimeService {
         conversationId?: string,
         userId?: string,
     ) {
+        const startedAt = Date.now();
         const workspaceId = await this._resolveWorkspaceId(agentId, subscriber);
         if (!workspaceId) return;
 
-        const ragStream = await this._startRagStream(subscriber, workspaceId, agentId, query);
-        if (!ragStream) return;
+        const result = await this._startRagStream(workspaceId, agentId, query);
+        if (!result.ok) {
+            subscriber.next({ data: JSON.stringify({ error: result.error, isOutOfCredits: result.isOutOfCredits }) });
+            subscriber.complete();
+            return;
+        }
+        const ragStream = result.stream;
 
         const convId = await this._initConversation(subscriber, workspaceId, agentId, query, conversationId, userId);
         if (!convId) {
@@ -88,7 +125,12 @@ export class AgentRuntimeService {
             return;
         }
 
-        this._forwardStreamWithPersistence(ragStream, convId, subscriber);
+        this._forwardStreamWithPersistence(ragStream, convId, subscriber, {
+            workspaceId,
+            agentId,
+            query,
+            startedAt,
+        });
     }
 
     private async _resolveWorkspaceId(agentId: string, subscriber: Subscriber<MessageEvent>): Promise<string | null> {
@@ -107,14 +149,13 @@ export class AgentRuntimeService {
     }
 
     private async _startRagStream(
-        subscriber: Subscriber<MessageEvent>,
         workspaceId: string,
         agentId: string,
         query: string,
         { orgIdOverride, skipUsageTracking = false, forceActiveWorkflow = false }: StreamOptions = {},
-    ): Promise<Awaited<ReturnType<typeof this.orchestrator.streamQuery>> | null> {
+    ): Promise<StartRagResult> {
         try {
-            return await this.orchestrator.streamQuery({
+            const stream = await this.orchestrator.streamQuery({
                 query,
                 agentId,
                 workspaceId,
@@ -122,20 +163,22 @@ export class AgentRuntimeService {
                 skipUsageTracking,
                 forceActiveWorkflow,
             });
+            return { ok: true, stream };
         } catch (err: unknown) {
             const isOutOfCredits = err instanceof ForbiddenException;
-            subscriber.next({
-                data: JSON.stringify({
-                    error: isOutOfCredits
-                        ? 'Pas de crédits disponibles.'
-                        : err instanceof Error
-                          ? err.message
-                          : 'Unknown error',
-                    isOutOfCredits,
-                }),
-            });
-            subscriber.complete();
-            return null;
+            if (!isOutOfCredits) {
+                this.logger.error(`RAG stream error: ${err instanceof Error ? err.message : String(err)}`);
+                Sentry.captureException(err);
+            }
+            return {
+                ok: false,
+                isOutOfCredits,
+                error: isOutOfCredits
+                    ? 'Pas de crédits disponibles.'
+                    : err instanceof Error
+                      ? err.message
+                      : 'Unknown error',
+            };
         }
     }
 
@@ -182,27 +225,53 @@ export class AgentRuntimeService {
         }
     }
 
-    private _forwardStream(
-        ragStream: Awaited<ReturnType<typeof this.orchestrator.streamQuery>>,
-        subscriber: Subscriber<MessageEvent>,
-    ) {
+    private _forwardStream(ragStream: RagStream, subscriber: Subscriber<MessageEvent>, logCtx?: LogCtx) {
         ragStream.on('data', (chunk: Buffer) => {
             subscriber.next({ data: JSON.stringify({ chunk: chunk.toString('utf-8') }) });
         });
         ragStream.on('end', () => {
+            if (logCtx) {
+                void this.usageTracker
+                    .recordQuery({
+                        workspaceId: logCtx.workspaceId,
+                        agentId: logCtx.agentId,
+                        query: logCtx.query.slice(0, 500),
+                        durationMs: Date.now() - logCtx.startedAt,
+                        status: QueryLogStatus.SUCCESS,
+                    })
+                    .catch((e: Error) => {
+                        this.logger.error(`Failed to record query: ${e.message}`);
+                        Sentry.captureException(e);
+                    });
+            }
             subscriber.next({ data: JSON.stringify({ done: true }) });
             subscriber.complete();
         });
         ragStream.on('error', (err: Error) => {
+            if (logCtx) {
+                void this.usageTracker
+                    .recordQuery({
+                        workspaceId: logCtx.workspaceId,
+                        agentId: logCtx.agentId,
+                        query: logCtx.query.slice(0, 500),
+                        durationMs: Date.now() - logCtx.startedAt,
+                        status: QueryLogStatus.ERROR,
+                    })
+                    .catch((e: Error) => {
+                        this.logger.error(`Failed to record query error: ${e.message}`);
+                        Sentry.captureException(e);
+                    });
+            }
             subscriber.next({ data: JSON.stringify({ error: err.message }) });
             subscriber.complete();
         });
     }
 
     private _forwardStreamWithPersistence(
-        ragStream: Awaited<ReturnType<typeof this.orchestrator.streamQuery>>,
+        ragStream: RagStream,
         convId: string,
         subscriber: Subscriber<MessageEvent>,
+        logCtx: LogCtx,
     ) {
         let fullText = '';
 
@@ -213,6 +282,19 @@ export class AgentRuntimeService {
         });
 
         ragStream.on('end', () => {
+            void this.usageTracker
+                .recordQuery({
+                    workspaceId: logCtx.workspaceId,
+                    agentId: logCtx.agentId,
+                    query: logCtx.query.slice(0, 500),
+                    durationMs: Date.now() - logCtx.startedAt,
+                    status: QueryLogStatus.SUCCESS,
+                })
+                .catch((e: Error) => {
+                    this.logger.error(`Failed to record query: ${e.message}`);
+                    Sentry.captureException(e);
+                });
+
             void this.prisma.message
                 .create({
                     data: { conversationId: convId, sender: MessageSender.AGENT, content: fullText },
@@ -223,9 +305,10 @@ export class AgentRuntimeService {
                         data: { updatedAt: new Date() },
                     }),
                 )
-                .catch((e: Error) =>
-                    this.logger.error(`Failed to persist agent message for conv ${convId}: ${e.message}`),
-                )
+                .catch((e: Error) => {
+                    this.logger.error(`Failed to persist agent message for conv ${convId}: ${e.message}`);
+                    Sentry.captureException(e);
+                })
                 .finally(() => {
                     subscriber.next({ data: JSON.stringify({ done: true, conversationId: convId }) });
                     subscriber.complete();
@@ -233,6 +316,19 @@ export class AgentRuntimeService {
         });
 
         ragStream.on('error', (err: Error) => {
+            void this.usageTracker
+                .recordQuery({
+                    workspaceId: logCtx.workspaceId,
+                    agentId: logCtx.agentId,
+                    query: logCtx.query.slice(0, 500),
+                    durationMs: Date.now() - logCtx.startedAt,
+                    status: QueryLogStatus.ERROR,
+                })
+                .catch((e: Error) => {
+                    this.logger.error(`Failed to record query error: ${e.message}`);
+                    Sentry.captureException(e);
+                });
+
             void this.prisma.message
                 .create({
                     data: {
@@ -241,9 +337,10 @@ export class AgentRuntimeService {
                         content: fullText || err.message,
                     },
                 })
-                .catch((e: Error) =>
-                    this.logger.error(`Failed to persist error message for conv ${convId}: ${e.message}`),
-                )
+                .catch((e: Error) => {
+                    this.logger.error(`Failed to persist error message for conv ${convId}: ${e.message}`);
+                    Sentry.captureException(e);
+                })
                 .finally(() => {
                     subscriber.next({ data: JSON.stringify({ error: err.message }) });
                     subscriber.complete();

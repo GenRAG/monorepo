@@ -1,7 +1,7 @@
 import { HStack, Icon, Stack, Text } from "@chakra-ui/react";
 import { Activity } from "lucide-react";
 import { Period } from "pages/Dashboard/data";
-import MultiOptionButtons from "components/System/Atoms/MultiOptionButtons";
+import MultiOptionButtons from "components/ui/MultiOptionButtons";
 
 const PERIOD_LABELS: Record<Period, string> = {
     "24h": "24h",

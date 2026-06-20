@@ -1,13 +1,12 @@
 import React, { useCallback } from "react";
 import { Box, Stack, VStack, chakra } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import { ChatMessage } from "hooks/useChat";
-import { useAgentQuery } from "hooks/useAgentQuery";
+import { ChatMessage, useAgentQuery } from "hooks/chat";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
-import { ChatInterface } from "components/System/Molecules/ChatInterface";
-import StepLevel from "components/System/Molecules/StepLevel";
-import OnboardingStepBanner from "components/System/Molecules/OnboardingStepBanner";
+import { ChatInterface } from "components/ui/chat/ChatInterface";
+import StepLevel from "components/ui/StepLevel";
+import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
 
 const STEP_ID = "test-assistant";
 const MAX_EXCHANGES = 5;
@@ -21,38 +20,38 @@ const SUGGESTED_QUESTIONS = [
 export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data, updateData }) => {
     const { workspaceId, agentId } = useOnboarding();
     const onboardingStreamUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/onboarding/stream`;
-    const { sendQuery, isOutOfCredits } = useAgentQuery(workspaceId, agentId, false, onboardingStreamUrl);
+    const { sendQuery, isOutOfCredits } = useAgentQuery(workspaceId, agentId, onboardingStreamUrl);
     const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
 
     const savedMessages: ChatMessage[] = (data.messages as ChatMessage[]) ?? [];
-    const sessionQueryCount = (data.queryCount as number) ?? 0;
-    const messageCount: number = Math.max(sessionQueryCount, (data.messageCount as number) ?? savedMessages.length);
+    const messageCount: number = (data.messageCount as number) ?? 0;
     const isAtLimit = messageCount >= MAX_EXCHANGES;
 
     const getResponse = useCallback(
         async (question: string, onChunk: (partialText: string) => void) => {
             const fullText = await sendQuery(question, onChunk);
-            return { response: [fullText] };
+
+            const newCount = messageCount + 1;
+            updateData({ messageCount: newCount, testQuestion: question });
+            void updateStepsData({
+                workspaceId,
+                stepId: STEP_ID,
+                data: { messageCount: newCount },
+            });
+
+            return fullText;
         },
-        [sendQuery],
+        [sendQuery, messageCount, updateData, updateStepsData, workspaceId],
     );
 
     const handleMessagesChange = useCallback(
         (msgs: ChatMessage[]) => {
-            updateData({ messages: msgs, messageCount: Math.max(msgs.length, messageCount) });
-
-            if (msgs.length > messageCount) {
-                void updateStepsData({
-                    workspaceId,
-                    stepId: STEP_ID,
-                    data: { messageCount: msgs.length },
-                });
-            }
-
             const last = msgs[msgs.length - 1];
-            if (last?.question) updateData({ testQuestion: last.question });
+            if (!last) return;
+            // Don't persist error messages — keeps savedMessages clean for the fallback
+            updateData({ messages: last.error ? msgs.slice(0, -1) : msgs });
         },
-        [updateData, updateStepsData, workspaceId, messageCount],
+        [updateData],
     );
 
     return (

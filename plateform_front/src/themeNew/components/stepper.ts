@@ -35,11 +35,14 @@ const createVariant = (colorName: "orange" | "green" | "blue") => {
             },
         },
         separator: {
+            // Solid green line for completed steps
             "&[data-status=complete]": {
-                bg: colors.primary900,
+                bg: colors.rgba.primary,
             },
-            "&[data-status=incomplete]": {
-                bg: "gray.300",
+            // Dashed line via repeating gradient for active/incomplete steps
+            "&[data-status=incomplete], &[data-status=active]": {
+                bg: "transparent",
+                backgroundImage: `repeating-linear-gradient(to bottom, ${colors.rgba.primary30} 0, ${colors.rgba.primary30} 5px, transparent 5px, transparent 11px)`,
             },
         },
     });

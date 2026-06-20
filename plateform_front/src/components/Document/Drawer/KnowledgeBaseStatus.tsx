@@ -1,6 +1,6 @@
 import React from "react";
 import { VStack, Text, Box } from "@chakra-ui/react";
-import Banner from "components/System/Atoms/Banner";
+import Banner from "components/ui/Banner";
 import { DocumentEntity, DocumentStatus } from "types/document/document";
 
 interface KnowledgeBaseStatusProps {
@@ -9,7 +9,7 @@ interface KnowledgeBaseStatusProps {
 
 export const KnowledgeBaseStatus: React.FC<KnowledgeBaseStatusProps> = ({ document }) => {
     return (
-        <VStack align="stretch" spacing={4}>
+        <VStack align="stretch" spacing={2}>
             <Text
                 fontWeight="medium"
                 fontSize="11px"

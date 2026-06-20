@@ -5,9 +5,9 @@ import { InstructionNode } from "../../components/nodes/SettingNodes/Instruction
 
 export const AddInstruction = {
     type: TaskType.INSTRUCTION,
-    label: "Instruction",
+    label: "Instructions",
     shape: ShapeType.CIRCLE,
-    description: "LLM instruction configuration",
+    description: "Consignes et personnalité de votre assistant",
     icon: (props: React.ComponentProps<LucideIcon>) => {
         return <FileText {...props} className="stroke-blue-500" />;
     },

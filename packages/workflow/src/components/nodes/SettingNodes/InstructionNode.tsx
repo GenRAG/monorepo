@@ -13,17 +13,61 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import type { AppNodeData, WorkflowNodeProps } from "../../../types/app-node";
-import { Terminal, MoreHorizontal, Info, Plus, FileText, Pencil } from "lucide-react";
+import { Terminal, Info, FileText, Pencil } from "lucide-react";
+import BoxIcon from "../../BoxIcon";
 import { motion, AnimatePresence } from "framer-motion";
 
-type TabId = "rediger" | "apercu";
+const InstructionPlaceholder = ({
+    onClick,
+    isHighlighted,
+}: {
+    onClick: (e: React.MouseEvent) => void;
+    isHighlighted?: boolean;
+}) => {
+    const borderColor = useColorModeValue(
+        isHighlighted ? "red.500" : "green.200",
+        isHighlighted ? "red.600" : "grey.600",
+    );
+    const bgHover = useColorModeValue(
+        isHighlighted ? "red.100" : "green.50",
+        isHighlighted ? "red.950" : "grey.700",
+    );
+    const bg = useColorModeValue(
+        "white", "grey.800",
+    );
+    const iconColor = useColorModeValue(
+        isHighlighted ? "red.500" : "green.400",
+        isHighlighted ? "red.400" : "green.400",
+    );
+    const textColor = useColorModeValue(
+        isHighlighted ? "red.800" : "grey.500",
+        isHighlighted ? "red.300" : "grey.400",
+    );
 
-const TABS: { id: TabId; label: string }[] = [
-    { id: "rediger", label: "Rédiger" },
-    { id: "apercu", label: "Aperçu" },
-];
-
-// ── Validated state: compact read card (unchanged from original) ─────────────
+    return (
+        <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            gap={1}
+            w="120px"
+            h="52px"
+            border="2px dashed"
+            borderColor={borderColor}
+            bg={bg}
+            borderRadius="10px"
+            cursor="pointer"
+            transition="all 0.15s"
+            _hover={{ bg: bgHover, borderColor: iconColor }}
+            onClick={onClick}
+        >
+            <Icon as={FileText} boxSize={4} color={iconColor} />
+            <Text fontSize="10px" color={textColor} fontWeight={500} textAlign="center">
+                Ajouter des instructions
+            </Text>
+        </Flex>
+    );
+};
 
 const InstructionCard = ({
     text,
@@ -38,29 +82,26 @@ const InstructionCard = ({
     onEditClick: (e: React.MouseEvent) => void;
     settingLabel?: string;
 }) => {
-    const bg = useColorModeValue("#FFFFFF", "#3D3D3D");
-    const bgHover = useColorModeValue("#ECFDF9", "#464646");
-    const borderColor = useColorModeValue("#A8F3DF", "#4F4F4F");
-    const borderActive = useColorModeValue("#34D3A9", "#12B98C");
-    const textColor = useColorModeValue("#3D3D3D", "#E7E7E7");
-    const subColor = useColorModeValue("#6D6D6D", "#8F8F8F");
-    const iconBg = useColorModeValue("#ECFDF9", "#4F4F4F");
-    const iconColor = useColorModeValue("#12B98C", "#34D3A9");
-    const editBg = useColorModeValue("#E7E7E7", "#4F4F4F");
-    const editColor = useColorModeValue("#6D6D6D", "#8F8F8F");
-    const headerBorder = useColorModeValue("#D1FAEF", "#4F4F4F");
-    const editHoverBg = useColorModeValue("#D1D1D1", "#5D5D5D");
+    const bg = useColorModeValue("white", "grey.800");
+    const bgHover = useColorModeValue("green.50", "grey.700");
+    const borderColor = useColorModeValue("green.200", "grey.700");
+    const borderActive = useColorModeValue("green.400", "green.500");
+    const textColor = useColorModeValue("grey.800", "grey.100");
+    const subColor = useColorModeValue("grey.500", "grey.400");
+    const iconBg = useColorModeValue("green.50", "grey.700");
+    const iconColor = useColorModeValue("green.500", "green.400");
+    const editBg = useColorModeValue("grey.100", "grey.700");
+    const editColor = useColorModeValue("grey.500", "grey.400");
+    const headerBorder = useColorModeValue("green.100", "grey.700");
+    const editHoverBg = useColorModeValue("grey.200", "grey.600");
 
     return (
         <Box
-            onClick={onCardClick}
-            cursor="pointer"
             bg={bg}
             border="1px solid"
             borderColor={isSelected ? borderActive : borderColor}
             borderRadius="12px"
-            minW="180px"
-            maxW="240px"
+            w="250px"
             overflow="hidden"
             transition="all 0.15s"
             boxShadow={
@@ -100,9 +141,9 @@ const InstructionCard = ({
                         {settingLabel ?? "Instruction"}
                     </Text>
                 </HStack>
-                <IconButton
+                <Button
                     aria-label="Edit instruction"
-                    icon={<Pencil size={11} />}
+                    leftIcon={<Icon as={Pencil} boxSize={3} />}
                     size="xs"
                     variant="ghost"
                     bg={editBg}
@@ -112,7 +153,10 @@ const InstructionCard = ({
                     borderRadius="5px"
                     _hover={{ bg: editHoverBg }}
                     onClick={onEditClick}
-                />
+                    cursor="pointer"
+                >
+                    Modifier
+                </Button>
             </Flex>
             <Box px={3} py={2}>
                 <Text fontSize="xs" color={textColor} lineHeight={1.6} noOfLines={3}>
@@ -124,7 +168,6 @@ const InstructionCard = ({
 };
 
 const InstructionPanel = ({
-    nodeData,
     selected,
     draft,
     setDraft,
@@ -132,7 +175,6 @@ const InstructionPanel = ({
     onCancel,
     onCardClick,
 }: {
-    nodeData: AppNodeData;
     selected?: boolean;
     draft: string;
     setDraft: (v: string) => void;
@@ -140,31 +182,24 @@ const InstructionPanel = ({
     onCancel: () => void;
     onCardClick: () => void;
 }) => {
-    const [tab, setTab] = useState<TabId>("rediger");
-
-    const cardBg = useColorModeValue("#FFFFFF", "#2E2E2E");
-    const headerBg = useColorModeValue("#F6F6F6", "#262626");
-    const borderColor = useColorModeValue("#E7E7E7", "#3D3D3D");
-    const selectedBorder = "#12B98C";
-    const iconContainerBg = useColorModeValue("#D1FAEF", "#064E3B");
-    const iconColor = useColorModeValue("#07966F", "#12B98C");
-    const titleColor = useColorModeValue("#262626", "#E7E7E7");
-    const subtitleColor = useColorModeValue("#8F8F8F", "#6D6D6D");
-    const moreButtonHover = useColorModeValue("#E7E7E7", "#4F4F4F");
-    const tabActiveColor = useColorModeValue("#07966F", "#12B98C");
-    const tabInactiveColor = useColorModeValue("#8F8F8F", "#6D6D6D");
-    const contentColor = useColorModeValue("#3D3D3D", "#D1D1D1");
-    const placeholderColor = useColorModeValue("#B0B0B0", "#4F4F4F");
-    const footerBg = useColorModeValue("#F6F6F6", "#1E1E1E");
-    const footerInfoColor = useColorModeValue("#8F8F8F", "#6D6D6D");
-    const validateHoverBg = useColorModeValue("#ECFDF9", "#064E3B");
-
-    const stringValue = nodeData.stringValue ?? "";
+    const cardBg = useColorModeValue("white", "grey.850");
+    const headerBg = useColorModeValue("grey.50", "grey.900");
+    const borderColor = useColorModeValue("grey.100", "grey.800");
+    const selectedBorder = "green.300";
+    const iconContainerBg = useColorModeValue("green.100", "green.900");
+    const iconColor = useColorModeValue("green.600", "green.500");
+    const titleColor = useColorModeValue("grey.900", "grey.100");
+    const subtitleColor = useColorModeValue("grey.400", "grey.500");
+    const contentColor = useColorModeValue("grey.800", "grey.200");
+    const placeholderColor = useColorModeValue("grey.300", "grey.700");
+    const footerBg = useColorModeValue("grey.50", "grey.950");
+    const footerInfoColor = useColorModeValue("grey.400", "grey.500");
+    const validateHoverBg = useColorModeValue("green.50", "green.900");
 
     return (
         <Box
             bg={cardBg}
-            border="1.5px solid"
+            border="2px solid"
             borderColor={selected ? selectedBorder : borderColor}
             borderRadius="14px"
             w="290px"
@@ -187,98 +222,40 @@ const InstructionPanel = ({
                 borderColor={borderColor}
                 gap={2}
             >
-                <Flex
-                    w="28px"
-                    h="28px"
-                    borderRadius="8px"
-                    bg={iconContainerBg}
-                    align="center"
-                    justify="center"
-                    flexShrink={0}
-                >
-                    <Icon as={Terminal} boxSize="13px" color={iconColor} />
-                </Flex>
+                <BoxIcon icon={Terminal} color={iconColor} bg={iconContainerBg} size="sm" />
 
                 <VStack align="start" spacing={0} flex={1} minW={0}>
                     <Text fontSize="12px" fontWeight={700} color={titleColor} lineHeight={1.3} noOfLines={1}>
-                        {nodeData.settingLabel ?? "Prompt instruction"}
+                        Instruction
                     </Text>
                     <Text fontSize="10px" color={subtitleColor} lineHeight={1.3}>
-                        Nœud · paramètre
+                        paramètre
                     </Text>
                 </VStack>
-
-                <IconButton
-                    aria-label="More options"
-                    icon={<MoreHorizontal size={14} />}
-                    size="xs"
-                    variant="ghost"
-                    color={subtitleColor}
-                    minW="24px"
-                    h="24px"
-                    flexShrink={0}
-                    _hover={{ bg: moreButtonHover }}
-                    onClick={(e) => e.stopPropagation()}
-                />
             </Flex>
-            <HStack spacing={1} px={3} pt={2} pb="6px" borderBottom="1px solid" borderColor={borderColor}>
-                {TABS.map((t) => {
-                    const isActive = tab === t.id;
-                    return (
-                        <Button
-                            key={t.id}
-                            size="xs"
-                            variant="outline"
-                            colorScheme={isActive ? "green" : undefined}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setTab(t.id);
-                            }}
-                        >
-                            {t.label}
-                        </Button>
-                    );
-                })}
-            </HStack>
             <Box minH="90px">
-                {tab === "rediger" && (
-                    <Textarea
-                        value={draft}
-                        onChange={(e) => {
-                            e.stopPropagation();
-                            setDraft(e.target.value);
-                        }}
-                        placeholder="Écrivez votre instruction."
-                        size="sm"
-                        border="none"
-                        borderRadius={0}
-                        resize="none"
-                        minH="90px"
-                        maxH="220px"
-                        fontSize="12px"
-                        lineHeight={1.7}
-                        color={contentColor}
-                        bg="transparent"
-                        _placeholder={{ color: placeholderColor, fontSize: "12px" }}
-                        _focus={{ boxShadow: "none" }}
-                        onClick={(e) => e.stopPropagation()}
-                        p={3}
-                    />
-                )}
-
-                {tab === "apercu" && (
-                    <Box p={3} minH="90px">
-                        {stringValue ? (
-                            <Text fontSize="12px" color={contentColor} lineHeight={1.7} whiteSpace="pre-wrap">
-                                {stringValue}
-                            </Text>
-                        ) : (
-                            <Text fontSize="12px" color={placeholderColor} fontStyle="italic">
-                                Aucun contenu à prévisualiser.
-                            </Text>
-                        )}
-                    </Box>
-                )}
+                <Textarea
+                    value={draft}
+                    onChange={(e) => {
+                        e.stopPropagation();
+                        setDraft(e.target.value);
+                    }}
+                    placeholder="Écrivez votre instruction."
+                    size="sm"
+                    border="none"
+                    borderRadius={0}
+                    resize="none"
+                    minH="90px"
+                    maxH="220px"
+                    fontSize="12px"
+                    lineHeight={1.7}
+                    color={contentColor}
+                    bg="transparent"
+                    _placeholder={{ color: placeholderColor, fontSize: "12px" }}
+                    _focus={{ boxShadow: "none" }}
+                    onClick={(e) => e.stopPropagation()}
+                    p={3}
+                />
             </Box>
             <Flex
                 align="center"
@@ -309,9 +286,7 @@ const InstructionPanel = ({
                     </Button>
                     <Button
                         size="xs"
-                        variant="outline"
-                        colorScheme="green"
-                        _hover={{ bg: validateHoverBg }}
+                        variant="superPrimary"
                         onClick={onValidate}
                     >
                         Valider
@@ -322,7 +297,7 @@ const InstructionPanel = ({
     );
 };
 
-export const InstructionNode = ({ id, data, selected, onNodeClick }: WorkflowNodeProps) => {
+export const InstructionNode = ({ id, data, selected, onNodeClick, onInstructionSave }: WorkflowNodeProps) => {
     const { updateNodeData } = useReactFlow();
     const nodeData = data as AppNodeData;
 
@@ -338,6 +313,7 @@ export const InstructionNode = ({ id, data, selected, onNodeClick }: WorkflowNod
             isPlaceholder: false,
             isEditing: false,
         });
+        onInstructionSave?.(id);
     };
 
     const handleCancel = () => {
@@ -379,24 +355,18 @@ export const InstructionNode = ({ id, data, selected, onNodeClick }: WorkflowNod
             <AnimatePresence mode="wait">
                 {nodeData.isPlaceholder && !nodeData.isEditing && !stringValue && (
                     <motion.div
-                        key="plus"
+                        key="placeholder"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ duration: 0.15 }}
                     >
-                        <IconButton
-                            variant="secondary"
+                        <InstructionPlaceholder
+                            isHighlighted={nodeData.isHighlighted as boolean | undefined}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                updateNodeData(id, {
-                                    isEditing: true,
-                                    isPlaceholder: false,
-                                });
+                                updateNodeData(id, { isEditing: true, isPlaceholder: false });
                             }}
-                            size="xs"
-                            aria-label="add instruction"
-                            icon={<Plus size={12} />}
                         />
                     </motion.div>
                 )}
@@ -410,7 +380,6 @@ export const InstructionNode = ({ id, data, selected, onNodeClick }: WorkflowNod
                         transition={{ duration: 0.2, ease: "easeOut" }}
                     >
                         <InstructionPanel
-                            nodeData={nodeData}
                             selected={selected}
                             draft={draft}
                             setDraft={setDraft}

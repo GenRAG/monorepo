@@ -1,6 +1,6 @@
 import { Box, VStack, Text, useColorModeValue, HStack } from "@chakra-ui/react";
 import { ExternalLink, Globe } from "lucide-react";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 import type { FC } from "react";
 
 interface Props {

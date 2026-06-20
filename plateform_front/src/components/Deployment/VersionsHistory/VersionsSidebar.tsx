@@ -59,7 +59,7 @@ export const VersionsSidebar = ({ selectedId, onSelect, workspaceId, agentId }: 
                                       id={`v${d.version}`}
                                       env={env}
                                       badge={ENV_BADGE[env]}
-                                      description={d.changelog ?? "Aucune description"}
+                                      description={d.name ?? "Aucune description"}
                                       date={formatDate(d.createdAt)}
                                       isSelected={d.id === selectedId}
                                       onClick={() => onSelect(d.id)}

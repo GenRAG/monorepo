@@ -43,7 +43,7 @@ export class TokenService {
             const remaining = Math.ceil(
                 (tokenResendIntervalMs - (now - user.emailVerificationLastSentAt.getTime())) / 1000,
             );
-            throw new BadRequestException(`Please wait ${remaining}s before requesting a new code.`);
+            throw new BadRequestException(`Veuillez attendre ${remaining}s avant de demander un nouveau code.`);
         }
 
         const plainToken = randomInt(100000, 1000000);

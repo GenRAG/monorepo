@@ -1,26 +1,76 @@
 import React from "react";
 import { Box, HStack, Text } from "@chakra-ui/react";
-import { Copy } from "lucide-react";
-import { DocumentStatusBadge } from "components/System/Atoms/DocumentStatusBadge";
-import { DocumentEntity } from "types/document/document";
+import { DocumentStatusBadge } from "components/ui/DocumentStatusBadge";
+import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { formatFileSize, getFileTypeBadgeConfig } from "utils/documentFormatters";
 import { DocumentActionsMenu } from "./DocumentActionsMenu";
+import BoxIcon from "components/ui/BoxIcon";
+import { useGetDocumentUrlQuery } from "services/document/document";
 
 interface DocumentCardProps {
     document: DocumentEntity;
+    workspaceId: string;
+    agentId: string;
     onPreview: () => void;
     onDelete: () => void;
     onRetry?: () => void;
     onDownload: () => void;
 }
 
-export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onPreview, onDelete, onRetry, onDownload }) => {
+const DocumentThumbnail: React.FC<{ document: DocumentEntity; workspaceId: string; agentId: string }> = ({
+    document,
+    workspaceId,
+    agentId,
+}) => {
     const badge = getFileTypeBadgeConfig(document.mimeType);
+    const isPdf = document.mimeType === "application/pdf";
+    const isIndexed = document.status === DocumentStatus.INDEXED;
 
+    const { data: urlData } = useGetDocumentUrlQuery(
+        { workspaceId, agentId, id: document.id },
+        { skip: !isPdf || !isIndexed },
+    );
+
+    if (isPdf && urlData?.url) {
+        return (
+            <Box w="100%" h="100%" overflow="hidden" position="relative" borderRadius="8px">
+                <Box
+                    as="iframe"
+                    src={urlData.url}
+                    title={document.name}
+                    w="170%"
+                    h="170%"
+                    border="0"
+                    scrolling="no"
+                    style={{
+                        transform: "scale(0.588)",
+                        transformOrigin: "top left",
+                        pointerEvents: "none",
+                        overflow: "hidden",
+                    }}
+                    sx={{ "&::-webkit-scrollbar": { display: "none" } }}
+                />
+            </Box>
+        );
+    }
+
+    return <BoxIcon letters={badge.label} />;
+};
+
+export const DocumentCard: React.FC<DocumentCardProps> = ({
+    document,
+    workspaceId,
+    agentId,
+    onPreview,
+    onDelete,
+    onRetry,
+    onDownload,
+}) => {
     return (
         <Box
             bg="surfacePrimary"
-            border="1px solid"
+            borderWidth="1px"
+            borderStyle="solid"
             borderColor="borderDefault"
             borderRadius="12px"
             overflow="hidden"
@@ -36,23 +86,9 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onPreview,
                 alignItems="center"
                 justifyContent="center"
                 position="relative"
+                overflow="hidden"
             >
-                <Box
-                    as="span"
-                    bg={badge.bg}
-                    color={badge.color}
-                    fontSize="13px"
-                    fontWeight="700"
-                    letterSpacing="0.06em"
-                    px={4}
-                    py={6}
-                    borderRadius="6px"
-                >
-                    {badge.label}
-                </Box>
-                <Box position="absolute" top={2} right={2} color="textLabel">
-                    <Copy size={13} />
-                </Box>
+                <DocumentThumbnail document={document} workspaceId={workspaceId} agentId={agentId} />
             </Box>
 
             <Box px={3} pt={2} pb={3}>

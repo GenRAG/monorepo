@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { Box, Text, useColorModeValue } from "@chakra-ui/react";
 
 interface Props {
@@ -12,7 +12,7 @@ export const TemplateCard: FC<Props> = ({ title, description, isSelected, onClic
     const titleColor = useColorModeValue(isSelected ? "green.600" : "grey.900", "grey.50");
     const tplCardHoverBg = useColorModeValue("grey.50", "grey.850");
 
-    const borderColor = isSelected ? "green.500" : "borderDefault";
+    const borderColor = isSelected ? "green.400" : "borderDefault";
     const bgColor = isSelected ? "accentCardBg" : "surfaceModal";
     const hoverBgColor = isSelected ? "accentCardBg" : tplCardHoverBg;
     const hoverBorderColor = isSelected ? "green.500" : "grey.400";

@@ -3,7 +3,7 @@ import {
     useNodesState,
     useEdgesState,
     useReactFlow,
-    Edge,
+    type Edge,
 } from "@xyflow/react";
 import {
     CreateFlowNode,
@@ -48,11 +48,7 @@ export const useWorkflowNodes = (
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(
         initialStateRef.current.edges,
     );
-    const {
-        getEdges,
-        deleteElements,
-        addEdges,
-    } = useReactFlow();
+    const { getEdges } = useReactFlow();
 
     // Refs so handleAddChainNode can read the latest nodes/edges without
     // capturing them as useCallback deps (which would recreate the function
@@ -88,27 +84,31 @@ export const useWorkflowNodes = (
     );
 
     const handleRemoveChainNode = useCallback(
-        async (nodeId: string) => {
+        (nodeId: string) => {
             if (readonlyMode) return;
             const allEdges = getEdges();
 
-            const settingEdges = allEdges.filter(
-                (e) => e.source === nodeId && e.type === EdgeType.Settings,
+            const settingNodeIds = allEdges
+                .filter((e) => e.source === nodeId && e.type === EdgeType.Settings)
+                .map((e) => e.target);
+
+            const incomingEdge = allEdges.find(
+                (e) => e.target === nodeId && e.type !== EdgeType.Settings,
             );
-            const settingNodeIds = settingEdges.map((e) => e.target);
+            const outgoingEdge = allEdges.find(
+                (e) => e.source === nodeId && e.type !== EdgeType.Settings,
+            );
 
-            const incomingEdge = allEdges.find((e) => e.target === nodeId);
-            const outgoingEdge = allEdges.find((e) => e.source === nodeId);
+            const idsToRemove = new Set([nodeId, ...settingNodeIds]);
 
-            await deleteElements({
-                nodes: [
-                    { id: nodeId },
-                    ...settingNodeIds.map((id) => ({ id })),
-                ],
-            });
-
-            if (incomingEdge && outgoingEdge) {
-                addEdges([
+            setNodes((prev) => prev.filter((n) => !idsToRemove.has(n.id)));
+            setEdges((prev) => {
+                const remaining = prev.filter(
+                    (e) => !idsToRemove.has(e.source) && !idsToRemove.has(e.target),
+                );
+                if (!incomingEdge || !outgoingEdge) return remaining;
+                return [
+                    ...remaining,
                     {
                         id: `${incomingEdge.source}-to-${outgoingEdge.target}`,
                         source: incomingEdge.source,
@@ -118,10 +118,10 @@ export const useWorkflowNodes = (
                         animated: true,
                         type: EdgeType.Main,
                     },
-                ]);
-            }
+                ];
+            });
         },
-        [getEdges, deleteElements, addEdges, readonlyMode],
+        [getEdges, setNodes, setEdges, readonlyMode],
     );
 
     const handleAddChainNode = useCallback(

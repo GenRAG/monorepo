@@ -5,8 +5,8 @@ import { ShapeType } from "../../components/nodes";
 export const AddQuery = {
     type: TaskType.QUERY,
     shape: ShapeType.CIRCLE,
-    label: "Query",
-    description: "Question you ask to your assistant",
+    label: "Question",
+    description: "La question posée à votre assistant",
     id: "tooltip-workflow-5",
     isEntryPoint: true,
     isEndPoint: false,

@@ -1,4 +1,5 @@
-import { Box, HStack, Icon, Text, Tooltip, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Badge, Box, HStack, Icon, Text, Tooltip, VStack, useColorModeValue } from "@chakra-ui/react";
+import BoxIcon from "components/ui/BoxIcon";
 import { Activity } from "lucide-react";
 
 type DayStatus = "operational" | "degraded" | "incident" | "maintenance";
@@ -76,25 +77,14 @@ export const HealthSection = () => {
             <HStack justify="space-between" p={4} borderBottom="0.5px solid" borderColor="borderDefault">
                 <HStack spacing={3}>
                     <HStack spacing={2}>
-                        <Icon as={Activity} boxSize={3.5} color="textMuted" />
+                        <BoxIcon icon={Activity} />
                         <Text fontWeight="600" fontSize="sm" color={textPrimary}>
                             Disponibilité
                         </Text>
                     </HStack>
-                    <HStack
-                        spacing={1.5}
-                        px={2}
-                        py={0.5}
-                        borderRadius="full"
-                        bg={statusBg}
-                        border="1px solid"
-                        borderColor={statusBorder}
-                    >
-                        <Box w="6px" h="6px" borderRadius="full" bg={statusColor} flexShrink={0} />
-                        <Text fontSize="11px" fontWeight="600" color={statusColor} lineHeight="1">
-                            {STATUS_LABEL[currentStatus]}
-                        </Text>
-                    </HStack>
+                    <Badge color={statusColor} bg={statusBg} border="1px solid" borderColor={statusBorder}>
+                        {STATUS_LABEL[currentStatus]}
+                    </Badge>
                 </HStack>
             </HStack>
 

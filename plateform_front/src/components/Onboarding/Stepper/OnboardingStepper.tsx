@@ -6,6 +6,7 @@ import {
     Step,
     StepDescription,
     StepIndicator,
+    StepSeparator,
     StepStatus,
     StepTitle,
     Stepper,
@@ -23,10 +24,12 @@ interface OnboardingStepperProps {
     onStepClick?: () => void;
 }
 
-const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ justCompletedStep, onStepClick }) => {
+const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ onStepClick }) => {
     const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { currentStep, goToStep } = useOnboarding();
+
+    const isDark = colorMode === "dark";
 
     return (
         <Stepper h="100%" index={currentStep} orientation="vertical" variant={currentDarkTheme.colorScheme}>
@@ -37,6 +40,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ justCompletedStep
                         goToStep(index);
                         if (isMobile) onStepClick?.();
                     }}
+                    style={{ cursor: "pointer" }}
                 >
                     <StepIndicator flexShrink={0} border="none">
                         <StepStatus
@@ -45,16 +49,11 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ justCompletedStep
                                     <Icon as={Check} color="white" boxSize={5} />
                                 </Circle>
                             }
-                            incomplete={
-                                <Icon
-                                    as={step.icon}
-                                    color={colorMode === "dark" ? "grey.900" : "grey.500"}
-                                    boxSize={5}
-                                />
-                            }
+                            incomplete={<Icon as={step.icon} color={isDark ? "grey.900" : "grey.500"} boxSize={5} />}
                             active={<Icon as={step.icon} color="white" boxSize={5} />}
                         />
                     </StepIndicator>
+
                     <Box flex={1} ml={4} minW={0}>
                         <StepTitle>
                             <Text fontWeight="semibold" fontSize="md">
@@ -67,54 +66,8 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ justCompletedStep
                             </Text>
                         </StepDescription>
                     </Box>
-                    <Box
-                        position="absolute"
-                        left="16px"
-                        top="38px"
-                        bottom={index === stepsConfig.length - 1 ? "auto" : "0"}
-                        width="2px"
-                        className="step-separator-wrapper"
-                    >
-                        <Box
-                            position="absolute"
-                            left="0"
-                            top="0"
-                            bottom="0"
-                            width="2px"
-                            style={{
-                                backgroundColor: "transparent",
-                                borderLeft:
-                                    index >= currentStep
-                                        ? `2px dashed ${colorMode === "dark" ? currentDarkTheme.rgba.primary30 : "#D1D5DB"}`
-                                        : `2px solid transparent`,
-                                transition: "border-color 0.6s ease-in-out, border-style 0.6s ease-in-out",
-                                zIndex: 1,
-                            }}
-                        />
-                        {index < currentStep && index !== justCompletedStep && (
-                            <Box
-                                className="step-separator-fill step-separator-static"
-                                style={
-                                    {
-                                        "--separator-fill-color": currentDarkTheme.hex.primary,
-                                        height: "100%",
-                                        opacity: 1,
-                                    } as React.CSSProperties
-                                }
-                            />
-                        )}
-                        {index === justCompletedStep && index < currentStep && (
-                            <Box
-                                key={`separator-fill-animating-${index}-${currentStep}`}
-                                className="step-separator-fill"
-                                style={
-                                    {
-                                        "--separator-fill-color": currentDarkTheme.hex.primary,
-                                    } as React.CSSProperties
-                                }
-                            />
-                        )}
-                    </Box>
+
+                    <StepSeparator />
                 </Step>
             ))}
         </Stepper>

@@ -1,6 +1,6 @@
 import { Box, Icon, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import type { LucideIcon } from "lucide-react";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 
 interface CardEmptyStateProps {
     icon: LucideIcon;

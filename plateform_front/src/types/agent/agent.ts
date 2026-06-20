@@ -6,8 +6,7 @@ export const VisibilityStatus = {
     API: "api",
 } as const;
 
-export type VisibilityMode =
-    (typeof VisibilityStatus)[keyof typeof VisibilityStatus];
+export type VisibilityMode = (typeof VisibilityStatus)[keyof typeof VisibilityStatus];
 
 export interface AgentPreview {
     id: string;
@@ -16,7 +15,7 @@ export interface AgentPreview {
     documentsCount?: number;
     updatedAt?: string;
     description?: string;
-    deploymentStatus?: AgentStatus;
+    status: AgentStatus;
 }
 
 export interface Agent {
@@ -24,6 +23,7 @@ export interface Agent {
     name: string;
     workspaceId: string;
     description?: string;
+    retentionDays?: number | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -63,4 +63,5 @@ export interface CreateAgentParams {
 export interface UpdateAgentParams extends AgentByIdParams {
     name?: string;
     description?: string;
+    retentionDays?: number | null;
 }

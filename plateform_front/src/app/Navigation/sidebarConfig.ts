@@ -2,15 +2,14 @@ import {
     LayoutDashboard,
     Folder,
     FileText,
-    HelpCircle,
     Bell,
     MessageCircle,
     GitGraph,
     Settings,
     CreditCard,
     Cloud,
-    BarChart2,
     type LucideIcon,
+    TowerControl,
 } from "lucide-react";
 
 export interface NavItem {
@@ -19,22 +18,42 @@ export interface NavItem {
     label: string;
 }
 
+export interface NavSection {
+    label: string;
+    items: NavItem[];
+}
+
 export const mainMenu = [
     { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
     { id: "agents", icon: Folder, label: "Agents" },
     { id: "assistants", icon: MessageCircle, label: "Assistants" },
-    { id: "billing", icon: CreditCard, label: "Facturation" },
+    { id: "billing", icon: CreditCard, label: "Crédits" },
 ];
 
-export const supportMenu = [
-    { id: "help", icon: HelpCircle, label: "Centre d'aide" },
-    { id: "notifications", icon: Bell, label: "Documentation" },
+export const supportMenu = [{ id: "notifications", icon: Bell, label: "Documentation" }];
+
+export const agentNavSections: NavSection[] = [
+    {
+        label: "Développement",
+        items: [
+            { id: "playground", icon: MessageCircle, label: "Test & chat" },
+            { id: "documents", icon: FileText, label: "Documents" },
+            { id: "workflow", icon: GitGraph, label: "Architecture" },
+        ],
+    },
+    {
+        label: "Production",
+        items: [
+            { id: "deploy", icon: Cloud, label: "Déploiement" },
+            { id: "access-control", icon: TowerControl, label: "Contrôle d'accès" },
+        ],
+    },
+    {
+        label: "Général",
+        items: [
+            { id: "settings", icon: Settings, label: "Paramètres" },
+        ],
+    },
 ];
 
-export const agentNavItems: NavItem[] = [
-    { id: "playground", icon: MessageCircle, label: "Test & chat" },
-    { id: "documents", icon: FileText, label: "Documents" },
-    { id: "workflow", icon: GitGraph, label: "Architecture" },
-    { id: "deploy", icon: Cloud, label: "Déploiement" },
-    { id: "settings", icon: Settings, label: "Paramètres" },
-];
+export const agentNavItems: NavItem[] = agentNavSections.flatMap((s) => s.items);

@@ -3,9 +3,9 @@ import { useLocation } from "react-router-dom";
 export const useActiveSidebarItem = (itemArray: string[]) => {
     const { pathname } = useLocation();
 
-    const lastSegment = pathname.split("/").filter(Boolean).pop();
+    const segments = pathname.split("/").filter(Boolean);
 
-    const match = itemArray.find((item) => item === lastSegment);
+    const match = segments.find((segment) => itemArray.includes(segment));
 
-    return match ?? itemArray[0];
+    return match ?? null;
 };

@@ -2,6 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { AxiosError } from 'axios';
+import * as Sentry from '@sentry/nestjs';
 import { IndexDocumentCommandProps } from 'src/document/commands/index-document.command';
 import { IndexDocumentHandler } from './handlers/index-document.handler';
 
@@ -32,6 +33,7 @@ export class DocumentProcessor extends WorkerHost {
             );
 
             if (attemptNumber >= maxAttempts) {
+                Sentry.captureException(error);
                 await this.indexDocumentHandler.failed(job.data, this.extractErrorMessage(error));
             } else {
                 await this.indexDocumentHandler.retrying(job.data, attemptNumber);

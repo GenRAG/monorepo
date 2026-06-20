@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import {
-    Box,
     Grid,
     HStack,
     Icon,
@@ -17,17 +16,10 @@ import { Bot, Clock, Search, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetAssistantsListQuery, AssistantPreview } from "services/chat/chat";
 import { useIsDark } from "hooks/useIsDark";
-import BoxIcon from "components/System/Atoms/BoxIcon";
+import BoxIcon from "components/ui/BoxIcon";
+import { EntityCard } from "components/ui/EntityCard";
 
 export type SortKey = string;
-
-const AVATAR_COLORS = ["#22C55E", "#3B82F6", "#8B5CF6", "#F97316", "#EC4899", "#14B8A6", "#EF4444", "#F59E0B"];
-
-const getAvatarColor = (str: string) => {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-};
 
 const formatDate = (iso: string) => {
     const date = new Date(iso);
@@ -48,75 +40,31 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => 
     const { colorMode } = useColorMode();
     const isDark = colorMode === "dark";
     const sub = isDark ? "grey.400" : "grey.500";
-    const avatarColor = getAvatarColor(assistant.title);
 
     return (
-        <Box
-            bg={isDark ? "grey.900" : "white"}
-            border="1px solid"
-            borderColor={isDark ? "grey.700" : "grey.200"}
-            borderRadius="12px"
-            cursor="pointer"
-            transition="all 0.15s"
-            _hover={{
-                borderColor: isDark ? "grey.600" : "grey.300",
-                transform: "translateY(-1px)",
-            }}
+        <EntityCard
+            title={assistant.title}
             onClick={onClick}
-        >
-            <HStack spacing={3} align="flex-start" mb={3} p={4}>
-                <Box
-                    w="44px"
-                    h="44px"
-                    borderRadius="10px"
-                    bg={avatarColor + "22"}
-                    border="1px solid"
-                    borderColor={avatarColor + "44"}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                >
-                    <Text fontSize="lg" fontWeight="bold" color={avatarColor}>
-                        {assistant.title.charAt(0).toUpperCase()}
-                    </Text>
-                </Box>
-                <VStack align="start" spacing={1} flex={1} minW={0}>
-                    <Text fontSize="sm" fontWeight="semibold" color={isDark ? "white" : "grey.900"} noOfLines={1}>
-                        {assistant.title}
-                    </Text>
-                    {assistant.lastMessage && (
-                        <Text fontSize="xs" color={sub} noOfLines={2} lineHeight="1.4">
-                            {assistant.lastMessage}
-                        </Text>
-                    )}
-                </VStack>
-            </HStack>
-
-            <HStack
-                justify="space-between"
-                pt={2}
-                borderTop="1px solid"
-                borderColor={isDark ? "grey.800" : "grey.100"}
-                p={4}
-            >
-                <HStack spacing={2}>
-                    <BoxIcon letters={assistant.sharedBy ? assistant.sharedBy.charAt(0).toUpperCase() : "?"} />
-                    <Text fontSize="xs" color={isDark ? "grey.300" : "grey.700"}>
-                        {assistant.sharedBy}
-                    </Text>
-                </HStack>
-
-                {assistant.updatedAt && (
-                    <HStack spacing={1}>
-                        <Icon as={Clock} boxSize={3} color={sub} />
-                        <Text fontSize="10px" color={sub}>
-                            {formatDate(assistant.updatedAt)}
+            footer={
+                <>
+                    <HStack spacing={2}>
+                        <BoxIcon letters={assistant.sharedBy ? assistant.sharedBy.charAt(0).toUpperCase() : "?"} />
+                        <Text fontSize="xs" color={isDark ? "grey.300" : "grey.700"}>
+                            {assistant.sharedBy}
                         </Text>
                     </HStack>
-                )}
-            </HStack>
-        </Box>
+
+                    {assistant.updatedAt && (
+                        <HStack spacing={1}>
+                            <Icon as={Clock} boxSize={3} color={sub} />
+                            <Text fontSize="10px" color={sub}>
+                                Dernière modification : {formatDate(assistant.updatedAt)}
+                            </Text>
+                        </HStack>
+                    )}
+                </>
+            }
+        />
     );
 };
 

@@ -1,12 +1,5 @@
-import {
-    Box,
-    HStack,
-    VStack,
-    Text,
-    Badge,
-    useColorModeValue,
-    Switch,
-} from "@chakra-ui/react";
+import { Box, Collapse, HStack, VStack, Text, Badge, useColorModeValue, Switch } from "@chakra-ui/react";
+import type { ReactNode } from "react";
 
 interface PrivacyRowProps {
     title: string;
@@ -14,6 +7,9 @@ interface PrivacyRowProps {
     recommended?: boolean;
     checked: boolean;
     onChange: (v: boolean) => void;
+    disabled?: boolean;
+    comingSoon?: boolean;
+    children?: ReactNode;
 }
 
 export const PrivacyRow = ({
@@ -22,9 +18,12 @@ export const PrivacyRow = ({
     recommended,
     checked,
     onChange,
+    disabled,
+    comingSoon,
+    children,
 }: PrivacyRowProps) => {
     const borderColor = useColorModeValue("grey.100", "grey.800");
-    const titleColor = useColorModeValue("grey.900", "grey.50");
+    const titleColor = useColorModeValue(disabled ? "grey.400" : "grey.900", disabled ? "grey.600" : "grey.50");
     const descriptionColor = useColorModeValue("grey.400", "grey.500");
 
     return (
@@ -32,6 +31,7 @@ export const PrivacyRow = ({
             borderBottom="1px solid"
             borderBottomColor={borderColor}
             _last={{ borderBottom: "none" }}
+            opacity={disabled ? 0.6 : 1}
         >
             <HStack justify="space-between" align="center" px={4} py={2}>
                 <VStack align="start">
@@ -39,9 +39,14 @@ export const PrivacyRow = ({
                         <Text fontSize="sm" fontWeight={500} color={titleColor}>
                             {title}
                         </Text>
-                        {recommended && (
+                        {recommended && !comingSoon && (
                             <Badge colorScheme="green" size="xs">
                                 Recommandé
+                            </Badge>
+                        )}
+                        {comingSoon && (
+                            <Badge colorScheme="grey" size="xs" variant="subtle">
+                                Disponible prochainement
                             </Badge>
                         )}
                     </HStack>
@@ -49,11 +54,15 @@ export const PrivacyRow = ({
                         {description}
                     </Text>
                 </VStack>
-                <Switch
-                    isChecked={checked}
-                    onChange={(e) => onChange(e.target.checked)}
-                />
+                <Switch isChecked={checked} onChange={(e) => onChange(e.target.checked)} isDisabled={disabled} />
             </HStack>
+            {children && (
+                <Collapse in={checked} animateOpacity>
+                    <Box px={4} pb={3}>
+                        {children}
+                    </Box>
+                </Collapse>
+            )}
         </Box>
     );
 };

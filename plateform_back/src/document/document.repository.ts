@@ -89,6 +89,13 @@ export class DocumentRepository {
         return result._sum.size ?? 0;
     }
 
+    resetForRetry(id: string) {
+        return this.prisma.document.update({
+            where: { id },
+            data: { status: DocumentStatus.UPLOADED, failedAt: null, indexError: null },
+        });
+    }
+
     delete(id: string) {
         return this.prisma.document.delete({ where: { id } });
     }

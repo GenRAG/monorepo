@@ -1,14 +1,14 @@
-import { verify } from "crypto";
-import ResetPassword from "pages/Auth/Password";
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
 import {
     AuthResponse,
+    ChangePasswordRequest,
     LoginParams,
     NewPasswordRequest,
     RegisterParams,
     ResendVerifyTokenRequest,
     ResetPasswordRequest,
+    UpdateProfileRequest,
     User,
     VerifyTokenRequest,
 } from "types/user";
@@ -71,6 +71,38 @@ export const extendedUserApi = backendApi.injectEndpoints({
             }),
             providesTags: [Tag.Users],
         }),
+
+        updateMe: builder.mutation<User, UpdateProfileRequest>({
+            query: (body) => ({
+                url: "/users/me",
+                method: "PATCH",
+                body,
+            }),
+            invalidatesTags: [Tag.Users],
+        }),
+
+        changePassword: builder.mutation<void, ChangePasswordRequest>({
+            query: (body) => ({
+                url: "/users/me/password",
+                method: "PATCH",
+                body,
+            }),
+        }),
+
+        deleteMe: builder.mutation<void, void>({
+            query: () => ({
+                url: "/users/me",
+                method: "DELETE",
+            }),
+            invalidatesTags: [Tag.Users],
+        }),
+
+        logoutUser: builder.mutation<void, void>({
+            query: () => ({
+                url: "/auth/logout",
+                method: "POST",
+            }),
+        }),
     }),
 });
 
@@ -82,4 +114,8 @@ export const {
     useResetPasswordMutation,
     useApplyResetPasswordMutation,
     useGetMeQuery,
+    useUpdateMeMutation,
+    useChangePasswordMutation,
+    useDeleteMeMutation,
+    useLogoutUserMutation,
 } = extendedUserApi;

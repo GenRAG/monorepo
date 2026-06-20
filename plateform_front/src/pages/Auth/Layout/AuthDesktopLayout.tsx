@@ -1,75 +1,63 @@
-import {
-    Box,
-    Flex,
-    Heading,
-    HStack,
-    Icon,
-    VStack,
-    useColorMode,
-    useColorModeValue,
-    IconButton,
-} from "@chakra-ui/react";
-import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { Box, DarkMode, Flex, Heading, HStack, Icon, IconButton } from "@chakra-ui/react";
+import { ArrowLeft } from "lucide-react";
 import Spline from "@splinetool/react-spline";
+import type { Application } from "@splinetool/runtime";
 
-const AuthDesktopLayout = ({ children, canGoBack }: { children: React.ReactNode; canGoBack?: () => void }) => {
-    const { colorMode, toggleColorMode } = useColorMode();
-    const textColor = useColorModeValue("grey.900", "white");
-    const iconColor = useColorModeValue("grey.900", "whites.offwhite");
-    const toggleButtonBg = useColorModeValue("grey.100", "grey.700");
-    const toggleButtonHoverBg = useColorModeValue("green.200", "green.600");
+const fixSplineCanvas = (spline: Application) => {
+    const canvas = spline.canvas as HTMLCanvasElement | undefined;
+    if (!canvas) return;
+    canvas.style.position = "absolute";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+};
 
-    return (
-        <HStack w="100vw" h="100vh" spacing={0} overflow="hidden" bg="backgroundDefault">
-            <VStack flex={2} h="100%" justify="space-between" align="center" color={textColor}>
-                <Box w="100%" h="100%" position="relative" overflow="hidden">
-                    <Spline
-                        scene="https://prod.spline.design/6wq8PVEEPfkxrIjs/scene.splinecode"
-                        className="w-full h-full"
-                    />
-                </Box>
-            </VStack>
-            <Heading
-                position="absolute"
-                top="24px"
-                left="6%"
-                transform="translateX(-50%)"
-                zIndex={3}
-                color="white"
-                variant="display-2xl"
+const AuthDesktopLayout = ({ children, canGoBack }: { children: React.ReactNode; canGoBack?: () => void }) => (
+    <DarkMode>
+        <HStack w="100vw" h="100vh" spacing={0} overflow="hidden" align="stretch" bg="grey.950">
+            <Box flex={7} minW={0} h="100%" position="relative" overflow="hidden">
+                <Spline
+                    scene="https://prod.spline.design/6wq8PVEEPfkxrIjs/scene.splinecode"
+                    onLoad={fixSplineCanvas}
+                    className="w-full h-full"
+                />
+            </Box>
+
+            <Flex
+                flex={3}
+                minW={0}
+                h="100%"
+                direction="column"
+                justify="center"
+                align="center"
+                bg="grey.950"
+                position="relative"
+                borderLeft="1px solid"
+                borderColor="grey.800"
             >
-                GenRAG
-            </Heading>
-
-            <Flex flex={1} h="100%" justify="center" position="relative" borderLeft="1px solid" borderColor="grey.500">
-                <HStack position="absolute" top="24px" right="24px" zIndex={3} spacing={2}>
-                    <IconButton
-                        aria-label="Toggle color mode"
-                        icon={<Icon as={colorMode === "light" ? Moon : Sun} />}
-                        onClick={toggleColorMode}
-                        variant="ghost"
-                        bg={toggleButtonBg}
-                        _hover={{ bg: toggleButtonHoverBg }}
-                        color={iconColor}
-                    />
-                    {canGoBack && (
+                {canGoBack && (
+                    <HStack position="absolute" top="24px" right="24px">
                         <IconButton
                             aria-label="Go back"
                             icon={<Icon as={ArrowLeft} />}
                             onClick={canGoBack}
                             variant="ghost"
-                            bg={toggleButtonBg}
-                            _hover={{ bg: toggleButtonHoverBg }}
-                            color={iconColor}
+                            color="grey.400"
+                            _hover={{ bg: "grey.800" }}
                         />
-                    )}
-                </HStack>
+                    </HStack>
+                )}
                 <Flex w="100%" maxW="80%" direction="column" gap="32px" justify="center">
                     {children}
                 </Flex>
             </Flex>
+
+            <Heading position="absolute" top="24px" left="24px" zIndex={3} color="white" variant="display-2xl">
+                GenRAG
+            </Heading>
         </HStack>
-    );
-};
+    </DarkMode>
+);
 
 export default AuthDesktopLayout;

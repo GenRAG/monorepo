@@ -1,5 +1,5 @@
 import { Grid, Heading, Stack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
-import { BookOpen, FileUp, Plus, ExternalLink, Bot, FileText, MessageSquare, Coins } from "lucide-react";
+import { BookOpen, Plus, Bot, FileText, MessageSquare, Coins } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "hooks/useUserInfo";
 import { MetricCard } from "components/Dashboard/MetricCard";
@@ -7,9 +7,17 @@ import { QuickActionCard } from "components/Dashboard/QuickActionCard";
 import { ActivityChart } from "components/Dashboard/ActivityChart";
 import { AgentsCard } from "components/Dashboard/AgentsCard";
 import { RecentActivityCard } from "components/Dashboard/RecentActivityCard";
-import { CreateAgentModal } from "pages/Agents/CreateAgentModal";
+import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useState } from "react";
 import { useGetWorkspaceStatsQuery } from "services/workspace/workspace";
+
+const buildTrend = (value: number, points = 20): number[] => {
+    if (value === 0) return Array(points).fill(0);
+    return Array.from({ length: points }, (_, i) => {
+        const t = i / (points - 1);
+        return value * t * t * (3 - 2 * t);
+    });
+};
 
 const Dashboard = () => {
     const { name } = useUserInfo();
@@ -26,11 +34,8 @@ const Dashboard = () => {
     const conversationsToday = stats?.conversations.today ?? 0;
     const conversationsTodayArr = stats?.activityChart["24h"].values ?? Array(24).fill(0);
     const agentsProd = stats?.agents.production ?? 0;
-    const agentsProdArr = Array(20).fill(agentsProd);
     const docsIndexed = stats?.documents.indexed ?? 0;
-    const docsArr = Array(20).fill(docsIndexed);
     const credits = stats?.credits ?? 0;
-    const creditsArr = Array(20).fill(credits);
 
     return (
         <Stack p={{ base: 4, lg: 6 }} gap={4} overflow="auto" maxH="100vh" minH="100vh">
@@ -87,7 +92,7 @@ const Dashboard = () => {
                     value={String(agentsProd)}
                     trend={`${stats?.agents.total ?? 0} au total`}
                     trendPositive
-                    sparkData={agentsProdArr}
+                    sparkData={buildTrend(agentsProd)}
                     isLoading={isStatsLoading}
                 />
                 <MetricCard
@@ -96,7 +101,7 @@ const Dashboard = () => {
                     value={String(docsIndexed)}
                     trend={`${stats?.documents.total ?? 0} au total`}
                     trendPositive
-                    sparkData={docsArr}
+                    sparkData={buildTrend(docsIndexed)}
                     isLoading={isStatsLoading}
                 />
                 <MetricCard
@@ -105,7 +110,7 @@ const Dashboard = () => {
                     value={credits.toLocaleString("fr-FR")}
                     trend="disponibles"
                     trendPositive
-                    sparkData={creditsArr}
+                    sparkData={buildTrend(credits, 24)}
                     isLoading={isStatsLoading}
                 />
             </Grid>
@@ -113,7 +118,7 @@ const Dashboard = () => {
             <Grid
                 templateColumns={{
                     base: "repeat(2, 1fr)",
-                    lg: "repeat(4, 1fr)",
+                    lg: "repeat(2, 1fr)",
                 }}
                 gap={3}
             >
@@ -121,24 +126,20 @@ const Dashboard = () => {
                     icon={Plus}
                     title="Nouvel agent"
                     subtitle="Partez d'un template ou d'un agent existant"
-                    onClick={() => setIsCreateModalOpen(true)}
+                    onClick={() => {
+                        throw new Error("Not implemented yet");
+                    }}
                 />
-                <QuickActionCard icon={FileUp} title="Téléverser des docs" subtitle="Vers la base de connaissance" />
                 <QuickActionCard
                     icon={BookOpen}
                     title="Tester un agent"
                     subtitle="Ouvrir le playground"
                     onClick={() => navigate(`/workspaces/${workspaceId}/agents`)}
                 />
-                <QuickActionCard
-                    icon={ExternalLink}
-                    title="Documentation API"
-                    subtitle="Intégrer GenRAG dans votre app"
-                />
             </Grid>
 
             <Grid templateColumns={{ base: "1fr", xl: "1fr 360px" }} gap={3} alignItems="stretch">
-                <VStack spacing={3} align="stretch" h="100%" minW={0}>
+                <VStack spacing={3} align="stretch" h="100%" minW={0} w="100%">
                     <ActivityChart
                         chartData={stats?.activityChart}
                         totalConversations={stats?.conversations.total ?? 0}
@@ -146,21 +147,21 @@ const Dashboard = () => {
                         isLoading={isStatsLoading}
                         isEmpty={!isStatsLoading && (stats?.conversations.total ?? 0) === 0}
                     />
+                </VStack>
+                <VStack spacing={3} align="stretch" h="100%" minW={0}>
                     <RecentActivityCard
                         items={stats?.recentActivity}
                         isLoading={isStatsLoading}
                         isEmpty={!isStatsLoading && (stats?.recentActivity.length ?? 0) === 0}
                     />
                 </VStack>
-                <VStack spacing={3} align="stretch" h="100%" minW={0}>
-                    <AgentsCard
-                        agents={stats?.agents.items}
-                        isLoading={isStatsLoading}
-                        isEmpty={!isStatsLoading && (stats?.agents.total ?? 0) === 0}
-                        flex={1}
-                    />
-                </VStack>
             </Grid>
+            <AgentsCard
+                agents={stats?.agents.items}
+                isLoading={isStatsLoading}
+                isEmpty={!isStatsLoading && (stats?.agents.total ?? 0) === 0}
+                flex={1}
+            />
             <CreateAgentModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}

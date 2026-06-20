@@ -1,10 +1,5 @@
 import { useMemo } from "react";
-import {
-    AgentStatus,
-    Deployment,
-    DeploymentEnv,
-    VersionStatus,
-} from "types/deployment/deployment";
+import { AgentStatus, Deployment, DeploymentEnv, VersionStatus } from "types/deployment/deployment";
 
 export const useDeploymentEnvGetter = (deployments: Deployment[]) => {
     return useMemo(() => {
@@ -13,8 +8,6 @@ export const useDeploymentEnvGetter = (deployments: Deployment[]) => {
             .find((d) => d.toStatus === AgentStatus.PRODUCTION);
 
         return (deployment: Deployment): DeploymentEnv =>
-            latestProd?.id === deployment.id
-                ? VersionStatus.PRODUCTION
-                : VersionStatus.ARCHIVED;
+            latestProd?.id === deployment.id ? VersionStatus.PRODUCTION : VersionStatus.ARCHIVED;
     }, [deployments]);
 };

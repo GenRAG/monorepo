@@ -52,7 +52,7 @@ const Sidebar = () => {
 
     const activePath = useMemo(() => {
         const match = location.pathname.match(/^\/workspaces\/[^/]+\/([^/]+)/);
-        return match?.[1] ?? defaultActivePath;
+        return match?.[1] ?? defaultActivePath ?? null;
     }, [location.pathname, defaultActivePath]);
 
     const { isOpen, onToggle, onClose } = useDisclosure({
@@ -129,7 +129,7 @@ const Sidebar = () => {
 
             <SidebarFooter
                 isOpen={isOpen}
-                activeItem={activePath ?? "dashboard"}
+                activeItem={activePath}
                 name={name}
                 email={email}
                 supportMenu={supportMenu}

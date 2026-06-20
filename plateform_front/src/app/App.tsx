@@ -1,11 +1,11 @@
-import { Box, useColorMode } from "@chakra-ui/react";
+import { Box, useColorModeValue } from "@chakra-ui/react";
 import Router from "app/Router";
 import React, { useState, useEffect } from "react";
-import { AppLoader } from "components/System/Molecules/AppLoader";
+import { AppLoader } from "components/ui/AppLoader";
 
 const App: React.FC = () => {
     const [isInitializing, setIsInitializing] = useState(true);
-    const { colorMode } = useColorMode();
+    const backgroundColor = useColorModeValue("white", "grey.975");
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -19,11 +19,7 @@ const App: React.FC = () => {
     }
 
     return (
-        <Box
-            bg={colorMode === "dark" ? "grey.975" : "white"}
-            minH="100vh"
-            display="flex"
-        >
+        <Box bg={backgroundColor} minH="100vh" display="flex">
             <Router />
         </Box>
     );

@@ -40,4 +40,11 @@ export class WorkspaceService {
         }
         return this.workspaceStatsService.getStats(workspaceId);
     }
+
+    async getConsumption(workspaceId: string, days: number) {
+        if (!(await this.workspaceRepository.exists(workspaceId))) {
+            throw new NotFoundException('Workspace not found');
+        }
+        return this.workspaceStatsService.getConsumption(workspaceId, days);
+    }
 }

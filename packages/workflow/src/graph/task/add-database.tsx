@@ -5,9 +5,8 @@ import { ShapeType } from "../../components/nodes";
 export const AddDatabase = {
     type: TaskType.RETRIEVER,
     shape: ShapeType.HEXAGON,
-    label: "Retriever",
-    description:
-        "Retrieve documents from your database and transform them into vectors",
+    label: "Recherche",
+    description: "Recherche les passages pertinents dans votre base de documents",
     id: "tooltip-workflow-retriever",
     isEntryPoint: false,
     isEndPoint: false,

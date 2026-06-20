@@ -1,3 +1,4 @@
+import { WelcomeScreen } from "components/Auth/WelcomeScreen";
 import AuthLayout from "pages/Auth/Layout/AuthLayout";
 import Login from "pages/Auth/Login";
 import ResetPassword from "pages/Auth/Password";
@@ -13,5 +14,6 @@ export const AuthRoutes = () => (
         <Route path="/validate" element={<Validate />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/new-password" element={<ApplyResetPassword />} />
+        <Route path="/test" element={<WelcomeScreen /*onDone={handleWelcomeDone}*/ />} />
     </Route>
 );

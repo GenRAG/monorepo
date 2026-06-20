@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, HStack, Text, useColorMode } from "@chakra-ui/react";
 import { Moon, Sun } from "lucide-react";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 import { IconButton } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { Menu as MenuIcon } from "lucide-react";

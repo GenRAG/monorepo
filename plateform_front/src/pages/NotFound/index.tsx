@@ -1,18 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    Box,
-    Heading,
-    Text,
-    VStack,
-    HStack,
-    useColorMode,
-    Icon,
-} from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, HStack, useColorMode } from "@chakra-ui/react";
 import { Home, ArrowLeft } from "lucide-react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import Button from "components/System/Atoms/Button";
-import "../Onboarding/onboardingAnimations.css";
+import Button from "components/ui/Button";
 
 const NotFound: React.FC = () => {
     const { colorMode } = useColorMode();
@@ -47,12 +38,7 @@ const NotFound: React.FC = () => {
                     >
                         404
                     </Heading>
-                    <Box
-                        w="80px"
-                        h="4px"
-                        bg={currentDarkTheme.primary}
-                        borderRadius="full"
-                    />
+                    <Box w="80px" h="4px" bg={currentDarkTheme.primary} borderRadius="full" />
                 </VStack>
                 <VStack spacing={4} maxW="500px">
                     <Heading
@@ -60,15 +46,11 @@ const NotFound: React.FC = () => {
                         fontWeight="bold"
                         color={colorMode === "dark" ? "white" : "grey.900"}
                     >
-                        Page Not Found
+                        Page pas trouvée
                     </Heading>
-                    <Text
-                        fontSize="lg"
-                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
-                        lineHeight="1.6"
-                    >
-                        The page you're looking for doesn't exist or has been
-                        moved. Let's get you back on track.
+                    <Text fontSize="lg" color={colorMode === "dark" ? "grey.400" : "grey.600"} lineHeight="1.6">
+                        La page que vous recherchez n&apos;existe pas ou a été déplacée. Retournons-vous sur la bonne
+                        voie.
                     </Text>
                 </VStack>
                 <HStack spacing={4} flexWrap="wrap" justify="center">
@@ -79,7 +61,7 @@ const NotFound: React.FC = () => {
                         onClick={() => navigate("/")}
                         size="lg"
                     >
-                        Go Home
+                        Accueil
                     </Button>
                     <Button
                         variant="outline"
@@ -88,7 +70,7 @@ const NotFound: React.FC = () => {
                         onClick={() => navigate(-1)}
                         size="lg"
                     >
-                        Go Back
+                        Retour
                     </Button>
                 </HStack>
                 <Box

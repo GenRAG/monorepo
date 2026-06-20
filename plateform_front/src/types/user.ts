@@ -48,8 +48,18 @@ export interface ResendVerifyTokenRequest {
     email: string;
 }
 
-export interface ResetPasswordRequest extends ResendVerifyTokenRequest {}
+export type ResetPasswordRequest = ResendVerifyTokenRequest;
 
 export interface NewPasswordRequest extends VerifyTokenRequest {
     password: string;
+}
+
+export interface UpdateProfileRequest {
+    name?: string;
+    email?: string;
+}
+
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
 }

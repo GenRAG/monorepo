@@ -3,8 +3,8 @@ import { Activity, Clock, FileUp, MessageSquare, ArrowUpRight } from "lucide-rea
 import type { LucideIcon } from "lucide-react";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { WorkspaceStatsActivity } from "types/workspace";
-import RowContainer from "components/System/Atoms/RowContainer";
-import BoxIcon from "components/System/Atoms/BoxIcon";
+import RowContainer from "components/ui/RowContainer";
+import BoxIcon from "components/ui/BoxIcon";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     conversation: MessageSquare,
@@ -27,15 +27,17 @@ export const RecentActivityItem = ({ item }: { item: WorkspaceStatsActivity }) =
     const IconComponent = ICON_MAP[item.type] ?? MessageSquare;
 
     return (
-        <RowContainer>
-            <BoxIcon icon={IconComponent} />
-            <VStack align="start" spacing={0} flex={1} minW={0}>
-                <Text variant="body-sm">{item.title}</Text>
-                <Text variant="caption-xs" color="textLabel">
+        <RowContainer p="10.75px" overflow="hidden" minW={0} w="100%">
+            <BoxIcon size="sm" icon={IconComponent} />
+            <VStack align="start" spacing={0} flex={1} minW={0} overflow="hidden">
+                <Text variant="body-sm" isTruncated w="100%">
+                    {item.title}
+                </Text>
+                <Text variant="caption-xs" color="textLabel" isTruncated w="100%">
                     {item.subtitle}
                 </Text>
             </VStack>
-            <Text variant="body-xs" color="textLabel" flexShrink={0}>
+            <Text variant="body-xs" color="textLabel" flexShrink={0} whiteSpace="nowrap">
                 {formatRelativeTime(item.createdAt)}
             </Text>
         </RowContainer>
@@ -91,6 +93,7 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
             borderRadius="12px"
             display="flex"
             flexDirection="column"
+            overflow="hidden"
         >
             <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor="borderDefault">
                 <HStack spacing={2}>

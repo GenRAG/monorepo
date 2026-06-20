@@ -37,14 +37,19 @@ export class RagEngineService {
         };
     }
 
-    private async _mockStream(): Promise<IncomingMessage> {
+    private async _mockStream(pipeline: Pipeline, query: string, orgId: string): Promise<IncomingMessage> {
+        this.logger.debug('Using mock RAG stream');
+
+        const { body } = this._buildStreamRequest(pipeline, query, orgId);
+
         const response = await firstValueFrom(
-            this.httpService.post(
-                `${this.ragEngineUrl}/rag/stream/mock`,
-                {},
-                { responseType: 'stream', timeout: 30_000 },
-            ),
+            this.httpService.post(`${this.ragEngineUrl}/rag/stream/mock`, body, {
+                headers: { 'Content-Type': 'application/json' },
+                responseType: 'stream',
+                timeout: 30_000,
+            }),
         );
+
         return response.data as IncomingMessage;
     }
 
@@ -90,10 +95,9 @@ export class RagEngineService {
         orgId: string;
         mock?: boolean;
     }): Promise<IncomingMessage> {
-        if (mock) return this._mockStream();
+        if (mock) return this._mockStream(pipeline, query, orgId);
 
         const { body, headers } = this._buildStreamRequest(pipeline, query, orgId);
-        this.logger.debug(`Sending query to RAG engine: ${this.ragEngineUrl}/rag/stream`);
 
         const response = await firstValueFrom(
             this.httpService.post(`${this.ragEngineUrl}/rag/stream`, body, {
@@ -104,6 +108,41 @@ export class RagEngineService {
         );
 
         return response.data as IncomingMessage;
+    }
+
+    private modelsCache: { data: unknown; expiresAt: number } | null = null;
+    private readonly MODELS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+    async getModelsGeneration(): Promise<unknown[]> {
+        if (this.modelsCache && Date.now() < this.modelsCache.expiresAt) {
+            return this.modelsCache.data as unknown[];
+        }
+
+        const response = await firstValueFrom(
+            this.httpService.get(`${this.ragEngineUrl}/models`, {
+                headers: { 'X-API-Key': this.apiKey },
+                timeout: 10_000,
+            }),
+        );
+
+        const raw = response.data as { models?: { data?: unknown[] } };
+        const models = raw?.models?.data ?? [];
+
+        this.modelsCache = { data: models, expiresAt: Date.now() + this.MODELS_CACHE_TTL_MS };
+        return models;
+    }
+
+    async getRerankingModels(): Promise<unknown[]> {
+        const response = await firstValueFrom(
+            this.httpService.get(`${this.ragEngineUrl}/models/rerank`, {
+                headers: { 'X-API-Key': this.apiKey },
+                timeout: 10_000,
+            }),
+        );
+        console.log('Reranking models response:', response.data);
+
+        const raw = response.data as { rerank_models?: { data?: unknown[] } };
+        return raw?.rerank_models?.data ?? [];
     }
 
     async indexDocument(name: string, agentId: string, buffer: Buffer, mimeType: string): Promise<void> {
@@ -143,7 +182,9 @@ export class RagEngineService {
                 error?: string;
             };
 
-            if (status === JobStatus.COMPLETED) return;
+            if (status === JobStatus.COMPLETED) {
+                return;
+            }
 
             if (status === JobStatus.FAILED) {
                 throw new Error(`RAG engine job ${jobId} failed: ${error ?? 'unknown error'}`);
@@ -152,7 +193,6 @@ export class RagEngineService {
             this.logger.debug(`Job ${jobId} status: ${status}`);
             await new Promise((resolve) => setTimeout(resolve, 2_000));
         }
-
         throw new Error(`RAG engine job ${jobId} timed out after ${timeoutMs}ms`);
     }
 }

@@ -1,9 +1,6 @@
 import { Box, IconButton, Divider, Tooltip, useColorModeValue, Spinner } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
-import { Plus, Minus, Expand, MousePointer2, Hand, Frame, LayoutGrid, Image, MoreHorizontal, Save } from "lucide-react";
-import { useState } from "react";
-
-type Tool = "select" | "pan" | "frame" | null;
+import { Plus, Minus, Expand, Save } from "lucide-react";
 
 interface CustomControlsProps {
     onMenuToggle?: () => void;
@@ -13,8 +10,6 @@ interface CustomControlsProps {
 
 const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps) => {
     const { zoomIn, zoomOut, fitView } = useReactFlow();
-    const [activeTool, setActiveTool] = useState<Tool>("pan");
-
     const bgColor = useColorModeValue("white", "grey.800");
     const iconColor = useColorModeValue("grey.900", "grey.100");
     const hoverBg = useColorModeValue("green.100", "green.800");
@@ -23,7 +18,7 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
 
     const toolButtons = [
         {
-            label: "Add node",
+            label: "Ajouter un bloc",
             icon: <Plus size={18} />,
             action: () => onMenuToggle?.(),
             tool: null,
@@ -62,14 +57,14 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
     ];*/
 
     const zoomButtons = [
-        { label: "Zoom in", icon: <Plus size={18} />, action: () => zoomIn() },
+        { label: "Agrandir", icon: <Plus size={18} />, action: () => zoomIn() },
         {
-            label: "Zoom out",
+            label: "Réduire",
             icon: <Minus size={18} />,
             action: () => zoomOut(),
         },
         {
-            label: "Fit view",
+            label: "Centrer la vue",
             icon: <Expand size={18} />,
             action: () => fitView({ duration: 500, minZoom: 1, maxZoom: 1 }),
         },
@@ -113,9 +108,7 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                 zIndex={5}
                 boxShadow="lg"
             >
-                {toolButtons.map(({ label, icon, action, tool }) =>
-                    renderButton(label, icon, action, tool !== null && activeTool === tool),
-                )}
+                {toolButtons.map(({ label, icon, action, tool }) => renderButton(label, icon, action, tool !== null))}
 
                 {/*<Divider borderColor={dividerColor} width="20px" my="2px" />
 
@@ -129,20 +122,20 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
 
                 <Tooltip
                     bg={tooltipBg}
-                    label="Save workflow"
+                    label="Enregistrer l'architecture"
                     placement="right"
                     color="white"
                     borderRadius="8px"
                     hasArrow
                 >
                     <IconButton
-                        aria-label="Save workflow"
+                        aria-label="Enregistrer l'architecture"
                         icon={isSaving ? <Spinner size="xs" /> : <Save size={18} />}
                         onClick={onSave}
                         size="sm"
                         variant="ghost"
                         borderRadius="8px"
-                        color="green.500"
+                        color={iconColor}
                         bg="transparent"
                         _hover={{ bg: hoverBg }}
                         _active={{ bg: activeBg }}

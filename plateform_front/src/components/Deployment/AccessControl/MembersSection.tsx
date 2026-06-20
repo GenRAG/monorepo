@@ -3,14 +3,14 @@ import { Box, HStack, Input, Text, VStack, useColorModeValue } from "@chakra-ui/
 import { UserPlus, Trash2 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import SectionHeader from "components/Deployment/SectionHeader";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 import {
     useGetAgentMembersQuery,
     useAddAgentMemberMutation,
     useRemoveAgentMemberMutation,
 } from "services/agent/agentMembers";
 import useThemedToast from "hooks/useThemedToast";
-import BoxIcon from "components/System/Atoms/BoxIcon";
+import BoxIcon from "components/ui/BoxIcon";
 
 export const MembersSection = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
@@ -58,6 +58,7 @@ export const MembersSection = () => {
     return (
         <Box borderRadius="12px" borderWidth="1px" borderStyle="solid" borderColor={borderColor} bg={containerBg}>
             <SectionHeader
+                icon={UserPlus}
                 title="Membres autorisés"
                 subtitle={`${members.length} membre${members.length !== 1 ? "s" : ""}`}
                 action={

@@ -7,6 +7,8 @@ import * as multer from 'multer';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from './document.repository';
 import { IndexDocumentCommandProps } from './commands/index-document.command';
+import { ConfigService } from '@nestjs/config';
+import ms from 'ms';
 
 const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024;
 const MAX_AGENT_STORAGE = 100 * 1024 * 1024;
@@ -21,6 +23,8 @@ export class DocumentService {
         private readonly storage: IStorageStrategy,
 
         private readonly documentRepository: DocumentRepository,
+
+        private readonly configService: ConfigService,
 
         @InjectQueue('documents')
         private readonly documentQueue: Queue<IndexDocumentCommandProps>,
@@ -89,6 +93,57 @@ export class DocumentService {
 
     getByAgentPaginated(agentId: string, page: number, limit: number) {
         return this.documentRepository.findByAgentPaginated(agentId, page, limit);
+    }
+
+    async getContent(id: string, agentId: string): Promise<string> {
+        const doc = await this.documentRepository.findById(id, agentId);
+        if (!doc) throw new NotFoundException('Document not found');
+        const buffer = await this.storage.get(doc.storageKey);
+        return buffer.toString('utf-8');
+    }
+
+    async retry(id: string, agentId: string) {
+        const doc = await this.documentRepository.findById(id, agentId);
+        if (!doc) throw new NotFoundException('Document not found');
+
+        await this._checkRetryAllowed(id, agentId);
+
+        await this.documentRepository.resetForRetry(id);
+
+        const payload: IndexDocumentCommandProps = {
+            documentId: doc.id,
+            agentId,
+            storageKey: doc.storageKey,
+            mimeType: doc.mimeType,
+            name: doc.name,
+            buffer: null,
+        };
+
+        await this.documentQueue.add(INDEX_DOCUMENT_JOB, payload, {
+            attempts: 5,
+            backoff: { type: 'exponential', delay: 3000 },
+            removeOnComplete: true,
+            removeOnFail: false,
+        });
+
+        return { id };
+    }
+
+    private async _checkRetryAllowed(documentId: string, agentId: string): Promise<void> {
+        const doc = await this.documentRepository.findById(documentId, agentId);
+        if (!doc) throw new NotFoundException('Document not found');
+
+        const documentRetryAge = Date.now() - doc.updatedAt.getTime();
+        const resendIntervalMs = ms(
+            this.configService.getOrThrow<string>('DOCUMENT_INDEXING_RETRY_INTERVAL') as ms.StringValue,
+        );
+
+        if (documentRetryAge < resendIntervalMs) {
+            const remaniningTime = ms(resendIntervalMs - documentRetryAge, { long: true });
+            throw new BadRequestException(
+                `Re-indexion impossible pour le moment. Veuillez réessayer dans ${remaniningTime}.`,
+            );
+        }
     }
 
     async delete(id: string, agentId: string): Promise<void> {

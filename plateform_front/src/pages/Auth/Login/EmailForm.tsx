@@ -14,13 +14,14 @@ import {
     VStack,
     Image,
     useColorModeValue,
+    Button as ChakraButton,
 } from "@chakra-ui/react";
-import { AuthHeader } from "pages/Auth/AuthHeader";
+import { AuthHeader } from "components/Auth/AuthHeader";
 import { AuthStepType } from "pages/Auth/Layout/AuthLayout";
 import { LocalStorageKeys } from "types/localStorage";
 import { useLocalStorage } from "usehooks-ts";
 
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 import { validateEmail } from "utils/validateEmail";
 import Google from "assets/icons/google.svg";
 
@@ -46,7 +47,7 @@ export const EmailForm: FC<{
             rememberEmail: !!rememberedEmail,
         },
     });
-    const textColor = useColorModeValue("grey.900", "white");
+    const textColor = useColorModeValue("grey.900", "grey.100");
 
     const onSubmit = handleSubmit((data: EmailFormType) => {
         if (data.rememberEmail) remember(data.email);
@@ -58,23 +59,12 @@ export const EmailForm: FC<{
         <VStack gap="32px" w="100%">
             <VStack>
                 <AuthHeader currentStep={currentStep} />
-
-                <HStack wrap="wrap" justify="flex-start" w="100%" gap="0">
-                    <Text variant="body-sm" color={textColor} mr={2}>
-                        You don&apos;t have an account yet ?
-                    </Text>
-                    <Link as={ReachLink} to={{ pathname: "/register", search: location.search }}>
-                        <Text color={textColor} variant="body-sm-semibold">
-                            Create an account
-                        </Text>
-                    </Link>
-                </HStack>
             </VStack>
 
             <chakra.form w="100%" onSubmit={onSubmit}>
-                <VStack align="start" gap="32px">
+                <VStack align="start" gap="22px">
                     <FormControl isInvalid={!!errors.email}>
-                        <FormLabel color={textColor}>Email address</FormLabel>
+                        <FormLabel color={textColor}>Adresse email</FormLabel>
                         <Controller
                             name="email"
                             control={control}
@@ -103,34 +93,43 @@ export const EmailForm: FC<{
                             data-cy="cy-connect-btn"
                             color={useColorModeValue("white", "whites")}
                         >
-                            Sign in
+                            Connectez-vous
                         </Button>
+                        <HStack wrap="wrap" justify="flex-start" w="100%" gap="0">
+                            <Text variant="body-xs" color="grey.300" mr={2}>
+                                Vous n&apos;avez pas de compte ?
+                            </Text>
+                            <Link as={ReachLink} to={{ pathname: "/register", search: location.search }}>
+                                <Text color={textColor} variant="body-sm-semibold">
+                                    Crée un compte
+                                </Text>
+                            </Link>
+                        </HStack>
                     </VStack>
                     <>
                         <HStack w="100%">
                             <Divider borderColor={useColorModeValue("grey.300", "grey.100")} />
                             <Text m="auto" variant="body-sm" color={useColorModeValue("grey.900", "whites.offwhite")}>
-                                or
+                                ou
                             </Text>
                             <Divider borderColor={useColorModeValue("grey.300", "grey.100")} />
                         </HStack>
                         <VStack w="100%">
-                            <Button
+                            <ChakraButton
                                 w="100%"
-                                bg={useColorModeValue("white", "grey.800 !important")}
-                                border="1px solid"
-                                borderColor="grey.200"
-                                _hover={{
-                                    borderColor: "grey.300",
-                                    bg: "grey.50",
-                                }}
                                 size="lg"
+                                bg="white"
+                                _hover={{ bg: "grey.25" }}
+                                _active={{ bg: "grey.25" }}
+                                variant="none"
                             >
                                 <HStack justify="center" spacing="8px">
                                     <Image src={Google} boxSize="24px" />
-                                    <Text color={useColorModeValue("black", "white")}>Continue with Google</Text>
+                                    <Text size="sm" color="black">
+                                        Continuer avec Google
+                                    </Text>
                                 </HStack>
-                            </Button>
+                            </ChakraButton>
                         </VStack>
                     </>
                 </VStack>

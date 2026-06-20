@@ -1,13 +1,13 @@
-import { useRef } from "react";
-import "@xyflow/react/dist/style.css";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useColorMode, VStack, Box, useDisclosure, useToken, Spinner, Center } from "@chakra-ui/react";
-import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
-import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider } from "@xyflow/react";
+import { useBlocker } from "react-router-dom";
+import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import {
     useNodeSelection,
     useWorkflowCanvas,
     sanitizeWorkflowEdges,
     serializeWorkflow,
+    getTaskDef,
     TaskType,
     type AppNode,
     type AppNodeData,
@@ -17,13 +17,14 @@ import type { Edge } from "@xyflow/react";
 import { NodeModal } from "pages/Agents/Workflow/NodeModal";
 import MenuNodeModal from "pages/Agents/Workflow/MenuNodeModal";
 import CustomControls from "pages/Agents/Workflow/CustomControls";
-import { applyAlphaToColor } from "components/System/Molecules/WorkflowPreview/WorkflowPreview";
+import { applyAlphaToColor } from "components/ui/workflow-preview/WorkflowPreview";
 import { useParams } from "react-router-dom";
 import {
     useGetActiveWorkflowQuery,
     useUpdateWorkflowMutation,
     useCreateWorkflowMutation,
 } from "services/workflow/workflow";
+import { useGetModelsGenerationQuery } from "services/models/models";
 import useThemedToast from "hooks/useThemedToast";
 
 interface WorkflowInnerProps {
@@ -38,6 +39,11 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
     const { colorMode } = useColorMode();
     const reactFlowContainerRef = useRef<HTMLDivElement>(null);
     const toast = useThemedToast();
+
+    useGetModelsGenerationQuery();
+
+    const [isDirty, setIsDirty] = useState(false);
+    const markDirty = useCallback(() => setIsDirty(true), []);
 
     const { isOpen: isMenuOpen, onOpen: onMenuOpen, onClose: onMenuClose } = useDisclosure({ defaultIsOpen: false });
 
@@ -56,15 +62,51 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
     } = useWorkflowCanvas({
         onNodeClick: handleNodeClick,
         onEdgeClick: isMenuOpen ? onMenuClose : onMenuOpen,
+        onInstructionSave: () => {
+            markDirty();
+            toast({ title: "Instruction modifiée", status: "success", duration: 2000 });
+        },
+        onMutation: markDirty,
         initialNodes,
         initialEdges,
     });
 
+    const { updateNodeData } = useReactFlow();
     const [updateWorkflow, { isLoading: isUpdating }] = useUpdateWorkflowMutation();
     const [createWorkflow, { isLoading: isCreating }] = useCreateWorkflowMutation();
     const isSaving = isUpdating || isCreating;
 
     const handleSave = async () => {
+        const incompleteNodes = nodes.filter((n) => n.data.isPlaceholder);
+        if (incompleteNodes.length > 0) {
+            const names = incompleteNodes.map((n) => {
+                const parent = nodes.find((p) => p.id === n.data.parentNodeId);
+                const parentLabel = parent ? (getTaskDef(parent.data.type)?.label ?? parent.data.type) : null;
+                const settingLabel =
+                    n.data.settingLabel ?? (n.data.type === TaskType.MODEL ? "Modèle IA" : "Instructions");
+                return parentLabel ? `${parentLabel} - ${settingLabel}` : settingLabel;
+            });
+            incompleteNodes.forEach((n) => updateNodeData(n.id, { isHighlighted: true }));
+            setTimeout(() => {
+                incompleteNodes.forEach((n) => updateNodeData(n.id, { isHighlighted: false }));
+            }, 2000);
+
+            toast({
+                title: "Configuration incomplète",
+                description: (
+                    <div>
+                        {names.map((name, i) => (
+                            <div key={i}>{name}</div>
+                        ))}
+                    </div>
+                ),
+                status: "warning",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+
         const definition: WorkflowDefinition = serializeWorkflow(nodes, edges);
         const params = { workspaceId, agentId, definition };
 
@@ -74,13 +116,13 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
             } else {
                 await createWorkflow(params).unwrap();
             }
+            setIsDirty(false);
             toast({
                 title: "Workflow enregistré",
                 description: "Votre workflow d'execution a été enregistré avec succès.",
                 status: "success",
                 duration: 2000,
                 isClosable: true,
-                position: "bottom-right",
             });
         } catch {
             toast({
@@ -89,10 +131,52 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                 status: "error",
                 duration: 3000,
                 isClosable: true,
-                position: "bottom-right",
             });
         }
     };
+
+    // handleSettingSelect (model selection) triggers setNodes internally → mark dirty at call site
+    const handleSettingSelectWithDirty = useCallback(
+        (nodeId: string, item: string) => {
+            handleSettingSelect(nodeId, item);
+            markDirty();
+        },
+        [handleSettingSelect, markDirty],
+    );
+
+    // handleAddChainNode triggers setNodes internally → mark dirty at call site
+    const handleAddChainNodeWithDirty = useCallback(
+        (nodeType: Parameters<typeof handleAddChainNode>[0]) => {
+            handleAddChainNode(nodeType);
+            markDirty();
+        },
+        [handleAddChainNode, markDirty],
+    );
+
+    const blocker = useBlocker(
+        ({ currentLocation, nextLocation }) => isDirty && currentLocation.pathname !== nextLocation.pathname,
+    );
+    const blockerRef = useRef(blocker);
+    blockerRef.current = blocker;
+
+    useEffect(() => {
+        if (blocker.state !== "blocked") return;
+        if (toast.isActive("workflow-unsaved")) return;
+        toast({
+            id: "workflow-unsaved",
+            title: "Modifications non enregistrées",
+            status: "warning",
+            description: "Vous avez des modifications non enregistrées. Quitter la page ?",
+            actionLabel: "Quitter sans enregistrer",
+            onAction: () => {
+                toast.close("workflow-unsaved");
+                blockerRef.current.proceed?.();
+            },
+            onCloseComplete: () => {
+                if (blockerRef.current.state === "blocked") blockerRef.current.reset?.();
+            },
+        } as any);
+    }, [blocker.state, toast]);
 
     const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.950"]);
     const lineColor = applyAlphaToColor(colorMode === "dark" ? gridLineDark : gridLineLight, 0.8);
@@ -105,7 +189,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
             <MenuNodeModal
                 usedNodes={nodes}
                 isOpen={isMenuOpen}
-                addNode={handleAddChainNode}
+                addNode={handleAddChainNodeWithDirty}
                 onClose={onMenuClose}
                 onToggle={isMenuOpen ? onMenuClose : onMenuOpen}
             />
@@ -168,7 +252,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                 isOpen={isModalOpen}
                 onClose={handleModalClose}
                 selectedNodeId={selectedNodeId}
-                onSettingSelect={handleSettingSelect}
+                onSettingSelect={handleSettingSelectWithDirty}
             />
         </Box>
     );
@@ -193,11 +277,6 @@ const WorkflowWorkspace = () => {
 
     return (
         <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
-            <WorkspaceHeader
-                title="Workflow"
-                description="Manage your rag workflow. Customize it to add new features to your assistant."
-            />
-
             {isLoading ? (
                 <Center flex={1}>
                     <Spinner size="lg" color="green.500" />

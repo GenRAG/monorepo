@@ -1,6 +1,6 @@
 import { HStack, VStack, Text, useColorModeValue } from "@chakra-ui/react";
-import BoxIcon from "components/System/Atoms/BoxIcon";
-import Button from "components/System/Atoms/Button";
+import BoxIcon from "components/ui/BoxIcon";
+import Button from "components/ui/Button";
 import { LucideIcon } from "lucide-react";
 
 interface DistribRowProps {
@@ -28,7 +28,7 @@ export const DistribRow = ({ icon, label, value, actionLabel }: DistribRowProps)
                     <Text fontSize="xs">{value}</Text>
                 </VStack>
             </HStack>
-            <Button size="sm" variant="outline">
+            <Button size="sm">
                 {actionLabel}
             </Button>
         </HStack>

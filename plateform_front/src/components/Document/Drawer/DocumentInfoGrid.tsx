@@ -1,17 +1,19 @@
 import React from "react";
-import { VStack, Box, Grid, GridItem, Text, HStack } from "@chakra-ui/react";
+import { VStack, Box, Grid, GridItem, Text, HStack, useColorModeValue } from "@chakra-ui/react";
 import { File, Clock, Database } from "lucide-react";
-import { DocumentStatusBadge } from "components/System/Atoms/DocumentStatusBadge";
 import { DocumentEntity } from "types/document/document";
 import { formatFileSize, formatDateTime, getFileTypeLabel } from "utils/documentFormatters";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface DocumentInfoGridProps {
     document: DocumentEntity;
 }
 
 export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) => {
+    const bgColor = useColorModeValue("white", "grey.900");
+
     return (
-        <VStack align="stretch" spacing={3}>
+        <VStack align="stretch" spacing={2}>
             <Text
                 fontWeight="medium"
                 fontSize="11px"
@@ -22,13 +24,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                 Informations du document
             </Text>
 
-            <Box
-                bg="surfacePrimary"
-                border="0.5px solid"
-                borderColor="borderDefault"
-                borderRadius="12px"
-                overflow="hidden"
-            >
+            <Box bg={bgColor} border="0.5px solid" borderColor="borderDefault" borderRadius="12px" overflow="hidden">
                 <Grid templateColumns="1fr 1fr" borderBottom="0.5px solid" borderColor="borderDefault">
                     <GridItem p={4} borderRight="0.5px solid" borderColor="borderDefault">
                         <Text
@@ -42,7 +38,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                             Type
                         </Text>
                         <HStack spacing={2}>
-                            <Box as={File} size={14} color="gray.400" />
+                            <BoxIcon icon={File} size="sm" color="gray.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {getFileTypeLabel(document.mimeType)}
                             </Text>
@@ -60,7 +56,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                             Taille
                         </Text>
                         <HStack spacing={2}>
-                            <Box as={Database} size={14} color="gray.400" />
+                            <BoxIcon icon={Database} size="sm" color="gray.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatFileSize(document.size)}
                             </Text>
@@ -80,7 +76,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                             Téléversé
                         </Text>
                         <HStack spacing={2}>
-                            <Box as={Clock} size={14} color="gray.400" />
+                            <BoxIcon icon={Clock} size="sm" color="gray.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatDateTime(document.createdAt)}
                             </Text>
@@ -99,7 +95,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                                 Indexé
                             </Text>
                             <HStack spacing={2}>
-                                <Box as={Clock} size={14} color="gray.400" />
+                                <BoxIcon icon={Clock} size="sm" color="gray.400" />
                                 <Text fontSize="13px" fontWeight="medium">
                                     {formatDateTime(document.indexedAt)}
                                 </Text>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Prisma, User } from 'generated/prisma';
 import { CreateUserRequest, UserSafe } from 'src/users/dto/create-user.request';
 import * as bcrypt from 'bcryptjs';
@@ -33,6 +33,18 @@ export class UsersService {
         const { where, data } = params;
 
         return this.userRepository.update(where, data);
+    }
+
+    async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+        const user = await this.userRepository.findOneWithCredentials({ id: userId });
+        if (!user) throw new NotFoundException('User not found');
+
+        if (!user.password) throw new UnauthorizedException('Mot de passe actuel incorrect');
+
+        const isValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isValid) throw new UnauthorizedException('Mot de passe actuel incorrect');
+
+        await this.userRepository.update({ id: userId }, { password: await bcrypt.hash(newPassword, 10) });
     }
 
     async delete(id: string): Promise<UserSafe> {

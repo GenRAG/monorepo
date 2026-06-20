@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Text, VStack } from "@chakra-ui/react";
 import { CloudUpload } from "lucide-react";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface UploadDropzoneProps {
     isDragging: boolean;
@@ -26,7 +27,7 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({
             borderStyle="dashed"
             borderColor={isDragging ? "green.400" : "borderDefault"}
             borderRadius="14px"
-            bg={isDragging ? "accentCardBg" : "surfaceSubtle"}
+            bg={isDragging ? "accentCardBg" : "surfaceHover"}
             p={6}
             textAlign="center"
             transition="all 0.15s"
@@ -36,7 +37,7 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({
             onDragLeave={onDragLeave}
         >
             <VStack spacing={2}>
-                <CloudUpload size={36} color={isDragging ? "#10B981" : "#6B7280"} />
+                <BoxIcon icon={CloudUpload} color="green.500" />
                 <Text fontWeight="600" fontSize="15px" color="textPrimary">
                     Glissez vos fichiers ici
                 </Text>

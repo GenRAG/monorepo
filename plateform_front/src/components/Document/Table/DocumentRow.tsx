@@ -1,9 +1,10 @@
 import React from "react";
-import { Badge, HStack, Td, Text, Tr, useColorModeValue } from "@chakra-ui/react";
-import { DocumentStatusBadge } from "components/System/Atoms/DocumentStatusBadge";
+import { HStack, Td, Text, Tr, useColorModeValue } from "@chakra-ui/react";
+import { DocumentStatusBadge } from "components/ui/DocumentStatusBadge";
 import { DocumentEntity } from "types/document/document";
 import { formatFileSize, formatDate, getFileTypeLabel, getFileTypeBadgeConfig } from "utils/documentFormatters";
 import { DocumentActionsMenu } from "./DocumentActionsMenu";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface DocumentRowProps {
     document: DocumentEntity;
@@ -22,9 +23,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({ document, onPreview, o
         <Tr _hover={{ bg: "surfaceSubtle" }} onClick={onPreview} cursor="pointer">
             <Td>
                 <HStack spacing={3}>
-                    <Badge bg={badge.bg} variant="subtle" fontSize="xs" borderRadius="8px">
-                        {badge.label}
-                    </Badge>
+                    <BoxIcon letters={badge.label} />
                     <Text fontWeight="500" fontSize="sm" color={textColor} noOfLines={1}>
                         {document.name}
                     </Text>

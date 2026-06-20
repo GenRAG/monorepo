@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { HStack, Icon, IconButton, Input, InputGroup, InputLeftElement, useColorModeValue } from "@chakra-ui/react";
-import { LayoutGrid, LayoutList, Search } from "lucide-react";
-import Button from "components/System/Atoms/Button";
+import React from "react";
+import { HStack, Icon, Input, InputGroup, InputLeftElement, useColorModeValue } from "@chakra-ui/react";
+import { Search } from "lucide-react";
+import Button from "components/ui/Button";
+import MultiOptionButtons from "components/ui/MultiOptionButtons";
 
 const TYPE_FILTERS = [
     { label: "Tous", value: null },
     { label: "PDF", value: "PDF" },
-    { label: "Word", value: "Word" },
     { label: "Markdown", value: "Markdown" },
     { label: "Texte", value: "Texte" },
 ] as const;
@@ -37,14 +37,7 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
     total,
     onOpenUpload,
 }) => {
-    const [localView, setLocalView] = useState<ViewMode>(viewMode);
-    useEffect(() => setLocalView(viewMode), [viewMode]);
-    const bg = useColorModeValue("white", "grey.900");
-    const buttonBg = useColorModeValue("grey.100", "grey.800");
-    const borderColor = useColorModeValue("grey.100", "grey.700");
     const textColor = useColorModeValue("grey.700", "grey.200");
-    const iconActive = useColorModeValue("grey.900", "white");
-    const iconMuted = useColorModeValue("grey.400", "grey.500");
 
     return (
         <HStack flexWrap={{ base: "wrap", md: "nowrap" }} align="center" mb={4}>
@@ -66,61 +59,28 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
                     <Button
                         key={f.value}
                         size="sm"
-                        variant="outline"
-                        colorScheme={activeType === f.value ? "green" : "gray"}
+                        variant={activeType === f.value ? "superPrimary" : "outline"}
                         onClick={() => onTypeChange(f.value)}
                     >
                         {f.label}
                     </Button>
                 ))}
             </HStack>
-            <Button
-                size="sm"
-                variant="outline"
-                colorScheme="green"
-                onClick={() => {
-                    onOpenUpload?.();
-                }}
-            >
+
+            <Button size="sm" variant="superPrimary" onClick={() => onOpenUpload?.()}>
                 Téléverser un document
             </Button>
 
             {!isMobile && (
-                <HStack
-                    spacing={1}
-                    flexShrink={0}
-                    align="center"
-                    bg={bg}
-                    p={1}
-                    borderRadius="8px"
-                    border={`1px solid`}
-                    borderColor={borderColor}
-                >
-                    <IconButton
-                        aria-label="Vue liste"
-                        icon={<LayoutList size={15} />}
-                        size="xs"
-                        variant="ghost"
-                        color={localView === "list" ? iconActive : iconMuted}
-                        bg={localView === "list" ? buttonBg : bg}
-                        onClick={() => {
-                            setLocalView("list");
-                            onViewModeChange("list");
-                        }}
-                    />
-                    <IconButton
-                        aria-label="Vue grille"
-                        icon={<LayoutGrid size={15} />}
-                        size="xs"
-                        variant="ghost"
-                        color={localView === "grid" ? iconActive : iconMuted}
-                        bg={localView === "grid" ? buttonBg : bg}
-                        onClick={() => {
-                            setLocalView("grid");
-                            onViewModeChange("grid");
-                        }}
-                    />
-                </HStack>
+                <MultiOptionButtons
+                    options={[
+                        { value: "list", label: "Liste" },
+                        { value: "grid", label: "Grille" },
+                    ]}
+                    value={viewMode}
+                    onChange={onViewModeChange}
+                    size="xs"
+                />
             )}
         </HStack>
     );

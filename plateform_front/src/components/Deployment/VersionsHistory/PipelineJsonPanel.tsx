@@ -1,11 +1,15 @@
-import { Box, HStack, Skeleton, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { useIsDark } from "hooks/useIsDark";
 import { useGetWorkflowByVersionQuery } from "services/workflow/workflow";
+import { FileText } from "lucide-react";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface PipelineJsonPanelProps {
     workflowVersion: number | null;
     workspaceId: string;
     agentId: string;
+    deploymentName: string | null;
+    deploymentChangelog: string | null;
 }
 
 const highlightJson = (json: object, isDark: boolean): string => {
@@ -31,7 +35,13 @@ const highlightJson = (json: object, isDark: boolean): string => {
     );
 };
 
-export const PipelineJsonPanel = ({ workflowVersion, workspaceId, agentId }: PipelineJsonPanelProps) => {
+export const PipelineJsonPanel = ({
+    workflowVersion,
+    workspaceId,
+    agentId,
+    deploymentName,
+    deploymentChangelog,
+}: PipelineJsonPanelProps) => {
     const { data: workflow, isLoading } = useGetWorkflowByVersionQuery(
         { workspaceId, agentId, version: workflowVersion! },
         { skip: workflowVersion === null },
@@ -56,10 +66,10 @@ export const PipelineJsonPanel = ({ workflowVersion, workspaceId, agentId }: Pip
                 borderColor={borderColor}
             >
                 <Text fontSize="lg" textTransform="uppercase" color={textColor}>
-                    Pipeline JSON
+                    {deploymentName}
                     {workflowVersion !== null && (
                         <Box as="span" ml={2} color="green.500">
-                            · workflow v{workflowVersion}
+                            · {deploymentChangelog}
                         </Box>
                     )}
                 </Text>

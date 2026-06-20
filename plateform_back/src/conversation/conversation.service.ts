@@ -5,7 +5,7 @@ import { ConversationRepository } from './conversation.repository';
 export interface MessageSerialized {
     id: string;
     question: string;
-    response: string | null;
+    response: string;
     timestamp: number;
 }
 
@@ -71,7 +71,7 @@ export class ConversationService {
             result.push({
                 id: msg.id,
                 question: msg.content,
-                response: agentMsg?.content ?? null,
+                response: agentMsg?.content ?? "",
                 timestamp: msg.createdAt.getTime(),
             });
         }

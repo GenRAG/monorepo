@@ -25,6 +25,8 @@ export const VersionDetailPanel = ({ selectedId, workspaceId, agentId }: Version
                     workflowVersion={deployment?.workflowVersion ?? null}
                     workspaceId={workspaceId}
                     agentId={agentId}
+                    deploymentName={deployment?.name ?? null}
+                    deploymentChangelog={deployment?.changelog ?? null}
                 />
             </VStack>
         </Box>

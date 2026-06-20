@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useRegisterMutation } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
-import { ShowHidePasswordInput } from "components/System/Molecules/Inputs/ShowHidePasswordInput";
+import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 import { validateEmail } from "utils/validateEmail";
 
 type RegisterFormType = {
@@ -72,7 +72,6 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
         })
             .unwrap()
             .then((authResponse) => {
-                console.log("authResponse", authResponse);
                 navigate(`/validate?email=${data.email}`, { replace: true });
             })
             .catch((error) => {

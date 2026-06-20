@@ -1,4 +1,5 @@
 import { defineStyleConfig } from "@chakra-ui/react";
+import borderRadius from "themeNew/foundations/borderRadius";
 import { textStyles } from "themeNew/foundations/typography";
 
 const fieldStyles = {
@@ -6,14 +7,14 @@ const fieldStyles = {
     borderWidth: "1px",
     borderStyle: "solid",
     bg: "inputBg",
-    borderRadius: "4px",
+    borderRadius: borderRadius.md,
     borderColor: "inputBorder",
     color: "inputText",
     _hover: {
         borderColor: "inputBorder",
     },
     _disabled: {
-        bg: "inputDisabledBg",
+        bg: "inputBg",
         color: "inputPlaceholder",
     },
     _placeholder: {
@@ -24,6 +25,7 @@ const fieldStyles = {
     },
     _focus: {
         borderColor: "inputActiveBorder",
+        boxShadow: "0 0 0 1px var(--chakra-colors-green-400)",
     },
 };
 

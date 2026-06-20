@@ -1,18 +1,18 @@
 import React, { useMemo } from "react";
-import { Box, HStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { DocumentStats } from "types/document/document";
 
-const DEFAULT_QUOTA_BYTES = 5 * 1024 ** 3;
+const DEFAULT_QUOTA_BYTES = 100 * 1024 * 1024;
 
 const SEGMENTS = [
-    { key: "pdf", label: "PDF", fill: "#7F1D1D" },
-    { key: "word", label: "Word", fill: "#1E3A5F" },
-    { key: "markdown", label: "Markdown", fill: "#064E3B" },
+    { key: "pdf", label: "PDF", fill: "#2ae48d" },
+    { key: "text", label: "Text", fill: "#064fee" },
+    { key: "markdown", label: "Markdown", fill: "#a9ec0e" },
 ] as const;
 
-function getTypeKey(mimeType: string): "pdf" | "word" | "markdown" | "other" {
+function getTypeKey(mimeType: string): "pdf" | "text" | "markdown" | "other" {
     if (mimeType.includes("pdf")) return "pdf";
-    if (mimeType.includes("word") || mimeType.includes("document")) return "word";
+    if (mimeType.includes("text") || mimeType.includes("document")) return "text";
     if (mimeType.includes("markdown")) return "markdown";
     return "other";
 }
@@ -39,7 +39,7 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
     const { byType, totalUsed, freeBytes, usedPct } = useMemo(() => {
         const sums: Record<string, number> = {
             pdf: 0,
-            word: 0,
+            text: 0,
             markdown: 0,
             other: 0,
         };
@@ -60,29 +60,18 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
             bg={bg}
             border="1px solid"
             borderColor={borderColor}
-            borderRadius="8px"
-            p={4}
+            borderTop="none"
+            borderBottomRadius="12px"
+            p={5}
+            pt={3}
             display="flex"
             flexDirection="column"
             gap={3}
             minW={0}
         >
-            <HStack justify="space-between" align="flex-start">
-                <Box>
-                    <HStack align="baseline" spacing={2}>
-                        <Text fontSize="28px" fontWeight="700" color={textColor} lineHeight="1">
-                            {fmt(totalUsed)}
-                        </Text>
-                        <Text fontSize="13px" fontWeight="600" color={pctColor}>
-                            {usedPct.toFixed(1)}%
-                        </Text>
-                    </HStack>
-                    <Text fontSize="11px" color={mutedColor} mt={0.5}>
-                        / {fmt(DEFAULT_QUOTA_BYTES)} · {fmt(freeBytes)} libre
-                    </Text>
-                </Box>
+            <Stack spacing="2px">
                 <Text
-                    fontSize="10px"
+                    fontSize="28px"
                     fontWeight="700"
                     letterSpacing="0.1em"
                     textTransform="uppercase"
@@ -90,7 +79,22 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                 >
                     Stockage
                 </Text>
-            </HStack>
+                <HStack align="flex-start">
+                    <Box>
+                        <HStack align="baseline" spacing={2}>
+                            <Text fontSize="28px" fontWeight="700" color={textColor} lineHeight="1">
+                                {fmt(totalUsed)}
+                            </Text>
+                            <Text fontSize="13px" fontWeight="600" color={pctColor}>
+                                {usedPct.toFixed(1)}%
+                            </Text>
+                        </HStack>
+                        <Text fontSize="11px" color={mutedColor} mt={0.5}>
+                            / {fmt(DEFAULT_QUOTA_BYTES)} · {fmt(freeBytes)} libre
+                        </Text>
+                    </Box>
+                </HStack>
+            </Stack>
 
             <Box position="relative" h="8px" borderRadius="full" bg={barTrack} overflow="hidden">
                 <HStack spacing={0} h="100%" position="absolute" inset={0}>

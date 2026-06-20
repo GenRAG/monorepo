@@ -1,11 +1,5 @@
-import {
-    ExceptionFilter,
-    Catch,
-    ArgumentsHost,
-    HttpException,
-    HttpStatus,
-    Inject,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Inject } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
 import { Logger } from 'nestjs-pino';
 
 @Catch()
@@ -17,15 +11,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const response = ctx.getResponse();
         const request = ctx.getRequest();
 
-        const status =
-            exception instanceof HttpException
-                ? exception.getStatus()
-                : HttpStatus.INTERNAL_SERVER_ERROR;
+        const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        const message = exception instanceof HttpException ? exception.getResponse() : exception;
 
-        const message =
-            exception instanceof HttpException
-                ? exception.getResponse()
-                : exception;
+        if (!(exception instanceof HttpException) || status >= 500) {
+            Sentry.captureException(exception);
+        }
 
         this.logger.error({
             statusCode: status,

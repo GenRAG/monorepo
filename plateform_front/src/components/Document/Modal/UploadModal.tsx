@@ -12,7 +12,7 @@ import {
     HStack,
 } from "@chakra-ui/react";
 import { Check } from "lucide-react";
-import { ACCEPTED_TYPES } from "hooks/useUploadDocuments";
+import { ACCEPTED_TYPES, ACCEPTED_EXTENSIONS } from "hooks/useUploadDocuments";
 import useThemedToast from "hooks/useThemedToast";
 import useUploadDocuments from "hooks/useUploadDocuments";
 import UploadDropzone from "./UploadDropzone";
@@ -41,7 +41,10 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     const { selectedFiles, sources, isUploading, isDone, allDone, addFiles, removeSelectedFile, handleUpload, reset } =
         useUploadDocuments(workspaceId, agentId);
 
-    const acceptedTypesString = useMemo(() => (ACCEPTED_TYPES as readonly string[]).join(","), []);
+    const acceptedTypesString = useMemo(
+        () => [...(ACCEPTED_TYPES as readonly string[]), ...ACCEPTED_EXTENSIONS].join(","),
+        [],
+    );
 
     const handleFileSelect = useCallback(
         (files: FileList | null) => {
@@ -124,7 +127,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
                         {!isDone && (
                             <Button
-                                variant="primary"
+                                variant="superPrimary"
                                 onClick={onClickUpload}
                                 isDisabled={selectedFiles.length === 0}
                                 isLoading={isUploading}
@@ -136,7 +139,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
                         {isDone && (
                             <Button
-                                variant="primary"
+                                variant="superPrimary"
                                 onClick={handleClose}
                                 isDisabled={!allDone}
                                 isLoading={!allDone}

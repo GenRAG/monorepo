@@ -2,6 +2,7 @@ import React from "react";
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { X } from "lucide-react";
 import { formatFileSize, getFileTypeBadgeConfig } from "utils/documentFormatters";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface SelectedFilesListProps {
     files: File[];
@@ -32,18 +33,7 @@ const SelectedFilesList: React.FC<SelectedFilesListProps> = ({ files, onRemoveFi
                         borderColor="borderDivider"
                         spacing={3}
                     >
-                        <Box
-                            bg={badge.bg}
-                            color={badge.color}
-                            fontSize="9px"
-                            fontWeight="700"
-                            px="5px"
-                            py="3px"
-                            borderRadius="4px"
-                            flexShrink={0}
-                        >
-                            {badge.label}
-                        </Box>
+                        <BoxIcon letters={badge.label} />
                         <Text fontSize="13px" color="textPrimary" flex={1} noOfLines={1}>
                             {file.name}
                         </Text>

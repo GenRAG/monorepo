@@ -1,8 +1,16 @@
 import { useRef, useState } from "react";
+import * as Sentry from "@sentry/react";
 import { useUploadDocumentMutation } from "services/document/document";
 import { DocumentStatus } from "types/document/document";
 
-export const ACCEPTED_TYPES = ["application/pdf", "text/plain", "text/markdown"] as const;
+export const ACCEPTED_TYPES = ["application/pdf", "text/plain", "text/markdown", "text/x-markdown"] as const;
+export const ACCEPTED_EXTENSIONS = [".pdf", ".txt", ".md"];
+
+const isAcceptedFile = (file: File): boolean => {
+    if ((ACCEPTED_TYPES as readonly string[]).includes(file.type)) return true;
+    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+    return ACCEPTED_EXTENSIONS.includes(ext);
+};
 
 export enum Status {
     UPLOADING = "uploading",
@@ -63,6 +71,9 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
                         prev.map((s) => (s.id === sourceId ? { ...s, status: Status.COMPLETED, progress: 100 } : s)),
                     );
                 } else if (doc.status === DocumentStatus.FAILED) {
+                    Sentry.captureException(new Error("Document indexing failed"), {
+                        extra: { documentId, agentId, workspaceId },
+                    });
                     setSources((prev) => prev.map((s) => (s.id === sourceId ? { ...s, status: Status.ERROR } : s)));
                 } else {
                     setTimeout(check, POLL_INTERVAL_MS);
@@ -131,7 +142,7 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
         const rejected: File[] = [];
 
         Array.from(files).forEach((file) => {
-            if ((ACCEPTED_TYPES as readonly string[]).includes(file.type)) valid.push(file);
+            if (isAcceptedFile(file)) valid.push(file);
             else rejected.push(file);
         });
 

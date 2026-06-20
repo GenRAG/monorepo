@@ -1,5 +1,5 @@
 import { Badge, Box, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 import { useDeploymentEnvGetter } from "hooks/useGetEnv";
 import { useIsDark } from "hooks/useIsDark";
 import { ENV_BADGE } from "pages/Agents/Deployment/data";

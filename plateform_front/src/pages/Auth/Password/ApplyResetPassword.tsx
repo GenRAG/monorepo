@@ -1,10 +1,6 @@
 import { FC } from "react";
 import { useForm } from "react-hook-form";
-import {
-    Link as ReachLink,
-    useNavigate,
-    useSearchParams,
-} from "react-router-dom";
+import { Link as ReachLink, useNavigate, useSearchParams } from "react-router-dom";
 import {
     Button,
     chakra,
@@ -19,7 +15,7 @@ import {
     VStack,
 } from "@chakra-ui/react";
 
-import { ShowHidePasswordInput } from "components/System/Molecules/Inputs/ShowHidePasswordInput";
+import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 
 import useThemedToast from "hooks/useThemedToast";
 import { useApplyResetPasswordMutation } from "services/auth/auth";
@@ -69,9 +65,7 @@ const ApplyResetPassword: FC = () => {
                 if ("status" in error) {
                     toast({
                         title: "An error occurred.",
-                        description:
-                            error.data.error.message ||
-                            "Please try again later.",
+                        description: error.data.error.message || "Please try again later.",
                         status: "error",
                         duration: 9000,
                         isClosable: true,
@@ -82,19 +76,15 @@ const ApplyResetPassword: FC = () => {
 
     return (
         <VStack gap="24px">
-            <Heading
-                variant="display-lg"
-                color="whites.offwhite"
-                textAlign="center"
-            >
-                Reset your password
+            <Heading variant="display-lg" color="whites.offwhite" textAlign="center">
+                Reinitialiser votre mot de passe
             </Heading>
 
             <chakra.form w="100%" onSubmit={onSubmit}>
                 <VStack align="start" gap="16px" w="100%">
                     <VStack align="left" gap="8px" w="100%">
                         <FormControl isInvalid={!!errors.password}>
-                            <FormLabel color={labelColor}>Password</FormLabel>
+                            <FormLabel color={labelColor}>Mot de passe</FormLabel>
                             <ShowHidePasswordInput
                                 {...register("password", {
                                     required: true,
@@ -107,29 +97,20 @@ const ApplyResetPassword: FC = () => {
                                 color={fieldTextColor}
                             />
                             {errors.password?.type === "required" && (
-                                <FormErrorMessage>
-                                    This field is required
-                                </FormErrorMessage>
+                                <FormErrorMessage>Ce champ est requis</FormErrorMessage>
                             )}
                             {errors.password?.type === "minLength" && (
-                                <FormErrorMessage>
-                                    Password must be at least 8 characters long
-                                </FormErrorMessage>
+                                <FormErrorMessage>Le mot de passe doit contenir au moins 8 caractères</FormErrorMessage>
                             )}
                             {errors.password?.type === "maxLength" && (
-                                <FormErrorMessage>
-                                    Password cannot be longer than 100
-                                    characters
-                                </FormErrorMessage>
+                                <FormErrorMessage>Le mot de passe ne peut pas dépasser 100 caractères</FormErrorMessage>
                             )}
                         </FormControl>
                     </VStack>
 
                     <VStack align="left" gap="8px" w="100%">
                         <FormControl isInvalid={!!errors.confirmPassword}>
-                            <FormLabel color={labelColor}>
-                                Confirm Password
-                            </FormLabel>
+                            <FormLabel color={labelColor}>Confirmer le mot de passe</FormLabel>
                             <ShowHidePasswordInput
                                 {...register("confirmPassword", {
                                     required: true,
@@ -142,39 +123,26 @@ const ApplyResetPassword: FC = () => {
                                 color={fieldTextColor}
                             />
                             {errors.confirmPassword?.type === "required" && (
-                                <FormErrorMessage>
-                                    This field is required
-                                </FormErrorMessage>
+                                <FormErrorMessage>This field is required</FormErrorMessage>
                             )}
                             {errors.confirmPassword?.type === "minLength" && (
-                                <FormErrorMessage>
-                                    Password must be at least 8 characters long
-                                </FormErrorMessage>
+                                <FormErrorMessage>Password must be at least 8 characters long</FormErrorMessage>
                             )}
                             {errors.confirmPassword?.type === "maxLength" && (
-                                <FormErrorMessage>
-                                    Password cannot be longer than 100
-                                    characters
-                                </FormErrorMessage>
+                                <FormErrorMessage>Password cannot be longer than 100 characters</FormErrorMessage>
                             )}
                         </FormControl>
                     </VStack>
 
-                    <Button
-                        variant={buttonType}
-                        size="lg"
-                        w="100%"
-                        isLoading={isLoading}
-                        type="submit"
-                    >
-                        Change my password
+                    <Button variant={buttonType} size="lg" w="100%" isLoading={isLoading} type="submit">
+                        Changer mon mot de passe
                     </Button>
                 </VStack>
             </chakra.form>
             <Flex justify="space-between">
                 <Link as={ReachLink} to={"/login"}>
                     <Text variant="body-sm" color="whites.offwhite">
-                        I know my password
+                        Je connais mon mot de passe
                     </Text>
                 </Link>
             </Flex>

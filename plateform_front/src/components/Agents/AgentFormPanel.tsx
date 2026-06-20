@@ -11,6 +11,7 @@ import {
     Stack,
     Text,
     Textarea,
+    useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
@@ -18,7 +19,7 @@ import { MessageSquare } from "lucide-react";
 import TemplateCard from "components/Agents/TemplateCard";
 import type { AppNode } from "@genrag/workflow";
 import type { Edge } from "@xyflow/react";
-import BoxIcon from "components/System/Atoms/BoxIcon";
+import BoxIcon from "components/ui/BoxIcon";
 
 export interface Template {
     id: string;
@@ -63,6 +64,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
         defaultValues: { name: "", description: "" },
         mode: "onChange",
     });
+    const headerBg = useColorModeValue("grey.25", "grey.900");
 
     const name = watch("name");
     const description = watch("description");
@@ -97,32 +99,33 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
             borderColor="borderDefault"
             overflowY="auto"
         >
-            <Stack p={6}>
+            <Stack p={6} bg={headerBg}>
                 <Heading variant="heading-xl" mb={8}>
                     Créer à partir de zéro
                 </Heading>
 
-                <Text variant="body-md" color="textLabel" fontWeight={500} mb={3}>
-                    Choisir un type d&apos;application
+                <Text variant="body-md" color="textSecondary" fontWeight={500} mb={1}>
+                    Choisir un type d&apos;agent
                 </Text>
 
                 <Box
                     p={4}
                     borderRadius="10px"
                     border="1.5px solid"
-                    borderColor="green.500"
+                    borderColor="green.400"
                     bg="accentCardBg"
-                    maxW="260px"
+                    maxW="300px"
                     cursor="pointer"
                 >
                     <HStack spacing={3} align="flex-start">
                         <BoxIcon icon={MessageSquare} />
                         <VStack align="start" spacing={0}>
                             <Text variant="body-sm-semibold" lineHeight="1.3">
-                                Flux de conversation d&apos;agent
+                                Flux de conversation
                             </Text>
                             <Text variant="body-xs" color="textLabel" lineHeight="1.5" mt="2px">
-                                Flux de travail optimisé pour créer des assistants de chat
+                                Flux de travail optimisé pour créer des assistants qui répondent à vos questions sur vos
+                                documents.
                             </Text>
                         </VStack>
                     </HStack>
@@ -132,8 +135,8 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
             <Divider borderColor="borderDefault" mb={7} />
 
             <Stack p={6}>
-                <Text variant="body-md" mb={3}>
-                    Nom de l&apos;application
+                <Text variant="body-md" mb={1}>
+                    Nom de l&apos;agent
                 </Text>
 
                 <Input
@@ -143,7 +146,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                     autoFocus
                 />
 
-                <Text variant="body-sm" fontWeight={500} mb={3}>
+                <Text variant="body-sm" fontWeight={500} mb={1}>
                     Description{" "}
                     <Text as="span" color="textMuted">
                         (Facultative)
@@ -157,7 +160,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                     mb={6}
                 />
 
-                <Text variant="body-sm" color="textLabel" fontWeight={500} mb={3}>
+                <Text variant="body-sm" color="textLabel" fontWeight={500} mb={1}>
                     Ou partir d&apos;un modèle
                 </Text>
 
@@ -181,7 +184,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                             Annuler
                         </Button>
 
-                        <Button type="submit" isDisabled={!isValid} isLoading={isLoading} variant="primary">
+                        <Button type="submit" isDisabled={!isValid} isLoading={isLoading} variant="superPrimary">
                             Créer
                         </Button>
                     </HStack>

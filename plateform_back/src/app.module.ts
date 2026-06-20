@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
@@ -14,11 +15,15 @@ import { DocumentModule } from './document/document.module';
 import { DeploymentModule } from './deployment/deployment.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { ConversationModule } from './conversation/conversation.module';
+import { RetentionModule } from './retention/retention.module';
 import { BullModule } from '@nestjs/bullmq';
+import { SentryModule } from '@sentry/nestjs/setup';
 
 @Module({
     imports: [
+        SentryModule.forRoot(),
         ConfigModule.forRoot({ isGlobal: true }),
+        ScheduleModule.forRoot(),
         ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
         RedisModule,
         LoggerModule.forRootAsync({
@@ -77,6 +82,7 @@ import { BullModule } from '@nestjs/bullmq';
         DeploymentModule,
         OnboardingModule,
         ConversationModule,
+        RetentionModule,
     ],
     controllers: [],
     providers: [],

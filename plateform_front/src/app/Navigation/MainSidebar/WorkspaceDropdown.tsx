@@ -12,7 +12,7 @@ import {
     useColorModeValue,
     useDisclosure,
 } from "@chakra-ui/react";
-import BoxIcon from "components/System/Atoms/BoxIcon";
+import BoxIcon from "components/ui/BoxIcon";
 import { Check, ChevronDown, Plus } from "lucide-react";
 import { Workspace } from "types/workspace";
 
@@ -36,9 +36,10 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
     const titleColor = useColorModeValue("grey.900", "white");
     const subColor = useColorModeValue("grey.500", "grey.400");
     const itemHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
-    const dividerColor = useColorModeValue("grey.100", "#2a2a2a");
+    const dividerColor = useColorModeValue("grey.100", "grey.700");
     const actionColor = useColorModeValue("grey.700", "grey.300");
     const activeCheckColor = useColorModeValue("green.500", "green.300");
+    const borderColor = useColorModeValue("grey.100", "grey.700");
 
     const handleSelect = (id: string) => {
         onSelect(id);
@@ -54,7 +55,7 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                     py={2}
                     borderRadius="8px"
                     border="1px solid"
-                    borderColor="grey.600"
+                    borderColor={borderColor}
                     bg={triggerBg}
                     cursor="pointer"
                     _hover={{ bg: triggerHoverBg }}
@@ -119,7 +120,7 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                                 letterSpacing="0.6px"
                                 color={headingColor}
                             >
-                                All workspaces
+                                Tout les workspaces
                             </Text>
 
                             <VStack spacing={0} align="stretch">
@@ -161,16 +162,17 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                                 px={2}
                                 py="7px"
                                 borderRadius="8px"
-                                cursor="pointer"
-                                _hover={{ bg: itemHoverBg }}
+                                cursor="not-allowed"
+                                opacity={0.4}
                                 transition="background 0.12s"
                                 spacing={2}
+                                aria-disabled="true"
                             >
                                 <Box color={actionColor}>
                                     <Plus size={14} />
                                 </Box>
                                 <Text fontSize="13px" color={actionColor}>
-                                    Create new workspace
+                                    Crée un nouveau workspace
                                 </Text>
                             </HStack>
                         </Box>

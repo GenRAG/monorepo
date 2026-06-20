@@ -5,9 +5,9 @@ import { ModelNode } from "../../components/nodes/SettingNodes/ModelNode";
 
 export const AddModel = {
     type: TaskType.MODEL,
-    label: "Model",
+    label: "Modèle IA",
     shape: ShapeType.CIRCLE,
-    description: "LLM Model configuration",
+    description: "Modèle d'intelligence artificielle",
     icon: (props: React.ComponentProps<LucideIcon>) => {
         return <Brain {...props} className="stroke-blue-500" />;
     },

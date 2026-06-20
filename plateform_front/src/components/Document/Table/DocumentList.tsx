@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Box, Stack, Table, Tbody, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, Skeleton, Stack, Table, Tbody, VStack, useColorModeValue } from "@chakra-ui/react";
 import { grayScrollbar } from "themeNew/scrollbar";
 import { DocumentEntity } from "types/document/document";
 import { getFileTypeLabel } from "utils/documentFormatters";
@@ -8,34 +8,46 @@ import { DocumentRow } from "./DocumentRow";
 import { DocumentEmptyState } from "../DocumentEmptyState";
 import { DocumentTableHeader } from "./DocumentTableHeader";
 import { DocumentFilters } from "./DocumentFilters";
+import { DocumentSkeletonRow } from "./DocumentSkeletonRow";
+import useUploadDocuments from "hooks/useUploadDocuments";
 
-type TypeFilter = "PDF" | "Word" | "Markdown" | "Texte" | null;
+type TypeFilter = "PDF" | "Markdown" | "Texte" | null;
 type ViewMode = "list" | "grid";
 
 interface DocumentListProps {
     documents: DocumentEntity[];
     total: number;
     selectedFolderId: string | null;
+    workspaceId: string;
+    agentId: string;
     onUploadClick: () => void;
     onDocumentPreview: (document: DocumentEntity) => void;
     onDocumentDelete: (documentId: string) => void;
+    onDocumentRetry?: (documentId: string) => void;
     onDocumentDownload: (documentId: string) => void;
     onOpenFolderDrawer?: () => void;
     onUploadOpen?: () => void;
     isMobile?: boolean;
+    footer?: React.ReactNode;
+    isLoading?: boolean;
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
     documents,
     total,
     selectedFolderId,
+    workspaceId,
+    agentId,
     onUploadClick,
     onDocumentPreview,
     onDocumentDelete,
+    onDocumentRetry,
     onDocumentDownload,
     onOpenFolderDrawer,
     onUploadOpen,
     isMobile = false,
+    isLoading = false,
+    footer,
 }) => {
     const [search, setSearch] = useState("");
     const [activeType, setActiveType] = useState<TypeFilter>(null);
@@ -52,7 +64,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         });
     }, [documents, search, activeType]);
 
-    if (documents.length === 0) {
+    if (documents.length === 0 && !isLoading) {
         return (
             <Stack h="100%" w="100%" align="center" justify="center">
                 <DocumentEmptyState
@@ -88,7 +100,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     sx={grayScrollbar}
                     border="1px solid"
                     borderColor={borderColor}
-                    borderRadius="8px"
+                    borderTopRadius="12px"
                     p={3}
                     bg={tableBg}
                 >
@@ -100,22 +112,43 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                         }}
                         gap={3}
                     >
-                        {filtered.map((doc) => (
-                            <DocumentCard
-                                key={doc.id}
-                                document={doc}
-                                onPreview={() => onDocumentPreview(doc)}
-                                onDelete={() => onDocumentDelete(doc.id)}
-                                onDownload={() => onDocumentDownload(doc.id)}
-                            />
-                        ))}
+                        {isLoading
+                            ? Array.from({ length: 8 }).map((_, i) => (
+                                  <Box
+                                      key={i}
+                                      borderRadius="12px"
+                                      overflow="hidden"
+                                      borderWidth="1px"
+                                      borderStyle="solid"
+                                      borderColor={borderColor}
+                                  >
+                                      <Skeleton h="140px" borderRadius={0} />
+                                      <Box px={3} pt={2} pb={3}>
+                                          <Skeleton h="13px" w="80%" mb={2} borderRadius="4px" />
+                                          <Skeleton h="13px" w="50%" borderRadius="4px" />
+                                      </Box>
+                                  </Box>
+                              ))
+                            : filtered.map((doc) => (
+                                  <DocumentCard
+                                      key={doc.id}
+                                      document={doc}
+                                      workspaceId={workspaceId}
+                                      agentId={agentId}
+                                      onRetry={onDocumentRetry ? () => onDocumentRetry(doc.id) : undefined}
+                                      onPreview={() => onDocumentPreview(doc)}
+                                      onDelete={() => onDocumentDelete(doc.id)}
+                                      onDownload={() => onDocumentDownload(doc.id)}
+                                  />
+                              ))}
                     </Box>
+                    {footer && <Box mt={3}>{footer}</Box>}
                 </Box>
             ) : (
                 <Box
                     border="1px solid"
                     borderColor={borderColor}
-                    borderRadius="8px"
+                    borderTopRadius="12px"
                     overflow="auto"
                     flex={1}
                     w="100%"
@@ -126,17 +159,25 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     <Table variant="simple" size="sm" minW="600px" borderColor={borderColor}>
                         <DocumentTableHeader />
                         <Tbody bg={tableBg}>
-                            {filtered.map((doc) => (
-                                <DocumentRow
-                                    key={doc.id}
-                                    document={doc}
-                                    onPreview={() => onDocumentPreview(doc)}
-                                    onDelete={() => onDocumentDelete(doc.id)}
-                                    onDownload={() => onDocumentDownload(doc.id)}
-                                />
-                            ))}
+                            {isLoading
+                                ? Array.from({ length: 5 }).map((_, i) => <DocumentSkeletonRow key={i} />)
+                                : filtered.map((doc) => (
+                                      <DocumentRow
+                                          key={doc.id}
+                                          document={doc}
+                                          onPreview={() => onDocumentPreview(doc)}
+                                          onDelete={() => onDocumentDelete(doc.id)}
+                                          onRetry={onDocumentRetry ? () => onDocumentRetry(doc.id) : undefined}
+                                          onDownload={() => onDocumentDownload(doc.id)}
+                                      />
+                                  ))}
                         </Tbody>
                     </Table>
+                    {footer && (
+                        <Box borderTopWidth="1px" borderTopStyle="solid" borderTopColor={borderColor}>
+                            {footer}
+                        </Box>
+                    )}
                 </Box>
             )}
         </VStack>

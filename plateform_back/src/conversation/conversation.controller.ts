@@ -8,7 +8,7 @@ import { UserSafe } from 'src/users/dto/create-user.request';
 import { ConversationService } from './conversation.service';
 import { AgentRuntimeService } from 'src/agent-runtime/agent-runtime.service';
 
-@Controller('v1/assistants')
+@Controller('assistants')
 @UseGuards(JwtAuthGuard)
 export class ConversationController {
     constructor(

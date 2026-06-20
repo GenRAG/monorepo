@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box, useColorModeValue, VStack } from "@chakra-ui/react";
-import { Globe, Lock, Zap } from "lucide-react";
-import RadioButton from "components/System/Atoms/RadioButton";
+import { Eye, Globe, Lock, Zap } from "lucide-react";
+import RadioButton from "components/ui/RadioButton";
 import { VisibilityMode, VisibilityStatus } from "types/agent/agent";
 import SectionHeader from "components/Deployment/SectionHeader";
 
@@ -38,7 +38,7 @@ export const VisibilitySection = () => {
 
     return (
         <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={bgColor}>
-            <SectionHeader title="Visibilité" />
+            <SectionHeader title="Visibilité" icon={Eye} />
             <VStack spacing={0} align="stretch">
                 {VISIBILITY_OPTIONS.map((opt, idx) => {
                     const isSelected = visibility === opt.id;

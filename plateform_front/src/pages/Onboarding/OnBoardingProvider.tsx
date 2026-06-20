@@ -202,8 +202,8 @@ export const OnboardingProvider: React.FC<{
                             workspaceId,
                             style,
                         }).unwrap();
-                    } catch (err) {
-                        console.error("Failed to complete onboarding:", err);
+                    } catch {
+                        // ignore — navigate to dashboard regardless
                     }
                 }
                 await navigate(`/workspaces/${workspaceId}/dashboard`);
@@ -215,7 +215,7 @@ export const OnboardingProvider: React.FC<{
                 step: state.currentStep + 2,
             })
                 .unwrap()
-                .catch((err) => console.error("Failed to sync onboarding step:", err));
+                .catch(() => {});
         }
 
         setState((prev) => {

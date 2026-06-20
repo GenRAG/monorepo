@@ -150,8 +150,10 @@ export const ActivityChart = ({
             ) : (
                 <>
                     <ActivityMetrics total={totalConversations} today={todayConversations} period={period} />
-                    <Box h="200px" position="relative">
-                        <Line data={chartJsData} options={options} />
+                    <Box h="200px" position="relative" minW={0}>
+                        <Box position="absolute" inset={0}>
+                            <Line data={chartJsData} options={options} />
+                        </Box>
                     </Box>
                     <ActivityLegend />
                 </>

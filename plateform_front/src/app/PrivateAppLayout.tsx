@@ -4,9 +4,9 @@ import { Outlet } from "react-router-dom";
 
 const PrivateAppLayout: React.FC = () => {
     return (
-        <Flex overflow="hidden">
+        <Flex flex={1} minW={0} h="100vh" overflow="hidden">
             <Sidebar />
-            <Box flex={1}>
+            <Box flex={1} minW={0} overflow="hidden">
                 <Outlet />
             </Box>
         </Flex>

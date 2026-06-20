@@ -1,6 +1,6 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import { useForm } from "react-hook-form";
-import { Link as ReachLink, useLocation } from "react-router-dom";
+import { Link as ReachLink } from "react-router-dom";
 import {
     chakra,
     Flex,
@@ -45,9 +45,8 @@ const ResetPasswordForm: FC = () => {
             .then(() => {
                 toast({
                     status: "success",
-                    title: "An email has been sent",
-                    description:
-                        "Please check your inbox to reset your password.",
+                    title: "Un email de réinitialisation a été envoyé !",
+                    description: "Veuillez vérifier votre boîte de réception pour réinitialiser votre mot de passe.",
                     duration: 4000,
                     isClosable: true,
                 });
@@ -55,10 +54,8 @@ const ResetPasswordForm: FC = () => {
             .catch((error) => {
                 if ("status" in error) {
                     toast({
-                        title: "An error occurred.",
-                        description:
-                            error.data.error.message ||
-                            "Please try again later.",
+                        title: "Une erreur est survenue.",
+                        description: error.data.error.message || "Veuillez réessayer plus tard.",
                         status: "error",
                         duration: 9000,
                         isClosable: true,
@@ -69,40 +66,24 @@ const ResetPasswordForm: FC = () => {
 
     return (
         <VStack gap="24px">
-            <Heading
-                variant="display-lg"
-                color="whites.offwhite"
-                textAlign="center"
-            >
+            <Heading variant="display-lg" color="whites.offwhite" textAlign="center">
                 Reset your password
             </Heading>
 
             <chakra.form w="100%" onSubmit={onSubmit}>
                 <VStack gap={6}>
                     <FormControl isInvalid={!!errors.email}>
-                        <FormLabel color={labelColor}>
-                            Email address of the lost account
-                        </FormLabel>
+                        <FormLabel color={labelColor}>Adresse mail du compte perdu</FormLabel>
                         <Input
                             {...register("email", { validate: validateEmail })}
                             placeholder="john.smith@gmail.com"
                             autoComplete="email"
                             color={fieldTextColor}
                         />
-                        {errors.email && (
-                            <FormErrorMessage>
-                                {errors.email.message}
-                            </FormErrorMessage>
-                        )}
+                        {errors.email && <FormErrorMessage>{errors.email.message}</FormErrorMessage>}
                     </FormControl>
 
-                    <Button
-                        variant={buttonType}
-                        size="lg"
-                        w="100%"
-                        isLoading={isLoading}
-                        type="submit"
-                    >
+                    <Button variant={buttonType} size="lg" w="100%" isLoading={isLoading} type="submit">
                         Reset your password
                     </Button>
 

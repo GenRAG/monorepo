@@ -1,15 +1,18 @@
-import { Box, Divider, HStack, Icon, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { ChevronRight, LogOut, MessageSquare, Monitor, Moon, Settings, Sun, User, UserPlus } from "lucide-react";
+import { Box, Divider, HStack, Icon, Stack, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { LogOut, MessageSquare, Monitor, Moon, Scale, Sun, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import BoxIcon from "components/System/Atoms/BoxIcon";
+import { useAppDispatch } from "store";
+import { setLastWorkspaceId } from "store/navigationSlice";
+import BoxIcon from "components/ui/BoxIcon";
 import { useAuth } from "app/AuthContext";
-import { ActionMenu } from "components/System/Molecules/ActionMenu/ActionMenu";
-import { useGetUserWorkspacesQuery } from "services/workspace/workspace";
+import { ActionMenu } from "components/ui/ActionMenu";
+import { useLogoutUserMutation } from "services/auth/auth";
+import { backendApi } from "services/api";
 
 interface SidebarFooterProps {
     isOpen: boolean;
-    activeItem: string;
+    activeItem: string | null;
     name?: string;
     email?: string;
     supportMenu: { id: string; icon: any; label: string }[];
@@ -19,20 +22,18 @@ type ThemeMode = "light" | "dark" | "system";
 
 export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFooterProps) => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const { workspaceId } = useParams<{ workspaceId: string }>();
     const { logout } = useAuth();
+    const [logoutUser] = useLogoutUserMutation();
     const { colorMode, setColorMode } = useColorMode();
-    const { data: workspaces = [] } = useGetUserWorkspacesQuery();
 
     const [themeMode, setThemeMode] = useState<ThemeMode>(
         () => (localStorage.getItem("themeMode") as ThemeMode) ?? colorMode,
     );
 
     const subColor = useColorModeValue("grey.500", "grey.400");
-    const itemColor = useColorModeValue("grey.800", "grey.100");
-    const itemHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
     const dividerColor = useColorModeValue("grey.100", "#222");
-    const headerBg = useColorModeValue("grey.50", "#1c1c1c");
     const cardBorder = useColorModeValue("grey.200", "grey.700");
     const cardBg = useColorModeValue("grey.50", "#1c1c1c");
     const cardActiveBg = useColorModeValue("green.50", "rgba(52,211,153,0.07)");
@@ -47,7 +48,6 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
 
     const displayName = (name || email) ?? "";
     const truncated = displayName.length > 16 ? displayName.slice(0, 16) + "…" : displayName;
-    const selectedWorkspace = workspaces.find((w) => w.id === workspaceId) ?? workspaces[0];
 
     const handleTheme = (mode: ThemeMode) => {
         setThemeMode(mode);
@@ -68,56 +68,26 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
 
     const trigger = (
         <HStack
-            p={2}
             ml={0.5}
             spacing={3}
             justify={isOpen ? "flex-start" : "center"}
             w="100%"
-            borderRadius="8px"
-            _hover={{ bg: triggerHoverBg }}
             transition="background 0.12s"
             role="button"
         >
             <BoxIcon letters={name?.slice(0, 2) || email?.slice(0, 2)} />
             {isOpen && (
-                <Text fontSize="sm" color={triggerColor} noOfLines={1} flex={1}>
-                    {truncated}
-                </Text>
+                <VStack align="start" spacing={0}>
+                    <Text fontSize="sm" color={triggerColor} noOfLines={1} flex={1}>
+                        {truncated}
+                    </Text>
+                    <Text fontSize="xs" color="textSecondary" noOfLines={1} flex={1}>
+                        {email}
+                    </Text>
+                </VStack>
             )}
         </HStack>
     );
-
-    const header = selectedWorkspace ? (
-        <HStack
-            px={3}
-            py="10px"
-            bg={headerBg}
-            justify="space-between"
-            cursor="pointer"
-            _hover={{ bg: itemHoverBg }}
-            transition="background 0.12s"
-            onClick={() =>
-                void navigate(
-                    workspaceId
-                        ? `/workspaces/${workspaceId}/settings`
-                        : `/workspaces/${selectedWorkspace.id}/settings`,
-                )
-            }
-        >
-            <HStack spacing={2} minW={0}>
-                <BoxIcon letters={selectedWorkspace.name.slice(0, 2)} />
-                <VStack spacing={0} align="start" minW={0}>
-                    <Text fontSize="13px" fontWeight="600" color={itemColor} noOfLines={1} isTruncated>
-                        {selectedWorkspace.name}
-                    </Text>
-                    <Text fontSize="11px" color={subColor}>
-                        {workspaces.length} espace{workspaces.length !== 1 ? "s" : ""}
-                    </Text>
-                </VStack>
-            </HStack>
-            <Icon as={ChevronRight} boxSize="14px" color={subColor} flexShrink={0} />
-        </HStack>
-    ) : null;
 
     const footer = ({ onClose }: { onClose: () => void }) => (
         <Box>
@@ -175,8 +145,14 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
                     cursor="pointer"
                     _hover={{ bg: dangerHoverBg }}
                     transition="background 0.12s"
-                    onClick={() => {
+                    onClick={async () => {
                         onClose();
+                        try {
+                            await logoutUser().unwrap();
+                        } catch {
+                            /* ignore network errors — proceed with local logout */
+                        }
+                        dispatch(backendApi.util.resetApiState());
                         logout();
                         void navigate("/login");
                     }}
@@ -191,59 +167,56 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
     );
 
     return (
-        <VStack align="stretch" gap={0}>
+        <VStack align="stretch" gap={0} w="100%">
             <Divider w="100%" borderColor="borderDefault" borderWidth="1px" />
-            <ActionMenu
-                trigger={trigger}
-                header={header}
-                sections={[
-                    {
-                        label: "Compte",
-                        items: [
-                            {
-                                label: "Mon profil",
-                                icon: <User size={14} />,
-                                onClick: () => void navigate("/profile"),
-                                shortcut: "⌘ P",
-                            },
-                            {
-                                label: "Paramètres",
-                                icon: <Settings size={14} />,
-                                onClick: () =>
-                                    void navigate(workspaceId ? `/workspaces/${workspaceId}/settings` : "/settings"),
-                            },
-                            {
-                                label: "Inviter des collègues",
-                                icon: <UserPlus size={14} />,
-                                onClick: () => void navigate(workspaceId ? `/workspaces/${workspaceId}/members` : "/"),
-                                badge: "Bientôt",
-                            },
-                        ],
-                    },
-                    {
-                        label: "Aide & Ressources",
-                        items: [
-                            ...supportMenu.map(({ id, icon, label }) => ({
-                                label,
-                                icon: <Icon as={icon} boxSize="14px" />,
-                                onClick: () => {
-                                    if (id === "help") void navigate("/help");
-                                    else void navigate("/docs");
+            <Stack p={2} _hover={{ bg: triggerHoverBg }} transition="background 0.12s" cursor="pointer" w="100%">
+                <ActionMenu
+                    trigger={trigger}
+                    sections={[
+                        {
+                            label: "Compte",
+                            items: [
+                                {
+                                    label: "Mon profil",
+                                    icon: <User size={14} />,
+                                    onClick: () => void navigate("/profile"),
+                                    shortcut: "⌘ P",
                                 },
-                                external: true,
-                            })),
-                            {
-                                label: "Contacter le support",
-                                icon: <MessageSquare size={14} />,
-                                onClick: () => void navigate("/support"),
-                            },
-                        ],
-                    },
-                ]}
-                footer={footer}
-                placement="right-start"
-                width="280px"
-            />
+                            ],
+                        },
+                        {
+                            label: "Aide & Ressources",
+                            items: [
+                                ...supportMenu.map(({ id, icon, label }) => ({
+                                    label,
+                                    icon: <Icon as={icon} boxSize="14px" />,
+                                    onClick: () => {
+                                        if (id === "help") void navigate("/help");
+                                        else void navigate("/docs");
+                                    },
+                                    external: true,
+                                })),
+                                {
+                                    label: "Contacter le support",
+                                    icon: <MessageSquare size={14} />,
+                                    onClick: () => void navigate("/legal/contact"),
+                                },
+                                {
+                                    label: "Données & Légal",
+                                    icon: <Scale size={14} />,
+                                    onClick: () => {
+                                        if (workspaceId) dispatch(setLastWorkspaceId(workspaceId));
+                                        void navigate("/legal");
+                                    },
+                                },
+                            ],
+                        },
+                    ]}
+                    footer={footer}
+                    placement="right-start"
+                    width="250px"
+                />
+            </Stack>
         </VStack>
     );
 };

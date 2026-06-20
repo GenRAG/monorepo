@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreditTransactionType } from 'generated/prisma';
+import { QueryLogStatus } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreditBalanceService } from './credit-balance.service';
 
@@ -12,35 +12,42 @@ export class UsageTrackerService {
         private readonly prisma: PrismaService,
     ) {}
 
-    async record({
+    async recordQuery({
         workspaceId,
         agentId,
-        tokensUsed,
+        query,
+        durationMs,
+        status,
+        creditsUsed = UsageTrackerService.COST_PER_QUERY,
     }: {
         workspaceId: string;
         agentId: string;
-        tokensUsed?: number;
+        query: string;
+        durationMs: number;
+        status: QueryLogStatus;
+        creditsUsed?: number;
     }): Promise<void> {
-        const COST_PER_QUERY = UsageTrackerService.COST_PER_QUERY;
+        const shouldDebit = status === QueryLogStatus.SUCCESS;
 
         await this.prisma.$transaction(async (tx) => {
-            const balance = await tx.creditBalance.findUnique({ where: { workspaceId } });
-
-            if (!balance || balance.balance < COST_PER_QUERY) {
-                throw new ForbiddenException('Insufficient credits');
+            if (shouldDebit) {
+                const balance = await tx.creditBalance.findUnique({ where: { workspaceId } });
+                if (!balance || balance.balance < creditsUsed) {
+                    throw new ForbiddenException('Insufficient credits');
+                }
+                await tx.creditBalance.update({
+                    where: { workspaceId },
+                    data: { balance: { decrement: creditsUsed } },
+                });
             }
 
-            await tx.creditBalance.update({
-                where: { workspaceId },
-                data: { balance: { decrement: COST_PER_QUERY } },
-            });
-
-            await tx.creditTransaction.create({
+            await tx.agentQueryLog.create({
                 data: {
-                    workspaceId,
-                    amount: COST_PER_QUERY,
-                    type: CreditTransactionType.USAGE,
-                    metadata: { agentId, tokensUsed: tokensUsed ?? null },
+                    agentId,
+                    query,
+                    durationMs,
+                    status,
+                    creditsUsed: shouldDebit ? creditsUsed : 0,
                 },
             });
         });

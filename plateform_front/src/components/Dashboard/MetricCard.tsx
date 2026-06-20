@@ -1,7 +1,17 @@
 import { Box, HStack, Icon, Skeleton, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Sparkline } from "components/Deployment/Sparkline";
+import { Line } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Filler } from "chart.js";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler);
+
+const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 interface MetricCardProps {
     icon: LucideIcon;
@@ -92,13 +102,42 @@ export const MetricCard = ({
                 </Text>
             </HStack>
 
-            <Box mt="auto" mx={-4}>
-                <Sparkline
-                    width="full"
-                    data={sparkData}
-                    id={label}
-                    color={sparkColor ?? "var(--chakra-colors-green-500)"}
-                />
+            <Box mt="auto" mx={-4} h="70px" position="relative" minW={0}>
+                <Box position="absolute" inset={0}>
+                    <Line
+                    data={{
+                        labels: sparkData.map(() => ""),
+                        datasets: [
+                            {
+                                data: sparkData,
+                                borderColor: sparkColor ?? "#34D3A9",
+                                borderWidth: 1.5,
+                                fill: true,
+                                backgroundColor: (ctx) => {
+                                    const color = sparkColor ?? "#34D3A9";
+                                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 70);
+                                    gradient.addColorStop(0, hexToRgba(color, 0.3));
+                                    gradient.addColorStop(1, hexToRgba(color, 0));
+                                    return gradient;
+                                },
+                                tension: 0.4,
+                                pointRadius: 0,
+                            },
+                        ],
+                    }}
+                    options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false },
+                        },
+                        elements: { line: { borderCapStyle: "round", borderJoinStyle: "round" } },
+                    }}
+                    />
+                </Box>
             </Box>
         </Box>
     );

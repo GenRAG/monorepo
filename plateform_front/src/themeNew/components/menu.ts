@@ -21,7 +21,7 @@ const baseStyle = definePartsStyle({
         color: "font.primary",
         bg: {
             default: "white",
-            _dark: "grey.800",
+            _dark: "grey.900",
         },
 
         _hover: {

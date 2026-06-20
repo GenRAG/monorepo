@@ -71,6 +71,10 @@ export class DeploymentService {
         const { workflow } = agent;
         if (!workflow) throw new BadRequestException('Agent has no active workflow');
 
+        const definition = workflow.definition as { nodes?: Array<{ data?: { isPlaceholder?: boolean } }> };
+        const hasPlaceholders = definition.nodes?.some((n) => n.data?.isPlaceholder === true);
+        if (hasPlaceholders) throw new BadRequestException('Workflow has unconfigured nodes');
+
         const { version } = await this.workflowService.createSnapshot(agentId, {
             definition: workflow.definition as Record<string, unknown>,
         });

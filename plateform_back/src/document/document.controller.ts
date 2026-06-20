@@ -72,6 +72,18 @@ export class DocumentController {
         return this.documentService.getUrl(id, agentId);
     }
 
+    @Get(':id/content')
+    getContent(@Param('id') id: string, @Param('agentId') agentId: string) {
+        return this.documentService.getContent(id, agentId);
+    }
+
+    @Post(':id/retry')
+    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
+    @ApiOperation({ summary: 'Retry indexing a failed document' })
+    retry(@Param('id') id: string, @Param('agentId') agentId: string) {
+        return this.documentService.retry(id, agentId);
+    }
+
     @Delete(':id')
     @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     @HttpCode(204)

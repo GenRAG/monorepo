@@ -9,6 +9,15 @@ import { AgentQueryCompletedEvent } from 'src/events/agent/agent-events';
 import { AgentEventType } from 'src/events/agent/agent-events.type';
 import { ConfigService } from '@nestjs/config';
 
+interface PrepareOptions {
+    agentId: string;
+    workspaceId: string;
+    orgIdOverride?: string;
+    skipUsageTracking?: boolean;
+    instructionOverride?: string;
+    forceActive?: boolean;
+}
+
 @Injectable()
 export class AgentRuntimeOrchestrator {
     private readonly mock: boolean;
@@ -37,18 +46,15 @@ export class AgentRuntimeOrchestrator {
         orgIdOverride?: string;
         skipUsageTracking?: boolean;
     }): Promise<{ answer: string }> {
-        if (!skipUsageTracking) {
-            await this.usageTracker.checkOrThrow(workspaceId);
-        }
-
-        const pipeline: Pipeline = await this.pipelineBuilder.buildPipeline({ agentId, instructionOverride });
-
-        const answer = await this.ragEngineService.sendQuery({
-            pipeline,
-            query,
-            orgId: orgIdOverride ?? agentId,
-            mock: this.mock,
+        const { pipeline, orgId } = await this._prepare({
+            agentId,
+            workspaceId,
+            orgIdOverride,
+            skipUsageTracking,
+            instructionOverride,
         });
+
+        const answer = await this.ragEngineService.sendQuery({ pipeline, query, orgId, mock: this.mock });
 
         if (!answer) {
             throw new Error('Failed to get an answer from the RAG engine.');
@@ -79,31 +85,31 @@ export class AgentRuntimeOrchestrator {
         skipUsageTracking?: boolean;
         forceActiveWorkflow?: boolean;
     }): Promise<IncomingMessage> {
+        const { pipeline, orgId } = await this._prepare({
+            agentId,
+            workspaceId,
+            orgIdOverride,
+            skipUsageTracking,
+            forceActive: forceActiveWorkflow,
+        });
+
+        return this.ragEngineService.getQueryStream({ pipeline, query, orgId, mock: this.mock });
+    }
+
+    private async _prepare({
+        agentId,
+        workspaceId,
+        orgIdOverride,
+        skipUsageTracking = false,
+        instructionOverride,
+        forceActive = false,
+    }: PrepareOptions): Promise<{ pipeline: Pipeline; orgId: string }> {
         if (!skipUsageTracking) {
             await this.usageTracker.checkOrThrow(workspaceId);
         }
 
-        const pipeline: Pipeline = await this.pipelineBuilder.buildPipeline({
-            agentId,
-            forceActive: forceActiveWorkflow,
-        });
+        const pipeline = await this.pipelineBuilder.buildPipeline({ agentId, instructionOverride, forceActive });
 
-        const ragStream = await this.ragEngineService.getQueryStream({
-            pipeline,
-            query,
-            orgId: orgIdOverride ?? agentId,
-            mock: this.mock,
-        });
-
-        if (!skipUsageTracking) {
-            ragStream.once('end', () => {
-                EventBus.emit(
-                    AgentEventType.AGENT_QUERY_COMPLETED,
-                    new AgentQueryCompletedEvent(workspaceId, agentId, undefined),
-                );
-            });
-        }
-
-        return ragStream;
+        return { pipeline, orgId: orgIdOverride ?? agentId };
     }
 }

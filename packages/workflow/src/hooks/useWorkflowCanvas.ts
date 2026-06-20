@@ -17,6 +17,8 @@ export interface UseWorkflowCanvasOptions {
 
     onNodeClick?: (nodeId: string) => void;
     onEdgeClick?: () => void;
+    onInstructionSave?: (nodeId: string) => void;
+    onMutation?: () => void;
 }
 
 export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
@@ -24,6 +26,8 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         nodeComponent,
         onNodeClick,
         onEdgeClick,
+        onInstructionSave,
+        onMutation,
         initialNodes,
         initialEdges,
         initialVertical,
@@ -40,7 +44,7 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         registry: TaskRegistry,
     };
 
-    const { edgeTypes, nodeTypes, workflow } = useFlowTypes({ onEdgeClick, onNodeClick, nodeComponent, workflowNodesOptions });
+    const { edgeTypes, nodeTypes, workflow } = useFlowTypes({ onEdgeClick, onNodeClick, onInstructionSave, onMutation, nodeComponent, workflowNodesOptions });
 
     return {
         ...workflow,

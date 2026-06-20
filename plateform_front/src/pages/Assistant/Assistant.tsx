@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useChat } from "hooks/useChat";
+import { useChat, useAssistantQuery } from "hooks/chat";
 import { useUserInfo } from "hooks/useUserInfo";
 import {
     useGetChatHistoryQuery,
     useGetAssistantMetadataQuery,
     useGetConversationsForAssistantQuery,
 } from "services/chat/chat";
-import { useAssistantQuery } from "hooks/useAssistantQuery";
 import AssistantHome from "./AssistantHome";
-import AssistantChatLayout from "./AssistantChatLayout";
+import AssistantChatLayout from "components/Assistant/AssistantChatLayout";
 
 export const Assistant = () => {
-    const { assistantId } = useParams<{ assistantId: string }>();
+    const { assistantId, conversationId: conversationIdParam } = useParams<{
+        assistantId: string;
+        conversationId?: string;
+    }>();
     const navigate = useNavigate();
     const { name } = useUserInfo();
 
-    const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+    const [currentConversationId, setCurrentConversationId] = useState<string | null>(conversationIdParam ?? null);
     const currentConversationIdRef = useRef<string | null>(null);
 
     useEffect(() => {
@@ -37,8 +39,12 @@ export const Assistant = () => {
 
     const getResponse = useCallback(
         async (question: string, onChunk: (partial: string) => void) => {
-            if (!assistantId) return { response: ["Erreur : ID assistant manquant."] };
+            if (!assistantId) {
+                throw new Error("ID assistant manquant.");
+            }
+
             const wasNewConversation = currentConversationIdRef.current === null;
+
             const { text, conversationId: newConvId } = await sendQuery(
                 question,
                 currentConversationIdRef.current,
@@ -46,8 +52,11 @@ export const Assistant = () => {
             );
             currentConversationIdRef.current = newConvId;
             setCurrentConversationId(newConvId);
-            if (wasNewConversation) void refetchConversations();
-            return { response: [text] };
+
+            if (wasNewConversation) {
+                void refetchConversations();
+            }
+            return text;
         },
         [assistantId, sendQuery, refetchConversations],
     );
@@ -56,7 +65,7 @@ export const Assistant = () => {
 
     useEffect(() => {
         if (!isHistoryFetching && historyData) {
-            setMessages(historyData);
+            setMessages(historyData.map((m) => ({ ...m, error: false })));
         }
     }, [historyData, isHistoryFetching, setMessages]);
 
@@ -64,6 +73,7 @@ export const Assistant = () => {
         if (convId === currentConversationId) return;
         setMessages([]);
         setCurrentConversationId(convId);
+        void navigate(`/assistants/${assistantId}/conversations/${convId}`);
     };
 
     const handleNewConversation = () => {
@@ -89,7 +99,8 @@ export const Assistant = () => {
                 messages={messages}
                 conversations={conversationsData}
                 currentConversationId={currentConversationId}
-                isLoading={isLoading || isHistoryFetching}
+                isLoading={isLoading}
+                isHistoryLoading={isHistoryFetching}
                 onSend={sendMessage}
                 onSelectConversation={handleConversationSelect}
                 onNewConversation={handleNewConversation}

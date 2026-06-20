@@ -3,8 +3,8 @@ import { Bot, Zap } from "lucide-react";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { AgentStatus } from "types/deployment/deployment";
 import { WorkspaceStatsAgentItem } from "types/workspace";
-import BoxIcon from "components/System/Atoms/BoxIcon";
-import RowContainer from "components/System/Atoms/RowContainer";
+import BoxIcon from "components/ui/BoxIcon";
+import RowContainer from "components/ui/RowContainer";
 
 const STATUS_DOT: Record<string, string> = {
     PRODUCTION: "#12B98C",
@@ -75,7 +75,14 @@ export const AgentsCard = ({ agents = [], isEmpty = false, isLoading = false, ..
 
     if (isLoading) {
         return (
-            <Box bg="surfaceCard" border="1px solid" borderColor="borderDefault" borderRadius="12px" {...props}>
+            <Box
+                w="100%"
+                bg="surfaceCard"
+                border="1px solid"
+                borderColor="borderDefault"
+                borderRadius="12px"
+                {...props}
+            >
                 <HStack justify="space-between" borderBottom="1px solid" borderColor="borderDefault" p={4}>
                     <HStack spacing={2}>
                         <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />

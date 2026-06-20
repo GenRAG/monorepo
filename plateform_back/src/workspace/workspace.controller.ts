@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    Param,
+    Post,
+    Query,
+    DefaultValuePipe,
+    ParseIntPipe,
+    UseGuards,
+} from '@nestjs/common';
 import { UserRole } from 'generated/prisma';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -38,6 +50,15 @@ export class WorkspaceController {
     @UseGuards(WorkspaceRolesGuard)
     getWorkspaceStats(@Param('id') workspaceId: string) {
         return this.workspaceService.getStats(workspaceId);
+    }
+
+    @Get(':id/consumption')
+    @UseGuards(WorkspaceRolesGuard)
+    getWorkspaceConsumption(
+        @Param('id') workspaceId: string,
+        @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
+    ) {
+        return this.workspaceService.getConsumption(workspaceId, Math.min(Math.max(days, 7), 90));
     }
 
     @Delete(':id')

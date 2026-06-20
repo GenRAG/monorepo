@@ -5,7 +5,7 @@ const colorTokens = {
     inputText: { default: "grey.900", _dark: "grey.100" },
     inputBorder: { default: "grey.100", _dark: "grey.700" },
     inputPlaceholder: { default: "grey.500", _dark: "grey.400" },
-    inputActiveBorder: { default: "grey.300", _dark: "grey.500" },
+    inputActiveBorder: { default: "green.400", _dark: "green.400" },
     inputBg: { default: "white", _dark: "grey.950" },
     inputDisabledBg: { default: "grey.50", _dark: "grey.800" },
 
@@ -20,7 +20,7 @@ const colorTokens = {
     surfacePrimary: { default: "white", _dark: "grey.950" }, // Page principale
     surfaceCard: { default: "white", _dark: "grey.850" }, // Cartes
     surfaceModal: { default: "white", _dark: "grey.900" }, // Modales
-    surfaceSubtle: { default: "grey.50", _dark: "grey.800" }, // Fond subtil, inputs désactivés
+    surfaceSubtle: { default: "grey.25", _dark: "grey.800" }, // Fond subtil, inputs désactivés
     surfaceHover: { default: "grey.50", _dark: "grey.900" }, // Survol de lignes/cartes
     surfaceThumbnail: { default: "grey.100", _dark: "grey.850" }, // Miniatures, avatars
     surfaceAction: { default: "white", _dark: "grey.800" }, // Bouton d'action secondaire
@@ -45,7 +45,7 @@ const colorTokens = {
     darkAccent900: { default: "grey.500", _dark: currentDarkTheme.primary900 },
 
     backgroundDefault: { default: "white", _dark: "grey.900" },
-    secondBackgroundDefault: { default: "grey.50", _dark: "grey.950" },
+    secondBackgroundDefault: { default: "grey.25", _dark: "grey.950" },
 };
 
 export default colorTokens;

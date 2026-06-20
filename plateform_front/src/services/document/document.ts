@@ -11,8 +11,7 @@ import {
     UploadDocumentParams,
 } from "types/document/document";
 
-const getAgentDocumentsTagId = (workspaceId: string, agentId: string) =>
-    `${workspaceId}-${agentId}`;
+const getAgentDocumentsTagId = (workspaceId: string, agentId: string) => `${workspaceId}-${agentId}`;
 
 export const extendedDocumentApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -35,10 +34,7 @@ export const extendedDocumentApi = backendApi.injectEndpoints({
             ],
         }),
 
-        getAgentDocuments: builder.query<
-            DocumentPaginatedResponse,
-            DocumentPaginatedParams
-        >({
+        getAgentDocuments: builder.query<DocumentPaginatedResponse, DocumentPaginatedParams>({
             query: ({ workspaceId, agentId, page, limit }) => ({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/documents`,
                 method: "GET",
@@ -57,9 +53,7 @@ export const extendedDocumentApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/documents/${id}`,
                 method: "GET",
             }),
-            providesTags: (_result, _error, { id }) => [
-                { type: Tag.Documents, id },
-            ],
+            providesTags: (_result, _error, { id }) => [{ type: Tag.Documents, id }],
         }),
 
         getDocumentUrl: builder.query<DocumentUrlResponse, DocumentByIdParams>({
@@ -67,15 +61,10 @@ export const extendedDocumentApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/documents/${id}/url`,
                 method: "GET",
             }),
-            providesTags: (_result, _error, { id }) => [
-                { type: Tag.Documents, id },
-            ],
+            providesTags: (_result, _error, { id }) => [{ type: Tag.Documents, id }],
         }),
 
-        getAgentDocumentStats: builder.query<
-            DocumentStats,
-            DocumentRouteParams
-        >({
+        getAgentDocumentStats: builder.query<DocumentStats, DocumentRouteParams>({
             query: ({ workspaceId, agentId }) => ({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/documents/stats`,
                 method: "GET",
@@ -88,16 +77,31 @@ export const extendedDocumentApi = backendApi.injectEndpoints({
             ],
         }),
 
+        getDocumentContent: builder.query<string, DocumentByIdParams>({
+            query: ({ workspaceId, agentId, id }) => ({
+                url: `/workspaces/${workspaceId}/agents/${agentId}/documents/${id}/content`,
+                method: "GET",
+                responseHandler: "text",
+            }),
+        }),
+
+        retryDocument: builder.mutation<{ id: string }, DocumentByIdParams>({
+            query: ({ workspaceId, agentId, id }) => ({
+                url: `/workspaces/${workspaceId}/agents/${agentId}/documents/${id}/retry`,
+                method: "POST",
+            }),
+            invalidatesTags: (_result, _error, { workspaceId, agentId, id }) => [
+                { type: Tag.Documents, id },
+                { type: Tag.Documents, id: getAgentDocumentsTagId(workspaceId, agentId) },
+            ],
+        }),
+
         deleteDocument: builder.mutation<void, DocumentByIdParams>({
             query: ({ workspaceId, agentId, id }) => ({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/documents/${id}`,
                 method: "DELETE",
             }),
-            invalidatesTags: (
-                _result,
-                _error,
-                { workspaceId, agentId, id },
-            ) => [
+            invalidatesTags: (_result, _error, { workspaceId, agentId, id }) => [
                 { type: Tag.Documents, id },
                 {
                     type: Tag.Documents,
@@ -115,5 +119,7 @@ export const {
     useGetDocumentByIdQuery,
     useGetDocumentUrlQuery,
     useLazyGetDocumentUrlQuery,
+    useGetDocumentContentQuery,
+    useRetryDocumentMutation,
     useDeleteDocumentMutation,
 } = extendedDocumentApi;

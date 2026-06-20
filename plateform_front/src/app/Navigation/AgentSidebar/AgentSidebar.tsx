@@ -14,7 +14,7 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import { ArrowLeft, Menu, PanelRightClose, PanelRightOpen } from "lucide-react";
-import { agentNavItems } from "app/Navigation/sidebarConfig";
+import { agentNavItems, agentNavSections } from "app/Navigation/sidebarConfig";
 import { SidebarItem } from "app/Navigation/SidebarItem";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
 import { useAppResponsive } from "hooks/useAppResponsive";
@@ -38,7 +38,7 @@ const AgentSidebar = () => {
 
     const bg = useColorModeValue("white", "linear-gradient(135deg,rgba(44, 44, 44, 0.54) 0%,rgb(69, 69, 69) 100%)");
     const bgMobile = useColorModeValue("white", "linear-gradient(135deg,rgb(44, 44, 44) 0%,rgb(69, 69, 69) 100%)");
-    const border = useColorModeValue("grey.100", "grey.800");
+    const border = useColorModeValue("grey.100", "grey.700");
     const color = useColorModeValue("grey.900", "white");
     const labelColor = useColorModeValue("grey.500", "grey.400");
     const backItemColor = useColorModeValue("grey.500", "grey.400");
@@ -96,13 +96,14 @@ const AgentSidebar = () => {
                 <VStack align="stretch" spacing={0} mt={1}>
                     <HStack
                         px={5}
-                        py={3}
+                        py="13.5px"
                         spacing={2}
                         cursor="pointer"
                         _hover={{ bg: backItemHoverBg }}
                         onClick={() => void handleBackToDashboard()}
                         borderBottom="1px solid"
                         borderColor={border}
+                        mb={4}
                     >
                         <Icon as={ArrowLeft} boxSize={3.5} color={backItemColor} />
                         {isOpen && (
@@ -112,16 +113,35 @@ const AgentSidebar = () => {
                         )}
                     </HStack>
 
-                    {agentNavItems.map(({ id, icon, label }: { id: string; icon: any; label: string }) => (
-                        <SidebarItem
-                            key={id}
-                            active={activePath === id}
-                            onClick={() => void handleItemClick(id)}
-                            icon={icon}
-                            label={label}
-                            open={isOpen}
-                            size="md"
-                        />
+                    {agentNavSections.map((section, i) => (
+                        <Box key={section.label}>
+                            {i > 0 && <Box h={3} />}
+                            {isOpen && (
+                                <Text
+                                    fontSize="9px"
+                                    fontWeight="700"
+                                    letterSpacing="0.1em"
+                                    textTransform="uppercase"
+                                    color={labelColor}
+                                    px={5}
+                                    pt={i > 0 ? 2 : 1}
+                                    pb={1}
+                                >
+                                    {section.label}
+                                </Text>
+                            )}
+                            {section.items.map(({ id, icon, label }) => (
+                                <SidebarItem
+                                    key={id}
+                                    active={activePath === id}
+                                    onClick={() => void handleItemClick(id)}
+                                    icon={icon}
+                                    label={label}
+                                    open={isOpen}
+                                    size="md"
+                                />
+                            ))}
+                        </Box>
                     ))}
                 </VStack>
             </Stack>

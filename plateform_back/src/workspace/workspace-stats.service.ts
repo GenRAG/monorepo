@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AgentStatus, DocumentStatus } from 'generated/prisma';
+import { AgentStatus, DocumentStatus, QueryLogStatus } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -126,7 +126,7 @@ export class WorkspaceStatsService {
             })),
         ]
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .slice(0, 8);
+            .slice(0, 6);
     }
 
     private formatAgents(agents: Awaited<ReturnType<WorkspaceStatsService['getAgentStats']>>) {
@@ -143,6 +143,56 @@ export class WorkspaceStatsService {
                 latestVersion: a.deployments[0]?.version ?? null,
             })),
         };
+    }
+
+    async getConsumption(workspaceId: string, days: number) {
+        const now = new Date();
+        const since = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+        const [agentRows, dailyRows] = await Promise.all([
+            this.prisma.agentQueryLog.groupBy({
+                by: ['agentId'],
+                where: { status: QueryLogStatus.SUCCESS, createdAt: { gte: since }, agent: { workspaceId } },
+                _sum: { creditsUsed: true },
+                _count: { id: true },
+            }),
+            this.prisma.$queryRaw<{ day: Date; total: number }[]>`
+                SELECT DATE_TRUNC('day', "createdAt")::date AS day, SUM("creditsUsed")::int AS total
+                FROM "AgentQueryLog"
+                WHERE "agentId" IN (SELECT id FROM "Agent" WHERE "workspaceId" = ${workspaceId})
+                  AND "status" = 'SUCCESS'
+                  AND "createdAt" >= ${since}
+                GROUP BY day ORDER BY day ASC
+            `,
+        ]);
+
+        const agentIds = agentRows.map((r) => r.agentId);
+        const agents = agentIds.length
+            ? await this.prisma.agent.findMany({
+                  where: { id: { in: agentIds } },
+                  select: { id: true, name: true },
+              })
+            : [];
+        const nameMap = new Map(agents.map((a) => [a.id, a.name]));
+
+        const byAgent = agentRows
+            .map((r) => ({
+                agentId: r.agentId,
+                agentName: nameMap.get(r.agentId) ?? r.agentId,
+                creditsUsed: r._sum.creditsUsed ?? 0,
+                queryCount: r._count.id,
+            }))
+            .sort((a, b) => b.creditsUsed - a.creditsUsed);
+
+        const dayMap = new Map(dailyRows.map((r) => [new Date(r.day).toISOString().slice(0, 10), Number(r.total)]));
+        const byDay = Array.from({ length: days }, (_, i) => {
+            const d = new Date(now.getTime() - (days - 1 - i) * 86400000);
+            return dayMap.get(d.toISOString().slice(0, 10)) ?? 0;
+        });
+
+        const total = byAgent.reduce((s, a) => s + a.creditsUsed, 0);
+
+        return { byAgent, byDay, total };
     }
 
     private formatDocStatus(status: DocumentStatus): string {

@@ -12,7 +12,7 @@ import {
     useColorModeValue,
     Button,
 } from "@chakra-ui/react";
-import { NodeShape } from "./NodeShape";
+import BoxIcon from "../BoxIcon";
 import { useAppResponsive } from "../../hooks/useAppResponsive";
 import { TrashIcon } from "lucide-react";
 
@@ -76,13 +76,11 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                 >
                     <HStack spacing={2} justify="space-between">
                         <HStack spacing={2} minW={0} flex={1}>
-                            <NodeShape
-                                shape={task.shape}
+                            <BoxIcon
                                 icon={task.icon}
-                                isSelected={!!props.selected}
-                                size={isMobile ? 20 : 24}
-                                iconSize={isMobile ? 11 : 13}
-                                canHover={false}
+                                size="sm"
+                                bg={props.selected ? "green.400" : "accentIconBg"}
+                                color={props.selected ? "white" : "green.500"}
                             />
                             <Text
                                 fontSize={isMobile ? "10px" : "xs"}
@@ -110,7 +108,7 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                                 textTransform="uppercase"
                                 flexShrink={0}
                             >
-                                {task.isEntryPoint ? "input" : "output"}
+                                {task.isEntryPoint ? "Départ" : "Fin"}
                             </Badge>
                         )}
 
@@ -181,7 +179,7 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                                     letterSpacing="0.02em"
                                     noOfLines={1}
                                 >
-                                    Input
+                                    Entrée
                                 </Text>
                             </HStack>
                         </Box>
@@ -268,7 +266,7 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                                         letterSpacing="0.02em"
                                         noOfLines={1}
                                     >
-                                        Output
+                                        Sortie
                                     </Text>
                                     <Box
                                         position="relative"

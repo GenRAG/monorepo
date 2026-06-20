@@ -10,6 +10,7 @@ import {
 import type { AppNodeData, WorkflowNodeProps } from "../../../types/app-node";
 import { Cpu, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import BoxIcon from "../../BoxIcon" 
 
 const ModelCard = ({
     label,
@@ -22,16 +23,15 @@ const ModelCard = ({
     isSelected: boolean;
     onCardClick: () => void;
 }) => {
-    const bg = useColorModeValue("#FFFFFF", "#3D3D3D");
-    const bgHover = useColorModeValue("#ECFDF9", "#464646");
-    const borderColor = useColorModeValue("#A8F3DF", "#4F4F4F");
-    const borderActive = useColorModeValue("#34D3A9", "#12B98C");
-    const accentBg = useColorModeValue("#ECFDF9", "#064E3B");
-    const accentBorder = useColorModeValue("#D1FAEF", "#076048");
-    const accentColor = useColorModeValue("#12B98C", "#6EE7C7");
-    const labelColor = useColorModeValue("#3D3D3D", "#E7E7E7");
-    const subColor = useColorModeValue("#6D6D6D", "#8F8F8F");
-    const arrowColor = useColorModeValue("#6EE7C7", "#12B98C");
+    const bg = useColorModeValue("white", "grey.800");
+    const bgHover = useColorModeValue("green.50", "grey.700");
+    const borderColor = useColorModeValue("green.200", "grey.700");
+    const borderActive = useColorModeValue("green.400", "green.500");
+    const accentBg = useColorModeValue("green.50", "green.900");
+    const accentColor = useColorModeValue("green.500", "green.300");
+    const labelColor = useColorModeValue("grey.800", "grey.100");
+    const subColor = useColorModeValue("grey.500", "grey.400");
+    const arrowColor = useColorModeValue("green.300", "green.500");
 
     return (
         <Box
@@ -58,20 +58,8 @@ const ModelCard = ({
                 borderTopRadius="12px"
             />
 
-            <Flex align="center" gap={3} px={3} py={2}>
-                <Flex
-                    w="30px"
-                    h="30px"
-                    borderRadius="8px"
-                    bg={accentBg}
-                    border="1px solid"
-                    borderColor={accentBorder}
-                    align="center"
-                    justify="center"
-                    flexShrink={0}
-                >
-                    <Icon as={Cpu} boxSize={4} color={accentColor} />
-                </Flex>
+            <Flex align="center" gap={3} px={3} py={3}>
+                <BoxIcon icon={Cpu} color={accentColor} bg={accentBg} size="sm" />
 
                 <VStack align="start" spacing={0} flex={1} minW={0}>
                     {settingLabel && (
@@ -84,7 +72,7 @@ const ModelCard = ({
                             lineHeight={1}
                             mb="2px"
                         >
-                            {settingLabel}
+                            Modèle d'IA
                         </Text>
                     )}
                     <Text
@@ -96,7 +84,7 @@ const ModelCard = ({
                         {label}
                     </Text>
                     <Text fontSize="10px" color={subColor}>
-                        Click to configure
+                        Cliquer pour modifier
                     </Text>
                 </VStack>
 
@@ -113,14 +101,31 @@ const ModelCard = ({
 
 const ModelPlaceholder = ({
     onClick,
+    isHighlighted,
 }: {
     onClick: (e: React.MouseEvent) => void;
+    isHighlighted?: boolean;
 }) => {
-    const borderColor = useColorModeValue("#A8F3DF", "#5D5D5D");
-    const bgHover = useColorModeValue("#ECFDF9", "#4F4F4F");
-    const bg = useColorModeValue("#FFFFFF", "#3D3D3D");
-    const iconColor = useColorModeValue("#34D3A9", "#34D3A9");
-    const textColor = useColorModeValue("#6D6D6D", "#8F8F8F");
+    const borderColor = useColorModeValue(
+        isHighlighted ? "#EF4444" : "#A8F3DF",
+        isHighlighted ? "#DC2626" : "#5D5D5D",
+    );
+    const bgHover = useColorModeValue(
+        isHighlighted ? "#FEE2E2" : "#ECFDF9",
+        isHighlighted ? "#3D0F0F" : "#4F4F4F",
+    );
+    const bg = useColorModeValue(
+        "#FFFFFF",
+        "#3D3D3D",
+    );
+    const iconColor = useColorModeValue(
+        isHighlighted ? "#EF4444" : "#34D3A9",
+        isHighlighted ? "#F87171" : "#34D3A9",
+    );
+    const textColor = useColorModeValue(
+        isHighlighted ? "#991B1B" : "#6D6D6D",
+        isHighlighted ? "#FCA5A5" : "#8F8F8F",
+    );
 
     return (
         <Flex
@@ -128,9 +133,9 @@ const ModelPlaceholder = ({
             align="center"
             justify="center"
             gap={1}
-            w="70px"
+            w="120px"
             h="52px"
-            border="1.5px dashed"
+            border="2px dashed"
             borderColor={borderColor}
             bg={bg}
             borderRadius="10px"
@@ -140,8 +145,8 @@ const ModelPlaceholder = ({
             onClick={onClick}
         >
             <Icon as={Cpu} boxSize={4} color={iconColor} />
-            <Text fontSize="10px" color={textColor} fontWeight={500}>
-                Add model
+            <Text fontSize="10px" color={textColor} fontWeight={500} textAlign="center">
+                Choisir un modèle IA
             </Text>
         </Flex>
     );
@@ -187,7 +192,7 @@ export const ModelNode = ({ id, data, selected, onNodeClick }: WorkflowNodeProps
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.15 }}
                     >
-                        <ModelPlaceholder onClick={handleClick} />
+                        <ModelPlaceholder onClick={handleClick} isHighlighted={nodeData.isHighlighted as boolean | undefined} />
                     </motion.div>
                 ) : (
                     <motion.div

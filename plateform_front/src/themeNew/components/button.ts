@@ -1,5 +1,4 @@
 import { StyleFunctionProps } from "@chakra-ui/styled-system";
-import { color } from "framer-motion";
 
 import borderRadius from "themeNew/foundations/borderRadius";
 import colors from "themeNew/foundations/colors";
@@ -9,7 +8,7 @@ import { textStyles } from "themeNew/foundations/typography";
 
 const Button = {
     baseStyle: {
-        borderRadius: borderRadius.xs,
+        borderRadius: borderRadius.sm,
         _disabled: {
             opacity: "1",
         },
@@ -52,8 +51,8 @@ const Button = {
                 cursor: disabled ? "not-allowed" : "pointer",
 
                 background: disabled
-                    ? "linear-gradient(130deg, rgba(209, 209, 209, 0.9) 0%, rgba(176, 176, 176, 0.9) 100%)"
-                    : "radial-gradient(120% 120% at 100% 0%, rgba(183, 233, 220, 0.4) 0%, rgba(153, 238, 215, 0.34) 48%), linear-gradient(130deg, #12B98C 0%, #07966F 55%, #07b889 100%)",
+                    ? "linear-gradient(130deg, rgba(250, 250, 250, 0.9) 0%, rgba(240, 238, 238, 0.9) 100%)"
+                    : "radial-gradient(120% 120% at 100% 0%, rgba(93, 223, 188, 0.4) 0%, rgba(81, 248, 203, 0.34) 48%), linear-gradient(130deg, #12B98C 0%, #07966F 55%, #07b889 100%)",
                 border: disabled ? "1px solid rgba(209, 209, 209, 0.95)" : "1px solid rgba(168, 243, 223, 0.7)",
                 backgroundSize: "180% 180%",
                 backgroundPosition: "0% 50%",
@@ -62,11 +61,12 @@ const Button = {
                     : "background-position 0.45s ease, transform 0.2s ease, box-shadow 0.2s ease",
 
                 _hover: disabled
-                    ? {}
+                    ? {
+                          background:
+                              "linear-gradient(130deg, rgba(250, 250, 250, 0.9) 0%, rgba(240, 238, 238, 0.9) 100%)",
+                      }
                     : {
-                          backgroundPosition: "100% 50%",
                           transform: "translateY(-1px)",
-                          boxShadow: "0 10px 24px rgba(7, 150, 111, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22)",
                       },
 
                 _active: disabled
@@ -74,8 +74,7 @@ const Button = {
                     : {
                           transform: "translateY(0)",
                           background:
-                              "radial-gradient(120% 120% at 100% 0%, rgba(52, 211, 169, 0.28) 0%, rgba(52, 211, 169, 0) 48%), linear-gradient(130deg, #07966F 0%, #076048 100%)",
-                          boxShadow: "0 4px 12px rgba(7, 150, 111, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14)",
+                              "radial-gradient(120% 120% at 100% 0%, rgba(43, 235, 184, 0.28) 0%, rgba(20, 228, 172, 0) 48%), linear-gradient(130deg, #0cdaa3 0%, #0fd19d 100%)",
                       },
 
                 _focus: {
@@ -83,32 +82,24 @@ const Button = {
                 },
 
                 _dark: {
-                    color: disabled ? colors.grey[600] : colors.whites.white,
+                    color: disabled ? colors.grey[600] : colors.grey[900],
                     background: disabled
-                        ? "linear-gradient(130deg, rgba(80, 80, 80, 0.9) 0%, rgba(60, 60, 60, 0.9) 100%)"
-                        : "radial-gradient(120% 120% at 100% 0%, rgba(121, 221, 194, 0.3) 0%, rgba(125, 235, 205, 0) 48%), linear-gradient(130deg, #0D7F66 0%, #055D47 55%, #077960 100%)",
+                        ? "grey.800"
+                        : "radial-gradient(120% 120% at 100% 0%, rgba(121, 221, 194, 0.3) 0%, rgba(125, 235, 205, 0) 48%), linear-gradient(130deg, #14daaf 0%, #19e4b1 55%, #04cfa3 100%)",
                     border: disabled ? "1px solid rgba(100, 100, 100, 0.95)" : "1px solid rgba(90, 200, 170, 0.6)",
-                    boxShadow: disabled
-                        ? "none"
-                        : "0 6px 20px rgba(0, 120, 90, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
                     _hover: disabled
-                        ? {}
+                        ? { background: "grey.800 !important" }
                         : {
                               backgroundPosition: "100% 50%",
                               transform: "translateY(-1px)",
-                              boxShadow: "0 10px 24px rgba(0, 120, 90, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18)",
                           },
                     _active: disabled
                         ? {}
                         : {
                               transform: "translateY(0)",
                               background:
-                                  "radial-gradient(120% 120% at 100% 0%, rgba(52, 180, 150, 0.25) 0%, rgba(52, 180, 150, 0) 48%), linear-gradient(130deg, #055D47 0%, #043830 100%)",
-                              boxShadow: "0 4px 12px rgba(0, 120, 90, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                                  "radial-gradient(120% 120% at 100% 0%, rgba(93, 223, 188, 0.4) 0%, rgba(81, 248, 203, 0.34) 48%), linear-gradient(130deg, #12B98C 0%, #07966F 55%, #07b889 100%)",
                           },
-                    _focus: {
-                        boxShadow: disabled ? "none" : shadow["focus-button"],
-                    },
                 },
             };
         },
@@ -331,7 +322,7 @@ const Button = {
     },
 
     defaultProps: {
-        variant: "primary",
+        variant: "superPrimary",
         size: "md",
     },
 };

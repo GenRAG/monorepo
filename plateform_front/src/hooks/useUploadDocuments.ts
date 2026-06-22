@@ -45,7 +45,7 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
         sources.length > 0 && sources.every((s) => s.status === Status.COMPLETED || s.status === Status.ERROR);
 
     const pollDocumentStatus = (documentId: string, sourceId: string): void => {
-        const backendUrl = process.env.REACT_APP_BACKEND_URL ?? "";
+        const backendUrl = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
         let polls = 0;
 
         const check = async (): Promise<void> => {

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import * as Sentry from "@sentry/react";
 
-export const BACKEND_URL = process.env.REACT_APP_BACKEND_URL ?? "";
+export const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
 
 export class InsufficientCreditsError extends Error {
     constructor() {

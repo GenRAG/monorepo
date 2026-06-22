@@ -12,7 +12,7 @@ const ChatWorkspace = () => {
         agentId: string;
     }>();
 
-    const playgroundUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/agents/${agentId}/runtime/playground`;
+    const playgroundUrl = `${(process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "")}/workspaces/${workspaceId}/agents/${agentId}/runtime/playground`;
     const { sendQuery } = useAgentQuery(workspaceId, agentId, playgroundUrl);
 
     const getResponse = useCallback(

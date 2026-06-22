@@ -22,7 +22,7 @@ export const UserRights = () => {
     const borderColor = useColorModeValue("grey.100", "grey.800");
     const bgColor = useColorModeValue("white", "grey.950");
 
-    const baseUrl = process.env.REACT_APP_BACKEND_URL ?? "";
+    const baseUrl = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
 
     const handleExportConversations = async () => {
         if (!workspaceId || !agentId) return;

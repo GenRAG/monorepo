@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import "pages/Onboarding/onboardingAnimations.css";
 import { Box, Button, HStack, Spinner, Stack, Text, VStack, useColorModeValue, useDisclosure } from "@chakra-ui/react";
 import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
-import StepFooter from "pages/Onboarding/StepFooter";
+import StepFooter from "components/Onboarding/StepFooter";
 import OnboardingHeader from "components/Onboarding/Stepper/OnboardingHeader";
 import OnboardingSidebar from "components/Onboarding/Stepper/OnboardingSidebar";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -31,6 +32,7 @@ const OnboardingContent: React.FC = () => {
         currentStep,
         goNext,
         goPrevious,
+        skip,
         updateStepData,
         getStepData,
         isStepValid,
@@ -192,6 +194,7 @@ const OnboardingContent: React.FC = () => {
                             goNext={goNext}
                             goPrevious={goPrevious}
                             onValidateAndGoNext={async () => goNext()}
+                            onSkip={skip}
                         />
                     </VStack>
                 </VStack>

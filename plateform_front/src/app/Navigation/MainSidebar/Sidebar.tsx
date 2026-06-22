@@ -7,7 +7,6 @@ import {
     IconButton,
     useColorModeValue,
     useDisclosure,
-    useColorMode,
     Stack,
 } from "@chakra-ui/react";
 import { Menu } from "lucide-react";
@@ -45,7 +44,6 @@ const Sidebar = () => {
         currentWorkspaceIdFromPath ?? workspaces[0]?.id ?? "",
     );
 
-    const { colorMode, toggleColorMode } = useColorMode();
     const color = useColorModeValue("grey.300", "white");
     const bg = useColorModeValue("white", "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)");
     const border = useColorModeValue("grey.100", "grey.800");
@@ -54,7 +52,7 @@ const Sidebar = () => {
 
     const activePath = useMemo(() => {
         const match = location.pathname.match(/^\/workspaces\/[^/]+\/([^/]+)/);
-        return match?.[1] ?? defaultActivePath;
+        return match?.[1] ?? defaultActivePath ?? null;
     }, [location.pathname, defaultActivePath]);
 
     const { isOpen, onToggle, onClose } = useDisclosure({
@@ -131,9 +129,7 @@ const Sidebar = () => {
 
             <SidebarFooter
                 isOpen={isOpen}
-                colorMode={colorMode}
-                toggleColorMode={toggleColorMode}
-                activeItem={activePath ?? "dashboard"}
+                activeItem={activePath}
                 name={name}
                 email={email}
                 supportMenu={supportMenu}

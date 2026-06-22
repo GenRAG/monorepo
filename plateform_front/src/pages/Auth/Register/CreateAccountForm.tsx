@@ -1,21 +1,19 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
     Button,
     chakra,
-    Checkbox,
     FormControl,
     FormErrorMessage,
     FormLabel,
     Input,
-    Text,
     useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
 import { useRegisterMutation } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
-import { ShowHidePasswordInput } from "components/System/Molecules/Inputs/ShowHidePasswordInput";
+import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 import { validateEmail } from "utils/validateEmail";
 
 type RegisterFormType = {
@@ -31,14 +29,11 @@ type CreateAccountFormProps = {
 
 const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
     const toast = useThemedToast();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const location = useLocation();
     const navigate = useNavigate();
 
     const [registerUser, { isLoading }] = useRegisterMutation();
 
     const buttonType = useColorModeValue("superSecondary", "superPrimary");
-    //const { handleFcmToken } = useFcmTokenManager();
 
     const {
         formState: { errors },
@@ -55,9 +50,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
     const passwordErrors = useMemo(
         () =>
             errors.password?.types
-                ? Object.keys(errors.password?.types).filter(
-                      (e) => !["required", "maxLength"].includes(e),
-                  )
+                ? Object.keys(errors.password?.types).filter((e) => !["required", "maxLength"].includes(e))
                 : [],
         [errors.password?.types],
     );
@@ -71,17 +64,14 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
             name: data.name,
         })
             .unwrap()
-            .then((authResponse) => {
-                console.log("authResponse", authResponse);
-                navigate(`/validate?email=${data.email}`, { replace: true });
+            .then(async (authResponse) => {
+                await navigate(`/validate?email=${data.email}`, { replace: true });
             })
             .catch((error) => {
                 if ("status" in error) {
                     toast({
                         title: "An error occurred.",
-                        description:
-                            error.data.error.message ||
-                            "Please try again later.",
+                        description: error.data.error.message || "Please try again later.",
                         status: "error",
                         duration: 9000,
                         isClosable: true,
@@ -102,15 +92,12 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                         disabled={!!email}
                         color={fieldTextColor}
                     />
-                    {errors.email && (
-                        <FormErrorMessage>
-                            {errors.email.message}
-                        </FormErrorMessage>
-                    )}
+                    {errors.email && <FormErrorMessage>{errors.email.message}</FormErrorMessage>}
                 </FormControl>
                 <FormControl>
                     <FormLabel color={labelColor}>Name</FormLabel>
                     <Input
+                        {...register("name", { required: true })}
                         placeholder="John Smith"
                         autoComplete="name"
                         color={fieldTextColor}
@@ -135,45 +122,29 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                         color={fieldTextColor}
                     />
                     {errors.password?.type === "required" && (
-                        <FormErrorMessage>
-                            This field is required
-                        </FormErrorMessage>
+                        <FormErrorMessage>This field is required</FormErrorMessage>
                     )}
                     {errors.password?.type === "maxLength" && (
-                        <FormErrorMessage>
-                            No more than 100 characters
-                        </FormErrorMessage>
+                        <FormErrorMessage>No more than 100 characters</FormErrorMessage>
                     )}
 
                     {passwordErrors?.length > 0 && (
                         <>
-                            <FormErrorMessage>
-                                Password must contain at least:
-                            </FormErrorMessage>
+                            <FormErrorMessage>Le mot de passe doit contenir au moins :</FormErrorMessage>
                             {passwordErrors.includes("minLength") && (
-                                <FormErrorMessage fontSize="12px">
-                                    - 8 characters
-                                </FormErrorMessage>
+                                <FormErrorMessage fontSize="12px">- 8 characters</FormErrorMessage>
                             )}
                             {passwordErrors.includes("symbols") && (
-                                <FormErrorMessage fontSize="12px">
-                                    - One symbol
-                                </FormErrorMessage>
+                                <FormErrorMessage fontSize="12px">- 1 symbol</FormErrorMessage>
                             )}
                             {passwordErrors.includes("digits") && (
-                                <FormErrorMessage fontSize="12px">
-                                    - One digit
-                                </FormErrorMessage>
+                                <FormErrorMessage fontSize="12px">- 1 chiffre</FormErrorMessage>
                             )}
                             {passwordErrors.includes("uppercase") && (
-                                <FormErrorMessage fontSize="12px">
-                                    - One uppercase letter
-                                </FormErrorMessage>
+                                <FormErrorMessage fontSize="12px">- 1 lettre majuscule</FormErrorMessage>
                             )}
                             {passwordErrors.includes("lowercase") && (
-                                <FormErrorMessage fontSize="12px">
-                                    - One lowercase letter
-                                </FormErrorMessage>
+                                <FormErrorMessage fontSize="12px">- 1 lettre minuscule</FormErrorMessage>
                             )}
                         </>
                     )}
@@ -185,42 +156,26 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                             required: true,
                             minLength: 8,
                             maxLength: 100,
-                            validate: (value) =>
-                                value === watch("password") ||
-                                "Passwords do not match",
+                            validate: (value) => value === watch("password") || "Passwords do not match",
                         })}
                         placeholder="Minimum 8 characters"
                         autoComplete="new-password"
                         color={fieldTextColor}
                     />
                     {errors.confirmPassword?.type === "required" && (
-                        <FormErrorMessage>
-                            This field is required
-                        </FormErrorMessage>
+                        <FormErrorMessage>This field is required</FormErrorMessage>
                     )}
                     {errors.confirmPassword?.type === "minLength" && (
-                        <FormErrorMessage>
-                            At least 8 characters
-                        </FormErrorMessage>
+                        <FormErrorMessage>At least 8 characters</FormErrorMessage>
                     )}
                     {errors.confirmPassword?.type === "maxLength" && (
-                        <FormErrorMessage>
-                            No more than 100 characters
-                        </FormErrorMessage>
+                        <FormErrorMessage>No more than 100 characters</FormErrorMessage>
                     )}
                     {errors.confirmPassword?.message && (
-                        <FormErrorMessage>
-                            {errors.confirmPassword?.message}
-                        </FormErrorMessage>
+                        <FormErrorMessage>{errors.confirmPassword?.message}</FormErrorMessage>
                     )}
                 </FormControl>
-                <Button
-                    variant={buttonType}
-                    size="lg"
-                    w="100%"
-                    isLoading={isLoading}
-                    type="submit"
-                >
+                <Button variant={buttonType} size="lg" w="100%" isLoading={isLoading} type="submit">
                     Sign up
                 </Button>
             </VStack>

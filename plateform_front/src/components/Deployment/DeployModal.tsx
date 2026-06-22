@@ -13,8 +13,9 @@ import {
     Textarea,
     Text,
 } from "@chakra-ui/react";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 import { useIsDark } from "hooks/useIsDark";
+import useThemedToast from "hooks/useThemedToast";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCreateDeploymentMutation } from "services/deployment/deployment";
@@ -25,11 +26,7 @@ interface DeployModalProps {
     title?: string;
 }
 
-export const DeployModal = ({
-    isOpen,
-    onClose,
-    title = "Déployer en Production",
-}: DeployModalProps) => {
+export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production" }: DeployModalProps) => {
     const { workspaceId = "", agentId = "" } = useParams<{
         workspaceId: string;
         agentId: string;
@@ -38,10 +35,27 @@ export const DeployModal = ({
     const [name, setName] = useState("");
     const [changelog, setChangelog] = useState("");
     const [deploy, { isLoading: isDeploying }] = useCreateDeploymentMutation();
+    const toast = useThemedToast();
 
     const handleSubmit = async () => {
-        await deploy({ workspaceId, agentId, name, changelog });
-        onClose();
+        try {
+            await deploy({ workspaceId, agentId, name, changelog }).unwrap();
+            toast({
+                title: "Déploiement en cours",
+                description: "Votre agent a été déployé avec succès.",
+                status: "success",
+            });
+            onClose();
+        } catch (err) {
+            const isIncomplete = (err as any)?.data?.message === "Workflow has unconfigured nodes";
+            toast({
+                title: isIncomplete ? "Workflow incomplet" : "Erreur",
+                description: isIncomplete
+                    ? "Configurez tous les modèles et instructions avant de déployer."
+                    : "Une erreur est survenue lors du déploiement.",
+                status: "error",
+            });
+        }
     };
 
     const handleClose = () => {
@@ -55,16 +69,12 @@ export const DeployModal = ({
             <ModalOverlay backdropFilter="blur(4px)" />
             <ModalContent
                 bg={isDark ? "grey.900" : "white"}
-                border="1px solid"
+                borderWidth="1px"
+                borderStyle="solid"
                 borderColor={isDark ? "grey.700" : "grey.150"}
                 borderRadius="14px"
             >
-                <ModalHeader
-                    fontSize="2xl"
-                    fontWeight={600}
-                    color={isDark ? "grey.50" : "grey.900"}
-                    pb={1}
-                >
+                <ModalHeader fontSize="2xl" fontWeight={600} color={isDark ? "grey.50" : "grey.900"} pb={1}>
                     {title}
                 </ModalHeader>
                 <ModalCloseButton />
@@ -72,16 +82,11 @@ export const DeployModal = ({
                 <ModalBody>
                     <VStack spacing={4} align="stretch">
                         <Text fontSize="sm" color="textmuted">
-                            Cette version sera mise en production et accessible
-                            aux utilisateurs.
+                            Cette version sera mise en production et accessible aux utilisateurs.
                         </Text>
 
                         <FormControl>
-                            <FormLabel
-                                fontSize="12px"
-                                fontWeight={600}
-                                mb={1.5}
-                            >
+                            <FormLabel fontSize="12px" fontWeight={600} mb={1.5}>
                                 Nom du déploiement
                             </FormLabel>
                             <Input
@@ -93,11 +98,7 @@ export const DeployModal = ({
                         </FormControl>
 
                         <FormControl>
-                            <FormLabel
-                                fontSize="12px"
-                                fontWeight={600}
-                                mb={1.5}
-                            >
+                            <FormLabel fontSize="12px" fontWeight={600} mb={1.5}>
                                 Description (optionnelle)
                             </FormLabel>
                             <Textarea
@@ -111,12 +112,7 @@ export const DeployModal = ({
                 </ModalBody>
 
                 <ModalFooter gap={2}>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleClose}
-                        isDisabled={isDeploying}
-                    >
+                    <Button size="sm" variant="outline" onClick={handleClose} isDisabled={isDeploying}>
                         Annuler
                     </Button>
                     <Button

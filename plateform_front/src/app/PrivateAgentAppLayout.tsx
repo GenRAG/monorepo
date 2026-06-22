@@ -6,13 +6,7 @@ const PrivateAgentAppLayout: React.FC = () => {
     return (
         <Flex overflow="hidden">
             <AgentSidebar />
-            <Box
-                flex={1}
-                minW={0}
-                display="flex"
-                flexDirection="column"
-                overflow="hidden"
-            >
+            <Box flex={1} minW={0} display="flex" flexDirection="column" overflow="hidden">
                 <Outlet />
             </Box>
         </Flex>

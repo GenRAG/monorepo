@@ -14,17 +14,17 @@ import {
     ModalBody,
     useColorModeValue,
     Input,
-    Center,
 } from "@chakra-ui/react";
-import { Info, Search, X, CommandIcon } from "lucide-react";
+import { Info, Search, X } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
 import { useMemo, useState, useEffect, useRef } from "react";
-import RerankerInformation from "pages/Agents/Workflow/NodeInformation/Reranker";
-import { NodeShape } from "@genrag/workflow";
-import StyledKbd from "components/System/Atoms/KdbStyles";
+import RerankerInformation from "components/Agents/Workflow/NodeInformation/Reranker";
+import RewriterInformation from "components/Agents/Workflow/NodeInformation/Rewriter";
+import StyledKbd from "components/ui/KdbStyles";
 
 import type { AppNode } from "@genrag/workflow";
 import { TaskType, getTaskDef, getNonSettingsTaskTypes, getAddableTaskTypes } from "@genrag/workflow";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface MenuNodeModalProps {
     usedNodes: AppNode[];
@@ -38,27 +38,15 @@ interface NodeCardProps {
     nodeType: TaskType;
     alreadyUsed: boolean;
     isSelected: boolean;
-    isDragging: boolean;
-    onDragStart: (e: React.DragEvent, type: TaskType) => void;
-    onDragEnd: () => void;
     onClick: (type: TaskType) => void;
     tooltipContent: React.ReactNode;
 }
 
-const NodeCard = ({
-    nodeType,
-    alreadyUsed,
-    isSelected,
-    isDragging,
-    onDragStart,
-    onDragEnd,
-    onClick,
-    tooltipContent,
-}: NodeCardProps) => {
+const NodeCard = ({ nodeType, alreadyUsed, isSelected, onClick, tooltipContent }: NodeCardProps) => {
     const task = getTaskDef(nodeType)!;
     const isDraggable = !alreadyUsed;
 
-    const cardBg = useColorModeValue("white", "grey.800");
+    const cardBg = useColorModeValue("white", "grey.850");
     const cardActiveBg = useColorModeValue("green.50", "grey.700");
     const borderColor = useColorModeValue("green.200", "grey.700");
     const borderActive = useColorModeValue("green.300", "green.500");
@@ -70,31 +58,19 @@ const NodeCard = ({
 
     return (
         <Box
-            draggable={isDraggable}
-            onDragStart={isDraggable ? (e) => onDragStart(e, nodeType) : undefined}
-            onDragEnd={isDraggable ? onDragEnd : undefined}
             onClick={isDraggable ? () => onClick(nodeType) : undefined}
-            cursor={isDraggable ? "grab" : "default"}
-            _active={{ cursor: isDraggable ? "grabbing" : "default" }}
-            bg={isSelected || isDragging ? cardActiveBg : cardBg}
+            bg={isSelected ? cardActiveBg : cardBg}
             border="1px solid"
-            borderColor={isSelected || isDragging ? borderActive : borderColor}
+            borderColor={isSelected ? borderActive : borderColor}
             borderRadius="10px"
             p={2}
             transition="all 0.15s"
-            opacity={alreadyUsed || isDragging ? 0.5 : 1}
+            opacity={alreadyUsed ? 0.5 : 1}
             _hover={isDraggable ? { bg: cardActiveBg, borderColor: borderActive } : {}}
         >
             <Flex align="center" gap={3}>
                 <Box flexShrink={0}>
-                    <NodeShape
-                        shape={task.shape}
-                        icon={task.icon}
-                        isSelected={false}
-                        size={32}
-                        iconSize={16}
-                        canHover={false}
-                    />
+                    <BoxIcon icon={task.icon} />
                 </Box>
 
                 <VStack align="start" spacing={0} flex={1} minW={0}>
@@ -103,19 +79,8 @@ const NodeCard = ({
                             {task.label}
                         </Text>
                         {alreadyUsed && (
-                            <Badge
-                                fontSize="9px"
-                                fontWeight={700}
-                                letterSpacing="0.06em"
-                                bg={badgeBg}
-                                color={badgeColor}
-                                border="1px solid"
-                                borderColor={borderColor}
-                                borderRadius="4px"
-                                px="5px"
-                                textTransform="uppercase"
-                            >
-                                used
+                            <Badge bg={badgeBg} color={badgeColor} size="sm">
+                                UTILISE
                             </Badge>
                         )}
                     </HStack>
@@ -153,11 +118,10 @@ const NodeCard = ({
 const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNodeModalProps) => {
     const [query, setQuery] = useState("");
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [draggedNode, setDraggedNode] = useState<TaskType | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const { fitView } = useReactFlow();
 
-    const bgColor = useColorModeValue("white", "grey.800");
+    const bgColor = useColorModeValue("white", "grey.900");
     const borderColor = useColorModeValue("green.200", "grey.700");
     const dividerColor = useColorModeValue("green.100", "grey.700");
     const iconColor = useColorModeValue("grey.600", "grey.300");
@@ -166,7 +130,6 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
     const subColor = useColorModeValue("grey.500", "grey.400");
     const sectionColor = useColorModeValue("grey.400", "grey.600");
     const overlayBg = useColorModeValue("blackAlpha.500", "blackAlpha.700");
-    const kbdBg = useColorModeValue("grey.50", "grey.700");
 
     const presentTypes = useMemo(() => usedNodes.map((n) => n.data.type), [usedNodes]);
 
@@ -194,7 +157,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
             [TaskType.QUERY]: null,
             [TaskType.MODEL]: null,
             [TaskType.INSTRUCTION]: null,
-            [TaskType.REWRITER]: null,
+            [TaskType.REWRITER]: <RewriterInformation />,
         }),
         [],
     );
@@ -246,14 +209,6 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
         handleClose();
     };
 
-    const handleDragStart = (e: React.DragEvent, nodeType: TaskType) => {
-        setDraggedNode(nodeType);
-        e.dataTransfer.setData("application/reactflow", nodeType);
-        e.dataTransfer.effectAllowed = "move";
-    };
-
-    const handleDragEnd = () => setDraggedNode(null);
-
     return (
         <Box>
             <Modal isOpen={isOpen} onClose={handleClose} isCentered motionPreset="scale">
@@ -276,24 +231,13 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Search nodes…"
+                                placeholder="Chercher des blocs…"
                                 fontSize="sm"
                                 color={textColor}
                                 _placeholder={{ color: subColor }}
                                 flex={1}
+                                size="sm"
                             />
-                            <HStack spacing={1} flexShrink={0}>
-                                <Box p="3.5" bg={kbdBg} borderRadius="4px">
-                                    <Center>
-                                        <Icon as={CommandIcon} />
-                                    </Center>
-                                </Box>
-                                <Box bg={kbdBg} borderRadius="4px" px="4" py="3">
-                                    <Center>
-                                        <Text>K</Text>
-                                    </Center>
-                                </Box>
-                            </HStack>
                             <IconButton
                                 aria-label="Close"
                                 icon={<X size={14} />}
@@ -331,7 +275,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                         pt={2}
                                         pb={1}
                                     >
-                                        Available
+                                        Disponibles
                                     </Text>
                                     {filteredAvailable.map((nodeType, i) => (
                                         <NodeCard
@@ -339,9 +283,6 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                             nodeType={nodeType}
                                             alreadyUsed={false}
                                             isSelected={i === selectedIndex}
-                                            isDragging={draggedNode === nodeType}
-                                            onDragStart={handleDragStart}
-                                            onDragEnd={handleDragEnd}
                                             onClick={handleNodeClick}
                                             tooltipContent={tooltipContent[nodeType]}
                                         />
@@ -352,7 +293,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                             {filteredAvailable.length === 0 && (
                                 <Flex justify="center" py={8}>
                                     <Text fontSize="sm" color={subColor}>
-                                        No nodes match &quot;
+                                        Aucun nœud ne correspond à &quot;
                                         <Text as="span" color={textColor}>
                                             {query}
                                         </Text>
@@ -374,7 +315,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                         pt={2}
                                         pb={1}
                                     >
-                                        Already in workflow
+                                        Déjà dans le workflow
                                     </Text>
                                     {alreadyUsedNodes.map((nodeType) => (
                                         <NodeCard
@@ -382,9 +323,6 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                             nodeType={nodeType}
                                             alreadyUsed={true}
                                             isSelected={false}
-                                            isDragging={false}
-                                            onDragStart={handleDragStart}
-                                            onDragEnd={handleDragEnd}
                                             onClick={() => {}}
                                             tooltipContent={tooltipContent[nodeType]}
                                         />
@@ -395,10 +333,10 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
 
                         <HStack px={4} py={2} borderTop="1px solid" borderColor={dividerColor} spacing={4}>
                             {[
-                                { keys: ["↑", "↓"], label: "navigate" },
-                                { keys: ["↵"], label: "add" },
-                                { keys: ["drag"], label: "place" },
-                                { keys: ["⌘", "K"], label: "close" },
+                                { keys: ["↑", "↓"], label: "naviguer" },
+                                { keys: ["↵"], label: "ajouter" },
+                                { keys: ["drag"], label: "placer" },
+                                { keys: ["⌘", "K"], label: "fermer" },
                             ].map(({ keys, label }) => (
                                 <HStack key={label} spacing={1}>
                                     {keys.map((k) => (

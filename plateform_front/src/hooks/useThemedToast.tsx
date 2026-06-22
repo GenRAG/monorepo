@@ -1,19 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { X, TriangleAlert, Info, Star, Check, ChevronUp } from "lucide-react";
-import {
-    HStack,
-    Text,
-    useToast,
-    UseToastOptions,
-    VStack,
-    Box,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { HStack, Text, useToast, UseToastOptions, VStack, Box, useColorModeValue } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 
 import colors from "themeNew/foundations/colors";
 import { isNotNone } from "utils/isNotNone";
 import standaloneToast from "utils/standaloneToast";
+import BoxIcon from "components/ui/BoxIcon";
+import Button from "components/ui/Button";
 
 const shrink = keyframes`
     from { width: 100%; }
@@ -61,39 +55,29 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
     const accentColor = getAccentColorFromStatus(options.status);
     const progressColor = getProgressColorFromStatus(options.status);
 
-    // Dark mode tokens
-    const bg = useColorModeValue("white", "grey.850");
-    const borderColor = useColorModeValue("grey.100", "grey.700");
     const titleColor = useColorModeValue("grey.900", "white");
     const descriptionColor = useColorModeValue("grey.600", "grey.300");
     const iconBg = useColorModeValue(`${accentColor}18`, `${accentColor}30`);
-    const progressTrackBg = useColorModeValue("grey.100", "grey.700");
-    const actionBorderColor = useColorModeValue("grey.200", "grey.600");
-    const actionBg = useColorModeValue("white", "grey.800");
-    const actionColor = useColorModeValue("grey.800", "grey.100");
-    const actionHoverBg = useColorModeValue("grey.50", "grey.700");
-    const actionHoverBorderColor = useColorModeValue("grey.300", "grey.500");
     const controlColor = useColorModeValue("grey.400", "grey.500");
     const controlHoverBg = useColorModeValue("grey.50", "grey.700");
     const controlHoverColor = useColorModeValue("grey.700", "grey.200");
 
     return (
         <Box
-            bg={bg}
+            bg="surfaceCard"
             borderRadius="16px"
             boxShadow={useColorModeValue(
                 "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)",
                 "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)",
             )}
             border="1px solid"
-            borderColor={borderColor}
+            borderColor="borderSubtle"
             overflow="hidden"
             minW="320px"
-            maxW="420px"
+            maxW="480px"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
         >
-            {/* Header */}
             <HStack
                 px="16px"
                 pt="16px"
@@ -114,13 +98,7 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
                     {options.icon ?? getIconFromStatus(options.status)}
                 </Box>
 
-                <Text
-                    flex="1"
-                    fontSize="sm"
-                    fontWeight="semibold"
-                    color={titleColor}
-                    noOfLines={1}
-                >
+                <Text flex="1" fontSize="sm" fontWeight="semibold" color={titleColor} noOfLines={1}>
                     {options.title}
                 </Text>
 
@@ -143,25 +121,10 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
                             <ChevronUp size={16} />
                         </Box>
                     )}
-                    <Box
-                        as="button"
-                        w="28px"
-                        h="28px"
-                        borderRadius="8px"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        color={controlColor}
-                        _hover={{ bg: controlHoverBg, color: controlHoverColor }}
-                        transition="all 0.15s"
-                        onClick={onClose}
-                    >
-                        <X size={16} />
-                    </Box>
+                    <BoxIcon icon={X} size="sm" color={controlColor} onClick={onClose} />
                 </HStack>
             </HStack>
 
-            {/* Description + bouton action */}
             {!collapsed && hasDescription && (
                 <VStack align="start" px="16px" pb="16px" spacing="12px">
                     <Text fontSize="sm" color={descriptionColor} lineHeight="1.5">
@@ -169,29 +132,14 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
                     </Text>
 
                     {(options as any).actionLabel && (
-                        <Box
-                            as="button"
-                            px="16px"
-                            py="8px"
-                            borderRadius="10px"
-                            border="1.5px solid"
-                            borderColor={actionBorderColor}
-                            fontSize="sm"
-                            fontWeight="medium"
-                            color={actionColor}
-                            bg={actionBg}
-                            _hover={{ bg: actionHoverBg, borderColor: actionHoverBorderColor }}
-                            transition="all 0.15s"
-                            onClick={(options as any).onAction}
-                        >
+                        <Button size="sm" variant="superPrimary" onClick={(options as any).onAction}>
                             {(options as any).actionLabel}
-                        </Box>
+                        </Button>
                     )}
                 </VStack>
             )}
 
-            {/* Barre de progression */}
-            <Box h="3px" bg={progressTrackBg} w="100%">
+            <Box h="3px" bg="borderSubtle" w="100%">
                 <Box
                     h="100%"
                     bg={progressColor}
@@ -214,27 +162,20 @@ const useThemedToast = () => {
             toast({
                 id: options.id,
                 duration: options.duration ?? 5000,
-                render: ({ onClose }) => (
-                    <ThemedToastComponent options={options} onClose={onClose} />
-                ),
+                render: ({ onClose }) => <ThemedToastComponent options={options} onClose={onClose} />,
                 ...options,
             }),
         [toast],
     );
 
-    return useMemo(
-        () => Object.assign(returnFunction, toast),
-        [returnFunction, toast],
-    );
+    return useMemo(() => Object.assign(returnFunction, toast), [returnFunction, toast]);
 };
 
 export const createStandaloneThemedToast = () => {
     const returnFunction = (options: UseToastOptions) =>
         standaloneToast({
             id: options.id,
-            render: ({ onClose }) => (
-                <ThemedToastComponent options={options} onClose={onClose} />
-            ),
+            render: ({ onClose }) => <ThemedToastComponent options={options} onClose={onClose} />,
         });
     return Object.assign(returnFunction, standaloneToast);
 };

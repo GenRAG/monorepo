@@ -1,6 +1,6 @@
 import { VStack } from "@chakra-ui/react";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import { useIsDark } from "hooks/useIsDark";
-import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
 import { AccessControl } from "pages/Agents/Deployment/AccessControl";
 
 const AccessControlWorkspace = () => {
@@ -10,6 +10,7 @@ const AccessControlWorkspace = () => {
         <VStack
             h="100vh"
             align="stretch"
+            justify="center"
             spacing={0}
             overflow="hidden"
             bg={isDark ? "grey.975" : "grey.50"}

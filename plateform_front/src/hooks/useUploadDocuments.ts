@@ -1,5 +1,16 @@
 import { useRef, useState } from "react";
+import * as Sentry from "@sentry/react";
 import { useUploadDocumentMutation } from "services/document/document";
+import { DocumentStatus } from "types/document/document";
+
+export const ACCEPTED_TYPES = ["application/pdf", "text/plain", "text/markdown", "text/x-markdown"] as const;
+export const ACCEPTED_EXTENSIONS = [".pdf", ".txt", ".md"];
+
+const isAcceptedFile = (file: File): boolean => {
+    if ((ACCEPTED_TYPES as readonly string[]).includes(file.type)) return true;
+    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+    return ACCEPTED_EXTENSIONS.includes(ext);
+};
 
 export enum Status {
     UPLOADING = "uploading",
@@ -18,39 +29,29 @@ export interface UploadedSource {
 }
 
 const POLL_INTERVAL_MS = 3000;
-const MAX_POLLS = 40; // 2 minutes max
+const MAX_POLLS = 40;
 
-const useUploadDocuments = (
-    workspaceId?: string | null,
-    agentId?: string | null,
-    maxFiles = 3,
-    initialCount = 0,
-) => {
+const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null, maxFiles = 3, initialCount = 0) => {
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [sources, setSources] = useState<UploadedSource[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
     const [uploadDocument] = useUploadDocumentMutation();
     const cancelledPolls = useRef<Set<string>>(new Set());
 
-    const sessionValidCount = sources.filter(
-        (s) => s.status !== Status.ERROR,
-    ).length;
+    const sessionValidCount = sources.filter((s) => s.status !== Status.ERROR).length;
     const isAtMaxFiles = initialCount + sessionValidCount >= maxFiles;
+    const isDone = sources.length > 0;
+    const allDone =
+        sources.length > 0 && sources.every((s) => s.status === Status.COMPLETED || s.status === Status.ERROR);
 
-    const pollDocumentStatus = (
-        documentId: string,
-        sourceId: string,
-    ): void => {
+    const pollDocumentStatus = (documentId: string, sourceId: string): void => {
         const backendUrl = process.env.REACT_APP_BACKEND_URL ?? "";
         let polls = 0;
 
         const check = async (): Promise<void> => {
             if (cancelledPolls.current.has(sourceId)) return;
-
             if (polls >= MAX_POLLS) {
-                setSources((prev) =>
-                    prev.map((s) =>
-                        s.id === sourceId ? { ...s, status: Status.ERROR } : s,
-                    ),
-                );
+                setSources((prev) => prev.map((s) => (s.id === sourceId ? { ...s, status: Status.ERROR } : s)));
                 return;
             }
             polls++;
@@ -65,22 +66,15 @@ const useUploadDocuments = (
 
                 if (cancelledPolls.current.has(sourceId)) return;
 
-                if (doc.status === "INDEXED") {
+                if (doc.status === DocumentStatus.INDEXED) {
                     setSources((prev) =>
-                        prev.map((s) =>
-                            s.id === sourceId
-                                ? { ...s, status: Status.COMPLETED, progress: 100 }
-                                : s,
-                        ),
+                        prev.map((s) => (s.id === sourceId ? { ...s, status: Status.COMPLETED, progress: 100 } : s)),
                     );
-                } else if (doc.status === "FAILED") {
-                    setSources((prev) =>
-                        prev.map((s) =>
-                            s.id === sourceId
-                                ? { ...s, status: Status.ERROR }
-                                : s,
-                        ),
-                    );
+                } else if (doc.status === DocumentStatus.FAILED) {
+                    Sentry.captureException(new Error("Document indexing failed"), {
+                        extra: { documentId, agentId, workspaceId },
+                    });
+                    setSources((prev) => prev.map((s) => (s.id === sourceId ? { ...s, status: Status.ERROR } : s)));
                 } else {
                     setTimeout(check, POLL_INTERVAL_MS);
                 }
@@ -94,62 +88,35 @@ const useUploadDocuments = (
         setTimeout(check, POLL_INTERVAL_MS);
     };
 
-    const uploadDocuments = async (
-        files: FileList,
-    ): Promise<UploadedSource[]> => {
-        const validSources = sources.filter((s) => s.status !== Status.ERROR);
-        const remaining = maxFiles - initialCount - validSources.length;
-        const filesToUpload = Array.from(files).slice(0, remaining);
-
-        if (filesToUpload.length === 0) return [];
-
+    const uploadFilesInternal = async (filesToUpload: File[], updateSources = true): Promise<UploadedSource[]> => {
         const timestamp = Date.now();
-        const newSources: UploadedSource[] = filesToUpload.map(
-            (file, index) => ({
-                id: `${timestamp}-${index}-${file.name}`,
-                type: "file" as const,
-                name: file.name,
-                status: Status.UPLOADING,
-                progress: 0,
-            }),
-        );
+        const newSources: UploadedSource[] = filesToUpload.map((file, index) => ({
+            id: `${timestamp}-${index}-${file.name}`,
+            type: "file" as const,
+            name: file.name,
+            status: Status.UPLOADING,
+            progress: 0,
+        }));
 
-        setSources((prev) => [...prev, ...newSources]);
+        if (updateSources) setSources((prev) => [...prev, ...newSources]);
 
-        void Promise.allSettled(
+        await Promise.allSettled(
             filesToUpload.map(async (file, index) => {
                 const sourceId = newSources[index].id;
                 try {
                     if (workspaceId && agentId) {
-                        const doc = await uploadDocument({
-                            workspaceId,
-                            agentId,
-                            file,
-                        }).unwrap();
-
+                        const doc = await uploadDocument({ workspaceId, agentId, file }).unwrap();
                         setSources((prev) =>
                             prev.map((s) =>
                                 s.id === sourceId
-                                    ? {
-                                          ...s,
-                                          status: Status.PROCESSING,
-                                          progress: 50,
-                                          documentId: doc.id,
-                                      }
+                                    ? { ...s, status: Status.PROCESSING, progress: 50, documentId: doc.id }
                                     : s,
                             ),
                         );
-
                         pollDocumentStatus(doc.id, sourceId);
                     }
                 } catch {
-                    setSources((prev) =>
-                        prev.map((s) =>
-                            s.id === sourceId
-                                ? { ...s, status: Status.ERROR }
-                                : s,
-                        ),
-                    );
+                    setSources((prev) => prev.map((s) => (s.id === sourceId ? { ...s, status: Status.ERROR } : s)));
                 }
             }),
         );
@@ -157,12 +124,72 @@ const useUploadDocuments = (
         return newSources;
     };
 
-    const removeSource = (id: string) => {
+    // Kept for backwards compatibility (ImproveAssistantStep uses this directly with a FileList)
+    const uploadDocuments = async (files: FileList): Promise<UploadedSource[]> => {
+        const validSources = sources.filter((s) => s.status !== Status.ERROR);
+        const remaining = maxFiles - initialCount - validSources.length;
+        const filesToUpload = Array.from(files).slice(0, remaining);
+        if (filesToUpload.length === 0) return [];
+        return uploadFilesInternal(filesToUpload);
+    };
+
+    // Add files to the pending selection after validating their type.
+    // Returns which files were accepted and which were rejected so the caller can show feedback.
+    const addFiles = (files: FileList | null): { valid: File[]; rejected: File[] } => {
+        if (!files) return { valid: [], rejected: [] };
+
+        const valid: File[] = [];
+        const rejected: File[] = [];
+
+        Array.from(files).forEach((file) => {
+            if (isAcceptedFile(file)) valid.push(file);
+            else rejected.push(file);
+        });
+
+        setSelectedFiles((prev) => [...prev, ...valid]);
+        return { valid, rejected };
+    };
+
+    const removeSelectedFile = (index: number): void => {
+        setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    // Upload all pending selectedFiles, then clear the selection.
+    // isUploading is true while initial mutations are in flight; polling continues after.
+    const handleUpload = async (): Promise<void> => {
+        if (selectedFiles.length === 0 || !workspaceId || !agentId) return;
+        setIsUploading(true);
+        const filesToUpload = selectedFiles;
+        setSelectedFiles([]);
+        await uploadFilesInternal(filesToUpload);
+        setIsUploading(false);
+    };
+
+    const removeSource = (id: string): void => {
         cancelledPolls.current.add(id);
         setSources((prev) => prev.filter((s) => s.id !== id));
     };
 
-    return { sources, uploadDocuments, removeSource, isAtMaxFiles };
+    const reset = (): void => {
+        setSelectedFiles([]);
+        setSources([]);
+        setIsUploading(false);
+    };
+
+    return {
+        selectedFiles,
+        sources,
+        isUploading,
+        isDone,
+        allDone,
+        isAtMaxFiles,
+        uploadDocuments,
+        addFiles,
+        removeSelectedFile,
+        handleUpload,
+        removeSource,
+        reset,
+    };
 };
 
 export default useUploadDocuments;

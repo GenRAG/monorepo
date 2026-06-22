@@ -29,30 +29,20 @@ export const extendedDeploymentApi = backendApi.injectEndpoints({
             providesTags: (_result, _error, { agentId }) => [listTag(agentId)],
         }),
 
-        getCurrentDeployment: builder.query<
-            CurrentDeployment,
-            DeploymentRouteParams
-        >({
+        getCurrentDeployment: builder.query<CurrentDeployment, DeploymentRouteParams>({
             query: ({ workspaceId, agentId }) => ({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/deployments/current`,
                 method: "GET",
             }),
-            providesTags: (_result, _error, { agentId }) => [
-                currentTag(agentId),
-            ],
+            providesTags: (_result, _error, { agentId }) => [currentTag(agentId)],
         }),
 
-        getDeploymentById: builder.query<
-            Deployment,
-            DeploymentRouteParams & { id: string }
-        >({
+        getDeploymentById: builder.query<Deployment, DeploymentRouteParams & { id: string }>({
             query: ({ workspaceId, agentId, id }) => ({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/deployments/${id}`,
                 method: "GET",
             }),
-            providesTags: (_result, _error, { id }) => [
-                { type: Tag.Deployments, id },
-            ],
+            providesTags: (_result, _error, { id }) => [{ type: Tag.Deployments, id }],
         }),
 
         createDeployment: builder.mutation<Deployment, CreateDeploymentParams>({
@@ -83,11 +73,7 @@ export const extendedDeploymentApi = backendApi.injectEndpoints({
             async onQueryStarted({ agentId }, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
-                    dispatch(
-                        backendApi.util.invalidateTags([
-                            { type: Tag.Workflow, id: agentId },
-                        ]),
-                    );
+                    dispatch(backendApi.util.invalidateTags([{ type: Tag.Workflow, id: agentId }]));
                 } catch {
                     // ignore
                 }

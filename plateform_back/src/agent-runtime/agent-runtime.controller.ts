@@ -1,30 +1,37 @@
-import { Controller, Param, UseGuards, Sse, Query } from '@nestjs/common';
+import {
+    BadRequestException,
+    Controller,
+    Get,
+    Param,
+    ParseIntPipe,
+    UseGuards,
+    Sse,
+    Query,
+    DefaultValuePipe,
+} from '@nestjs/common';
 import type { MessageEvent } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { AgentRuntimeService } from './agent-runtime.service';
+import { AgentQueryLogRepository } from './agent-query-log.repository';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
 @Controller('workspaces/:workspaceId/agents/:agentId/runtime')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
+@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
 export class AgentRuntimeController {
-    constructor(private readonly agentRuntimeService: AgentRuntimeService) {}
+    constructor(
+        private readonly agentRuntimeService: AgentRuntimeService,
+        private readonly queryLogRepository: AgentQueryLogRepository,
+    ) {}
 
-    @Sse('stream')
-    stream(
-        @Param('workspaceId') workspaceId: string,
+    @Get('query-logs')
+    getQueryLogs(
         @Param('agentId') agentId: string,
-        @Query('query') query: string,
-    ): Observable<MessageEvent> {
-        if (!query) {
-            return new Observable((s) => {
-                s.next({
-                    data: JSON.stringify({ error: 'Query parameter required' }),
-                });
-                s.complete();
-            });
-        }
-        return this.agentRuntimeService.stream(workspaceId, agentId, query);
+        @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+        @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+    ) {
+        return this.queryLogRepository.findByAgent(agentId, page, Math.min(limit, 100));
     }
 
     @Sse('playground')
@@ -33,14 +40,8 @@ export class AgentRuntimeController {
         @Param('agentId') agentId: string,
         @Query('query') query: string,
     ): Observable<MessageEvent> {
-        if (!query) {
-            return new Observable((s) => {
-                s.next({
-                    data: JSON.stringify({ error: 'Query parameter required' }),
-                });
-                s.complete();
-            });
-        }
+        if (!query) throw new BadRequestException('Query parameter required');
+
         return this.agentRuntimeService.playgroundStream(workspaceId, agentId, query);
     }
 }

@@ -6,8 +6,10 @@ import { LocalStrategy } from 'src/auth/strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
-import { BrevoService } from 'src/auth/brevo.service';
+import { ResendService } from 'src/auth/resend.service';
 import { TokenService } from 'src/auth/token.service';
+import { JwtBlacklistService } from 'src/auth/jwt-blacklist.service';
+import { LoginAttemptService } from 'src/auth/login-attempt.service';
 
 @Module({
     imports: [
@@ -29,8 +31,10 @@ import { TokenService } from 'src/auth/token.service';
         AuthService,
         LocalStrategy,
         JwtStrategy,
-        BrevoService,
+        ResendService,
         TokenService,
+        JwtBlacklistService,
+        LoginAttemptService,
     ],
 })
 export class AuthModule {}

@@ -9,6 +9,8 @@ import { useWorkflowNodes, UseWorkflowNodesOptions } from "./useWorkflowNodes";
 interface UseFlowTypesParams {
     onEdgeClick?: () => void;
     onNodeClick?: (nodeId: string) => void;
+    onInstructionSave?: (nodeId: string) => void;
+    onMutation?: () => void;
     nodeComponent?: NodeComponentType
     workflowNodesOptions: UseWorkflowNodesOptions;
 }
@@ -16,6 +18,8 @@ interface UseFlowTypesParams {
 export const useFlowTypes = ({
     onNodeClick,
     onEdgeClick,
+    onInstructionSave,
+    onMutation,
     nodeComponent,
     workflowNodesOptions
 }: UseFlowTypesParams) => {
@@ -34,10 +38,18 @@ export const useFlowTypes = ({
         [],
     );
 
-    const nodeCallbacksRef = useRef({ onNodeClick, onRemoveNode: workflow.handleRemoveChainNode, isVertical: workflow.isVertical });
-    nodeCallbacksRef.current = { onNodeClick, onRemoveNode: workflow.handleRemoveChainNode, isVertical: workflow.isVertical };
+    const wrappedRemove = useMemo(
+        () => (nodeId: string) => {
+            workflow.handleRemoveChainNode(nodeId);
+            onMutation?.();
+        },
+        [workflow.handleRemoveChainNode],
+    );
+
+    const nodeCallbacksRef = useRef({ onNodeClick, onRemoveNode: wrappedRemove, onInstructionSave, onMutation, isVertical: workflow.isVertical });
+    nodeCallbacksRef.current = { onNodeClick, onRemoveNode: wrappedRemove, onInstructionSave, onMutation, isVertical: workflow.isVertical };
     const Renderer = nodeComponent ?? NodeComponent;
-        
+
     const nodeTypes = useMemo(
         () => ({
 
@@ -47,9 +59,11 @@ export const useFlowTypes = ({
                     isVertical: nodeCallbacksRef.current.isVertical,
                     onNodeClick: nodeCallbacksRef.current.onNodeClick,
                     onRemoveNode: nodeCallbacksRef.current.onRemoveNode,
+                    onInstructionSave: nodeCallbacksRef.current.onInstructionSave,
+                    onMutation: nodeCallbacksRef.current.onMutation,
                 }),
             }),
-            
+
         [nodeComponent],
     );
 

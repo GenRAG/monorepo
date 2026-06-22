@@ -1,6 +1,6 @@
 import { Box, VStack, Text, useColorModeValue, HStack } from "@chakra-ui/react";
 import { ExternalLink, Globe } from "lucide-react";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 import type { FC } from "react";
 
 interface Props {
@@ -16,13 +16,7 @@ export const HeaderCardEmpty: FC<Props> = ({ onGuideClick, onOpen }) => {
     const borderColor = useColorModeValue("grey.100", "grey.800");
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={borderColor}
-            p={8}
-            bg={bg}
-        >
+        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} p={8} bg={bg}>
             <VStack spacing={4} align="center">
                 <Box
                     w="44px"
@@ -40,32 +34,16 @@ export const HeaderCardEmpty: FC<Props> = ({ onGuideClick, onOpen }) => {
                     Pas encore en production
                 </Text>
 
-                <Text
-                    fontSize="sm"
-                    color={descColor}
-                    textAlign="center"
-                    maxW="640px"
-                >
-                    Votre agent est prêt à être déployé en production. Cliquez
-                    sur le bouton ci-dessous pour lire notre guide de mise en
-                    production
+                <Text fontSize="sm" color={descColor} textAlign="center" maxW="640px">
+                    Votre agent est prêt à être déployé en production. Cliquez sur le bouton ci-dessous pour lire notre
+                    guide de mise en production
                 </Text>
 
                 <HStack spacing={4}>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        leftIcon={ExternalLink}
-                        onClick={onGuideClick}
-                    >
+                    <Button size="sm" variant="outline" leftIcon={ExternalLink} onClick={onGuideClick}>
                         Deployment guide
                     </Button>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        leftIcon={Globe}
-                        onClick={onOpen}
-                    >
+                    <Button size="sm" variant="outline" leftIcon={Globe} onClick={onOpen}>
                         Premier déploiement
                     </Button>
                 </HStack>

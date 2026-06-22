@@ -8,10 +8,7 @@ import { WorkflowRepository } from 'src/workflow/workflow.repository';
 export class WorkflowService {
     constructor(private readonly workflowRepository: WorkflowRepository) {}
 
-    async create(
-        agentId: string,
-        createWorkflowRequest: CreateWorkflowRequest,
-    ) {
+    async create(agentId: string, createWorkflowRequest: CreateWorkflowRequest) {
         return this.workflowRepository.transaction(async (tx) => {
             await tx.workflow.updateMany({
                 where: { agentId, isActive: true },
@@ -28,8 +25,7 @@ export class WorkflowService {
             return tx.workflow.create({
                 data: {
                     agentId,
-                    definition:
-                        createWorkflowRequest.definition as Prisma.InputJsonValue,
+                    definition: createWorkflowRequest.definition as Prisma.InputJsonValue,
                     version: nextVersion,
                     isActive: true,
                 },
@@ -37,10 +33,7 @@ export class WorkflowService {
         });
     }
 
-    async createSnapshot(
-        agentId: string,
-        createWorkflowRequest: CreateWorkflowRequest,
-    ): Promise<Workflow> {
+    async createSnapshot(agentId: string, createWorkflowRequest: CreateWorkflowRequest): Promise<Workflow> {
         return this.workflowRepository.transaction(async (tx) => {
             const lastWorkflow = await tx.workflow.findFirst({
                 where: { agentId },
@@ -50,8 +43,7 @@ export class WorkflowService {
             return tx.workflow.create({
                 data: {
                     agentId,
-                    definition:
-                        createWorkflowRequest.definition as Prisma.InputJsonValue,
+                    definition: createWorkflowRequest.definition as Prisma.InputJsonValue,
                     version: nextVersion,
                     isActive: false,
                 },
@@ -61,39 +53,24 @@ export class WorkflowService {
 
     async findActive(agentId: string): Promise<Workflow> {
         const workflow = await this.workflowRepository.findActive(agentId);
-
-        if (!workflow) {
-            throw new NotFoundException('Workflow not found');
-        }
-
+        if (!workflow) throw new NotFoundException('Workflow not found');
         return workflow;
     }
 
     async activate(id: string, agentId: string): Promise<Workflow> {
-        const workflow = await this.workflowRepository.findOne(id, agentId);
-
-        if (!workflow) {
+        try {
+            return await this.workflowRepository.activate(id, agentId);
+        } catch (_e: any) {
             throw new NotFoundException('Workflow not found');
         }
-
-        return this.workflowRepository.activate(id, agentId);
     }
 
-    async update(
-        agentId: string,
-        updateWorkflowRequest: UpdateWorkflowRequest,
-    ): Promise<Workflow> {
+    async update(agentId: string, updateWorkflowRequest: UpdateWorkflowRequest): Promise<Workflow> {
         const workflow = await this.workflowRepository.findActive(agentId);
-
-        if (!workflow) {
-            throw new NotFoundException('Workflow not found');
-        }
+        if (!workflow) throw new NotFoundException('Workflow not found');
 
         return this.workflowRepository.update(workflow.id, {
-            ...{
-                definition:
-                    updateWorkflowRequest.definition as Prisma.InputJsonValue,
-            },
+            definition: updateWorkflowRequest.definition as Prisma.InputJsonValue,
         });
     }
 
@@ -102,23 +79,14 @@ export class WorkflowService {
     }
 
     async findByVersion(agentId: string, version: number): Promise<Workflow> {
-        const workflow = await this.workflowRepository.findByVersion(
-            agentId,
-            version,
-        );
-
-        if (!workflow)
-            throw new NotFoundException('Workflow version not found');
+        const workflow = await this.workflowRepository.findByVersion(agentId, version);
+        if (!workflow) throw new NotFoundException('Workflow version not found');
         return workflow;
     }
 
     async findOne(id: string, agentId: string): Promise<Workflow> {
         const workflow = await this.workflowRepository.findOne(id, agentId);
-
-        if (!workflow) {
-            throw new NotFoundException('Workflow not found');
-        }
-
+        if (!workflow) throw new NotFoundException('Workflow not found');
         return workflow;
     }
 }

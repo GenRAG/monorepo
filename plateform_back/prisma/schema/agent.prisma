@@ -1,19 +1,22 @@
 model Agent {
-  id          String         @id @default(cuid())
-  name        String
-  description String?
-  status      AgentStatus    @default(DEVELOPMENT)
-  createdAt   DateTime       @default(now())
-  createdBy   String
-  updatedAt   DateTime       @updatedAt
-  updatedBy   String
-  workspaceId String
-  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  status        AgentStatus    @default(DEVELOPMENT)
+  retentionDays Int?
+  createdAt     DateTime       @default(now())
+  createdBy     String
+  updatedAt     DateTime       @updatedAt
+  updatedBy     String
+  workspaceId   String
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workflows          Workflow[]
   documents          Document[]
   deployments        AgentVersion[]
   onboardingSession  OnboardingSession?
   conversations      Conversation[]
+  members            AgentMember[]
+  queryLogs          AgentQueryLog[]
 }
 
 model AgentVersion {
@@ -33,7 +36,35 @@ model AgentVersion {
   @@unique([agentId, version])
 }
 
+model AgentMember {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([agentId, userId])
+}
+
+model AgentQueryLog {
+  id          String         @id @default(cuid())
+  agentId     String
+  agent       Agent          @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  query       String
+  durationMs  Int
+  status      QueryLogStatus
+  creditsUsed Int            @default(1)
+  createdAt   DateTime       @default(now())
+}
+
 enum AgentStatus {
   DEVELOPMENT
   PRODUCTION
+}
+
+enum QueryLogStatus {
+  SUCCESS
+  ERROR
+  OUT_OF_CREDITS
 }

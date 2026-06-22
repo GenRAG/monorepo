@@ -1,45 +1,22 @@
 import EventBus from 'src/lib/event-bus';
-import { UsageTrackerService } from 'src/usage-tracker/usage-tracker.service';
-import {
-    AgentQueryCompletedEvent,
-    AgentDeployedEvent,
-    AgentStatusChangedEvent,
-} from './agent-events';
+import { AgentDeployedEvent, AgentStatusChangedEvent } from './agent-events';
 import { AgentEventType } from 'src/events/agent/agent-events.type';
 import { Logger } from 'nestjs-pino';
 
-export function registerAgentListeners(
-    usageTracker: UsageTrackerService,
-    logger: Logger,
-) {
-    EventBus.on(
-        AgentEventType.AGENT_QUERY_COMPLETED,
-        (event: AgentQueryCompletedEvent) => {
-            usageTracker
-                .record({
-                    workspaceId: event.workspaceId,
-                    agentId: event.agentId,
-                    tokensUsed: event.tokensUsed,
-                })
-                .catch((err) => {
-                    logger.error('[UsageTracker] record failed', err);
-                    throw err;
-                });
-        },
-    );
+export function registerAgentListeners(logger: Logger): () => void {
+    const onDeployed = (event: AgentDeployedEvent) => {
+        logger.log(`[AgentListener] agent=${event.agentId} deployed v${event.version}`);
+    };
 
-    EventBus.on(AgentEventType.AGENT_DEPLOYED, (event: AgentDeployedEvent) => {
-        logger.log(
-            `[AgentListener] agent=${event.agentId} deployed v${event.version}`,
-        );
-    });
+    const onStatusChanged = (event: AgentStatusChangedEvent) => {
+        logger.log(`[AgentListener] ${event.agentId}: ${event.fromStatus} → ${event.toStatus}`);
+    };
 
-    EventBus.on(
-        AgentEventType.STATUS_CHANGED,
-        (event: AgentStatusChangedEvent) => {
-            logger.log(
-                `[AgentListener] ${event.agentId}: ${event.fromStatus} → ${event.toStatus}`,
-            );
-        },
-    );
+    EventBus.on(AgentEventType.AGENT_DEPLOYED, onDeployed);
+    EventBus.on(AgentEventType.STATUS_CHANGED, onStatusChanged);
+
+    return () => {
+        EventBus.removeListener(AgentEventType.AGENT_DEPLOYED, onDeployed);
+        EventBus.removeListener(AgentEventType.STATUS_CHANGED, onStatusChanged);
+    };
 }

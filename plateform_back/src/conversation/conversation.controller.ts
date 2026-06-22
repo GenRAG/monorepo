@@ -1,12 +1,4 @@
-import {
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Query,
-    Sse,
-    UseGuards,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Delete, Get, Param, Query, Sse, UseGuards } from '@nestjs/common';
 import type { MessageEvent } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -16,7 +8,7 @@ import { UserSafe } from 'src/users/dto/create-user.request';
 import { ConversationService } from './conversation.service';
 import { AgentRuntimeService } from 'src/agent-runtime/agent-runtime.service';
 
-@Controller('v1/assistants')
+@Controller('assistants')
 @UseGuards(JwtAuthGuard)
 export class ConversationController {
     constructor(
@@ -35,38 +27,28 @@ export class ConversationController {
     }
 
     @Get(':agentId/conversations')
-    getConversations(@Param('agentId') agentId: string) {
-        return this.conversationService.getConversations(agentId);
+    getConversations(@Param('agentId') agentId: string, @CurrentUser(CurrentUserPipe) user: UserSafe) {
+        return this.conversationService.getConversations(user.id, agentId);
     }
 
     @Sse(':agentId/stream')
     stream(
         @Param('agentId') agentId: string,
         @Query('query') query: string,
+        @CurrentUser(CurrentUserPipe) user: UserSafe,
         @Query('conversationId') conversationId?: string,
     ): Observable<MessageEvent> {
-        if (!query) {
-            return new Observable((s) => {
-                s.next({
-                    data: JSON.stringify({ error: 'Query parameter required' }),
-                });
-                s.complete();
-            });
-        }
-        return this.agentRuntimeService.streamWithPersistence(
-            agentId,
-            query,
-            conversationId,
-        );
+        if (!query) throw new BadRequestException('Query parameter required');
+        return this.agentRuntimeService.streamWithPersistence(agentId, query, conversationId, user.id);
     }
 
     @Get(':agentId/conversations/:conversationId/messages')
-    getMessages(@Param('conversationId') conversationId: string) {
-        return this.conversationService.getMessages(conversationId);
+    getMessages(@Param('conversationId') conversationId: string, @CurrentUser(CurrentUserPipe) user: UserSafe) {
+        return this.conversationService.getMessages(user.id, conversationId);
     }
 
     @Delete(':agentId/conversations/:conversationId')
-    deleteConversation(@Param('conversationId') conversationId: string) {
-        return this.conversationService.deleteConversation(conversationId);
+    deleteConversation(@Param('conversationId') conversationId: string, @CurrentUser(CurrentUserPipe) user: UserSafe) {
+        return this.conversationService.deleteConversation(user.id, conversationId);
     }
 }

@@ -1,14 +1,8 @@
 import React, { useRef } from "react";
-import {
-    Box,
-    HStack,
-    Icon,
-    Text,
-    VStack,
-    useColorMode,
-} from "@chakra-ui/react";
+import { Box, HStack, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface DocumentDropZoneProps {
     isDragging: boolean;
@@ -56,13 +50,7 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
             borderRadius="12px"
             p={8}
             bg={
-                disabled
-                    ? colorMode === "dark"
-                        ? "grey.800"
-                        : "grey.50"
-                    : colorMode === "dark"
-                      ? "grey.900"
-                      : "white"
+                disabled ? (colorMode === "dark" ? "grey.800" : "grey.50") : colorMode === "dark" ? "grey.900" : "white"
             }
             textAlign="center"
             onDragOver={disabled ? undefined : onDragOver}
@@ -94,16 +82,10 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
                 disabled={disabled}
             />
             <VStack spacing={3}>
-                <Icon
-                    as={Upload}
-                    boxSize={10}
-                    color={
-                        disabled
-                            ? colorMode === "dark"
-                                ? "grey.600"
-                                : "grey.400"
-                            : currentDarkTheme.primary
-                    }
+                <BoxIcon
+                    icon={Upload}
+                    size="xl"
+                    color={disabled ? (colorMode === "dark" ? "grey.500" : "grey.400") : "green.500"}
                 />
                 <Text
                     fontWeight="semibold"
@@ -117,34 +99,20 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
                               : "grey.900"
                     }
                 >
-                    {disabled
-                        ? `Limite atteinte (${maxFiles} fichiers max)`
-                        : "Ajoute tes documents internes, convention collective ou PDF RH"}
+                    {disabled ? `Limite atteinte (${maxFiles} fichiers max)` : "Ajoute tes documents"}
                 </Text>
                 {!disabled && (
-                    <Text
-                        fontSize="sm"
-                        color={colorMode === "dark" ? "grey.400" : "grey.600"}
-                    >
+                    <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
                         Glisse & dépose ou clique pour sélectionner
                     </Text>
                 )}
-                {maxFiles !== undefined &&
-                    currentCount !== undefined &&
-                    !disabled && (
-                        <HStack spacing={1}>
-                            <Text
-                                fontSize="xs"
-                                color={
-                                    colorMode === "dark"
-                                        ? "grey.500"
-                                        : "grey.400"
-                                }
-                            >
-                                {currentCount}/{maxFiles} fichiers
-                            </Text>
-                        </HStack>
-                    )}
+                {maxFiles !== undefined && currentCount !== undefined && !disabled && (
+                    <HStack spacing={1}>
+                        <Text fontSize="xs" color={colorMode === "dark" ? "grey.500" : "grey.400"}>
+                            {currentCount}/{maxFiles} fichiers
+                        </Text>
+                    </HStack>
+                )}
             </VStack>
         </Box>
     );

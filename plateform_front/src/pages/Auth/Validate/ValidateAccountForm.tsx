@@ -1,13 +1,14 @@
-import { HStack, VStack, PinInput, PinInputField, Button, Text, useColorModeValue } from "@chakra-ui/react";
+import { HStack, VStack, PinInput, PinInputField, Text } from "@chakra-ui/react";
 import useThemedToast from "hooks/useThemedToast";
 import { FileWarningIcon, MailIcon, RepeatIcon, TimerIcon } from "lucide-react";
-import { AuthHeader } from "pages/Auth/AuthHeader";
+import { AuthHeader } from "components/Auth/AuthHeader";
 import { RegisterFormSteps } from "pages/Auth/Layout/AuthLayout";
 import { FC, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useResendEmailTokenMutation, useVerifyEmailTokenMutation, useGetMeQuery } from "services/auth/auth";
 import colors from "themeNew/foundations/colors";
 import { useAuth } from "app/AuthContext";
+import Button from "components/ui/Button";
 
 const ValidateAccountForm: FC = () => {
     const [searchParams] = useSearchParams();
@@ -18,8 +19,6 @@ const ValidateAccountForm: FC = () => {
     const { refetch: refetchMe } = useGetMeQuery();
     const [pin, setPin] = useState("");
     const toast = useThemedToast();
-    const buttonType = useColorModeValue("superSecondary", "superPrimary");
-    const pinInputColor = useColorModeValue("whites.offwhite", "black");
 
     const email = searchParams.get("email");
 
@@ -71,28 +70,29 @@ const ValidateAccountForm: FC = () => {
                     <HStack w="100%" gap="8px">
                         <MailIcon color="white" />
                         <Text variant="body-sm" w="100%" color="whites.offwhite">
-                            You should have received a verification code via Email
+                            Vous devriez avoir reçu un code de vérification par email
                         </Text>
                     </HStack>
 
                     <HStack w="100%" gap="8px">
                         <TimerIcon color="white" />
                         <Text variant="body-sm" w="100%" color="whites.offwhite">
-                            The code expires in 20 minutes
+                            Le code expire dans 20 minutes
                         </Text>
                     </HStack>
 
                     <HStack w="100%" gap="8px">
                         <FileWarningIcon color="white" />
                         <Text variant="body-sm" w="100%" color="whites.offwhite">
-                            Can&apos;t find the email? Check your spam or junk folder.
+                            Impossible de trouver l&apos;email? Vérifiez votre dossier de spam ou de courrier
+                            indésirable.
                         </Text>
                     </HStack>
 
                     <HStack w="100%" gap="8px">
                         <RepeatIcon color="white" />
                         <Text variant="body-sm" w="100%" color="whites.offwhite">
-                            Still can&apos;t find it?{" "}
+                            Vous ne recevez pas le code?{" "}
                             <Button
                                 isDisabled={isResending}
                                 variant="link"
@@ -101,7 +101,7 @@ const ValidateAccountForm: FC = () => {
                                 m={0}
                                 onClick={onSubmitResend}
                             >
-                                Resend code
+                                Renvoyer le code
                             </Button>
                         </Text>
                     </HStack>
@@ -116,7 +116,8 @@ const ValidateAccountForm: FC = () => {
                             flex="1"
                             textAlign="center"
                             borderWidth="2px"
-                            color={pinInputColor}
+                            color="grey.900"
+                            bg="green.400"
                         />
                     ))}
                 </PinInput>
@@ -127,7 +128,7 @@ const ValidateAccountForm: FC = () => {
                 disabled={isLoading || pin.length !== 6}
                 isLoading={isLoading}
                 w="100%"
-                variant={buttonType}
+                variant="superPrimary"
             >
                 Valider
             </Button>

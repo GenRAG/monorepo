@@ -6,17 +6,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class DeploymentRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    async findAll(agentId: string) {
-        const deployments = await this.prisma.agentVersion.findMany({
+    findAll(agentId: string) {
+        return this.prisma.agentVersion.findMany({
             where: { agentId },
             orderBy: { version: 'desc' },
         });
-
-        return deployments;
     }
 
-    async findOne(id: string, agentId: string) {
-        return await this.prisma.agentVersion.findFirst({
+    findOne(id: string, agentId: string) {
+        return this.prisma.agentVersion.findFirst({
             where: { id, agentId },
             include: {
                 createdByUser: {
@@ -37,7 +35,7 @@ export class DeploymentRepository {
         agentId: string;
         fromStatus: AgentStatus;
         toStatus: AgentStatus;
-        name: string;
+        name?: string;
         changelog?: string;
         workflowVersion?: number;
         userId: string;
@@ -57,8 +55,8 @@ export class DeploymentRepository {
                 data: {
                     agentId: data.agentId,
                     version: last ? last.version + 1 : 1,
-                    name: data.name,
-                    changelog: data.changelog ?? null,
+                    name: data.name ?? 'Deployment',
+                    changelog: data.changelog,
                     fromStatus: data.fromStatus,
                     toStatus: data.toStatus,
                     workflowVersion: data.workflowVersion ?? null,

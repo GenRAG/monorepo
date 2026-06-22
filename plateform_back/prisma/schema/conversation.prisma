@@ -2,12 +2,14 @@ model Conversation {
     id String @id @default(cuid())
     workspaceId String
     agentId String
+    userId String?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     title String
     messages Message[]
     workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
     agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+    user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 model Message {

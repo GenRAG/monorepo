@@ -14,12 +14,13 @@ import {
 } from "@chakra-ui/react";
 import { Clock, Plus, Search, SortAsc } from "lucide-react";
 import { useMemo, useState } from "react";
-import { AgentCard } from "pages/Agents/AgentCard";
-import { CreateAgentModal } from "pages/Agents/CreateAgentModal";
+import { AgentCard } from "components/Agents/AgentCard";
+import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
 import { useIsDark } from "hooks/useIsDark";
 import { SortButton, SortKey } from "pages/Assistant/AssistantList";
+import BoxIcon from "components/ui/BoxIcon";
 
 export const AgentsList = () => {
     const { workspaceId = "default" } = useParams<{ workspaceId: string }>();
@@ -30,8 +31,9 @@ export const AgentsList = () => {
     const [sort, setSort] = useState<SortKey>("recent");
     const { colorMode } = useColorMode();
 
-    const textSecondary = useColorModeValue("grey.500", "grey.400");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
+    const textSecondary = useColorModeValue("grey.500", "white");
+    const borderColor = useColorModeValue("grey.100", "grey.500");
+    const bgColor = useColorModeValue("green.50", "grey.900");
 
     const visibleAgents = useMemo(() => {
         const normalizedQuery = searchValue.trim().toLowerCase();
@@ -88,11 +90,10 @@ export const AgentsList = () => {
                 border="1px solid"
                 borderColor={border}
                 borderRadius="10px"
-                p={1}
                 w="fit-content"
             >
-                {SortButton("recent", "Récent", Clock, sort, setSort)}
-                {SortButton("az", "A→Z", SortAsc, sort, setSort)}
+                {SortButton("recent", "Récent", Clock, sort, setSort, "first")}
+                {SortButton("az", "A→Z", SortAsc, sort, setSort, "last")}
             </HStack>
 
             {isLoading ? (
@@ -105,7 +106,8 @@ export const AgentsList = () => {
                         w="100%"
                         minH="160px"
                         borderRadius="12px"
-                        border="1.5px dashed"
+                        border="2px dashed"
+                        bg={bgColor}
                         borderColor={borderColor}
                         display="flex"
                         flexDirection="column"
@@ -115,24 +117,11 @@ export const AgentsList = () => {
                         cursor="pointer"
                         onClick={() => setIsCreateModalOpen(true)}
                         _hover={{
-                            borderColor: colorMode === "dark" ? "grey.500" : "grey.400",
-                            bg: colorMode === "dark" ? "grey.900" : "grey.50",
+                            borderColor: colorMode === "dark" ? "green.500" : "grey.200",
                         }}
                         transition="all 0.15s"
                     >
-                        <Box
-                            w="28px"
-                            h="28px"
-                            border="1.5px solid"
-                            borderColor={borderColor}
-                            borderRadius="full"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            color={textSecondary}
-                        >
-                            <Icon as={Plus} boxSize={3.5} />
-                        </Box>
+                        <BoxIcon icon={Plus} />
                         <Text fontSize="13px" color={textSecondary}>
                             Créer un nouvel agent
                         </Text>

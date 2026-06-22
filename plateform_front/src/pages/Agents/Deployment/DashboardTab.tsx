@@ -20,9 +20,7 @@ export const DashboardTab = () => {
     const bgColor = useColorModeValue("white", "grey.975");
 
     if (isLoading || !data) {
-        return (
-            <Skeleton height="200px" width="100%" borderRadius="12px" mb={6} />
-        );
+        return <Skeleton m={6} height="200px" width="100%" borderRadius="12px" mb={6} />;
     }
 
     return (

@@ -1,24 +1,19 @@
-import {
-    Box,
-    HStack,
-    Skeleton,
-    Text,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Icon, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { useIsDark } from "hooks/useIsDark";
 import { useGetWorkflowByVersionQuery } from "services/workflow/workflow";
+import { FileText } from "lucide-react";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface PipelineJsonPanelProps {
     workflowVersion: number | null;
     workspaceId: string;
     agentId: string;
+    deploymentName: string | null;
+    deploymentChangelog: string | null;
 }
 
 const highlightJson = (json: object, isDark: boolean): string => {
-    const escaped = JSON.stringify(json, null, 2)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+    const escaped = JSON.stringify(json, null, 2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     return escaped.replace(
         /("(\\u[\dA-Fa-f]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
         (match) => {
@@ -26,9 +21,7 @@ const highlightJson = (json: object, isDark: boolean): string => {
                 if (/:$/.test(match)) {
                     return `<span style="color:var(--chakra-colors-green-500)">${match}</span>`;
                 }
-                const greenColor = isDark
-                    ? "var(--chakra-colors-green-200)"
-                    : "var(--chakra-colors-green-700)";
+                const greenColor = isDark ? "var(--chakra-colors-green-200)" : "var(--chakra-colors-green-700)";
                 return `<span style="color:${greenColor}">${match}</span>`;
             }
             if (/true|false/.test(match)) {
@@ -46,6 +39,8 @@ export const PipelineJsonPanel = ({
     workflowVersion,
     workspaceId,
     agentId,
+    deploymentName,
+    deploymentChangelog,
 }: PipelineJsonPanelProps) => {
     const { data: workflow, isLoading } = useGetWorkflowByVersionQuery(
         { workspaceId, agentId, version: workflowVersion! },
@@ -62,14 +57,7 @@ export const PipelineJsonPanel = ({
     const pipeline = workflow?.definition.blocks ?? null;
 
     return (
-        <Box
-            borderBottomRadius="12px"
-            bg={bgColor}
-            overflow="hidden"
-            display="flex"
-            flexDirection="column"
-            h="full"
-        >
+        <Box borderBottomRadius="12px" bg={bgColor} overflow="hidden" display="flex" flexDirection="column" h="full">
             <HStack
                 justify="space-between"
                 p={4}
@@ -78,22 +66,15 @@ export const PipelineJsonPanel = ({
                 borderColor={borderColor}
             >
                 <Text fontSize="lg" textTransform="uppercase" color={textColor}>
-                    Pipeline JSON
+                    {deploymentName}
                     {workflowVersion !== null && (
                         <Box as="span" ml={2} color="green.500">
-                            · workflow v{workflowVersion}
+                            · {deploymentChangelog}
                         </Box>
                     )}
                 </Text>
             </HStack>
-            <Box
-                p={5}
-                bg={jsonBgColor}
-                flex="1"
-                maxW="100%"
-                overflowY="scroll"
-                overflowX="hidden"
-            >
+            <Box p={5} bg={jsonBgColor} flex="1" maxW="100%" overflowY="scroll" overflowX="hidden">
                 {isLoading ? (
                     <Skeleton h="200px" borderRadius="6px" />
                 ) : pipeline ? (

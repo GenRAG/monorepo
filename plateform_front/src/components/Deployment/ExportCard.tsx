@@ -1,14 +1,16 @@
 import type { ReactNode } from "react";
 import { Box, HStack, VStack, Text, useColorModeValue } from "@chakra-ui/react";
-import Button from "components/System/Atoms/Button";
+import Button from "components/ui/Button";
 
 interface ExportCardProps {
     icon: ReactNode;
     title: string;
     subtitle: string;
+    onClick?: () => void;
+    isLoading?: boolean;
 }
 
-export const ExportCard = ({ icon, title, subtitle }: ExportCardProps) => {
+export const ExportCard = ({ icon, title, subtitle, onClick, isLoading }: ExportCardProps) => {
     const bg = useColorModeValue("white", "grey.900");
     const titleColor = useColorModeValue("grey.900", "grey.50");
     const subtitleColor = useColorModeValue("grey.300", "grey.600");
@@ -16,7 +18,7 @@ export const ExportCard = ({ icon, title, subtitle }: ExportCardProps) => {
     return (
         <Box flex={1} p={4} borderRadius="8px" bg={bg}>
             <HStack>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" onClick={onClick} isLoading={isLoading}>
                     {icon}
                 </Button>
                 <VStack align="start" spacing={0.5}>

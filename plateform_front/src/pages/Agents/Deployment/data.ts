@@ -13,10 +13,7 @@ export interface Version {
     pipeline: object;
 }
 
-export const ENV_BADGE: Record<
-    Version["env"],
-    { label: string; color: string; bg: string; borderToken: string }
-> = {
+export const ENV_BADGE: Record<Version["env"], { label: string; color: string; bg: string; borderToken: string }> = {
     prod: {
         label: "PROD",
         color: "green",

@@ -1,39 +1,31 @@
 import type { ReactNode } from "react";
-import { HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { HStack, Text, VStack } from "@chakra-ui/react";
+import { LucideIcon } from "lucide-react";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface SectionHeaderProps {
     title: string;
     subtitle?: string;
     action?: ReactNode;
+    icon?: LucideIcon;
 }
 
-export const SectionHeader = ({
-    title,
-    subtitle,
-    action,
-}: SectionHeaderProps) => {
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const titleColor = useColorModeValue("grey.900", "grey.50");
-    const subtitleColor = useColorModeValue("grey.300", "grey.500");
-
+export const SectionHeader = ({ title, subtitle, action, icon }: SectionHeaderProps) => {
     return (
-        <HStack
-            justify="space-between"
-            p={4}
-            borderBottom="1px solid"
-            borderBottomColor={borderColor}
-        >
-            <VStack align="start" spacing={0.5}>
-                <Text fontSize="sm" fontWeight={600} color={titleColor}>
-                    {title}
-                </Text>
-                {subtitle && (
-                    <Text fontSize="xs" color={subtitleColor}>
-                        {subtitle}
+        <HStack justify="space-between" p={4} borderBottom="1px solid" borderBottomColor="borderDefault">
+            <HStack spacing={3}>
+                {icon && <BoxIcon icon={icon} />}
+                <VStack align="start" spacing={0.5}>
+                    <Text fontSize="sm" fontWeight={600} color="textPrimary">
+                        {title}
                     </Text>
-                )}
-            </VStack>
-
+                    {subtitle && (
+                        <Text fontSize="xs" color="textSubtle">
+                            {subtitle}
+                        </Text>
+                    )}
+                </VStack>
+            </HStack>
             {action}
         </HStack>
     );

@@ -1,11 +1,4 @@
-import {
-    Box,
-    HStack,
-    VStack,
-    Text,
-    Badge,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, VStack, Text, Badge, useColorModeValue } from "@chakra-ui/react";
 import { VersionStatus } from "types/deployment/deployment";
 
 interface EnvBadge {
@@ -23,15 +16,7 @@ interface VersionListItemProps {
     onClick: () => void;
 }
 
-export const VersionListItem = ({
-    id,
-    env,
-    badge,
-    description,
-    date,
-    isSelected,
-    onClick,
-}: VersionListItemProps) => {
+export const VersionListItem = ({ id, env, badge, description, date, isSelected, onClick }: VersionListItemProps) => {
     const selectedBg = useColorModeValue("grey.50", "grey.900");
     const borderBottomColor = useColorModeValue("grey.100", "grey.900");
     const hoverBg = useColorModeValue("grey.25", "grey.950");
@@ -68,21 +53,11 @@ export const VersionListItem = ({
             <VStack align="stretch" spacing={0.5} minW={0}>
                 <HStack justify="space-between" align="center" minW={0}>
                     <HStack spacing={1.5} minW={0}>
-                        <Text
-                            fontSize="md"
-                            fontWeight={500}
-                            color={idColor}
-                            fontFamily="mono"
-                        >
+                        <Text fontSize="md" fontWeight={500} color={idColor} fontFamily="mono">
                             {id}
                         </Text>
                         {env === "prod" && (
-                            <Badge
-                                colorScheme={badge.color}
-                                fontSize="8px"
-                                fontWeight={500}
-                                size="xs"
-                            >
+                            <Badge colorScheme={badge.color} fontSize="8px" fontWeight={500} size="xs">
                                 EN PROD
                             </Badge>
                         )}

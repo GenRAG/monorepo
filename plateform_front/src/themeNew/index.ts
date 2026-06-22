@@ -40,6 +40,7 @@ import { Slider } from "./components/slider";
 // import Stepper from './components/stepper';
 import Switch from "./components/switch";
 import Stepper from "themeNew/components/stepper";
+import Skeleton from "themeNew/components/skeleton";
 import { shadow } from "./foundations/shadow";
 
 import "./index.scss";
@@ -111,6 +112,7 @@ const overrides = {
         Modal,
         Divider,
         Stepper,
+        Skeleton,
         // Tooltip,
         Textarea,
     },

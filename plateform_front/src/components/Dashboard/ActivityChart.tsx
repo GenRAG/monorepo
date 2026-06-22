@@ -139,9 +139,7 @@ export const ActivityChart = ({
 
     return (
         <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" overflow="hidden" minW={0}>
-            <Box p={4}>
-                <ActivityHeader period={period} setPeriod={setPeriod} />
-            </Box>
+            <ActivityHeader period={period} setPeriod={setPeriod} />
 
             {isEmpty ? (
                 <CardEmptyState
@@ -152,8 +150,10 @@ export const ActivityChart = ({
             ) : (
                 <>
                     <ActivityMetrics total={totalConversations} today={todayConversations} period={period} />
-                    <Box h="200px" position="relative">
-                        <Line data={chartJsData} options={options} />
+                    <Box h="200px" position="relative" minW={0}>
+                        <Box position="absolute" inset={0}>
+                            <Line data={chartJsData} options={options} />
+                        </Box>
                     </Box>
                     <ActivityLegend />
                 </>

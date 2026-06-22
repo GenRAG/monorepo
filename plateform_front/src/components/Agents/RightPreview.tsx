@@ -1,6 +1,6 @@
-import React, { FC } from "react";
+import { FC } from "react";
 import { Box } from "@chakra-ui/react";
-import { WorkflowPreview } from "components/System/Molecules/WorkflowPreview/WorkflowPreview";
+import { WorkflowPreview } from "components/ui/workflow-preview/WorkflowPreview";
 import type { AppNode } from "@genrag/workflow";
 import type { Edge } from "@xyflow/react";
 
@@ -10,11 +10,7 @@ interface Props {
     selectedTemplateId?: string | null;
 }
 
-export const RightPreview: FC<Props> = ({
-    nodes,
-    edges,
-    selectedTemplateId,
-}) => {
+export const RightPreview: FC<Props> = ({ nodes, edges, selectedTemplateId }) => {
     return (
         <Box flex={1} position="relative" overflow="hidden">
             <Box position="absolute" inset={0}>

@@ -5,9 +5,9 @@ import { ShapeType } from "../../components/nodes";
 
 export const AddResponse = {
     type: TaskType.RESPONSE,
-    label: "Response",
+    label: "Réponse",
     shape: ShapeType.CIRCLE,
-    description: "Generate a response based on the question and the workflow",
+    description: "Génère la réponse finale à partir des documents trouvés",
     icon: (props: React.ComponentProps<LucideIcon>) => {
         return <Speech {...props} className="stroke-blue-500" />;
     },
@@ -18,20 +18,20 @@ export const AddResponse = {
     id: "tooltip-workflow-4",
     inputs: [
         {
-            name: "Large Language Model",
+            name: "Modèle IA",
             type: TaskParamType.SELECT,
             nodeType: TaskType.MODEL,
-            helperText: "Choose a LLM model for your response",
+            helperText: "Choisissez le modèle IA pour la génération de réponse",
             required: true,
             hideHandle: false,
             items: LLMS,
             id: "tooltip-workflow-5",
         },
         {
-            name: "system_prompt",
+            name: "Instruction",
             type: TaskParamType.STRING,
             nodeType: TaskType.INSTRUCTION,
-            helperText: "Enter the instruction prompt for the response",
+            helperText: "Rédigez les instructions de votre assistant",
             required: true,
             hideHandle: false,
             items: [],

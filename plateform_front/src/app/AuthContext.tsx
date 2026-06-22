@@ -1,12 +1,6 @@
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-    ReactNode,
-} from "react";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import useAuthentification from "hooks/useAuthentification";
-import { AppLoader } from "components/System/Molecules/AppLoader";
+import { AppLoader } from "components/ui/AppLoader";
 
 interface AuthContextType {
     isLoggedIn: boolean;
@@ -17,9 +11,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-    children,
-}) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuthentification();
     const [isInit, setIsInit] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);

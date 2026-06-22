@@ -35,7 +35,7 @@ import {
     ChartOptions,
 } from "chart.js";
 import { Line, Bar } from "react-chartjs-2";
-import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import { ChevronDownIcon, ChevronUpIcon, ClockIcon } from "lucide-react";
 
 // Register ChartJS components

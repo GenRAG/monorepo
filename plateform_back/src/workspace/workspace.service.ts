@@ -11,13 +11,8 @@ export class WorkspaceService {
     ) {}
 
     async create(workspaceData: CreateWorkspaceRequest, userId: string): Promise<WorkspaceWithUsers> {
-        const { name, description, plan } = workspaceData;
-        return this.workspaceRepository.create({
-            name,
-            description,
-            userId,
-            plan,
-        });
+        const { name, description } = workspaceData;
+        return this.workspaceRepository.create({ name, description, userId });
     }
 
     async findAll(userId: string): Promise<WorkspaceWithUsers[]> {
@@ -26,22 +21,30 @@ export class WorkspaceService {
 
     async findOne(workspaceId: string): Promise<WorkspacePayload> {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
-        if (!workspace) {
-            throw new NotFoundException('Workspace not found');
-        }
+        if (!workspace) throw new NotFoundException('Workspace not found');
         return workspace;
     }
 
     async delete(workspaceId: string): Promise<void> {
-        const workspace = await this.workspaceRepository.findOne(workspaceId);
-        if (!workspace) {
-            throw new NotFoundException('Workspace not found');
+        try {
+            await this.workspaceRepository.delete(workspaceId);
+        } catch (e: any) {
+            if (e?.code === 'P2025') throw new NotFoundException('Workspace not found');
+            throw e;
         }
-        await this.workspaceRepository.delete(workspaceId);
     }
 
     async getStats(workspaceId: string) {
-        await this.findOne(workspaceId);
+        if (!(await this.workspaceRepository.exists(workspaceId))) {
+            throw new NotFoundException('Workspace not found');
+        }
         return this.workspaceStatsService.getStats(workspaceId);
+    }
+
+    async getConsumption(workspaceId: string, days: number) {
+        if (!(await this.workspaceRepository.exists(workspaceId))) {
+            throw new NotFoundException('Workspace not found');
+        }
+        return this.workspaceStatsService.getConsumption(workspaceId, days);
     }
 }

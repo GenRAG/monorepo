@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { randomInt } from 'crypto';
+import { createHmac, randomInt } from 'crypto';
 import { User } from 'generated/prisma';
 import ms from 'ms';
-import { BrevoService } from 'src/auth/brevo.service';
-import { VerifyTokenRequest } from 'src/users/dto/verify-token.request';
+import { ResendService } from 'src/auth/resend.service';
+import { LoginAttemptService } from 'src/auth/login-attempt.service';
+import { VerifyTokenRequest } from 'src/auth/dto/verify-token.request';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -12,21 +13,27 @@ export class TokenService {
     constructor(
         private readonly usersService: UsersService,
         private readonly configService: ConfigService,
-        private readonly brevoService: BrevoService,
-    ) {
-        console.log('BREVO_API_KEY:', process.env.BREVO_API_KEY?.substring(0, 5) + '...');
+        private readonly resendService: ResendService,
+        private readonly loginAttempt: LoginAttemptService,
+    ) {}
+
+    hashOtpCode(code: number): string {
+        return createHmac('sha256', this.configService.getOrThrow<string>('JWT_SECRET'))
+            .update(code.toString())
+            .digest('hex');
     }
 
     async generateAndSendVerificationToken(email: string): Promise<void> {
+        const normalizedEmail = email.toLowerCase().trim();
         const now = Date.now();
 
         const tokenResendIntervalMs = ms(
             this.configService.getOrThrow<string>('TOKEN_RESEND_INTERVAL') as ms.StringValue,
         );
 
-        const user = await this.usersService.findOneWithCredentials({ email });
+        const user = await this.usersService.findOneWithCredentials({ email: normalizedEmail });
         if (!user) {
-            throw new BadRequestException('User not found.');
+            throw new BadRequestException('Invalid request.');
         }
 
         if (
@@ -36,44 +43,54 @@ export class TokenService {
             const remaining = Math.ceil(
                 (tokenResendIntervalMs - (now - user.emailVerificationLastSentAt.getTime())) / 1000,
             );
-            throw new BadRequestException(`Please wait ${remaining}s before requesting a new code.`);
+            throw new BadRequestException(`Veuillez attendre ${remaining}s avant de demander un nouveau code.`);
         }
 
-        const emailVerificationToken = randomInt(100000, 1000000);
+        const plainToken = randomInt(100000, 1000000);
+        const hashedToken = this.hashOtpCode(plainToken);
 
         await this.usersService.update({
-            where: { email: user.email },
+            where: { email: normalizedEmail },
             data: {
-                emailVerificationToken,
+                emailVerificationToken: hashedToken,
                 emailVerificationLastSentAt: new Date(),
             },
         });
 
         if (this.configService.get('SEND_EMAILS') === 'true') {
-            await this.brevoService.sendConfirmationEmail(user.email, emailVerificationToken);
+            await this.resendService.sendConfirmationEmail(normalizedEmail, plainToken);
         }
     }
 
     async verifyEmailToken(emailVerificationToken: VerifyTokenRequest): Promise<User> {
-        const { email, token } = emailVerificationToken;
-        const user = await this.usersService.findOneWithCredentials({ email });
+        const email = emailVerificationToken.email.toLowerCase().trim();
+        const { token: code } = emailVerificationToken;
 
-        if (!user) {
-            throw new UnauthorizedException('User not found.');
+        if (await this.loginAttempt.isBlocked(email)) {
+            throw new UnauthorizedException('Too many failed attempts. Try again later.');
         }
 
-        if (user.emailVerificationToken !== token) {
+        const user = await this.usersService.findOneWithCredentials({ email });
+
+        if (!user || !user.emailVerificationToken || !user.emailVerificationLastSentAt) {
+            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Invalid verification token.');
         }
 
-        if (user.emailVerificationLastSentAt) {
-            const tokenAgeMs = Date.now() - user.emailVerificationLastSentAt.getTime();
-            const tokenValidityMs = ms(this.configService.getOrThrow<string>('TOKEN_VALIDITY') as ms.StringValue);
-            if (tokenAgeMs > tokenValidityMs) {
-                throw new UnauthorizedException('Email verification token has expired.');
-            }
+        const tokenAgeMs = Date.now() - user.emailVerificationLastSentAt.getTime();
+        const tokenValidityMs = ms(this.configService.getOrThrow<string>('TOKEN_VALIDITY') as ms.StringValue);
+        if (tokenAgeMs > tokenValidityMs) {
+            await this.loginAttempt.recordFailure(email);
+            throw new UnauthorizedException('Email verification token has expired.');
         }
 
+        const hashedIncoming = this.hashOtpCode(code);
+        if (user.emailVerificationToken !== hashedIncoming) {
+            await this.loginAttempt.recordFailure(email);
+            throw new UnauthorizedException('Invalid verification token.');
+        }
+
+        await this.loginAttempt.reset(email);
         await this.usersService.update({
             where: { email },
             data: {
@@ -83,7 +100,8 @@ export class TokenService {
             },
         });
 
-        return user;
+        const fresh = await this.usersService.findOneWithCredentials({ email });
+        return fresh!;
     }
 
     async generateAndSendPasswordResetToken(user: User): Promise<void> {
@@ -100,18 +118,19 @@ export class TokenService {
             throw new BadRequestException(`Please wait ${remaining}s before requesting a new code.`);
         }
 
-        const passwordResetToken = randomInt(100000, 1000000);
+        const plainToken = randomInt(100000, 1000000);
+        const hashedToken = this.hashOtpCode(plainToken);
 
         await this.usersService.update({
             where: { email: user.email },
             data: {
-                passwordResetToken,
+                passwordResetToken: hashedToken,
                 passwordResetLastSentAt: new Date(),
             },
         });
 
         if (this.configService.get('SEND_EMAILS') === 'true') {
-            await this.brevoService.sendPasswordResetEmail(user.email, passwordResetToken);
+            await this.resendService.sendPasswordResetEmail(user.email, plainToken);
         }
     }
 }

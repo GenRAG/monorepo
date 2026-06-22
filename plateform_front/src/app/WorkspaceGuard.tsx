@@ -11,8 +11,9 @@ export default function WorkspaceGuard() {
         skip: !workspaceId,
     });
 
-    const { data: onboardingSession, isLoading: isOnboardingLoading } =
-        useGetOnboardingSessionQuery(workspaceId!, { skip: !workspaceId });
+    const { data: onboardingSession, isLoading: isOnboardingLoading } = useGetOnboardingSessionQuery(workspaceId!, {
+        skip: !workspaceId,
+    });
 
     if (isLoading || isOnboardingLoading) {
         return (
@@ -26,9 +27,9 @@ export default function WorkspaceGuard() {
         return <NotFound />;
     }
 
-    if (onboardingSession && !onboardingSession.completed) {
+    /*if (onboardingSession && !onboardingSession.completed) {
         return <Navigate to={`/onboarding/${workspaceId}`} replace />;
-    }
+    }*/
 
     return <Outlet />;
 }

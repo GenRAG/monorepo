@@ -1,0 +1,1 @@
+ALTER TABLE "AgentQueryLog" ADD COLUMN "creditsUsed" INTEGER NOT NULL DEFAULT 1;

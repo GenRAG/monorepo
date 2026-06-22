@@ -1,13 +1,7 @@
 import React from "react";
-import {
-    Box,
-    Button,
-    HStack,
-    Text,
-    useColorModeValue,
-    VStack,
-} from "@chakra-ui/react";
+import { Box, Button, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { CloudUpload, Upload } from "lucide-react";
+import BoxIcon from "components/ui/BoxIcon";
 
 interface DocumentEmptyStateProps {
     folderId: string | null;
@@ -17,7 +11,7 @@ interface DocumentEmptyStateProps {
     isMobile?: boolean;
 }
 
-const FORMAT_BADGES = ["PDF", "DOCX", "TXT", "MD"];
+const FORMAT_BADGES = ["PDF", "TXT", "MD"];
 
 export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
     folderId,
@@ -46,34 +40,15 @@ export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
             py={12}
             textAlign="center"
         >
-            <Box
-                w="64px"
-                h="64px"
-                borderRadius="16px"
-                bg="green.600"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-            >
-                <CloudUpload size={28} color="white" />
-            </Box>
+            <BoxIcon icon={CloudUpload} size="xl" />
 
             <VStack spacing={2} maxW="360px">
-                <Text
-                    fontSize="xl"
-                    fontWeight="700"
-                    color={textColor}
-                    lineHeight="1.2"
-                >
-                    {folderId
-                        ? `Aucun document dans ${folderName ?? "ce dossier"}`
-                        : "Aucun document indexé"}
+                <Text fontSize="xl" fontWeight="700" color={textColor} lineHeight="1.2">
+                    {folderId ? `Aucun document dans ${folderName ?? "ce dossier"}` : "Aucun document indexé"}
                 </Text>
                 <Text fontSize="sm" color={mutedColor} lineHeight="1.6">
-                    Glissez-déposez vos fichiers ici, ou téléversez-les
-                    manuellement. Votre agent utilisera ces documents comme base
-                    de connaissance pour répondre aux questions.
+                    Glissez-déposez vos fichiers ici, ou téléversez-les manuellement. Votre agent utilisera ces
+                    documents comme base de connaissance pour répondre aux questions.
                 </Text>
             </VStack>
 
@@ -81,7 +56,7 @@ export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
                 leftIcon={<Upload size={15} />}
                 onClick={onUploadClick}
                 size={isMobile ? "md" : "md"}
-                variant="primary"
+                variant="superPrimary"
             >
                 Téléverser vos premiers documents
             </Button>

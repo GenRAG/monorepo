@@ -8,13 +8,7 @@ export const ActivityLegend = () => {
     return (
         <HStack p={4} spacing={4} borderTop="1px solid" borderColor={border}>
             <HStack spacing={1.5}>
-                <Box
-                    w="8px"
-                    h="8px"
-                    borderRadius="2px"
-                    bg="green.500"
-                    flexShrink={0}
-                />
+                <Box w="8px" h="8px" borderRadius="2px" bg="green.500" flexShrink={0} />
                 <Text fontSize="12px" color={textSecondary}>
                     Conversations
                 </Text>

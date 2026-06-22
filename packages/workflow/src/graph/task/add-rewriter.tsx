@@ -6,8 +6,8 @@ import { ShapeType } from "../../components/nodes";
 export const AddRewriter = {
     type: TaskType.REWRITER,
     shape: ShapeType.CIRCLE,
-    label: "Rewriter",
-    description: "Rewrites the user query to improve retrieval from the knowledge base.",
+    label: "Reformulation",
+    description: "Reformule la question pour améliorer la recherche dans vos documents.",
     id: "tooltip-workflow-rewriter",
     isEntryPoint: false,
     isEndPoint: false,
@@ -16,13 +16,12 @@ export const AddRewriter = {
     icon: (props: React.ComponentProps<LucideIcon>) => (
         <PencilIcon {...props} className="stroke-blue-500" />
     ),
-
     inputs: [
         {
-            name: "Large Language Model",
+            name: "Modèle de reformulation",
             type: TaskParamType.SELECT,
             nodeType: TaskType.MODEL,
-            helperText: "Choose a LLM model for your rewriter",
+            helperText: "Choisissez le modèle IA pour la reformulation",
             required: true,
             hideHandle: false,
             items: LLMSRewriter,

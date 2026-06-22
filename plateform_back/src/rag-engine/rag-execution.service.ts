@@ -1,8 +1,8 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Prisma } from 'generated/prisma';
 import { firstValueFrom } from 'rxjs';
+import type { Pipeline } from './pipeline.schema';
 import FormData from 'form-data';
 import type { IncomingMessage } from 'http';
 
@@ -26,56 +26,47 @@ export class RagEngineService {
         this.apiKey = this.configService.getOrThrow<string>('RAGENGINE_API_KEY');
     }
 
+    private _buildStreamRequest(pipeline: Pipeline, query: string, orgId: string) {
+        return {
+            body: { pipeline: { blocks: pipeline }, query, org_id: orgId },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': this.apiKey,
+                'Accept-Encoding': 'identity',
+            },
+        };
+    }
+
+    private async _mockStream(pipeline: Pipeline, query: string, orgId: string): Promise<IncomingMessage> {
+        this.logger.debug('Using mock RAG stream');
+
+        const { body } = this._buildStreamRequest(pipeline, query, orgId);
+
+        const response = await firstValueFrom(
+            this.httpService.post(`${this.ragEngineUrl}/rag/stream/mock`, body, {
+                headers: { 'Content-Type': 'application/json' },
+                responseType: 'stream',
+                timeout: 30_000,
+            }),
+        );
+
+        return response.data as IncomingMessage;
+    }
+
     async sendQuery({
         pipeline,
         query,
         orgId,
         mock = false,
     }: {
-        pipeline: Prisma.JsonValue;
+        pipeline: Pipeline;
         query: string;
         orgId: string;
         mock?: boolean;
     }): Promise<string> {
-        if (mock) {
-            const response = await firstValueFrom(
-                this.httpService.post(
-                    `${this.ragEngineUrl}/rag/stream/mock`,
-                    {},
-                    { responseType: 'stream', timeout: 30_000 },
-                ),
-            );
-            return new Promise<string>((resolve, reject) => {
-                const stream = response.data as IncomingMessage;
-                const chunks: Buffer[] = [];
-                stream.on('data', (chunk: Buffer) => chunks.push(chunk));
-                stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
-                stream.on('error', (err: Error) => reject(err));
-            });
-        }
-
-        const body = JSON.stringify({
-            pipeline: { blocks: pipeline },
-            query,
-            org_id: orgId,
-        });
-
-        this.logger.debug(`Sending query to RAG engine: ${this.ragEngineUrl}/rag/stream`);
-        console.log(body);
-        const response = await firstValueFrom(
-            this.httpService.post(`${this.ragEngineUrl}/rag/stream`, body, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-API-Key': this.apiKey,
-                    'Accept-Encoding': 'identity',
-                },
-                responseType: 'stream',
-                timeout: 120_000,
-            }),
-        );
+        const stream = await this.getQueryStream({ pipeline, query, orgId, mock });
 
         return new Promise<string>((resolve, reject) => {
-            const stream = response.data as IncomingMessage;
             const chunks: Buffer[] = [];
 
             stream.on('data', (chunk: Buffer) => chunks.push(chunk));
@@ -87,14 +78,8 @@ export class RagEngineService {
             });
 
             stream.on('error', (err: Error) => {
-                const partial = Buffer.concat(chunks).toString('utf-8');
-                if (partial.length > 0) {
-                    this.logger.warn(`RAG stream aborted after ${partial.length} chars: ${err.message}`);
-                    resolve(partial);
-                } else {
-                    this.logger.error(`RAG stream failed: ${err.message}`);
-                    reject(new Error(`RAG engine stream failed: ${err.message}`));
-                }
+                this.logger.error(`RAG stream failed: ${err.message}`);
+                reject(new Error(`RAG engine stream failed: ${err.message}`));
             });
         });
     }
@@ -105,40 +90,59 @@ export class RagEngineService {
         orgId,
         mock = false,
     }: {
-        pipeline: Prisma.JsonValue;
+        pipeline: Pipeline;
         query: string;
         orgId: string;
         mock?: boolean;
     }): Promise<IncomingMessage> {
-        if (mock) {
-            const response = await firstValueFrom(
-                this.httpService.post(
-                    `${this.ragEngineUrl}/rag/stream/mock`,
-                    {},
-                    { responseType: 'stream', timeout: 30_000 },
-                ),
-            );
-            return response.data as IncomingMessage;
-        }
+        if (mock) return this._mockStream(pipeline, query, orgId);
 
-        const body = JSON.stringify({
-            pipeline: { blocks: pipeline },
-            query,
-            org_id: orgId,
-        });
+        const { body, headers } = this._buildStreamRequest(pipeline, query, orgId);
+
         const response = await firstValueFrom(
             this.httpService.post(`${this.ragEngineUrl}/rag/stream`, body, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-API-Key': this.apiKey,
-                    'Accept-Encoding': 'identity',
-                },
+                headers,
                 responseType: 'stream',
                 timeout: 120_000,
             }),
         );
 
         return response.data as IncomingMessage;
+    }
+
+    private modelsCache: { data: unknown; expiresAt: number } | null = null;
+    private readonly MODELS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+    async getModelsGeneration(): Promise<unknown[]> {
+        if (this.modelsCache && Date.now() < this.modelsCache.expiresAt) {
+            return this.modelsCache.data as unknown[];
+        }
+
+        const response = await firstValueFrom(
+            this.httpService.get(`${this.ragEngineUrl}/models`, {
+                headers: { 'X-API-Key': this.apiKey },
+                timeout: 10_000,
+            }),
+        );
+
+        const raw = response.data as { models?: { data?: unknown[] } };
+        const models = raw?.models?.data ?? [];
+
+        this.modelsCache = { data: models, expiresAt: Date.now() + this.MODELS_CACHE_TTL_MS };
+        return models;
+    }
+
+    async getRerankingModels(): Promise<unknown[]> {
+        const response = await firstValueFrom(
+            this.httpService.get(`${this.ragEngineUrl}/models/rerank`, {
+                headers: { 'X-API-Key': this.apiKey },
+                timeout: 10_000,
+            }),
+        );
+        console.log('Reranking models response:', response.data);
+
+        const raw = response.data as { rerank_models?: { data?: unknown[] } };
+        return raw?.rerank_models?.data ?? [];
     }
 
     async indexDocument(name: string, agentId: string, buffer: Buffer, mimeType: string): Promise<void> {
@@ -166,6 +170,7 @@ export class RagEngineService {
 
     private async waitForJob(jobId: string, timeoutMs = 300_000): Promise<void> {
         const start = Date.now();
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
 
         while (Date.now() - start < timeoutMs) {
             const response = await firstValueFrom(
@@ -177,7 +182,9 @@ export class RagEngineService {
                 error?: string;
             };
 
-            if (status === JobStatus.COMPLETED) return;
+            if (status === JobStatus.COMPLETED) {
+                return;
+            }
 
             if (status === JobStatus.FAILED) {
                 throw new Error(`RAG engine job ${jobId} failed: ${error ?? 'unknown error'}`);
@@ -186,7 +193,6 @@ export class RagEngineService {
             this.logger.debug(`Job ${jobId} status: ${status}`);
             await new Promise((resolve) => setTimeout(resolve, 2_000));
         }
-
         throw new Error(`RAG engine job ${jobId} timed out after ${timeoutMs}ms`);
     }
 }

@@ -4,8 +4,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 import borderRadius from "themeNew/foundations/borderRadius";
 import { textStyles } from "themeNew/foundations/typography";
 
-const { definePartsStyle, defineMultiStyleConfig } =
-    createMultiStyleConfigHelpers(inputAnatomy.keys);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(inputAnatomy.keys);
 
 const baseStyle = definePartsStyle({
     field: {
@@ -13,7 +12,7 @@ const baseStyle = definePartsStyle({
         bg: "inputBg",
         borderWidth: "1px",
         borderStyle: "solid",
-        borderRadius: borderRadius.xs,
+        borderRadius: borderRadius.sm,
         borderColor: "inputBorder",
         color: "inputText",
         _hover: {
@@ -31,28 +30,26 @@ const baseStyle = definePartsStyle({
         },
         _focus: {
             borderColor: "inputActiveBorder",
+            boxShadow: "0 0 0 1px var(--chakra-colors-green-400)",
         },
         "&:-webkit-autofill": {
             borderColor: "inputActiveBorder",
             WebkitTextFillColor: "var(--chakra-colors-inputText)",
-            WebkitBoxShadow:
-                "0 0 0px 1000px var(--chakra-colors-inputBg) inset",
+            WebkitBoxShadow: "0 0 0px 1000px var(--chakra-colors-inputBg) inset",
             caretColor: "var(--chakra-colors-inputText)",
             transition: "background-color 5000s ease-in-out 0s",
         },
         "&:-webkit-autofill:hover": {
             borderColor: "inputActiveBorder",
             WebkitTextFillColor: "var(--chakra-colors-inputText)",
-            WebkitBoxShadow:
-                "0 0 0px 1000px var(--chakra-colors-inputBg) inset",
+            WebkitBoxShadow: "0 0 0px 1000px var(--chakra-colors-inputBg) inset",
             caretColor: "var(--chakra-colors-inputText)",
             transition: "background-color 5000s ease-in-out 0s",
         },
         "&:-webkit-autofill:focus": {
             borderColor: "inputActiveBorder",
             WebkitTextFillColor: "var(--chakra-colors-inputText)",
-            WebkitBoxShadow:
-                "0 0 0px 1000px var(--chakra-colors-inputBg) inset",
+            WebkitBoxShadow: "0 0 0px 1000px var(--chakra-colors-inputBg) inset",
             caretColor: "var(--chakra-colors-inputText)",
             transition: "background-color 5000s ease-in-out 0s",
         },

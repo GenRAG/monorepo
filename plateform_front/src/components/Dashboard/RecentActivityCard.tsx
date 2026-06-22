@@ -1,8 +1,10 @@
-import { Box, HStack, Icon, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
-import { Activity, ArrowUpRight, Clock, FileUp, MessageSquare } from "lucide-react";
+import { Box, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react";
+import { Activity, Clock, FileUp, MessageSquare, ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { WorkspaceStatsActivity } from "types/workspace";
+import RowContainer from "components/ui/RowContainer";
+import BoxIcon from "components/ui/BoxIcon";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     conversation: MessageSquare,
@@ -22,38 +24,23 @@ const formatRelativeTime = (iso: string) => {
 };
 
 export const RecentActivityItem = ({ item }: { item: WorkspaceStatsActivity }) => {
-    const border = useColorModeValue("grey.100", "grey.800");
-    const iconBg = useColorModeValue("grey.50", "grey.800");
-    const textPrimary = useColorModeValue("grey.900", "grey.50");
-    const textSecondary = useColorModeValue("grey.500", "grey.400");
     const IconComponent = ICON_MAP[item.type] ?? MessageSquare;
 
     return (
-        <HStack p={3} spacing={3} borderBottom="1px solid" borderColor={border} _last={{ borderBottom: "none" }}>
-            <Box
-                w="32px"
-                h="32px"
-                borderRadius="8px"
-                bg={iconBg}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-            >
-                <Icon as={IconComponent} boxSize={3.5} color={textSecondary} />
-            </Box>
-            <VStack align="start" spacing={0} flex={1} minW={0}>
-                <Text fontSize="sm" fontWeight="500" color={textPrimary} noOfLines={1}>
+        <RowContainer p="10.75px" overflow="hidden" minW={0} w="100%">
+            <BoxIcon size="sm" icon={IconComponent} />
+            <VStack align="start" spacing={0} flex={1} minW={0} overflow="hidden">
+                <Text variant="body-sm" isTruncated w="100%">
                     {item.title}
                 </Text>
-                <Text fontSize="xs" color={textSecondary}>
+                <Text variant="caption-xs" color="textLabel" isTruncated w="100%">
                     {item.subtitle}
                 </Text>
             </VStack>
-            <Text fontSize="xs" color={textSecondary} flexShrink={0}>
+            <Text variant="body-xs" color="textLabel" flexShrink={0} whiteSpace="nowrap">
                 {formatRelativeTime(item.createdAt)}
             </Text>
-        </HStack>
+        </RowContainer>
     );
 };
 
@@ -64,25 +51,19 @@ interface RecentActivityCardProps {
 }
 
 export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = false }: RecentActivityCardProps) => {
-    const cardBg = useColorModeValue("white", "grey.850");
-    const border = useColorModeValue("grey.100", "grey.800");
-    const textPrimary = useColorModeValue("grey.900", "grey.50");
-    const textSecondary = useColorModeValue("grey.500", "grey.400");
-    const skeletonStart = useColorModeValue("grey.100", "grey.800");
-    const skeletonEnd = useColorModeValue("grey.200", "grey.700");
-    const skeletonProps = { startColor: skeletonStart, endColor: skeletonEnd };
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     if (isLoading) {
         return (
             <Box
-                bg={cardBg}
+                bg="surfaceCard"
                 border="1px solid"
-                borderColor={border}
+                borderColor="borderDefault"
                 borderRadius="12px"
                 display="flex"
                 flexDirection="column"
             >
-                <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor={border}>
+                <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor="borderDefault">
                     <HStack spacing={2}>
                         <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
                         <Skeleton {...skeletonProps} h="14px" w="110px" borderRadius="4px" />
@@ -90,21 +71,14 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                 </HStack>
                 <VStack spacing={0} align="stretch">
                     {[...Array(3)].map((_, i) => (
-                        <HStack
-                            key={i}
-                            p={3}
-                            spacing={3}
-                            borderBottom="1px solid"
-                            borderColor={border}
-                            _last={{ borderBottom: "none" }}
-                        >
+                        <RowContainer key={i}>
                             <Skeleton {...skeletonProps} w="32px" h="32px" borderRadius="8px" flexShrink={0} />
                             <VStack align="start" spacing={1} flex={1} minW={0}>
                                 <Skeleton {...skeletonProps} h="14px" w="160px" borderRadius="4px" />
                                 <Skeleton {...skeletonProps} h="12px" w="100px" borderRadius="4px" />
                             </VStack>
                             <Skeleton {...skeletonProps} h="12px" w="40px" borderRadius="4px" flexShrink={0} />
-                        </HStack>
+                        </RowContainer>
                     ))}
                 </VStack>
             </Box>
@@ -113,17 +87,18 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
 
     return (
         <Box
-            bg={cardBg}
+            bg="surfaceCard"
             border="1px solid"
-            borderColor={border}
+            borderColor="borderDefault"
             borderRadius="12px"
             display="flex"
             flexDirection="column"
+            overflow="hidden"
         >
-            <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor={border}>
+            <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor="borderDefault">
                 <HStack spacing={2}>
-                    <Icon as={Activity} boxSize={3.5} color={textSecondary} />
-                    <Text fontSize="sm" fontWeight="600" color={textPrimary}>
+                    <Icon as={Activity} boxSize={3.5} color="textLabel" />
+                    <Text fontSize="sm" fontWeight="600" color="textPrimary">
                         Activité récente
                     </Text>
                 </HStack>

@@ -1,21 +1,20 @@
 import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
-import { ChatMessage } from "hooks/useChat";
+import { ChatMessage, useAgentQuery } from "hooks/chat";
 import { HStack, Stack, VStack, chakra } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import { ChatInterface } from "components/System/Molecules/ChatInterface";
-import StepLevel from "components/System/Molecules/StepLevel";
+import { ChatInterface } from "components/ui/chat/ChatInterface";
+import StepLevel from "components/ui/StepLevel";
 import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import { useAgentQuery } from "hooks/useAgentQuery";
 import UploadProgressStepper from "components/Onboarding/ImproveAssistant/UploadProgressStepper";
 import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
 import { useGetAgentDocumentStatsQuery } from "services/document/document";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
-import OnboardingStepBanner from "components/System/Molecules/OnboardingStepBanner";
+import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
 
 const MAX_FILES = 3;
 const MAX_EXCHANGES = 5;
@@ -26,13 +25,11 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
     const { workspaceId, agentId } = useOnboarding();
     const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
     const onboardingStreamUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/onboarding/stream`;
-    const { sendQuery } = useAgentQuery(workspaceId, agentId, false, onboardingStreamUrl, "improve-assistant");
+    const { sendQuery } = useAgentQuery(workspaceId, agentId, onboardingStreamUrl, "improve-assistant");
 
     const savedMessages: ChatMessage[] = (data.messages as ChatMessage[]) ?? [];
-    const persistedMessageCount: number = (data.messageCount as number) ?? savedMessages.length;
-    const sessionQueryCount = (data.queryCount as number) ?? 0;
-    const liveMessageCount: number = Math.max(sessionQueryCount, (data.messageCount as number) ?? savedMessages.length);
-    const isAtLimit = liveMessageCount >= MAX_EXCHANGES;
+    const messageCount: number = (data.messageCount as number) ?? 0;
+    const isAtLimit = messageCount >= MAX_EXCHANGES;
 
     const { data: documentStats } = useGetAgentDocumentStatsQuery(
         { workspaceId: workspaceId!, agentId: agentId! },
@@ -67,9 +64,12 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
     const getResponse = useCallback(
         async (question: string, onChunk: (partialText: string) => void) => {
             const fullText = await sendQuery(question, onChunk);
-            return { response: [fullText] };
+            const newCount = messageCount + 1;
+            updateData({ messageCount: newCount });
+            void updateStepsData({ workspaceId, stepId: STEP_ID, data: { messageCount: newCount } });
+            return fullText;
         },
-        [sendQuery],
+        [sendQuery, messageCount, updateData, updateStepsData, workspaceId],
     );
 
     useEffect(() => {
@@ -78,17 +78,11 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
 
     const handleMessagesChange = useCallback(
         (msgs: ChatMessage[]) => {
-            updateData({ messages: msgs, messageCount: Math.max(msgs.length, persistedMessageCount) });
-
-            if (msgs.length > persistedMessageCount) {
-                void updateStepsData({
-                    workspaceId,
-                    stepId: STEP_ID,
-                    data: { messageCount: msgs.length },
-                });
-            }
+            const last = msgs[msgs.length - 1];
+            if (!last) return;
+            updateData({ messages: last.error ? msgs.slice(0, -1) : msgs });
         },
-        [updateData, updateStepsData, workspaceId, persistedMessageCount],
+        [updateData],
     );
 
     const handleFileUpload = async (files: FileList | null) => {
@@ -128,16 +122,11 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
                             maxFiles={MAX_FILES}
                             currentCount={persistedIndexedCount + sessionValidCount}
                         />
-                        <UploadProgressStepper
-                            completedFilesCount={totalCompletedCount}
-                            isProcessing={processingFiles.length > 0}
-                            showComparison={showComparison}
-                        />
                         <DocumentFileList sources={sources} />
                     </VStack>
 
                     <Stack flex={2} minH={0} h="100%" display="flex" flexDirection="column" gap={2} overflow="hidden">
-                        <OnboardingStepBanner current={liveMessageCount} max={MAX_EXCHANGES} mb={0} />
+                        <OnboardingStepBanner current={messageCount} max={MAX_EXCHANGES} mb={0} />
                         <ChatInterface
                             fullHeight={!isMobile}
                             compact={!isMobile}

@@ -1,11 +1,4 @@
-import {
-    Box,
-    HStack,
-    Icon,
-    Text,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, Icon, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import type { LucideIcon } from "lucide-react";
 
 interface QuickActionCardProps {
@@ -15,12 +8,7 @@ interface QuickActionCardProps {
     onClick?: () => void;
 }
 
-export const QuickActionCard = ({
-    icon,
-    title,
-    subtitle,
-    onClick,
-}: QuickActionCardProps) => {
+export const QuickActionCard = ({ icon, title, subtitle, onClick }: QuickActionCardProps) => {
     const cardBg = useColorModeValue("white", "grey.850");
     const border = useColorModeValue("grey.100", "grey.800");
     const hoverBorder = useColorModeValue("grey.200", "grey.700");
@@ -57,12 +45,7 @@ export const QuickActionCard = ({
                     <Icon as={icon} boxSize={4} color={titleCol} />
                 </Box>
                 <VStack align="start" spacing={0.5}>
-                    <Text
-                        fontSize="sm"
-                        fontWeight="600"
-                        color={titleCol}
-                        lineHeight="1.2"
-                    >
+                    <Text fontSize="sm" fontWeight="600" color={titleCol} lineHeight="1.2">
                         {title}
                     </Text>
                     <Text fontSize="12px" color={subCol} lineHeight="1.3">

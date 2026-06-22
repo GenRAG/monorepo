@@ -1,14 +1,4 @@
-import {
-    Badge,
-    Box,
-    Collapse,
-    HStack,
-    Icon,
-    Text,
-    Tooltip,
-    useColorModeValue,
-    VStack,
-} from "@chakra-ui/react";
+import { Badge, Box, Collapse, HStack, Icon, Text, Tooltip, useColorModeValue, VStack } from "@chakra-ui/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -22,6 +12,7 @@ interface SidebarItemProps {
     open: boolean;
     childrenItems?: { label: string; icon?: any; onClick?: () => void }[];
     badgeColor?: string;
+    size?: "sm" | "md" | "lg";
     onClick?: () => void;
 }
 
@@ -34,15 +25,10 @@ export const SidebarItem = ({
     open,
     childrenItems,
     onClick,
+    size = "lg",
 }: SidebarItemProps) => {
-    const activeBg = useColorModeValue(
-        currentDarkTheme.rgba.primary20,
-        currentDarkTheme.rgba.primary20,
-    );
-    const hoverBg = useColorModeValue(
-        currentDarkTheme.rgba.primary20,
-        currentDarkTheme.rgba.primary30,
-    );
+    const activeBg = useColorModeValue(currentDarkTheme.rgba.primary20, currentDarkTheme.rgba.primary20);
+    const hoverBg = useColorModeValue(currentDarkTheme.rgba.primary20, currentDarkTheme.rgba.primary30);
     const color = useColorModeValue("grey.900", "white");
     const activeColor = currentDarkTheme.primary500;
     const beforeColor = currentDarkTheme.primary;
@@ -51,10 +37,7 @@ export const SidebarItem = ({
     const childTextColor = useColorModeValue("grey.300", "grey.300");
     const tooltipBg = useColorModeValue("grey.700", "green.600");
     const chevronColor = useColorModeValue("grey.500", "grey.300");
-    const iconColorValue = useColorModeValue(
-        "grey.900",
-        active ? currentDarkTheme.primary : "grey.300",
-    );
+    const iconColorValue = useColorModeValue("grey.900", active ? currentDarkTheme.primary : "grey.300");
 
     const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
@@ -68,7 +51,7 @@ export const SidebarItem = ({
     const content = (
         <VStack align="stretch">
             <HStack
-                p={4}
+                p={size === "sm" ? 2 : size === "lg" ? 4 : 3}
                 position="relative"
                 bg={active ? activeBg : "transparent"}
                 _hover={{ bg: hoverBg, cursor: "pointer" }}
@@ -83,18 +66,14 @@ export const SidebarItem = ({
                     left: 0,
                     top: 0,
                     bottom: 0,
-                    width: "3.5px",
+                    width: size === "sm" ? "3px" : "4px",
                     bg: active ? beforeColor : "transparent",
                     borderTopRightRadius: "9999px",
                     borderBottomRightRadius: "9999px",
                 }}
             >
                 <HStack spacing={open ? 3 : 0} alignItems="center">
-                    <Icon
-                        as={icon}
-                        size="18"
-                        color={active ? activeColor : iconColorValue}
-                    />
+                    <Icon as={icon} size="18" color={active ? activeColor : iconColorValue} />
                     {open && (
                         <Text
                             onClick={(e) => {
@@ -127,11 +106,7 @@ export const SidebarItem = ({
                             </Badge>
                         )}
                         {tag && (
-                            <Badge
-                                colorScheme="yellow"
-                                fontSize="0.7em"
-                                borderRadius="md"
-                            >
+                            <Badge colorScheme="yellow" fontSize="0.7em" borderRadius="md">
                                 {tag}
                             </Badge>
                         )}
@@ -154,20 +129,8 @@ export const SidebarItem = ({
             {hasChildren && (
                 <Collapse in={isExpanded && open}>
                     <HStack align="stretch" pl={4} spacing={2} mt={1} mb={4}>
-                        <Box
-                            w="1.5px"
-                            bg={childLineColor}
-                            borderRadius="0px"
-                            pb={4}
-                            mr={2}
-                        />
-                        <VStack
-                            align="stretch"
-                            w="100%"
-                            spacing={1}
-                            alignItems="center"
-                            verticalAlign="center"
-                        >
+                        <Box w="1.5px" bg={childLineColor} borderRadius="0px" pb={4} mr={2} />
+                        <VStack align="stretch" w="100%" spacing={1} alignItems="center" verticalAlign="center">
                             {childrenItems.map((child, i) => (
                                 <HStack
                                     key={i}
@@ -183,18 +146,8 @@ export const SidebarItem = ({
                                     }}
                                     _hover={{ cursor: "pointer", bg: hoverBg }}
                                 >
-                                    {child.icon && (
-                                        <Icon
-                                            as={child.icon}
-                                            boxSize={4}
-                                            color={"grey.200"}
-                                        />
-                                    )}
-                                    <Text
-                                        fontSize="sm"
-                                        textAlign="center"
-                                        color={childTextColor}
-                                    >
+                                    {child.icon && <Icon as={child.icon} boxSize={4} color={"grey.200"} />}
+                                    <Text fontSize="sm" textAlign="center" color={childTextColor}>
                                         {child.label}
                                     </Text>
                                 </HStack>
@@ -209,14 +162,7 @@ export const SidebarItem = ({
     return open ? (
         content
     ) : (
-        <Tooltip
-            placement="right"
-            color="white"
-            borderRadius="8px"
-            hasArrow
-            bg={tooltipBg}
-            label={label}
-        >
+        <Tooltip placement="right" color="white" borderRadius="8px" hasArrow bg={tooltipBg} label={label}>
             {content}
         </Tooltip>
     );

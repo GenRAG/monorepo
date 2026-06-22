@@ -13,9 +13,9 @@ import {
     useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
-import { AuthHeader } from "pages/Auth/AuthHeader";
+import { AuthHeader } from "components/Auth/AuthHeader";
 import { LoginFormSteps } from "pages/Auth/Layout/AuthLayout";
-import { ShowHidePasswordInput } from "components/System/Molecules/Inputs/ShowHidePasswordInput";
+import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 import colors from "themeNew/foundations/colors";
 import { useLoginMutation, useGetMeQuery } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
@@ -62,8 +62,8 @@ export const PasswordForm: FC<{
             setLoggedIn();
 
             toast({
-                title: "Successfully logged in!",
-                description: "Welcome back",
+                title: "Connexion réussie",
+                description: "Bienvenue",
                 status: "success",
                 duration: 3000,
                 isClosable: true,
@@ -73,10 +73,10 @@ export const PasswordForm: FC<{
                 await navigate("/");
             }, 100);
         } catch (err: any) {
-            const message = "Please try again later.";
+            const message = "Une erreur est survenue lors de la connexion. Veuillez réessayer.";
 
             toast({
-                title: "An error occurred.",
+                title: "Une erreur est survenue.",
                 description: err?.data?.error?.message || message,
                 status: "error",
                 duration: 9000,
@@ -92,9 +92,7 @@ export const PasswordForm: FC<{
             <chakra.form w="100%" onSubmit={onSubmit}>
                 <VStack align="start" gap="24px" w="100%">
                     <FormControl>
-                        <FormLabel color={colors.font.disabled}>
-                            Email address
-                        </FormLabel>
+                        <FormLabel color={colors.font.disabled}>Adresse Email</FormLabel>
                         <Input
                             type="email"
                             name="email"
@@ -106,14 +104,7 @@ export const PasswordForm: FC<{
                     </FormControl>
                     <VStack align="start" w="100%" gap="24px">
                         <FormControl isInvalid={!!errors.password}>
-                            <FormLabel
-                                color={useColorModeValue(
-                                    "grey.900",
-                                    "whites.offwhite",
-                                )}
-                            >
-                                Password
-                            </FormLabel>
+                            <FormLabel color={useColorModeValue("grey.900", "whites.offwhite")}>Mot de passe</FormLabel>
                             <ShowHidePasswordInput
                                 {...register("password", {
                                     required: true,
@@ -124,11 +115,7 @@ export const PasswordForm: FC<{
                                 autoComplete="new-password"
                                 color={fieldTextColor}
                             />
-                            {!!errors.password && (
-                                <FormErrorMessage>
-                                    {errors.password?.message}
-                                </FormErrorMessage>
-                            )}
+                            {!!errors.password && <FormErrorMessage>{errors.password?.message}</FormErrorMessage>}
                         </FormControl>
                     </VStack>
                     <Button
@@ -140,21 +127,12 @@ export const PasswordForm: FC<{
                         type="submit"
                         data-cy="cy-connect-btn"
                     >
-                        Sign in
+                        Connectez-vous
                     </Button>
                     <VStack w="100%" justifyContent="center">
-                        <Link
-                            as={ReachLink}
-                            to={"/reset-password" + location.search}
-                        >
-                            <Text
-                                variant="body-sm-semibold"
-                                color={useColorModeValue(
-                                    "grey.900",
-                                    "whites.offwhite",
-                                )}
-                            >
-                                Forgot password?
+                        <Link as={ReachLink} to={"/reset-password" + location.search}>
+                            <Text variant="body-sm-semibold" color={useColorModeValue("grey.900", "whites.offwhite")}>
+                                Mot de passe oublié ?
                             </Text>
                         </Link>
                     </VStack>

@@ -1,18 +1,13 @@
 import { VStack, Box, useColorModeValue } from "@chakra-ui/react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import WorkspaceHeader from "components/System/Molecules/WorkspaceHeader";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import { DashboardTab } from "./DashboardTab";
 import { VersionsHistory } from "./VersionsHistory";
-import {
-    DeploymentTab,
-    DeploymentTabs,
-} from "components/Deployment/DeploymentTabs";
+import { DeploymentTab, DeploymentTabs } from "components/Deployment/DeploymentTabs";
 
 const DeploymentWorkspace = () => {
-    const [activeTab, setActiveTab] = useState<DeploymentTab>(
-        DeploymentTab.Dashboard,
-    );
+    const [activeTab, setActiveTab] = useState<DeploymentTab>(DeploymentTab.Dashboard);
 
     const bgColor = useColorModeValue("white", "grey.975");
     const borderColor = useColorModeValue("grey.100", "grey.800");
@@ -27,24 +22,13 @@ const DeploymentWorkspace = () => {
     };
 
     return (
-        <VStack
-            h="100vh"
-            align="stretch"
-            spacing={0}
-            overflow="hidden"
-            bg={bgColor}
-        >
+        <VStack h="100vh" align="stretch" spacing={0} overflow="hidden" bg={bgColor}>
             <WorkspaceHeader
                 title="Déploiement"
                 description="Promouvoir, surveiller, et gérer les différentes versions de votre agent."
             />
 
-            <Box
-                bg={bgColor}
-                borderBottom="1px solid"
-                borderBottomColor={borderColor}
-                flexShrink={0}
-            >
+            <Box bg={bgColor} flexShrink={0}>
                 <DeploymentTabs activeTab={activeTab} onChange={setActiveTab} />
             </Box>
 

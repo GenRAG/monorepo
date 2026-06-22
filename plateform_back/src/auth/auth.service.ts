@@ -148,7 +148,7 @@ export class AuthService {
     }
 
     async verifyPasswordResetToken(verifyTokenBody: NewPasswordRequest): Promise<void> {
-        const { code, password } = verifyTokenBody;
+        const { token: code, password } = verifyTokenBody;
         const email = verifyTokenBody.email.toLowerCase().trim();
 
         if (await this.loginAttempt.isBlocked(email)) {

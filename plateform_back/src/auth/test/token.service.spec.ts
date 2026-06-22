@@ -2,7 +2,7 @@ import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { TokenService } from 'src/auth/token.service';
-import { BrevoService } from 'src/auth/brevo.service';
+import { ResendService } from 'src/auth/resend.service';
 import { LoginAttemptService } from 'src/auth/login-attempt.service';
 import { UsersService } from 'src/users/users.service';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
@@ -41,7 +41,7 @@ const mockConfigService = {
     }),
 };
 
-const mockBrevoService = {
+const mockResendService = {
     sendConfirmationEmail: jest.fn(),
     sendPasswordResetEmail: jest.fn(),
 };
@@ -61,7 +61,7 @@ describe('TokenService', () => {
                 TokenService,
                 { provide: UsersService, useValue: mockUsersService },
                 { provide: ConfigService, useValue: mockConfigService },
-                { provide: BrevoService, useValue: mockBrevoService },
+                { provide: ResendService, useValue: mockResendService },
                 { provide: LoginAttemptService, useValue: mockLoginAttempt },
             ],
         }).compile();
@@ -133,7 +133,7 @@ describe('TokenService', () => {
 
             await service.generateAndSendVerificationToken(fakeUser.email);
 
-            expect(mockBrevoService.sendConfirmationEmail).toHaveBeenCalledWith(fakeUser.email, expect.any(Number));
+            expect(mockResendService.sendConfirmationEmail).toHaveBeenCalledWith(fakeUser.email, expect.any(Number));
         });
 
         it('should not send email when SEND_EMAILS=false', async () => {
@@ -146,7 +146,7 @@ describe('TokenService', () => {
 
             await service.generateAndSendVerificationToken(fakeUser.email);
 
-            expect(mockBrevoService.sendConfirmationEmail).not.toHaveBeenCalled();
+            expect(mockResendService.sendConfirmationEmail).not.toHaveBeenCalled();
         });
     });
 
@@ -154,7 +154,7 @@ describe('TokenService', () => {
         it('should throw if email is blocked', async () => {
             mockLoginAttempt.isBlocked.mockImplementation(() => Promise.resolve(true));
 
-            await expect(service.verifyEmailToken({ email: fakeUser.email, code: 123456 })).rejects.toThrow(
+            await expect(service.verifyEmailToken({ email: fakeUser.email, token: 123456 })).rejects.toThrow(
                 UnauthorizedException,
             );
             expect(mockUsersService.findOneWithCredentials).not.toHaveBeenCalled();
@@ -163,7 +163,7 @@ describe('TokenService', () => {
         it('should record failure and throw if user not found', async () => {
             mockUsersService.findOneWithCredentials.mockImplementation(() => Promise.resolve(null));
 
-            await expect(service.verifyEmailToken({ email: fakeUser.email, code: 123456 })).rejects.toThrow(
+            await expect(service.verifyEmailToken({ email: fakeUser.email, token: 123456 })).rejects.toThrow(
                 UnauthorizedException,
             );
             expect(mockLoginAttempt.recordFailure).toHaveBeenCalled();
@@ -177,7 +177,7 @@ describe('TokenService', () => {
                 }),
             );
 
-            await expect(service.verifyEmailToken({ email: fakeUser.email, code: 123456 })).rejects.toThrow(
+            await expect(service.verifyEmailToken({ email: fakeUser.email, token: 123456 })).rejects.toThrow(
                 UnauthorizedException,
             );
             expect(mockLoginAttempt.recordFailure).toHaveBeenCalled();
@@ -186,7 +186,7 @@ describe('TokenService', () => {
         it('should record failure and throw if code is wrong', async () => {
             mockUsersService.findOneWithCredentials.mockImplementation(() => Promise.resolve(fakeUser));
 
-            await expect(service.verifyEmailToken({ email: fakeUser.email, code: 999999 })).rejects.toThrow(
+            await expect(service.verifyEmailToken({ email: fakeUser.email, token: 999999 })).rejects.toThrow(
                 UnauthorizedException,
             );
             expect(mockLoginAttempt.recordFailure).toHaveBeenCalled();
@@ -200,7 +200,7 @@ describe('TokenService', () => {
                     Promise.resolve({ ...fakeUser, isEmailVerified: true, emailVerificationToken: null }),
                 );
 
-            const result = await service.verifyEmailToken({ email: fakeUser.email, code: 123456 });
+            const result = await service.verifyEmailToken({ email: fakeUser.email, token: 123456 });
 
             expect(mockLoginAttempt.reset).toHaveBeenCalledWith(fakeUser.email);
             expect(mockUsersService.update).toHaveBeenCalledWith(

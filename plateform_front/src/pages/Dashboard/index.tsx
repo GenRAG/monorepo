@@ -127,7 +127,7 @@ const Dashboard = () => {
                     title="Nouvel agent"
                     subtitle="Partez d'un template ou d'un agent existant"
                     onClick={() => {
-                        throw new Error("Not implemented yet");
+                        setIsCreateModalOpen(true);
                     }}
                 />
                 <QuickActionCard

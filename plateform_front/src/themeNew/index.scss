@@ -49,12 +49,12 @@ $breakpoint-3xl: 1920px;
 /* ------ horizontal spacing -------- */
 @media (max-width: $breakpoint-xl) {
     :root {
-        --genrag-p-spacing-2xs: 4px;
-        --genrag-p-spacing-xs: 8px;
-        --genrag-p-spacing-sm: 12px;
-        --genrag-p-spacing-md: 16px;
-        --genrag-p-spacing-lg: 24px;
-        --genrag-p-spacing-xl: 32px;
+        --genrag-h-spacing-2xs: 4px;
+        --genrag-h-spacing-xs: 8px;
+        --genrag-h-spacing-sm: 12px;
+        --genrag-h-spacing-md: 16px;
+        --genrag-h-spacing-lg: 24px;
+        --genrag-h-spacing-xl: 32px;
     }
 }
 @media (min-width: $breakpoint-xl) {

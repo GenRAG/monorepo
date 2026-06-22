@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createHmac, randomInt } from 'crypto';
 import { User } from 'generated/prisma';
 import ms from 'ms';
-import { BrevoService } from 'src/auth/brevo.service';
+import { ResendService } from 'src/auth/resend.service';
 import { LoginAttemptService } from 'src/auth/login-attempt.service';
 import { VerifyTokenRequest } from 'src/auth/dto/verify-token.request';
 import { UsersService } from 'src/users/users.service';
@@ -13,7 +13,7 @@ export class TokenService {
     constructor(
         private readonly usersService: UsersService,
         private readonly configService: ConfigService,
-        private readonly brevoService: BrevoService,
+        private readonly resendService: ResendService,
         private readonly loginAttempt: LoginAttemptService,
     ) {}
 
@@ -58,13 +58,13 @@ export class TokenService {
         });
 
         if (this.configService.get('SEND_EMAILS') === 'true') {
-            await this.brevoService.sendConfirmationEmail(normalizedEmail, plainToken);
+            await this.resendService.sendConfirmationEmail(normalizedEmail, plainToken);
         }
     }
 
     async verifyEmailToken(emailVerificationToken: VerifyTokenRequest): Promise<User> {
         const email = emailVerificationToken.email.toLowerCase().trim();
-        const { code } = emailVerificationToken;
+        const { token: code } = emailVerificationToken;
 
         if (await this.loginAttempt.isBlocked(email)) {
             throw new UnauthorizedException('Too many failed attempts. Try again later.');
@@ -130,7 +130,7 @@ export class TokenService {
         });
 
         if (this.configService.get('SEND_EMAILS') === 'true') {
-            await this.brevoService.sendPasswordResetEmail(user.email, plainToken);
+            await this.resendService.sendPasswordResetEmail(user.email, plainToken);
         }
     }
 }

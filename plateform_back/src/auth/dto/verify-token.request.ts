@@ -14,7 +14,7 @@ export class VerifyTokenRequest {
         description: '6-digit verification code',
     })
     @IsInt()
-    code: number;
+    token: number;
 }
 
 export class ResendVerifyTokenRequest {

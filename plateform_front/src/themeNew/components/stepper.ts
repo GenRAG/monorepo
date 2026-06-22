@@ -1,20 +1,9 @@
-import { extendTheme } from "@chakra-ui/react";
-import { createMultiStyleConfigHelpers, defineStyle } from "@chakra-ui/react";
+import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import { darkThemeColors } from "../foundations/themeConfig";
 
-const parts = [
-    "stepper",
-    "step",
-    "title",
-    "description",
-    "indicator",
-    "separator",
-    "icon",
-    "number",
-];
+const parts = ["stepper", "step", "title", "description", "indicator", "separator", "icon", "number"];
 
-const { definePartsStyle, defineMultiStyleConfig } =
-    createMultiStyleConfigHelpers(parts);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(parts);
 
 const createVariant = (colorName: "orange" | "green" | "blue") => {
     const colors = darkThemeColors[colorName];
@@ -31,7 +20,7 @@ const createVariant = (colorName: "orange" | "green" | "blue") => {
             },
             "&[data-status=incomplete]": {
                 bg: "white",
-                borderColor: "gray.300",
+                borderColor: "grey.300",
             },
         },
         separator: {

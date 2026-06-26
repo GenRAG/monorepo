@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import * as Sentry from "@sentry/react";
 
 export const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
 
@@ -42,9 +41,7 @@ export function useSSEStream() {
                         if (parsed.isOutOfCredits) {
                             reject(new InsufficientCreditsError());
                         } else {
-                            const err = new Error(parsed.error);
-                            Sentry.captureException(err, { extra: { url } });
-                            reject(err);
+                            reject(new Error(parsed.error));
                         }
                         return;
                     }
@@ -59,8 +56,6 @@ export function useSSEStream() {
 
             es.onerror = () => {
                 es.close();
-                const err = new Error("SSE connection error");
-                Sentry.captureException(err, { extra: { url }, level: "warning" });
                 reject(new Error("Erreur de connexion au serveur."));
             };
         });

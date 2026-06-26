@@ -1,10 +1,17 @@
 import { useRef, useState } from "react";
-import * as Sentry from "@sentry/react";
 import { useUploadDocumentMutation } from "services/document/document";
 import { DocumentStatus } from "types/document/document";
+import posthog from "posthog-js";
 
-export const ACCEPTED_TYPES = ["application/pdf", "text/plain", "text/markdown", "text/x-markdown"] as const;
-export const ACCEPTED_EXTENSIONS = [".pdf", ".txt", ".md"];
+export const ACCEPTED_TYPES = [
+    "application/pdf",
+    "text/plain",
+    "text/markdown",
+    "text/x-markdown",
+    "text/html",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+] as const;
+export const ACCEPTED_EXTENSIONS = [".pdf", ".txt", ".md", ".html", ".htm", ".docx"];
 
 const isAcceptedFile = (file: File): boolean => {
     if ((ACCEPTED_TYPES as readonly string[]).includes(file.type)) return true;
@@ -71,9 +78,6 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
                         prev.map((s) => (s.id === sourceId ? { ...s, status: Status.COMPLETED, progress: 100 } : s)),
                     );
                 } else if (doc.status === DocumentStatus.FAILED) {
-                    Sentry.captureException(new Error("Document indexing failed"), {
-                        extra: { documentId, agentId, workspaceId },
-                    });
                     setSources((prev) => prev.map((s) => (s.id === sourceId ? { ...s, status: Status.ERROR } : s)));
                 } else {
                     setTimeout(check, POLL_INTERVAL_MS);
@@ -106,6 +110,12 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
                 try {
                     if (workspaceId && agentId) {
                         const doc = await uploadDocument({ workspaceId, agentId, file }).unwrap();
+                        posthog.capture("document_uploaded", {
+                            agent_id: agentId,
+                            document_id: doc.id,
+                            file_size_bytes: file.size,
+                            mime_type: file.type,
+                        });
                         setSources((prev) =>
                             prev.map((s) =>
                                 s.id === sourceId
@@ -116,6 +126,7 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
                         pollDocumentStatus(doc.id, sourceId);
                     }
                 } catch {
+                    newSources[index].status = Status.ERROR;
                     setSources((prev) => prev.map((s) => (s.id === sourceId ? { ...s, status: Status.ERROR } : s)));
                 }
             }),
@@ -156,13 +167,14 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
 
     // Upload all pending selectedFiles, then clear the selection.
     // isUploading is true while initial mutations are in flight; polling continues after.
-    const handleUpload = async (): Promise<void> => {
-        if (selectedFiles.length === 0 || !workspaceId || !agentId) return;
+    const handleUpload = async (): Promise<{ erroredFiles: string[] }> => {
+        if (selectedFiles.length === 0 || !workspaceId || !agentId) return { erroredFiles: [] };
         setIsUploading(true);
         const filesToUpload = selectedFiles;
         setSelectedFiles([]);
-        await uploadFilesInternal(filesToUpload);
+        const results = await uploadFilesInternal(filesToUpload);
         setIsUploading(false);
+        return { erroredFiles: results.filter((s) => s.status === Status.ERROR).map((s) => s.name) };
     };
 
     const removeSource = (id: string): void => {

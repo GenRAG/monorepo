@@ -1,7 +1,7 @@
 import { Box, Skeleton, useColorModeValue, VStack } from "@chakra-ui/react";
-import DistributionSection from "components/Deployment/DashboardTab/DistributionSection";
+//import DistributionSection from "components/Deployment/DashboardTab/DistributionSection";
 import HeaderCard from "components/Deployment/DashboardTab/HeaderCard/HeaderCard";
-import HealthSection from "components/Deployment/DashboardTab/HealthSection";
+//import HealthSection from "components/Deployment/DashboardTab/HealthSection";
 import { useGetCurrentDeploymentQuery } from "services/deployment/deployment";
 import { useParams } from "react-router-dom";
 import { AgentStatus } from "types/deployment/deployment";
@@ -29,9 +29,9 @@ export const DashboardTab = () => {
                 <HeaderCard data={data} isLoading={isLoading} />
                 {data.deploymentStatus === AgentStatus.PRODUCTION && (
                     <>
-                        <HealthSection />
-                        {/* <ChangesSection /> */}
-                        <DistributionSection />
+                        {/*<HealthSection />
+                         <ChangesSection />
+                        <DistributionSection />*/}
                     </>
                 )}
             </VStack>

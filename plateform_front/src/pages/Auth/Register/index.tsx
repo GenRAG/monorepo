@@ -8,9 +8,7 @@ export interface AuthPageProps {
 }
 
 const Register: FC = () => {
-    const [step, setStep] = useState<AuthStepType>(
-        RegisterFormSteps.REGISTER_EMAIL,
-    );
+    const [step, setStep] = useState<AuthStepType>(RegisterFormSteps.REGISTER_EMAIL);
     const { setConfig } = useAuthLayout();
 
     useEffect(() => {

@@ -15,13 +15,10 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
     return (
         <React.Fragment>
             <VStack align="flex-end" spacing={1} alignSelf="flex-end" maxW="80%">
-                <Text fontSize="xs" color={labelColor}>Vous</Text>
-                <Box
-                    p={3}
-                    bg={isDark ? "green.700" : "green.100"}
-                    borderRadius="12px"
-                    borderBottomRightRadius="2px"
-                >
+                <Text fontSize="xs" color={labelColor}>
+                    Vous
+                </Text>
+                <Box p={3} bg={isDark ? "green.700" : "green.100"} borderRadius="12px" borderBottomRightRadius="2px">
                     <Text fontSize="sm" color={isDark ? "grey.100" : "green.800"}>
                         {message.question}
                     </Text>
@@ -29,11 +26,10 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
             </VStack>
 
             <VStack align="flex-start" spacing={1} maxW="80%">
-                <Text fontSize="xs" color={labelColor}>Assistant</Text>
-                <ChatResponseBubble
-                    response={message.response}
-                    isError={message.error}
-                />
+                <Text fontSize="xs" color={labelColor}>
+                    Assistant
+                </Text>
+                <ChatResponseBubble response={message.response} isError={message.error} />
             </VStack>
         </React.Fragment>
     );

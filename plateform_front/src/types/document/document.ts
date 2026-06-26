@@ -5,8 +5,7 @@ export const DocumentStatus = {
     FAILED: "FAILED",
 } as const;
 
-export type DocumentStatus =
-    (typeof DocumentStatus)[keyof typeof DocumentStatus];
+export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus];
 
 export interface DocumentEntity {
     id: string;

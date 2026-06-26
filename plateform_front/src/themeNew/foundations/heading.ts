@@ -1,7 +1,4 @@
-import {
-    baseHeadingStyle,
-    headingStyles,
-} from "themeNew/foundations/typography";
+import { baseHeadingStyle, headingStyles } from "themeNew/foundations/typography";
 
 const Heading = {
     baseStyle: {

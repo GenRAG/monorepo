@@ -51,15 +51,23 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:7.0-alpine
+    image: redis:7-alpine
     container_name: genrag-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-    restart: unless-stopped
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   # ── Platform Backend ─────────────────────────────────────────────────────────
 
@@ -74,116 +82,18 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      rag_api:
-        condition: service_started
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      # Override localhost URL from .env — inside Docker, services talk by name
-      RAGENGINE_URL: http://rag_api:8000
     command: >
       sh -c "yarn install --frozen-lockfile && yarn start:dev"
     volumes:
       - ./plateform_back:/usr/src/app
       - /usr/src/app/node_modules
 
-  # ── RAG Engine ───────────────────────────────────────────────────────────────
-
-  rag_api:
-    build: ./RAG-GenRag
-    container_name: genrag_api
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./RAG-GenRag/.env
-    volumes:
-      - ./RAG-GenRag:/app
-      - /app/.venv
-    command: >
-      /app/.venv/bin/uvicorn app.main:app
-      --host 0.0.0.0
-      --port 8000
-      --reload
-      --reload-exclude "minio_data"
-      --reload-exclude "qdrant_data"
-    depends_on:
-      minio:
-        condition: service_healthy
-      qdrant:
-        condition: service_healthy
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
-        reservations:
-          memory: 256M
-          cpus: '0.25'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  minio:
-    image: minio/minio:latest
-    container_name: genrag-minio
-    ports:
-      - "9010:9000"
-      - "9011:9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
-    command: server /data --console-address ":9001"
-    volumes:
-      - minio_data:/data
-      - minio_config:/root/.minio
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.5'
-        reservations:
-          memory: 512M
-          cpus: '0.25'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 5s
-      timeout: 10s
-      retries: 3
-
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: genrag-qdrant
-    ports:
-      - "6333:6333"
-    volumes:
-      - qdrant_data:/qdrant/storage
-      - qdrant_snapshots:/qdrant/snapshots
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1.0'
-        reservations:
-          memory: 1G
-          cpus: '0.5'
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1
-      interval: 5s
-      timeout: 10s
-      retries: 3
-
+ 
 volumes:
   postgres_data:
   postgres_test_data:
   pgadmin_data:
-  minio_data:
-  minio_config:
-  qdrant_data:
-  qdrant_snapshots:
+  redis_data:

@@ -19,6 +19,7 @@ import useThemedToast from "hooks/useThemedToast";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCreateDeploymentMutation } from "services/deployment/deployment";
+import { usePostHog } from "@posthog/react";
 
 interface DeployModalProps {
     isOpen: boolean;
@@ -32,6 +33,7 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
         agentId: string;
     }>();
     const isDark = useIsDark();
+    const posthog = usePostHog();
     const [name, setName] = useState("");
     const [changelog, setChangelog] = useState("");
     const [deploy, { isLoading: isDeploying }] = useCreateDeploymentMutation();
@@ -39,7 +41,11 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
 
     const handleSubmit = async () => {
         try {
-            await deploy({ workspaceId, agentId, name, changelog }).unwrap();
+            const deployment = await deploy({ workspaceId, agentId, name, changelog }).unwrap();
+            posthog?.capture("agent_deployed", {
+                agent_id: agentId,
+                deployment_version: deployment.version,
+            });
             toast({
                 title: "Déploiement en cours",
                 description: "Votre agent a été déployé avec succès.",

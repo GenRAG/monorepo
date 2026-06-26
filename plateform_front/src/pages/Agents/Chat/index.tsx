@@ -4,9 +4,11 @@ import { useCallback } from "react";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
 import { useUserInfo } from "hooks/useUserInfo";
 import { useAgentQuery } from "hooks/chat";
+import { usePostHog } from "@posthog/react";
 
 const ChatWorkspace = () => {
     const { name } = useUserInfo();
+    const posthog = usePostHog();
     const { workspaceId = "", agentId = "" } = useParams<{
         workspaceId: string;
         agentId: string;
@@ -16,8 +18,11 @@ const ChatWorkspace = () => {
     const { sendQuery } = useAgentQuery(workspaceId, agentId, playgroundUrl);
 
     const getResponse = useCallback(
-        (question: string, onChunk: (partial: string) => void) => sendQuery(question, onChunk),
-        [sendQuery],
+        (question: string, onChunk: (partial: string) => void) => {
+            posthog?.capture("rag_query_sent", { agent_id: agentId });
+            return sendQuery(question, onChunk);
+        },
+        [sendQuery, agentId, posthog],
     );
 
     return (

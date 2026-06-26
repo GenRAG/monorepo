@@ -3,9 +3,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 
 import colors from "themeNew/foundations/colors";
 
-const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-    drawerAnatomy.keys,
-);
+const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(drawerAnatomy.keys);
 
 const Drawer = defineMultiStyleConfig({
     baseStyle: {

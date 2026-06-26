@@ -3,7 +3,6 @@ export const emailPattern =
 
 export const validateEmail = (email?: string): string | true => {
     if (!email) return "Ce champ est obligatoire.";
-    if (!emailPattern.test(email))
-        return "Le format de l'adresse email est incorrect.";
+    if (!emailPattern.test(email)) return "Le format de l'adresse email est incorrect.";
     return true;
 };

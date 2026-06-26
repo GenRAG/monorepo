@@ -7,11 +7,7 @@ interface SidebarSectionProps {
     children: ReactNode;
 }
 
-export const SidebarSection = ({
-    title,
-    isOpen,
-    children,
-}: SidebarSectionProps) => {
+export const SidebarSection = ({ title, isOpen, children }: SidebarSectionProps) => {
     const titleColor = useColorModeValue("grey.600", "grey.400");
 
     return (

@@ -6,9 +6,7 @@ import colors from "themeNew/foundations/colors";
 
 type PortfolioType = keyof typeof colors.gradients;
 
-const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-    cardAnatomy.keys,
-);
+const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(cardAnatomy.keys);
 
 const cardColors = {
     base: {

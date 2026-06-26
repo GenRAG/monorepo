@@ -96,7 +96,13 @@ const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                                     justify="space-between"
                                     p={2}
                                     cursor="pointer"
-                                    bg={isActive ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)") : "transparent"}
+                                    bg={
+                                        isActive
+                                            ? isDark
+                                                ? "rgba(255,255,255,0.08)"
+                                                : "rgba(0,0,0,0.05)"
+                                            : "transparent"
+                                    }
                                     borderLeft={isActive ? "2px solid #34D3A9" : "2px solid transparent"}
                                     _hover={{ bg: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" }}
                                     transition="all 0.12s"
@@ -112,7 +118,15 @@ const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                                             fontSize="xs"
                                             noOfLines={1}
                                             textAlign="left"
-                                            color={isActive ? (isDark ? "white" : "grey.900") : (isDark ? "grey.400" : "grey.600")}
+                                            color={
+                                                isActive
+                                                    ? isDark
+                                                        ? "white"
+                                                        : "grey.900"
+                                                    : isDark
+                                                      ? "grey.400"
+                                                      : "grey.600"
+                                            }
                                             fontWeight={isActive ? "500" : "400"}
                                         >
                                             {conv.title ?? conv.lastMessage ?? `Conversation ${conv.id.slice(0, 8)}`}

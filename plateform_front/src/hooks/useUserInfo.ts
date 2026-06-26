@@ -1,8 +1,7 @@
 import { useGetMeQuery } from "services/auth/auth";
 
 export const useUserInfo = () => {
-    const { data, error, isLoading, refetch, isFetching, isSuccess } =
-        useGetMeQuery();
+    const { data, error, isLoading, refetch, isFetching, isSuccess } = useGetMeQuery();
 
     const id = data?.id ?? "";
     const name = data?.name ?? "";

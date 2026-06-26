@@ -15,6 +15,7 @@ import { useRef } from "react";
 import { Trash2 } from "lucide-react";
 import { useDeleteAgentMutation } from "services/agent/agent";
 import BoxIcon from "components/ui/BoxIcon";
+import { usePostHog } from "@posthog/react";
 
 interface DeleteAgentModalProps {
     agentId: string;
@@ -34,6 +35,7 @@ export const DeleteAgentModal: React.FC<DeleteAgentModalProps> = ({
     onSuccess,
 }: DeleteAgentModalProps) => {
     const cancelRef = useRef<HTMLButtonElement>(null);
+    const posthog = usePostHog();
     const [deleteAgent, { isLoading: isDeleting }] = useDeleteAgentMutation();
 
     const modalBg = useColorModeValue("white", "grey.900");
@@ -46,6 +48,7 @@ export const DeleteAgentModal: React.FC<DeleteAgentModalProps> = ({
 
     const handleDelete = async () => {
         await deleteAgent({ workspaceId, id: agentId });
+        posthog?.capture("agent_deleted", { agent_id: agentId });
         onClose();
         onSuccess?.();
     };

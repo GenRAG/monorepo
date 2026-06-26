@@ -60,7 +60,7 @@ const Dashboard = () => {
                         fontWeight="semibold"
                         fontSize={{ base: "xl", md: "3xl" }}
                     >
-                        Bonjour {name}.
+                        Bonjour {name}
                     </Heading>
                     <Text fontSize="sm" color={textSecondary}>
                         {stats

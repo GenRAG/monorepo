@@ -21,9 +21,16 @@ import { DocumentService } from './document.service';
 import { DocumentPaginationQuery } from './dto/document-pagination.query';
 import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 
-const ALLOWED_MIME_TYPES = new Set(['application/pdf', 'text/plain', 'text/markdown']);
+const ALLOWED_MIME_TYPES = new Set([
+    'application/pdf',
+    'text/plain',
+    'text/markdown',
+    'text/x-markdown',
+    'text/html',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 @Controller('workspaces/:workspaceId/agents/:agentId/documents')
 @UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)

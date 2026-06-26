@@ -8,8 +8,7 @@ export const WorkflowNodeTypes = {
     MODELE: "MODÈLE",
 } as const;
 
-export type WorkflowNodeType =
-    (typeof WorkflowNodeTypes)[keyof typeof WorkflowNodeTypes];
+export type WorkflowNodeType = (typeof WorkflowNodeTypes)[keyof typeof WorkflowNodeTypes];
 
 export interface WorkflowEntity {
     id: string;

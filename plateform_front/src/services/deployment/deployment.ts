@@ -7,6 +7,7 @@ import {
     DeploymentRouteParams,
     CreateDeploymentParams,
     RollbackParams,
+    StopParams,
 } from "types/deployment/deployment";
 
 const listTag = (agentId: string) => ({
@@ -79,6 +80,18 @@ export const extendedDeploymentApi = backendApi.injectEndpoints({
                 }
             },
         }),
+
+        stopDeployment: builder.mutation<Deployment, StopParams>({
+            query: ({ workspaceId, agentId }) => ({
+                url: `/workspaces/${workspaceId}/agents/${agentId}/deployments/stop`,
+                method: "POST",
+            }),
+            invalidatesTags: (_result, _error, { agentId }) => [
+                listTag(agentId),
+                currentTag(agentId),
+                { type: Tag.Agents as const, id: agentId },
+            ],
+        }),
     }),
 });
 
@@ -88,4 +101,5 @@ export const {
     useGetDeploymentByIdQuery,
     useCreateDeploymentMutation,
     useRollbackDeploymentMutation,
+    useStopDeploymentMutation,
 } = extendedDeploymentApi;

@@ -120,7 +120,9 @@ export class DeploymentService {
 
     async stop(agentId: string, workspaceId: string, userId: string) {
         const agent = await this.agentRepository.findOne(agentId, workspaceId);
+
         if (!agent) throw new NotFoundException('Agent not found');
+
         if (agent.status !== AgentStatus.PRODUCTION) {
             throw new BadRequestException('Agent is not in production');
         }

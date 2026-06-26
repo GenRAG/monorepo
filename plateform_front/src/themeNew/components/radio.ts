@@ -5,8 +5,7 @@ import borderRadius from "themeNew/foundations/borderRadius";
 import colors from "themeNew/foundations/colors";
 import { textStyles } from "themeNew/foundations/typography";
 
-const { definePartsStyle, defineMultiStyleConfig } =
-    createMultiStyleConfigHelpers(radioAnatomy.keys);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(radioAnatomy.keys);
 
 const baseStyle = definePartsStyle({
     container: {

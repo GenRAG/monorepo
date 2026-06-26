@@ -19,7 +19,7 @@ const SUGGESTED_QUESTIONS = [
 
 export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data, updateData }) => {
     const { workspaceId, agentId } = useOnboarding();
-    const onboardingStreamUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/onboarding/stream`;
+    const onboardingStreamUrl = `${(process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "")}/workspaces/${workspaceId}/onboarding/stream`;
     const { sendQuery, isOutOfCredits } = useAgentQuery(workspaceId, agentId, onboardingStreamUrl);
     const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
 

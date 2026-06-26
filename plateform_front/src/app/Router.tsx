@@ -1,5 +1,4 @@
 import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route } from "react-router-dom";
-import * as Sentry from "@sentry/react";
 import PrivateRoute from "app/PrivateRoute";
 import DefaultRedirect from "app/DefaultRedirect";
 import OnBoarding from "pages/Onboarding/OnBoarding";
@@ -9,9 +8,7 @@ import { AgentRoutes } from "app/Routes/AgentRoutes";
 import { AppRoutes } from "app/Routes/AppRoutes";
 import { LegalRoutes } from "app/Routes/LegalRoutes";
 
-const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV7(createBrowserRouter);
-
-const router = sentryCreateBrowserRouter(
+const router = createBrowserRouter(
     createRoutesFromElements(
         <>
             {AuthRoutes()}

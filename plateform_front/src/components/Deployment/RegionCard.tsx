@@ -1,11 +1,4 @@
-import {
-    Box,
-    HStack,
-    VStack,
-    Text,
-    Badge,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Box, HStack, VStack, Text, Badge, useColorModeValue } from "@chakra-ui/react";
 
 interface RegionCardProps {
     flag: string;
@@ -16,14 +9,7 @@ interface RegionCardProps {
     onClick: () => void;
 }
 
-export const RegionCard = ({
-    flag,
-    name,
-    description,
-    badge,
-    isSelected,
-    onClick,
-}: RegionCardProps) => {
+export const RegionCard = ({ flag, name, description, badge, isSelected, onClick }: RegionCardProps) => {
     const bgSelectedColor = useColorModeValue("green.50", "green.950");
     const bgColor = useColorModeValue("white", "grey.900");
 

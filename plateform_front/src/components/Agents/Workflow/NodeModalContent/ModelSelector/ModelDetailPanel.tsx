@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Divider, HStack, Stack, Text, VStack, Wrap, WrapItem, useColorModeValue } from "@chakra-ui/react";
 import { RagModel } from "types/models/models";
 import { formatContextLength, formatPrice, getProviderName } from "./modelUtils";
-import { CapabilityBadge, PerformanceBars, StatBadge } from "./ModelDetailHelpers";
+import { CapabilityBadge, StatBadge } from "./ModelDetailHelpers";
 import BoxIcon from "components/ui/BoxIcon";
 import { getAgentAvatar } from "utils/agentAvatar";
 import Button from "components/ui/Button";
@@ -129,9 +129,9 @@ export const ModelDetailPanel: React.FC<Props> = ({ model, onConfirm }) => {
                     </SectionModelInformation>
                 )}
 
-                <SectionModelInformation sectionTitle="Performance">
+                {/*<SectionModelInformation sectionTitle="Performance">
                     <PerformanceBars modelId={model.id} />
-                </SectionModelInformation>
+                </SectionModelInformation>*/}
 
                 {capabilities.length > 0 && (
                     <SectionModelInformation sectionTitle="Capacités">

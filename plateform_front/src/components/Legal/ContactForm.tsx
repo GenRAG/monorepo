@@ -32,23 +32,13 @@ export const ContactForm = () => {
                     <FormLabel fontSize="sm" color={labelColor} mb={1}>
                         Prénom *
                     </FormLabel>
-                    <Input
-                        placeholder="Votre prénom"
-                        value={form.firstName}
-                        onChange={update("firstName")}
-                        size="sm"
-                    />
+                    <Input placeholder="Votre prénom" value={form.firstName} onChange={update("firstName")} size="sm" />
                 </FormControl>
                 <FormControl>
                     <FormLabel fontSize="sm" color={labelColor} mb={1}>
                         Nom *
                     </FormLabel>
-                    <Input
-                        placeholder="Votre nom"
-                        value={form.lastName}
-                        onChange={update("lastName")}
-                        size="sm"
-                    />
+                    <Input placeholder="Votre nom" value={form.lastName} onChange={update("lastName")} size="sm" />
                 </FormControl>
             </HStack>
             <FormControl>

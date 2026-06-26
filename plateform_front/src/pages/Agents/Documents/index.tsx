@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { HStack, IconButton, Skeleton, Text, VStack, useColorMode, useDisclosure } from "@chakra-ui/react";
+import { HStack, IconButton, Text, VStack, useColorMode, useDisclosure } from "@chakra-ui/react";
 import { DocumentList } from "components/Document/Table/DocumentList";
 import { PreviewDrawer } from "components/Document/Drawer/PreviewDrawer";
 import { UploadModal } from "components/Document/Modal/UploadModal";

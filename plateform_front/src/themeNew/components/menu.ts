@@ -4,8 +4,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import borderRadius from "themeNew/foundations/borderRadius";
 import { textStyles } from "themeNew/foundations/typography";
 
-const { definePartsStyle, defineMultiStyleConfig } =
-    createMultiStyleConfigHelpers(menuAnatomy.keys);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(menuAnatomy.keys);
 
 const baseStyle = definePartsStyle({
     list: {

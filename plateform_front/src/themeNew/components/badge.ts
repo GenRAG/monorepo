@@ -1,25 +1,13 @@
 import { textStyles } from "themeNew/foundations/typography";
 
 export type BadgeProps = {
-    colorScheme:
-        | "gold"
-        | "white"
-        | "green"
-        | "olive"
-        | "red"
-        | "transparent"
-        | "grey"
-        | "blue"
-        | "lightGold";
+    colorScheme: "gold" | "white" | "green" | "olive" | "red" | "transparent" | "grey" | "blue" | "lightGold";
     size: "lg" | "md" | "sm" | "xs" | "2xs";
 };
 
 import { mode, StyleFunctionProps } from "@chakra-ui/theme-tools";
 
-const getColorScheme = (
-    colorScheme: BadgeProps["colorScheme"],
-    props: StyleFunctionProps,
-) => {
+const getColorScheme = (colorScheme: BadgeProps["colorScheme"], props: StyleFunctionProps) => {
     const badgeColors = {
         gold: {
             bg: mode("gold.200", "gold.400")(props),

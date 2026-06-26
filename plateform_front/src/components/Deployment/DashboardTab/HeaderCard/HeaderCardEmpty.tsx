@@ -44,7 +44,7 @@ export const HeaderCardEmpty: FC<Props> = ({ onGuideClick, onOpen }) => {
                         Deployment guide
                     </Button>
                     <Button size="sm" variant="outline" leftIcon={Globe} onClick={onOpen}>
-                        Premier déploiement
+                        Déployer en production
                     </Button>
                 </HStack>
             </VStack>

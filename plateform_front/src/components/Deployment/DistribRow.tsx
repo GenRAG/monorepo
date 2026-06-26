@@ -28,9 +28,7 @@ export const DistribRow = ({ icon, label, value, actionLabel }: DistribRowProps)
                     <Text fontSize="xs">{value}</Text>
                 </VStack>
             </HStack>
-            <Button size="sm">
-                {actionLabel}
-            </Button>
+            <Button size="sm">{actionLabel}</Button>
         </HStack>
     );
 };

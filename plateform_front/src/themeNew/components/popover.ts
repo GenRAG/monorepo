@@ -3,9 +3,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 
 import colors from "themeNew/foundations/colors";
 
-const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-    popoverAnatomy.keys,
-);
+const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(popoverAnatomy.keys);
 
 // Important to use backgroundColor and not bg, to enable stripes
 const Popover = defineMultiStyleConfig({

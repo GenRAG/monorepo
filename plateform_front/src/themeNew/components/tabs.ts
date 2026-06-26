@@ -4,9 +4,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 import colors from "themeNew/foundations/colors";
 import { textStyles } from "themeNew/foundations/typography";
 
-const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-    tabsAnatomy.keys,
-);
+const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(tabsAnatomy.keys);
 
 const Tabs = defineMultiStyleConfig({
     variants: {

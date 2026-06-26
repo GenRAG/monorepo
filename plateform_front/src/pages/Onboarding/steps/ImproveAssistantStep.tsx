@@ -24,7 +24,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId, agentId } = useOnboarding();
     const [updateStepsData] = useUpdateOnboardingStepsDataMutation();
-    const onboardingStreamUrl = `${process.env.REACT_APP_BACKEND_URL ?? ""}/workspaces/${workspaceId}/onboarding/stream`;
+    const onboardingStreamUrl = `${(process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "")}/workspaces/${workspaceId}/onboarding/stream`;
     const { sendQuery } = useAgentQuery(workspaceId, agentId, onboardingStreamUrl, "improve-assistant");
 
     const savedMessages: ChatMessage[] = (data.messages as ChatMessage[]) ?? [];

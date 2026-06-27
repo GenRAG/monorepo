@@ -1,5 +1,5 @@
 {
-  "installCommand": "yarn install",
+  "installCommand": "yarn install --production=false",
   "buildCommand": "yarn --cwd packages/workflow build && yarn --cwd plateform_front build",
   "outputDirectory": "plateform_front/build",
   "framework": null,

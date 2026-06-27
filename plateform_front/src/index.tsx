@@ -10,6 +10,7 @@ import { AuthProvider } from "app/AuthContext";
 import { ReactFlowProvider } from "@xyflow/react";
 import posthog from "posthog-js";
 import { PostHogProvider } from "@posthog/react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY!, {
     api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
@@ -32,18 +33,20 @@ const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 
 root.render(
     <React.StrictMode>
-        <PostHogProvider client={posthog}>
-            <ReduxProvider>
-                <ReactFlowProvider>
-                    <ChakraProvider theme={themeNew} resetCSS>
-                        <ColorModeScript initialColorMode={themeNew.config.initialColorMode} />
-                        <AuthProvider>
-                            <App />
-                        </AuthProvider>
-                    </ChakraProvider>
-                </ReactFlowProvider>
-            </ReduxProvider>
-        </PostHogProvider>
+        <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID ?? ""}>
+            <PostHogProvider client={posthog}>
+                <ReduxProvider>
+                    <ReactFlowProvider>
+                        <ChakraProvider theme={themeNew} resetCSS>
+                            <ColorModeScript initialColorMode={themeNew.config.initialColorMode} />
+                            <AuthProvider>
+                                <App />
+                            </AuthProvider>
+                        </ChakraProvider>
+                    </ReactFlowProvider>
+                </ReduxProvider>
+            </PostHogProvider>
+        </GoogleOAuthProvider>
     </React.StrictMode>,
 );
 

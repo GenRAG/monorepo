@@ -10,7 +10,7 @@ export const PRIVACY_SECTIONS: SectionData[] = [
             {
                 title: "Données fournies directement",
                 items: [
-                    "Identité : nom, prénom, adresse e-mail, organisation",
+                    "Identité : nom, adresse e-mail",
                     "Identifiants de connexion (mot de passe chiffré, tokens d'accès)",
                     "Documents et fichiers téléversés dans vos espaces de travail",
                     "Configurations d'agents, de pipelines RAG et de bases de connaissances",
@@ -48,7 +48,6 @@ export const PRIVACY_SECTIONS: SectionData[] = [
         intro: "GenRAG utilise uniquement des cookies strictement nécessaires au fonctionnement du service :",
         bullets: [
             "Cookies de session pour maintenir votre connexion sécurisée (JWT, HttpOnly)",
-            "Cookies de préférences pour mémoriser vos paramètres d'interface",
             "Aucun cookie publicitaire ou de tracking tiers",
         ],
     },
@@ -64,13 +63,5 @@ export const PRIVACY_SECTIONS: SectionData[] = [
             "Droit à la portabilité : recevoir vos données dans un format structuré",
             "Droit d'opposition : vous opposer à certains traitements",
         ],
-        infoBox:
-            "Pour exercer vos droits, contactez notre DPO à dpo@genrag.io. Nous répondrons dans un délai de 30 jours conformément à la réglementation.",
-    },
-    {
-        number: 5,
-        id: "dpo",
-        title: "Contact DPO",
-        text: "Notre Délégué à la Protection des Données (DPO) est votre interlocuteur privilégié pour toute question relative à vos données personnelles. Vous pouvez le contacter à l'adresse dpo@genrag.io ou par courrier à notre siège social.",
     },
 ];

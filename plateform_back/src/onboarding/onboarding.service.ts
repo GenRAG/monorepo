@@ -176,15 +176,22 @@ export class OnboardingService {
 
         const definition = workflow.definition as {
             blocks: PipelineBlock[];
-            nodes?: unknown[];
+            nodes?: Array<{ data?: { type?: string; isPlaceholder?: boolean; stringValue?: string } }>;
             edges?: unknown[];
         };
 
         const updatedBlocks =
             definition.blocks?.map((b) => (b.type === 'answer' ? { ...b, system_prompt: instruction } : b)) ?? [];
 
+        const updatedNodes =
+            definition.nodes?.map((node) =>
+                node.data?.type === 'INSTRUCTION'
+                    ? { ...node, data: { ...node.data, stringValue: instruction, isPlaceholder: false } }
+                    : node,
+            ) ?? [];
+
         await this.workflowService.update(session.agentId, {
-            definition: { ...definition, blocks: updatedBlocks } as Record<string, unknown>,
+            definition: { ...definition, blocks: updatedBlocks, nodes: updatedNodes } as Record<string, unknown>,
         });
 
         await this.onboardingRepository.update(session.id, { instruction, completed: true });

@@ -103,6 +103,15 @@ export const extendedUserApi = backendApi.injectEndpoints({
                 method: "POST",
             }),
         }),
+
+        googleLogin: builder.mutation<AuthResponse, { credential: string }>({
+            query: (body) => ({
+                url: "/auth/google",
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: [Tag.Users],
+        }),
     }),
 });
 
@@ -118,4 +127,5 @@ export const {
     useChangePasswordMutation,
     useDeleteMeMutation,
     useLogoutUserMutation,
+    useGoogleLoginMutation,
 } = extendedUserApi;

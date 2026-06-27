@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards, BadRequestException } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
@@ -57,6 +57,14 @@ export class AuthController {
     @Post('verify-password-reset-token')
     verifyPasswordResetToken(@Body() body: NewPasswordRequest) {
         return this.authService.verifyPasswordResetToken(body);
+    }
+
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 10, ttl: 60000 } })
+    @Post('google')
+    googleLogin(@Body('credential') credential: string, @Res({ passthrough: true }) response: Response) {
+        if (!credential) throw new BadRequestException('Missing Google credential');
+        return this.authService.loginWithGoogle(credential, response);
     }
 
     @Post('logout')

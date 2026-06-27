@@ -101,11 +101,16 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
                 >
                     {disabled ? `Limite atteinte (${maxFiles} fichiers max)` : "Ajoute tes documents"}
                 </Text>
-                {!disabled && (
-                    <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
-                        Glisse & dépose ou clique pour sélectionner
+                <VStack spacing={1}>
+                    {!disabled && (
+                        <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                            Glisse & dépose ou clique pour sélectionner
+                        </Text>
+                    )}
+                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                        PDF, MD, TXT, DOCX, HTML · max 15 Mo / fichier
                     </Text>
-                )}
+                </VStack>
                 {maxFiles !== undefined && currentCount !== undefined && !disabled && (
                     <HStack spacing={1}>
                         <Text fontSize="xs" color={colorMode === "dark" ? "grey.500" : "grey.400"}>

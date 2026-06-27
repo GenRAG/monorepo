@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import bcryptjs from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
 import { User } from 'generated/prisma';
 import { Response } from 'express';
@@ -145,6 +146,29 @@ export class AuthService {
 
     resendVerificationToken(email: string): Promise<void> {
         return this.tokenService.generateAndSendVerificationToken(email);
+    }
+
+    async loginWithGoogle(accessToken: string, response: Response) {
+        const client = new OAuth2Client();
+
+        const tokenInfo = await client.getTokenInfo(accessToken).catch(() => {
+            throw new UnauthorizedException('Invalid Google token');
+        });
+
+        if (!tokenInfo.email) throw new UnauthorizedException('Google token has no email');
+
+        const email = tokenInfo.email.toLowerCase();
+
+        let user = await this.usersService.findOneWithCredentials({ email });
+
+        if (!user) {
+            user = (await this.usersService.createGoogleUser({
+                email,
+                name: email.split('@')[0],
+            })) as User;
+        }
+
+        return this.login(user, response);
     }
 
     async verifyPasswordResetToken(verifyTokenBody: NewPasswordRequest): Promise<void> {

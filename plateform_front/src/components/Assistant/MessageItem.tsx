@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { ChatMessage } from "hooks/chat";
 import { getMarkdownStyles } from "components/ui/chat/markdownStyles";
 import BoxIcon from "components/ui/BoxIcon";
+import ThinkingBubble from "components/ui/chat/ThinkingBubble";
 
 const getInitials = (name: string) =>
     name
@@ -89,21 +90,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, agentTitle, userName, is
             ) : isLoading ? (
                 <HStack align="flex-start" spacing={3}>
                     <BoxIcon icon={Bot} />
-                    <Box flex={1} pt={1}>
-                        <HStack spacing={1.5}>
-                            {[0, 1, 2].map((i) => (
-                                <Box
-                                    key={i}
-                                    w="7px"
-                                    h="7px"
-                                    borderRadius="full"
-                                    bg="#34D3A9"
-                                    opacity={0.7}
-                                    animation={`pulse 1.2s ease-in-out ${i * 0.2}s infinite`}
-                                />
-                            ))}
-                        </HStack>
-                    </Box>
+                    <ThinkingBubble />
                 </HStack>
             ) : null}
         </Box>

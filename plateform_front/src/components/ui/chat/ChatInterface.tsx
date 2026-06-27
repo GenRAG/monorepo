@@ -5,6 +5,7 @@ import { ChatMessage, UseChatOptions, useChat } from "hooks/chat";
 import ChatMessageItem from "./ChatMessageItem";
 import ChatInput from "./ChatInput";
 import SuggestedQuestions from "./SuggestedQuestions";
+import ThinkingBubble from "./ThinkingBubble";
 
 interface ChatInterfaceProps {
     getResponse: UseChatOptions["getResponse"];
@@ -42,11 +43,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const iconBoxBg = useColorModeValue("rgba(40, 158, 87, 0.1)", "rgba(72, 187, 120, 0.12)");
     const iconBoxBorderColor = useColorModeValue("green.300", "green.700");
     const iconColor = useColorModeValue("green.500", "green.400");
+    const labelColor = useColorModeValue("grey.400", "grey.500");
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const { messages, sendMessage, isLoading } = useChat({ getResponse, initialMessages });
 
     const isDisabled = disabled || (maxMessages !== undefined && messages.length >= maxMessages);
+    const isThinking = isLoading && messages.length > 0 && messages[messages.length - 1].response === "";
 
     useEffect(() => {
         onMessagesChange?.(messages);
@@ -112,6 +115,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         {messages.map((message) => (
                             <ChatMessageItem key={message.id} message={message} />
                         ))}
+                        {isThinking && (
+                            <VStack align="flex-start" spacing={1}>
+                                <Text fontSize="xs" color={labelColor}>
+                                    Assistant
+                                </Text>
+                                <ThinkingBubble />
+                            </VStack>
+                        )}
                     </VStack>
                 </Box>
             )}

@@ -39,24 +39,12 @@ import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import { ChevronDownIcon, ChevronUpIcon, ClockIcon } from "lucide-react";
 
 // Register ChartJS components
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-    BarElement,
-    Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip, BarElement, Legend);
 
 // Icon components
 const TrendingUpIcon = (props: any) => (
     <Icon viewBox="0 0 24 24" {...props}>
-        <path
-            fill="currentColor"
-            d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"
-        />
+        <path fill="currentColor" d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
     </Icon>
 );
 
@@ -172,12 +160,7 @@ const mockActivityLog = [
     },
 ];
 
-const createGradient = (
-    ctx: CanvasRenderingContext2D,
-    chartArea: any,
-    color: string,
-    opacity: number = 0.5,
-) => {
+const createGradient = (ctx: CanvasRenderingContext2D, chartArea: any, color: string, opacity: number = 0.5) => {
     const { top, bottom } = chartArea;
 
     const r = parseInt(color.slice(1, 3), 16);
@@ -193,11 +176,7 @@ const createGradient = (
     return gradient;
 };
 
-const CustomTooltip = (
-    context: any,
-    isDark: boolean,
-    type: "volume" | "latency" | "cost",
-) => {
+const CustomTooltip = (context: any, isDark: boolean, type: "volume" | "latency" | "cost") => {
     let tooltipEl = document.getElementById("chartjs-tooltip");
 
     if (!tooltipEl) {
@@ -231,8 +210,7 @@ const CustomTooltip = (
             padding: "6px",
             borderRadius: "8px",
             border: `1px solid ${isDark ? "grey.700" : "grey.200"}`,
-            boxShadow:
-                "0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)",
+            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)",
             minWidth: "200px",
             transformOrigin: "center",
         });
@@ -276,10 +254,7 @@ const CustomTooltip = (
 
             const colorBox = document.createElement("span");
             Object.assign(colorBox.style, {
-                background:
-                    type === "cost"
-                        ? colors.backgroundColor
-                        : colors.borderColor,
+                background: type === "cost" ? colors.backgroundColor : colors.borderColor,
                 width: "10px",
                 height: "10px",
                 display: "inline-block",
@@ -317,19 +292,13 @@ const CustomTooltip = (
     const tooltipWidth = tooltipEl.offsetWidth;
     const tooltipHeight = tooltipEl.offsetHeight;
 
-    let leftPos =
-        position.left +
-        window.scrollX +
-        tooltipModel.caretX -
-        tooltipWidth -
-        10;
+    let leftPos = position.left + window.scrollX + tooltipModel.caretX - tooltipWidth - 10;
 
     if (leftPos < window.scrollX + 20) {
         leftPos = position.left + window.scrollX + tooltipModel.caretX + 10;
     }
 
-    let topPos =
-        position.top + window.scrollY + tooltipModel.caretY - tooltipHeight / 2;
+    let topPos = position.top + window.scrollY + tooltipModel.caretY - tooltipHeight / 2;
 
     if (topPos < window.scrollY + 10) {
         topPos = window.scrollY + 10;
@@ -375,9 +344,7 @@ const ChartWithFade: React.FC<{
                             return createGradient(
                                 ctx,
                                 chartArea,
-                                isDark
-                                    ? darkVolumeColorLine
-                                    : volumeColorBackground,
+                                isDark ? darkVolumeColorLine : volumeColorBackground,
                                 0.5,
                             );
                         },
@@ -385,9 +352,7 @@ const ChartWithFade: React.FC<{
                         pointRadius: 0,
                         pointHoverRadius: 6,
                         pointHoverBorderWidth: 3,
-                        pointHoverBackgroundColor: isDark
-                            ? volumeColorLine
-                            : volumeColorLine,
+                        pointHoverBackgroundColor: isDark ? volumeColorLine : volumeColorLine,
                         pointHoverBorderColor: isDark ? "#1A202C" : "#ffffff",
                     },
                 ],
@@ -406,12 +371,7 @@ const ChartWithFade: React.FC<{
                             const chart = context.chart;
                             const { ctx, chartArea } = chart;
                             if (!chartArea) return;
-                            return createGradient(
-                                ctx,
-                                chartArea,
-                                "#EC4899",
-                                0.2,
-                            );
+                            return createGradient(ctx, chartArea, "#EC4899", 0.2);
                         },
                         tension: 0.4,
                         pointRadius: 0,
@@ -430,12 +390,7 @@ const ChartWithFade: React.FC<{
                             const chart = context.chart;
                             const { ctx, chartArea } = chart;
                             if (!chartArea) return;
-                            return createGradient(
-                                ctx,
-                                chartArea,
-                                "#6366F1",
-                                0.25,
-                            );
+                            return createGradient(ctx, chartArea, "#6366F1", 0.25);
                         },
                         tension: 0.4,
                         pointRadius: 0,
@@ -550,8 +505,7 @@ const ChartWithFade: React.FC<{
             },
         },
         onHover: (event: any, activeElements: any) => {
-            event.native.target.style.cursor =
-                activeElements.length > 0 ? "pointer" : "default";
+            event.native.target.style.cursor = activeElements.length > 0 ? "pointer" : "default";
         },
     });
 
@@ -614,17 +568,9 @@ const ChartWithFade: React.FC<{
                 </>
             )}
             {type === "cost" ? (
-                <Bar
-                    ref={chartRef}
-                    data={createChartData()}
-                    options={getOptions()}
-                />
+                <Bar ref={chartRef} data={createChartData()} options={getOptions()} />
             ) : (
-                <Line
-                    ref={chartRef}
-                    data={createChartData()}
-                    options={getOptions()}
-                />
+                <Line ref={chartRef} data={createChartData()} options={getOptions()} />
             )}
         </Box>
     );
@@ -638,25 +584,9 @@ const AnalyticsWorkspace = () => {
     const isDark = colorMode === "dark";
 
     return (
-        <VStack
-            w="100%"
-            h="100vh"
-            align="stretch"
-            spacing={0}
-            overflow="hidden"
-        >
-            <WorkspaceHeader
-                title="Analytics"
-                description="View data about your assistant performance and usage."
-            />
-            <VStack
-                w="100%"
-                flex={1}
-                align="stretch"
-                spacing={0}
-                overflow="auto"
-                bg={isDark ? "grey.975" : "white"}
-            >
+        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
+            <WorkspaceHeader title="Analytics" description="View data about your assistant performance and usage." />
+            <VStack w="100%" flex={1} align="stretch" spacing={0} overflow="auto" bg={isDark ? "grey.975" : "white"}>
                 <HStack w="100%" align="start" spacing={6} p={6}>
                     <Box flex={1} minW={0}>
                         <VStack spacing={6} align="stretch" w="100%">
@@ -667,15 +597,8 @@ const AnalyticsWorkspace = () => {
                                 borderColor={isDark ? "grey.700" : "grey.200"}
                             >
                                 <CardBody p={2}>
-                                    <VStack
-                                        spacing={6}
-                                        align="stretch"
-                                        w="100%"
-                                    >
-                                        <Grid
-                                            templateColumns="repeat(auto-fit, minmax(280px, 1fr))"
-                                            gap={6}
-                                        >
+                                    <VStack spacing={6} align="stretch" w="100%">
+                                        <Grid templateColumns="repeat(auto-fit, minmax(280px, 1fr))" gap={6}>
                                             <PremiumKPICard
                                                 icon={MessageIcon}
                                                 label="Queries"
@@ -703,32 +626,15 @@ const AnalyticsWorkspace = () => {
                                                 trendLabel="vs yesterday"
                                             />
                                         </Grid>
-                                        <HStack
-                                            display="flex"
-                                            align="stretch"
-                                            spacing={6}
-                                            w="100%"
-                                        >
+                                        <HStack display="flex" align="stretch" spacing={6} w="100%">
                                             <Box flexGrow={2} minW={0}>
-                                                <VStack
-                                                    w="100%"
-                                                    align="stretch"
-                                                    spacing={6}
-                                                >
-                                                    <HStack
-                                                        w="100%"
-                                                        justify="space-between"
-                                                        align="start"
-                                                    >
+                                                <VStack w="100%" align="stretch" spacing={6}>
+                                                    <HStack w="100%" justify="space-between" align="start">
                                                         <Box>
                                                             <Text
                                                                 fontSize="lg"
                                                                 fontWeight="600"
-                                                                color={
-                                                                    isDark
-                                                                        ? "grey.100"
-                                                                        : "grey.800"
-                                                                }
+                                                                color={isDark ? "grey.100" : "grey.800"}
                                                             >
                                                                 Query Volume
                                                             </Text>
@@ -748,51 +654,27 @@ const AnalyticsWorkspace = () => {
                                                     <Text
                                                         fontSize="lg"
                                                         fontWeight="600"
-                                                        color={
-                                                            isDark
-                                                                ? "grey.100"
-                                                                : "grey.800"
-                                                        }
+                                                        color={isDark ? "grey.100" : "grey.800"}
                                                     >
                                                         Response Latency
                                                     </Text>
                                                     <HStack spacing={4} mt={2}>
                                                         <HStack spacing={2}>
-                                                            <Box
-                                                                w={2}
-                                                                h={2}
-                                                                borderRadius="full"
-                                                                bg="#6366F1"
-                                                            />
-                                                            <Text
-                                                                fontSize="xs"
-                                                                color="grey.500"
-                                                            >
+                                                            <Box w={2} h={2} borderRadius="full" bg="#6366F1" />
+                                                            <Text fontSize="xs" color="grey.500">
                                                                 p50 median
                                                             </Text>
                                                         </HStack>
                                                         <HStack spacing={2}>
-                                                            <Box
-                                                                w={2}
-                                                                h={2}
-                                                                borderRadius="full"
-                                                                bg="#EC4899"
-                                                            />
-                                                            <Text
-                                                                fontSize="xs"
-                                                                color="grey.500"
-                                                            >
+                                                            <Box w={2} h={2} borderRadius="full" bg="#EC4899" />
+                                                            <Text fontSize="xs" color="grey.500">
                                                                 p95
                                                             </Text>
                                                         </HStack>
                                                     </HStack>
                                                 </Box>
                                             </HStack>
-                                            <ChartWithFade
-                                                data={mockLatencyData}
-                                                isDark={isDark}
-                                                type="latency"
-                                            />
+                                            <ChartWithFade data={mockLatencyData} isDark={isDark} type="latency" />
                                         </VStack>
                                     </VStack>
                                 </CardBody>
@@ -809,70 +691,33 @@ const AnalyticsWorkspace = () => {
                                 borderColor={isDark ? "grey.700" : "grey.200"}
                             >
                                 <CardBody p={2}>
-                                    <VStack
-                                        spacing={6}
-                                        align="stretch"
-                                        w="100%"
-                                    >
+                                    <VStack spacing={6} align="stretch" w="100%">
                                         <VStack align="stretch" spacing={1}>
                                             <Text
                                                 fontSize="lg"
                                                 fontWeight="600"
-                                                color={
-                                                    isDark
-                                                        ? "grey.100"
-                                                        : "grey.800"
-                                                }
+                                                color={isDark ? "grey.100" : "grey.800"}
                                             >
                                                 Query Activity Heatmap
                                             </Text>
-                                            <Text
-                                                fontSize="xs"
-                                                color="grey.500"
-                                                fontWeight="500"
-                                                mb={1}
-                                            >
+                                            <Text fontSize="xs" color="grey.500" fontWeight="500" mb={1}>
                                                 Last 60 days
                                             </Text>
                                         </VStack>
-                                        <VStack
-                                            align="stretch"
-                                            spacing={1}
-                                            h="300px"
-                                        >
-                                            <ActivityHeatmap
-                                                data={allVolumeData}
-                                                isDark={isDark}
-                                            />
+                                        <VStack align="stretch" spacing={1} h="300px">
+                                            <ActivityHeatmap data={allVolumeData} isDark={isDark} />
                                         </VStack>
                                     </VStack>
-                                    <VStack
-                                        spacing={4}
-                                        align="stretch"
-                                        w="100%"
-                                        mt={7}
-                                    >
+                                    <VStack spacing={4} align="stretch" w="100%" mt={7}>
                                         <HStack justify="space-between">
                                             <Text
                                                 fontSize="lg"
                                                 fontWeight="600"
-                                                color={
-                                                    isDark
-                                                        ? "grey.100"
-                                                        : "grey.800"
-                                                }
+                                                color={isDark ? "grey.100" : "grey.800"}
                                             >
                                                 Activity log
                                             </Text>
-                                            <Button
-                                                size="xs"
-                                                variant="ghost"
-                                                color={
-                                                    isDark
-                                                        ? "grey.400"
-                                                        : "grey.600"
-                                                }
-                                            >
+                                            <Button size="xs" variant="ghost" color={isDark ? "grey.400" : "grey.600"}>
                                                 Expand all activities
                                             </Button>
                                         </HStack>
@@ -892,26 +737,14 @@ const AnalyticsWorkspace = () => {
                                             <Text
                                                 fontSize="lg"
                                                 fontWeight="600"
-                                                color={
-                                                    isDark
-                                                        ? "grey.100"
-                                                        : "grey.800"
-                                                }
+                                                color={isDark ? "grey.100" : "grey.800"}
                                             >
                                                 Total Cost
                                             </Text>
                                             <HStack spacing={4} mt={2}>
                                                 <HStack spacing={2}>
-                                                    <Box
-                                                        w={2}
-                                                        h={2}
-                                                        borderRadius="full"
-                                                        bg="#10B981"
-                                                    />
-                                                    <Text
-                                                        fontSize="xs"
-                                                        color="grey.500"
-                                                    >
+                                                    <Box w={2} h={2} borderRadius="full" bg="#10B981" />
+                                                    <Text fontSize="xs" color="grey.500">
                                                         Daily spend
                                                     </Text>
                                                 </HStack>
@@ -919,11 +752,7 @@ const AnalyticsWorkspace = () => {
                                         </Box>
                                     </HStack>
 
-                                    <ChartWithFade
-                                        data={mockCostData}
-                                        isDark={isDark}
-                                        type="cost"
-                                    />
+                                    <ChartWithFade data={mockCostData} isDark={isDark} type="cost" />
                                 </CardBody>
                             </Card>
                         </VStack>
@@ -948,10 +777,7 @@ interface ActivityLogItemProps {
     isDark: boolean;
 }
 
-const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
-    activity,
-    isDark,
-}) => {
+const ActivityLogItem: React.FC<ActivityLogItemProps> = ({ activity, isDark }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
@@ -972,19 +798,9 @@ const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
             <VStack spacing={3} align="stretch">
                 <HStack justify="space-between" align="start">
                     <HStack spacing={3} flex={1}>
-                        <Avatar
-                            size="sm"
-                            name={activity.user.name}
-                            bg="green.500"
-                            color="white"
-                            fontSize="xs"
-                        />
+                        <Avatar size="sm" name={activity.user.name} bg="green.500" color="white" fontSize="xs" />
                         <VStack align="start" spacing={0} flex={1}>
-                            <Text
-                                fontSize="sm"
-                                fontWeight="600"
-                                color={isDark ? "grey.100" : "grey.900"}
-                            >
+                            <Text fontSize="sm" fontWeight="600" color={isDark ? "grey.100" : "grey.900"}>
                                 {activity.user.name}
                             </Text>
                             <Text
@@ -997,20 +813,11 @@ const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
                         </VStack>
                     </HStack>
                     <VStack align="end" spacing={1}>
-                        <Text
-                            fontSize="xs"
-                            color={isDark ? "grey.500" : "grey.500"}
-                        >
+                        <Text fontSize="xs" color={isDark ? "grey.500" : "grey.500"}>
                             {activity.timestamp}
                         </Text>
                         <IconButton
-                            icon={
-                                isExpanded ? (
-                                    <ChevronUpIcon size={16} />
-                                ) : (
-                                    <ChevronDownIcon size={16} />
-                                )
-                            }
+                            icon={isExpanded ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />}
                             size="xs"
                             variant="ghost"
                             aria-label="Expand"
@@ -1024,47 +831,26 @@ const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
                 {!isExpanded && (
                     <HStack spacing={4} flexWrap="wrap">
                         <HStack spacing={1}>
-                            <Text
-                                fontSize="xs"
-                                color={isDark ? "grey.500" : "grey.500"}
-                            >
+                            <Text fontSize="xs" color={isDark ? "grey.500" : "grey.500"}>
                                 Response time:
                             </Text>
-                            <Text
-                                fontSize="xs"
-                                fontWeight="600"
-                                color={isDark ? "grey.300" : "grey.700"}
-                            >
+                            <Text fontSize="xs" fontWeight="600" color={isDark ? "grey.300" : "grey.700"}>
                                 {activity.responseTime}
                             </Text>
                         </HStack>
                         <HStack spacing={1}>
-                            <Text
-                                fontSize="xs"
-                                color={isDark ? "grey.500" : "grey.500"}
-                            >
+                            <Text fontSize="xs" color={isDark ? "grey.500" : "grey.500"}>
                                 Cost:
                             </Text>
-                            <Text
-                                fontSize="xs"
-                                fontWeight="600"
-                                color={isDark ? "grey.300" : "grey.700"}
-                            >
+                            <Text fontSize="xs" fontWeight="600" color={isDark ? "grey.300" : "grey.700"}>
                                 {activity.cost}
                             </Text>
                         </HStack>
                         <HStack spacing={1}>
-                            <Text
-                                fontSize="xs"
-                                color={isDark ? "grey.500" : "grey.500"}
-                            >
+                            <Text fontSize="xs" color={isDark ? "grey.500" : "grey.500"}>
                                 Sources:
                             </Text>
-                            <Text
-                                fontSize="xs"
-                                fontWeight="600"
-                                color={isDark ? "grey.300" : "grey.700"}
-                            >
+                            <Text fontSize="xs" fontWeight="600" color={isDark ? "grey.300" : "grey.700"}>
                                 {activity.sources.length}
                             </Text>
                         </HStack>
@@ -1074,37 +860,21 @@ const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
                 {/* Expanded view */}
                 <Collapse in={isExpanded} animateOpacity>
                     <VStack spacing={3} align="stretch" pt={2}>
-                        <Divider
-                            borderColor={isDark ? "grey.800" : "grey.200"}
-                        />
+                        <Divider borderColor={isDark ? "grey.800" : "grey.200"} />
 
                         {/* Response */}
                         <Box>
-                            <Text
-                                fontSize="xs"
-                                fontWeight="600"
-                                color={isDark ? "grey.400" : "grey.600"}
-                                mb={1}
-                            >
+                            <Text fontSize="xs" fontWeight="600" color={isDark ? "grey.400" : "grey.600"} mb={1}>
                                 Response
                             </Text>
-                            <Text
-                                fontSize="xs"
-                                color={isDark ? "grey.300" : "grey.700"}
-                                lineHeight="1.5"
-                            >
+                            <Text fontSize="xs" color={isDark ? "grey.300" : "grey.700"} lineHeight="1.5">
                                 {activity.response}
                             </Text>
                         </Box>
 
                         {/* Sources */}
                         <Box>
-                            <Text
-                                fontSize="xs"
-                                fontWeight="600"
-                                color={isDark ? "grey.400" : "grey.600"}
-                                mb={2}
-                            >
+                            <Text fontSize="xs" fontWeight="600" color={isDark ? "grey.400" : "grey.600"} mb={2}>
                                 Sources ({activity.sources.length})
                             </Text>
                             <HStack spacing={2} flexWrap="wrap">
@@ -1133,18 +903,10 @@ const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
                                 border="1px solid"
                                 borderColor={isDark ? "grey.700" : "grey.200"}
                             >
-                                <Text
-                                    fontSize="xs"
-                                    color={isDark ? "grey.500" : "grey.500"}
-                                    mb={1}
-                                >
+                                <Text fontSize="xs" color={isDark ? "grey.500" : "grey.500"} mb={1}>
                                     Response Time
                                 </Text>
-                                <Text
-                                    fontSize="sm"
-                                    fontWeight="600"
-                                    color={isDark ? "grey.100" : "grey.900"}
-                                >
+                                <Text fontSize="sm" fontWeight="600" color={isDark ? "grey.100" : "grey.900"}>
                                     {activity.responseTime}
                                 </Text>
                             </Box>
@@ -1156,18 +918,10 @@ const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
                                 border="1px solid"
                                 borderColor={isDark ? "grey.700" : "grey.200"}
                             >
-                                <Text
-                                    fontSize="xs"
-                                    color={isDark ? "grey.500" : "grey.500"}
-                                    mb={1}
-                                >
+                                <Text fontSize="xs" color={isDark ? "grey.500" : "grey.500"} mb={1}>
                                     Cost
                                 </Text>
-                                <Text
-                                    fontSize="sm"
-                                    fontWeight="600"
-                                    color={isDark ? "grey.100" : "grey.900"}
-                                >
+                                <Text fontSize="sm" fontWeight="600" color={isDark ? "grey.100" : "grey.900"}>
                                     {activity.cost}
                                 </Text>
                             </Box>
@@ -1179,18 +933,10 @@ const ActivityLogItem: React.FC<ActivityLogItemProps> = ({
                                 border="1px solid"
                                 borderColor={isDark ? "grey.700" : "grey.200"}
                             >
-                                <Text
-                                    fontSize="xs"
-                                    color={isDark ? "grey.500" : "grey.500"}
-                                    mb={1}
-                                >
+                                <Text fontSize="xs" color={isDark ? "grey.500" : "grey.500"} mb={1}>
                                     Sources
                                 </Text>
-                                <Text
-                                    fontSize="sm"
-                                    fontWeight="600"
-                                    color={isDark ? "grey.100" : "grey.900"}
-                                >
+                                <Text fontSize="sm" fontWeight="600" color={isDark ? "grey.100" : "grey.900"}>
                                     {activity.sources.length}
                                 </Text>
                             </Box>
@@ -1240,39 +986,20 @@ const PremiumKPICard: React.FC<PremiumKPICardProps> = ({
             <CardBody p={1}>
                 <VStack align="stretch" spacing={3}>
                     <HStack justify="space-between" align="top">
-                        <Text
-                            fontSize="xl"
-                            color={isDark ? "grey.100" : "grey.600"}
-                            fontWeight="400"
-                        >
+                        <Text fontSize="xl" color={isDark ? "grey.100" : "grey.600"} fontWeight="400">
                             {label}
                         </Text>
-                        <Box
-                            p={4}
-                            borderRadius="12px"
-                            bg={isDark ? "green.700" : "green.100"}
-                        >
-                            <IconComponent
-                                boxSize={6}
-                                color={isDark ? "grey.100" : "grey.600"}
-                            />
+                        <Box p={4} borderRadius="12px" bg={isDark ? "green.700" : "green.100"}>
+                            <IconComponent boxSize={6} color={isDark ? "grey.100" : "grey.600"} />
                         </Box>
                     </HStack>
                     <HStack align="baseline" spacing={1}>
                         {unit && (
-                            <Text
-                                fontSize="xl"
-                                fontWeight="600"
-                                color={isDark ? "grey.300" : "grey.600"}
-                            >
+                            <Text fontSize="xl" fontWeight="600" color={isDark ? "grey.300" : "grey.600"}>
                                 {unit}
                             </Text>
                         )}
-                        <Text
-                            fontSize="3xl"
-                            fontWeight="700"
-                            color={isDark ? "grey.100" : "grey.800"}
-                        >
+                        <Text fontSize="3xl" fontWeight="700" color={isDark ? "grey.100" : "grey.800"}>
                             {value}
                         </Text>
                     </HStack>
@@ -1305,11 +1032,8 @@ interface ActivityHeatmapProps {
 }
 
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, isDark }) => {
-    const weeks: Array<
-        Array<{ date: Date; queries: number; dayOfWeek: number }>
-    > = [];
-    let currentWeek: Array<{ date: Date; queries: number; dayOfWeek: number }> =
-        [];
+    const weeks: Array<Array<{ date: Date; queries: number; dayOfWeek: number }>> = [];
+    let currentWeek: Array<{ date: Date; queries: number; dayOfWeek: number }> = [];
 
     const firstDate = new Date(data[0].fullDate);
     const firstDay = firstDate.getDay();
@@ -1358,13 +1082,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, isDark }) => {
         <VStack w="100%" h="100%" align="start" spacing={1} flex={1}>
             <Flex w="100%" h="calc(100% - 24px)" gap="4px" flex={1}>
                 {weeks.map((week, weekIndex) => (
-                    <Flex
-                        key={weekIndex}
-                        flexDirection="column"
-                        gap="4px"
-                        flex={1}
-                        minW={0}
-                    >
+                    <Flex key={weekIndex} flexDirection="column" gap="4px" flex={1} minW={0}>
                         {week.map((day, dayIndex) => (
                             <ChakraTooltip
                                 key={dayIndex}
@@ -1372,9 +1090,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, isDark }) => {
                                 hasArrow
                                 borderRadius="8px"
                                 label={
-                                    day.queries > 0
-                                        ? `${day.date.toLocaleDateString()}: ${day.queries} queries`
-                                        : ""
+                                    day.queries > 0 ? `${day.date.toLocaleDateString()}: ${day.queries} queries` : ""
                                 }
                             >
                                 <Box
@@ -1406,10 +1122,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, isDark }) => {
                         w="10px"
                         h="10px"
                         borderRadius="2px"
-                        bg={getColor(
-                            minQueries +
-                                (level / 4) * (maxQueries - minQueries),
-                        )}
+                        bg={getColor(minQueries + (level / 4) * (maxQueries - minQueries))}
                     />
                 ))}
                 <Text fontSize="9px" color="grey.500">

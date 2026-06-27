@@ -3,8 +3,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 
 import colors from "themeNew/foundations/colors";
 
-const { definePartsStyle, defineMultiStyleConfig } =
-    createMultiStyleConfigHelpers(switchAnatomy.keys);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(switchAnatomy.keys);
 
 const baseStyle = definePartsStyle({
     thumb: {

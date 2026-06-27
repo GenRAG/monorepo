@@ -126,11 +126,9 @@ const baseColors = {
         FLAGSHIP: "linear-gradient(180deg, #726F6B -0.1%, #989591 99.99%)",
         ELITE: "linear-gradient(0deg, #B59C76 2.32%, #98743F 99.87%)",
 
-        premier:
-            "radial-gradient(124.26% 81.24% at 79.69% 34.2%, #FFF 0%, #E4E4E4 42%, #B0B0B0 100%)",
+        premier: "radial-gradient(124.26% 81.24% at 79.69% 34.2%, #FFF 0%, #E4E4E4 42%, #B0B0B0 100%)",
         black: "radial-gradient(124.26% 81.24% at 79.69% 34.2%, #A38556 0%, #38322A 42%,  #1E1E1E 100%)",
-        obsidian:
-            "radial-gradient(124.26% 81.24% at 79.69% 34.2%, #988ED5 0%, #281986 42.31%, #0A052A 100%)",
+        obsidian: "radial-gradient(124.26% 81.24% at 79.69% 34.2%, #988ED5 0%, #281986 42.31%, #0A052A 100%)",
 
         gold: "radial-gradient(152.96% 100% at 100% 50%, rgba(239, 235, 229, 0.40) 0%, rgba(234, 214, 187, 0.40) 75%, rgba(220, 189, 145, 0.40) 100%), rgba(230, 181, 103, 0.90)",
     },

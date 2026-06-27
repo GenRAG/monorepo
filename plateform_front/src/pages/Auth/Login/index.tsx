@@ -1,7 +1,4 @@
-import AuthLayout, {
-    AuthStepType,
-    LoginFormSteps,
-} from "pages/Auth/Layout/AuthLayout";
+import AuthLayout, { AuthStepType, LoginFormSteps } from "pages/Auth/Layout/AuthLayout";
 import { useAuthLayout } from "pages/Auth/Layout/AuthLayoutContext";
 import { LoginForm } from "pages/Auth/Login/LoginForm";
 import { FC, useEffect, useState } from "react";
@@ -14,8 +11,7 @@ const Login: FC = () => {
     useEffect(() => {
         setConfig({
             canGoBack:
-                step === LoginFormSteps.LOGIN_PASSWORD ||
-                step === LoginFormSteps.LOGIN_PASSKEY
+                step === LoginFormSteps.LOGIN_PASSWORD || step === LoginFormSteps.LOGIN_PASSKEY
                     ? () => setStep(LoginFormSteps.LOGIN_EMAIL)
                     : undefined,
             showBackground: step === LoginFormSteps.LOGIN_EMAIL,

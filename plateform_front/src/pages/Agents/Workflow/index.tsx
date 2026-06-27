@@ -26,6 +26,7 @@ import {
 } from "services/workflow/workflow";
 import { useGetModelsGenerationQuery } from "services/models/models";
 import useThemedToast from "hooks/useThemedToast";
+import { usePostHog } from "@posthog/react";
 
 interface WorkflowInnerProps {
     initialNodes?: AppNode[];
@@ -38,6 +39,7 @@ interface WorkflowInnerProps {
 const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId, agentId }: WorkflowInnerProps) => {
     const { colorMode } = useColorMode();
     const reactFlowContainerRef = useRef<HTMLDivElement>(null);
+    const posthog = usePostHog();
     const toast = useThemedToast();
 
     useGetModelsGenerationQuery();
@@ -116,6 +118,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
             } else {
                 await createWorkflow(params).unwrap();
             }
+            posthog?.capture("workflow_saved", { agent_id: agentId });
             setIsDirty(false);
             toast({
                 title: "Workflow enregistré",

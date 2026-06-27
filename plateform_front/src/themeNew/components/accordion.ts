@@ -1,9 +1,7 @@
 import { accordionAnatomy } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 
-const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-    accordionAnatomy.keys,
-);
+const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(accordionAnatomy.keys);
 
 const accordionVariant = defineMultiStyleConfig({
     baseStyle: {

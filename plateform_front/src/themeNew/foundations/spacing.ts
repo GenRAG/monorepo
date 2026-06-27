@@ -18,10 +18,7 @@ const responsiveList = ["2xs", "xs", "sm", "md", "lg", "xl"];
 const customsToken = prefixList
     .map((prefix) =>
         Object.fromEntries(
-            responsiveList.map((size) => [
-                `${prefix}-${size}`,
-                `var(--genrag-${prefix}-spacing-${size})`,
-            ]),
+            responsiveList.map((size) => [`${prefix}-${size}`, `var(--genrag-${prefix}-spacing-${size})`]),
         ),
     )
     .reduce((acc, curr) => ({ ...acc, ...curr }), {});

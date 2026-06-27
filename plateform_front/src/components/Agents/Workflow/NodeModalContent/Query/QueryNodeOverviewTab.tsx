@@ -56,29 +56,13 @@ const QueryOverviewTab = () => {
 
                 <Box>
                     <HStack spacing={2} mb={1}>
-                        <Box w="8px" h="8px" borderRadius="full" bg="green.500" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
-                            2. Normalisation de requête
-                        </Text>
-                    </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
-                        La requête est nettoyée et formatée pour être comprise par le système.
-                    </Text>
-                </Box>
-
-                <Box>
-                    <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.600" />
                         <Text
                             fontSize="sm"
                             fontWeight="semibold"
                             color={colorMode === "dark" ? "grey.100" : "grey.900"}
                         >
-                            3. Injection de contexte
+                            2. Injection de contexte
                         </Text>
                     </HStack>
                     <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
@@ -94,7 +78,7 @@ const QueryOverviewTab = () => {
                             fontWeight="semibold"
                             color={colorMode === "dark" ? "grey.100" : "grey.900"}
                         >
-                            4. Déclenchement du pipeline
+                            3. Déclenchement du pipeline
                         </Text>
                     </HStack>
                     <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>

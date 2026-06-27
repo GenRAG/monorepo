@@ -20,6 +20,7 @@ import colors from "themeNew/foundations/colors";
 import { useLoginMutation, useGetMeQuery } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
 import { useAuth } from "app/AuthContext";
+import { usePostHog } from "@posthog/react";
 
 type PasswordFormType = {
     password: string;
@@ -36,6 +37,7 @@ export const PasswordForm: FC<{
     const navigate = useNavigate();
     const { login: setLoggedIn } = useAuth();
     const { refetch: refetchMe } = useGetMeQuery();
+    const posthog = usePostHog();
     const fieldTextColor = useColorModeValue("grey.800", "grey.100");
 
     const {
@@ -57,9 +59,17 @@ export const PasswordForm: FC<{
                 password: data.password,
             }).unwrap();
 
-            await refetchMe();
+            const meResult = await refetchMe();
 
             setLoggedIn();
+
+            if (meResult.data) {
+                posthog?.identify(meResult.data.id, {
+                    email: meResult.data.email,
+                    name: meResult.data.name,
+                });
+            }
+            posthog?.capture("user_logged_in");
 
             toast({
                 title: "Connexion réussie",
@@ -73,11 +83,23 @@ export const PasswordForm: FC<{
                 await navigate("/");
             }, 100);
         } catch (err: any) {
-            const message = "Une erreur est survenue lors de la connexion. Veuillez réessayer.";
+            const serverMessage: string = err?.data?.error?.message ?? "";
+
+            if (serverMessage === "Account not verified") {
+                toast({
+                    title: "Compte non vérifié",
+                    description: "Veuillez vérifier votre adresse email avant de vous connecter.",
+                    status: "warning",
+                    duration: 5000,
+                    isClosable: true,
+                });
+                void navigate(`/validate?email=${encodeURIComponent(email)}`);
+                return;
+            }
 
             toast({
                 title: "Une erreur est survenue.",
-                description: err?.data?.error?.message || message,
+                description: serverMessage || "Une erreur est survenue lors de la connexion. Veuillez réessayer.",
                 status: "error",
                 duration: 9000,
                 isClosable: true,

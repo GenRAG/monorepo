@@ -3,8 +3,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 
 import colors from "themeNew/foundations/colors";
 
-const { definePartsStyle, defineMultiStyleConfig } =
-    createMultiStyleConfigHelpers(parts.keys);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(parts.keys);
 const baseStyle = definePartsStyle({
     thumb: {
         bg: colors.whites.white,

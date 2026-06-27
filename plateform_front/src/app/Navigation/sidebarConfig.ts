@@ -50,9 +50,7 @@ export const agentNavSections: NavSection[] = [
     },
     {
         label: "Général",
-        items: [
-            { id: "settings", icon: Settings, label: "Paramètres" },
-        ],
+        items: [{ id: "settings", icon: Settings, label: "Paramètres" }],
     },
 ];
 

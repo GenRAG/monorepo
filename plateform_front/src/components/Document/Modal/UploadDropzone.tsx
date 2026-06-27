@@ -1,7 +1,8 @@
 import React from "react";
-import { Box, Text, VStack } from "@chakra-ui/react";
-import { CloudUpload } from "lucide-react";
+import { Box, HStack, Icon, Text, VStack } from "@chakra-ui/react";
+import { AlertTriangle, CloudUpload } from "lucide-react";
 import BoxIcon from "components/ui/BoxIcon";
+import { useColorModeValue } from "@chakra-ui/react";
 
 interface UploadDropzoneProps {
     isDragging: boolean;
@@ -20,6 +21,9 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({
     onDragOver,
     onDragLeave,
 }) => {
+    const bgWarning = useColorModeValue("orange.50", "orange.900");
+    const textColor = useColorModeValue("grey.900", "grey.50");
+
     return (
         <Box
             as="label"
@@ -48,8 +52,24 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({
                     </Box>
                 </Text>
                 <Text fontSize="12px" color="textMuted">
-                    PDF, DOCX, TXT, MD · max 50 Mo / fichier
+                    PDF, MD, TXT, DOCX, HTML · max 15 Mo / fichier
                 </Text>
+                <HStack
+                    spacing={2}
+                    px={3}
+                    py={2}
+                    bg={bgWarning}
+                    borderWidth="1px"
+                    borderStyle="solid"
+                    borderColor="orange.200"
+                    borderRadius="10px"
+                    align="flex-start"
+                >
+                    <Icon as={AlertTriangle} color="orange.400" boxSize={3.5} mt="1px" flexShrink={0} />
+                    <Text fontSize="11px" color={textColor} textAlign="left">
+                        Les PDFs scannés ou composés uniquement d&apos;images ne sont pas pris en charge.
+                    </Text>
+                </HStack>
             </VStack>
             <input
                 type="file"

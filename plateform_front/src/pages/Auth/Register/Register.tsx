@@ -7,7 +7,6 @@ import {
     FormErrorMessage,
     FormLabel,
     HStack,
-    Image,
     Input,
     Link,
     Text,
@@ -20,8 +19,7 @@ import { AuthStepFormProps, RegisterFormSteps } from "pages/Auth/Layout/AuthLayo
 
 import Button from "components/ui/Button";
 import { validateEmail } from "utils/validateEmail";
-import Google from "assets/icons/google.svg";
-
+import GoogleLoginButton from "components/Auth/GoogleLoginButton";
 import CreateAccountForm from "./CreateAccountForm";
 
 const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
@@ -102,14 +100,7 @@ const RegisterForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {
                                 <Divider borderColor="grey.300" />
                             </HStack>
                             <VStack w="100%">
-                                <Button w="100%" size="lg" bg="white" variant="ghost">
-                                    <HStack justify="center" spacing="8px">
-                                        <Image src={Google} boxSize="24px" />
-                                        <Text size="sm" color="black">
-                                            Continuer avec Google
-                                        </Text>
-                                    </HStack>
-                                </Button>
+                                <GoogleLoginButton />
                             </VStack>
                         </>
                     </>

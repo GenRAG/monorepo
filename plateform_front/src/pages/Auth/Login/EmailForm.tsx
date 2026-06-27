@@ -12,18 +12,15 @@ import {
     Link,
     Text,
     VStack,
-    Image,
     useColorModeValue,
-    Button as ChakraButton,
 } from "@chakra-ui/react";
 import { AuthHeader } from "components/Auth/AuthHeader";
 import { AuthStepType } from "pages/Auth/Layout/AuthLayout";
 import { LocalStorageKeys } from "types/localStorage";
 import { useLocalStorage } from "usehooks-ts";
-
 import Button from "components/ui/Button";
+import GoogleLoginButton from "components/Auth/GoogleLoginButton";
 import { validateEmail } from "utils/validateEmail";
-import Google from "assets/icons/google.svg";
 
 type EmailFormType = {
     email: string;
@@ -54,6 +51,7 @@ export const EmailForm: FC<{
         else forget();
         setEmail(data.email);
     });
+
 
     return (
         <VStack gap="32px" w="100%">
@@ -115,21 +113,7 @@ export const EmailForm: FC<{
                             <Divider borderColor={useColorModeValue("grey.300", "grey.100")} />
                         </HStack>
                         <VStack w="100%">
-                            <ChakraButton
-                                w="100%"
-                                size="lg"
-                                bg="white"
-                                _hover={{ bg: "grey.25" }}
-                                _active={{ bg: "grey.25" }}
-                                variant="none"
-                            >
-                                <HStack justify="center" spacing="8px">
-                                    <Image src={Google} boxSize="24px" />
-                                    <Text size="sm" color="black">
-                                        Continuer avec Google
-                                    </Text>
-                                </HStack>
-                            </ChakraButton>
+                            <GoogleLoginButton />
                         </VStack>
                     </>
                 </VStack>

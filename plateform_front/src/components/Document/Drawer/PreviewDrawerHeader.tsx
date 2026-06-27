@@ -10,7 +10,6 @@ interface PreviewDrawerHeaderProps {
 }
 
 export const PreviewDrawerHeader: React.FC<PreviewDrawerHeaderProps> = ({ document }) => {
-
     const badge = getFileTypeBadgeConfig(document.mimeType);
 
     return (

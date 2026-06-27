@@ -43,10 +43,7 @@ export const billingApi = {
         ];
     },
 
-    purchaseCredits: async (
-        packageId: string,
-        paymentMethodId: string,
-    ): Promise<{ newBalance: number }> => {
+    purchaseCredits: async (packageId: string, paymentMethodId: string): Promise<{ newBalance: number }> => {
         throw new Error("Non implémenté - connecter Stripe");
     },
 };

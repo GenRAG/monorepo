@@ -52,7 +52,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             rejected.forEach((file) => {
                 toast({
                     title: `${file.name} n'est pas pris en charge`,
-                    description: "Veuillez téléverser des fichiers PDF, DOCX, TXT ou MD",
+                    description: "Veuillez téléverser des fichiers PDF, DOCX, TXT, MD ou HTML",
                     status: "warning",
                     duration: 3000,
                 });
@@ -81,7 +81,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     }, []);
 
     const onClickUpload = async () => {
-        await handleUpload();
+        const { erroredFiles } = await handleUpload();
+        if (erroredFiles.length > 0) {
+            toast({
+                title: "Erreur lors du téléversement",
+                description: `${erroredFiles.join(", ")} n'${erroredFiles.length === 1 ? "a" : "ont"} pas pu être téléversé${erroredFiles.length === 1 ? "" : "s"}.`,
+                status: "error",
+                duration: 5000,
+            });
+        }
         onUploadComplete();
     };
 

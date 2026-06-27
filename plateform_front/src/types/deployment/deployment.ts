@@ -52,4 +52,6 @@ export interface RollbackParams extends DeploymentRouteParams {
     changelog?: string;
 }
 
+export type StopParams = DeploymentRouteParams;
+
 export type DeploymentEnv = VersionStatus;

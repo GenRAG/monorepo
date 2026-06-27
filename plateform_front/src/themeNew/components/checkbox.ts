@@ -6,8 +6,7 @@ import colors from "themeNew/foundations/colors";
 import { darkThemeColors } from "themeNew/foundations/themeConfig";
 import { textStyles } from "themeNew/foundations/typography";
 
-const { definePartsStyle, defineMultiStyleConfig } =
-    createMultiStyleConfigHelpers(checkboxAnatomy.keys);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(checkboxAnatomy.keys);
 
 const simpleGold = definePartsStyle({
     control: {

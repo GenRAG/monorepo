@@ -105,37 +105,37 @@ export const MetricCard = ({
             <Box mt="auto" mx={-4} h="70px" position="relative" minW={0}>
                 <Box position="absolute" inset={0}>
                     <Line
-                    data={{
-                        labels: sparkData.map(() => ""),
-                        datasets: [
-                            {
-                                data: sparkData,
-                                borderColor: sparkColor ?? "#34D3A9",
-                                borderWidth: 1.5,
-                                fill: true,
-                                backgroundColor: (ctx) => {
-                                    const color = sparkColor ?? "#34D3A9";
-                                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 70);
-                                    gradient.addColorStop(0, hexToRgba(color, 0.3));
-                                    gradient.addColorStop(1, hexToRgba(color, 0));
-                                    return gradient;
+                        data={{
+                            labels: sparkData.map(() => ""),
+                            datasets: [
+                                {
+                                    data: sparkData,
+                                    borderColor: sparkColor ?? "#34D3A9",
+                                    borderWidth: 1.5,
+                                    fill: true,
+                                    backgroundColor: (ctx) => {
+                                        const color = sparkColor ?? "#34D3A9";
+                                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 70);
+                                        gradient.addColorStop(0, hexToRgba(color, 0.3));
+                                        gradient.addColorStop(1, hexToRgba(color, 0));
+                                        return gradient;
+                                    },
+                                    tension: 0.4,
+                                    pointRadius: 0,
                                 },
-                                tension: 0.4,
-                                pointRadius: 0,
+                            ],
+                        }}
+                        options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: false,
+                            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                            scales: {
+                                x: { display: false },
+                                y: { display: false },
                             },
-                        ],
-                    }}
-                    options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                        scales: {
-                            x: { display: false },
-                            y: { display: false },
-                        },
-                        elements: { line: { borderCapStyle: "round", borderJoinStyle: "round" } },
-                    }}
+                            elements: { line: { borderCapStyle: "round", borderJoinStyle: "round" } },
+                        }}
                     />
                 </Box>
             </Box>

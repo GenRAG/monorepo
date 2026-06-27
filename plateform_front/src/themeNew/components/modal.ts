@@ -4,9 +4,7 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 import colors from "themeNew/foundations/colors";
 import { headingStyles } from "themeNew/foundations/typography";
 
-const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-    modalAnatomy.keys,
-);
+const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(modalAnatomy.keys);
 
 const spacingValues = {
     xs: {

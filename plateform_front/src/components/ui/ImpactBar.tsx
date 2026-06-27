@@ -19,14 +19,14 @@ export const ImpactBar = ({ label, value }: ImpactBarProps) => {
                     {pct}%
                 </Text>
             </HStack>
-            <Box w="100%" h="6px" borderRadius="full" bg={colorMode === "dark" ? "grey.800" : "grey.200"} overflow="hidden">
-                <Box
-                    h="100%"
-                    w={`${pct}%`}
-                    bg="green.500"
-                    borderRadius="full"
-                    transition="width 0.6s ease"
-                />
+            <Box
+                w="100%"
+                h="6px"
+                borderRadius="full"
+                bg={colorMode === "dark" ? "grey.800" : "grey.200"}
+                overflow="hidden"
+            >
+                <Box h="100%" w={`${pct}%`} bg="green.500" borderRadius="full" transition="width 0.6s ease" />
             </Box>
         </Box>
     );

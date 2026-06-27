@@ -25,12 +25,14 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
                 </Box>
             </VStack>
 
-            <VStack align="flex-start" spacing={1} maxW="80%">
-                <Text fontSize="xs" color={labelColor}>
-                    Assistant
-                </Text>
-                <ChatResponseBubble response={message.response} isError={message.error} />
-            </VStack>
+            {message.response !== "" && (
+                <VStack align="flex-start" spacing={1} maxW="80%">
+                    <Text fontSize="xs" color={labelColor}>
+                        Assistant
+                    </Text>
+                    <ChatResponseBubble response={message.response} isError={message.error} />
+                </VStack>
+            )}
         </React.Fragment>
     );
 };

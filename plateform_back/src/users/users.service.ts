@@ -21,6 +21,15 @@ export class UsersService {
         });
     }
 
+    async createGoogleUser(data: { email: string; name: string }): Promise<UserSafe> {
+        return this.userRepository.create({
+            email: data.email,
+            name: data.name,
+            password: null,
+            isEmailVerified: true,
+        });
+    }
+
     async findOneWithCredentials(filter: Prisma.UserWhereUniqueInput): Promise<User | null> {
         return this.userRepository.findOneWithCredentials(filter);
     }

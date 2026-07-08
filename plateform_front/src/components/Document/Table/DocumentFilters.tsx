@@ -9,6 +9,7 @@ const TYPE_FILTERS = [
     { label: "PDF", value: "PDF" },
     { label: "Markdown", value: "Markdown" },
     { label: "Texte", value: "Texte" },
+    { label: "Word", value: "Word" },
 ] as const;
 
 type TypeFilter = (typeof TYPE_FILTERS)[number]["value"];

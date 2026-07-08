@@ -90,7 +90,7 @@ const Dashboard = () => {
                     icon={Bot}
                     label="Agents en production"
                     value={String(agentsProd)}
-                    trend={`${stats?.agents.total ?? 0} au total`}
+                    trend={`${stats?.agents.total ?? 0} agent au total`}
                     trendPositive
                     sparkData={buildTrend(agentsProd)}
                     isLoading={isStatsLoading}

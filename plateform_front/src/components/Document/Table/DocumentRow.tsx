@@ -23,19 +23,19 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({ document, onPreview, o
         <Tr _hover={{ bg: "surfaceSubtle" }} onClick={onPreview} cursor="pointer">
             <Td>
                 <HStack spacing={3}>
-                    <BoxIcon letters={badge.label} />
-                    <Text fontWeight="500" fontSize="sm" color={textColor} noOfLines={1}>
+                    <BoxIcon size="sm" letters={badge.label} />
+                    <Text fontWeight="500" fontSize="xs" color={textColor} noOfLines={1}>
                         {document.name}
                     </Text>
                 </HStack>
             </Td>
             <Td>
-                <Text fontSize="sm" color="textLabel">
+                <Text fontSize="xs" color="textLabel">
                     {getFileTypeLabel(document.mimeType)}
                 </Text>
             </Td>
             <Td>
-                <Text fontSize="sm" color="textLabel">
+                <Text fontSize="xs" color="textLabel">
                     {formatFileSize(document.size)}
                 </Text>
             </Td>
@@ -43,7 +43,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({ document, onPreview, o
                 <DocumentStatusBadge status={document.status} retryCount={document.retryCount} />
             </Td>
             <Td>
-                <Text fontSize="sm" color="textLabel">
+                <Text fontSize="xs" color="textLabel">
                     {formatDate(document.createdAt)}
                 </Text>
             </Td>

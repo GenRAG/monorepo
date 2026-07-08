@@ -33,7 +33,7 @@ export const AgentsList = () => {
 
     const textSecondary = useColorModeValue("grey.500", "white");
     const borderColor = useColorModeValue("grey.100", "grey.500");
-    const bgColor = useColorModeValue("green.50", "grey.900");
+    const bgColor = useColorModeValue("grey.25", "grey.900");
 
     const visibleAgents = useMemo(() => {
         const normalizedQuery = searchValue.trim().toLowerCase();

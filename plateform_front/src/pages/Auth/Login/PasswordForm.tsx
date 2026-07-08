@@ -20,7 +20,7 @@ import colors from "themeNew/foundations/colors";
 import { useLoginMutation, useGetMeQuery } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
 import { useAuth } from "app/AuthContext";
-import { usePostHog } from "@posthog/react";
+import mixpanel from "lib/mixpanel";
 
 type PasswordFormType = {
     password: string;
@@ -37,7 +37,6 @@ export const PasswordForm: FC<{
     const navigate = useNavigate();
     const { login: setLoggedIn } = useAuth();
     const { refetch: refetchMe } = useGetMeQuery();
-    const posthog = usePostHog();
     const fieldTextColor = useColorModeValue("grey.800", "grey.100");
 
     const {
@@ -64,12 +63,10 @@ export const PasswordForm: FC<{
             setLoggedIn();
 
             if (meResult.data) {
-                posthog?.identify(meResult.data.id, {
-                    email: meResult.data.email,
-                    name: meResult.data.name,
-                });
+                mixpanel.identify(meResult.data.id);
+                mixpanel.people.set({ $name: meResult.data.name, $email: meResult.data.email });
             }
-            posthog?.capture("user_logged_in");
+            mixpanel.track("user_logged_in", { method: "email" });
 
             toast({
                 title: "Connexion réussie",

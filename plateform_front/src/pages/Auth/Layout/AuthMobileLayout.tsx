@@ -1,5 +1,6 @@
-import { Box, Heading, Icon, Stack, VStack, useColorModeValue, IconButton, HStack, DarkMode } from "@chakra-ui/react";
+import { Box, Icon, Image, Stack, VStack, useColorModeValue, IconButton, HStack, DarkMode } from "@chakra-ui/react";
 import { ArrowLeft } from "lucide-react";
+import logoGreen from "assets/logo/logoGreen.png";
 
 const AuthMobileLayout = ({
     canGoBack,
@@ -42,7 +43,7 @@ const AuthMobileLayout = ({
                                 />
                             )}
                         </HStack>
-                        <Heading variant="heading-2xl">GenRAG</Heading>
+                        <Image src={logoGreen} alt="GenRAG" h="40px" />
                         <Box w="100%">{children}</Box>
                     </VStack>
                 </Stack>

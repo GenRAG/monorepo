@@ -21,7 +21,7 @@ export const BillingWorkspace = () => {
                 </Text>
             </Stack>
 
-            <Stack spacing={0} h="100%" w="80%" mx="auto">
+            <Stack spacing={0} h="100%" w="100%" mx="auto">
                 <PlanCard tier={currentTier} />
                 <Divider borderColor={isDark ? "grey.600" : "grey.200"} />
                 <ConsumptionCard />

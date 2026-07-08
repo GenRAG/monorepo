@@ -9,7 +9,7 @@ import { useAuth } from "app/AuthContext";
 import { ActionMenu } from "components/ui/ActionMenu";
 import { useLogoutUserMutation } from "services/auth/auth";
 import { backendApi } from "services/api";
-import { usePostHog } from "@posthog/react";
+import mixpanel from "lib/mixpanel";
 
 interface SidebarFooterProps {
     isOpen: boolean;
@@ -28,7 +28,6 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
     const { logout } = useAuth();
     const [logoutUser] = useLogoutUserMutation();
     const { colorMode, setColorMode } = useColorMode();
-    const posthog = usePostHog();
 
     const [themeMode, setThemeMode] = useState<ThemeMode>(
         () => (localStorage.getItem("themeMode") as ThemeMode) ?? colorMode,
@@ -154,8 +153,8 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
                         } catch {
                             /* ignore network errors — proceed with local logout */
                         }
-                        posthog?.capture("user_logged_out");
-                        posthog?.reset();
+                        mixpanel.track("user_logged_out");
+                        mixpanel.reset();
                         dispatch(backendApi.util.resetApiState());
                         logout();
                         void navigate("/login");

@@ -15,7 +15,7 @@ import { useRegisterMutation } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
 import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 import { validateEmail } from "utils/validateEmail";
-import { usePostHog } from "@posthog/react";
+import mixpanel from "lib/mixpanel";
 
 type RegisterFormType = {
     email: string;
@@ -31,7 +31,6 @@ type CreateAccountFormProps = {
 const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
     const toast = useThemedToast();
     const navigate = useNavigate();
-    const posthog = usePostHog();
 
     const [registerUser, { isLoading }] = useRegisterMutation();
 
@@ -66,8 +65,8 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
             name: data.name,
         })
             .unwrap()
-            .then(async (authResponse) => {
-                posthog?.capture("user_signed_up");
+            .then(async () => {
+                mixpanel.track("user_signed_up", { method: "email" });
                 await navigate(`/validate?email=${data.email}`, { replace: true });
             })
             .catch((error) => {

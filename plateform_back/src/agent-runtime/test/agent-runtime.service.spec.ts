@@ -30,6 +30,18 @@ function createMockStream() {
     return stream;
 }
 
+function ndjson(events: Array<{ type: string; data: unknown }>): Buffer {
+    return Buffer.from(events.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf-8');
+}
+
+function tokenEvent(text: string): Buffer {
+    return ndjson([{ type: 'token', data: text }]);
+}
+
+function costEvent(totalCostUsd: number): Buffer {
+    return ndjson([{ type: 'cost_summary', data: { total_cost_usd: totalCostUsd } }]);
+}
+
 const fakeAgent = { id: 'agent-1', workspaceId: 'ws-1', status: AgentStatus.PRODUCTION };
 const fakeConversation = { id: 'conv-1', agentId: 'agent-1', workspaceId: 'ws-1', title: 'Test' };
 
@@ -71,7 +83,7 @@ describe('AgentRuntimeService', () => {
             const { events, done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
             await flushPromises();
 
-            mockStream.emit('data', Buffer.from('Hello world'));
+            mockStream.emit('data', tokenEvent('Hello world'));
             mockStream.emit('end');
             await done;
 
@@ -120,6 +132,22 @@ describe('AgentRuntimeService', () => {
             );
         });
 
+        it('should convert the RAG engine cost_summary into creditsUsed', async () => {
+            const mockStream = createMockStream();
+            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
+
+            const { done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
+            await flushPromises();
+
+            mockStream.emit('data', tokenEvent('answer'));
+            mockStream.emit('data', costEvent(0.014729510000000001));
+            mockStream.emit('end');
+            await done;
+            await flushPromises();
+
+            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(expect.objectContaining({ creditsUsed: 111 }));
+        });
+
         it('should send isOutOfCredits:true when ForbiddenException is thrown', async () => {
             mockOrchestrator.streamQuery.mockRejectedValue(new ForbiddenException('No credits'));
 
@@ -144,7 +172,7 @@ describe('AgentRuntimeService', () => {
     });
 
     describe('streamWithOrgOverride', () => {
-        it('should pass skipUsageTracking:true to orchestrator', async () => {
+        it('should pass orgIdOverride to orchestrator without skipping usage tracking', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
@@ -154,11 +182,11 @@ describe('AgentRuntimeService', () => {
             await done;
 
             expect(mockOrchestrator.streamQuery).toHaveBeenCalledWith(
-                expect.objectContaining({ skipUsageTracking: true, orgIdOverride: 'org-x' }),
+                expect.objectContaining({ orgIdOverride: 'org-x', skipUsageTracking: false }),
             );
         });
 
-        it('should not deduct credits', async () => {
+        it('should deduct credits (onboarding test queries are billed)', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
@@ -168,7 +196,9 @@ describe('AgentRuntimeService', () => {
             await done;
             await flushPromises();
 
-            expect(mockUsageTracker.recordQuery).not.toHaveBeenCalled();
+            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
+                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', status: QueryLogStatus.SUCCESS }),
+            );
         });
     });
 
@@ -252,8 +282,8 @@ describe('AgentRuntimeService', () => {
             const { done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
             await flushPromises();
 
-            mockStream.emit('data', Buffer.from('Hello '));
-            mockStream.emit('data', Buffer.from('world'));
+            mockStream.emit('data', tokenEvent('Hello '));
+            mockStream.emit('data', tokenEvent('world'));
             mockStream.emit('end');
             await done;
 
@@ -297,7 +327,7 @@ describe('AgentRuntimeService', () => {
             const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
             await flushPromises();
 
-            mockStream.emit('data', Buffer.from('Partial'));
+            mockStream.emit('data', tokenEvent('Partial'));
             mockStream.emit('error', new Error('Stream aborted'));
             await done;
 

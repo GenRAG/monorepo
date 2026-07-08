@@ -118,10 +118,11 @@ describe('OnboardingService', () => {
                 workspaceId,
             );
             expect(mockRepository.create).toHaveBeenCalled();
-            expect(mockCreditBalanceService.grantInitial).toHaveBeenCalledWith({
-                workspaceId,
-                amount: 20,
-            });
+            expect(mockCreditBalanceService.grantInitial).toHaveBeenCalledWith(
+                { workspaceId, amount: 20 },
+                'SUBSCRIPTION',
+                { source: 'onboarding_bonus' },
+            );
             expect(result.sessionId).toBe('session-1');
         });
 

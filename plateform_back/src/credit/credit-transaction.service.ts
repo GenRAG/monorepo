@@ -18,4 +18,8 @@ export class CreditTransactionService {
     findAll(workspaceId: string) {
         return this.creditTransactionRepository.findAll(workspaceId);
     }
+
+    getTotalGranted(workspaceId: string): Promise<number> {
+        return this.creditTransactionRepository.sumGranted(workspaceId);
+    }
 }

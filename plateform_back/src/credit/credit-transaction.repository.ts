@@ -28,4 +28,15 @@ export class CreditTransactionRepository {
             orderBy: { createdAt: 'desc' },
         });
     }
+
+    async sumGranted(workspaceId: string): Promise<number> {
+        const result = await this.prisma.creditTransaction.aggregate({
+            where: {
+                workspaceId,
+                type: { in: [CreditTransactionType.SUBSCRIPTION, CreditTransactionType.PURCHASE] },
+            },
+            _sum: { amount: true },
+        });
+        return result._sum.amount ?? 0;
+    }
 }

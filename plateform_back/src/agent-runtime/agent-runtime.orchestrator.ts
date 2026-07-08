@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import type { IncomingMessage } from 'http';
+import * as Sentry from '@sentry/nestjs';
+import { QueryLogStatus } from 'generated/prisma';
 import EventBus from 'src/lib/event-bus';
 import { RagPipelineBuilder } from 'src/agent-runtime/agent-runtime.builder';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 import type { Pipeline } from 'src/rag-engine/pipeline.schema';
 import { UsageTrackerService } from 'src/credit/usage-tracker.service';
+import { costToCredits } from 'src/credit/credit-pricing';
 import { AgentQueryCompletedEvent } from 'src/events/agent/agent-events';
 import { AgentEventType } from 'src/events/agent/agent-events.type';
 import { ConfigService } from '@nestjs/config';
@@ -20,6 +23,7 @@ interface PrepareOptions {
 
 @Injectable()
 export class AgentRuntimeOrchestrator {
+    private readonly logger = new Logger(AgentRuntimeOrchestrator.name);
     private readonly mock: boolean;
 
     constructor(
@@ -46,6 +50,7 @@ export class AgentRuntimeOrchestrator {
         orgIdOverride?: string;
         skipUsageTracking?: boolean;
     }): Promise<{ answer: string }> {
+        const startedAt = Date.now();
         const { pipeline, orgId } = await this._prepare({
             agentId,
             workspaceId,
@@ -54,13 +59,27 @@ export class AgentRuntimeOrchestrator {
             instructionOverride,
         });
 
-        const answer = await this.ragEngineService.sendQuery({ pipeline, query, orgId, mock: this.mock });
+        const { answer, costUsd } = await this.ragEngineService.sendQuery({ pipeline, query, orgId, mock: this.mock });
 
         if (!answer) {
             throw new Error('Failed to get an answer from the RAG engine.');
         }
 
         if (!skipUsageTracking) {
+            void this.usageTracker
+                .recordQuery({
+                    workspaceId,
+                    agentId,
+                    query: query.slice(0, 500),
+                    durationMs: Date.now() - startedAt,
+                    status: QueryLogStatus.SUCCESS,
+                    creditsUsed: costToCredits(costUsd),
+                })
+                .catch((e: Error) => {
+                    this.logger.error(`Failed to record query: ${e.message}`);
+                    Sentry.captureException(e);
+                });
+
             EventBus.emit(
                 AgentEventType.AGENT_QUERY_COMPLETED,
                 new AgentQueryCompletedEvent(workspaceId, agentId, undefined),

@@ -13,7 +13,7 @@ export class CreditBalanceController {
 
     @Get()
     getBalance(@Param('workspaceId') workspaceId: string) {
-        return this.creditBalanceService.getBalance(workspaceId);
+        return this.creditBalanceService.getBalanceSummary(workspaceId);
     }
 
     @Post()

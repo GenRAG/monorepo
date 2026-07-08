@@ -7,7 +7,11 @@ export class AgentMemberService {
 
     async addMember(agentId: string, email: string) {
         const user = await this.agentMemberRepository.findUserByEmail(email);
-        if (!user) throw new NotFoundException('Utilisateur introuvable');
+        if (!user) {
+            throw new NotFoundException(
+                `Aucun compte GenRAG n'existe avec l'email ${email}. Cette personne doit d'abord créer un compte avant de pouvoir être ajoutée.`,
+            );
+        }
 
         const existing = await this.agentMemberRepository.findMembership(agentId, user.id);
         if (existing) throw new ConflictException(`${email} a déjà accès à cet assistant`);

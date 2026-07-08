@@ -30,8 +30,8 @@ model AgentVersion {
   agentId         String
   agent           Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
   createdAt       DateTime    @default(now())
-  createdBy       String
-  createdByUser   User        @relation(fields: [createdBy], references: [id])  // 👈
+  createdBy       String?
+  createdByUser   User?       @relation(fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@unique([agentId, version])
 }

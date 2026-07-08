@@ -8,6 +8,7 @@ import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from './document.repository';
 import { IndexDocumentCommandProps } from './commands/index-document.command';
 import { ConfigService } from '@nestjs/config';
+import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 import ms from 'ms';
 
 const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024;
@@ -25,6 +26,8 @@ export class DocumentService {
         private readonly documentRepository: DocumentRepository,
 
         private readonly configService: ConfigService,
+
+        private readonly ragEngineService: RagEngineService,
 
         @InjectQueue('documents')
         private readonly documentQueue: Queue<IndexDocumentCommandProps>,
@@ -149,6 +152,7 @@ export class DocumentService {
     async delete(id: string, agentId: string): Promise<void> {
         const doc = await this.documentRepository.findById(id, agentId);
         if (!doc) throw new NotFoundException('Document not found');
+        await this.ragEngineService.deleteDocument(doc.name, agentId);
         await this.storage.delete(doc.storageKey);
         await this.documentRepository.delete(id);
     }

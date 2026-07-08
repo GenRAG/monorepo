@@ -233,7 +233,7 @@ describe('AuthService', () => {
         it('should call verifyEmailToken then login', async () => {
             mockTokenService.verifyEmailToken.mockResolvedValue(fakeUser);
 
-            const result = await service.verifyEmailAndLogin({ email: fakeUser.email, code: 123456 }, response);
+            const result = await service.verifyEmailAndLogin({ email: fakeUser.email, token: 123456 }, response);
 
             expect(mockTokenService.verifyEmailToken).toHaveBeenCalled();
             expect(mockJwtService.sign).toHaveBeenCalled();
@@ -252,7 +252,7 @@ describe('AuthService', () => {
     });
 
     describe('verifyPasswordResetToken', () => {
-        const validBody = { email: 'test@genrag.com', code: 123456, password: 'NewPass123!' };
+        const validBody = { email: 'test@genrag.com', token: 123456, password: 'NewPass123!' };
 
         it('should throw if email is blocked', async () => {
             mockLoginAttempt.isBlocked.mockResolvedValue(true);

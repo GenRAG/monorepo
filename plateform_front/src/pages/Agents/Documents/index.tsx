@@ -15,8 +15,9 @@ import { useParams } from "react-router-dom";
 import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import useThemedToast from "hooks/useThemedToast";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 8;
 
 export const DocumentWorkspace: React.FC = () => {
     const { workspaceId, agentId } = useParams();
@@ -106,11 +107,12 @@ export const DocumentWorkspace: React.FC = () => {
 
     return (
         <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden" position="relative">
+            <WorkspaceHeader title="Documents" description="Gérez vos documents et consultez leur statut." />
             <VStack
                 align="stretch"
                 spacing={0}
                 px={{ base: 12, md: 16 }}
-                py={{ base: 12, md: 16 }}
+                py={{ base: 3, md: 8 }}
                 overflow="auto"
                 flex={1}
                 zIndex={1}

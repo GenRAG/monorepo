@@ -7,8 +7,8 @@ import { CompareIntelligenceStepComponent } from "pages/Onboarding/steps/Compare
 export const stepsConfig: StepConfig[] = [
     {
         id: "test-assistant",
-        title: "Essaye ton assistant RH en 30 secondes",
-        description: "Voici ton assistant RH prêt à être utilisé",
+        title: "Essaye ton assistant en 30 secondes",
+        description: "Voici ton assistant prêt à être utilisé",
         icon: Sparkles as LucideIcon,
         component: TestAssistantStepComponent,
         validate: (data) => Math.max(Number(data.messageCount ?? 0), Number(data.queryCount ?? 0)) >= 1,

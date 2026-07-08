@@ -45,7 +45,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ onStepClick }) =>
                     <StepIndicator flexShrink={0} border="none">
                         <StepStatus
                             complete={
-                                <Circle size="45px" mr="1px">
+                                <Circle size="55px" mr="1px">
                                     <Icon as={Check} color="white" boxSize={5} />
                                 </Circle>
                             }
@@ -67,7 +67,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ onStepClick }) =>
                         </StepDescription>
                     </Box>
 
-                    <StepSeparator />
+                    <StepSeparator mt={2} />
                 </Step>
             ))}
         </Stepper>

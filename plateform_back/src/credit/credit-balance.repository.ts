@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CreditTransactionType, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -17,11 +18,21 @@ export class CreditBalanceRepository {
         });
     }
 
-    async incrementOrCreate(workspaceId: string, amount: number): Promise<void> {
-        await this.prisma.creditBalance.upsert({
-            where: { workspaceId },
-            update: { balance: { increment: amount } },
-            create: { workspaceId, balance: amount },
-        });
+    async incrementOrCreate(
+        workspaceId: string,
+        amount: number,
+        type: CreditTransactionType,
+        metadata?: Record<string, unknown>,
+    ): Promise<void> {
+        await this.prisma.$transaction([
+            this.prisma.creditBalance.upsert({
+                where: { workspaceId },
+                update: { balance: { increment: amount } },
+                create: { workspaceId, balance: amount },
+            }),
+            this.prisma.creditTransaction.create({
+                data: { workspaceId, amount, type, metadata: (metadata ?? {}) as Prisma.InputJsonObject },
+            }),
+        ]);
     }
 }

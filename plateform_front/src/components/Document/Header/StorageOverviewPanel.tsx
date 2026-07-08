@@ -8,12 +8,14 @@ const SEGMENTS = [
     { key: "pdf", label: "PDF", fill: "#2ae48d" },
     { key: "text", label: "Text", fill: "#064fee" },
     { key: "markdown", label: "Markdown", fill: "#a9ec0e" },
+    { key: "word", label: "Word", fill: "#f5a623" },
 ] as const;
 
-function getTypeKey(mimeType: string): "pdf" | "text" | "markdown" | "other" {
+function getTypeKey(mimeType: string): "pdf" | "text" | "markdown" | "word" | "other" {
     if (mimeType.includes("pdf")) return "pdf";
-    if (mimeType.includes("text") || mimeType.includes("document")) return "text";
+    if (mimeType.includes("text")) return "text";
     if (mimeType.includes("markdown")) return "markdown";
+    if (mimeType.includes("word")) return "word";
     return "other";
 }
 

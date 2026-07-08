@@ -6,7 +6,7 @@ import { AgentPreviewPanel } from "components/Agents/AgentPreviewPanel";
 import { useCreateAgentMutation } from "services/agent/agent";
 import useThemedToast from "hooks/useThemedToast";
 import { makeFlowNode, linkNodes, withAutoSettings, serializeWorkflow, TaskType } from "@genrag/workflow";
-import { usePostHog } from "@posthog/react";
+import mixpanel from "lib/mixpanel";
 
 const { nodes: _faqNodes, edges: _faqEdges } = withAutoSettings(
     [
@@ -47,7 +47,6 @@ interface CreateAgentModalProps {
 export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, workspaceId }) => {
     const navigate = useNavigate();
     const toast = useThemedToast();
-    const posthog = usePostHog();
     const [createAgent, { isLoading }] = useCreateAgentMutation();
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
@@ -71,7 +70,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
                     },
                 }).unwrap();
 
-                posthog?.capture("agent_created", {
+                mixpanel.track("agent_created", {
                     agent_id: agent.id,
                     template_used: selectedTemplate?.id ?? "blank",
                 });
@@ -86,7 +85,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
                 });
             }
         },
-        [selectedTemplate, workspaceId, createAgent, navigate, onClose, toast, posthog],
+        [selectedTemplate, workspaceId, createAgent, navigate, onClose, toast],
     );
 
     return (

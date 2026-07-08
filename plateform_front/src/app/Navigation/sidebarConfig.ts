@@ -2,7 +2,6 @@ import {
     LayoutDashboard,
     Folder,
     FileText,
-    Bell,
     MessageCircle,
     GitGraph,
     Settings,
@@ -30,7 +29,7 @@ export const mainMenu = [
     { id: "billing", icon: CreditCard, label: "Crédits" },
 ];
 
-export const supportMenu = [{ id: "notifications", icon: Bell, label: "Documentation" }];
+export const supportMenu = [];
 
 export const agentNavSections: NavSection[] = [
     {

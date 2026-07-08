@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useUploadDocumentMutation } from "services/document/document";
 import { DocumentStatus } from "types/document/document";
-import posthog from "posthog-js";
+import mixpanel from "lib/mixpanel";
 
 export const ACCEPTED_TYPES = [
     "application/pdf",
@@ -110,7 +110,7 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
                 try {
                     if (workspaceId && agentId) {
                         const doc = await uploadDocument({ workspaceId, agentId, file }).unwrap();
-                        posthog.capture("document_uploaded", {
+                        mixpanel.track("document_uploaded", {
                             agent_id: agentId,
                             document_id: doc.id,
                             file_size_bytes: file.size,

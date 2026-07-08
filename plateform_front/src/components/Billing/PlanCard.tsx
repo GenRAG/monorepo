@@ -4,29 +4,11 @@ import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { useParams } from "react-router-dom";
 import { useGetCreditBalanceQuery } from "services/credit/credit";
 
-const TIER_DATA: Record<
-    string,
-    {
-        displayName: string;
-        total: number;
-    }
-> = {
-    free: {
-        displayName: "Découverte",
-        total: 200,
-    },
-    pro: {
-        displayName: "Pro",
-        total: 3000,
-    },
-    business: {
-        displayName: "Business",
-        total: 5000,
-    },
-    enterprise: {
-        displayName: "Enterprise",
-        total: 20000,
-    },
+const TIER_DATA: Record<string, { displayName: string }> = {
+    free: { displayName: "Découverte" },
+    pro: { displayName: "Pro" },
+    business: { displayName: "Business" },
+    enterprise: { displayName: "Enterprise" },
 };
 
 interface PlanCardProps {
@@ -39,23 +21,22 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
     const { data: creditBalance } = useGetCreditBalanceQuery(workspaceId ?? "", {
         skip: !workspaceId,
     });
-    console.log(creditBalance, "creditBalance");
 
     const isDark = colorMode === "dark";
-
     const data = TIER_DATA[tier] ?? TIER_DATA.free;
+
     const now = new Date();
-    const daysFromMonday = now.getDay() === 0 ? 6 : now.getDay() - 1;
-    const lastMonday = new Date(now);
-    lastMonday.setDate(now.getDate() - daysFromMonday);
-    lastMonday.setHours(0, 0, 0, 0);
-    const nextMonday = new Date(lastMonday);
-    nextMonday.setDate(lastMonday.getDate() + 7);
-    const cycleStart = lastMonday.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
-    const renewalDate = nextMonday.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
-    const resetDays = Math.ceil((nextMonday.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    const consumed = creditBalance !== undefined ? data.total - creditBalance : 0;
-    const progress = Math.min(100, Math.round((consumed / data.total) * 100));
+    const daysFromMonday = (now.getDay() + 6) % 7;
+    const lastMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysFromMonday);
+    const nextMonday = new Date(lastMonday.getFullYear(), lastMonday.getMonth(), lastMonday.getDate() + 7);
+    const resetDays = Math.ceil((nextMonday.getTime() - now.getTime()) / 86_400_000);
+    const fmt = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+
+    const total = creditBalance?.totalGranted ?? 0;
+    const balance = creditBalance?.balance ?? 0;
+    const consumed = total > 0 ? total - balance : 0;
+    const progress = total > 0 ? Math.min(100, Math.round((consumed / total) * 100)) : 0;
+
     const sub = isDark ? "grey.400" : "grey.500";
     const border = isDark ? "grey.700" : "grey.100";
 
@@ -89,9 +70,6 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
                             </Text>
                         </HStack>
                     </HStack>
-                    <Text fontSize="xs" color={sub}>
-                        Renouvellement le {renewalDate} · hebdomadaire
-                    </Text>
                 </VStack>
             </HStack>
 
@@ -106,7 +84,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
                                 {consumed.toLocaleString("fr-FR")}{" "}
                             </Text>
                             <Text fontSize="md" color={sub}>
-                                / {data.total.toLocaleString("fr-FR")} consommés
+                                / {total.toLocaleString("fr-FR")} consommés
                             </Text>
                         </HStack>
                         <Box h="10px" bg={isDark ? "grey.700" : "grey.200"} borderRadius="full" overflow="hidden">
@@ -120,7 +98,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
                         </Box>
                         <HStack justify="space-between" mt={1} flexWrap="wrap" gap={1}>
                             <Text fontSize="13px" color={sub}>
-                                Cycle commencé le {cycleStart}
+                                Cycle commencé le {fmt(lastMonday)}
                             </Text>
                             <Text fontSize="13px" color={sub}>
                                 Reset dans {resetDays} jours

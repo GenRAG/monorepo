@@ -11,7 +11,7 @@ interface DocumentEmptyStateProps {
     isMobile?: boolean;
 }
 
-const FORMAT_BADGES = ["PDF", "TXT", "MD"];
+const FORMAT_BADGES = ["PDF", "TXT", "MD", "HTML", "DOCX"];
 
 export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
     folderId,

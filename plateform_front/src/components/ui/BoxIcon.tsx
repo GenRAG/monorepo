@@ -9,6 +9,7 @@ const BoxIcon = ({
     bg = "accentIconBg",
     size = "md",
     onClick,
+    spin = false,
 }: {
     icon?: LucideIcon | React.ComponentType<React.ComponentProps<any>>;
     letters?: string;
@@ -16,6 +17,7 @@ const BoxIcon = ({
     bg?: string;
     size?: "sm" | "md" | "lg" | "xl";
     onClick?: () => void;
+    spin?: boolean;
 }) => {
     const iconSize = size === "sm" ? 14 : size === "md" ? 16 : size === "lg" ? 20 : 24;
     const IconComp = icon as React.ComponentType<{ size?: number }> | undefined;
@@ -38,9 +40,31 @@ const BoxIcon = ({
             cursor={onClick ? "pointer" : "default"}
         >
             {IconComp ? (
-                <IconComp size={iconSize} />
+                <Box
+                    as="span"
+                    display="flex"
+                    sx={
+                        spin
+                            ? {
+                                  "@keyframes boxicon-spin": {
+                                      from: { transform: "rotate(0deg)" },
+                                      to: { transform: "rotate(360deg)" },
+                                  },
+                                  animation: "boxicon-spin 1s linear infinite",
+                              }
+                            : undefined
+                    }
+                >
+                    <IconComp size={iconSize} />
+                </Box>
             ) : letters ? (
-                <Text fontSize="12px" fontWeight="bold" color={color} textTransform="uppercase" lineHeight="1">
+                <Text
+                    fontSize={size === "sm" ? "10px" : size === "md" ? "12px" : size === "lg" ? "14px" : "18px"}
+                    fontWeight="bold"
+                    color={color}
+                    textTransform="uppercase"
+                    lineHeight="1"
+                >
                     {letters}
                 </Text>
             ) : null}

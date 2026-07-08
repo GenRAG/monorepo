@@ -26,7 +26,7 @@ import {
 } from "services/workflow/workflow";
 import { useGetModelsGenerationQuery } from "services/models/models";
 import useThemedToast from "hooks/useThemedToast";
-import { usePostHog } from "@posthog/react";
+import mixpanel from "lib/mixpanel";
 
 interface WorkflowInnerProps {
     initialNodes?: AppNode[];
@@ -39,7 +39,6 @@ interface WorkflowInnerProps {
 const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId, agentId }: WorkflowInnerProps) => {
     const { colorMode } = useColorMode();
     const reactFlowContainerRef = useRef<HTMLDivElement>(null);
-    const posthog = usePostHog();
     const toast = useThemedToast();
 
     useGetModelsGenerationQuery();
@@ -118,7 +117,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
             } else {
                 await createWorkflow(params).unwrap();
             }
-            posthog?.capture("workflow_saved", { agent_id: agentId });
+            mixpanel.track("workflow_saved", { agent_id: agentId });
             setIsDirty(false);
             toast({
                 title: "Workflow enregistré",
@@ -219,9 +218,11 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                             if ((node.data as AppNodeData).isPlaceholder) return "transparent";
                             switch ((node.data as AppNodeData).type) {
                                 case TaskType.QUERY:
-                                case TaskType.RESPONSE:
-                                case TaskType.INSTRUCTION:
                                     return "#34D3A9";
+                                case TaskType.RESPONSE:
+                                    return "#34D3A9";
+                                case TaskType.INSTRUCTION:
+                                    return "#8b5cf6";
                                 case TaskType.MODEL:
                                     return "#8b5cf6";
                                 default:

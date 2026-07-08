@@ -1,10 +1,11 @@
 import React from "react";
-import { Box, HStack, Text, useColorMode } from "@chakra-ui/react";
+import { HStack, Image, useColorMode } from "@chakra-ui/react";
 import { Moon, Sun } from "lucide-react";
 import Button from "components/ui/Button";
 import { IconButton } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { Menu as MenuIcon } from "lucide-react";
+import logoGreen from "assets/logo/logoGreen.png";
 
 interface OnboardingHeaderProps {
     onOpenDrawer: () => void;
@@ -33,22 +34,7 @@ const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({ onOpenDrawer }) => 
                         color={colorMode === "dark" ? "grey.300" : "grey.600"}
                     />
                 )}
-                <Box
-                    w="32px"
-                    h="32px"
-                    bg={colorMode === "dark" ? "white" : "black"}
-                    borderRadius="4px"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                >
-                    <Text color={colorMode === "dark" ? "black" : "white"} fontWeight="bold" fontSize="sm">
-                        G
-                    </Text>
-                </Box>
-                <Text fontWeight="semibold" fontSize="lg" color={colorMode === "dark" ? "white" : "grey.900"}>
-                    GenRAG
-                </Text>
+                <Image src={logoGreen} alt="GenRAG" h="28px" w="28px" />
             </HStack>
 
             <Button btnType="icon" size="sm" onClick={toggleColorMode} icon={colorMode === "dark" ? Moon : Sun} />

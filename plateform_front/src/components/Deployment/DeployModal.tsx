@@ -19,7 +19,7 @@ import useThemedToast from "hooks/useThemedToast";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCreateDeploymentMutation } from "services/deployment/deployment";
-import { usePostHog } from "@posthog/react";
+import mixpanel from "lib/mixpanel";
 
 interface DeployModalProps {
     isOpen: boolean;
@@ -33,7 +33,6 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
         agentId: string;
     }>();
     const isDark = useIsDark();
-    const posthog = usePostHog();
     const [name, setName] = useState("");
     const [changelog, setChangelog] = useState("");
     const [deploy, { isLoading: isDeploying }] = useCreateDeploymentMutation();
@@ -42,10 +41,7 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
     const handleSubmit = async () => {
         try {
             const deployment = await deploy({ workspaceId, agentId, name, changelog }).unwrap();
-            posthog?.capture("agent_deployed", {
-                agent_id: agentId,
-                deployment_version: deployment.version,
-            });
+            mixpanel.track("agent_deployed", { agent_id: agentId, deployment_version: deployment.version });
             toast({
                 title: "Déploiement en cours",
                 description: "Votre agent a été déployé avec succès.",
@@ -88,7 +84,7 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
                 <ModalBody>
                     <VStack spacing={4} align="stretch">
                         <Text fontSize="sm" color="textmuted">
-                            Cette version sera mise en production et accessible aux utilisateurs.
+                            Cette version sera mise en production et accessible a vous et aux membres ajoutés
                         </Text>
 
                         <FormControl>
@@ -121,13 +117,7 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
                     <Button size="sm" variant="outline" onClick={handleClose} isDisabled={isDeploying}>
                         Annuler
                     </Button>
-                    <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={handleSubmit}
-                        isLoading={isDeploying}
-                        isDisabled={!name.trim()}
-                    >
+                    <Button size="sm" onClick={handleSubmit} isLoading={isDeploying} isDisabled={!name.trim()}>
                         {title}
                     </Button>
                 </ModalFooter>

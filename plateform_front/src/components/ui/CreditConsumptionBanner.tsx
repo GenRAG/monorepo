@@ -17,15 +17,14 @@ const CreditConsumptionBanner: React.FC<CreditConsumptionBannerProps> = ({
         skip: !workspaceId,
     });
     const disclaimerColor = useColorModeValue("grey.500", "grey.200");
+    const balance = creditBalance?.balance;
 
     return (
         <Banner variant="blue" size="xs" title="Crédits de test" {...bannerProps}>
             <Text fontSize="xs" color={disclaimerColor}>
                 Chaque message consomme {creditsPerMessage} crédit
                 {creditsPerMessage !== 1 ? "s" : ""}
-                {creditBalance !== undefined
-                    ? ` · Solde : ${creditBalance} crédit${creditBalance !== 1 ? "s" : ""}`
-                    : ""}
+                {balance !== undefined ? ` · Solde : ${balance} crédit${balance !== 1 ? "s" : ""}` : ""}
             </Text>
         </Banner>
     );

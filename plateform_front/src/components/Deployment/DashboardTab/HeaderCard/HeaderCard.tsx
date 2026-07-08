@@ -7,7 +7,7 @@ import HeaderCardEmpty from "components/Deployment/DashboardTab/HeaderCard/Heade
 import HeaderCardMain from "components/Deployment/DashboardTab/HeaderCard/HeaderCardMain";
 import { useStopDeploymentMutation } from "services/deployment/deployment";
 import useThemedToast from "hooks/useThemedToast";
-import { usePostHog } from "@posthog/react";
+import mixpanel from "lib/mixpanel";
 
 interface HeaderCardProps {
     data: CurrentDeployment;
@@ -17,7 +17,6 @@ interface HeaderCardProps {
 export const HeaderCard = ({ data, isLoading }: HeaderCardProps) => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const posthog = usePostHog();
     const toast = useThemedToast();
     const [stopDeployment, { isLoading: isStopping }] = useStopDeploymentMutation();
 
@@ -32,7 +31,7 @@ export const HeaderCard = ({ data, isLoading }: HeaderCardProps) => {
     const handleStop = async () => {
         try {
             await stopDeployment({ workspaceId, agentId }).unwrap();
-            posthog?.capture("agent_stopped", { agent_id: agentId });
+            mixpanel.track("agent_stopped", { agent_id: agentId });
             toast({ title: "Agent arrêté", status: "success", duration: 3000 });
         } catch {
             toast({ title: "Erreur lors de l'arrêt de l'agent", status: "error", duration: 3000 });
@@ -42,7 +41,7 @@ export const HeaderCard = ({ data, isLoading }: HeaderCardProps) => {
     const renderHeader = () => {
         switch (hasBeenInProd) {
             case false:
-                return <HeaderCardEmpty onOpen={onOpen} onGuideClick={() => {}} />;
+                return <HeaderCardEmpty onOpen={onOpen} />;
             case true:
                 return (
                     <HeaderCardMain

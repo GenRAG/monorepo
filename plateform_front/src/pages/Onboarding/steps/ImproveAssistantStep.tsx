@@ -9,7 +9,6 @@ import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import UploadProgressStepper from "components/Onboarding/ImproveAssistant/UploadProgressStepper";
 import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
 import { useGetAgentDocumentStatsQuery } from "services/document/document";
@@ -52,10 +51,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
     );
 
     const completedFiles = useMemo(() => sources.filter((s) => s.status === Status.COMPLETED), [sources]);
-    const processingFiles = useMemo(
-        () => sources.filter((s) => s.status === Status.PROCESSING || s.status === Status.UPLOADING),
-        [sources],
-    );
+
     const sessionValidCount = useMemo(() => sources.filter((s) => s.status !== Status.ERROR).length, [sources]);
 
     const totalCompletedCount = persistedIndexedCount + completedFiles.length;
@@ -137,7 +133,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
                             welcomeMessage={
                                 showComparison
                                     ? "Pose une question pour voir la différence avec tes documents."
-                                    : "Uploade tes fichiers RH à gauche pour activer les réponses personnalisées."
+                                    : "Uploade tes fichiers à gauche pour activer les réponses personnalisées."
                             }
                             icon={showComparison ? undefined : Upload}
                             placeholder={showComparison ? "Pose ta question..." : "Indexation en cours..."}

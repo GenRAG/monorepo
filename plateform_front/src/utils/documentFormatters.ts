@@ -66,6 +66,8 @@ export function getFileTypeLabel(mimeType: string): string {
         "application/pdf": "PDF",
         "text/plain": "Texte",
         "text/markdown": "Markdown",
+        "application/msword": "Word",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "Word",
     };
 
     return typeMap[mimeType] ?? "Document";

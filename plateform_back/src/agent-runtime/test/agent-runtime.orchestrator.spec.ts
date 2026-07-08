@@ -29,6 +29,7 @@ const mockRagEngineService = {
 
 const mockUsageTracker = {
     checkOrThrow: jest.fn() as any,
+    recordQuery: (jest.fn() as any).mockResolvedValue(undefined),
 };
 
 const mockConfigService = {
@@ -54,6 +55,7 @@ describe('AgentRuntimeOrchestrator', () => {
         emitSpy = jest.spyOn(EventBus, 'emit');
         jest.clearAllMocks();
         mockUsageTracker.checkOrThrow.mockResolvedValue(undefined);
+        mockUsageTracker.recordQuery.mockResolvedValue(undefined);
     });
 
     afterEach(() => {
@@ -135,36 +137,6 @@ describe('AgentRuntimeOrchestrator', () => {
             );
         });
 
-        it('should emit AGENT_QUERY_COMPLETED on stream end when tracking enabled', async () => {
-            mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            const mockStream = createMockStream();
-            mockRagEngineService.getQueryStream.mockResolvedValue(mockStream);
-
-            await orchestrator.streamQuery({ query: 'test', agentId: 'agent-1', workspaceId: 'ws-1' });
-            mockStream.emit('end');
-
-            expect(emitSpy).toHaveBeenCalledWith(
-                AgentEventType.AGENT_QUERY_COMPLETED,
-                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1' }),
-            );
-        });
-
-        it('should not emit event on stream end when skipUsageTracking=true', async () => {
-            mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            const mockStream = createMockStream();
-            mockRagEngineService.getQueryStream.mockResolvedValue(mockStream);
-
-            await orchestrator.streamQuery({
-                query: 'test',
-                agentId: 'agent-1',
-                workspaceId: 'ws-1',
-                skipUsageTracking: true,
-            });
-            mockStream.emit('end');
-
-            expect(emitSpy).not.toHaveBeenCalled();
-        });
-
         it('should return the RAG stream', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
             const mockStream = createMockStream();
@@ -183,7 +155,7 @@ describe('AgentRuntimeOrchestrator', () => {
     describe('execute', () => {
         it('should check usage when skipUsageTracking=false', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            mockRagEngineService.sendQuery.mockResolvedValue('The answer.');
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'The answer.', costUsd: 0.01 });
 
             await orchestrator.executeQuery({ query: 'test', agentId: 'agent-1', workspaceId: 'ws-1' });
 
@@ -192,7 +164,7 @@ describe('AgentRuntimeOrchestrator', () => {
 
         it('should skip usage check when skipUsageTracking=true', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            mockRagEngineService.sendQuery.mockResolvedValue('The answer.');
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'The answer.', costUsd: 0.01 });
 
             await orchestrator.executeQuery({
                 query: 'test',
@@ -206,7 +178,7 @@ describe('AgentRuntimeOrchestrator', () => {
 
         it('should return { answer } on success', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            mockRagEngineService.sendQuery.mockResolvedValue('The answer is 42.');
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'The answer is 42.', costUsd: 0.01 });
 
             const result = await orchestrator.executeQuery({
                 query: 'test',
@@ -220,7 +192,7 @@ describe('AgentRuntimeOrchestrator', () => {
 
         it('should throw when RAG engine returns an empty answer', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            mockRagEngineService.sendQuery.mockResolvedValue('');
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: '', costUsd: 0 });
 
             await expect(
                 orchestrator.executeQuery({
@@ -234,7 +206,7 @@ describe('AgentRuntimeOrchestrator', () => {
 
         it('should pass instructionOverride to buildPipeline', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            mockRagEngineService.sendQuery.mockResolvedValue('answer');
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'answer', costUsd: 0.01 });
 
             await orchestrator.executeQuery({
                 query: 'test',
@@ -251,7 +223,7 @@ describe('AgentRuntimeOrchestrator', () => {
 
         it('should emit AGENT_QUERY_COMPLETED on success when tracking enabled', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            mockRagEngineService.sendQuery.mockResolvedValue('answer');
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'answer', costUsd: 0.01 });
 
             await orchestrator.executeQuery({ query: 'test', agentId: 'agent-1', workspaceId: 'ws-1' });
 
@@ -263,7 +235,7 @@ describe('AgentRuntimeOrchestrator', () => {
 
         it('should not emit event when skipUsageTracking=true', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
-            mockRagEngineService.sendQuery.mockResolvedValue('answer');
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'answer', costUsd: 0.01 });
 
             await orchestrator.executeQuery({
                 query: 'test',
@@ -273,6 +245,33 @@ describe('AgentRuntimeOrchestrator', () => {
             });
 
             expect(emitSpy).not.toHaveBeenCalled();
+        });
+
+        it('should record query with credits converted from the RAG engine cost when tracking enabled', async () => {
+            mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'answer', costUsd: 0.1 });
+
+            await orchestrator.executeQuery({ query: 'test', agentId: 'agent-1', workspaceId: 'ws-1' });
+            await Promise.resolve();
+
+            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
+                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', creditsUsed: 750 }),
+            );
+        });
+
+        it('should not record query when skipUsageTracking=true', async () => {
+            mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
+            mockRagEngineService.sendQuery.mockResolvedValue({ answer: 'answer', costUsd: 0.1 });
+
+            await orchestrator.executeQuery({
+                query: 'test',
+                agentId: 'agent-1',
+                workspaceId: 'ws-1',
+                skipUsageTracking: true,
+            });
+            await Promise.resolve();
+
+            expect(mockUsageTracker.recordQuery).not.toHaveBeenCalled();
         });
     });
 });

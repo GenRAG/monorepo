@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { OnboardingSession, Prisma } from 'generated/prisma';
+import { CreditTransactionType, OnboardingSession, Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
@@ -73,7 +73,11 @@ export class OnboardingService {
         }
 
         try {
-            await this.creditBalanceService.grantInitial({ workspaceId, amount: ONBOARDING_INITIAL_CREDITS });
+            await this.creditBalanceService.grantInitial(
+                { workspaceId, amount: ONBOARDING_INITIAL_CREDITS },
+                CreditTransactionType.SUBSCRIPTION,
+                { source: 'onboarding_bonus' },
+            );
         } catch (err) {
             this.logger.error(`Failed to grant initial credits for workspace ${workspaceId}`, err);
         }
@@ -133,21 +137,18 @@ export class OnboardingService {
                 agentId: session.agentId,
                 workspaceId,
                 instructionOverride: STYLE_TO_INSTRUCTION.standard,
-                skipUsageTracking: true,
             }),
             this.orchestrator.executeQuery({
                 query,
                 agentId: session.agentId,
                 workspaceId,
                 instructionOverride: STYLE_TO_INSTRUCTION.precise,
-                skipUsageTracking: true,
             }),
             this.orchestrator.executeQuery({
                 query,
                 agentId: session.agentId,
                 workspaceId,
                 instructionOverride: STYLE_TO_INSTRUCTION.creative,
-                skipUsageTracking: true,
             }),
         ]);
 

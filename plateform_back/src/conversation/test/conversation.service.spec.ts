@@ -183,7 +183,7 @@ describe('ConversationService', () => {
                 {
                     id: 'msg-3',
                     question: 'How are you?',
-                    response: null,
+                    response: '',
                     timestamp: date3.getTime(),
                 },
             ]);
@@ -207,7 +207,7 @@ describe('ConversationService', () => {
                 {
                     id: 'msg-1',
                     question: 'Question?',
-                    response: null,
+                    response: '',
                     timestamp: date1.getTime(),
                 },
             ]);

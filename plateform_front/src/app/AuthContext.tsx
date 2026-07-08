@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [isAuthenticated, isLoading]);
 
     if (!isInit) {
-        return <AppLoader message="Checking authentication..." />;
+        return <AppLoader message="Vérification de l'authentification..." />;
     }
 
     return (

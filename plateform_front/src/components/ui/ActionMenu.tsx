@@ -144,7 +144,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                         {visibleSections.map((section, si) => (
                             <React.Fragment key={si}>
                                 {si > 0 && <Divider borderColor={dividerColor} />}
-                                <Box px={2} pt={2} pb={1}>
+                                <Box px={2} pt={2} pb={2}>
                                     {section.label && (
                                         <Text
                                             px={2}

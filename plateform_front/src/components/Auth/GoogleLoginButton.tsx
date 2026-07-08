@@ -1,8 +1,8 @@
 import { HStack, Image, Text, Button as ChakraButton } from "@chakra-ui/react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
-import { usePostHog } from "@posthog/react";
 import { useGoogleLoginMutation, useGetMeQuery } from "services/auth/auth";
+import mixpanel from "lib/mixpanel";
 import { useAuth } from "app/AuthContext";
 import useThemedToast from "hooks/useThemedToast";
 import Google from "assets/icons/google.svg";
@@ -10,7 +10,6 @@ import Google from "assets/icons/google.svg";
 const GoogleLoginButton = () => {
     const navigate = useNavigate();
     const toast = useThemedToast();
-    const posthog = usePostHog();
     const { login: setLoggedIn } = useAuth();
     const { refetch: refetchMe } = useGetMeQuery();
     const [googleLogin, { isLoading }] = useGoogleLoginMutation();
@@ -21,12 +20,10 @@ const GoogleLoginButton = () => {
                 await googleLogin({ credential: access_token }).unwrap();
                 const meResult = await refetchMe();
                 if (meResult.data) {
-                    posthog?.identify(meResult.data.id, {
-                        email: meResult.data.email,
-                        name: meResult.data.name,
-                    });
+                    mixpanel.identify(meResult.data.id);
+                    mixpanel.people.set({ $name: meResult.data.name, $email: meResult.data.email });
                 }
-                posthog?.capture("user_logged_in", { method: "google" });
+                mixpanel.track("user_logged_in", { method: "google" });
                 setLoggedIn();
                 void navigate("/");
             } catch {

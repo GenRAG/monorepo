@@ -5,11 +5,31 @@ import { firstValueFrom } from 'rxjs';
 import type { Pipeline } from './pipeline.schema';
 import FormData from 'form-data';
 import type { IncomingMessage } from 'http';
+import { NdjsonLineBuffer, RagCostSummary } from './ndjson-line-buffer';
 
 enum JobStatus {
     COMPLETED = 'completed',
     FAILED = 'failed',
     PENDING = 'pending',
+}
+
+export interface RagModelPricing {
+    prompt: string;
+    completion: string;
+}
+
+interface RagModel {
+    id: string;
+    name: string;
+    description?: string;
+    pricing?: RagModelPricing;
+    context_length?: number;
+    architecture?: {
+        input_modalities: string[];
+        output_modalities: string[];
+    };
+    supported_parameters?: string[];
+    provider?: string;
 }
 
 @Injectable()
@@ -63,18 +83,27 @@ export class RagEngineService {
         query: string;
         orgId: string;
         mock?: boolean;
-    }): Promise<string> {
+    }): Promise<{ answer: string; costUsd: number }> {
         const stream = await this.getQueryStream({ pipeline, query, orgId, mock });
 
-        return new Promise<string>((resolve, reject) => {
-            const chunks: Buffer[] = [];
+        return new Promise<{ answer: string; costUsd: number }>((resolve, reject) => {
+            const lineBuffer = new NdjsonLineBuffer();
+            let text = '';
+            let costSummary: RagCostSummary | undefined;
 
-            stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+            const handleEvents = (events: ReturnType<NdjsonLineBuffer['push']>) => {
+                for (const event of events) {
+                    if (event.type === 'token') text += event.data as string;
+                    else if (event.type === 'cost_summary') costSummary = event.data as RagCostSummary;
+                }
+            };
+
+            stream.on('data', (chunk: Buffer) => handleEvents(lineBuffer.push(chunk.toString('utf-8'))));
 
             stream.on('end', () => {
-                const text = Buffer.concat(chunks).toString('utf-8');
+                handleEvents(lineBuffer.flush());
                 this.logger.debug(`RAG stream completed, length: ${text.length}`);
-                resolve(text);
+                resolve({ answer: text, costUsd: costSummary?.total_cost_usd ?? 0 });
             });
 
             stream.on('error', (err: Error) => {
@@ -125,8 +154,9 @@ export class RagEngineService {
             }),
         );
 
-        const raw = response.data as { models?: { data?: unknown[] } };
-        const models = raw?.models?.data ?? [];
+        const raw = response.data as { models?: { data?: RagModel[] } };
+        const allModels = raw?.models?.data ?? [];
+        const models = allModels.filter((model) => model && !model.id.startsWith('openrouter/'));
 
         this.modelsCache = { data: models, expiresAt: Date.now() + this.MODELS_CACHE_TTL_MS };
         return models;
@@ -139,7 +169,6 @@ export class RagEngineService {
                 timeout: 10_000,
             }),
         );
-        console.log('Reranking models response:', response.data);
 
         const raw = response.data as { rerank_models?: { data?: unknown[] } };
         return raw?.rerank_models?.data ?? [];
@@ -166,6 +195,21 @@ export class RagEngineService {
 
         const { job_id } = response.data as { job_id: string };
         await this.waitForJob(job_id);
+    }
+
+    async deleteDocument(filename: string, agentId: string): Promise<void> {
+        const response = await firstValueFrom(
+            this.httpService.delete(`${this.ragEngineUrl}/documents`, {
+                headers: { 'X-API-Key': this.apiKey, 'Content-Type': 'application/json' },
+                data: { filename, org_id: agentId },
+                timeout: 30_000,
+            }),
+        );
+
+        const { status, file_deleted } = response.data as { status: string; file_deleted: boolean };
+        if (status !== 'deleted' || !file_deleted) {
+            throw new Error(`RAG engine failed to delete document '${filename}' for org '${agentId}'`);
+        }
     }
 
     private async waitForJob(jobId: string, timeoutMs = 300_000): Promise<void> {

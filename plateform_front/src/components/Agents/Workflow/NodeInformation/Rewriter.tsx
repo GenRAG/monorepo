@@ -98,11 +98,11 @@ export const RewriterInformation = () => {
                             fontWeight="semibold"
                             color={colorMode === "dark" ? "grey.100" : "grey.900"}
                         >
-                            Complémentaire au Reranker
+                            Complémentaire au bloc Classement
                         </Text>
                         <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
-                            Combiné au Reranker, il agit en amont pour améliorer la qualité de la récupération et en
-                            aval pour affiner le classement.
+                            Combiné au bloc Classement, il agit en amont pour améliorer la qualité de la récupération et
+                            en aval pour affiner le classement.
                         </Text>
                     </Box>
                 </VStack>

@@ -9,9 +9,8 @@ import { DocumentEmptyState } from "../DocumentEmptyState";
 import { DocumentTableHeader } from "./DocumentTableHeader";
 import { DocumentFilters } from "./DocumentFilters";
 import { DocumentSkeletonRow } from "./DocumentSkeletonRow";
-import useUploadDocuments from "hooks/useUploadDocuments";
 
-type TypeFilter = "PDF" | "Markdown" | "Texte" | null;
+type TypeFilter = "PDF" | "Markdown" | "Texte" | "Word" | null;
 type ViewMode = "list" | "grid";
 
 interface DocumentListProps {
@@ -156,7 +155,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     minW={0}
                     sx={grayScrollbar}
                 >
-                    <Table variant="simple" size="sm" minW="600px" borderColor={borderColor}>
+                    <Table variant="simple" size="xs" minW="600px" borderColor={borderColor}>
                         <DocumentTableHeader />
                         <Tbody bg={tableBg}>
                             {isLoading

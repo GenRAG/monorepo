@@ -235,6 +235,7 @@ const InstructionPanel = ({
             </Flex>
             <Box minH="90px">
                 <Textarea
+                    className="nowheel"
                     value={draft}
                     onChange={(e) => {
                         e.stopPropagation();

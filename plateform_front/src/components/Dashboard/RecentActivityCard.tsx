@@ -94,6 +94,7 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
             display="flex"
             flexDirection="column"
             overflow="hidden"
+            h="100%"
         >
             <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor="borderDefault">
                 <HStack spacing={2}>

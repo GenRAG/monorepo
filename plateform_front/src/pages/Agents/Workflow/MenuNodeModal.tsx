@@ -290,7 +290,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                 </>
                             )}
 
-                            {filteredAvailable.length === 0 && (
+                            {filteredAvailable.length === 0 && availableNodes.length > 0 && (
                                 <Flex justify="center" py={8}>
                                     <Text fontSize="sm" color={subColor}>
                                         Aucun nœud ne correspond à &quot;
@@ -298,6 +298,14 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                             {query}
                                         </Text>
                                         &quot;
+                                    </Text>
+                                </Flex>
+                            )}
+
+                            {availableNodes.length === 0 && filteredAvailable.length === 0 && (
+                                <Flex justify="center" py={8}>
+                                    <Text fontSize="sm" color={subColor}>
+                                        Pas de blocs disponibles.
                                     </Text>
                                 </Flex>
                             )}

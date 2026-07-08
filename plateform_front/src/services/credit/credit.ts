@@ -14,9 +14,14 @@ export interface WorkspaceConsumption {
     total: number;
 }
 
+export interface CreditBalanceSummary {
+    balance: number;
+    totalGranted: number;
+}
+
 export const creditApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
-        getCreditBalance: builder.query<number, string>({
+        getCreditBalance: builder.query<CreditBalanceSummary, string>({
             query: (workspaceId) => ({
                 url: `/workspaces/${workspaceId}/credit-balance`,
                 method: "GET",

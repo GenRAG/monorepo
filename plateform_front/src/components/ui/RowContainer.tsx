@@ -14,7 +14,7 @@ const RowContainer = ({ children, withBorder = true, ...props }: RowContainerPro
             p={2}
             borderBottom={withBorder ? "1px solid" : "none"}
             borderColor="borderDefault"
-            _hover={{ bg: "surfaceSubtle", cursor: "pointer" }}
+            _hover={{ bg: "surfaceSubtle" }}
             _last={{ borderBottom: "none", borderBottomRadius: "8px" }}
             transition="background 0.1s"
             {...props}

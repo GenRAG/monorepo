@@ -15,7 +15,7 @@ const App: React.FC = () => {
     }, []);
 
     if (isInitializing) {
-        return <AppLoader message="Initializing application..." />;
+        return <AppLoader message="Initialisation de l'application..." />;
     }
 
     return (

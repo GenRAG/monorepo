@@ -6,7 +6,9 @@ import { Observable, Subscriber } from 'rxjs';
 import * as Sentry from '@sentry/nestjs';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import { UsageTrackerService } from 'src/credit/usage-tracker.service';
+import { costToCredits } from 'src/credit/credit-pricing';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { NdjsonLineBuffer, RagCostSummary } from 'src/rag-engine/ndjson-line-buffer';
 
 type RagStream = IncomingMessage;
 type StartRagResult = { ok: true; stream: RagStream } | { ok: false; isOutOfCredits: boolean; error: string };
@@ -47,10 +49,7 @@ export class AgentRuntimeService {
         orgIdOverride: string,
     ): Observable<MessageEvent> {
         return new Observable((subscriber) => {
-            void this._dispatchStream(subscriber, workspaceId, agentId, query, {
-                orgIdOverride,
-                skipUsageTracking: true,
-            });
+            void this._dispatchStream(subscriber, workspaceId, agentId, query, { orgIdOverride });
         });
     }
 
@@ -226,8 +225,17 @@ export class AgentRuntimeService {
     }
 
     private _forwardStream(ragStream: RagStream, subscriber: Subscriber<MessageEvent>, logCtx?: LogCtx) {
+        const lineBuffer = new NdjsonLineBuffer();
+        let costSummary: RagCostSummary | undefined;
+
         ragStream.on('data', (chunk: Buffer) => {
-            subscriber.next({ data: JSON.stringify({ chunk: chunk.toString('utf-8') }) });
+            for (const event of lineBuffer.push(chunk.toString('utf-8'))) {
+                if (event.type === 'token') {
+                    subscriber.next({ data: JSON.stringify({ chunk: event.data as string }) });
+                } else if (event.type === 'cost_summary') {
+                    costSummary = event.data as RagCostSummary;
+                }
+            }
         });
         ragStream.on('end', () => {
             if (logCtx) {
@@ -238,6 +246,7 @@ export class AgentRuntimeService {
                         query: logCtx.query.slice(0, 500),
                         durationMs: Date.now() - logCtx.startedAt,
                         status: QueryLogStatus.SUCCESS,
+                        creditsUsed: costSummary ? costToCredits(costSummary.total_cost_usd) : undefined,
                     })
                     .catch((e: Error) => {
                         this.logger.error(`Failed to record query: ${e.message}`);
@@ -274,11 +283,19 @@ export class AgentRuntimeService {
         logCtx: LogCtx,
     ) {
         let fullText = '';
+        const lineBuffer = new NdjsonLineBuffer();
+        let costSummary: RagCostSummary | undefined;
 
         ragStream.on('data', (chunk: Buffer) => {
-            const text = chunk.toString('utf-8');
-            fullText += text;
-            subscriber.next({ data: JSON.stringify({ chunk: text }) });
+            for (const event of lineBuffer.push(chunk.toString('utf-8'))) {
+                if (event.type === 'token') {
+                    const text = event.data as string;
+                    fullText += text;
+                    subscriber.next({ data: JSON.stringify({ chunk: text }) });
+                } else if (event.type === 'cost_summary') {
+                    costSummary = event.data as RagCostSummary;
+                }
+            }
         });
 
         ragStream.on('end', () => {
@@ -289,6 +306,7 @@ export class AgentRuntimeService {
                     query: logCtx.query.slice(0, 500),
                     durationMs: Date.now() - logCtx.startedAt,
                     status: QueryLogStatus.SUCCESS,
+                    creditsUsed: costSummary ? costToCredits(costSummary.total_cost_usd) : undefined,
                 })
                 .catch((e: Error) => {
                     this.logger.error(`Failed to record query: ${e.message}`);

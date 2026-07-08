@@ -1,12 +1,13 @@
 import React from "react";
-import { Box, VStack, Text, Spinner } from "@chakra-ui/react";
+import { Box, VStack, Text, Image, Spinner } from "@chakra-ui/react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import logoGreen from "assets/logo/logoGreen.png";
 
 interface AppLoaderProps {
     message?: string;
 }
 
-export const AppLoader: React.FC<AppLoaderProps> = ({ message = "Loading..." }) => {
+export const AppLoader: React.FC<AppLoaderProps> = ({ message = "Chargement..." }) => {
     return (
         <Box
             position="fixed"
@@ -21,19 +22,19 @@ export const AppLoader: React.FC<AppLoaderProps> = ({ message = "Loading..." }) 
             zIndex={9999}
         >
             <VStack spacing={6} align="center">
-                <Box position="relative">
-                    <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)">
-                        <Spinner size="xl" thickness="4px" speed="0.65s" color={currentDarkTheme.primary} />
-                    </Box>
+                <Box position="relative" w="64px" h="64px" display="flex" alignItems="center" justifyContent="center">
+                    <Spinner
+                        position="absolute"
+                        size="xl"
+                        thickness="4px"
+                        speed="0.65s"
+                        color={currentDarkTheme.primary}
+                    />
+                    <Image src={logoGreen} alt="GenRAG" h="26px" w="26px" position="relative" zIndex={1} />
                 </Box>
-                <VStack spacing={2} align="center">
-                    <Text fontSize="xl" fontWeight="semibold" color="textPrimary">
-                        GenRAG
-                    </Text>
-                    <Text fontSize="sm" color="textSecondary">
-                        {message}
-                    </Text>
-                </VStack>
+                <Text fontSize="sm" color="textSecondary">
+                    {message}
+                </Text>
             </VStack>
 
             <style>{`

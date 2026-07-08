@@ -1,7 +1,8 @@
-import { Box, DarkMode, Flex, Heading, HStack, Icon, IconButton } from "@chakra-ui/react";
+import { Box, DarkMode, Flex, HStack, Icon, IconButton, Image } from "@chakra-ui/react";
 import { ArrowLeft } from "lucide-react";
 import Spline from "@splinetool/react-spline";
 import type { Application } from "@splinetool/runtime";
+import logoGreen from "assets/logo/logoGreen.png";
 
 const fixSplineCanvas = (spline: Application) => {
     const canvas = spline.canvas as HTMLCanvasElement | undefined;
@@ -53,9 +54,7 @@ const AuthDesktopLayout = ({ children, canGoBack }: { children: React.ReactNode;
                 </Flex>
             </Flex>
 
-            <Heading position="absolute" top="24px" left="24px" zIndex={3} color="white" variant="display-2xl">
-                GenRAG
-            </Heading>
+            <Image src={logoGreen} alt="GenRAG" position="absolute" top="24px" left="24px" zIndex={3} h="36px" />
         </HStack>
     </DarkMode>
 );

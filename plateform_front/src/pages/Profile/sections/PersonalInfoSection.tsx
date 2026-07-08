@@ -22,11 +22,7 @@ import { ActionMenu } from "components/ui/ActionMenu";
 
 const LANG_OPTIONS = [{ value: "fr", label: "Français" }];
 
-const TZ_OPTIONS = [
-    { value: "Europe/Paris", label: "Europe/Paris (UTC+1)" },
-    { value: "UTC", label: "UTC" },
-    { value: "America/New_York", label: "America/New_York (UTC-5)" },
-];
+const TZ_OPTIONS = [{ value: "Europe/Paris", label: "Europe/Paris (UTC+1)" }];
 
 const splitName = (name: string): [string, string] => {
     const idx = name.indexOf(" ");
@@ -78,15 +74,9 @@ const PersonalInfoSection = ({ user, onSave, isLoading }: Props) => {
                 <Grid templateColumns="1fr 1fr" gap={4} w="100%">
                     <FormControl>
                         <FormLabel fontSize="xs" color="textLabel">
-                            Prénom
-                        </FormLabel>
-                        <Input bg={inputBg} {...register("firstName")} />
-                    </FormControl>
-                    <FormControl>
-                        <FormLabel fontSize="xs" color="textLabel">
                             Nom
                         </FormLabel>
-                        <Input bg={inputBg} {...register("lastName")} />
+                        <Input bg={inputBg} {...register("firstName")} />
                     </FormControl>
 
                     <FormControl gridColumn="1 / -1">
@@ -129,7 +119,6 @@ const PersonalInfoSection = ({ user, onSave, isLoading }: Props) => {
                                 <ActionMenu
                                     placement="bottom-start"
                                     fullWidth
-                                    width="100%"
                                     trigger={
                                         <HStack
                                             h="40px"

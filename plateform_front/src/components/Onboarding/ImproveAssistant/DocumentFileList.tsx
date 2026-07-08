@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, HStack, Icon, Progress, Text, VStack, useColorMode } from "@chakra-ui/react";
+import { Box, HStack, Progress, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Status, UploadedSource } from "hooks/useUploadDocuments";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -15,24 +15,28 @@ const statusConfig = {
         color: currentDarkTheme.primary,
         showProgress: true,
         progressValue: 25,
+        spin: true,
     },
     [Status.PROCESSING]: {
         icon: Loader2,
         color: currentDarkTheme.primary,
         showProgress: true,
         progressValue: 60,
+        spin: true,
     },
     [Status.COMPLETED]: {
         icon: CheckCircle2,
         color: "green.500",
         showProgress: false,
         progressValue: 100,
+        spin: false,
     },
     [Status.ERROR]: {
         icon: AlertCircle,
         color: "red.400",
         showProgress: false,
         progressValue: 0,
+        spin: false,
     },
 };
 
@@ -64,6 +68,7 @@ const DocumentFileList: React.FC<DocumentFileListProps> = ({ sources }) => {
                                 color={config.color}
                                 bg={colorMode === "dark" ? "grey.850" : "grey.50"}
                                 size="sm"
+                                spin={config.spin}
                             />
                             <Text
                                 fontSize="sm"
@@ -77,6 +82,7 @@ const DocumentFileList: React.FC<DocumentFileListProps> = ({ sources }) => {
                                 <Progress
                                     value={config.progressValue}
                                     colorScheme="green"
+                                    bg={colorMode === "dark" ? "grey.850" : "grey.100"}
                                     size="sm"
                                     borderRadius="999px"
                                     w="80px"

@@ -11,12 +11,14 @@ import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+    app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
     const config = new DocumentBuilder().setTitle('GenRAG API').setVersion('1.0').build();
     const document = SwaggerModule.createDocument(app, config);
 
+    const frontendUrl = app.get(ConfigService).getOrThrow<string>('FRONTEND_URL');
     app.enableCors({
-        origin: app.get(ConfigService).getOrThrow('FRONTEND_URL'),
+        origin: frontendUrl.split(',').map((u) => u.trim()),
         credentials: true,
     });
 

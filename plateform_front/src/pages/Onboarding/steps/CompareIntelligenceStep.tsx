@@ -124,7 +124,16 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                     <OnboardingStepBanner current={compareCount} max={MAX_COMPARES} />
                 </VStack>
 
-                <Box flex={1} minH={0} overflowY="auto" pr={2}>
+                <Box
+                    flex={1}
+                    minH={0}
+                    overflowY="auto"
+                    pr={2}
+                    border="1px solid"
+                    borderColor={colorMode === "dark" ? "grey.800" : "grey.200"}
+                    borderRadius="12px"
+                    p={4}
+                >
                     {!question ? (
                         <ChatInput
                             placeholder={

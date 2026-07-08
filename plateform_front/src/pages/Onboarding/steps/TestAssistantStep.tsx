@@ -70,7 +70,7 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
                     <ChatInterface
                         fullHeight
                         compact
-                        title="Ton assistant RH est prêt"
+                        title="Ton assistant est prêt"
                         getResponse={getResponse}
                         onMessagesChange={handleMessagesChange}
                         suggestedQuestions={SUGGESTED_QUESTIONS}

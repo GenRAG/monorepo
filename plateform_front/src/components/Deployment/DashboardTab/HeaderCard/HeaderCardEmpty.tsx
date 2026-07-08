@@ -8,7 +8,7 @@ interface Props {
     onOpen?: () => void;
 }
 
-export const HeaderCardEmpty: FC<Props> = ({ onGuideClick, onOpen }) => {
+export const HeaderCardEmpty: FC<Props> = ({ onOpen }) => {
     const bg = useColorModeValue("white", "grey.950");
     const iconBg = useColorModeValue("grey.50", "grey.900");
     const titleColor = useColorModeValue("grey.900", "grey.50");
@@ -35,14 +35,11 @@ export const HeaderCardEmpty: FC<Props> = ({ onGuideClick, onOpen }) => {
                 </Text>
 
                 <Text fontSize="sm" color={descColor} textAlign="center" maxW="640px">
-                    Votre agent est prêt à être déployé en production. Cliquez sur le bouton ci-dessous pour lire notre
-                    guide de mise en production
+                    Votre agent est prêt à être déployé en production. Cliquez sur le bouton ci-dessous pour le déployer
+                    et commencer à l&apos;utiliser.
                 </Text>
 
                 <HStack spacing={4}>
-                    <Button size="sm" variant="outline" leftIcon={ExternalLink} onClick={onGuideClick}>
-                        Deployment guide
-                    </Button>
                     <Button size="sm" variant="outline" leftIcon={Globe} onClick={onOpen}>
                         Déployer en production
                     </Button>

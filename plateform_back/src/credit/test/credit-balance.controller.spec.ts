@@ -3,6 +3,7 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 
 const mockCreditBalanceService: any = {
     getBalance: jest.fn(),
+    getBalanceSummary: jest.fn(),
     add: jest.fn(),
 };
 
@@ -16,20 +17,20 @@ describe('CreditBalanceController', () => {
 
     describe('getBalance', () => {
         it('should delegate to service', async () => {
-            mockCreditBalanceService.getBalance.mockResolvedValue(500);
+            mockCreditBalanceService.getBalanceSummary.mockResolvedValue({ balance: 500, totalGranted: 500 });
 
             const result = await controller.getBalance('ws-1');
 
-            expect(mockCreditBalanceService.getBalance).toHaveBeenCalledWith('ws-1');
-            expect(result).toBe(500);
+            expect(mockCreditBalanceService.getBalanceSummary).toHaveBeenCalledWith('ws-1');
+            expect(result).toEqual({ balance: 500, totalGranted: 500 });
         });
 
         it('should return 0 when balance is empty', async () => {
-            mockCreditBalanceService.getBalance.mockResolvedValue(0);
+            mockCreditBalanceService.getBalanceSummary.mockResolvedValue({ balance: 0, totalGranted: 0 });
 
             const result = await controller.getBalance('ws-1');
 
-            expect(result).toBe(0);
+            expect(result).toEqual({ balance: 0, totalGranted: 0 });
         });
     });
 

@@ -47,10 +47,27 @@ export class UserRepository {
         });
     }
 
-    delete(id: string): Promise<UserSafe> {
-        return this.prisma.user.delete({
-            where: { id },
-            select: this.safeSelect,
+    async delete(id: string): Promise<UserSafe> {
+        return this.prisma.$transaction(async (tx) => {
+            const memberships = await tx.userWorkspace.findMany({
+                where: { userId: id },
+                select: { workspaceId: true },
+            });
+
+            const soleWorkspaceIds: string[] = [];
+            for (const { workspaceId } of memberships) {
+                const memberCount = await tx.userWorkspace.count({ where: { workspaceId } });
+                if (memberCount === 1) soleWorkspaceIds.push(workspaceId);
+            }
+
+            if (soleWorkspaceIds.length > 0) {
+                await tx.workspace.deleteMany({ where: { id: { in: soleWorkspaceIds } } });
+            }
+
+            return tx.user.delete({
+                where: { id },
+                select: this.safeSelect,
+            });
         });
     }
 }

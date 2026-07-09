@@ -79,7 +79,7 @@ const AgentSidebar = () => {
                             color={labelColor}
                             noOfLines={1}
                         >
-                            AGENT{agentName ? ` · ${agentName}` : ""}
+                            AGENT{agentName ? ` - ${agentName}` : ""}
                         </Text>
                     )}
                     <IconButton

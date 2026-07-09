@@ -92,7 +92,7 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                             </Text>
                         </HStack>
                         <Text fontSize="11px" color={mutedColor} mt={0.5}>
-                            / {fmt(DEFAULT_QUOTA_BYTES)} · {fmt(freeBytes)} libre
+                            / {fmt(DEFAULT_QUOTA_BYTES)} - {fmt(freeBytes)} libre
                         </Text>
                     </Box>
                 </HStack>

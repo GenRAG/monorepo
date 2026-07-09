@@ -62,6 +62,7 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                 borderRadius="12px"
                 display="flex"
                 flexDirection="column"
+                h="100%"
             >
                 <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor="borderDefault">
                     <HStack spacing={2}>
@@ -69,7 +70,7 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                         <Skeleton {...skeletonProps} h="14px" w="110px" borderRadius="4px" />
                     </HStack>
                 </HStack>
-                <VStack spacing={0} align="stretch">
+                <VStack spacing={0} align="stretch" h="100%">
                     {[...Array(3)].map((_, i) => (
                         <RowContainer key={i}>
                             <Skeleton {...skeletonProps} w="32px" h="32px" borderRadius="8px" flexShrink={0} />

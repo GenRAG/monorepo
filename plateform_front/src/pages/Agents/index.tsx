@@ -5,6 +5,7 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
+    Skeleton,
     SimpleGrid,
     Stack,
     Text,
@@ -13,19 +14,31 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import { Clock, Plus, Search, SortAsc } from "lucide-react";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AgentCard } from "components/Agents/AgentCard";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
-import { useIsDark } from "hooks/useIsDark";
-import { SortButton, SortKey } from "pages/Assistant/AssistantList";
+import { SortKey } from "pages/Assistant/AssistantList";
 import BoxIcon from "components/ui/BoxIcon";
+import MultiOptionButtons from "components/ui/MultiOptionButtons";
+
+const CardSkeleton: React.FC = () => {
+    const { colorMode } = useColorMode();
+    const isDark = colorMode === "dark";
+    return (
+        <Skeleton
+            height="110px"
+            borderRadius="12px"
+            startColor={isDark ? "grey.800" : "grey.100"}
+            endColor={isDark ? "grey.700" : "grey.200"}
+        />
+    );
+};
 
 export const AgentsList = () => {
     const { workspaceId = "default" } = useParams<{ workspaceId: string }>();
     const { data: agents = [], isLoading } = useGetWorkspaceAgentsQuery(workspaceId);
-    const isDark = useIsDark();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [sort, setSort] = useState<SortKey>("recent");
@@ -50,7 +63,6 @@ export const AgentsList = () => {
 
     const sub = useColorModeValue("grey.500", "grey.400");
     const titleColor = useColorModeValue("grey.900", "white");
-    const border = isDark ? "grey.700" : "grey.200";
 
     return (
         <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto">
@@ -60,7 +72,7 @@ export const AgentsList = () => {
                         Agents
                     </Text>
                     <Text fontSize="sm" color={sub}>
-                        Creez et gérez vos agents · {agents.length} au total
+                        Creez et gérez vos agents, vous avez {agents.length} agent(s) au total
                     </Text>
                 </VStack>
 
@@ -73,33 +85,26 @@ export const AgentsList = () => {
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
                         size="sm"
-                        bg={isDark ? "grey.800" : "white"}
-                        border="1px solid"
-                        borderColor={border}
-                        borderRadius="8px"
-                        fontSize="sm"
-                        _placeholder={{ color: sub }}
-                        _focus={{ borderColor: "green.400", boxShadow: "none" }}
                     />
                 </InputGroup>
             </HStack>
 
-            <HStack
-                spacing={0}
-                bg={isDark ? "grey.900" : "grey.50"}
-                border="1px solid"
-                borderColor={border}
-                borderRadius="10px"
-                w="fit-content"
-            >
-                {SortButton("recent", "Récent", Clock, sort, setSort, "first")}
-                {SortButton("az", "A→Z", SortAsc, sort, setSort, "last")}
-            </HStack>
+            <MultiOptionButtons
+                options={[
+                    { value: "recent", label: "Récent", icon: Clock },
+                    { value: "az", label: "A→Z", icon: SortAsc },
+                ]}
+                value={sort}
+                onChange={setSort}
+                size="sm"
+            />
 
             {isLoading ? (
-                <Text color={textSecondary} fontSize="13px">
-                    Chargement...
-                </Text>
+                <SimpleGrid spacing={3} columns={{ base: 1, sm: 2, xl: 4 }}>
+                    {[1, 2, 3, 4].map((i) => (
+                        <CardSkeleton key={i} />
+                    ))}
+                </SimpleGrid>
             ) : (
                 <SimpleGrid spacing={3} columns={{ base: 1, sm: 2, xl: 4 }}>
                     <Box

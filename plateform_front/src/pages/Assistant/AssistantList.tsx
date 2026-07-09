@@ -15,9 +15,9 @@ import {
 import { Bot, Clock, Search, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetAssistantsListQuery, AssistantPreview } from "services/chat/chat";
-import { useIsDark } from "hooks/useIsDark";
 import BoxIcon from "components/ui/BoxIcon";
 import { EntityCard } from "components/ui/EntityCard";
+import MultiOptionButtons from "components/ui/MultiOptionButtons";
 
 export type SortKey = string;
 
@@ -81,47 +81,6 @@ const CardSkeleton: React.FC = () => {
     );
 };
 
-export const SortButton = (
-    key: SortKey,
-    label: string,
-    icon: React.ElementType,
-    sort: SortKey,
-    setSort: (key: SortKey) => void,
-    position?: "first" | "last",
-) => {
-    const isDark = useIsDark();
-
-    const sub = isDark ? "grey.400" : "grey.500";
-    const isFirst = position === "first";
-    const isLast = position === "last";
-    return (
-        <HStack
-            as="button"
-            px={3}
-            py={1.5}
-            spacing={1.5}
-            borderRadius={isFirst ? "8px 0 0 8px" : isLast ? "0 8px 8px 0" : "8px"}
-            borderRight={isFirst ? "1px solid" : undefined}
-            borderLeft={isLast ? "1px solid" : undefined}
-            borderColor={isFirst || isLast ? (isDark ? "grey.700" : "grey.200") : undefined}
-            cursor="pointer"
-            bg={sort === key ? (isDark ? "grey.700" : "grey.100") : "transparent"}
-            onClick={() => setSort(key)}
-            transition="background 0.15s"
-        >
-            <Icon as={icon} boxSize={3.5} color={sort === key ? (isDark ? "white" : "grey.900") : sub} />
-            <Text
-                fontSize="sm"
-                fontWeight={sort === key ? "600" : "400"}
-                color={sort === key ? (isDark ? "white" : "grey.900") : sub}
-                whiteSpace="nowrap"
-            >
-                {label}
-            </Text>
-        </HStack>
-    );
-};
-
 export const AssistantsList = () => {
     const { colorMode } = useColorMode();
     const isDark = colorMode === "dark";
@@ -130,7 +89,6 @@ export const AssistantsList = () => {
     const [sort, setSort] = useState<SortKey>("recent");
 
     const sub = isDark ? "grey.400" : "grey.500";
-    const border = isDark ? "grey.700" : "grey.200";
 
     const { data: assistants = [], isLoading } = useGetAssistantsListQuery();
 
@@ -149,7 +107,7 @@ export const AssistantsList = () => {
                         Assistants
                     </Text>
                     <Text fontSize="sm" color={sub}>
-                        Agents déployés accessibles · {assistants.length} au total
+                        Agents déployés accessibles, vous avez {assistants.length} assistant(s) au total
                     </Text>
                 </VStack>
                 <InputGroup maxW="260px">
@@ -161,28 +119,19 @@ export const AssistantsList = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         size="sm"
-                        bg={isDark ? "grey.800" : "white"}
-                        border="1px solid"
-                        borderColor={border}
-                        borderRadius="8px"
-                        fontSize="sm"
-                        _placeholder={{ color: sub }}
-                        _focus={{ borderColor: "green.400", boxShadow: "none" }}
                     />
                 </InputGroup>
             </HStack>
 
-            <HStack
-                spacing={0}
-                bg={isDark ? "grey.900" : "grey.50"}
-                border="1px solid"
-                borderColor={border}
-                borderRadius="10px"
-                w="fit-content"
-            >
-                {SortButton("recent", "Récent", Clock, sort, setSort, "first")}
-                {SortButton("az", "A→Z", SortAsc, sort, setSort, "last")}
-            </HStack>
+            <MultiOptionButtons
+                options={[
+                    { value: "recent", label: "Récent", icon: Clock },
+                    { value: "az", label: "A→Z", icon: SortAsc },
+                ]}
+                value={sort}
+                onChange={setSort}
+                size="sm"
+            />
 
             {isLoading ? (
                 <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={3}>

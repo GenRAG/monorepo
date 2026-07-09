@@ -119,7 +119,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
                     )}
                     {compact && (
                         <Text fontSize="10px" color={subColor} mt={2} textAlign="right">
-                            Entrée pour envoyer · ⇧↵ pour la ligne suivante
+                            Entrée pour envoyer ⇧↵ pour la ligne suivante
                         </Text>
                     )}
                     <Button

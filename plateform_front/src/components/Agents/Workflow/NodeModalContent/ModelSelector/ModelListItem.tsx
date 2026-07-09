@@ -49,7 +49,7 @@ const ModelListItemBase: React.FC<Props> = ({ model, isSelected, onSelect }) => 
                     </Text>
                     {(provider || ctx) && (
                         <Text fontSize="9px" color={subColor} noOfLines={1}>
-                            {[provider, ctx].filter(Boolean).join(" · ")}
+                            {[provider, ctx].filter(Boolean).join(" - ")}
                         </Text>
                     )}
                 </VStack>

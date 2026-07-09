@@ -46,7 +46,7 @@ const AgentRow = ({ agent }: { agent: WorkspaceStatsAgentItem }) => {
                     />
                     <Text fontSize="11px" color="textLabel">
                         {STATUS_LABEL[agent.status] ?? agent.status}
-                        {agent.latestVersion != null ? ` · v${agent.latestVersion}` : ""}
+                        {agent.latestVersion != null ? ` - v${agent.latestVersion}` : ""}
                     </Text>
                 </HStack>
             </VStack>

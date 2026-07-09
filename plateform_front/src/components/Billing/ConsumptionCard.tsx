@@ -149,12 +149,12 @@ const ConsumptionCard: React.FC = () => {
                         : period === "30j"
                           ? "30 derniers jours"
                           : "90 derniers jours"}{" "}
-                    · crédits utilisés
+                    crédits utilisés
                 </Text>
 
                 <Box flex={1} minH="80px" position="relative" w="100%" minW={0}>
                     {isLoading ? (
-                        <Skeleton h="100%" borderRadius="md" />
+                        <Skeleton h="100%" borderRadius="8px" />
                     ) : (
                         <Box position="absolute" inset={0}>
                             <Bar data={chartData} options={chartOptions} plugins={[backgroundBarsPlugin]} />
@@ -180,7 +180,7 @@ const ConsumptionCard: React.FC = () => {
                             {byAgent.map((a, i) => (
                                 <ChakraTooltip
                                     key={a.agentId}
-                                    label={`${a.agentName} · ${agentTotal > 0 ? Math.round((a.creditsUsed / agentTotal) * 100) : 0}%`}
+                                    label={`${a.agentName}: ${agentTotal > 0 ? Math.round((a.creditsUsed / agentTotal) * 100) : 0}%`}
                                     bg={AGENT_COLORS[i % AGENT_COLORS.length]}
                                     placement="top"
                                     color="white"
@@ -208,7 +208,7 @@ const ConsumptionCard: React.FC = () => {
                                         flexShrink={0}
                                     />
                                     <Text fontSize="10px" color={sub}>
-                                        {a.agentName} · {a.creditsUsed}
+                                        {a.agentName} - {a.creditsUsed}
                                     </Text>
                                 </HStack>
                             ))}

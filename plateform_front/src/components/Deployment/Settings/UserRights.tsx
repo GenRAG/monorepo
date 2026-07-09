@@ -64,14 +64,14 @@ export const UserRights = () => {
                 <ExportCard
                     icon={<Download size={15} />}
                     title="Export des conversations"
-                    subtitle="Format JSON · 1 client par fichier"
+                    subtitle="Format JSON - 1 client par fichier"
                     onClick={handleExportConversations}
                     isLoading={isExportingConversations}
                 />
                 <ExportCard
                     icon={<Download size={15} />}
                     title="Export des logs API"
-                    subtitle="Format CSV · 90 derniers jours"
+                    subtitle="Format CSV - 90 derniers jours"
                     onClick={handleExportApiLogs}
                     isLoading={isExportingLogs}
                 />

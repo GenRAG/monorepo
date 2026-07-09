@@ -75,7 +75,7 @@ const AssistantHome: React.FC<AssistantHomeProps> = ({
                                     </Text>
                                     {sharedBy && (
                                         <Text fontSize="sm" color={isDark ? "grey.500" : "grey.400"}>
-                                            Partagé par · {sharedBy}
+                                            Partagé par {sharedBy}
                                         </Text>
                                     )}
                                 </VStack>

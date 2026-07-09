@@ -69,7 +69,7 @@ const overrides = {
     blur,
     borderWidth,
     fonts,
-    boxShadow: shadow,
+    shadows: shadow,
 
     radii: borderRadius,
     space: spacing,

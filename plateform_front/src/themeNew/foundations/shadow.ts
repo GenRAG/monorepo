@@ -7,6 +7,7 @@ const shadow = {
     lg: "0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1)",
     xl: "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 8px 10px -6px rgba(0, 0, 0, 0.1)",
     "focus-button": `0px 0px 0px 2px ${colors.green[100]}`,
+    outline: `0 0 0 3px ${colors.green[200]}`,
 };
 
 export { shadow };

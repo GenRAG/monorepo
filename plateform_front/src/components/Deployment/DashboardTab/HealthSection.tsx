@@ -1,4 +1,4 @@
-import { Badge, Box, HStack, Icon, Text, Tooltip, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Badge, Box, HStack, Text, Tooltip, VStack, useColorModeValue } from "@chakra-ui/react";
 import BoxIcon from "components/ui/BoxIcon";
 import { Activity } from "lucide-react";
 
@@ -95,7 +95,7 @@ export const HealthSection = () => {
                             {uptime}%
                         </Text>
                         <Text fontSize="sm" color="textMuted">
-                            uptime · {DAYS} derniers jours
+                            uptime - {DAYS} derniers jours
                         </Text>
                     </HStack>
                     {incidentCount > 0 && (

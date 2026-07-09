@@ -52,7 +52,7 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({
                     </Box>
                 </Text>
                 <Text fontSize="12px" color="textMuted">
-                    PDF, MD, TXT, DOCX, HTML · max 15 Mo / fichier
+                    PDF, MD, TXT, DOCX, HTML - max 15 Mo / fichier
                 </Text>
                 <HStack
                     spacing={2}

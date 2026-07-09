@@ -43,7 +43,7 @@ const AlertItem = ({ alert }: { alert: AlertEntry }) => {
                     {alert.description}
                 </Text>
                 <Text fontSize="11px" color={metaCol}>
-                    {alert.time} · {alert.source}
+                    {alert.time} - {alert.source}
                 </Text>
             </VStack>
         </HStack>

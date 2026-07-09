@@ -108,7 +108,7 @@ const DocumentDropZone: React.FC<DocumentDropZoneProps> = ({
                         </Text>
                     )}
                     <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
-                        PDF, MD, TXT, DOCX, HTML · max 15 Mo / fichier
+                        PDF, MD, TXT, DOCX, HTML - max 15 Mo / fichier
                     </Text>
                 </VStack>
                 {maxFiles !== undefined && currentCount !== undefined && !disabled && (

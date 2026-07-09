@@ -1,8 +1,6 @@
-import { Box, HStack, Icon, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Skeleton, Text, useColorModeValue } from "@chakra-ui/react";
 import { useIsDark } from "hooks/useIsDark";
 import { useGetWorkflowByVersionQuery } from "services/workflow/workflow";
-import { FileText } from "lucide-react";
-import BoxIcon from "components/ui/BoxIcon";
 
 interface PipelineJsonPanelProps {
     workflowVersion: number | null;
@@ -69,7 +67,7 @@ export const PipelineJsonPanel = ({
                     {deploymentName}
                     {workflowVersion !== null && (
                         <Box as="span" ml={2} color="green.500">
-                            · {deploymentChangelog}
+                            / {deploymentChangelog}
                         </Box>
                     )}
                 </Text>

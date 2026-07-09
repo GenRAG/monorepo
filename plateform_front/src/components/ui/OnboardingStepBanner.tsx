@@ -17,8 +17,8 @@ const OnboardingStepBanner: React.FC<OnboardingStepBannerProps> = ({ current, ma
         <Banner borderRadius="12px" variant={variant} size="xs" title="Messages de test" {...bannerProps}>
             <Text fontSize="xs" color={disclaimerColor}>
                 {remaining > 0
-                    ? `${remaining} message${remaining > 1 ? "s" : ""} restant${remaining > 1 ? "s" : ""} · ${current}/${max} utilisés`
-                    : `Limite atteinte · ${current}/${max} messages utilisés`}
+                    ? `${remaining} message${remaining > 1 ? "s" : ""} restant${remaining > 1 ? "s" : ""}, ${current}/${max} utilisés`
+                    : `Limite atteinte, ${current}/${max} messages utilisés`}
             </Text>
         </Banner>
     );

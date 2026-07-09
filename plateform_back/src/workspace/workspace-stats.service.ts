@@ -35,9 +35,12 @@ export class WorkspaceStatsService {
     }
 
     private async getAgentStats(workspaceId: string) {
-        const [production, development, items] = await this.prisma.$transaction([
-            this.prisma.agent.count({ where: { workspaceId, status: AgentStatus.PRODUCTION } }),
-            this.prisma.agent.count({ where: { workspaceId, status: AgentStatus.DEVELOPMENT } }),
+        const [grouped, items] = await Promise.all([
+            this.prisma.agent.groupBy({
+                by: ['status'],
+                where: { workspaceId },
+                _count: { _all: true },
+            }),
             this.prisma.agent.findMany({
                 where: { workspaceId },
                 select: {
@@ -50,17 +53,28 @@ export class WorkspaceStatsService {
                 orderBy: { updatedAt: 'desc' },
             }),
         ]);
+        const production = grouped.find((g) => g.status === AgentStatus.PRODUCTION)?._count._all ?? 0;
+        const development = grouped.find((g) => g.status === AgentStatus.DEVELOPMENT)?._count._all ?? 0;
         return { production, development, items };
     }
 
     private async getDocumentStats(workspaceId: string) {
-        const [indexed, processing, failed, total] = await this.prisma.$transaction([
-            this.prisma.document.count({ where: { agent: { workspaceId }, status: DocumentStatus.INDEXED } }),
-            this.prisma.document.count({ where: { agent: { workspaceId }, status: DocumentStatus.PROCESSING } }),
-            this.prisma.document.count({ where: { agent: { workspaceId }, status: DocumentStatus.FAILED } }),
-            this.prisma.document.count({ where: { agent: { workspaceId } } }),
-        ]);
-        return { indexed, processing, failed, total };
+        const grouped = await this.prisma.document.groupBy({
+            by: ['status'],
+            where: { agent: { workspaceId } },
+            _count: { _all: true },
+        });
+
+        return grouped.reduce(
+            (acc, row) => {
+                acc.total += row._count._all;
+                if (row.status === DocumentStatus.INDEXED) acc.indexed = row._count._all;
+                if (row.status === DocumentStatus.PROCESSING) acc.processing = row._count._all;
+                if (row.status === DocumentStatus.FAILED) acc.failed = row._count._all;
+                return acc;
+            },
+            { indexed: 0, processing: 0, failed: 0, total: 0 },
+        );
     }
 
     private async getConversationStats(workspaceId: string, since24h: Date, since30d: Date) {
@@ -109,12 +123,12 @@ export class WorkspaceStatsService {
             ...docs.map((d) => ({
                 type: 'document_upload' as const,
                 title: d.name,
-                subtitle: `${d.agent.name} · ${this.formatDocStatus(d.status)}`,
+                subtitle: `${d.agent.name} - ${this.formatDocStatus(d.status)}`,
                 createdAt: d.createdAt.toISOString(),
             })),
             ...deployments.map((d) => ({
                 type: 'deployment' as const,
-                title: `Promotion en production · v${d.version}`,
+                title: `Promotion en production - v${d.version}`,
                 subtitle: d.agent.name,
                 createdAt: d.createdAt.toISOString(),
             })),

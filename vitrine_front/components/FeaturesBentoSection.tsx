@@ -531,7 +531,7 @@ export function FeaturesBentoSection({
                                     padding: '6px 8px',
                                 }}
                             >
-                                Source: Accord d&apos;entreprise · Temps de travail
+                                Source: Accord d&apos;entreprise - Temps de travail
                             </div>
 
                             <div

@@ -7,7 +7,6 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 
 const mockRepository: any = {
     getBalance: jest.fn(),
-    incrementBalance: jest.fn(),
     incrementOrCreate: jest.fn(),
 };
 
@@ -47,24 +46,6 @@ describe('CreditBalanceService', () => {
             const result = await service.getBalance('ws-1');
 
             expect(result).toBe(0);
-        });
-    });
-
-    describe('add', () => {
-        it('should add credits via repository', async () => {
-            mockRepository.incrementBalance.mockResolvedValue(undefined);
-
-            await service.add({ workspaceId: 'ws-1', amount: 100 });
-
-            expect(mockRepository.incrementBalance).toHaveBeenCalledWith('ws-1', 100);
-        });
-
-        it('should handle various amounts', async () => {
-            mockRepository.incrementBalance.mockResolvedValue(undefined);
-
-            await service.add({ workspaceId: 'ws-1', amount: 5000 });
-
-            expect(mockRepository.incrementBalance).toHaveBeenCalledWith('ws-1', 5000);
         });
     });
 

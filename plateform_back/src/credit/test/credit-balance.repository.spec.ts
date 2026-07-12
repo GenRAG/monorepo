@@ -7,7 +7,6 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 const mockPrismaService: any = {
     creditBalance: {
         findUnique: jest.fn(),
-        update: jest.fn(),
         upsert: jest.fn(),
     },
     creditTransaction: {
@@ -44,19 +43,6 @@ describe('CreditBalanceRepository', () => {
             const result = await repository.getBalance('ws-1');
 
             expect(result).toBe(0);
-        });
-    });
-
-    describe('incrementBalance', () => {
-        it('should increment balance', async () => {
-            mockPrismaService.creditBalance.update.mockResolvedValue({ balance: 150 });
-
-            await repository.incrementBalance('ws-1', 50);
-
-            expect(mockPrismaService.creditBalance.update).toHaveBeenCalledWith({
-                where: { workspaceId: 'ws-1' },
-                data: { balance: { increment: 50 } },
-            });
         });
     });
 

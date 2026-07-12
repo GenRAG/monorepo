@@ -71,7 +71,7 @@ export class ConversationService {
             result.push({
                 id: msg.id,
                 question: msg.content,
-                response: agentMsg?.content ?? "",
+                response: agentMsg?.content ?? '',
                 timestamp: msg.createdAt.getTime(),
             });
         }

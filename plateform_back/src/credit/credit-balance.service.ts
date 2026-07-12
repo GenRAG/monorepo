@@ -27,10 +27,6 @@ export class CreditBalanceService {
         return { balance, totalGranted };
     }
 
-    async add({ workspaceId, amount }: UpdateCreditBalance): Promise<void> {
-        await this.creditBalanceRepository.incrementBalance(workspaceId, amount);
-    }
-
     async grantInitial(
         { workspaceId, amount }: UpdateCreditBalance,
         type: CreditTransactionType = CreditTransactionType.SUBSCRIPTION,

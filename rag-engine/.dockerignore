@@ -1,0 +1,57 @@
+# --- Security & Secrets ---
+.env
+.env.*
+*.pem
+*.key
+
+# --- Heavy Data & Databases ---
+qdrant_data/
+qdrant_storage/
+qdrant_snapshots/
+minio_data/
+minio_config/
+data/
+logs
+
+# --- Python & Environment Garbage ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.venv
+pip-log.txt
+uv.lock
+
+# --- System & IDE Files ---
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Test Files ---
+.coverage
+.pytest_cache/
+tests/
+test_*.py
+*_test.py
+
+# --- Documentation ---
+# !README.md
+# Removed README.md from ignore list so it can be copied into Docker image
+docs/
+
+# --- Docker Files ---
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# --- Build Artifacts ---
+build/
+dist/
+*.egg-info/

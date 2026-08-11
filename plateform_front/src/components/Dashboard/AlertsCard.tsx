@@ -1,8 +1,9 @@
-import { Badge, Box, HStack, Icon, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Badge, Box, Card, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { AlertCircle, AlertTriangle, Bell, CheckCircle, Info } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ALERTS, type AlertEntry } from "pages/Dashboard/data";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
+import CardHeader from "components/ui/CardHeader";
 
 const SEVERITY_ICON: Record<AlertEntry["severity"], LucideIcon> = {
     error: AlertCircle,
@@ -11,16 +12,12 @@ const SEVERITY_ICON: Record<AlertEntry["severity"], LucideIcon> = {
 };
 
 const AlertItem = ({ alert }: { alert: AlertEntry }) => {
-    const divider = useColorModeValue("grey.100", "grey.800");
-    const titleCol = useColorModeValue("grey.900", "grey.100");
-    const metaCol = useColorModeValue("grey.500", "grey.400");
-
     return (
         <HStack
             spacing={3}
             p={3}
             borderBottom="1px solid"
-            borderColor={divider}
+            borderColor="borderDefault"
             _last={{ borderBottom: "none" }}
             align="start"
         >
@@ -36,13 +33,13 @@ const AlertItem = ({ alert }: { alert: AlertEntry }) => {
                 <Icon as={SEVERITY_ICON[alert.severity]} boxSize={3} color="white" />
             </Box>
             <VStack align="start" spacing={0.5} flex={1} minW={0}>
-                <Text fontSize="13px" fontWeight="600" color={titleCol} noOfLines={1}>
+                <Text variant="body-sm-semibold" fontSize="13px" noOfLines={1}>
                     {alert.title}
                 </Text>
-                <Text fontSize="11px" color={metaCol} noOfLines={1}>
+                <Text variant="body-xs-muted" fontSize="11px" noOfLines={1}>
                     {alert.description}
                 </Text>
-                <Text fontSize="11px" color={metaCol}>
+                <Text variant="body-xs-muted" fontSize="11px">
                     {alert.time} - {alert.source}
                 </Text>
             </VStack>
@@ -56,32 +53,19 @@ interface AlertsCardProps {
 }
 
 export const AlertsCard = ({ isEmpty = false, isLoading = false }: AlertsCardProps) => {
-    const cardBg = useColorModeValue("white", "grey.850");
-    const border = useColorModeValue("grey.100", "grey.800");
-    const textPrimary = useColorModeValue("grey.900", "grey.50");
-    const textSecondary = useColorModeValue("grey.500", "grey.400");
-    const skeletonStart = useColorModeValue("grey.100", "grey.800");
-    const skeletonEnd = useColorModeValue("grey.200", "grey.700");
-    const skeletonProps = { startColor: skeletonStart, endColor: skeletonEnd };
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     const activeCount = ALERTS.filter((a) => a.severity === "error").length;
 
     if (isLoading) {
         return (
-            <Box
-                bg={cardBg}
-                border="1px solid"
-                borderColor={border}
-                borderRadius="12px"
-                display="flex"
-                flexDirection="column"
-            >
-                <HStack justify="space-between" borderBottom="1px solid" borderColor={border} p={4}>
+            <Card size="none" display="flex" flexDirection="column">
+                <CardHeader>
                     <HStack spacing={2}>
                         <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
                         <Skeleton {...skeletonProps} h="14px" w="50px" borderRadius="4px" />
                     </HStack>
-                </HStack>
+                </CardHeader>
                 <VStack spacing={0} align="stretch">
                     {[...Array(3)].map((_, i) => (
                         <HStack
@@ -89,7 +73,7 @@ export const AlertsCard = ({ isEmpty = false, isLoading = false }: AlertsCardPro
                             spacing={3}
                             p={3}
                             borderBottom="1px solid"
-                            borderColor={border}
+                            borderColor="borderDefault"
                             _last={{ borderBottom: "none" }}
                             align="start"
                         >
@@ -102,25 +86,16 @@ export const AlertsCard = ({ isEmpty = false, isLoading = false }: AlertsCardPro
                         </HStack>
                     ))}
                 </VStack>
-            </Box>
+            </Card>
         );
     }
 
     return (
-        <Box
-            bg={cardBg}
-            border="1px solid"
-            borderColor={border}
-            borderRadius="12px"
-            display="flex"
-            flexDirection="column"
-        >
-            <HStack justify="space-between" borderBottom="1px solid" borderColor={border} p={4}>
+        <Card size="none" display="flex" flexDirection="column">
+            <CardHeader>
                 <HStack spacing={2}>
-                    <Icon as={Bell} boxSize={3.5} color={textSecondary} />
-                    <Text fontSize="sm" fontWeight="600" color={textPrimary}>
-                        Alertes
-                    </Text>
+                    <Icon as={Bell} boxSize={3.5} color="textLabel" />
+                    <Text variant="body-sm-semibold">Alertes</Text>
                     {!isEmpty && activeCount > 0 && (
                         <Badge
                             bg="orange.500"
@@ -147,7 +122,7 @@ export const AlertsCard = ({ isEmpty = false, isLoading = false }: AlertsCardPro
                         Tout voir
                     </Text>
                 )}
-            </HStack>
+            </CardHeader>
             {isEmpty ? (
                 <CardEmptyState
                     icon={CheckCircle}
@@ -162,6 +137,6 @@ export const AlertsCard = ({ isEmpty = false, isLoading = false }: AlertsCardPro
                     ))}
                 </VStack>
             )}
-        </Box>
+        </Card>
     );
 };

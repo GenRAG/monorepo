@@ -1,36 +1,23 @@
 import { cardAnatomy } from "@chakra-ui/anatomy";
-import { CardProps } from "@chakra-ui/react";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
-
-import colors from "themeNew/foundations/colors";
-
-type PortfolioType = keyof typeof colors.gradients;
 
 const { defineMultiStyleConfig } = createMultiStyleConfigHelpers(cardAnatomy.keys);
 
-const cardColors = {
-    base: {
-        borderColor: colors.grey[50],
-        backgroundColor: colors.whites.white,
-    },
-    gold: {
-        borderColor: colors.gold[100],
-        backgroundColor: colors.gold[50],
-    },
-};
-
-type CardColorScheme = keyof typeof cardColors;
-
+// Reflète le pattern déjà utilisé partout dans l'app (Dashboard/MetricCard,
+// Dashboard/AgentsCard, Dashboard/RecentActivityCard...) plutôt que les anciennes
+// variantes "gold"/"portfolio", qui n'avaient aucun usage réel et n'avaient jamais
+// été adaptées au dark mode.
 const Card = defineMultiStyleConfig({
-    baseStyle: (props: CardProps) => ({
+    baseStyle: {
         container: {
-            boxShadow: "none",
-            borderRadius: "8px",
+            bg: "surfaceCard",
+            borderColor: "borderDefault",
             borderWidth: "1px",
+            borderRadius: "12px",
+            boxShadow: "none",
             position: "relative",
-            ...cardColors[(props.colorScheme as CardColorScheme) ?? "base"],
         },
-    }),
+    },
 
     sizes: {
         none: {
@@ -56,22 +43,14 @@ const Card = defineMultiStyleConfig({
     },
 
     variants: {
-        // @ts-ignore ts(2322)
-        portfolio: ({ type }: { type: PortfolioType }) => ({
-            container: {
-                bgGradient: colors.gradients[type],
-                borderColor: "transparent",
-                _hover: {
-                    cursor: "pointer",
-                    borderColor: colors.grey[200],
-                },
-            },
-        }),
         clickable: {
             container: {
                 cursor: "pointer",
+                transition: "border-color 0.15s, transform 0.15s, box-shadow 0.15s",
                 _hover: {
-                    borderColor: colors.grey[200],
+                    borderColor: "borderStrong",
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 },
             },
         },

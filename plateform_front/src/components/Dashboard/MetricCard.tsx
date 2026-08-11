@@ -1,4 +1,4 @@
-import { Box, HStack, Icon, Skeleton, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Card, HStack, Icon, Skeleton, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Line } from "react-chartjs-2";
@@ -36,7 +36,6 @@ export const MetricCard = ({
     sparkColor,
     isLoading = false,
 }: MetricCardProps) => {
-    const valueCol = useColorModeValue("grey.900", "grey.50");
     const trendGreen = useColorModeValue("green.600", "green.400");
     const trendOrange = useColorModeValue("orange.500", "orange.300");
     const trendRed = useColorModeValue("red.500", "red.400");
@@ -46,17 +45,7 @@ export const MetricCard = ({
 
     if (isLoading) {
         return (
-            <Box
-                bg="surfaceCard"
-                border="1px solid"
-                borderColor="borderDefault"
-                borderRadius="12px"
-                overflow="hidden"
-                display="flex"
-                flexDirection="column"
-                gap={3}
-                minH="140px"
-            >
+            <Card size="none" overflow="hidden" display="flex" flexDirection="column" gap={3} minH="140px">
                 <Stack p={4} spacing={2}>
                     <Skeleton {...skeletonProps} h="10px" w="110px" borderRadius="4px" />
                     <Skeleton {...skeletonProps} p={4} h="28px" w="80px" borderRadius="6px" />
@@ -65,29 +54,18 @@ export const MetricCard = ({
                 <Box mt="auto" mx={-4}>
                     <Skeleton {...skeletonProps} h="70px" w="100%" borderRadius="0" />
                 </Box>
-            </Box>
+            </Card>
         );
     }
 
     return (
-        <Box
-            bg="surfaceCard"
-            border="1px solid"
-            borderColor="borderDefault"
-            borderRadius="12px"
-            p={4}
-            display="flex"
-            flexDirection="column"
-            gap={2}
-        >
+        <Card size="none" p={4} display="flex" flexDirection="column" gap={2}>
             <HStack spacing={1.5}>
                 <Icon as={icon} boxSize={3} color="textLabel" />
-                <Text fontSize="sm" color="textLabel">
-                    {label}
-                </Text>
+                <Text variant="body-sm-muted">{label}</Text>
             </HStack>
 
-            <Text fontSize="3xl" fontWeight="700" color={valueCol}>
+            <Text fontSize="3xl" fontWeight="700" color="textPrimary">
                 {value}
             </Text>
 
@@ -139,6 +117,6 @@ export const MetricCard = ({
                     />
                 </Box>
             </Box>
-        </Box>
+        </Card>
     );
 };

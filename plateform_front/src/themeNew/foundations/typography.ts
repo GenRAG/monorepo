@@ -183,6 +183,20 @@ const body = {
         fontSize: { base: "14px", xl: "14px" },
         lineHeight: "20px",
     },
+
+    // Variantes "muted" : même taille que leur équivalent ci-dessus, mais couleur
+    // textLabel intégrée — pour ne plus repasser `color="textLabel"` (ou pire, un
+    // useColorModeValue("grey.500","grey.400") brut) à chaque usage.
+    "body-sm-muted": {
+        ...baseTextStyle,
+        fontSize: { base: "14px", xl: "14px" },
+        color: "textLabel",
+    },
+    "body-xs-muted": {
+        ...baseTextStyle,
+        fontSize: { base: "12px", xl: "12px" },
+        color: "textLabel",
+    },
 } satisfies Record<string, TextProps & HeadingProps>;
 
 const caption = {
@@ -227,6 +241,14 @@ const caption = {
         fontWeight: "semibold",
         letterSpacing: "1px",
         textTransform: "uppercase",
+    },
+    "caption-xs-muted": {
+        ...baseTextStyle,
+        fontSize: { base: "10px", xl: "10px" },
+        fontWeight: "normal",
+        letterSpacing: "1px",
+        textTransform: "uppercase",
+        color: "textLabel",
     },
 } satisfies Record<string, TextProps & HeadingProps>;
 

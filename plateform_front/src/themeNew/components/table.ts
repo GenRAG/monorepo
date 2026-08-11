@@ -8,7 +8,6 @@ const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpe
 
 const simple = definePartsStyle({
     tr: {
-        //borderBottom: "1px solid",
         borderColor: "transparent",
         _last: {
             borderBottom: "none",
@@ -17,7 +16,6 @@ const simple = definePartsStyle({
     th: {
         px: 4,
         borderColor: "transparent",
-        //borderBottom: "1px solid",
         "&[data-is-numeric=true]": {
             textAlign: "end",
         },
@@ -25,7 +23,6 @@ const simple = definePartsStyle({
     td: {
         px: 4,
         borderColor: "transparent",
-        //borderBottom: "1px solid",
         "&[data-is-numeric=true]": {
             textAlign: "end",
         },
@@ -44,12 +41,10 @@ const simple = definePartsStyle({
                 borderColor: "grey.100",
                 color: "grey.900",
             },
-            //borderBottom: "2px solid",
         },
     },
     tbody: {
         tr: {
-            //borderBottom: "1px solid",
             borderBottomColor: "transparent",
             _last: {
                 borderBottom: "none",
@@ -62,7 +57,6 @@ const simple = definePartsStyle({
             px: 4,
             py: 3,
             borderColor: "transparent",
-            //borderBottom: "1px solid",
         },
     },
 });

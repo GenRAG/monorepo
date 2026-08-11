@@ -1,5 +1,3 @@
-import { currentDarkTheme } from "./themeConfig";
-
 const colorTokens = {
     // === INPUTS ===
     inputText: { default: "grey.900", _dark: "grey.100" },
@@ -39,10 +37,6 @@ const colorTokens = {
     // === ACCENTS ===
     accentCardBg: { default: "green.50", _dark: "grey.850" }, // Carte sélectionnée/active
     accentIconBg: { default: "green.100", _dark: "grey.800" }, // Fond icône accent
-
-    darkAccent: { default: "grey.500", _dark: currentDarkTheme.primary },
-    darkAccent500: { default: "grey.500", _dark: currentDarkTheme.primary500 },
-    darkAccent900: { default: "grey.500", _dark: currentDarkTheme.primary900 },
 
     backgroundDefault: { default: "white", _dark: "grey.900" },
     secondBackgroundDefault: { default: "grey.25", _dark: "grey.950" },

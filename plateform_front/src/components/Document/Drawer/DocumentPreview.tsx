@@ -121,7 +121,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, prev
 
                 {!isLoading && (!previewUrl || isError) && (
                     <VStack h="100%" justify="center" align="center" spacing={3}>
-                        <Box as={File} fontSize="48px" color="gray.400" />
+                        <Box as={File} fontSize="48px" color="grey.400" />
                         <Text fontSize="sm" color="textMuted">
                             Aperçu non disponible
                         </Text>

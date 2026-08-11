@@ -38,7 +38,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                             Type
                         </Text>
                         <HStack spacing={2}>
-                            <BoxIcon icon={File} size="sm" color="gray.400" />
+                            <BoxIcon icon={File} size="sm" color="grey.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {getFileTypeLabel(document.mimeType)}
                             </Text>
@@ -56,7 +56,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                             Taille
                         </Text>
                         <HStack spacing={2}>
-                            <BoxIcon icon={Database} size="sm" color="gray.400" />
+                            <BoxIcon icon={Database} size="sm" color="grey.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatFileSize(document.size)}
                             </Text>
@@ -76,7 +76,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                             Téléversé
                         </Text>
                         <HStack spacing={2}>
-                            <BoxIcon icon={Clock} size="sm" color="gray.400" />
+                            <BoxIcon icon={Clock} size="sm" color="grey.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatDateTime(document.createdAt)}
                             </Text>
@@ -95,7 +95,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                                 Indexé
                             </Text>
                             <HStack spacing={2}>
-                                <BoxIcon icon={Clock} size="sm" color="gray.400" />
+                                <BoxIcon icon={Clock} size="sm" color="grey.400" />
                                 <Text fontSize="13px" fontWeight="medium">
                                     {formatDateTime(document.indexedAt)}
                                 </Text>

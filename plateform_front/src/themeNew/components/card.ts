@@ -54,6 +54,24 @@ const Card = defineMultiStyleConfig({
                 },
             },
         },
+        // Pour deux cards empilées visuellement comme un seul bloc (ex: PlanCard +
+        // ConsumptionCard dans Billing) : la pièce du haut perd sa bordure/radius bas,
+        // celle du bas perd sa bordure/radius haut. Fond légèrement plus "recessed"
+        // (surfacePrimary) que le fond de card standard, pour ce panneau composite.
+        attachedTop: {
+            container: {
+                bg: "surfacePrimary",
+                borderBottomWidth: "0",
+                borderBottomRadius: "0",
+            },
+        },
+        attachedBottom: {
+            container: {
+                bg: "surfacePrimary",
+                borderTopWidth: "0",
+                borderTopRadius: "0",
+            },
+        },
     },
 
     defaultProps: {

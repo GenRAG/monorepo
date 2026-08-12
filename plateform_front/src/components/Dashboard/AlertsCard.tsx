@@ -33,13 +33,13 @@ const AlertItem = ({ alert }: { alert: AlertEntry }) => {
                 <Icon as={SEVERITY_ICON[alert.severity]} boxSize={3} color="white" />
             </Box>
             <VStack align="start" spacing={0.5} flex={1} minW={0}>
-                <Text variant="body-sm-semibold" fontSize="13px" noOfLines={1}>
+                <Text variant="body-sm-semibold" noOfLines={1}>
                     {alert.title}
                 </Text>
-                <Text variant="body-xs-muted" fontSize="11px" noOfLines={1}>
+                <Text variant="body-2xs-muted" noOfLines={1}>
                     {alert.description}
                 </Text>
-                <Text variant="body-xs-muted" fontSize="11px">
+                <Text variant="body-2xs-muted">
                     {alert.time} - {alert.source}
                 </Text>
             </VStack>

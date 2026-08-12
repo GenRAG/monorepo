@@ -15,6 +15,10 @@ const colorTokens = {
     textSubtle: { default: "grey.300", _dark: "grey.500" }, // Très atténué, sous-descriptions
 
     // === SURFACES ===
+    // Fond de la coquille applicative (App.tsx, WorkspaceHeader, pages plein écran type
+    // Deployment/Settings/AccessControl). Distinct de surfacePrimary : un cran plus sombre
+    // en dark (grey.975 vs grey.950), c'est la valeur réellement utilisée à la racine de l'app.
+    surfaceAppShell: { default: "white", _dark: "grey.975" },
     surfacePrimary: { default: "white", _dark: "grey.950" }, // Page principale
     surfaceCard: { default: "white", _dark: "grey.850" }, // Cartes
     surfaceModal: { default: "white", _dark: "grey.900" }, // Modales

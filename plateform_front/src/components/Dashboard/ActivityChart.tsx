@@ -9,7 +9,7 @@ import {
     type ChartOptions,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { Box, HStack, Skeleton, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, Card, HStack, Skeleton, VStack } from "@chakra-ui/react";
 import { BarChart2 } from "lucide-react";
 import { useState } from "react";
 import { type Period } from "pages/Dashboard/data";
@@ -18,6 +18,7 @@ import { ActivityHeader } from "components/Dashboard/ActivityChart/ActivityHeade
 import { ActivityLegend } from "components/Dashboard/ActivityChart/ActivityLegend";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { WorkspaceStats } from "types/workspace";
+import { useIsDark } from "hooks/useIsDark";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip);
 
@@ -36,14 +37,9 @@ export const ActivityChart = ({
     isEmpty = false,
     isLoading = false,
 }: ActivityChartProps) => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
+    const isDark = useIsDark();
 
-    const cardBg = useColorModeValue("white", "grey.850");
-    const border = useColorModeValue("grey.100", "grey.800");
-    const skeletonStart = useColorModeValue("grey.100", "grey.800");
-    const skeletonEnd = useColorModeValue("grey.200", "grey.700");
-    const skeletonProps = { startColor: skeletonStart, endColor: skeletonEnd };
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     const [period, setPeriod] = useState<Period>("7j");
 
@@ -107,7 +103,7 @@ export const ActivityChart = ({
 
     if (isLoading) {
         return (
-            <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" overflow="hidden">
+            <Card size="none" overflow="hidden">
                 <HStack justify="space-between" p={4}>
                     <HStack spacing={2}>
                         <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
@@ -133,12 +129,12 @@ export const ActivityChart = ({
                     <Skeleton {...skeletonProps} h="12px" w="80px" borderRadius="4px" />
                     <Skeleton {...skeletonProps} h="12px" w="60px" borderRadius="4px" />
                 </HStack>
-            </Box>
+            </Card>
         );
     }
 
     return (
-        <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" overflow="hidden" minW={0}>
+        <Card size="none" overflow="hidden" minW={0}>
             <ActivityHeader period={period} setPeriod={setPeriod} />
 
             {isEmpty ? (
@@ -158,6 +154,6 @@ export const ActivityChart = ({
                     <ActivityLegend />
                 </>
             )}
-        </Box>
+        </Card>
     );
 };

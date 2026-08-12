@@ -1,4 +1,4 @@
-import { Box, Skeleton, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Box, Skeleton, VStack } from "@chakra-ui/react";
 //import DistributionSection from "components/Deployment/DashboardTab/DistributionSection";
 import HeaderCard from "components/Deployment/DashboardTab/HeaderCard/HeaderCard";
 //import HealthSection from "components/Deployment/DashboardTab/HealthSection";
@@ -17,14 +17,12 @@ export const DashboardTab = () => {
         agentId,
     });
 
-    const bgColor = useColorModeValue("white", "grey.975");
-
     if (isLoading || !data) {
         return <Skeleton m={6} height="200px" width="100%" borderRadius="12px" mb={6} />;
     }
 
     return (
-        <Box flex={1} overflowY="auto" p={6} bg={bgColor}>
+        <Box flex={1} overflowY="auto" p={6} bg="surfaceAppShell">
             <VStack spacing={5} align="stretch">
                 <HeaderCard data={data} isLoading={isLoading} />
                 {data.deploymentStatus === AgentStatus.PRODUCTION && (

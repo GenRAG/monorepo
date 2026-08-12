@@ -1,4 +1,4 @@
-import { Grid, Heading, Skeleton, Stack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Grid, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { BookOpen, Plus, Bot, FileText, MessageSquare, Coins } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "hooks/useUserInfo";
@@ -25,11 +25,7 @@ const Dashboard = () => {
     const { workspaceId = "" } = useParams<{ workspaceId: string }>();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-    const textPrimary = useColorModeValue("grey.900", "grey.50");
-    const textSecondary = useColorModeValue("grey.500", "grey.400");
-    const skeletonStart = useColorModeValue("grey.100", "grey.800");
-    const skeletonEnd = useColorModeValue("grey.200", "grey.700");
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     const { data: stats, isLoading: isStatsLoading } = useGetWorkspaceStatsQuery(workspaceId, { skip: !workspaceId });
 
@@ -48,7 +44,7 @@ const Dashboard = () => {
                 gap={3}
             >
                 <VStack align="start" spacing={1}>
-                    <Heading variant="heading-md" color="grey.400" fontWeight="md" fontSize={{ base: "sm", md: "md" }}>
+                    <Heading variant="heading-md" color="textLabel" fontWeight="md" fontSize={{ base: "sm", md: "md" }}>
                         {new Date().toLocaleDateString("fr-FR", {
                             weekday: "long",
                             year: "numeric",
@@ -58,25 +54,18 @@ const Dashboard = () => {
                     </Heading>
                     <Heading
                         variant="heading-3xl"
-                        color={textPrimary}
+                        color="textPrimary"
                         fontWeight="semibold"
                         fontSize={{ base: "xl", md: "3xl" }}
                     >
                         Bonjour {name}
                     </Heading>
                     {stats ? (
-                        <Text fontSize="sm" color={textSecondary}>
+                        <Text variant="body-sm-muted">
                             {`${stats.agents.total} agent${stats.agents.total > 1 ? "s" : ""} / ${stats.agents.production} en production / ${stats.documents.indexed} document${stats.documents.indexed > 1 ? "s" : ""} indexé${stats.documents.indexed > 1 ? "s" : ""}`}
                         </Text>
                     ) : (
-                        <Skeleton
-                            height="17px"
-                            width="320px"
-                            maxW="80vw"
-                            borderRadius="4px"
-                            startColor={skeletonStart}
-                            endColor={skeletonEnd}
-                        />
+                        <Skeleton height="17px" width="320px" maxW="80vw" borderRadius="4px" {...skeletonProps} />
                     )}
                 </VStack>
             </Stack>

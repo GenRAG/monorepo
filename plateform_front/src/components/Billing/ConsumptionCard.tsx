@@ -1,21 +1,12 @@
 import React, { useState, useMemo } from "react";
-import {
-    Box,
-    HStack,
-    Stack,
-    Text,
-    Tooltip as ChakraTooltip,
-    useColorMode,
-    useToken,
-    useColorModeValue,
-    Skeleton,
-} from "@chakra-ui/react";
+import { Box, Card, HStack, Stack, Text, Tooltip as ChakraTooltip, useToken, Skeleton } from "@chakra-ui/react";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, type Plugin } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useGetWorkspaceConsumptionQuery } from "services/credit/credit";
 import { useParams } from "react-router-dom";
+import { useIsDark } from "hooks/useIsDark";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
@@ -63,12 +54,9 @@ const getChartLabels = (period: Period): string[] => {
 };
 
 const ConsumptionCard: React.FC = () => {
-    const { colorMode } = useColorMode();
+    const isDark = useIsDark();
     const { workspaceId } = useParams();
-    const isDark = colorMode === "dark";
     const [period, setPeriod] = useState<Period>("30j");
-    const sub = useColorModeValue("grey.500", "grey.400");
-    const border = useColorModeValue("grey.100", "grey.700");
     const [subColor] = useToken("colors", [isDark ? "grey.400" : "grey.500"]);
 
     const backgroundBarsPlugin = useMemo(() => makeBackgroundBarsPlugin(isDark), [isDark]);
@@ -120,20 +108,10 @@ const ConsumptionCard: React.FC = () => {
     };
 
     return (
-        <Box
-            bg={isDark ? "grey.950" : "white"}
-            border="1px solid"
-            borderTop="none"
-            borderColor={border}
-            borderRadius="12px"
-            borderTopRadius="none"
-            h="100%"
-            display="flex"
-            flexDirection="column"
-        >
+        <Card size="none" variant="attachedBottom" h="100%" display="flex" flexDirection="column">
             <Stack p={{ base: 3, md: 4 }} spacing={0} flex={1} minH={0} display="flex" flexDirection="column">
                 <HStack justify="space-between" flexWrap="wrap" gap={0} flexShrink={0}>
-                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="textPrimary">
                         Consommation
                     </Text>
                     <MultiOptionButtons
@@ -143,7 +121,7 @@ const ConsumptionCard: React.FC = () => {
                     />
                 </HStack>
 
-                <Text fontSize="xs" color={sub} mb={3} flexShrink={0}>
+                <Text variant="body-xs-muted" mb={3} flexShrink={0}>
                     {period === "7j"
                         ? "7 derniers jours"
                         : period === "30j"
@@ -163,15 +141,15 @@ const ConsumptionCard: React.FC = () => {
                 </Box>
             </Stack>
 
-            <Box borderTop="1px solid" borderColor={border} p={{ base: 4, md: 5 }} flexShrink={0}>
-                <Text fontSize="12px" color={sub} mb={3}>
+            <Box borderTop="1px solid" borderColor="borderDefault" p={{ base: 4, md: 5 }} flexShrink={0}>
+                <Text variant="body-xs-muted" mb={3}>
                     PAR AGENT
                 </Text>
 
                 {isLoading ? (
                     <Skeleton h="10px" borderRadius="full" mb={3} />
                 ) : byAgent.length === 0 ? (
-                    <Text fontSize="xs" color={sub} mb={3}>
+                    <Text variant="body-xs-muted" mb={3}>
                         Aucune consommation sur cette période.
                     </Text>
                 ) : (
@@ -207,7 +185,7 @@ const ConsumptionCard: React.FC = () => {
                                         bg={AGENT_COLORS[i % AGENT_COLORS.length]}
                                         flexShrink={0}
                                     />
-                                    <Text fontSize="10px" color={sub}>
+                                    <Text fontSize="10px" color="textLabel">
                                         {a.agentName} - {a.creditsUsed}
                                     </Text>
                                 </HStack>
@@ -216,7 +194,7 @@ const ConsumptionCard: React.FC = () => {
                     </>
                 )}
             </Box>
-        </Box>
+        </Card>
     );
 };
 

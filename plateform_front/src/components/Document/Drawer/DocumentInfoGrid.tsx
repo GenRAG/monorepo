@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack, Box, Grid, GridItem, Text, HStack, useColorModeValue } from "@chakra-ui/react";
+import { VStack, Card, Grid, GridItem, Text, HStack } from "@chakra-ui/react";
 import { File, Clock, Database } from "lucide-react";
 import { DocumentEntity } from "types/document/document";
 import { formatFileSize, formatDateTime, getFileTypeLabel } from "utils/documentFormatters";
@@ -10,34 +10,15 @@ interface DocumentInfoGridProps {
 }
 
 export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) => {
-    const bgColor = useColorModeValue("white", "grey.900");
-
     return (
         <VStack align="stretch" spacing={2}>
-            <Text
-                fontWeight="medium"
-                fontSize="11px"
-                color="textPrimary"
-                letterSpacing="0.08em"
-                textTransform="uppercase"
-            >
-                Informations du document
-            </Text>
+            <Text variant="caption-md">Informations du document</Text>
 
-            <Box bg={bgColor} border="0.5px solid" borderColor="borderDefault" borderRadius="12px" overflow="hidden">
+            <Card size="none" bg="surfaceModal" borderWidth="0.5px" overflow="hidden">
                 <Grid templateColumns="1fr 1fr" borderBottom="0.5px solid" borderColor="borderDefault">
                     <GridItem p={4} borderRight="0.5px solid" borderColor="borderDefault">
-                        <Text
-                            fontSize="11px"
-                            color="textMuted"
-                            fontWeight="medium"
-                            textTransform="uppercase"
-                            letterSpacing="0.04em"
-                            mb={1}
-                        >
-                            Type
-                        </Text>
-                        <HStack spacing={2}>
+                        <Text variant="body-xs-muted">Type</Text>
+                        <HStack spacing={2} mt={2}>
                             <BoxIcon icon={File} size="sm" color="grey.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {getFileTypeLabel(document.mimeType)}
@@ -45,17 +26,8 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                         </HStack>
                     </GridItem>
                     <GridItem p={4}>
-                        <Text
-                            fontSize="11px"
-                            color="textMuted"
-                            fontWeight="medium"
-                            textTransform="uppercase"
-                            letterSpacing="0.04em"
-                            mb={1}
-                        >
-                            Taille
-                        </Text>
-                        <HStack spacing={2}>
+                        <Text variant="body-xs-muted">Taille</Text>
+                        <HStack spacing={2} mt={2}>
                             <BoxIcon icon={Database} size="sm" color="grey.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatFileSize(document.size)}
@@ -65,17 +37,8 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                 </Grid>
                 <Grid templateColumns="1fr 1fr" borderBottom="0.5px solid" borderColor="borderDefault">
                     <GridItem p={4} borderRight="0.5px solid" borderColor="borderDefault">
-                        <Text
-                            fontSize="11px"
-                            color="textMuted"
-                            fontWeight="medium"
-                            textTransform="uppercase"
-                            letterSpacing="0.04em"
-                            mb={1}
-                        >
-                            Téléversé
-                        </Text>
-                        <HStack spacing={2}>
+                        <Text variant="body-xs-muted">Téléversé</Text>
+                        <HStack spacing={2} mt={2}>
                             <BoxIcon icon={Clock} size="sm" color="grey.400" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatDateTime(document.createdAt)}
@@ -84,17 +47,8 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                     </GridItem>
                     {document.indexedAt && (
                         <GridItem p={4}>
-                            <Text
-                                fontSize="11px"
-                                color="textMuted"
-                                fontWeight="medium"
-                                textTransform="uppercase"
-                                letterSpacing="0.04em"
-                                mb={1}
-                            >
-                                Indexé
-                            </Text>
-                            <HStack spacing={2}>
+                            <Text variant="body-xs-muted">Indexé</Text>
+                            <HStack spacing={2} mt={2}>
                                 <BoxIcon icon={Clock} size="sm" color="grey.400" />
                                 <Text fontSize="13px" fontWeight="medium">
                                     {formatDateTime(document.indexedAt)}
@@ -103,7 +57,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                         </GridItem>
                     )}
                 </Grid>
-            </Box>
+            </Card>
         </VStack>
     );
 };

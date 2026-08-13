@@ -10,15 +10,7 @@ interface KnowledgeBaseStatusProps {
 export const KnowledgeBaseStatus: React.FC<KnowledgeBaseStatusProps> = ({ document }) => {
     return (
         <VStack align="stretch" spacing={2}>
-            <Text
-                fontWeight="medium"
-                fontSize="11px"
-                color="textPrimary"
-                letterSpacing="0.08em"
-                textTransform="uppercase"
-            >
-                Statut de la base de connaissances
-            </Text>
+            <Text variant="caption-md">Statut de la base de connaissances</Text>
 
             {document.status === DocumentStatus.INDEXED && (
                 <Banner variant="green" title="Document indexé" mb="16px" flexShrink={0}>
@@ -34,19 +26,13 @@ export const KnowledgeBaseStatus: React.FC<KnowledgeBaseStatusProps> = ({ docume
 
             {document.status === DocumentStatus.FAILED && (
                 <Banner variant="red" title="Échec de l'indexation" mb="16px" flexShrink={0}>
-                    {document.indexError && (
-                        <Text fontSize="xs" fontFamily="mono">
-                            {document.indexError}
-                        </Text>
-                    )}
+                    {document.indexError && <Text variant="body-xs">{document.indexError}</Text>}
                 </Banner>
             )}
 
             {document.status === DocumentStatus.UPLOADED && (
                 <Box p={4} bg="grey.50" borderRadius="12px" borderLeft="4px solid" borderColor="grey.400">
-                    <Text fontSize="sm" color="grey.700">
-                        Ce document est en file d&apos;attente pour le traitement.
-                    </Text>
+                    <Text variant="body-sm">Ce document est en file d&apos;attente pour le traitement.</Text>
                 </Box>
             )}
         </VStack>

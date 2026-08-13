@@ -6,6 +6,7 @@ import { AgentStatus } from "types/deployment/deployment";
 import { Trash2 } from "lucide-react";
 import { DeleteAgentModal } from "components/Agents/DeleteAgentModal";
 import { EntityCard } from "components/ui/EntityCard";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
 interface AgentCardProps {
     agent: AgentPreview;
@@ -13,8 +14,8 @@ interface AgentCardProps {
 }
 
 const STATUS_CONFIG: Record<AgentStatus, { label: string; color: string }> = {
-    [AgentStatus.DEVELOPMENT]: { label: "Développement", color: "#F59E0B" },
-    [AgentStatus.PRODUCTION]: { label: "Production", color: "#10B981" },
+    [AgentStatus.DEVELOPMENT]: { label: "Développement", color: STATUS_COLORS.warning },
+    [AgentStatus.PRODUCTION]: { label: "Production", color: STATUS_COLORS.success },
 };
 
 export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {

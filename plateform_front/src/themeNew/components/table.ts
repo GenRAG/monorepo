@@ -30,9 +30,11 @@ const simple = definePartsStyle({
     thead: {
         th: {
             px: 4,
+            py: 2,
             ...textStyles["caption-lg"],
             letterSpacing: "0px",
             textTransform: "none",
+            fontSize: "10px",
             _dark: {
                 borderColor: "grey.800",
                 color: "grey.300",

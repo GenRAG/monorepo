@@ -1,4 +1,4 @@
-import { Box, VStack, HStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Card, VStack, HStack, Text, useColorModeValue } from "@chakra-ui/react";
 import BoxIcon from "components/ui/BoxIcon";
 import { LucideIcon } from "lucide-react";
 
@@ -10,16 +10,11 @@ interface ContactCardProps {
 }
 
 export const ContactCard = ({ icon, category, contact, description }: ContactCardProps) => {
-    const bg = useColorModeValue("grey.25", "grey.900");
-    const border = useColorModeValue("grey.100", "grey.800");
-    const categoryColor = useColorModeValue("grey.400", "grey.500");
-    const contactColor = useColorModeValue("grey.900", "grey.50");
-    const descColor = useColorModeValue("grey.500", "grey.400");
     const iconBg = useColorModeValue("green.50", "green.900");
     const iconColor = useColorModeValue("green.600", "green.400");
 
     return (
-        <Box p={4} borderRadius="10px" bg={bg} border="1px solid" borderColor={border} w="100%">
+        <Card size="none" borderRadius="10px" bg="secondBackgroundDefault" p={4} w="100%">
             <HStack spacing={3} align="start" w="100%">
                 <BoxIcon bg={iconBg} color={iconColor} icon={icon} />
                 <VStack align="start" spacing={0.5}>
@@ -28,18 +23,18 @@ export const ContactCard = ({ icon, category, contact, description }: ContactCar
                         fontWeight={700}
                         letterSpacing="0.06em"
                         textTransform="uppercase"
-                        color={categoryColor}
+                        color="textMuted"
                     >
                         {category}
                     </Text>
-                    <Text fontSize="sm" fontWeight={600} color={contactColor}>
+                    <Text fontSize="sm" fontWeight={600} color="textPrimary">
                         {contact}
                     </Text>
-                    <Text fontSize="xs" color={descColor}>
+                    <Text fontSize="xs" color="textLabel">
                         {description}
                     </Text>
                 </VStack>
             </HStack>
-        </Box>
+        </Card>
     );
 };

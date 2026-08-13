@@ -5,11 +5,11 @@ import { Upload } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
 import StepLevel from "components/ui/StepLevel";
-import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
+import useUploadDocuments, { ACCEPTED_EXTENSIONS, ACCEPTED_TYPES, Status } from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
+import UploadDropzone from "components/ui/UploadDropzone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
 import { useGetAgentDocumentStatsQuery } from "services/document/document";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
@@ -90,6 +90,11 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
         handleFileUpload(e.dataTransfer.files),
     );
 
+    const acceptedTypesString = useMemo(
+        () => [...(ACCEPTED_TYPES as readonly string[]), ...ACCEPTED_EXTENSIONS].join(","),
+        [],
+    );
+
     return (
         <chakra.form w="100%" h="100%" display="flex" flexDirection="column">
             <Stack w="100%" flex={1} minH={0} spacing={8} display="flex" flexDirection="column">
@@ -108,13 +113,16 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
                     align="start"
                 >
                     <VStack flex={1} w="100%" spacing={4} align="stretch" h="100%">
-                        <DocumentDropZone
+                        <UploadDropzone
                             isDragging={isDragging}
+                            acceptedTypesString={acceptedTypesString}
                             onFileSelect={isAtMaxFiles ? undefined : handleFileUpload}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
+                            title="Ajoute tes documents"
                             disabled={isAtMaxFiles}
+                            disabledMessage={`Limite atteinte (${MAX_FILES} fichiers max)`}
                             maxFiles={MAX_FILES}
                             currentCount={persistedIndexedCount + sessionValidCount}
                         />

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Box, Skeleton, Stack, Table, Tbody, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, Skeleton, Stack, Table, Tbody, VStack } from "@chakra-ui/react";
 import { grayScrollbar } from "themeNew/scrollbar";
 import { DocumentEntity } from "types/document/document";
 import { getFileTypeLabel } from "utils/documentFormatters";
@@ -52,9 +52,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({
     const [activeType, setActiveType] = useState<TypeFilter>(null);
     const [viewMode, setViewMode] = useState<ViewMode>("list");
 
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const tableBg = useColorModeValue("white", "grey.950");
-
     const filtered = useMemo(() => {
         return documents.filter((doc) => {
             const matchSearch = doc.name.toLowerCase().includes(search.toLowerCase());
@@ -98,10 +95,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     overflowY="auto"
                     sx={grayScrollbar}
                     border="1px solid"
-                    borderColor={borderColor}
+                    borderColor="borderDefault"
                     borderTopRadius="12px"
                     p={3}
-                    bg={tableBg}
+                    bg="surfacePrimary"
                 >
                     <Box
                         display="grid"
@@ -119,7 +116,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                                       overflow="hidden"
                                       borderWidth="1px"
                                       borderStyle="solid"
-                                      borderColor={borderColor}
+                                      borderColor="borderDefault"
                                   >
                                       <Skeleton h="140px" borderRadius={0} />
                                       <Box px={3} pt={2} pb={3}>
@@ -146,7 +143,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             ) : (
                 <Box
                     border="1px solid"
-                    borderColor={borderColor}
+                    borderColor="borderDefault"
                     borderTopRadius="12px"
                     overflow="auto"
                     flex={1}
@@ -155,9 +152,9 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     minW={0}
                     sx={grayScrollbar}
                 >
-                    <Table variant="simple" size="xs" minW="600px" borderColor={borderColor}>
+                    <Table variant="simple" size="xs" minW="600px" borderColor="borderDefault">
                         <DocumentTableHeader />
-                        <Tbody bg={tableBg}>
+                        <Tbody bg="tableBg">
                             {isLoading
                                 ? Array.from({ length: 5 }).map((_, i) => <DocumentSkeletonRow key={i} />)
                                 : filtered.map((doc) => (
@@ -173,7 +170,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                         </Tbody>
                     </Table>
                     {footer && (
-                        <Box borderTopWidth="1px" borderTopStyle="solid" borderTopColor={borderColor}>
+                        <Box borderTopWidth="1px" borderTopStyle="solid" borderTopColor="borderDefault">
                             {footer}
                         </Box>
                     )}

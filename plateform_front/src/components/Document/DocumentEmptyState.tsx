@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Box, Button, Card, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { CloudUpload, Upload } from "lucide-react";
 import BoxIcon from "components/ui/BoxIcon";
 
@@ -19,34 +19,27 @@ export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
     onUploadClick,
     isMobile = false,
 }) => {
-    const bg = useColorModeValue("white", "grey.950");
-    const textColor = useColorModeValue("grey.900", "white");
-    const mutedColor = useColorModeValue("grey.500", "grey.400");
     const badgeBg = useColorModeValue("grey.100", "grey.800");
     const badgeColor = useColorModeValue("grey.600", "grey.300");
-    const labelColor = useColorModeValue("grey.400", "grey.500");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
 
     return (
-        <VStack
-            justify="center"
-            align="center"
-            spacing={5}
-            borderRadius="12px"
-            border="1.5px dashed"
-            borderColor={borderColor}
-            bg={bg}
-            px={{ base: 6, md: 10 }}
-            py={12}
+        <Card
+            size="md"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            gap={5}
+            bg="surfacePrimary"
             textAlign="center"
         >
             <BoxIcon icon={CloudUpload} size="xl" />
 
             <VStack spacing={2} maxW="360px">
-                <Text fontSize="xl" fontWeight="700" color={textColor} lineHeight="1.2">
+                <Text fontSize="xl" fontWeight="700" color="textPrimary" lineHeight="1.2">
                     {folderId ? `Aucun document dans ${folderName ?? "ce dossier"}` : "Aucun document indexé"}
                 </Text>
-                <Text fontSize="sm" color={mutedColor} lineHeight="1.6">
+                <Text variant="body-sm-muted" lineHeight="1.6">
                     Glissez-déposez vos fichiers ici, ou téléversez-les manuellement. Votre agent utilisera ces
                     documents comme base de connaissance pour répondre aux questions.
                 </Text>
@@ -67,7 +60,7 @@ export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
                     fontWeight="700"
                     letterSpacing="0.12em"
                     textTransform="uppercase"
-                    color={labelColor}
+                    color="textMuted"
                 >
                     Formats
                 </Text>
@@ -88,6 +81,6 @@ export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
                     ))}
                 </HStack>
             </VStack>
-        </VStack>
+        </Card>
     );
 };

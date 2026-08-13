@@ -1,5 +1,5 @@
 import React from "react";
-import { HStack, Icon, Input, InputGroup, InputLeftElement, useColorModeValue } from "@chakra-ui/react";
+import { HStack, Icon, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { Search } from "lucide-react";
 import Button from "components/ui/Button";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
@@ -38,8 +38,6 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
     total,
     onOpenUpload,
 }) => {
-    const textColor = useColorModeValue("grey.700", "grey.200");
-
     return (
         <HStack flexWrap={{ base: "wrap", md: "nowrap" }} align="center" mb={4}>
             <InputGroup size="sm" maxW={{ base: "100%", md: "260px" }} flexShrink={0}>
@@ -51,7 +49,7 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
                     onChange={(e) => onSearchChange(e.target.value)}
                     placeholder={`Rechercher dans ${total} document${total > 1 ? "s" : ""}`}
                     fontSize="13px"
-                    color={textColor}
+                    color="textSecondary"
                 />
             </InputGroup>
 

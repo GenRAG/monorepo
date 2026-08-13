@@ -27,6 +27,7 @@ import {
 import { useGetModelsGenerationQuery } from "services/models/models";
 import useThemedToast from "hooks/useThemedToast";
 import mixpanel from "lib/mixpanel";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface WorkflowInnerProps {
     initialNodes?: AppNode[];
@@ -137,7 +138,6 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         }
     };
 
-    // handleSettingSelect (model selection) triggers setNodes internally → mark dirty at call site
     const handleSettingSelectWithDirty = useCallback(
         (nodeId: string, item: string) => {
             handleSettingSelect(nodeId, item);
@@ -146,7 +146,6 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         [handleSettingSelect, markDirty],
     );
 
-    // handleAddChainNode triggers setNodes internally → mark dirty at call site
     const handleAddChainNodeWithDirty = useCallback(
         (nodeType: Parameters<typeof handleAddChainNode>[0]) => {
             handleAddChainNode(nodeType);
@@ -218,25 +217,27 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                             if ((node.data as AppNodeData).isPlaceholder) return "transparent";
                             switch ((node.data as AppNodeData).type) {
                                 case TaskType.QUERY:
-                                    return "#34D3A9";
+                                    return currentDarkTheme.hex.primary;
                                 case TaskType.RESPONSE:
-                                    return "#34D3A9";
+                                    return currentDarkTheme.hex.primary;
                                 case TaskType.INSTRUCTION:
                                     return "#8b5cf6";
                                 case TaskType.MODEL:
                                     return "#8b5cf6";
                                 default:
-                                    return "#34D3A9";
+                                    return currentDarkTheme.hex.primary;
                             }
                         }}
                         nodeStrokeColor={(node) => {
                             if ((node.data as AppNodeData).isPlaceholder) return "transparent";
-                            return (node.data as AppNodeData).type === TaskType.MODEL ? "#8b5cf6" : "#34D3A9";
+                            return (node.data as AppNodeData).type === TaskType.MODEL
+                                ? "#8b5cf6"
+                                : currentDarkTheme.hex.primary;
                         }}
                         maskColor={colorMode === "dark" ? "rgba(74, 74, 75, 0)" : "rgba(240, 253, 250, 0)"}
                         style={{
                             background: colorMode === "dark" ? "rgba(74, 74, 75, 0)" : "#f0fdf450",
-                            border: `1px solid ${colorMode === "dark" ? "#353535" : "#34D3A9"}`,
+                            border: `1px solid ${colorMode === "dark" ? "#353535" : currentDarkTheme.hex.primary}`,
                             borderRadius: "12px",
                             boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
                         }}

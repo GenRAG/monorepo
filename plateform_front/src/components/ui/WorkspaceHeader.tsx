@@ -9,7 +9,7 @@ interface ChatWorkspaceHeaderProps {
 }
 
 const WorkspaceHeader = ({ title, description, actions }: ChatWorkspaceHeaderProps) => {
-    const bg = useColorModeValue("white", "grey.975");
+    const bg = useColorModeValue("white", "grey.950");
     const isMobile = useAppResponsive({ base: true, lg: false });
 
     return (
@@ -18,7 +18,7 @@ const WorkspaceHeader = ({ title, description, actions }: ChatWorkspaceHeaderPro
             p={4}
             borderBottom="1px solid"
             bg={bg}
-            borderColor="borderDivider"
+            borderColor="borderSubtle"
             flexShrink={0}
             justify="space-between"
         >

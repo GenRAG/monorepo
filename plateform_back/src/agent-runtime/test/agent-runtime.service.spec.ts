@@ -1,14 +1,19 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AgentStatus, MessageSender, QueryLogStatus } from 'generated/prisma';
+import { AgentStatus, MessageSender } from 'generated/prisma';
 import { EventEmitter } from 'events';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import type { MessageEvent } from '@nestjs/common';
 import type { Observable } from 'rxjs';
+import * as Sentry from '@sentry/nestjs';
 import { AgentRuntimeService } from 'src/agent-runtime/agent-runtime.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import { UsageTrackerService } from 'src/credit/usage-tracker.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConversationRepository } from 'src/conversation/conversation.repository';
+import { RagStreamForwarderService } from 'src/agent-runtime/rag-stream-forwarder.service';
+
+jest.mock('@sentry/nestjs');
 
 const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -30,31 +35,25 @@ function createMockStream() {
     return stream;
 }
 
-function ndjson(events: Array<{ type: string; data: unknown }>): Buffer {
-    return Buffer.from(events.map((e) => JSON.stringify(e)).join('\n') + '\n', 'utf-8');
-}
-
-function tokenEvent(text: string): Buffer {
-    return ndjson([{ type: 'token', data: text }]);
-}
-
-function costEvent(totalCostUsd: number): Buffer {
-    return ndjson([{ type: 'cost_summary', data: { total_cost_usd: totalCostUsd } }]);
-}
-
 const fakeAgent = { id: 'agent-1', workspaceId: 'ws-1', status: AgentStatus.PRODUCTION };
 const fakeConversation = { id: 'conv-1', agentId: 'agent-1', workspaceId: 'ws-1', title: 'Test' };
 
 const mockOrchestrator = { streamQuery: jest.fn() as any };
 const mockUsageTracker = { recordQuery: (jest.fn() as any).mockResolvedValue(undefined) };
-const mockPrisma = {
+const mockPrisma: any = {
     agent: { findUnique: jest.fn() as any },
-    conversation: {
-        findUnique: jest.fn() as any,
-        create: jest.fn() as any,
-        update: jest.fn() as any,
-    },
-    message: { create: jest.fn() as any },
+};
+const mockConversationRepo: any = {
+    findOne: jest.fn() as any,
+    // Runs the callback with a dummy "tx" token — good enough to verify create()/
+    // createMessage() are called through it, without needing a real Prisma transaction.
+    transaction: jest.fn((cb: (tx: unknown) => unknown) => cb('tx')) as any,
+    create: jest.fn() as any,
+    createMessage: jest.fn() as any,
+};
+const mockStreamForwarder: any = {
+    forward: jest.fn() as any,
+    forwardWithPersistence: jest.fn() as any,
 };
 
 describe('AgentRuntimeService', () => {
@@ -67,85 +66,42 @@ describe('AgentRuntimeService', () => {
                 { provide: AgentRuntimeOrchestrator, useValue: mockOrchestrator },
                 { provide: UsageTrackerService, useValue: mockUsageTracker },
                 { provide: PrismaService, useValue: mockPrisma },
+                { provide: ConversationRepository, useValue: mockConversationRepo },
+                { provide: RagStreamForwarderService, useValue: mockStreamForwarder },
             ],
         }).compile();
 
         service = module.get<AgentRuntimeService>(AgentRuntimeService);
         jest.clearAllMocks();
         mockUsageTracker.recordQuery.mockResolvedValue(undefined);
+        mockConversationRepo.transaction.mockImplementation((cb: (tx: unknown) => unknown) => cb('tx'));
     });
 
     describe('playgroundStream', () => {
-        it('should forward chunk data to subscriber', async () => {
-            const mockStream = createMockStream();
-            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
-
-            const { events, done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
-            await flushPromises();
-
-            mockStream.emit('data', tokenEvent('Hello world'));
-            mockStream.emit('end');
-            await done;
-
-            expect(parseData(events[0])).toEqual({ chunk: 'Hello world' });
-        });
-
-        it('should send done:true and complete on stream end', async () => {
-            const mockStream = createMockStream();
-            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
-
-            const { events, done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
-            await flushPromises();
-
-            mockStream.emit('end');
-            await done;
-
-            expect(parseData(events[0])).toEqual({ done: true });
-        });
-
         it('should pass forceActiveWorkflow:true to orchestrator', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const { done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'test'));
+            service.playgroundStream('ws-1', 'agent-1', 'test').subscribe();
             await flushPromises();
-            mockStream.emit('end');
-            await done;
 
             expect(mockOrchestrator.streamQuery).toHaveBeenCalledWith(
                 expect.objectContaining({ forceActiveWorkflow: true }),
             );
         });
 
-        it('should deduct credits on successful stream end', async () => {
+        it('should hand the resolved RAG stream to the forwarder with a usage-tracking logCtx', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const { done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
-            await flushPromises();
-            mockStream.emit('end');
-            await done;
+            service.playgroundStream('ws-1', 'agent-1', 'hello').subscribe();
             await flushPromises();
 
-            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
-                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', status: QueryLogStatus.SUCCESS }),
+            expect(mockStreamForwarder.forward).toHaveBeenCalledWith(
+                mockStream,
+                expect.anything(),
+                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', query: 'hello' }),
             );
-        });
-
-        it('should convert the RAG engine cost_summary into creditsUsed', async () => {
-            const mockStream = createMockStream();
-            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
-
-            const { done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
-            await flushPromises();
-
-            mockStream.emit('data', tokenEvent('answer'));
-            mockStream.emit('data', costEvent(0.014729510000000001));
-            mockStream.emit('end');
-            await done;
-            await flushPromises();
-
-            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(expect.objectContaining({ creditsUsed: 111 }));
         });
 
         it('should send isOutOfCredits:true when ForbiddenException is thrown', async () => {
@@ -156,18 +112,33 @@ describe('AgentRuntimeService', () => {
 
             const data = parseData(events[0]);
             expect(data.isOutOfCredits).toBe(true);
-            expect(data.error).toBe('Pas de crédits disponibles.');
+            expect(data.error).toBe('Insufficient credits.');
         });
 
-        it('should send error message when non-Forbidden error is thrown', async () => {
-            mockOrchestrator.streamQuery.mockRejectedValue(new Error('Timeout'));
+        it('should pass through the message of a recognized business error (HttpException)', async () => {
+            mockOrchestrator.streamQuery.mockRejectedValue(new NotFoundException('Workflow not configured'));
 
             const { events, done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
             await done;
 
             const data = parseData(events[0]);
             expect(data.isOutOfCredits).toBe(false);
-            expect(data.error).toBe('Timeout');
+            expect(data.error).toBe('Workflow not configured');
+        });
+
+        it('should replace a non-HttpException error message with a generic one, and log/report the real one', async () => {
+            mockOrchestrator.streamQuery.mockRejectedValue(new Error('ECONNRESET at 10.0.0.1:8000'));
+
+            const { events, done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
+            await done;
+
+            const data = parseData(events[0]);
+            expect(data.isOutOfCredits).toBe(false);
+            expect(data.error).toBe('Une erreur est survenue. Veuillez réessayer.');
+            expect(data.error).not.toContain('ECONNRESET');
+            expect(Sentry.captureException).toHaveBeenCalledWith(
+                expect.objectContaining({ message: expect.stringContaining('ECONNRESET') }),
+            );
         });
     });
 
@@ -176,29 +147,22 @@ describe('AgentRuntimeService', () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const { done } = collectEvents(service.streamWithOrgOverride('ws-1', 'agent-1', 'test', 'org-x'));
+            service.streamWithOrgOverride('ws-1', 'agent-1', 'test', 'org-x').subscribe();
             await flushPromises();
-            mockStream.emit('end');
-            await done;
 
             expect(mockOrchestrator.streamQuery).toHaveBeenCalledWith(
                 expect.objectContaining({ orgIdOverride: 'org-x', skipUsageTracking: false }),
             );
         });
 
-        it('should deduct credits (onboarding test queries are billed)', async () => {
+        it('should forward with a defined logCtx so the query still gets billed', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const { done } = collectEvents(service.streamWithOrgOverride('ws-1', 'agent-1', 'test', 'org-x'));
-            await flushPromises();
-            mockStream.emit('end');
-            await done;
+            service.streamWithOrgOverride('ws-1', 'agent-1', 'test', 'org-x').subscribe();
             await flushPromises();
 
-            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
-                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', status: QueryLogStatus.SUCCESS }),
-            );
+            expect(mockStreamForwarder.forward).toHaveBeenCalledWith(mockStream, expect.anything(), expect.any(Object));
         });
     });
 
@@ -229,7 +193,7 @@ describe('AgentRuntimeService', () => {
         });
 
         it('should send error when conversationId not found', async () => {
-            mockPrisma.conversation.findUnique.mockResolvedValue(null);
+            mockConversationRepo.findOne.mockResolvedValue(null);
 
             const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello', 'unknown-conv'));
             await flushPromises();
@@ -239,7 +203,7 @@ describe('AgentRuntimeService', () => {
         });
 
         it('should send error when conversation belongs to a different agent', async () => {
-            mockPrisma.conversation.findUnique.mockResolvedValue({ ...fakeConversation, agentId: 'other-agent' });
+            mockConversationRepo.findOne.mockResolvedValue({ ...fakeConversation, agentId: 'other-agent' });
 
             const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello', 'conv-1'));
             await flushPromises();
@@ -249,104 +213,166 @@ describe('AgentRuntimeService', () => {
         });
 
         it('should create a new conversation when no conversationId is provided', async () => {
-            mockPrisma.conversation.create.mockResolvedValue(fakeConversation);
-            mockPrisma.message.create.mockResolvedValue({});
-            mockPrisma.conversation.update.mockResolvedValue(fakeConversation);
+            mockConversationRepo.create.mockResolvedValue(fakeConversation);
+            mockConversationRepo.createMessage.mockResolvedValue({});
 
-            const mockStream = createMockStream();
-            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
-
-            const { done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            service.streamWithPersistence('agent-1', 'hello').subscribe();
             await flushPromises();
-            mockStream.emit('end');
-            await done;
 
-            expect(mockPrisma.conversation.create).toHaveBeenCalledWith({
-                data: expect.objectContaining({ agentId: 'agent-1', workspaceId: 'ws-1' }),
-            });
+            expect(mockConversationRepo.create).toHaveBeenCalledWith(
+                expect.objectContaining({ agentId: 'agent-1', workspaceId: 'ws-1' }),
+                'tx',
+            );
         });
     });
 
-    describe('streamWithPersistence — _forwardStreamWithPersistence', () => {
+    describe('_initConversation — transactional creation', () => {
         beforeEach(() => {
             mockPrisma.agent.findUnique.mockResolvedValue(fakeAgent);
-            mockPrisma.conversation.create.mockResolvedValue(fakeConversation);
-            mockPrisma.message.create.mockResolvedValue({});
-            mockPrisma.conversation.update.mockResolvedValue(fakeConversation);
+            mockOrchestrator.streamQuery.mockResolvedValue(createMockStream());
         });
 
-        it('should accumulate chunks and persist agent message on stream end', async () => {
-            const mockStream = createMockStream();
-            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
+        it('should create the conversation and the first USER message inside a single transaction', async () => {
+            mockConversationRepo.create.mockResolvedValue(fakeConversation);
+            mockConversationRepo.createMessage.mockResolvedValue({});
 
-            const { done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            service.streamWithPersistence('agent-1', 'hello').subscribe();
             await flushPromises();
 
-            mockStream.emit('data', tokenEvent('Hello '));
-            mockStream.emit('data', tokenEvent('world'));
-            mockStream.emit('end');
-            await done;
-
-            expect(mockPrisma.message.create).toHaveBeenLastCalledWith({
-                data: expect.objectContaining({ sender: MessageSender.AGENT, content: 'Hello world' }),
-            });
-        });
-
-        it('should send done with conversationId on stream end', async () => {
-            const mockStream = createMockStream();
-            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
-
-            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
-            await flushPromises();
-
-            mockStream.emit('end');
-            await done;
-
-            expect(parseData(events[events.length - 1])).toEqual({ done: true, conversationId: 'conv-1' });
-        });
-
-        it('should deduct credits on stream end', async () => {
-            const mockStream = createMockStream();
-            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
-
-            const { done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
-            await flushPromises();
-            mockStream.emit('end');
-            await done;
-            await flushPromises();
-
-            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
-                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', status: QueryLogStatus.SUCCESS }),
+            expect(mockConversationRepo.transaction).toHaveBeenCalledTimes(1);
+            expect(mockConversationRepo.create).toHaveBeenCalledWith(
+                expect.objectContaining({ agentId: 'agent-1', workspaceId: 'ws-1' }),
+                'tx',
+            );
+            expect(mockConversationRepo.createMessage).toHaveBeenCalledWith(
+                expect.objectContaining({ sender: MessageSender.USER, content: 'hello' }),
+                'tx',
             );
         });
 
-        it('should send error event and persist partial text on stream error', async () => {
+        it('should not leave an orphaned conversation if the USER message insert fails', async () => {
+            mockConversationRepo.create.mockResolvedValue(fakeConversation);
+            mockConversationRepo.createMessage.mockRejectedValue(new Error('message insert failed'));
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
             const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
             await flushPromises();
-
-            mockStream.emit('data', tokenEvent('Partial'));
-            mockStream.emit('error', new Error('Stream aborted'));
             await done;
 
-            expect(parseData(events[events.length - 1])).toEqual({ error: 'Stream aborted' });
-            expect(mockPrisma.message.create).toHaveBeenLastCalledWith({
-                data: expect.objectContaining({ sender: MessageSender.AGENT, content: 'Partial' }),
+            // the failure must be surfaced through the same transaction() call that
+            // created the conversation, not persisted as a bare, message-less conversation
+            expect(mockConversationRepo.transaction).toHaveBeenCalledTimes(1);
+            expect(mockStream.destroy).toHaveBeenCalled();
+            expect(parseData(events[events.length - 1])).toEqual({
+                error: 'Une erreur est survenue. Veuillez réessayer.',
             });
         });
 
+        it('should wrap the existing-conversation USER message creation in a transaction too', async () => {
+            mockConversationRepo.findOne.mockResolvedValue(fakeConversation);
+            mockConversationRepo.createMessage.mockResolvedValue({});
+
+            service.streamWithPersistence('agent-1', 'hello', 'conv-1').subscribe();
+            await flushPromises();
+
+            expect(mockConversationRepo.create).not.toHaveBeenCalled();
+            expect(mockConversationRepo.transaction).toHaveBeenCalledTimes(1);
+            expect(mockConversationRepo.createMessage).toHaveBeenCalledWith(
+                expect.objectContaining({ conversationId: 'conv-1', sender: MessageSender.USER, content: 'hello' }),
+                'tx',
+            );
+        });
+
         it('should destroy the RAG stream if _initConversation fails', async () => {
-            mockPrisma.conversation.create.mockRejectedValue(new Error('DB error'));
+            mockConversationRepo.create.mockRejectedValue(new Error('DB error: constraint violation'));
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const { done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
             await flushPromises();
             await done;
 
             expect(mockStream.destroy).toHaveBeenCalled();
+            // the raw Prisma error must not leak to the client
+            expect(parseData(events[events.length - 1])).toEqual({
+                error: 'Une erreur est survenue. Veuillez réessayer.',
+            });
+        });
+    });
+
+    describe('streamWithPersistence — dispatch to the forwarder', () => {
+        beforeEach(() => {
+            mockPrisma.agent.findUnique.mockResolvedValue(fakeAgent);
+            mockConversationRepo.create.mockResolvedValue(fakeConversation);
+            mockConversationRepo.createMessage.mockResolvedValue({});
+        });
+
+        it('should call forwardWithPersistence with the RAG stream, conversation id and logCtx', async () => {
+            const mockStream = createMockStream();
+            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
+
+            service.streamWithPersistence('agent-1', 'hello').subscribe();
+            await flushPromises();
+
+            expect(mockStreamForwarder.forwardWithPersistence).toHaveBeenCalledWith(
+                mockStream,
+                'conv-1',
+                expect.anything(),
+                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', query: 'hello' }),
+            );
+        });
+    });
+
+    describe('client-disconnect teardown', () => {
+        it('should destroy the RAG stream when the client unsubscribes before completion (playgroundStream)', async () => {
+            const mockStream = createMockStream();
+            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
+
+            const subscription = service.playgroundStream('ws-1', 'agent-1', 'hello').subscribe();
+            await flushPromises();
+
+            subscription.unsubscribe();
+
+            expect(mockStream.destroy).toHaveBeenCalled();
+        });
+
+        it('should destroy the RAG stream when the client unsubscribes before completion (streamWithPersistence)', async () => {
+            mockPrisma.agent.findUnique.mockResolvedValue(fakeAgent);
+            mockConversationRepo.create.mockResolvedValue(fakeConversation);
+            mockConversationRepo.createMessage.mockResolvedValue({});
+            const mockStream = createMockStream();
+            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
+
+            const subscription = service.streamWithPersistence('agent-1', 'hello').subscribe();
+            await flushPromises();
+
+            subscription.unsubscribe();
+
+            expect(mockStream.destroy).toHaveBeenCalled();
+        });
+
+        it('should not throw when unsubscribing before the RAG stream is created', () => {
+            mockOrchestrator.streamQuery.mockImplementation(() => new Promise(() => {}));
+
+            const subscription = service.playgroundStream('ws-1', 'agent-1', 'hello').subscribe();
+
+            expect(() => subscription.unsubscribe()).not.toThrow();
+        });
+
+        it('should not call destroy again on a stream that already reports itself destroyed after completion', async () => {
+            const mockStream = createMockStream();
+            mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
+            // simulate the forwarder reaching the end of the stream and completing the subscriber
+            mockStreamForwarder.forward.mockImplementation((_s: unknown, subscriber: { complete: () => void }) => {
+                mockStream.destroyed = true;
+                subscriber.complete();
+            });
+
+            const { done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
+            await done;
+
+            expect(mockStream.destroy).not.toHaveBeenCalled();
         });
     });
 });

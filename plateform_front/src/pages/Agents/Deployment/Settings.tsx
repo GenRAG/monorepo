@@ -40,7 +40,6 @@ const AgentDangerZone = () => {
 };
 
 export const Settings = () => {
-    const isDark = useIsDark();
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
     const [apiLogs, setApiLogs] = useState(true);
 
@@ -54,7 +53,7 @@ export const Settings = () => {
     };
 
     return (
-        <Box flex={1} overflowY="auto" p={6} bg={isDark ? "grey.975" : "white"}>
+        <Box flex={1} overflowY="auto" p={6}>
             <VStack spacing={5} align="stretch" maxW="820px" mx="auto">
                 <RGPDBanner />
                 {/* <HostingRegion /> */}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { useColorModeValue } from "@chakra-ui/react";
 import { VStack, Box, HStack, Text, Icon } from "@chakra-ui/react";
 import { PencilLine, Sparkles, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,21 +36,17 @@ const RewriterNodeModal = ({ mainNodeId, onSettingSelect }: RewriterNodeModalPro
 };
 
 const RewriterOverviewTab = () => {
-    const { colorMode } = useColorMode();
-    const bgColor = useColorModeValue("white", "grey.900");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
-
     return (
         <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             <Box>
-                <Text fontSize="lg" fontWeight="bold" mb={2} color={colorMode === "dark" ? "grey.100" : "grey.900"}>
+                <Text fontSize="lg" fontWeight="bold" mb={2} color="textPrimary">
                     Comment la question est-elle améliorée ?
                 </Text>
-                <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" color="textDescription">
                     Le Reformulateur reformule la question de l&apos;utilisateur pour mieux correspondre aux documents
                     indexés.
                 </Text>
-                <Text fontSize="sm" mt={2} color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" mt={2} color="textDescription">
                     <strong>Une question vague en entrée.</strong> Une question{" "}
                     <strong>précise et contextualisée</strong> en sortie.
                 </Text>
@@ -60,10 +56,10 @@ const RewriterOverviewTab = () => {
                 position="relative"
                 w="100%"
                 h="250px"
-                bg={bgColor}
+                bg="backgroundDefault"
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={borderColor}
+                borderColor="borderDivider"
                 overflow="hidden"
             >
                 <RewriterAnimation />
@@ -73,15 +69,11 @@ const RewriterOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="999px" bg="green.400" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             1. Analyse de la question
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Le modèle LLM analyse l&apos;intention derrière la question de l&apos;utilisateur.
                     </Text>
                 </Box>
@@ -89,15 +81,11 @@ const RewriterOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="999px" bg="green.500" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             2. Reformulation
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         La question est réécrite avec les termes les plus susceptibles de matcher vos documents.
                     </Text>
                 </Box>
@@ -105,15 +93,11 @@ const RewriterOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="999px" bg="green.600" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             3. Meilleure récupération
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         La requête reformulée améliore la pertinence des documents récupérés par le retriever.
                     </Text>
                 </Box>
@@ -140,7 +124,6 @@ const STEPS = [
 export const RewriterAnimation = () => {
     const [stepIdx, setStepIdx] = useState(0);
     const [phase, setPhase] = useState<"original" | "rewriting" | "rewritten">("original");
-    const { colorMode } = useColorMode();
     const cardBg = useColorModeValue("white", "grey.800");
     const textColor = useColorModeValue("grey.800", "grey.200");
     const borderColor = useColorModeValue("grey.200", "grey.600");
@@ -259,15 +242,7 @@ export const RewriterAnimation = () => {
                 </AnimatePresence>
             </Box>
 
-            <Box
-                position="absolute"
-                bottom={0}
-                left={0}
-                right={0}
-                h="4px"
-                bg={colorMode === "dark" ? "grey.700" : "grey.100"}
-                overflow="hidden"
-            >
+            <Box position="absolute" bottom={0} left={0} right={0} h="4px" bg="borderSubtle" overflow="hidden">
                 <motion.div
                     key={stepIdx}
                     style={{ height: "100%", background: "var(--chakra-colors-green-500)" }}

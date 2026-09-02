@@ -9,21 +9,21 @@ interface ChatWorkspaceHeaderProps {
 }
 
 const WorkspaceHeader = ({ title, description, actions }: ChatWorkspaceHeaderProps) => {
-    const bg = useColorModeValue("white", "grey.950");
+    const bg = useColorModeValue("white", "grey.900");
     const isMobile = useAppResponsive({ base: true, lg: false });
 
     return (
         <HStack
             w="100%"
-            p={4}
+            p={2}
             borderBottom="1px solid"
             bg={bg}
             borderColor="borderSubtle"
             flexShrink={0}
             justify="space-between"
         >
-            <VStack align="flex-start">
-                <Heading variant="heading-2xl">{title}</Heading>
+            <VStack spacing={0} align="flex-start" ml={3}>
+                <Heading variant="heading-lg">{title}</Heading>
                 {!isMobile && (
                     <Text fontSize="sm" color="textLabel">
                         {description}

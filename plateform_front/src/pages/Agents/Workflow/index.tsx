@@ -179,7 +179,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         } as any);
     }, [blocker.state, toast]);
 
-    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.950"]);
+    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.800"]);
     const lineColor = applyAlphaToColor(colorMode === "dark" ? gridLineDark : gridLineLight, 0.8);
 
     const snapGrid: [number, number] = [50, 50];

@@ -27,29 +27,21 @@ interface MessageItemProps {
 
 const MessageItem: React.FC<MessageItemProps> = ({ msg, agentTitle, userName, isLoading }) => {
     const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
     const userInitials = getInitials(userName || "U");
 
     return (
         <Box mb={6}>
             <HStack justify="flex-end" mb={4} align="flex-start">
-                <Box
-                    maxW="65%"
-                    px={4}
-                    py={3}
-                    borderRadius="16px"
-                    borderBottomRightRadius="4px"
-                    bg={isDark ? "rgba(255,255,255,0.08)" : "grey.50"}
-                >
+                <Box maxW="65%" px={4} py={3} borderRadius="16px" borderBottomRightRadius="4px" bg="bubbleSentBg">
                     <HStack spacing={2} mb={2} justify="flex-end">
-                        <Text fontSize="10px" color={isDark ? "grey.600" : "grey.400"}>
+                        <Text fontSize="10px" color="textMuted">
                             {formatTime(msg.timestamp)}
                         </Text>
-                        <Text fontSize="xs" fontWeight="600" color={isDark ? "grey.300" : "grey.700"}>
+                        <Text fontSize="xs" fontWeight="600" color="textBody">
                             {userName}
                         </Text>
                     </HStack>
-                    <Text fontSize="sm" color={isDark ? "grey.100" : "grey.800"} lineHeight="1.6">
+                    <Text fontSize="sm" color="textOnBubble" lineHeight="1.6">
                         {msg.question}
                     </Text>
                 </Box>
@@ -63,26 +55,21 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, agentTitle, userName, is
                         flex={1}
                         minW={0}
                         maxW="75%"
-                        bg={isDark ? "grey.900" : "grey.50"}
+                        bg="surfaceHover"
                         px={4}
                         py={3}
                         borderRadius="16px"
                         borderBottomLeftRadius="4px"
                     >
                         <HStack spacing={2} mb={2}>
-                            <Text fontSize="xs" fontWeight="600" color={isDark ? "grey.300" : "grey.700"}>
+                            <Text fontSize="xs" fontWeight="600" color="textBody">
                                 {agentTitle}
                             </Text>
-                            <Text fontSize="10px" color={isDark ? "grey.600" : "grey.400"}>
+                            <Text fontSize="10px" color="textMuted">
                                 {formatTime(msg.timestamp)}
                             </Text>
                         </HStack>
-                        <Box
-                            fontSize="sm"
-                            color={isDark ? "grey.200" : "grey.700"}
-                            lineHeight="1.75"
-                            sx={getMarkdownStyles(colorMode)}
-                        >
+                        <Box fontSize="sm" color="textSecondary" lineHeight="1.75" sx={getMarkdownStyles(colorMode)}>
                             <ReactMarkdown>{msg.response}</ReactMarkdown>
                         </Box>
                     </Box>

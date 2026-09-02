@@ -43,7 +43,7 @@ const formatDate = (iso: string) =>
         minute: "2-digit",
     });
 
-const LIMIT = 5;
+const LIMIT = 1;
 
 export const QueryLogsTable = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
@@ -57,8 +57,8 @@ export const QueryLogsTable = () => {
     console.log(data);
 
     const borderColor = useColorModeValue("grey.100", "grey.800");
-    const bgColor = useColorModeValue("white", "grey.950");
-    const headerBg = useColorModeValue("grey.50", "grey.900");
+    const bgColor = useColorModeValue("white", "grey.900");
+    const headerBg = useColorModeValue("grey.50", "grey.950");
     const textColor = useColorModeValue("grey.700", "grey.300");
     const mutedColor = useColorModeValue("grey.400", "grey.600");
 
@@ -117,7 +117,7 @@ export const QueryLogsTable = () => {
                             </Thead>
                             <Tbody>
                                 {data.data.map((log) => (
-                                    <Tr key={log.id} _hover={{ bg: headerBg }}>
+                                    <Tr key={log.id} _hover={{ bg: headerBg }} borderRadius="12px">
                                         <Td maxW="360px">
                                             <Text fontSize="xs" color={textColor} noOfLines={1}>
                                                 {log.query}

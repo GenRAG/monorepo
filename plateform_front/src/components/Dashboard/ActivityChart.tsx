@@ -1,26 +1,37 @@
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Filler,
-    Tooltip,
-    type ChartOptions,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
-import { Box, Card, HStack, Skeleton, VStack } from "@chakra-ui/react";
+import { Box, Card, Skeleton } from "@chakra-ui/react";
 import { BarChart2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type Period } from "pages/Dashboard/data";
-import { ActivityMetrics } from "components/Dashboard/ActivityChart/ActivityMetrics";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { ActivityHeader } from "components/Dashboard/ActivityChart/ActivityHeader";
 import { ActivityLegend } from "components/Dashboard/ActivityChart/ActivityLegend";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { WorkspaceStats } from "types/workspace";
-import { useIsDark } from "hooks/useIsDark";
+import { Area, AreaChart, ChartStatFlow, ChartTooltip, TooltipContent, useChart } from "components/charts";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip);
+/** AreaChart is time-scaled — the x-axis is hidden here, so evenly-spaced
+ * placeholder dates only drive point spacing, never displayed to the user. */
+const toChartRows = (labels: string[], values: number[]) =>
+    labels.map((label, i) => ({ date: new Date(2020, 0, 1 + i), value: values[i] ?? 0, label }));
+
+interface HoverState {
+    value: number | null;
+    label: string | null;
+}
+
+/** Reads the chart's hover context and lifts the scrubbed point up to the card. */
+const ChartHoverBridge = ({ onHoverChange }: { onHoverChange: (state: HoverState) => void }) => {
+    const { tooltipData } = useChart();
+
+    useEffect(() => {
+        const point = tooltipData?.point;
+        const value = typeof point?.value === "number" ? point.value : null;
+        const label = typeof point?.label === "string" ? point.label : null;
+        onHoverChange({ value, label });
+    }, [tooltipData, onHoverChange]);
+
+    return null;
+};
 
 interface ActivityChartProps {
     chartData?: WorkspaceStats["activityChart"];
@@ -37,107 +48,22 @@ export const ActivityChart = ({
     isEmpty = false,
     isLoading = false,
 }: ActivityChartProps) => {
-    const isDark = useIsDark();
-
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
-
     const [period, setPeriod] = useState<Period>("7j");
+    const [hover, setHover] = useState<HoverState>({ value: null, label: null });
 
     const periodData = chartData?.[period] ?? { labels: [], values: [] };
     const { labels, values } = periodData;
 
-    const chartJsData = {
-        labels,
-        datasets: [
-            {
-                data: values,
-                fill: true,
-                tension: 0.4,
-                borderColor: "#12B98C",
-                borderWidth: 2,
-                pointRadius: 0,
-                pointStyle: "circle",
-                pointBackgroundColor: "#12B98C",
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: "#12B98C",
-                pointHoverBorderColor: isDark ? "#2E2E2E" : "#fff",
-                pointHoverBorderWidth: 2,
-                backgroundColor: (ctx: { chart: ChartJS }) => {
-                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
-                    gradient.addColorStop(0, "rgba(18, 185, 140, 0.28)");
-                    gradient.addColorStop(1, "rgba(18, 185, 140, 0.01)");
-                    return gradient;
-                },
-            },
-        ],
-    };
+    const defaultValue = period === "24h" ? todayConversations : totalConversations;
+    const defaultLabel = period === "24h" ? "Aujourd'hui" : "Total";
 
-    const options: ChartOptions<"line"> = {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                usePointStyle: true,
-                displayColors: true,
-                boxWidth: 6,
-                boxHeight: 6,
-                backgroundColor: isDark ? "#262626" : "#fff",
-                titleColor: isDark ? "#F6F6F6" : "#262626",
-                bodyColor: isDark ? "#8F8F8F" : "#6D6D6D",
-                borderColor: isDark ? "#4F4F4F" : "#E7E7E7",
-                borderWidth: 1,
-                padding: 8,
-                callbacks: {
-                    label: (ctx) => ` ${(ctx.parsed.y ?? 0).toLocaleString("fr-FR")} conversations`,
-                    labelPointStyle: () => ({ pointStyle: "circle", rotation: 0 }),
-                },
-            },
-        },
-        scales: {
-            x: { display: false, grid: { display: false } },
-            y: { display: false, grid: { display: false } },
-        },
-    };
-
-    if (isLoading) {
-        return (
-            <Card size="none" overflow="hidden">
-                <HStack justify="space-between" p={4}>
-                    <HStack spacing={2}>
-                        <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
-                        <Skeleton {...skeletonProps} h="14px" w="160px" borderRadius="4px" />
-                    </HStack>
-                    <HStack spacing={1}>
-                        {[0, 1, 2].map((i) => (
-                            <Skeleton key={i} {...skeletonProps} h="24px" w="40px" borderRadius="6px" />
-                        ))}
-                    </HStack>
-                </HStack>
-                <HStack px={4} spacing={6} flexWrap="wrap">
-                    {[0, 1, 2].map((i) => (
-                        <VStack key={i} align="start" spacing={1} py={2}>
-                            <Skeleton {...skeletonProps} h="11px" w="60px" borderRadius="3px" />
-                            <Skeleton {...skeletonProps} h="24px" w="80px" borderRadius="4px" />
-                            <Skeleton {...skeletonProps} h="11px" w="50px" borderRadius="3px" />
-                        </VStack>
-                    ))}
-                </HStack>
-                <Skeleton {...skeletonProps} h="200px" w="100%" borderRadius="0" />
-                <HStack p={4} spacing={4}>
-                    <Skeleton {...skeletonProps} h="12px" w="80px" borderRadius="4px" />
-                    <Skeleton {...skeletonProps} h="12px" w="60px" borderRadius="4px" />
-                </HStack>
-            </Card>
-        );
-    }
+    const chartRows = useMemo(() => toChartRows(labels, values), [labels, values]);
 
     return (
-        <Card size="none" overflow="hidden" minW={0}>
+        <Card size="none" overflow="hidden" minW={0} h="100%" display="flex" flexDirection="column">
             <ActivityHeader period={period} setPeriod={setPeriod} />
 
-            {isEmpty ? (
+            {isEmpty && !isLoading ? (
                 <CardEmptyState
                     icon={BarChart2}
                     title="Aucune conversation"
@@ -145,10 +71,61 @@ export const ActivityChart = ({
                 />
             ) : (
                 <>
-                    <ActivityMetrics total={totalConversations} today={todayConversations} period={period} />
-                    <Box h="200px" position="relative" minW={0}>
+                    <Box px={4} mt={3} pb={2} display="flex" flexDirection="column">
+                        {isLoading ? (
+                            <Skeleton
+                                startColor="skeletonStart"
+                                endColor="skeletonEnd"
+                                h="28px"
+                                w="80px"
+                                borderRadius="6px"
+                            />
+                        ) : (
+                            <ChartStatFlow
+                                value={hover.value ?? defaultValue}
+                                label={hover.label ?? defaultLabel}
+                                valueClassName="text-3xl font-bold"
+                                labelClassName="text-xs"
+                            />
+                        )}
+                    </Box>
+                    <Box flex={1} minH="200px" position="relative" minW={0}>
                         <Box position="absolute" inset={0}>
-                            <Line data={chartJsData} options={options} />
+                            <AreaChart
+                                key={period}
+                                status={isLoading ? "loading" : "ready"}
+                                loadingLabel="Chargement..."
+                                data={chartRows}
+                                margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
+                                aspectRatio=""
+                                className="h-full"
+                            >
+                                <ChartHoverBridge onHoverChange={setHover} />
+                                <Area
+                                    dataKey="value"
+                                    stroke={STATUS_COLORS.success}
+                                    fill={STATUS_COLORS.success}
+                                    fillOpacity={0.28}
+                                    strokeWidth={2}
+                                    showHighlight
+                                    loadingStroke={STATUS_COLORS.success}
+                                />
+                                <ChartTooltip
+                                    showDatePill={false}
+                                    content={({ point }) => (
+                                        <TooltipContent
+                                            title={point.label as string}
+                                            rows={[
+                                                {
+                                                    color: STATUS_COLORS.success,
+                                                    label: "Conversations",
+                                                    value: point.value as number,
+                                                },
+                                            ]}
+                                        />
+                                    )}
+                                />
+                            </AreaChart>
                         </Box>
                     </Box>
                     <ActivityLegend />

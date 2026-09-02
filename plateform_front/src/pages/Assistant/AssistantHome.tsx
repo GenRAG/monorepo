@@ -47,7 +47,7 @@ const AssistantHome: React.FC<AssistantHomeProps> = ({
                         zIndex={0}
                         background={
                             isDark
-                                ? "radial-gradient(ellipse 90% 70% at 50% 40%, transparent 25%, rgba(44, 44, 44, 0.65) 100%)"
+                                ? "radial-gradient(ellipse 90% 70% at 50% 40%, transparent 25%, rgba(46, 52, 60, 0.65) 100%)"
                                 : "radial-gradient(ellipse 90% 70% at 50% 40%, transparent 25%, rgba(247, 246, 246, 0.75) 100%)"
                         }
                     />

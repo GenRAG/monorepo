@@ -54,7 +54,7 @@ export const DataPrivacy = ({ apiLogs, onApiLogsChange, retentionDays, onRetenti
     };
 
     const borderColor = useColorModeValue("grey.100", "grey.800");
-    const bgColor = useColorModeValue("white", "grey.950");
+    const bgColor = useColorModeValue("white", "grey.900");
     const segmentBg = useColorModeValue("grey.100", "grey.800");
     const segmentLabelColor = useColorModeValue("grey.600", "grey.400");
 

@@ -15,7 +15,7 @@ const PrivateRoute: React.FC = () => {
 
     if (isLoading || !hasChecked.current) {
         return (
-            <Flex w="100vw" h="100vh" align="center" justify="center">
+            <Flex w="100%" h="100vh" align="center" justify="center">
                 <Spinner />
             </Flex>
         );
@@ -26,8 +26,8 @@ const PrivateRoute: React.FC = () => {
     }
 
     return (
-        <Flex w="100vw">
-            <Box flex={1}>
+        <Flex w="100%" minW={0} overflow="hidden">
+            <Box flex={1} minW={0}>
                 <OnboardingProvider steps={stepsConfig}>
                     <Outlet />
                 </OnboardingProvider>

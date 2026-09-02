@@ -32,12 +32,12 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
         <Box
             flex={1}
             border="1px solid"
-            borderColor={isSelected ? currentDarkTheme.primary : colorMode === "dark" ? "grey.700" : "grey.200"}
+            borderColor={isSelected ? currentDarkTheme.primary : "borderDivider"}
             borderRadius="12px"
             p={4}
             cursor="pointer"
             onClick={onClick}
-            bg={colorMode === "dark" ? "grey.800" : "white"}
+            bg="surfaceAction"
             _hover={{
                 borderColor: currentDarkTheme.primary,
             }}
@@ -47,12 +47,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                 <HStack justify="space-between" align="center">
                     <HStack spacing={2}>
                         <Icon as={icon} boxSize={4} color={currentDarkTheme.primary} />
-                        <Text
-                            fontWeight="bold"
-                            fontSize="xs"
-                            letterSpacing="wider"
-                            color={colorMode === "dark" ? "white" : "grey.900"}
-                        >
+                        <Text fontWeight="bold" fontSize="xs" letterSpacing="wider" color="textStrong">
                             {title}
                         </Text>
                     </HStack>
@@ -67,12 +62,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                     </Badge>
                 </HStack>
 
-                <Box
-                    fontSize="sm"
-                    color={colorMode === "dark" ? "grey.300" : "grey.700"}
-                    lineHeight="1.6"
-                    sx={getMarkdownStyles(colorMode)}
-                >
+                <Box fontSize="sm" color="textBody" lineHeight="1.6" sx={getMarkdownStyles(colorMode)}>
                     <ReactMarkdown>{responseText}</ReactMarkdown>
                 </Box>
 
@@ -80,7 +70,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                     {advantages.map((adv, i) => (
                         <HStack key={i} spacing={2}>
                             <Icon as={Check} boxSize={3} color={currentDarkTheme.primary} flexShrink={0} />
-                            <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                            <Text fontSize="xs" color="textDescription">
                                 {adv}
                             </Text>
                         </HStack>

@@ -1,11 +1,9 @@
 import { Box, VStack } from "@chakra-ui/react";
 import DataPrivacy from "components/Deployment/Settings/DataPrivacy";
-//import HostingRegion from "components/Deployment/Settings/HostingRegion";
 import RGPDBanner from "components/Deployment/Settings/RGPDBanner";
 import { UserRights } from "components/Deployment/Settings/UserRights";
 import { QueryLogsTable } from "components/Deployment/Settings/QueryLogsTable";
 import DangerZone from "components/ui/DangerZone";
-import { useIsDark } from "hooks/useIsDark";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteAgentMutation, useGetAgentByIdQuery, useUpdateAgentMutation } from "services/agent/agent";
@@ -54,7 +52,7 @@ export const Settings = () => {
 
     return (
         <Box flex={1} overflowY="auto" p={6}>
-            <VStack spacing={5} align="stretch" maxW="820px" mx="auto">
+            <VStack spacing={5} align="stretch" mx="auto">
                 <RGPDBanner />
                 {/* <HostingRegion /> */}
                 <DataPrivacy

@@ -1,0 +1,94 @@
+/*
+ * Tailwind CSS scoped for the Bklit chart components only.
+ * We intentionally skip the "preflight" (reset) layer — Chakra UI already
+ * owns global resets (`resetCSS` on ChakraProvider) and importing Tailwind's
+ * reset here would fight it across the whole app.
+ */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme inline {
+    --color-foreground: var(--foreground);
+    --color-chart-label: var(--chart-label);
+    --color-chart-tooltip-background: var(--chart-tooltip-background);
+    --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+    --color-chart-tooltip-muted: var(--chart-tooltip-muted);
+}
+
+:root {
+    --foreground: #262626;
+    --muted-foreground: #6d6d6d;
+    --chart-background: #ffffff;
+    --chart-foreground: #262626;
+    --chart-foreground-muted: #6d6d6d;
+    --chart-label: #6d6d6d;
+    --chart-grid: rgba(0, 0, 0, 0.06);
+    --chart-line-primary: #12b98c;
+    --chart-line-secondary: #6366f1;
+    --chart-crosshair: rgba(0, 0, 0, 0.12);
+    --chart-indicator-color: #12b98c;
+    --chart-indicator-secondary-color: #6366f1;
+    --chart-marker-background: #ffffff;
+    --chart-marker-border: #12b98c;
+    --chart-marker-foreground: #262626;
+    --chart-marker-badge-background: rgba(18, 185, 140, 0.12);
+    --chart-marker-badge-foreground: #076048;
+    --chart-segment-background: rgba(18, 185, 140, 0.08);
+    --chart-segment-line: #12b98c;
+    --chart-brush-border: #d1d1d1;
+    --border: #d1d1d1;
+    --chart-tooltip-background: #ffffff;
+    --chart-tooltip-foreground: #262626;
+    --chart-tooltip-muted: #6d6d6d;
+    --chart-1: #12b98c;
+    --chart-2: #6366f1;
+    --chart-3: #f59e0b;
+    --chart-4: #ec4899;
+    --chart-5: #a855f7;
+    --chart-scale-01: #f6f6f6;
+    --chart-scale-02: #cdf0e3;
+    --chart-scale-03: #8ee0c1;
+    --chart-scale-04: #4fc99a;
+    --chart-scale-05: #12b98c;
+    --chart-scale-pattern-color: rgba(0, 0, 0, 0.35);
+}
+
+/* Chakra's ColorModeScript toggles this class on the DOM — custom properties
+   set here cascade to the chart regardless of which ancestor carries it. */
+.chakra-ui-dark {
+    --foreground: #e7e7e7;
+    --muted-foreground: #8b939d;
+    --chart-background: #232830;
+    --chart-foreground: #e7e7e7;
+    --chart-foreground-muted: #8b939d;
+    --chart-label: #8b939d;
+    --chart-grid: rgba(255, 255, 255, 0.07);
+    --chart-line-primary: #34d3a9;
+    --chart-line-secondary: #6366f1;
+    --chart-crosshair: rgba(255, 255, 255, 0.15);
+    --chart-indicator-color: #34d3a9;
+    --chart-indicator-secondary-color: #6366f1;
+    --chart-marker-background: #232830;
+    --chart-marker-border: #34d3a9;
+    --chart-marker-foreground: #e7e7e7;
+    --chart-marker-badge-background: rgba(52, 211, 169, 0.15);
+    --chart-marker-badge-foreground: #34d3a9;
+    --chart-segment-background: rgba(52, 211, 169, 0.08);
+    --chart-segment-line: #34d3a9;
+    --chart-brush-border: #454c56;
+    --border: #454c56;
+    --chart-tooltip-background: #1a1f26;
+    --chart-tooltip-foreground: #f6f6f6;
+    --chart-tooltip-muted: #8b939d;
+    --chart-1: #34d3a9;
+    --chart-2: #6366f1;
+    --chart-3: #f59e0b;
+    --chart-4: #ec4899;
+    --chart-5: #a855f7;
+    --chart-scale-01: #232830;
+    --chart-scale-02: #164e3f;
+    --chart-scale-03: #0d7d5c;
+    --chart-scale-04: #1aab82;
+    --chart-scale-05: #34d3a9;
+    --chart-scale-pattern-color: rgba(255, 255, 255, 0.35);
+}

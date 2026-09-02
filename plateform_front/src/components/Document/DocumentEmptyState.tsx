@@ -30,7 +30,7 @@ export const DocumentEmptyState: React.FC<DocumentEmptyStateProps> = ({
             alignItems="center"
             justifyContent="center"
             gap={5}
-            bg="surfacePrimary"
+            bg="surfaceHover"
             textAlign="center"
         >
             <BoxIcon icon={CloudUpload} size="xl" />

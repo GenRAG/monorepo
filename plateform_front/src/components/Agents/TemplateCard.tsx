@@ -9,12 +9,12 @@ interface Props {
 }
 
 export const TemplateCard: FC<Props> = ({ title, description, isSelected, onClick }) => {
-    const titleColor = useColorModeValue(isSelected ? "green.600" : "grey.900", "grey.50");
-    const tplCardHoverBg = useColorModeValue("grey.50", "grey.850");
+    const selectedTitleColor = useColorModeValue("green.600", "grey.50");
+    const titleColor = isSelected ? selectedTitleColor : "textPrimary";
 
     const borderColor = isSelected ? "green.400" : "borderDefault";
     const bgColor = isSelected ? "accentCardBg" : "surfaceModal";
-    const hoverBgColor = isSelected ? "accentCardBg" : tplCardHoverBg;
+    const hoverBgColor = isSelected ? "accentCardBg" : "surfaceHover";
     const hoverBorderColor = isSelected ? "green.500" : "grey.400";
 
     return (

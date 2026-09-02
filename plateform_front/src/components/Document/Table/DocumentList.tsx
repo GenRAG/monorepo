@@ -9,6 +9,7 @@ import { DocumentEmptyState } from "../DocumentEmptyState";
 import { DocumentTableHeader } from "./DocumentTableHeader";
 import { DocumentFilters } from "./DocumentFilters";
 import { DocumentSkeletonRow } from "./DocumentSkeletonRow";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 
 type TypeFilter = "PDF" | "Markdown" | "Texte" | "Word" | null;
 type ViewMode = "list" | "grid";

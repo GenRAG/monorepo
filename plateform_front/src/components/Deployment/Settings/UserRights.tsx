@@ -20,7 +20,7 @@ export const UserRights = () => {
     const [isExportingLogs, setIsExportingLogs] = useState(false);
 
     const borderColor = useColorModeValue("grey.100", "grey.800");
-    const bgColor = useColorModeValue("white", "grey.950");
+    const bgColor = useColorModeValue("white", "grey.900");
 
     const baseUrl = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
 

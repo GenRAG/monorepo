@@ -1,34 +1,89 @@
-import React, { useState, useMemo } from "react";
-import { Box, Card, HStack, Stack, Text, Tooltip as ChakraTooltip, useToken, Skeleton } from "@chakra-ui/react";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, type Plugin } from "chart.js";
-import { Bar } from "react-chartjs-2";
+import React, { useMemo, useState } from "react";
+import { Box, Card, HStack, Stack, Text, Tooltip as ChakraTooltip, Skeleton } from "@chakra-ui/react";
+import { Bar, BarChart, BarXAxis, ChartTooltip, useChart, Grid } from "components/charts";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
-import { useGetWorkspaceConsumptionQuery } from "services/credit/credit";
+import { useGetWorkspaceConsumptionQuery, type WorkspaceConsumption } from "services/credit/credit";
 import { useParams } from "react-router-dom";
-import { useIsDark } from "hooks/useIsDark";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
+// TEMP: visual QA for the BarChart/BackgroundTrack rounding against non-empty data.
+// Remove once real consumption data is confirmed to render correctly.
+const DEBUG_USE_MOCK_CONSUMPTION = true;
 
-const AGENT_COLORS = ["#34D3A9", "#6366F1", "#F59E0B", "#EC4899", "#A855F7", "#3B82F6", "#EF4444", "#10B981"];
+const MOCK_AGENTS = [
+    { agentId: "mock-1", agentName: "Demo Assistant" },
+    { agentId: "mock-2", agentName: "Agent Conversationnel Avancé" },
+    { agentId: "mock-3", agentName: "ZAgent Conversationnel Avancé" },
+];
 
-const makeBackgroundBarsPlugin = (isDark: boolean): Plugin<"bar"> => ({
-    id: "backgroundBars",
-    beforeDatasetsDraw(chart) {
-        const {
-            ctx,
-            chartArea: { top, bottom },
-        } = chart;
-        chart.getDatasetMeta(0).data.forEach((bar: any) => {
-            ctx.save();
-            ctx.fillStyle = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)";
-            ctx.beginPath();
-            ctx.roundRect(bar.x - bar.width / 2, top, bar.width, bottom - top, 2);
-            ctx.fill();
-            ctx.restore();
-        });
-    },
-});
+const buildMockConsumption = (days: number): WorkspaceConsumption => {
+    const byDay = Array.from({ length: days }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (days - 1 - i));
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        const base = isWeekend ? 8 : 22;
+        return Math.max(0, Math.round(base + (Math.random() - 0.5) * 16));
+    });
+
+    const total = byDay.reduce((s, v) => s + v, 0);
+    const shares = [0.5, 0.32, 0.18];
+    const byAgent = MOCK_AGENTS.map((agent, i) => ({
+        ...agent,
+        creditsUsed: Math.max(1, Math.round(total * shares[i])),
+        queryCount: Math.max(1, Math.round((total * shares[i]) / 1.4)),
+    }));
+
+    return { byDay, byAgent, total };
+};
+
+const AGENT_COLORS = [
+    currentDarkTheme.hex.primary,
+    "#6366F1",
+    "#F59E0B",
+    "#EC4899",
+    "#A855F7",
+    "#3B82F6",
+    "#EF4444",
+    "#10B981",
+];
+
+/**
+ * Same corner radius as the `<Bar lineCap={...} />` below, so the track matches the bars.
+ * `rx`/`ry` round all 4 corners of the rect (the lib has no top-only option), so this must
+ * stay small — anything much bigger than this makes tall bars look like floating capsules
+ * and turns short bars into blobs.
+ */
+const BAR_RADIUS = 6;
+
+/**
+ * Faint full-height track behind each bar, matching the previous chart.js plugin.
+ * Named `keyPrefix`, not `dataKey` — `BarChart`'s `extractBarConfigs` treats any child
+ * with a `dataKey` prop as a real bar series, which would double the detected series
+ * count and make the actual `<Bar>` render at half width to "group" with this track.
+ */
+const BackgroundTrack = ({ keyPrefix }: { keyPrefix: string }) => {
+    const { data, barScale, bandWidth, barXAccessor, innerHeight } = useChart();
+    if (!(barScale && bandWidth && barXAccessor)) return null;
+    return (
+        <>
+            {data.map((d, i) => {
+                const x = barScale(barXAccessor(d)) ?? 0;
+                return (
+                    <rect
+                        key={`${keyPrefix}-track-${i}`}
+                        x={x}
+                        y={0}
+                        width={bandWidth}
+                        height={innerHeight}
+                        rx={BAR_RADIUS}
+                        ry={BAR_RADIUS}
+                        fill="var(--chart-grid)"
+                    />
+                );
+            })}
+        </>
+    );
+};
 
 type Period = "7j" | "30j" | "90j";
 
@@ -54,58 +109,26 @@ const getChartLabels = (period: Period): string[] => {
 };
 
 const ConsumptionCard: React.FC = () => {
-    const isDark = useIsDark();
     const { workspaceId } = useParams();
     const [period, setPeriod] = useState<Period>("30j");
-    const [subColor] = useToken("colors", [isDark ? "grey.400" : "grey.500"]);
-
-    const backgroundBarsPlugin = useMemo(() => makeBackgroundBarsPlugin(isDark), [isDark]);
 
     const days = PERIOD_DAYS[period];
-    const { data: consumption, isLoading } = useGetWorkspaceConsumptionQuery(
+    const { data: realConsumption, isLoading: isQueryLoading } = useGetWorkspaceConsumptionQuery(
         { workspaceId: workspaceId ?? "", days },
-        { skip: !workspaceId },
+        { skip: !workspaceId || DEBUG_USE_MOCK_CONSUMPTION },
     );
+    const mockConsumption = useMemo(() => buildMockConsumption(days), [days]);
+    const consumption = DEBUG_USE_MOCK_CONSUMPTION ? mockConsumption : realConsumption;
+    const isLoading = DEBUG_USE_MOCK_CONSUMPTION ? false : isQueryLoading;
 
     const byDay = consumption?.byDay ?? [];
     const byAgent = consumption?.byAgent ?? [];
     const agentTotal = byAgent.reduce((s, a) => s + a.creditsUsed, 0);
 
-    const chartData = {
-        labels: getChartLabels(period),
-        datasets: [
-            {
-                data: byDay,
-                backgroundColor: currentDarkTheme.rgba.primary,
-                borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
-                borderSkipped: false,
-                barPercentage: 0.8,
-                categoryPercentage: 0.9,
-            },
-        ],
-    };
-
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: true } },
-        scales: {
-            x: {
-                display: true,
-                ticks: {
-                    color: subColor,
-                    font: { size: period === "30j" ? 7 : 9 },
-                    maxTicksLimit: period === "90j" ? 4 : undefined,
-                    maxRotation: 0,
-                    minRotation: 0,
-                    padding: 2,
-                },
-                grid: { display: false },
-                border: { display: false },
-            },
-            y: { display: false, grid: { display: false } },
-        },
-    };
+    const chartRows = getChartLabels(period).map((name, i) => ({
+        name,
+        value: byDay[i] ?? 0,
+    }));
 
     return (
         <Card size="none" variant="attachedBottom" h="100%" display="flex" flexDirection="column">
@@ -115,7 +138,10 @@ const ConsumptionCard: React.FC = () => {
                         Consommation
                     </Text>
                     <MultiOptionButtons
-                        options={(["7j", "30j", "90j"] as Period[]).map((p) => ({ value: p, label: p }))}
+                        options={(["7j", "30j", "90j"] as Period[]).map((p) => ({
+                            value: p,
+                            label: p,
+                        }))}
                         value={period}
                         onChange={setPeriod}
                     />
@@ -131,13 +157,22 @@ const ConsumptionCard: React.FC = () => {
                 </Text>
 
                 <Box flex={1} minH="80px" position="relative" w="100%" minW={0}>
-                    {isLoading ? (
-                        <Skeleton h="100%" borderRadius="8px" />
-                    ) : (
-                        <Box position="absolute" inset={0}>
-                            <Bar data={chartData} options={chartOptions} plugins={[backgroundBarsPlugin]} />
-                        </Box>
-                    )}
+                    <Box position="absolute" inset={0}>
+                        <BarChart
+                            status={isLoading ? "loading" : "ready"}
+                            data={chartRows}
+                            xDataKey="name"
+                            margin={{ top: 8, right: 0, bottom: 32, left: 0 }}
+                            aspectRatio=""
+                            className="h-full"
+                        >
+                            <Grid horizontal />
+                            <BackgroundTrack keyPrefix="value" />
+                            <Bar dataKey="value" fill="var(--chart-line-primary)" lineCap={BAR_RADIUS} />
+                            <BarXAxis maxLabels={period === "90j" ? 4 : period === "30j" ? 10 : 7} />
+                            <ChartTooltip showDatePill={false} showDots={false} />
+                        </BarChart>
+                    </Box>
                 </Box>
             </Stack>
 

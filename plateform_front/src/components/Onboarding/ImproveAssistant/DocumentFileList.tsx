@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, HStack, Progress, Text, VStack, useColorMode } from "@chakra-ui/react";
+import { Box, HStack, Progress, Text, VStack } from "@chakra-ui/react";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Status, UploadedSource } from "hooks/useUploadDocuments";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -41,13 +41,11 @@ const statusConfig = {
 };
 
 const DocumentFileList: React.FC<DocumentFileListProps> = ({ sources }) => {
-    const { colorMode } = useColorMode();
-
     if (sources.length === 0) return null;
 
     return (
         <VStack align="start" w="100%" spacing={2} mt="4px" overflow="auto">
-            <Text fontWeight="semibold" color={colorMode === "dark" ? "white" : "grey.900"}>
+            <Text fontWeight="semibold" color="textStrong">
                 Fichiers ajoutés
             </Text>
             {sources.map((source, index) => {
@@ -58,31 +56,26 @@ const DocumentFileList: React.FC<DocumentFileListProps> = ({ sources }) => {
                         w="100%"
                         p={3}
                         border="1px solid"
-                        borderColor={colorMode === "dark" ? "grey.800" : "grey.100"}
+                        borderColor="borderDefault"
                         borderRadius="8px"
-                        bg={colorMode === "dark" ? "grey.800" : "white"}
+                        bg="surfaceAction"
                     >
                         <HStack spacing={3}>
                             <BoxIcon
                                 icon={config.icon}
                                 color={config.color}
-                                bg={colorMode === "dark" ? "grey.850" : "grey.50"}
+                                bg="surfaceThumbnail"
                                 size="sm"
                                 spin={config.spin}
                             />
-                            <Text
-                                fontSize="sm"
-                                color={colorMode === "dark" ? "white" : "grey.900"}
-                                flex={1}
-                                noOfLines={1}
-                            >
+                            <Text fontSize="sm" color="textStrong" flex={1} noOfLines={1}>
                                 {source.name}
                             </Text>
                             {config.showProgress && (
                                 <Progress
                                     value={config.progressValue}
                                     colorScheme="green"
-                                    bg={colorMode === "dark" ? "grey.850" : "grey.100"}
+                                    bg="surfaceThumbnail"
                                     size="sm"
                                     borderRadius="999px"
                                     w="80px"

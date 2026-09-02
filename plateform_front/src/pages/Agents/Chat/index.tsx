@@ -5,6 +5,7 @@ import { ChatInterface } from "components/ui/chat/ChatInterface";
 import { useUserInfo } from "hooks/useUserInfo";
 import { useAgentQuery } from "hooks/chat";
 import mixpanel from "lib/mixpanel";
+import WorkspaceHeader from "@/components/ui/WorkspaceHeader";
 
 const ChatWorkspace = () => {
     const { name } = useUserInfo();
@@ -26,6 +27,10 @@ const ChatWorkspace = () => {
 
     return (
         <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
+            <WorkspaceHeader
+                title="Bac à sable"
+                description="Testez votre agent dans un environnement de démonstration"
+            />
             <Box
                 p={8}
                 px={{ base: 4, xl: 52, lg: 24, md: 16, sm: 8 }}

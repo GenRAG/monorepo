@@ -13,8 +13,6 @@ interface NodeSettingsEditorProps {
     onSettingSelect: (nodeId: string, item: string) => void;
 }
 
-// Minimal view of a settings node — excludes position so that dragging nodes
-// (which mutates the flow store at 60fps) does not re-render this editor.
 interface SettingsNodeView {
     id: string;
     type: TaskType;

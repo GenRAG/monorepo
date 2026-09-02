@@ -5,6 +5,7 @@ import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import { DashboardTab } from "./DashboardTab";
 import { VersionsHistory } from "./VersionsHistory";
 import { DeploymentTab, DeploymentTabs } from "components/Deployment/DeploymentTabs";
+import MembersSection from "components/Deployment/AccessControl/MembersSection";
 
 const DeploymentWorkspace = () => {
     const [activeTab, setActiveTab] = useState<DeploymentTab>(DeploymentTab.Dashboard);
@@ -15,6 +16,8 @@ const DeploymentWorkspace = () => {
                 return <DashboardTab />;
             case DeploymentTab.Versions:
                 return <VersionsHistory />;
+            case DeploymentTab.Access:
+                return <MembersSection />;
         }
     };
 

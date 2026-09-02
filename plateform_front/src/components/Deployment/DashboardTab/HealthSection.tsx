@@ -1,6 +1,7 @@
 import { Badge, Box, HStack, Text, Tooltip, VStack, useColorModeValue } from "@chakra-ui/react";
 import BoxIcon from "components/ui/BoxIcon";
 import { Activity } from "lucide-react";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
 type DayStatus = "operational" | "degraded" | "incident" | "maintenance";
 
@@ -10,9 +11,9 @@ interface DayHealth {
 }
 
 const STATUS_COLOR: Record<DayStatus, string> = {
-    operational: "#12B98C",
+    operational: STATUS_COLORS.success,
     degraded: "#F59E0B",
-    incident: "#EF4444",
+    incident: STATUS_COLORS.error,
     maintenance: "#6B7280",
 };
 

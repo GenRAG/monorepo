@@ -1,12 +1,10 @@
-import { Box, HStack, Text, useColorMode } from "@chakra-ui/react";
+import { Box, HStack, Text } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const STEPS = ["Recherche dans les documents...", "Analyse du contexte...", "Formulation de la réponse..."];
 
 const ThinkingBubble = () => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
     const [stepIndex, setStepIndex] = useState(0);
 
     useEffect(() => {
@@ -20,12 +18,12 @@ const ThinkingBubble = () => {
         <Box
             px={3}
             py={2.5}
-            bg={isDark ? "grey.800" : "grey.50"}
+            bg="inputDisabledBg"
             borderRadius="12px"
             borderBottomLeftRadius="2px"
             borderWidth="1px"
             borderStyle="solid"
-            borderColor={isDark ? "grey.700" : "grey.200"}
+            borderColor="borderDivider"
             maxW="260px"
         >
             <HStack spacing={2} align="center">
@@ -39,7 +37,7 @@ const ThinkingBubble = () => {
                                 width: 6,
                                 height: 6,
                                 borderRadius: "50%",
-                                backgroundColor: isDark ? "#68D391" : "#38A169",
+                                backgroundColor: "var(--chakra-colors-thinkingDotColor)",
                             }}
                         />
                     ))}
@@ -53,7 +51,7 @@ const ThinkingBubble = () => {
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.25 }}
                     >
-                        <Text fontSize="xs" color={isDark ? "grey.400" : "grey.500"} whiteSpace="nowrap">
+                        <Text fontSize="xs" color="textLabel" whiteSpace="nowrap">
                             {STEPS[stepIndex]}
                         </Text>
                     </motion.div>

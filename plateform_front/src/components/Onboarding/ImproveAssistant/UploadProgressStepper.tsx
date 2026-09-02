@@ -10,7 +10,6 @@ import {
     StepTitle,
     StepSeparator,
     Stepper,
-    useColorMode,
 } from "@chakra-ui/react";
 import { FileText, Check, Sparkles, Loader2 } from "lucide-react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
@@ -39,8 +38,6 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
     isProcessing,
     showComparison,
 }) => {
-    const { colorMode } = useColorMode();
-
     const activeStepIndex = showComparison ? 2 : completedFilesCount > 0 ? 1 : 0;
 
     return (
@@ -48,11 +45,11 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
             w="100%"
             h="100%"
             p={4}
-            bg={colorMode === "dark" ? "grey.900" : "white"}
+            bg="backgroundDefault"
             borderRadius="12px"
             mb="4px"
             border="1px solid"
-            borderColor={colorMode === "dark" ? "grey.700" : "grey.200"}
+            borderColor="borderDivider"
         >
             <Stepper
                 index={activeStepIndex}
@@ -68,13 +65,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                         <StepIndicator
                             flexShrink={0}
                             border={index <= activeStepIndex ? "none" : "1px solid #E7E7E7"}
-                            bg={
-                                index <= activeStepIndex
-                                    ? currentDarkTheme.primary
-                                    : colorMode === "dark"
-                                      ? "rgba(255, 255, 255, 1)"
-                                      : "white"
-                            }
+                            bg={index <= activeStepIndex ? currentDarkTheme.primary : "white"}
                         >
                             <StepStatus
                                 complete={
@@ -107,11 +98,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                             />
                                         </Box>
                                     ) : (
-                                        <Icon
-                                            as={step.icon}
-                                            color={colorMode === "dark" ? "grey.500" : "grey.400"}
-                                            boxSize={4}
-                                        />
+                                        <Icon as={step.icon} color="textFaint" boxSize={4} />
                                     )
                                 }
                                 active={
@@ -136,21 +123,13 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                 <Text
                                     fontWeight="semibold"
                                     fontSize="sm"
-                                    color={
-                                        index <= activeStepIndex
-                                            ? colorMode === "dark"
-                                                ? "white"
-                                                : "grey.900"
-                                            : colorMode === "dark"
-                                              ? "grey.400"
-                                              : "grey.600"
-                                    }
+                                    color={index <= activeStepIndex ? "textStrong" : "textDescription"}
                                 >
                                     {step.title}
                                 </Text>
                             </StepTitle>
                             <StepDescription>
-                                <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                                <Text fontSize="xs" color="textDescription">
                                     {step.description}
                                 </Text>
                             </StepDescription>
@@ -160,7 +139,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                 backgroundColor: "transparent",
                                 borderLeft: showComparison
                                     ? `2px solid ${currentDarkTheme.primary}`
-                                    : `2px dashed ${colorMode === "dark" ? currentDarkTheme.rgba.primary30 : "#D1D5DB"}`,
+                                    : "2px dashed var(--chakra-colors-separatorDashAccent)",
                                 transition: "all 0.3s ease-in-out",
                             }}
                         />

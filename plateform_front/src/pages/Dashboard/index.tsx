@@ -10,6 +10,7 @@ import { RecentActivityCard } from "components/Dashboard/RecentActivityCard";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useState } from "react";
 import { useGetWorkspaceStatsQuery } from "services/workspace/workspace";
+import { WorkspaceStats } from "types/workspace";
 
 const buildTrend = (value: number, points = 20): number[] => {
     if (value === 0) return Array(points).fill(0);
@@ -17,6 +18,31 @@ const buildTrend = (value: number, points = 20): number[] => {
         const t = i / (points - 1);
         return value * t * t * (3 - 2 * t);
     });
+};
+
+// TEMP: visual QA for the redesigned MetricCard/ActivityChart against non-empty data.
+// Same shape as WorkspaceStats — remove once the new stat cards are confirmed.
+const DEBUG_USE_MOCK_STATS = true;
+const MOCK_STATS: WorkspaceStats = {
+    agents: { total: 5, production: 3, development: 2, items: [] },
+    documents: { total: 42, indexed: 38, processing: 2, failed: 2 },
+    conversations: { total: 1284, today: 37 },
+    credits: 2520,
+    recentActivity: [],
+    activityChart: {
+        "24h": {
+            labels: Array.from({ length: 24 }, (_, i) => `${i}h`),
+            values: [2, 1, 1, 1, 1, 3, 5, 8, 12, 15, 18, 14, 16, 19, 13, 11, 9, 10, 14, 17, 12, 8, 5, 3],
+        },
+        "7j": {
+            labels: ["Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam.", "Dim."],
+            values: [42, 58, 51, 67, 74, 39, 45],
+        },
+        "30j": {
+            labels: Array.from({ length: 30 }, (_, i) => String(i + 1)),
+            values: Array.from({ length: 30 }, (_, i) => Math.round(30 + 40 * Math.sin(i / 4) + i * 1.5)),
+        },
+    },
 };
 
 const Dashboard = () => {
@@ -27,7 +53,10 @@ const Dashboard = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
-    const { data: stats, isLoading: isStatsLoading } = useGetWorkspaceStatsQuery(workspaceId, { skip: !workspaceId });
+    const { data: realStats, isLoading: isStatsLoading } = useGetWorkspaceStatsQuery(workspaceId, {
+        skip: !workspaceId,
+    });
+    const stats = DEBUG_USE_MOCK_STATS ? MOCK_STATS : realStats;
 
     const conversationsToday = stats?.conversations.today ?? 0;
     const conversationsTodayArr = stats?.activityChart["24h"].values ?? Array(24).fill(0);
@@ -80,7 +109,7 @@ const Dashboard = () => {
                 <MetricCard
                     icon={MessageSquare}
                     label="Conversations aujourd'hui"
-                    value={conversationsToday.toLocaleString("fr-FR")}
+                    value={conversationsToday}
                     trend={`${stats?.conversations.total ?? 0} au total`}
                     trendPositive
                     sparkData={conversationsTodayArr}
@@ -89,7 +118,7 @@ const Dashboard = () => {
                 <MetricCard
                     icon={Bot}
                     label="Agents en production"
-                    value={String(agentsProd)}
+                    value={agentsProd}
                     trend={`${stats?.agents.total ?? 0} agent au total`}
                     trendPositive
                     sparkData={buildTrend(agentsProd)}
@@ -98,7 +127,7 @@ const Dashboard = () => {
                 <MetricCard
                     icon={FileText}
                     label="Documents indexés"
-                    value={String(docsIndexed)}
+                    value={docsIndexed}
                     trend={`${stats?.documents.total ?? 0} au total`}
                     trendPositive
                     sparkData={buildTrend(docsIndexed)}
@@ -107,7 +136,7 @@ const Dashboard = () => {
                 <MetricCard
                     icon={Coins}
                     label="Crédits restants"
-                    value={credits.toLocaleString("fr-FR")}
+                    value={credits}
                     trend="disponibles"
                     trendPositive
                     sparkData={buildTrend(credits, 24)}

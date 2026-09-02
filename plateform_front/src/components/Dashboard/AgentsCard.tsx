@@ -6,9 +6,10 @@ import { WorkspaceStatsAgentItem } from "types/workspace";
 import BoxIcon from "components/ui/BoxIcon";
 import CardHeader from "components/ui/CardHeader";
 import RowContainer from "components/ui/RowContainer";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
 const STATUS_DOT: Record<string, string> = {
-    PRODUCTION: "#12B98C",
+    PRODUCTION: STATUS_COLORS.success,
     DEVELOPMENT: "#6B7280",
 };
 

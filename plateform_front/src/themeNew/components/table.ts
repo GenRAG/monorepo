@@ -4,8 +4,6 @@ import { textStyles } from "themeNew/foundations/typography";
 
 const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(tableAnatomy.keys);
 
-// https://v2.chakra-ui.com/docs/components/table/theming
-
 const simple = definePartsStyle({
     tr: {
         borderColor: "transparent",

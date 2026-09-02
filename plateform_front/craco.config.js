@@ -7,6 +7,7 @@ const workflowSrc = resolve(currentDir, "../packages/workflow/src");
 
 export const webpack = {
   alias: {
+    "@": resolve(currentDir, "src"),
     "@genrag/workflow": resolve(currentDir, "../packages/workflow/src/index.ts"),
     react: resolve(currentDir, "node_modules/react"),
     "react-dom": resolve(currentDir, "node_modules/react-dom"),

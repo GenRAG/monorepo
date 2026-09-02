@@ -8,6 +8,7 @@ export interface GenragButtonProps extends Omit<ButtonProps, "leftIcon" | "right
     rightIcon?: LucideIcon;
     icon?: LucideIcon;
     iconProps?: IconProps;
+    color?: string;
     btnType?: "default" | "icon";
 }
 
@@ -28,7 +29,7 @@ const iconSizes: Record<string, number | string> = {
 };
 
 const Button = React.forwardRef<HTMLButtonElement, GenragButtonProps>(
-    ({ icon, variant, leftIcon, rightIcon, iconProps, btnType = "default", size = "md", ...props }, ref) => {
+    ({ icon, variant, leftIcon, rightIcon, iconProps, btnType = "default", size = "md", color, ...props }, ref) => {
         const validSize = typeof size === "string" ? size : "md";
         const iconSize = iconSizes[validSize] || "16px";
 
@@ -46,7 +47,7 @@ const Button = React.forwardRef<HTMLButtonElement, GenragButtonProps>(
                         props.onClick?.(e);
                     }}
                 >
-                    <Icon as={icon} boxSize={iconSize} {...iconProps} />
+                    <Icon as={icon} boxSize={iconSize} {...iconProps} color={color} />
                 </ChakraButton>
             );
         }

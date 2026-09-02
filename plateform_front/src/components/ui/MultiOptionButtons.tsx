@@ -7,6 +7,7 @@ type Option<T extends string> = {
     label: string;
     icon?: LucideIcon;
     size?: "xs" | "sm" | "md" | "lg";
+    color?: string;
 };
 
 type MultiOptionButtonsProps<T extends string> = {
@@ -14,10 +15,18 @@ type MultiOptionButtonsProps<T extends string> = {
     value: T;
     onChange: (v: T) => void;
     size?: "xs" | "sm" | "md" | "lg";
+    color?: string;
 };
 
-function MultiOptionButtons<T extends string>({ options, value, onChange, size = "xs" }: MultiOptionButtonsProps<T>) {
-    const bgColor = useColorModeValue("grey.50", "grey.900");
+function MultiOptionButtons<T extends string>({
+    options,
+    value,
+    onChange,
+    size = "xs",
+    color,
+}: MultiOptionButtonsProps<T>) {
+    const defaultBgColor = useColorModeValue("grey.50", "grey.900");
+    const bgColor = color || defaultBgColor;
 
     return (
         <HStack spacing={2} p={1} bg={bgColor} borderRadius="8px" flexShrink={0}>

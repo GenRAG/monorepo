@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { ALERTS, type AlertEntry } from "pages/Dashboard/data";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import CardHeader from "components/ui/CardHeader";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
 const SEVERITY_ICON: Record<AlertEntry["severity"], LucideIcon> = {
     error: AlertCircle,
@@ -126,7 +127,7 @@ export const AlertsCard = ({ isEmpty = false, isLoading = false }: AlertsCardPro
             {isEmpty ? (
                 <CardEmptyState
                     icon={CheckCircle}
-                    iconBgColor="#12B98C"
+                    iconBgColor={STATUS_COLORS.success}
                     title="Tout est en ordre"
                     description="Aucune alerte active pour le moment."
                 />

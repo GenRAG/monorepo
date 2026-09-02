@@ -7,7 +7,10 @@ export const STATUS_COLORS = {
     success: colors.green[500],
     accent: colors.green[400],
     error: colors.red[500],
+    warning: colors.orange[500],
 } as const;
+
+export const CHART_GREEN_SHADES = [colors.green[200], colors.green[400], colors.green[600], colors.green[800]] as const;
 
 export const darkThemeColors = {
     green: {

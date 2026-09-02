@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
-import { Box, Stack, VStack, chakra } from "@chakra-ui/react";
+import { Box, Stack, Text, chakra } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { ChatMessage, useAgentQuery } from "hooks/chat";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
-import StepLevel from "components/ui/StepLevel";
 import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
+import Banner from "components/ui/Banner";
 
 const STEP_ID = "test-assistant";
 const MAX_EXCHANGES = 5;
@@ -48,7 +48,6 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
         (msgs: ChatMessage[]) => {
             const last = msgs[msgs.length - 1];
             if (!last) return;
-            // Don't persist error messages — keeps savedMessages clean for the fallback
             updateData({ messages: last.error ? msgs.slice(0, -1) : msgs });
         },
         [updateData],
@@ -57,14 +56,13 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
     return (
         <chakra.form w="100%" h="100%">
             <Stack spacing={4} h="100%">
-                <VStack align="start">
-                    <StepLevel
-                        level={1}
-                        title="Démo"
-                        description="Ce modèle utilise uniquement des documents RH publics. Aucun de vos fichiers n'est encore utilisé."
-                    />
-                </VStack>
-                <OnboardingStepBanner current={messageCount} max={MAX_EXCHANGES} mb={0} />
+                <Banner title="Information concernant cette étape" variant="green">
+                    <Text fontSize="xs">
+                        L&apos;assistant actuel utilise des documents RH publics et des informations générales. Il
+                        n&apos;a pas encore accès à vos documents. Pose lui une question pour tester ses réponses. Tu
+                        peux poser jusqu&apos;à {MAX_EXCHANGES} questions.
+                    </Text>
+                </Banner>
 
                 <Box flex={1} minH={0} display="flex" flexDirection="column" gap={2}>
                     <ChatInterface
@@ -87,6 +85,7 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
                         welcomeMessage="Pose-lui une question ou essaie l'une des suggestions ci-dessous."
                     />
                 </Box>
+                <OnboardingStepBanner current={messageCount} max={MAX_EXCHANGES} mb={0} />
             </Stack>
         </chakra.form>
     );

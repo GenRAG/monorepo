@@ -8,7 +8,7 @@ export interface PlanConfig {
 export const PLANS: Record<PlanTier, PlanConfig> = {
     [PlanTier.FREE]: {
         displayName: 'Découverte',
-        initialCredits: 2500,
+        initialCredits: 180,
     },
     [PlanTier.PRO]: {
         displayName: 'Pro',

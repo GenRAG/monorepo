@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Box, Skeleton, Stack, Text, VStack, useColorMode, chakra } from "@chakra-ui/react";
+import { Box, Skeleton, Stack, Text, VStack, chakra } from "@chakra-ui/react";
 import { MessageCircle, RotateCcw, Search, Zap } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import StepLevel from "components/ui/StepLevel";
 import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
 import ChatInput from "components/ui/chat/ChatInput";
 import Button from "components/ui/Button";
@@ -14,6 +13,7 @@ import {
     useCompareOnboardingMutation,
     useUpdateOnboardingStepsDataMutation,
 } from "services/onboarding/onboarding";
+import Banner from "components/ui/Banner";
 
 const MAX_COMPARES = 2;
 const STEP_ID = "compare-intelligence";
@@ -46,7 +46,6 @@ const CARD_META = [
 ];
 
 export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({ data, updateData }) => {
-    const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { workspaceId } = useOnboarding();
 
@@ -116,12 +115,12 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
         <chakra.form w="100%" h="100%">
             <Stack w="100%" h="100%" spacing={4} flexDirection="column">
                 <VStack align="start" spacing={4} w="100%">
-                    <StepLevel
-                        level={4}
-                        title="Optimisé"
-                        description="Compare les différents styles de réponse et choisis celui qui correspond le mieux à ton usage."
-                    />
-                    <OnboardingStepBanner current={compareCount} max={MAX_COMPARES} />
+                    <Banner title="Information concernant cette étape" variant="green">
+                        <Text fontSize="xs">
+                            Pose une question pour comparer les différentes manières dont l&apos;assistant peut
+                            répondre. Ensuite choisis la réponse que tu préfères pour personnaliser ton assistant.
+                        </Text>
+                    </Banner>
                 </VStack>
 
                 <Box
@@ -130,7 +129,7 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                     overflowY="auto"
                     pr={2}
                     border="1px solid"
-                    borderColor={colorMode === "dark" ? "grey.800" : "grey.200"}
+                    borderColor="borderPanel"
                     borderRadius="12px"
                     p={4}
                 >
@@ -147,16 +146,11 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                     ) : (
                         <VStack spacing={4} align="stretch">
                             <VStack align="flex-end" spacing={1} alignSelf="flex-end" maxW="80%">
-                                <Text fontSize="xs" color={colorMode === "dark" ? "grey.500" : "grey.400"}>
+                                <Text fontSize="xs" color="textFaint">
                                     Vous
                                 </Text>
-                                <Box
-                                    p={3}
-                                    bg={colorMode === "dark" ? "green.700" : "green.100"}
-                                    borderRadius="12px"
-                                    borderBottomRightRadius="2px"
-                                >
-                                    <Text fontSize="sm" color={colorMode === "dark" ? "grey.100" : "green.800"}>
+                                <Box p={3} bg="bubbleAccentBg" borderRadius="12px" borderBottomRightRadius="2px">
+                                    <Text fontSize="sm" color="bubbleAccentText">
                                         {question}
                                     </Text>
                                 </Box>
@@ -170,14 +164,14 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                                             flex={1}
                                             height="200px"
                                             borderRadius="12px"
-                                            startColor={colorMode === "dark" ? "grey.800" : "grey.100"}
-                                            endColor={colorMode === "dark" ? "grey.700" : "grey.200"}
+                                            startColor="skeletonStart"
+                                            endColor="skeletonEnd"
                                         />
                                     ))}
                                 </Stack>
                             ) : responses ? (
                                 <>
-                                    <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                                    <Text fontSize="sm" color="textDescription">
                                         Sélectionne la réponse que tu préfères :
                                     </Text>
 
@@ -213,6 +207,7 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                         </VStack>
                     )}
                 </Box>
+                <OnboardingStepBanner current={compareCount} max={MAX_COMPARES} />
             </Stack>
         </chakra.form>
     );

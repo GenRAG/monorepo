@@ -11,7 +11,6 @@ interface StepFooterProps {
 }
 
 const StepFooter = ({ currentStep, goNext, goPrevious, onValidateAndGoNext, onSkip }: StepFooterProps) => {
-    const borderColor = useColorModeValue("grey.200", "grey.700");
     const skipHoverColor = useColorModeValue("grey.600", "grey.300");
 
     const handleNext = async () => {
@@ -23,15 +22,7 @@ const StepFooter = ({ currentStep, goNext, goPrevious, onValidateAndGoNext, onSk
     };
 
     return (
-        <VStack
-            w="100%"
-            spacing={3}
-            align="stretch"
-            pb="24px"
-            borderTop="1px solid"
-            borderColor={borderColor}
-            p={{ base: "8px", md: "12px" }}
-        >
+        <VStack w="100%" spacing={3} align="stretch" pb="24px" p={{ base: "8px", md: "12px" }}>
             <HStack w="100%" justify="space-between">
                 <Button variant="ghost" isDisabled={currentStep === 0} onClick={goPrevious}>
                     <ArrowLeft size={18} style={{ marginRight: 8 }} />

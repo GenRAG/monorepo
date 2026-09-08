@@ -10,11 +10,18 @@ const fakeAgent = {
     name: 'Support Agent',
     description: 'AI support',
     status: AgentStatus.DEVELOPMENT,
+    retentionDays: null,
     workspaceId: 'workspace-1',
     createdBy: 'user-1',
     updatedBy: 'user-1',
     createdAt: new Date(),
     updatedAt: new Date(),
+};
+
+const fakeAgentListRow = {
+    ...fakeAgent,
+    deployments: [],
+    _count: { documents: 3 },
 };
 
 const mockTx = {
@@ -85,13 +92,16 @@ describe('AgentService', () => {
     });
 
     describe('findAll', () => {
-        it('should return all agents for a workspace', async () => {
-            mockAgentRepository.findAll.mockImplementation(() => Promise.resolve([fakeAgent]));
+        it('should return all agents for a workspace with their documents count', async () => {
+            mockAgentRepository.findAll.mockImplementation(() => Promise.resolve([fakeAgentListRow]));
 
             const result = await service.findAll('workspace-1');
 
             expect(result).toHaveLength(1);
             expect(result[0].id).toBe('agent-1');
+            expect(result[0].documentsCount).toBe(3);
+            expect(result[0]).not.toHaveProperty('deployments');
+            expect(result[0]).not.toHaveProperty('_count');
             expect(mockAgentRepository.findAll).toHaveBeenCalledWith('workspace-1');
         });
 

@@ -10,6 +10,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { AgentModule } from './agent/agent.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
+import { AgentAnalyticsModule } from './agent-analytics/agent-analytics.module';
 import { CreditModule } from 'src/credit/credit.module';
 import { DocumentModule } from './document/document.module';
 import { DeploymentModule } from './deployment/deployment.module';
@@ -30,7 +31,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
             imports: [ConfigModule],
             useFactory: (configService: ConfigService) => {
                 const isProduction = configService.get('NODE_ENV') === 'production';
-                const isTest = configService.get('NODE_ENV') === 'development';
+                const isTest = configService.get('NODE_ENV') === 'test';
                 return {
                     pinoHttp: {
                         autoLogging: !isTest,
@@ -77,6 +78,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
         AgentModule,
         WorkflowModule,
         AgentRuntimeModule,
+        AgentAnalyticsModule,
         CreditModule,
         DocumentModule,
         DeploymentModule,

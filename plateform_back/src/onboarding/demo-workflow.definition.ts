@@ -39,8 +39,8 @@ export const DEMO_WORKFLOW_DEFINITION = {
                 settingLabel: 'Large Language Model',
                 inputType: 'SELECT',
                 parentNodeId: 'demo-response',
-                modelName: 'google/gemini-2.5-flash',
-                stringValue: 'google/gemini-2.5-flash',
+                modelName: 'inclusionai/ling-3.0-flash',
+                stringValue: 'inclusionai/ling-3.0-flash',
             },
             position: { x: 380, y: 295 },
             deletable: true,
@@ -106,6 +106,6 @@ export const DEMO_WORKFLOW_DEFINITION = {
     blocks: [
         { name: 'query', type: 'query' },
         { name: 'retrieve', type: 'retrieve', collection_name: 'genrag_knowledge_base', top_k: 5 },
-        { name: 'answer', type: 'answer', model: 'google/gemini-2.5-flash' },
+        { name: 'answer', type: 'answer', model: 'inclusionai/ling-3.0-flash' },
     ],
 };

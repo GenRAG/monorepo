@@ -14,6 +14,8 @@ import {
     ModalBody,
     useColorModeValue,
     Input,
+    Divider,
+    Stack,
 } from "@chakra-ui/react";
 import { Info, Search, X } from "lucide-react";
 import { useReactFlow } from "@xyflow/react";
@@ -251,7 +253,6 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
 
                         <VStack
                             align="stretch"
-                            p={2}
                             spacing={1}
                             maxH="360px"
                             overflowY="auto"
@@ -264,7 +265,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                             }}
                         >
                             {filteredAvailable.length > 0 && (
-                                <>
+                                <Stack px={2} pb={2}>
                                     <Text
                                         fontSize="10px"
                                         fontWeight={700}
@@ -287,11 +288,11 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                             tooltipContent={tooltipContent[nodeType]}
                                         />
                                     ))}
-                                </>
+                                </Stack>
                             )}
 
                             {filteredAvailable.length === 0 && availableNodes.length > 0 && (
-                                <Flex justify="center" py={8}>
+                                <Flex justify="center" py={8} px={2}>
                                     <Text fontSize="sm" color={subColor}>
                                         Aucun nœud ne correspond à &quot;
                                         <Text as="span" color={textColor}>
@@ -303,16 +304,16 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                             )}
 
                             {availableNodes.length === 0 && filteredAvailable.length === 0 && (
-                                <Flex justify="center" py={8}>
+                                <Flex justify="center" py={8} px={2}>
                                     <Text fontSize="sm" color={subColor}>
                                         Pas de blocs disponibles.
                                     </Text>
                                 </Flex>
                             )}
+                            <Divider borderColor={dividerColor} my={2} />
 
                             {alreadyUsedNodes.length > 0 && !query && (
-                                <>
-                                    <Box borderTop="1px solid" borderColor={dividerColor} mt={2} />
+                                <Stack px={2} pb={2}>
                                     <Text
                                         fontSize="10px"
                                         fontWeight={700}
@@ -335,7 +336,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                             tooltipContent={tooltipContent[nodeType]}
                                         />
                                     ))}
-                                </>
+                                </Stack>
                             )}
                         </VStack>
 

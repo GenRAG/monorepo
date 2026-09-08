@@ -4,11 +4,8 @@ import { textStyles } from "themeNew/foundations/typography";
 
 const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(tableAnatomy.keys);
 
-// https://v2.chakra-ui.com/docs/components/table/theming
-
 const simple = definePartsStyle({
     tr: {
-        //borderBottom: "1px solid",
         borderColor: "transparent",
         _last: {
             borderBottom: "none",
@@ -17,7 +14,6 @@ const simple = definePartsStyle({
     th: {
         px: 4,
         borderColor: "transparent",
-        //borderBottom: "1px solid",
         "&[data-is-numeric=true]": {
             textAlign: "end",
         },
@@ -25,7 +21,6 @@ const simple = definePartsStyle({
     td: {
         px: 4,
         borderColor: "transparent",
-        //borderBottom: "1px solid",
         "&[data-is-numeric=true]": {
             textAlign: "end",
         },
@@ -33,9 +28,11 @@ const simple = definePartsStyle({
     thead: {
         th: {
             px: 4,
+            py: 2,
             ...textStyles["caption-lg"],
             letterSpacing: "0px",
             textTransform: "none",
+            fontSize: "10px",
             _dark: {
                 borderColor: "grey.800",
                 color: "grey.300",
@@ -44,12 +41,10 @@ const simple = definePartsStyle({
                 borderColor: "grey.100",
                 color: "grey.900",
             },
-            //borderBottom: "2px solid",
         },
     },
     tbody: {
         tr: {
-            //borderBottom: "1px solid",
             borderBottomColor: "transparent",
             _last: {
                 borderBottom: "none",
@@ -62,7 +57,6 @@ const simple = definePartsStyle({
             px: 4,
             py: 3,
             borderColor: "transparent",
-            //borderBottom: "1px solid",
         },
     },
 });

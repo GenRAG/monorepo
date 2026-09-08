@@ -81,7 +81,14 @@ export const MembersSection = () => {
     };
 
     return (
-        <Box borderRadius="12px" borderWidth="1px" borderStyle="solid" borderColor={borderColor} bg={containerBg}>
+        <Box
+            borderRadius="12px"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor={borderColor}
+            bg={containerBg}
+            w="100%"
+        >
             <SectionHeader
                 icon={UserPlus}
                 title="Membres autorisés"

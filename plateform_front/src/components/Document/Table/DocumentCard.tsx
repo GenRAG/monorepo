@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, Card, HStack, Text } from "@chakra-ui/react";
 import { DocumentStatusBadge } from "components/ui/DocumentStatusBadge";
 import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { formatFileSize, getFileTypeBadgeConfig } from "utils/documentFormatters";
@@ -67,12 +67,9 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
     onDownload,
 }) => {
     return (
-        <Box
+        <Card
+            size="none"
             bg="surfacePrimary"
-            borderWidth="1px"
-            borderStyle="solid"
-            borderColor="borderDefault"
-            borderRadius="12px"
             overflow="hidden"
             cursor="pointer"
             onClick={onPreview}
@@ -113,6 +110,6 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                     </HStack>
                 </HStack>
             </Box>
-        </Box>
+        </Card>
     );
 };

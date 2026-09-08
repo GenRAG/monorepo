@@ -3,8 +3,6 @@ import colors from "themeNew/foundations/colors";
 const PinInput = {
     variants: {
         default: {
-            // border: `1px solid ${colors.grey[500]}`,
-            // background: colors.grey[100],
             border: `1px solid ${colors.grey[50]}`,
             background: "white",
             borderRadius: "4px",
@@ -40,7 +38,6 @@ const PinInput = {
             h: "32px",
         },
     },
-    // border: `1px solid ${colors.grey[700]}`,
     defaultProps: {
         size: "md",
         variant: "default",

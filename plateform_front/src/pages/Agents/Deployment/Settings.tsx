@@ -1,14 +1,13 @@
-import { Box, VStack } from "@chakra-ui/react";
+import { Box, VStack, Stack } from "@chakra-ui/react";
 import DataPrivacy from "components/Deployment/Settings/DataPrivacy";
-//import HostingRegion from "components/Deployment/Settings/HostingRegion";
 import RGPDBanner from "components/Deployment/Settings/RGPDBanner";
 import { UserRights } from "components/Deployment/Settings/UserRights";
 import { QueryLogsTable } from "components/Deployment/Settings/QueryLogsTable";
 import DangerZone from "components/ui/DangerZone";
-import { useIsDark } from "hooks/useIsDark";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteAgentMutation, useGetAgentByIdQuery, useUpdateAgentMutation } from "services/agent/agent";
+import WorkspaceHeader from "@/components/ui/WorkspaceHeader";
 
 const AgentDangerZone = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
@@ -40,7 +39,6 @@ const AgentDangerZone = () => {
 };
 
 export const Settings = () => {
-    const isDark = useIsDark();
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
     const [apiLogs, setApiLogs] = useState(true);
 
@@ -54,20 +52,23 @@ export const Settings = () => {
     };
 
     return (
-        <Box flex={1} overflowY="auto" p={6} bg={isDark ? "grey.975" : "white"}>
-            <VStack spacing={5} align="stretch" maxW="820px" mx="auto">
-                <RGPDBanner />
-                {/* <HostingRegion /> */}
-                <DataPrivacy
-                    apiLogs={apiLogs}
-                    onApiLogsChange={setApiLogs}
-                    retentionDays={retentionDays}
-                    onRetentionDaysChange={handleRetentionDaysChange}
-                />
-                {apiLogs && <QueryLogsTable />}
-                <UserRights />
-                <AgentDangerZone />
-            </VStack>
-        </Box>
+        <Stack flex={1} minH={0} spacing={0} overflow="hidden">
+            <WorkspaceHeader title="Paramètres" description="Gérez les paramètres de votre agent." />
+            <Box flex={1} minH={0} overflowY="auto" p={6}>
+                <VStack spacing={5} align="stretch" mx="auto">
+                    <RGPDBanner />
+                    {/* <HostingRegion /> */}
+                    <DataPrivacy
+                        apiLogs={apiLogs}
+                        onApiLogsChange={setApiLogs}
+                        retentionDays={retentionDays}
+                        onRetentionDaysChange={handleRetentionDaysChange}
+                    />
+                    {apiLogs && <QueryLogsTable />}
+                    <UserRights />
+                    <AgentDangerZone />
+                </VStack>
+            </Box>
+        </Stack>
     );
 };

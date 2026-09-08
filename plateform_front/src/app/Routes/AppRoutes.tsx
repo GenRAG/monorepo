@@ -8,7 +8,7 @@ import Dashboard from "pages/Dashboard";
 import { ProfilePage } from "pages/Profile";
 import { Route, useParams } from "react-router-dom";
 
-const ChatRoute = () => {
+export const ChatRoute = () => {
     const { assistantId } = useParams<{ assistantId: string }>();
     return <Assistant key={assistantId} />;
 };
@@ -17,8 +17,6 @@ export const AppRoutes = () => (
     <Route element={<PrivateAppLayout />}>
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/assistants" element={<AssistantsList />} />
-        <Route path="/assistants/:assistantId" element={<ChatRoute />} />
-        <Route path="/assistants/:assistantId/conversations/:conversationId" element={<ChatRoute />} />
         <Route path="/billing" element={<BillingWorkspace />} />
 
         <Route element={<WorkspaceGuard />}>

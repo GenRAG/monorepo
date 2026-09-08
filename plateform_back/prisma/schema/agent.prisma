@@ -55,6 +55,9 @@ model AgentQueryLog {
   durationMs  Int
   status      QueryLogStatus
   creditsUsed Int            @default(1)
+  costByModel Json?
+  costByType  Json?
+  sources     Json?
   createdAt   DateTime       @default(now())
 }
 

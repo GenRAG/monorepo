@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text, VStack, useColorMode } from "@chakra-ui/react";
+import { Box, HStack, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { ChatMessage } from "hooks/chat";
 import ChatResponseBubble from "./ChatResponseBubble";
 
@@ -31,6 +31,17 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
                         Assistant
                     </Text>
                     <ChatResponseBubble response={message.response} isError={message.error} />
+                    {message.sources && message.sources.length > 0 && (
+                        <HStack spacing={2} flexWrap="wrap">
+                            {message.sources.map((source) => (
+                                <Box key={source.index} px={2} py={1} borderRadius="4px" bg="surfaceSubtle">
+                                    <Text fontSize="xs" color="textBody">
+                                        {source.title}
+                                    </Text>
+                                </Box>
+                            ))}
+                        </HStack>
+                    )}
                 </VStack>
             )}
         </React.Fragment>

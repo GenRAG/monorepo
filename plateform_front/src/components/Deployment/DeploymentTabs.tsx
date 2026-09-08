@@ -1,14 +1,16 @@
-import { Activity, Clock } from "lucide-react";
+import { Activity, Clock, Lock } from "lucide-react";
 import { TabBar } from "components/ui/TabBar";
 
 export enum DeploymentTab {
     Dashboard = "dashboard",
     Versions = "versions",
+    Access = "access",
 }
 
 const TABS = [
     { value: DeploymentTab.Dashboard, label: "Tableau de bord", icon: Activity },
     { value: DeploymentTab.Versions, label: "Versions", icon: Clock },
+    { value: DeploymentTab.Access, label: "Controle d'accès", icon: Lock },
 ];
 
 interface DeploymentTabsProps {

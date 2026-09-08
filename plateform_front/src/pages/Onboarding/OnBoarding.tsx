@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import "pages/Onboarding/onboardingAnimations.css";
-import { Box, Button, HStack, Spinner, Stack, Text, VStack, useColorModeValue, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, HStack, Spinner, Stack, Text, VStack, useDisclosure } from "@chakra-ui/react";
 import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
@@ -10,7 +10,6 @@ import StepFooter from "components/Onboarding/StepFooter";
 import OnboardingHeader from "components/Onboarding/Stepper/OnboardingHeader";
 import OnboardingSidebar from "components/Onboarding/Stepper/OnboardingSidebar";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import { useIsDark } from "hooks/useIsDark";
 
 const SESSION_ERROR_MESSAGES = {
     not_found: {
@@ -41,14 +40,10 @@ const OnboardingContent: React.FC = () => {
     } = useOnboarding();
 
     const navigate = useNavigate();
-    const isDark = useIsDark();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const errorBg = useColorModeValue("white", "grey.900");
-    const errorBorder = useColorModeValue("grey.200", "grey.700");
 
     const containerStyles = {
-        bg: isDark ? "grey.950" : "white",
-        borderColor: isDark ? "grey.700" : "#acacac81",
+        borderColor: "borderDivider",
     };
     const responsivePadding = { base: 4, md: 6, lg: 10 };
 
@@ -84,7 +79,7 @@ const OnboardingContent: React.FC = () => {
         return (
             <Stack h="100vh" align="center" justify="center" spacing={4}>
                 <Spinner size="lg" color={currentDarkTheme.primary} />
-                <Text color={isDark ? "grey.400" : "grey.600"} fontSize="sm">
+                <Text color="textDescription" fontSize="sm">
                     Chargement de votre session...
                 </Text>
             </Stack>
@@ -98,23 +93,24 @@ const OnboardingContent: React.FC = () => {
                 <VStack
                     spacing={6}
                     maxW="480px"
+                    h="100%"
                     w="100%"
                     p={8}
-                    bg={errorBg}
+                    bg="surfaceModal"
                     border="1px solid"
-                    borderColor={errorBorder}
+                    borderColor="borderDivider"
                     borderRadius="16px"
                     align="center"
                     textAlign="center"
                 >
-                    <Box p={4} bg={isDark ? "grey.800" : "grey.100"} borderRadius="12px">
-                        <AlertTriangle size={32} color={isDark ? "#f87171" : "#ef4444"} />
+                    <Box p={4} bg="borderDefault" borderRadius="12px">
+                        <AlertTriangle size={32} color="var(--chakra-colors-errorIconAccent)" />
                     </Box>
                     <VStack spacing={2}>
-                        <Text fontSize="xl" fontWeight="semibold" color={isDark ? "white" : "grey.900"}>
+                        <Text fontSize="xl" fontWeight="semibold" color="textStrong">
                             {title}
                         </Text>
-                        <Text fontSize="sm" color={isDark ? "grey.400" : "grey.600"}>
+                        <Text fontSize="sm" color="textDescription">
                             {description}
                         </Text>
                     </VStack>
@@ -127,24 +123,25 @@ const OnboardingContent: React.FC = () => {
     }
 
     return (
-        <Stack h="100vh" bg={isDark ? "grey.950" : "grey.50"} spacing={0}>
+        <Stack h="100vh" bg="secondBackgroundDefault" spacing={0} overflow="hidden">
             <OnboardingHeader onOpenDrawer={onOpen} />
 
-            <HStack w="100%" h="calc(100vh - 90px)" p={{ base: "12px", md: "24px" }} spacing={0} align="stretch">
-                <OnboardingSidebar
-                    justCompletedStep={justCompletedStep}
-                    isDrawerOpen={isOpen}
-                    onDrawerClose={onClose}
-                />
+            <HStack w="100%" flex={1} minH={0} p={0} spacing={0} align="stretch">
+                <Stack p={4}>
+                    <OnboardingSidebar
+                        justCompletedStep={justCompletedStep}
+                        isDrawerOpen={isOpen}
+                        onDrawerClose={onClose}
+                    />
+                </Stack>
 
                 <VStack
                     flex={{ base: 1, md: 4 }}
                     align="start"
-                    spacing={{ base: 4, md: 8 }}
-                    borderRadius="12px"
-                    roundedLeft={{ xl: 0 }}
-                    border="1px solid"
-                    boxShadow="sm"
+                    px={responsivePadding}
+                    pt={responsivePadding}
+                    borderRadius={0}
+                    borderStyle="solid"
                     justify="space-between"
                     overflow="hidden"
                     h="100%"
@@ -152,15 +149,7 @@ const OnboardingContent: React.FC = () => {
                     {...containerStyles}
                 >
                     <VStack h="100%" align="start" spacing={0} w="100%" justify="space-between" minH={0}>
-                        <Stack
-                            w="100%"
-                            spacing={4}
-                            flex={1}
-                            minH={0}
-                            overflow="hidden"
-                            px={responsivePadding}
-                            pt={responsivePadding}
-                        >
+                        <Stack w="100%" spacing={4} flex={1} minH={0} overflow="hidden">
                             <Text
                                 fontSize="2xl"
                                 color={currentDarkTheme.primary}
@@ -168,7 +157,7 @@ const OnboardingContent: React.FC = () => {
                                 key={`step-text-${currentStep}`}
                                 className="step-text-animation"
                             >
-                                {`ETAPE ${currentStep + 1} / ${stepsConfig.length} — ${currentStepConfig.title}`}
+                                {`ETAPE ${currentStep + 1} / ${stepsConfig.length}`} <br /> {`${currentStepConfig.title}`}
                             </Text>
                             <Box
                                 key={`step-content-${currentStep}`}

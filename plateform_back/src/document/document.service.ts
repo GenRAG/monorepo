@@ -1,7 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { basename } from 'path';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as multer from 'multer';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
@@ -9,13 +8,12 @@ import { DocumentRepository } from './document.repository';
 import { IndexDocumentCommandProps } from './commands/index-document.command';
 import { ConfigService } from '@nestjs/config';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
+import { sanitizeFilename } from 'src/lib/filename.util';
 import ms from 'ms';
 
 const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024;
 const MAX_AGENT_STORAGE = 100 * 1024 * 1024;
 const INDEX_DOCUMENT_JOB = 'index-document';
-
-const sanitizeFilename = (name: string): string => basename(name).replace(/[^\w.-]/g, '_');
 
 @Injectable()
 export class DocumentService {

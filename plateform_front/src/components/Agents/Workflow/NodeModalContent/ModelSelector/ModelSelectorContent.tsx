@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { HStack, Spinner, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { useGetModelsGenerationQuery, useGetModelsRerankQuery } from "services/models/models";
 import { RagModel } from "types/models/models";
@@ -8,12 +8,19 @@ import { ModelDetailPanel } from "./ModelDetailPanel";
 interface Props {
     onSelect: (modelId: string) => void;
     fetchModels: () => ReturnType<typeof useGetModelsGenerationQuery | typeof useGetModelsRerankQuery>;
+    currentModelId?: string;
 }
 
-export const ModelSelectorContent: React.FC<Props> = memo(({ onSelect, fetchModels }: Props) => {
+export const ModelSelectorContent: React.FC<Props> = memo(({ onSelect, fetchModels, currentModelId }: Props) => {
     const { data: models = [], isLoading, isError } = fetchModels();
     const [selectedModel, setSelectedModel] = useState<RagModel | null>(null);
     const subColor = useColorModeValue("grey.500", "grey.400");
+
+    useEffect(() => {
+        if (!currentModelId || models.length === 0) return;
+        const current = models.find((m: RagModel) => m.id === currentModelId);
+        if (current) setSelectedModel(current);
+    }, [models, currentModelId]);
 
     if (isLoading) {
         return (

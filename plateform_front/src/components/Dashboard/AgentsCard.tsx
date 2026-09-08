@@ -1,13 +1,15 @@
-import { Box, HStack, Icon, Skeleton, Text, VStack, type BoxProps } from "@chakra-ui/react";
+import { Box, Card, CardProps, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { Bot, Zap } from "lucide-react";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { AgentStatus } from "types/deployment/deployment";
 import { WorkspaceStatsAgentItem } from "types/workspace";
 import BoxIcon from "components/ui/BoxIcon";
+import CardHeader from "components/ui/CardHeader";
 import RowContainer from "components/ui/RowContainer";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
 const STATUS_DOT: Record<string, string> = {
-    PRODUCTION: "#12B98C",
+    PRODUCTION: STATUS_COLORS.success,
     DEVELOPMENT: "#6B7280",
 };
 
@@ -60,7 +62,7 @@ const AgentRow = ({ agent }: { agent: WorkspaceStatsAgentItem }) => {
     );
 };
 
-interface AgentsCardProps extends BoxProps {
+interface AgentsCardProps extends CardProps {
     agents?: WorkspaceStatsAgentItem[];
     isEmpty?: boolean;
     isLoading?: boolean;
@@ -75,20 +77,13 @@ export const AgentsCard = ({ agents = [], isEmpty = false, isLoading = false, ..
 
     if (isLoading) {
         return (
-            <Box
-                w="100%"
-                bg="surfaceCard"
-                border="1px solid"
-                borderColor="borderDefault"
-                borderRadius="12px"
-                {...props}
-            >
-                <HStack justify="space-between" borderBottom="1px solid" borderColor="borderDefault" p={4}>
+            <Card size="none" w="100%" {...props}>
+                <CardHeader>
                     <HStack spacing={2}>
                         <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
                         <Skeleton {...skeletonProps} h="14px" w="60px" borderRadius="4px" />
                     </HStack>
-                </HStack>
+                </CardHeader>
                 <VStack spacing={0} align="stretch" p={2}>
                     {[...Array(4)].map((_, i) => (
                         <HStack key={i} spacing={3} p={2}>
@@ -106,23 +101,19 @@ export const AgentsCard = ({ agents = [], isEmpty = false, isLoading = false, ..
                         </HStack>
                     ))}
                 </VStack>
-            </Box>
+            </Card>
         );
     }
 
     return (
-        <Box bg="surfaceCard" border="1px solid" borderColor="borderDefault" borderRadius="12px" {...props}>
-            <HStack justify="space-between" borderBottom="1px solid" borderColor="borderDefault" p={4}>
+        <Card size="none" {...props}>
+            <CardHeader>
                 <HStack spacing={2}>
                     <Icon as={Zap} boxSize={3.5} color="textLabel" />
-                    <Text fontSize="sm" fontWeight="600" color="textPrimary">
-                        Agents
-                    </Text>
-                    <Text fontSize="sm" color="textLabel">
-                        {activeCount} actifs
-                    </Text>
+                    <Text variant="body-sm-semibold">Agents</Text>
+                    <Text variant="body-sm-muted">{activeCount} actifs</Text>
                 </HStack>
-            </HStack>
+            </CardHeader>
             {isEmpty ? (
                 <CardEmptyState
                     icon={Bot}
@@ -136,6 +127,6 @@ export const AgentsCard = ({ agents = [], isEmpty = false, isLoading = false, ..
                     ))}
                 </VStack>
             )}
-        </Box>
+        </Card>
     );
 };

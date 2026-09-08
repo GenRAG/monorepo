@@ -1,26 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, HStack, Icon, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Text, VStack } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpDown, CheckCircle2, FileText, ScanSearch } from "lucide-react";
 
 const RerankerOverviewTab = () => {
-    const { colorMode } = useColorMode();
-    const bgColor = useColorModeValue("white", "grey.900");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
-
     return (
         <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             <Box>
-                <Text fontSize="lg" fontWeight="bold" mb={2} color={colorMode === "dark" ? "grey.100" : "grey.900"}>
+                <Text fontSize="lg" fontWeight="bold" mb={2} color="textPrimary">
                     Comment améliorons-nous la pertinence des résultats ?
                 </Text>
 
-                <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" color="textDescription">
                     Nous analysons et réorganisons les résultats récupérés pour prioriser les informations les plus
                     pertinentes
                 </Text>
 
-                <Text fontSize="sm" mt={2} color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" mt={2} color="textDescription">
                     <strong>Plusieurs résultats en entrée.</strong> Nous affichons les{" "}
                     <strong>meilleurs en sortie</strong>.
                 </Text>
@@ -30,10 +26,10 @@ const RerankerOverviewTab = () => {
                 position="relative"
                 w="100%"
                 h="300px"
-                bg={bgColor}
+                bg="backgroundDefault"
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={borderColor}
+                borderColor="borderDivider"
                 overflow="hidden"
             >
                 <RerankerAnimation />
@@ -43,15 +39,11 @@ const RerankerOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.400" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             1. Résultats entrants
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Nous recevons plusieurs documents ou passages récupérés à partir des étapes précédentes (par
                         exemple, résultats de recherche, ingestion de documents, etc.)
                     </Text>
@@ -60,15 +52,11 @@ const RerankerOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.500" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             2. Évaluation de la pertinence
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Chaque résultat est évalué par rapport à la question de l&apos;utilisateur à l&apos;aide
                         d&apos;un modèle de classement IA
                     </Text>
@@ -77,15 +65,11 @@ const RerankerOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.600" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             3. Réorganisation intelligente
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Les résultats sont réorganisés pour placer le contenu le plus pertinent en haut
                     </Text>
                 </Box>
@@ -93,15 +77,11 @@ const RerankerOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.700" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             4. Résultat optimisé
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Les composants en aval reçoivent des résultats de meilleure qualité, mieux classés
                     </Text>
                 </Box>
@@ -172,7 +152,6 @@ export const RerankerAnimation = () => {
 };
 
 const IncomingResultsStep = () => {
-    const { colorMode } = useColorMode();
     const cards = [
         { id: 1, relevance: 0.6, delay: 0 },
         { id: 2, relevance: 0.9, delay: 0.1 },
@@ -210,9 +189,9 @@ const IncomingResultsStep = () => {
                     >
                         <Box
                             h="40px"
-                            bg={colorMode === "dark" ? "grey.800" : "white"}
+                            bg="surfaceAction"
                             border="2px solid"
-                            borderColor={colorMode === "dark" ? "green.300" : "green.200"}
+                            borderColor="borderAccentCard"
                             borderRadius="12px"
                             display="flex"
                             alignItems="center"
@@ -233,7 +212,6 @@ const IncomingResultsStep = () => {
 };
 
 const EvaluationStep = () => {
-    const { colorMode } = useColorMode();
     const [scannedCards, setScannedCards] = useState<Set<number>>(new Set());
     const cards = useMemo(
         () => [
@@ -303,17 +281,9 @@ const EvaluationStep = () => {
                             >
                                 <Box
                                     h="40px"
-                                    bg={colorMode === "dark" ? "grey.800" : "white"}
+                                    bg="surfaceAction"
                                     border="2px solid"
-                                    borderColor={
-                                        isScanned
-                                            ? colorMode === "dark"
-                                                ? "green.500"
-                                                : "green.400"
-                                            : colorMode === "dark"
-                                              ? "green.300"
-                                              : "green.200"
-                                    }
+                                    borderColor={isScanned ? "borderAccentCardActive" : "borderAccentCard"}
                                     borderRadius="12px"
                                     display="flex"
                                     alignItems="center"
@@ -357,7 +327,6 @@ const EvaluationStep = () => {
 
 const ReorganizationStep = () => {
     const [phase, setPhase] = useState<"idle" | "selecting" | "moving" | "reordering">("idle");
-    const { colorMode } = useColorMode();
     const cardsInitial = [
         { id: 1, relevance: 0.6, position: 0 },
         { id: 2, relevance: 0.9, position: 1 },
@@ -421,16 +390,14 @@ const ReorganizationStep = () => {
                         >
                             <Box
                                 h="40px"
-                                bg={colorMode === "dark" ? "grey.800" : "white"}
+                                bg="surfaceAction"
                                 border="2px solid"
                                 borderColor={
                                     isBest && phase !== "reordering"
                                         ? "green.400"
                                         : phase === "reordering" && finalIndex === 0
                                           ? "green.400"
-                                          : colorMode === "dark"
-                                            ? "green.700"
-                                            : "green.200"
+                                          : "borderAccentCardMuted"
                                 }
                                 borderRadius="12px"
                                 display="flex"
@@ -467,7 +434,6 @@ const FinalResultStep = () => {
         { id: 4, relevance: 0.7, rank: 2 },
         { id: 1, relevance: 0.6, rank: 3 },
     ];
-    const { colorMode } = useColorMode();
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -498,7 +464,7 @@ const FinalResultStep = () => {
                     >
                         <Box
                             h={index === 0 ? "50px" : "40px"}
-                            bg={colorMode === "dark" ? "grey.800" : "white"}
+                            bg="surfaceAction"
                             border="2px solid"
                             borderColor={index === 0 ? "green.400" : "green.300"}
                             borderRadius="12px"

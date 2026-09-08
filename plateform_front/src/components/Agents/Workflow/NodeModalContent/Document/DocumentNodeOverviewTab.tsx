@@ -1,24 +1,20 @@
 import { useEffect, useState } from "react";
-import { Box, HStack, Icon, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Text, VStack } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Database, FileText, Search } from "lucide-react";
 
 const DocumentOverviewTab = () => {
-    const bgColor = useColorModeValue("white", "grey.900");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
-    const { colorMode } = useColorMode();
-
     return (
         <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             <Box>
-                <Text fontSize="lg" fontWeight="bold" mb={2} color={colorMode === "dark" ? "grey.100" : "grey.900"}>
+                <Text fontSize="lg" fontWeight="bold" mb={2} color="textPrimary">
                     Comment gérons-nous vos documents ?
                 </Text>
-                <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" color="textDescription">
                     Nous transformons et stockons les documents en vecteurs consultables pour une récupération basée sur
                     l&apos;IA
                 </Text>
-                <Text fontSize="sm" mt={2} color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" mt={2} color="textDescription">
                     <strong>Téléchargez</strong> vos documents. Nous gérons <strong>le reste</strong>.
                 </Text>
             </Box>
@@ -27,10 +23,10 @@ const DocumentOverviewTab = () => {
                 position="relative"
                 w="100%"
                 h="200px"
-                bg={bgColor}
+                bg="backgroundDefault"
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={borderColor}
+                borderColor="borderDivider"
                 overflow="hidden"
             >
                 <DocumentDatabaseAnimation />
@@ -40,15 +36,11 @@ const DocumentOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.400" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             1. Ingestion de documents
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Vous pouvez télécharger et traiter divers formats de documents (PDF, TXT, DOCX)
                     </Text>
                 </Box>
@@ -56,15 +48,11 @@ const DocumentOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.500" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             2. Vectorisation
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Nous convertissons du texte en vecteurs numériques à l&apos;aide d&apos;intégrations IA
                     </Text>
                 </Box>
@@ -72,15 +60,11 @@ const DocumentOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.600" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             3. Stockage vectoriel
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Nous stockons les vecteurs dans une base de données optimisée pour une récupération rapide
                     </Text>
                 </Box>
@@ -88,15 +72,11 @@ const DocumentOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.700" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             4. Recherche sémantique
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Nous trouvons des documents similaires en fonction du sens, pas seulement des mots-clés
                     </Text>
                 </Box>
@@ -168,8 +148,6 @@ export const DocumentDatabaseAnimation = () => {
 };
 
 const DocumentIngestionStep = () => {
-    const { colorMode } = useColorMode();
-
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -201,14 +179,14 @@ const DocumentIngestionStep = () => {
                         <VStack
                             w="60px"
                             h="80px"
-                            bg={colorMode === "dark" ? "grey.800" : "white"}
+                            bg="surfaceAction"
                             border="2px solid"
-                            borderColor={colorMode === "dark" ? "green.300" : "green.200"}
+                            borderColor="borderAccentCard"
                             borderRadius="8px"
                             justify="center"
                             boxShadow="md"
                         >
-                            <Icon as={FileText} color={colorMode === "dark" ? "green.400" : "green.500"} boxSize={6} />
+                            <Icon as={FileText} color="iconAccent" boxSize={6} />
                             <Box w="70%" h="2px" bg="grey.300" />
                             <Box w="70%" h="2px" bg="grey.300" />
                             <Box w="50%" h="2px" bg="grey.300" />

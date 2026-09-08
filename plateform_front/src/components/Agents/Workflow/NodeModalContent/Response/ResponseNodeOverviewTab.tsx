@@ -1,26 +1,22 @@
 import { useEffect, useState } from "react";
-import { Box, HStack, Icon, Tag, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Tag, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen, Check, Copy, ExternalLink, FileText, Sparkles } from "lucide-react";
 
 const ResponseOverviewTab = () => {
-    const bgColor = useColorModeValue("white", "grey.900");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
-    const { colorMode } = useColorMode();
-
     return (
         <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             <Box>
-                <Text fontSize="lg" fontWeight="bold" mb={2} color={colorMode === "dark" ? "grey.100" : "grey.900"}>
+                <Text fontSize="lg" fontWeight="bold" mb={2} color="textPrimary">
                     Comment est générée la réponse finale ?
                 </Text>
 
-                <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" color="textDescription">
                     Nous générons une réponse claire et fiable en combinant votre requête avec les documents les plus
                     pertinents.
                 </Text>
 
-                <Text fontSize="sm" mt={2} color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" mt={2} color="textDescription">
                     La réponse est <strong>contextuelle</strong>, <strong>classée</strong> et prête à l&apos;emploi.
                 </Text>
             </Box>
@@ -29,10 +25,10 @@ const ResponseOverviewTab = () => {
                 position="relative"
                 w="100%"
                 h="300px"
-                bg={bgColor}
+                bg="backgroundDefault"
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={borderColor}
+                borderColor="borderDivider"
                 overflow="hidden"
             >
                 <ResponseAnimation />
@@ -42,15 +38,11 @@ const ResponseOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="999px" bg="green.400" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             1. Agrégation du contexte
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Les documents pertinents et les signaux du workflow sont collectés et préparés.
                     </Text>
                 </Box>
@@ -58,15 +50,11 @@ const ResponseOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="999px" bg="green.500" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             2. Génération de la réponse
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Le modèle de langage génère une réponse ancrée dans le contexte récupéré.
                     </Text>
                 </Box>
@@ -74,15 +62,11 @@ const ResponseOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="999px" bg="green.600" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             3. Affinage de la réponse
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         La réponse est affinée pour garantir clarté, pertinence et cohérence.
                     </Text>
                 </Box>
@@ -90,15 +74,11 @@ const ResponseOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="999px" bg="green.700" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             4. Résultat final
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         La réponse finale est livrée avec les sources utilisées pour la générer.
                     </Text>
                 </Box>

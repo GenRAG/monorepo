@@ -5,7 +5,6 @@ import {
     DrawerContent,
     DrawerOverlay,
     HStack,
-    Icon,
     IconButton,
     Stack,
     Text,
@@ -13,7 +12,7 @@ import {
     useDisclosure,
     VStack,
 } from "@chakra-ui/react";
-import { ArrowLeft, Menu, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { Menu, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { agentNavItems, agentNavSections } from "app/Navigation/sidebarConfig";
 import { SidebarItem } from "app/Navigation/SidebarItem";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
@@ -21,6 +20,7 @@ import { useAppResponsive } from "hooks/useAppResponsive";
 import { useNavigate, useParams } from "react-router-dom";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
 import { useGetAgentByIdQuery } from "services/agent/agent";
+import Button from "components/ui/Button";
 
 const AgentSidebar = () => {
     const navigate = useNavigate();
@@ -36,14 +36,11 @@ const AgentSidebar = () => {
 
     const activePath = useActiveSidebarItem(agentNavItems.map((i) => i.id));
 
-    const bg = useColorModeValue("white", "linear-gradient(135deg,rgba(44, 44, 44, 0.54) 0%,rgb(69, 69, 69) 100%)");
-    const bgMobile = useColorModeValue("white", "linear-gradient(135deg,rgb(44, 44, 44) 0%,rgb(69, 69, 69) 100%)");
+    const bg = useColorModeValue("white", "grey.900");
+    const bgMobile = useColorModeValue("white", "linear-gradient(135deg,rgb(46, 52, 60) 0%,rgb(69, 76, 86) 100%)");
     const border = useColorModeValue("grey.100", "grey.700");
     const color = useColorModeValue("grey.900", "white");
     const labelColor = useColorModeValue("grey.500", "grey.400");
-    const backItemColor = useColorModeValue("grey.500", "grey.400");
-    const backItemHoverBg = useColorModeValue("grey.50", "grey.800");
-    const hoverToggleBg = useColorModeValue("grey.100", "grey.700");
 
     const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: !isMobile });
 
@@ -60,6 +57,7 @@ const AgentSidebar = () => {
     };
 
     const agentName = agent?.name?.toUpperCase() ?? "";
+    const ToggleIcon = isOpen ? PanelRightClose : PanelRightOpen;
 
     const sidebarContent = (
         <Stack gap={0} flex={1} overflow="hidden" justify="space-between">
@@ -78,41 +76,25 @@ const AgentSidebar = () => {
                             letterSpacing="0.8px"
                             color={labelColor}
                             noOfLines={1}
+                            flex={1}
+                            minW={0}
                         >
-                            AGENT{agentName ? ` - ${agentName}` : ""}
+                            {agentName}
                         </Text>
                     )}
-                    <IconButton
-                        size="sm"
-                        variant="ghost"
-                        onClick={isMobile ? onToggle : onToggle}
-                        aria-label="Toggle sidebar"
-                        color={color}
-                        _hover={{ bg: hoverToggleBg }}
-                        icon={<Icon boxSize={4} as={isOpen ? PanelRightOpen : PanelRightClose} />}
+                    <Button
+                        size="md"
+                        btnType="icon"
+                        onClick={() => {
+                            onToggle();
+                        }}
+                        icon={ToggleIcon}
+                        flexShrink={0}
                     />
                 </HStack>
+                <Box h="1px" bg="borderSubtle" />
 
-                <VStack align="stretch" spacing={0} mt={1}>
-                    <HStack
-                        px={5}
-                        py="13.5px"
-                        spacing={2}
-                        cursor="pointer"
-                        _hover={{ bg: backItemHoverBg }}
-                        onClick={() => void handleBackToDashboard()}
-                        borderBottom="1px solid"
-                        borderColor={border}
-                        mb={4}
-                    >
-                        <Icon as={ArrowLeft} boxSize={3.5} color={backItemColor} />
-                        {isOpen && (
-                            <Text fontSize="sm" color={backItemColor} fontWeight="medium">
-                                Dashboard
-                            </Text>
-                        )}
-                    </HStack>
-
+                <VStack align="stretch" spacing={2} mt={4}>
                     {agentNavSections.map((section, i) => (
                         <Box key={section.label}>
                             {i > 0 && <Box h={3} />}
@@ -130,17 +112,33 @@ const AgentSidebar = () => {
                                     {section.label}
                                 </Text>
                             )}
-                            {section.items.map(({ id, icon, label }) => (
-                                <SidebarItem
-                                    key={id}
-                                    active={activePath === id}
-                                    onClick={() => void handleItemClick(id)}
-                                    icon={icon}
-                                    label={label}
-                                    open={isOpen}
-                                    size="md"
-                                />
-                            ))}
+                            {section.items.map(({ id, icon, label }) => {
+                                if (id === "retour") {
+                                    return (
+                                        <SidebarItem
+                                            key={id}
+                                            active={activePath === id}
+                                            onClick={() => void handleBackToDashboard()}
+                                            icon={icon}
+                                            label={label}
+                                            open={isOpen}
+                                            size="md"
+                                        />
+                                    );
+                                }
+
+                                return (
+                                    <SidebarItem
+                                        key={id}
+                                        active={activePath === id}
+                                        onClick={() => void handleItemClick(id)}
+                                        icon={icon}
+                                        label={label}
+                                        open={isOpen}
+                                        size="md"
+                                    />
+                                );
+                            })}
                         </Box>
                     ))}
                 </VStack>
@@ -192,7 +190,7 @@ const AgentSidebar = () => {
             w={isOpen ? "200px" : "60px"}
             bg={bg}
             borderRight="1px solid"
-            borderColor={border}
+            borderColor="borderSubtle"
             display="flex"
             flexDirection="column"
             transition="width 0.3s ease"

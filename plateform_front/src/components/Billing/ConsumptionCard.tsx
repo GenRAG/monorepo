@@ -1,43 +1,47 @@
-import React, { useState, useMemo } from "react";
-import {
-    Box,
-    HStack,
-    Stack,
-    Text,
-    Tooltip as ChakraTooltip,
-    useColorMode,
-    useToken,
-    useColorModeValue,
-    Skeleton,
-} from "@chakra-ui/react";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, type Plugin } from "chart.js";
-import { Bar } from "react-chartjs-2";
+import React, { useState } from "react";
+import { Box, Card, HStack, Stack, Text, Tooltip as ChakraTooltip, Skeleton } from "@chakra-ui/react";
+import { Bar, BarChart, BarXAxis, ChartTooltip, useChart, Grid } from "components/charts";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useGetWorkspaceConsumptionQuery } from "services/credit/credit";
 import { useParams } from "react-router-dom";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
+const AGENT_COLORS = [
+    currentDarkTheme.hex.primary,
+    "#6366F1",
+    "#F59E0B",
+    "#EC4899",
+    "#A855F7",
+    "#3B82F6",
+    "#EF4444",
+    "#10B981",
+];
 
-const AGENT_COLORS = ["#34D3A9", "#6366F1", "#F59E0B", "#EC4899", "#A855F7", "#3B82F6", "#EF4444", "#10B981"];
+const BAR_RADIUS = 6;
 
-const makeBackgroundBarsPlugin = (isDark: boolean): Plugin<"bar"> => ({
-    id: "backgroundBars",
-    beforeDatasetsDraw(chart) {
-        const {
-            ctx,
-            chartArea: { top, bottom },
-        } = chart;
-        chart.getDatasetMeta(0).data.forEach((bar: any) => {
-            ctx.save();
-            ctx.fillStyle = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)";
-            ctx.beginPath();
-            ctx.roundRect(bar.x - bar.width / 2, top, bar.width, bottom - top, 2);
-            ctx.fill();
-            ctx.restore();
-        });
-    },
-});
+const BackgroundTrack = ({ keyPrefix }: { keyPrefix: string }) => {
+    const { data, barScale, bandWidth, barXAccessor, innerHeight } = useChart();
+    if (!(barScale && bandWidth && barXAccessor)) return null;
+    return (
+        <>
+            {data.map((d, i) => {
+                const x = barScale(barXAccessor(d)) ?? 0;
+                return (
+                    <rect
+                        key={`${keyPrefix}-track-${i}`}
+                        x={x}
+                        y={0}
+                        width={bandWidth}
+                        height={innerHeight}
+                        rx={BAR_RADIUS}
+                        ry={BAR_RADIUS}
+                        fill="var(--chart-grid)"
+                    />
+                );
+            })}
+        </>
+    );
+};
 
 type Period = "7j" | "30j" | "90j";
 
@@ -63,15 +67,8 @@ const getChartLabels = (period: Period): string[] => {
 };
 
 const ConsumptionCard: React.FC = () => {
-    const { colorMode } = useColorMode();
     const { workspaceId } = useParams();
-    const isDark = colorMode === "dark";
     const [period, setPeriod] = useState<Period>("30j");
-    const sub = useColorModeValue("grey.500", "grey.400");
-    const border = useColorModeValue("grey.100", "grey.700");
-    const [subColor] = useToken("colors", [isDark ? "grey.400" : "grey.500"]);
-
-    const backgroundBarsPlugin = useMemo(() => makeBackgroundBarsPlugin(isDark), [isDark]);
 
     const days = PERIOD_DAYS[period];
     const { data: consumption, isLoading } = useGetWorkspaceConsumptionQuery(
@@ -83,67 +80,29 @@ const ConsumptionCard: React.FC = () => {
     const byAgent = consumption?.byAgent ?? [];
     const agentTotal = byAgent.reduce((s, a) => s + a.creditsUsed, 0);
 
-    const chartData = {
-        labels: getChartLabels(period),
-        datasets: [
-            {
-                data: byDay,
-                backgroundColor: currentDarkTheme.rgba.primary,
-                borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
-                borderSkipped: false,
-                barPercentage: 0.8,
-                categoryPercentage: 0.9,
-            },
-        ],
-    };
-
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: true } },
-        scales: {
-            x: {
-                display: true,
-                ticks: {
-                    color: subColor,
-                    font: { size: period === "30j" ? 7 : 9 },
-                    maxTicksLimit: period === "90j" ? 4 : undefined,
-                    maxRotation: 0,
-                    minRotation: 0,
-                    padding: 2,
-                },
-                grid: { display: false },
-                border: { display: false },
-            },
-            y: { display: false, grid: { display: false } },
-        },
-    };
+    const chartRows = getChartLabels(period).map((name, i) => ({
+        name,
+        value: byDay[i] ?? 0,
+    }));
 
     return (
-        <Box
-            bg={isDark ? "grey.950" : "white"}
-            border="1px solid"
-            borderTop="none"
-            borderColor={border}
-            borderRadius="12px"
-            borderTopRadius="none"
-            h="100%"
-            display="flex"
-            flexDirection="column"
-        >
+        <Card size="none" variant="attachedBottom" h="100%" display="flex" flexDirection="column">
             <Stack p={{ base: 3, md: 4 }} spacing={0} flex={1} minH={0} display="flex" flexDirection="column">
                 <HStack justify="space-between" flexWrap="wrap" gap={0} flexShrink={0}>
-                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="textPrimary">
                         Consommation
                     </Text>
                     <MultiOptionButtons
-                        options={(["7j", "30j", "90j"] as Period[]).map((p) => ({ value: p, label: p }))}
+                        options={(["7j", "30j", "90j"] as Period[]).map((p) => ({
+                            value: p,
+                            label: p,
+                        }))}
                         value={period}
                         onChange={setPeriod}
                     />
                 </HStack>
 
-                <Text fontSize="xs" color={sub} mb={3} flexShrink={0}>
+                <Text variant="body-xs-muted" mb={3} flexShrink={0}>
                     {period === "7j"
                         ? "7 derniers jours"
                         : period === "30j"
@@ -153,25 +112,34 @@ const ConsumptionCard: React.FC = () => {
                 </Text>
 
                 <Box flex={1} minH="80px" position="relative" w="100%" minW={0}>
-                    {isLoading ? (
-                        <Skeleton h="100%" borderRadius="8px" />
-                    ) : (
-                        <Box position="absolute" inset={0}>
-                            <Bar data={chartData} options={chartOptions} plugins={[backgroundBarsPlugin]} />
-                        </Box>
-                    )}
+                    <Box position="absolute" inset={0}>
+                        <BarChart
+                            status={isLoading ? "loading" : "ready"}
+                            data={chartRows}
+                            xDataKey="name"
+                            margin={{ top: 8, right: 0, bottom: 32, left: 0 }}
+                            aspectRatio=""
+                            className="h-full"
+                        >
+                            <Grid horizontal />
+                            <BackgroundTrack keyPrefix="value" />
+                            <Bar dataKey="value" fill="var(--chart-line-primary)" lineCap={BAR_RADIUS} />
+                            <BarXAxis maxLabels={period === "90j" ? 4 : period === "30j" ? 10 : 7} />
+                            <ChartTooltip showDatePill={false} showDots={false} />
+                        </BarChart>
+                    </Box>
                 </Box>
             </Stack>
 
-            <Box borderTop="1px solid" borderColor={border} p={{ base: 4, md: 5 }} flexShrink={0}>
-                <Text fontSize="12px" color={sub} mb={3}>
+            <Box borderTop="1px solid" borderColor="borderDefault" p={{ base: 4, md: 5 }} flexShrink={0}>
+                <Text variant="body-xs-muted" mb={3}>
                     PAR AGENT
                 </Text>
 
                 {isLoading ? (
                     <Skeleton h="10px" borderRadius="full" mb={3} />
                 ) : byAgent.length === 0 ? (
-                    <Text fontSize="xs" color={sub} mb={3}>
+                    <Text variant="body-xs-muted" mb={3}>
                         Aucune consommation sur cette période.
                     </Text>
                 ) : (
@@ -207,7 +175,7 @@ const ConsumptionCard: React.FC = () => {
                                         bg={AGENT_COLORS[i % AGENT_COLORS.length]}
                                         flexShrink={0}
                                     />
-                                    <Text fontSize="10px" color={sub}>
+                                    <Text fontSize="10px" color="textLabel">
                                         {a.agentName} - {a.creditsUsed}
                                     </Text>
                                 </HStack>
@@ -216,7 +184,7 @@ const ConsumptionCard: React.FC = () => {
                     </>
                 )}
             </Box>
-        </Box>
+        </Card>
     );
 };
 

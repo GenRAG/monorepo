@@ -3,9 +3,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AgentPreview } from "types/agent/agent";
 import { AgentStatus } from "types/deployment/deployment";
-import { Trash2 } from "lucide-react";
+import { Clock, FileText, Trash2 } from "lucide-react";
 import { DeleteAgentModal } from "components/Agents/DeleteAgentModal";
 import { EntityCard } from "components/ui/EntityCard";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
+import { formatDate } from "utils/documentFormatters";
 
 interface AgentCardProps {
     agent: AgentPreview;
@@ -13,8 +15,8 @@ interface AgentCardProps {
 }
 
 const STATUS_CONFIG: Record<AgentStatus, { label: string; color: string }> = {
-    [AgentStatus.DEVELOPMENT]: { label: "Développement", color: "#F59E0B" },
-    [AgentStatus.PRODUCTION]: { label: "Production", color: "#10B981" },
+    [AgentStatus.DEVELOPMENT]: { label: "Développement", color: STATUS_COLORS.warning },
+    [AgentStatus.PRODUCTION]: { label: "Production", color: STATUS_COLORS.success },
 };
 
 export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
@@ -26,11 +28,35 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
 
     const statusStyle = STATUS_CONFIG[agent.status] ?? STATUS_CONFIG[AgentStatus.DEVELOPMENT];
 
+    const hasMeta = typeof agent.documentsCount === "number" || Boolean(agent.updatedAt);
+
     return (
         <>
             <EntityCard
                 title={agent.name}
                 description={agent.description ?? ""}
+                meta={
+                    hasMeta && (
+                        <HStack spacing={3}>
+                            {typeof agent.documentsCount === "number" && (
+                                <HStack spacing={1}>
+                                    <Icon as={FileText} boxSize={3} color={descColor} />
+                                    <Text fontSize="xs" color={descColor}>
+                                        {agent.documentsCount} document{agent.documentsCount !== 1 ? "s" : ""}
+                                    </Text>
+                                </HStack>
+                            )}
+                            {agent.updatedAt && (
+                                <HStack spacing={1}>
+                                    <Icon as={Clock} boxSize={3} color={descColor} />
+                                    <Text fontSize="xs" color={descColor}>
+                                        {formatDate(agent.updatedAt)}
+                                    </Text>
+                                </HStack>
+                            )}
+                        </HStack>
+                    )
+                }
                 onClick={() => navigate(`/workspaces/${workspaceId}/agents/${agent.id}/playground`)}
                 footer={
                     <>

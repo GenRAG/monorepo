@@ -19,9 +19,9 @@ const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({ onOpenDrawer }) => 
         <HStack
             px={{ base: "16px", md: "24px" }}
             py="12px"
-            bg={colorMode === "dark" ? "grey.800" : "white"}
+            bg="surfacePrimary"
             borderBottom="1px"
-            borderColor={colorMode === "dark" ? "grey.700" : "grey.200"}
+            borderColor="borderDivider"
             justify="space-between"
         >
             <HStack spacing={3}>
@@ -31,7 +31,7 @@ const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({ onOpenDrawer }) => 
                         icon={<MenuIcon size={20} />}
                         variant="ghost"
                         onClick={onOpenDrawer}
-                        color={colorMode === "dark" ? "grey.300" : "grey.600"}
+                        color="textBody"
                     />
                 )}
                 <Image src={logoGreen} alt="GenRAG" h="28px" w="28px" />

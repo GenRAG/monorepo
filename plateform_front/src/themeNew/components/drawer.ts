@@ -25,9 +25,7 @@ const Drawer = defineMultiStyleConfig({
             },
         },
         closeButton: {
-            bg: colors.whites.white,
-            borderWidth: "1px",
-            borderColor: colors.grey[100],
+            bg: "surfaceSubtle",
             borderRadius: "4px",
             _focus: {
                 borderColor: "transparent",
@@ -37,8 +35,9 @@ const Drawer = defineMultiStyleConfig({
         },
         footer: {
             bg: colors.whites.offwhite,
-            borderTop: "1px solid",
-            borderColor: colors.grey[50],
+            borderTopWidth: "1px",
+            borderTopStyle: "solid",
+            borderTopColor: colors.grey[50],
         },
     },
 

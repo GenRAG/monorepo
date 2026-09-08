@@ -1,4 +1,4 @@
-import { VStack, HStack, Text, Box, useColorModeValue, useColorMode } from "@chakra-ui/react";
+import { VStack, HStack, Text, Box, useColorModeValue } from "@chakra-ui/react";
 import type { ModelOption } from "@genrag/workflow";
 
 import type { AppNodeData, Task } from "@genrag/workflow";
@@ -126,10 +126,6 @@ interface SettingPlaceholderContentProps {
 export default function SettingPlaceholderContent({ nodeData, onSelect }: SettingPlaceholderContentProps) {
     const configItems = nodeData.configItems ?? [];
     const settingLabel = nodeData.settingLabel ?? "Setting";
-    const { colorMode } = useColorMode();
-    const labelColor = useColorModeValue("grey.500", "grey.400");
-    const dividerColor = useColorModeValue("grey.100", "grey.700");
-
     const isLegacy = configItems.length > 0 && typeof configItems[0] === "string";
 
     return (
@@ -140,13 +136,13 @@ export default function SettingPlaceholderContent({ nodeData, onSelect }: Settin
                     fontWeight={700}
                     letterSpacing="0.08em"
                     textTransform="uppercase"
-                    color={labelColor}
+                    color="textLabel"
                 >
                     {settingLabel}
                 </Text>
             </Box>
 
-            <Box borderTop="1px solid" borderColor={dividerColor} mx={4} mb={3} />
+            <Box borderTop="1px solid" borderColor="borderSubtle" mx={4} mb={3} />
 
             <VStack spacing={2} align="stretch" px={4} pb={4}>
                 {isLegacy
@@ -160,11 +156,11 @@ export default function SettingPlaceholderContent({ nodeData, onSelect }: Settin
                               py={2}
                               borderRadius="8px"
                               border="1px solid"
-                              borderColor={colorMode === "dark" ? "grey.200" : "grey.700"}
+                              borderColor="textSecondary"
                               fontSize="13px"
                               fontWeight={600}
-                              color={colorMode === "dark" ? "grey.200" : "grey.700"}
-                              _hover={colorMode === "dark" ? "grey.200" : "grey.700"}
+                              color="textSecondary"
+                              _hover="textSecondary"
                               transition="all 0.15s"
                               onClick={() => onSelect(item)}
                           >

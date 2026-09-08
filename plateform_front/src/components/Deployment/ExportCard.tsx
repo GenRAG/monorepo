@@ -11,7 +11,7 @@ interface ExportCardProps {
 }
 
 export const ExportCard = ({ icon, title, subtitle, onClick, isLoading }: ExportCardProps) => {
-    const bg = useColorModeValue("white", "grey.900");
+    const bg = useColorModeValue("white", "grey.950");
     const titleColor = useColorModeValue("grey.900", "grey.50");
     const subtitleColor = useColorModeValue("grey.300", "grey.600");
 

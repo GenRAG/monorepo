@@ -54,11 +54,8 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
     const { colorMode } = useColorMode();
     const borderColor = useColorModeValue("grey.50", "grey.700");
 
-    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.950"]);
-    const lineColor = applyAlphaToColor(
-        colorMode === "dark" ? gridLineDark : gridLineLight,
-        colorMode === "dark" ? 0.6 : 1,
-    );
+    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.800"]);
+    const lineColor = colorMode === "dark" ? gridLineDark : gridLineLight;
 
     return (
         <Box

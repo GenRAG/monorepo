@@ -1,16 +1,14 @@
-import { VStack, Box, useColorModeValue } from "@chakra-ui/react";
+import { VStack, Box } from "@chakra-ui/react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import { DashboardTab } from "./DashboardTab";
 import { VersionsHistory } from "./VersionsHistory";
 import { DeploymentTab, DeploymentTabs } from "components/Deployment/DeploymentTabs";
+import MembersSection from "components/Deployment/AccessControl/MembersSection";
 
 const DeploymentWorkspace = () => {
     const [activeTab, setActiveTab] = useState<DeploymentTab>(DeploymentTab.Dashboard);
-
-    const bgColor = useColorModeValue("white", "grey.975");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
 
     const renderContent = () => {
         switch (activeTab) {
@@ -18,21 +16,23 @@ const DeploymentWorkspace = () => {
                 return <DashboardTab />;
             case DeploymentTab.Versions:
                 return <VersionsHistory />;
+            case DeploymentTab.Access:
+                return <MembersSection />;
         }
     };
 
     return (
-        <VStack h="100vh" align="stretch" spacing={0} overflow="hidden" bg={bgColor}>
+        <VStack h="100vh" align="stretch" spacing={0} overflow="hidden" bg="surfaceAppShell">
             <WorkspaceHeader
                 title="Déploiement"
                 description="Promouvoir, surveiller, et gérer les différentes versions de votre agent."
             />
 
-            <Box bg={bgColor} flexShrink={0}>
+            <Box bg="surfaceAppShell" flexShrink={0}>
                 <DeploymentTabs activeTab={activeTab} onChange={setActiveTab} />
             </Box>
 
-            <Box flex={1} minW={0} display="flex" overflow="hidden">
+            <Box flex={1} minW={0} display="flex" overflow="hidden" bg="secondBackgroundDefault">
                 <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                         key={activeTab}

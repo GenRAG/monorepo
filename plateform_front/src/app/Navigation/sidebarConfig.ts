@@ -7,8 +7,8 @@ import {
     Settings,
     CreditCard,
     Cloud,
+    BarChart3,
     type LucideIcon,
-    TowerControl,
 } from "lucide-react";
 
 export interface NavItem {
@@ -33,6 +33,10 @@ export const supportMenu = [];
 
 export const agentNavSections: NavSection[] = [
     {
+        label: "Menu",
+        items: [{ id: "retour", icon: LayoutDashboard, label: "Retour au menu" }],
+    },
+    {
         label: "Développement",
         items: [
             { id: "playground", icon: MessageCircle, label: "Test & chat" },
@@ -43,8 +47,8 @@ export const agentNavSections: NavSection[] = [
     {
         label: "Production",
         items: [
+            { id: "analytics", icon: BarChart3, label: "Analytics" },
             { id: "deploy", icon: Cloud, label: "Déploiement" },
-            { id: "access-control", icon: TowerControl, label: "Contrôle d'accès" },
         ],
     },
     {

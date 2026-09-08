@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useChat, useAssistantQuery } from "hooks/chat";
-import { useUserInfo } from "hooks/useUserInfo";
+import { useChat, useAssistantQuery, RagSource, ChatResponseMeta, ThinkingEvent } from "hooks/chat";
 import {
     useGetChatHistoryQuery,
     useGetAssistantMetadataQuery,
@@ -16,7 +15,6 @@ export const Assistant = () => {
         conversationId?: string;
     }>();
     const navigate = useNavigate();
-    const { name } = useUserInfo();
 
     const [currentConversationId, setCurrentConversationId] = useState<string | null>(conversationIdParam ?? null);
     const currentConversationIdRef = useRef<string | null>(null);
@@ -25,7 +23,7 @@ export const Assistant = () => {
         currentConversationIdRef.current = currentConversationId;
     }, [currentConversationId]);
 
-    const { sendQuery } = useAssistantQuery(assistantId ?? "");
+    const { sendQuery, isOutOfCredits } = useAssistantQuery(assistantId ?? "");
 
     const { data: metadata } = useGetAssistantMetadataQuery(assistantId ?? "", { skip: !assistantId });
     const { data: conversationsData = [], refetch: refetchConversations } = useGetConversationsForAssistantQuery(
@@ -38,18 +36,25 @@ export const Assistant = () => {
     );
 
     const getResponse = useCallback(
-        async (question: string, onChunk: (partial: string) => void) => {
+        async (
+            question: string,
+            onChunk: (partial: string) => void,
+            onSources?: (sources: RagSource[]) => void,
+            onMeta?: (meta: ChatResponseMeta) => void,
+            onThinking?: (event: ThinkingEvent) => void,
+        ) => {
             if (!assistantId) {
                 throw new Error("ID assistant manquant.");
             }
 
             const wasNewConversation = currentConversationIdRef.current === null;
 
-            const { text, conversationId: newConvId } = await sendQuery(
-                question,
-                currentConversationIdRef.current,
-                onChunk,
-            );
+            const {
+                text,
+                conversationId: newConvId,
+                durationMs,
+            } = await sendQuery(question, currentConversationIdRef.current, onChunk, onSources, onThinking);
+            onMeta?.({ durationMs });
             currentConversationIdRef.current = newConvId;
             setCurrentConversationId(newConvId);
 
@@ -89,13 +94,15 @@ export const Assistant = () => {
     const showChat = messages.length > 0 || currentConversationId !== null || isHistoryFetching;
     const title = metadata?.title ?? "Assistant";
     const sharedBy = metadata?.sharedBy;
+    const agentVersion = metadata?.version !== undefined ? `v${metadata.version}` : undefined;
 
     if (showChat) {
         return (
             <AssistantChatLayout
+                assistantId={assistantId}
+                agentVersion={agentVersion}
                 title={title}
                 sharedBy={sharedBy}
-                userName={name}
                 messages={messages}
                 conversations={conversationsData}
                 currentConversationId={currentConversationId}
@@ -104,6 +111,8 @@ export const Assistant = () => {
                 onSend={sendMessage}
                 onSelectConversation={handleConversationSelect}
                 onNewConversation={handleNewConversation}
+                disabled={isOutOfCredits}
+                disabledMessage="Crédits épuisés"
             />
         );
     }
@@ -116,6 +125,8 @@ export const Assistant = () => {
             isLoading={isLoading}
             onSend={sendMessage}
             onSelectConversation={handleConversationSelect}
+            disabled={isOutOfCredits}
+            disabledMessage="Crédits épuisés — contactez l'administrateur pour continuer"
         />
     );
 };

@@ -1,19 +1,19 @@
 import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
-import { ChatMessage, useAgentQuery } from "hooks/chat";
-import { HStack, Stack, VStack, chakra } from "@chakra-ui/react";
+import { ChatMessage, RagSource, ChatResponseMeta, ThinkingEvent, useAgentQuery } from "hooks/chat";
+import { HStack, Stack, Text, VStack, chakra } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
-import StepLevel from "components/ui/StepLevel";
-import useUploadDocuments, { Status } from "hooks/useUploadDocuments";
+import useUploadDocuments, { ACCEPTED_EXTENSIONS, ACCEPTED_TYPES, Status } from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import DocumentDropZone from "components/Onboarding/ImproveAssistant/DocumentDropZone";
+import UploadDropzone from "components/ui/UploadDropzone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
 import { useGetAgentDocumentStatsQuery } from "services/document/document";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
+import Banner from "components/ui/Banner";
 
 const MAX_FILES = 3;
 const MAX_EXCHANGES = 5;
@@ -58,8 +58,14 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
     const showComparison = totalCompletedCount > 0;
 
     const getResponse = useCallback(
-        async (question: string, onChunk: (partialText: string) => void) => {
-            const fullText = await sendQuery(question, onChunk);
+        async (
+            question: string,
+            onChunk: (partialText: string) => void,
+            onSources?: (sources: RagSource[]) => void,
+            _onMeta?: (meta: ChatResponseMeta) => void,
+            onThinking?: (event: ThinkingEvent) => void,
+        ) => {
+            const fullText = await sendQuery(question, onChunk, onSources, onThinking);
             const newCount = messageCount + 1;
             updateData({ messageCount: newCount });
             void updateStepsData({ workspaceId, stepId: STEP_ID, data: { messageCount: newCount } });
@@ -90,14 +96,21 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
         handleFileUpload(e.dataTransfer.files),
     );
 
+    const acceptedTypesString = useMemo(
+        () => [...(ACCEPTED_TYPES as readonly string[]), ...ACCEPTED_EXTENSIONS].join(","),
+        [],
+    );
+
     return (
         <chakra.form w="100%" h="100%" display="flex" flexDirection="column">
             <Stack w="100%" flex={1} minH={0} spacing={8} display="flex" flexDirection="column">
-                <StepLevel
-                    level={showComparison ? 3 : 2}
-                    title={showComparison ? "Personnalisé" : "En cours de personnalisation"}
-                    description="Ton assistant est en train d'être personnalisé avec les documents que tu as ajoutés"
-                />
+                <Banner title="Information concernant cette étape" variant="green">
+                    <Text fontSize="xs">
+                        Ajoute tes documents pour que l&apos;assistant puisse les utiliser pour répondre à tes
+                        questions. Tu peux téléverser jusqu&apos;à {MAX_FILES} fichiers et poser jusqu&apos;à{" "}
+                        {MAX_EXCHANGES} questions.
+                    </Text>
+                </Banner>
 
                 <HStack
                     flexDirection={isMobile ? "column" : "row"}
@@ -108,13 +121,16 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
                     align="start"
                 >
                     <VStack flex={1} w="100%" spacing={4} align="stretch" h="100%">
-                        <DocumentDropZone
+                        <UploadDropzone
                             isDragging={isDragging}
+                            acceptedTypesString={acceptedTypesString}
                             onFileSelect={isAtMaxFiles ? undefined : handleFileUpload}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
+                            title="Ajoute tes documents"
                             disabled={isAtMaxFiles}
+                            disabledMessage={`Limite atteinte (${MAX_FILES} fichiers max)`}
                             maxFiles={MAX_FILES}
                             currentCount={persistedIndexedCount + sessionValidCount}
                         />
@@ -122,7 +138,6 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
                     </VStack>
 
                     <Stack flex={2} minH={0} h="100%" display="flex" flexDirection="column" gap={2} overflow="hidden">
-                        <OnboardingStepBanner current={messageCount} max={MAX_EXCHANGES} mb={0} />
                         <ChatInterface
                             fullHeight={!isMobile}
                             compact={!isMobile}
@@ -144,6 +159,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
                                     : undefined
                             }
                         />
+                        <OnboardingStepBanner current={messageCount} max={MAX_EXCHANGES} mb={0} />
                     </Stack>
                 </HStack>
             </Stack>

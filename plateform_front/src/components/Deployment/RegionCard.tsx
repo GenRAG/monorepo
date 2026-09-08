@@ -14,14 +14,10 @@ export const RegionCard = ({ flag, name, description, badge, isSelected, onClick
     const bgColor = useColorModeValue("white", "grey.900");
 
     const borderColorSelected = useColorModeValue("green.500", "green.500");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
     const borderSelected = useColorModeValue("grey.500", "grey.200");
 
-    const textColor = useColorModeValue("grey.900", "grey.50");
-    const descriptionColor = useColorModeValue("grey.300", "grey.600");
-
     const bg = isSelected ? bgSelectedColor : bgColor;
-    const border = isSelected ? borderColorSelected : borderColor;
+    const border = isSelected ? borderColorSelected : "borderDefault";
 
     return (
         <Box
@@ -46,10 +42,10 @@ export const RegionCard = ({ flag, name, description, badge, isSelected, onClick
                         </Badge>
                     )}
                 </HStack>
-                <Text fontSize="sm" fontWeight={500} color={textColor}>
+                <Text fontSize="sm" fontWeight={500} color="textPrimary">
                     {name}
                 </Text>
-                <Text fontSize="xs" color={descriptionColor}>
+                <Text fontSize="xs" color="textSubtle">
                     {description}
                 </Text>
             </VStack>

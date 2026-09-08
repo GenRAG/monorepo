@@ -1,28 +1,128 @@
-import { Box, HStack, Icon, Skeleton, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import {
+    Badge,
+    Box,
+    Card,
+    HStack,
+    Icon,
+    Skeleton,
+    SkeletonCircle,
+    Text,
+    VStack,
+    useColorModeValue,
+} from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Filler } from "chart.js";
+import { curveCardinal } from "@visx/curve";
+import { LinearGradient } from "@visx/gradient";
+import { useEffect, useId, useState } from "react";
+import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import { Area, AreaChart, ChartStatFlow, PieCenter, PieChart, PieSlice, useChart, type PieData } from "components/charts";
+import { PatternLines } from "@/components/charts/visx-pattern";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler);
+const toSparkRows = (values: number[]) => values.map((value, i) => ({ date: new Date(2020, 0, 1 + i), value }));
 
-const hexToRgba = (hex: string, alpha: number) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+const computeTrendPercent = (data: number[]): number | null => {
+    if (data.length < 2) return null;
+
+    const last = data[data.length - 1];
+    const midpoint = data[Math.floor((data.length - 1) / 2)];
+    const reference = midpoint !== 0 ? midpoint : data.find((v) => v !== 0);
+
+    if (reference === undefined || reference === 0) return null;
+
+    return ((last - reference) / reference) * 100;
+};
+
+interface HoverState {
+    value: number | null;
+}
+
+const SparkHoverBridge = ({ onHoverChange }: { onHoverChange: (state: HoverState) => void }) => {
+    const { tooltipData } = useChart();
+
+    useEffect(() => {
+        const raw = tooltipData?.point?.value;
+        onHoverChange({ value: typeof raw === "number" ? raw : null });
+    }, [tooltipData, onHoverChange]);
+
+    return null;
+};
+
+export interface CompositionSegment {
+    label: string;
+    value: number;
+    color: string;
+}
+
+const COMPOSITION_PIE_SIZE = 160;
+
+const CompositionPie = ({ segments, isLoading, defaultLabel }: { segments: CompositionSegment[]; isLoading: boolean; defaultLabel: string }) => {
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
+    const patternIdBase = `metric-pie-pattern-${useId()}`;
+    const total = segments.reduce((sum, segment) => sum + segment.value, 0);
+
+    if (isLoading) {
+        return (
+            <VStack spacing={2} flexShrink={0}>
+                <SkeletonCircle {...skeletonProps} boxSize={`${COMPOSITION_PIE_SIZE}px`} />
+                <Skeleton {...skeletonProps} h="8px" w="70px" borderRadius="4px" />
+            </VStack>
+        );
+    }
+
+    const pieData: PieData[] = segments.map((segment) => ({
+        label: segment.label,
+        value: segment.value,
+        color: segment.color,
+    }));
+
+    return (
+        <VStack spacing={2} flexShrink={0} align="center" pt={4} pb={1}>
+            <Box boxSize={`${COMPOSITION_PIE_SIZE}px`} flexShrink={0}>
+                {total > 0 ? (
+                    <PieChart data={pieData} size={COMPOSITION_PIE_SIZE} innerRadius={50} hoverOffset={0}>
+                        {segments.map((segment, index) => (
+                            <PatternLines
+                                key={`pattern-${index}`}
+                                id={`${patternIdBase}-${index}`}
+                                height={6}
+                                width={6}
+                                orientation={["diagonal"]}
+                                stroke={segment.color}
+                            />
+                        ))}
+                        {pieData.map((_, index) => (
+                            <PieSlice
+                                key={index}
+                                index={index}
+                                fill={`url(#${patternIdBase}-${index})`}
+                                animate={false}
+                                showGlow={false}
+                                hoverEffect="none"
+                            />
+                        ))}
+                        <PieCenter defaultLabel={defaultLabel} />
+                    </PieChart>
+                ) : (
+                    <Box boxSize="full" borderRadius="full" bg="surfaceHover" />
+                )}
+            </Box>
+        </VStack>
+    );
 };
 
 interface MetricCardProps {
     icon: LucideIcon;
     label: string;
-    value: string;
+    value: number;
     trend: string;
     trendPositive: boolean;
     trendNeutral?: boolean;
-    sparkData: number[];
+    sparkData?: number[];
     sparkColor?: string;
+    composition?: CompositionSegment[];
     isLoading?: boolean;
+    defaultLabel?: string;
 }
 
 export const MetricCard = ({
@@ -34,111 +134,135 @@ export const MetricCard = ({
     trendNeutral,
     sparkData,
     sparkColor,
+    composition,
     isLoading = false,
+    defaultLabel = "Documents",
 }: MetricCardProps) => {
-    const valueCol = useColorModeValue("grey.900", "grey.50");
     const trendGreen = useColorModeValue("green.600", "green.400");
     const trendOrange = useColorModeValue("orange.500", "orange.300");
     const trendRed = useColorModeValue("red.500", "red.400");
     const trendCol = trendNeutral ? trendOrange : trendPositive ? trendGreen : trendRed;
+    const accentColor = sparkColor ?? currentDarkTheme.hex.primary;
+
+    const gradientId = `metric-spark-fill-${useId()}`;
+    const [hover, setHover] = useState<HoverState>({ value: null });
+    const displayValue = hover.value ?? value;
+
+    const trendPercent = sparkData ? computeTrendPercent(sparkData) : null;
+    const trendPercentPositive = (trendPercent ?? 0) >= 0;
 
     const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
-    if (isLoading) {
+    const headerRow = (
+        <HStack justify="space-between" align="start">
+            {isLoading ? (
+                <Skeleton {...skeletonProps} h="10px" w="110px" borderRadius="4px" />
+            ) : (
+                <>
+                    <HStack spacing={1.5}>
+                        <Icon as={icon} boxSize={3} color="textLabel" />
+                        <Text variant="body-sm-muted">{label}</Text>
+                    </HStack>
+                    {trendPercent !== null && (
+                        <Badge
+                            display="flex"
+                            alignItems="center"
+                            gap={0.5}
+                            px={1.5}
+                            py={0.5}
+                            borderRadius="full"
+                            bg={trendPercentPositive ? "rgba(52,211,169,0.12)" : "rgba(239,68,68,0.12)"}
+                            color={trendPercentPositive ? trendGreen : trendRed}
+                        >
+                            <Icon as={trendPercentPositive ? TrendingUp : TrendingDown} boxSize={2.5} />
+                            {trendPercentPositive ? "+" : ""}
+                            {trendPercent.toFixed(1)}%
+                        </Badge>
+                    )}
+                </>
+            )}
+        </HStack>
+    );
+
+    const valueBlock = (
+        <Box>
+            {isLoading ? (
+                <Skeleton {...skeletonProps} h="28px" w="80px" borderRadius="6px" mb={2} />
+            ) : (
+                <ChartStatFlow
+                    value={displayValue}
+                    label=""
+                    valueClassName="text-3xl font-bold"
+                    labelClassName="hidden"
+                />
+            )}
+            {isLoading ? (
+                <Skeleton {...skeletonProps} h="10px" w="60px" borderRadius="4px" />
+            ) : (
+                <HStack spacing={1}>
+                    <Icon
+                        as={trendPositive && !trendNeutral ? TrendingUp : trendNeutral ? TrendingUp : TrendingDown}
+                        boxSize={3}
+                        color={trendCol}
+                    />
+                    <Text fontSize="xs" fontWeight="600" color={trendCol}>
+                        {hover.value !== null ? "Survolé" : trend}
+                    </Text>
+                </HStack>
+            )}
+        </Box>
+    );
+
+    if (composition) {
         return (
-            <Box
-                bg="surfaceCard"
-                border="1px solid"
-                borderColor="borderDefault"
-                borderRadius="12px"
-                overflow="hidden"
-                display="flex"
-                flexDirection="column"
-                gap={3}
-                minH="140px"
-            >
-                <Stack p={4} spacing={2}>
-                    <Skeleton {...skeletonProps} h="10px" w="110px" borderRadius="4px" />
-                    <Skeleton {...skeletonProps} p={4} h="28px" w="80px" borderRadius="6px" />
-                    <Skeleton {...skeletonProps} h="10px" w="60px" borderRadius="4px" />
-                </Stack>
-                <Box mt="auto" mx={-4}>
-                    <Skeleton {...skeletonProps} h="70px" w="100%" borderRadius="0" />
-                </Box>
-            </Box>
+            <Card size="none" p={4} display="flex" flexDirection="row" gap={3} overflow="hidden">
+                <VStack align="stretch" spacing={2} flex={1} minW={0}>
+                    {headerRow}
+                    {valueBlock}
+                </VStack>
+                <CompositionPie segments={composition} isLoading={isLoading} defaultLabel={defaultLabel} />
+            </Card>
         );
     }
 
     return (
-        <Box
-            bg="surfaceCard"
-            border="1px solid"
-            borderColor="borderDefault"
-            borderRadius="12px"
-            p={4}
-            display="flex"
-            flexDirection="column"
-            gap={2}
-        >
-            <HStack spacing={1.5}>
-                <Icon as={icon} boxSize={3} color="textLabel" />
-                <Text fontSize="sm" color="textLabel">
-                    {label}
-                </Text>
-            </HStack>
+        <Card size="none" p={4} display="flex" flexDirection="column" gap={2} overflow="hidden">
+            {headerRow}
+            {valueBlock}
 
-            <Text fontSize="3xl" fontWeight="700" color={valueCol}>
-                {value}
-            </Text>
-
-            <HStack spacing={1}>
-                <Icon
-                    as={trendPositive && !trendNeutral ? TrendingUp : trendNeutral ? TrendingUp : TrendingDown}
-                    boxSize={3}
-                    color={trendCol}
-                />
-                <Text fontSize="xs" fontWeight="600" color={trendCol}>
-                    {trend}
-                </Text>
-            </HStack>
-
-            <Box mt="auto" mx={-4} h="70px" position="relative" minW={0}>
-                <Box position="absolute" inset={0}>
-                    <Line
-                        data={{
-                            labels: sparkData.map(() => ""),
-                            datasets: [
-                                {
-                                    data: sparkData,
-                                    borderColor: sparkColor ?? "#34D3A9",
-                                    borderWidth: 1.5,
-                                    fill: true,
-                                    backgroundColor: (ctx) => {
-                                        const color = sparkColor ?? "#34D3A9";
-                                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 70);
-                                        gradient.addColorStop(0, hexToRgba(color, 0.3));
-                                        gradient.addColorStop(1, hexToRgba(color, 0));
-                                        return gradient;
-                                    },
-                                    tension: 0.4,
-                                    pointRadius: 0,
-                                },
-                            ],
-                        }}
-                        options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            animation: false,
-                            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                            scales: {
-                                x: { display: false },
-                                y: { display: false },
-                            },
-                            elements: { line: { borderCapStyle: "round", borderJoinStyle: "round" } },
-                        }}
-                    />
+            {sparkData && sparkData.length > 0 && (
+                <Box mt="auto" mx={-4} h="70px" position="relative" minW={0}>
+                    <Box position="absolute" inset={0}>
+                        <AreaChart
+                            status={isLoading ? "loading" : "ready"}
+                            loadingLabel=""
+                            data={toSparkRows(sparkData ?? [])}
+                            margin={{ top: 1, right: 0, bottom: 10, left: 0 }}
+                            aspectRatio=""
+                            className="h-full"
+                        >
+                            <SparkHoverBridge onHoverChange={setHover} />
+                            <LinearGradient
+                                id={gradientId}
+                                from={accentColor}
+                                fromOpacity={0.4}
+                                to={accentColor}
+                                toOpacity={0}
+                            />
+                            <Area
+                                dataKey="value"
+                                curve={curveCardinal.tension(0.65)}
+                                stroke={accentColor}
+                                fill={`url(#${gradientId})`}
+                                fillOpacity={1}
+                                strokeWidth={1.5}
+                                showHighlight
+                                loadingStroke={accentColor}
+                            />
+                        </AreaChart>
+                    </Box>
                 </Box>
-            </Box>
-        </Box>
+            )}
+        </Card>
     );
 };

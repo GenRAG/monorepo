@@ -58,7 +58,7 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, d
                     <VStack align="stretch" spacing={6} py={4}>
                         <Banner variant="green" flexShrink={0} gap="0">
                             <HStack>
-                                <Text fontSize="sm">
+                                <Text variant="body-sm">
                                     Votre assistant peut s&apos;appuyer sur ce document pour fournir des réponses
                                     précises et contextualisées selon son contenu.
                                 </Text>

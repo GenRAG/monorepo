@@ -1,5 +1,6 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
+import { RagSource } from "hooks/chat";
 
 export interface ChatResponse {
     response: string;
@@ -12,12 +13,15 @@ export interface ChatMessageHistory {
     response: string;
     timestamp: number;
     isImproved?: boolean;
+    sources?: RagSource[];
+    durationMs?: number;
 }
 
 export interface ChatMetadata {
     id: string;
     title: string;
     sharedBy: string;
+    version?: number;
 }
 
 export interface AssistantPreview {
@@ -70,6 +74,14 @@ export const extendedChatApi = backendApi.injectEndpoints({
                 { type: Tag.Chat, id: `${assistantId}-${conversationId}-messages` },
             ],
         }),
+
+        getSourceUrl: builder.query<{ url: string }, { assistantId: string; title: string }>({
+            query: ({ assistantId, title }) => ({
+                url: `/assistants/${assistantId}/sources/url`,
+                method: "GET",
+                params: { title },
+            }),
+        }),
     }),
 });
 
@@ -78,4 +90,5 @@ export const {
     useGetChatHistoryQuery,
     useGetAssistantsListQuery,
     useGetConversationsForAssistantQuery,
+    useGetSourceUrlQuery,
 } = extendedChatApi;

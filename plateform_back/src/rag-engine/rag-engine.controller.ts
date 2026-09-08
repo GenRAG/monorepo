@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Param } from '@nestjs/common';
 import { RagEngineService } from './rag-execution.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
@@ -15,5 +15,10 @@ export class RagEngineController {
     @Get('models/rerank')
     async getRerankingModels() {
         return this.ragEngineService.getRerankingModels();
+    }
+
+    @Get('models/:modelId/info')
+    async getModelInfo(@Param('modelId') modelId: string) {
+        return this.ragEngineService.getModelInfo(modelId);
     }
 }

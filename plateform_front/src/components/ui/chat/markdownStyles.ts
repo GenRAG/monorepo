@@ -30,4 +30,21 @@ export const getMarkdownStyles = (colorMode: string) => ({
         color: colorMode === "dark" ? "grey.400" : "grey.500",
         fontStyle: "italic",
     },
+    "& table": {
+        borderCollapse: "collapse",
+        marginBottom: "8px",
+        display: "block",
+        overflowX: "auto",
+        maxWidth: "100%",
+    },
+    "& th, & td": {
+        border: "1px solid",
+        borderColor: colorMode === "dark" ? "grey.700" : "grey.200",
+        padding: "6px 10px",
+        textAlign: "left",
+    },
+    "& th": {
+        bg: colorMode === "dark" ? "grey.900" : "grey.100",
+        fontWeight: "bold",
+    },
 });

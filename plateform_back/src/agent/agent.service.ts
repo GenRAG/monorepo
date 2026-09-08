@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAgentRequest } from './dto/create-agent.request';
 import { UpdateAgentRequest } from './dto/update-agent.request';
 import { Agent, Prisma } from 'generated/prisma';
-import { AgentRepository, FindAllAgentResult } from 'src/agent/agent.repository';
+import { AgentListItem, AgentRepository } from 'src/agent/agent.repository';
 
 @Injectable()
 export class AgentService {
@@ -35,8 +35,12 @@ export class AgentService {
         });
     }
 
-    async findAll(workspaceId: string): Promise<FindAllAgentResult[]> {
-        return this.agentRepository.findAll(workspaceId);
+    async findAll(workspaceId: string): Promise<AgentListItem[]> {
+        const agents = await this.agentRepository.findAll(workspaceId);
+        return agents.map(({ deployments: _deployments, _count, ...agent }) => ({
+            ...agent,
+            documentsCount: _count.documents,
+        }));
     }
 
     async findOne(id: string, workspaceId: string): Promise<Agent> {

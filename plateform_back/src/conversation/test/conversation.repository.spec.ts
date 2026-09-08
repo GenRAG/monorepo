@@ -180,7 +180,10 @@ describe('ConversationRepository', () => {
 
             expect(mockPrismaService.agent.findUnique).toHaveBeenCalledWith({
                 where: { id: 'agent-1' },
-                include: { workspace: { select: { name: true } } },
+                include: {
+                    workspace: { select: { name: true } },
+                    deployments: { orderBy: { version: 'desc' }, take: 1, select: { version: true } },
+                },
             });
             expect(result).toEqual(agent);
         });

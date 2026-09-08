@@ -76,7 +76,7 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "tailwind:build": "tailwindcss -i src/tailwind.src.css -o src/tailwind.generated.css",
+    "tailwind:build": "tailwindcss -i src/tailwind.src.css -o src/tailwind.generated.css && node scripts/fix-tailwind-infinity.js",
     "tailwind:watch": "tailwindcss -i src/tailwind.src.css -o src/tailwind.generated.css --watch",
     "dev": "yarn tailwind:build && concurrently \"yarn tailwind:watch\" \"craco start\"",
     "start": "yarn tailwind:build && concurrently \"yarn tailwind:watch\" \"craco start\"",

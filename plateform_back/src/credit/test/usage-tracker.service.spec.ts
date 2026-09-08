@@ -87,16 +87,25 @@ describe('UsageTrackerService', () => {
             });
         });
 
-        it('should throw ForbiddenException when balance is insufficient on SUCCESS', async () => {
+        it('should still debit (even below zero) and log when balance is smaller than the query cost', async () => {
             const mockTx = {
-                creditBalance: { findUnique: (jest.fn() as any).mockResolvedValue({ balance: 0 }) },
+                creditBalance: {
+                    findUnique: (jest.fn() as any).mockResolvedValue({ balance: 0 }),
+                    update: (jest.fn() as any).mockResolvedValue({ balance: -4 }),
+                },
                 agentQueryLog: { create: jest.fn() as any },
             } as any;
             mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
 
-            await expect(service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.SUCCESS })).rejects.toThrow(
-                ForbiddenException,
-            );
+            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.SUCCESS, creditsUsed: 4 });
+
+            expect(mockTx.creditBalance.update).toHaveBeenCalledWith({
+                where: { workspaceId: 'ws-1' },
+                data: { balance: { decrement: 4 } },
+            });
+            expect(mockTx.agentQueryLog.create).toHaveBeenCalledWith({
+                data: expect.objectContaining({ status: QueryLogStatus.SUCCESS, creditsUsed: 4 }),
+            });
         });
     });
 

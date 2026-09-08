@@ -13,10 +13,7 @@ export const TEST_USER_2 = {
     name: 'Test User 2',
 };
 
-export async function registerAndLogin(
-    app: INestApplication,
-    user = TEST_USER,
-): Promise<string> {
+export async function registerAndLogin(app: INestApplication, user = TEST_USER): Promise<string> {
     await request(app.getHttpServer()).post('/auth/register').send(user);
 
     const res = await request(app.getHttpServer())
@@ -31,10 +28,7 @@ export async function createWorkspace(
     cookie: string,
     data = { name: 'Test Workspace', description: 'Test description' },
 ): Promise<string> {
-    const res = await request(app.getHttpServer())
-        .post('/workspaces')
-        .set('Cookie', cookie)
-        .send(data);
+    const res = await request(app.getHttpServer()).post('/workspaces').set('Cookie', cookie).send(data);
 
     return res.body.id;
 }

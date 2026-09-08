@@ -1,7 +1,8 @@
-import { HStack, Icon, Image, useColorModeValue, IconButton } from "@chakra-ui/react";
+import { HStack, Image, useColorModeValue } from "@chakra-ui/react";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import logoGreen from "assets/logo/logoGreen.png";
+import Button from "components/ui/Button";
 
 interface SidebarHeaderProps {
     isOpen: boolean;
@@ -12,29 +13,22 @@ interface SidebarHeaderProps {
     onMobileClose?: () => void;
 }
 
-export const SidebarHeader = ({
-    isOpen,
-    onToggle,
-    title,
-    iconColor = "grey.600",
-    onMobileClose,
-}: SidebarHeaderProps) => {
-    const iconColorValue = useColorModeValue(iconColor, "green.500");
-    const hoverBg = useColorModeValue(currentDarkTheme.rgba.primary20, currentDarkTheme.rgba.primary20);
+export const SidebarHeader = ({ isOpen, onToggle, title, onMobileClose }: SidebarHeaderProps) => {
+    const ToggleIcon = isOpen ? PanelRightClose : PanelRightOpen;
 
     return (
         <HStack justify="space-between" align="center" p={3}>
             {isOpen && <Image src={logoGreen} alt={title} h="28px" w="28px" />}
-            <IconButton
+            <Button
                 size="sm"
-                variant="ghost"
-                onClick={onMobileClose ?? onToggle}
-                aria-label="Toggle Sidebar"
-                color={iconColorValue}
-                _hover={{
-                    bg: hoverBg,
+                btnType="icon"
+                onClick={() => {
+                    onToggle();
+                    if (onMobileClose) {
+                        onMobileClose();
+                    }
                 }}
-                icon={<Icon color={iconColorValue} boxSize={5} as={isOpen ? PanelRightOpen : PanelRightClose} />}
+                icon={ToggleIcon}
             />
         </HStack>
     );

@@ -29,7 +29,7 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
 
     const triggerBg = useColorModeValue("whiteAlpha.100", "whiteAlpha.50");
     const triggerHoverBg = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
-    const popoverBg = useColorModeValue("white", "#1a1a1a");
+    const popoverBg = useColorModeValue("white", "grey.900");
     const popoverBorder = useColorModeValue("grey.100", "#333");
     const headingColor = useColorModeValue("grey.400", "grey.500");
     const nameColor = useColorModeValue("grey.900", "white");

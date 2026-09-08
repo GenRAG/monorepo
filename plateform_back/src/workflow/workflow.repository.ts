@@ -49,9 +49,7 @@ export class WorkflowRepository {
         });
     }
 
-    transaction<T>(
-        fn: (tx: Prisma.TransactionClient) => Promise<T>,
-    ): Promise<T> {
+    transaction<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
         return this.prisma.$transaction(fn);
     }
 }

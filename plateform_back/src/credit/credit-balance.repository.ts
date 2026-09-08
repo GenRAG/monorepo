@@ -11,13 +11,6 @@ export class CreditBalanceRepository {
         return record?.balance ?? 0;
     }
 
-    async incrementBalance(workspaceId: string, amount: number): Promise<void> {
-        await this.prisma.creditBalance.update({
-            where: { workspaceId },
-            data: { balance: { increment: amount } },
-        });
-    }
-
     async incrementOrCreate(
         workspaceId: string,
         amount: number,

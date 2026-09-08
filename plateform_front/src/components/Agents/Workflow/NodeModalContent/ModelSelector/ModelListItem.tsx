@@ -14,7 +14,7 @@ interface Props {
 const ModelListItemBase: React.FC<Props> = ({ model, isSelected, onSelect }) => {
     const bg = useColorModeValue(
         isSelected ? "green.50" : "white",
-        isSelected ? "rgba(45, 226, 151, 0.1)" : "grey.700",
+        isSelected ? "rgba(45, 226, 151, 0.1)" : "grey.950",
     );
     const bgHover = useColorModeValue("green.50", "grey.800");
     const borderHoverColor = useColorModeValue("green.200", "green.700");
@@ -33,10 +33,10 @@ const ModelListItemBase: React.FC<Props> = ({ model, isSelected, onSelect }) => 
             display="flex"
             alignItems="center"
             textAlign="left"
-            px={2}
-            bg={bg}
             borderRadius="8px"
             cursor="pointer"
+            bg={bg}
+            px={2}
             _hover={{ bg: bgHover, borderColor: borderHoverColor }}
             transition="all 0.12s"
             onClick={() => onSelect(model)}
@@ -49,7 +49,7 @@ const ModelListItemBase: React.FC<Props> = ({ model, isSelected, onSelect }) => 
                     </Text>
                     {(provider || ctx) && (
                         <Text fontSize="9px" color={subColor} noOfLines={1}>
-                            {[provider, ctx].filter(Boolean).join(" · ")}
+                            {[provider, ctx].filter(Boolean).join(" - ")}
                         </Text>
                     )}
                 </VStack>

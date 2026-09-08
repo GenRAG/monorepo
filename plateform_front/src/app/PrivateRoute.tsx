@@ -1,7 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "app/AuthContext";
 import { useRef } from "react";
-import { Box, Flex, Spinner } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
+import { AppLoader } from "components/ui/AppLoader";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 
@@ -14,11 +15,7 @@ const PrivateRoute: React.FC = () => {
     }
 
     if (isLoading || !hasChecked.current) {
-        return (
-            <Flex w="100vw" h="100vh" align="center" justify="center">
-                <Spinner />
-            </Flex>
-        );
+        return <AppLoader message="Vérification de l'authentification..." />;
     }
 
     if (!isLoggedIn) {
@@ -26,8 +23,8 @@ const PrivateRoute: React.FC = () => {
     }
 
     return (
-        <Flex w="100vw">
-            <Box flex={1}>
+        <Flex w="100%" minW={0} overflow="hidden">
+            <Box flex={1} minW={0}>
                 <OnboardingProvider steps={stepsConfig}>
                     <Outlet />
                 </OnboardingProvider>

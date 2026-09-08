@@ -1,6 +1,5 @@
 import React from "react";
-import { DrawerHeader, VStack, HStack, Text, Box } from "@chakra-ui/react";
-import { DocumentStatusBadge } from "components/ui/DocumentStatusBadge";
+import { DrawerHeader, VStack, HStack, Text } from "@chakra-ui/react";
 import { DocumentEntity } from "types/document/document";
 import BoxIcon from "components/ui/BoxIcon";
 import { getFileTypeBadgeConfig } from "utils/documentFormatters";

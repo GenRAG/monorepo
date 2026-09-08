@@ -47,6 +47,16 @@ export class ConversationController {
         return this.conversationService.getMessages(user.id, conversationId);
     }
 
+    @Get(':agentId/sources/url')
+    getSourceUrl(
+        @Param('agentId') agentId: string,
+        @Query('title') title: string,
+        @CurrentUser(CurrentUserPipe) user: UserSafe,
+    ) {
+        if (!title) throw new BadRequestException('Title query parameter required');
+        return this.conversationService.getSourceUrl(user.id, agentId, title);
+    }
+
     @Delete(':agentId/conversations/:conversationId')
     deleteConversation(@Param('conversationId') conversationId: string, @CurrentUser(CurrentUserPipe) user: UserSafe) {
         return this.conversationService.deleteConversation(user.id, conversationId);

@@ -1,10 +1,11 @@
-import { Box, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react";
+import { Card, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { Activity, Clock, FileUp, MessageSquare, ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { WorkspaceStatsActivity } from "types/workspace";
 import RowContainer from "components/ui/RowContainer";
 import BoxIcon from "components/ui/BoxIcon";
+import CardHeader from "components/ui/CardHeader";
 
 const ICON_MAP: Record<string, LucideIcon> = {
     conversation: MessageSquare,
@@ -33,11 +34,11 @@ export const RecentActivityItem = ({ item }: { item: WorkspaceStatsActivity }) =
                 <Text variant="body-sm" isTruncated w="100%">
                     {item.title}
                 </Text>
-                <Text variant="caption-xs" color="textLabel" isTruncated w="100%">
+                <Text variant="caption-xs-muted" isTruncated w="100%">
                     {item.subtitle}
                 </Text>
             </VStack>
-            <Text variant="body-xs" color="textLabel" flexShrink={0} whiteSpace="nowrap">
+            <Text variant="body-xs-muted" flexShrink={0} whiteSpace="nowrap">
                 {formatRelativeTime(item.createdAt)}
             </Text>
         </RowContainer>
@@ -55,21 +56,14 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
 
     if (isLoading) {
         return (
-            <Box
-                bg="surfaceCard"
-                border="1px solid"
-                borderColor="borderDefault"
-                borderRadius="12px"
-                display="flex"
-                flexDirection="column"
-            >
-                <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor="borderDefault">
+            <Card size="none" display="flex" flexDirection="column" h="100%">
+                <CardHeader>
                     <HStack spacing={2}>
                         <Skeleton {...skeletonProps} h="14px" w="14px" borderRadius="3px" />
                         <Skeleton {...skeletonProps} h="14px" w="110px" borderRadius="4px" />
                     </HStack>
-                </HStack>
-                <VStack spacing={0} align="stretch">
+                </CardHeader>
+                <VStack spacing={0} align="stretch" h="100%">
                     {[...Array(3)].map((_, i) => (
                         <RowContainer key={i}>
                             <Skeleton {...skeletonProps} w="32px" h="32px" borderRadius="8px" flexShrink={0} />
@@ -81,29 +75,18 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                         </RowContainer>
                     ))}
                 </VStack>
-            </Box>
+            </Card>
         );
     }
 
     return (
-        <Box
-            bg="surfaceCard"
-            border="1px solid"
-            borderColor="borderDefault"
-            borderRadius="12px"
-            display="flex"
-            flexDirection="column"
-            overflow="hidden"
-            h="100%"
-        >
-            <HStack justify="space-between" p={4} borderBottom="1px solid" borderColor="borderDefault">
+        <Card size="none" display="flex" flexDirection="column" overflow="hidden" h="100%">
+            <CardHeader>
                 <HStack spacing={2}>
                     <Icon as={Activity} boxSize={3.5} color="textLabel" />
-                    <Text fontSize="sm" fontWeight="600" color="textPrimary">
-                        Activité récente
-                    </Text>
+                    <Text variant="body-sm-semibold">Activité récente</Text>
                 </HStack>
-            </HStack>
+            </CardHeader>
             {isEmpty ? (
                 <CardEmptyState
                     icon={Clock}
@@ -117,6 +100,6 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                     ))}
                 </VStack>
             )}
-        </Box>
+        </Card>
     );
 };

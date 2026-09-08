@@ -15,7 +15,7 @@ import { Check } from "lucide-react";
 import { ACCEPTED_TYPES, ACCEPTED_EXTENSIONS } from "hooks/useUploadDocuments";
 import useThemedToast from "hooks/useThemedToast";
 import useUploadDocuments from "hooks/useUploadDocuments";
-import UploadDropzone from "./UploadDropzone";
+import UploadDropzone from "components/ui/UploadDropzone";
 import SelectedFilesList from "./SelectedFilesList";
 import UploadProgressList from "./UploadProgressList";
 

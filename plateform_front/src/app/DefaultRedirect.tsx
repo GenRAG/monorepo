@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useGetUserWorkspacesQuery, useCreateWorkspaceMutation } from "services/workspace/workspace";
-import { Spinner, Flex } from "@chakra-ui/react";
 import { WelcomeScreen } from "components/Auth/WelcomeScreen";
+import { AppLoader } from "components/ui/AppLoader";
 
 export default function DefaultRedirect() {
     const navigate = useNavigate();
@@ -37,11 +37,7 @@ export default function DefaultRedirect() {
     }
 
     if (isLoading || isCreating || !workspaces?.length) {
-        return (
-            <Flex h="100vh" align="center" justify="center">
-                <Spinner size="lg" />
-            </Flex>
-        );
+        return <AppLoader message="Chargement de votre espace..." />;
     }
 
     return <Navigate to={`/workspaces/${workspaces[0].id}/agents`} replace />;

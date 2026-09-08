@@ -5,27 +5,67 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
+    Skeleton,
     SimpleGrid,
     Stack,
     Text,
     useColorMode,
     useColorModeValue,
     VStack,
+    Divider,
 } from "@chakra-ui/react";
 import { Clock, Plus, Search, SortAsc } from "lucide-react";
-import { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AgentCard } from "components/Agents/AgentCard";
+import { AgentsStatsRow } from "components/Agents/AgentsStatsRow";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
-import { useIsDark } from "hooks/useIsDark";
-import { SortButton, SortKey } from "pages/Assistant/AssistantList";
+import { SortKey } from "pages/Assistant/AssistantList";
+import { AgentStatus } from "types/deployment/deployment";
 import BoxIcon from "components/ui/BoxIcon";
+import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { useAppResponsive } from "hooks/useAppResponsive";
+
+const COLUMN_BREAKPOINTS = { base: 1, sm: 2, xl: 4 };
+
+const SKELETON_CARD_HEIGHT = 160;
+const GRID_GAP = 12;
+
+const useSkeletonCount = (columns: number) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [count, setCount] = useState(columns * 2);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const observer = new ResizeObserver(([entry]) => {
+            const rows = Math.max(
+                1,
+                Math.round((entry.contentRect.height + GRID_GAP) / (SKELETON_CARD_HEIGHT + GRID_GAP)),
+            );
+            setCount(Math.min(columns * rows, 60));
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [columns]);
+
+    return { containerRef, count };
+};
+
+const CardSkeleton: React.FC = () => (
+    <Skeleton
+        height={`${SKELETON_CARD_HEIGHT}px`}
+        borderRadius="12px"
+        startColor="skeletonStart"
+        endColor="skeletonEnd"
+    />
+);
 
 export const AgentsList = () => {
     const { workspaceId = "default" } = useParams<{ workspaceId: string }>();
     const { data: agents = [], isLoading } = useGetWorkspaceAgentsQuery(workspaceId);
-    const isDark = useIsDark();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [sort, setSort] = useState<SortKey>("recent");
@@ -48,19 +88,31 @@ export const AgentsList = () => {
         });
     }, [agents, searchValue, sort]);
 
+    const stats = useMemo(
+        () => ({
+            total: agents.length,
+            production: agents.filter((agent) => agent.status === AgentStatus.PRODUCTION).length,
+            development: agents.filter((agent) => agent.status === AgentStatus.DEVELOPMENT).length,
+            totalDocuments: agents.reduce((sum, agent) => sum + (agent.documentsCount ?? 0), 0),
+        }),
+        [agents],
+    );
+
     const sub = useColorModeValue("grey.500", "grey.400");
     const titleColor = useColorModeValue("grey.900", "white");
-    const border = isDark ? "grey.700" : "grey.200";
+
+    const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.xl;
+    const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto">
+        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" h="100%">
             <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
                     <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={titleColor}>
                         Agents
                     </Text>
                     <Text fontSize="sm" color={sub}>
-                        Creez et gérez vos agents · {agents.length} au total
+                        Creez et gérez vos agents, vous avez {agents.length} agent(s) au total
                     </Text>
                 </VStack>
 
@@ -73,35 +125,41 @@ export const AgentsList = () => {
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
                         size="sm"
-                        bg={isDark ? "grey.800" : "white"}
-                        border="1px solid"
-                        borderColor={border}
-                        borderRadius="8px"
-                        fontSize="sm"
-                        _placeholder={{ color: sub }}
-                        _focus={{ borderColor: "green.400", boxShadow: "none" }}
                     />
                 </InputGroup>
             </HStack>
 
-            <HStack
-                spacing={0}
-                bg={isDark ? "grey.900" : "grey.50"}
-                border="1px solid"
-                borderColor={border}
-                borderRadius="10px"
-                w="fit-content"
-            >
-                {SortButton("recent", "Récent", Clock, sort, setSort, "first")}
-                {SortButton("az", "A→Z", SortAsc, sort, setSort, "last")}
-            </HStack>
+            {!isLoading && (
+                <AgentsStatsRow
+                    total={stats.total}
+                    production={stats.production}
+                    development={stats.development}
+                    totalDocuments={stats.totalDocuments}
+                />
+            )}
+
+            <MultiOptionButtons
+                options={[
+                    { value: "recent", label: "Récent", icon: Clock },
+                    { value: "az", label: "A→Z", icon: SortAsc },
+                ]}
+                value={sort}
+                onChange={setSort}
+                size="sm"
+            />
+
+            <Divider borderColor="borderSubtle" />
 
             {isLoading ? (
-                <Text color={textSecondary} fontSize="13px">
-                    Chargement...
-                </Text>
+                <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
+                    <SimpleGrid spacing={3} columns={COLUMN_BREAKPOINTS}>
+                        {Array.from({ length: skeletonCount }).map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </SimpleGrid>
+                </Box>
             ) : (
-                <SimpleGrid spacing={3} columns={{ base: 1, sm: 2, xl: 4 }}>
+                <SimpleGrid spacing={3} columns={COLUMN_BREAKPOINTS}>
                     <Box
                         w="100%"
                         minH="160px"

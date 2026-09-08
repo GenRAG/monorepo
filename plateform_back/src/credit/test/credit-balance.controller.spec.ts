@@ -4,7 +4,6 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 const mockCreditBalanceService: any = {
     getBalance: jest.fn(),
     getBalanceSummary: jest.fn(),
-    add: jest.fn(),
 };
 
 describe('CreditBalanceController', () => {
@@ -31,41 +30,6 @@ describe('CreditBalanceController', () => {
             const result = await controller.getBalance('ws-1');
 
             expect(result).toEqual({ balance: 0, totalGranted: 0 });
-        });
-    });
-
-    describe('addCredit', () => {
-        it('should add credits with workspace and amount', async () => {
-            mockCreditBalanceService.add.mockResolvedValue(undefined);
-
-            await controller.addCredit('ws-1', { amount: 1000 });
-
-            expect(mockCreditBalanceService.add).toHaveBeenCalledWith({
-                workspaceId: 'ws-1',
-                amount: 1000,
-            });
-        });
-
-        it('should handle various amounts', async () => {
-            mockCreditBalanceService.add.mockResolvedValue(undefined);
-
-            await controller.addCredit('ws-1', { amount: 5000 });
-
-            expect(mockCreditBalanceService.add).toHaveBeenCalledWith({
-                workspaceId: 'ws-1',
-                amount: 5000,
-            });
-        });
-
-        it('should accept minimum amount (1)', async () => {
-            mockCreditBalanceService.add.mockResolvedValue(undefined);
-
-            await controller.addCredit('ws-1', { amount: 1 });
-
-            expect(mockCreditBalanceService.add).toHaveBeenCalledWith({
-                workspaceId: 'ws-1',
-                amount: 1,
-            });
         });
     });
 });

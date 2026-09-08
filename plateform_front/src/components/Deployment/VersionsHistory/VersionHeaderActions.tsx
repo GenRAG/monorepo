@@ -50,7 +50,8 @@ export const VersionHeaderActions = ({ deployment, workspaceId, agentId }: Versi
                     </Badge>
                 </HStack>
                 <Text fontSize="14px" color={dateColor}>
-                    {formatDate(deployment.createdAt)} · par {deployment.createdByUser?.name ?? deployment.createdBy}
+                    {formatDate(deployment.createdAt)}, deployé par{" "}
+                    {deployment.createdByUser?.name ?? deployment.createdBy}
                 </Text>
             </VStack>
             <HStack flexWrap="wrap">

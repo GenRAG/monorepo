@@ -1,25 +1,22 @@
 import { useEffect, useState } from "react";
-import { Box, HStack, Icon, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Database, MessageSquare, Send, Sparkles, User, WandSparkles, Zap } from "lucide-react";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
 const QueryOverviewTab = () => {
-    const bgColor = useColorModeValue("white", "grey.900");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
-    const { colorMode } = useColorMode();
-
     return (
         <VStack flex={1} p={4} spacing={6} align="stretch" overflowY="auto">
             <Box>
-                <Text fontSize="lg" fontWeight="bold" mb={2} color={colorMode === "dark" ? "grey.100" : "grey.900"}>
+                <Text fontSize="lg" fontWeight="bold" mb={2} color="textPrimary">
                     Comment une requête utilisateur entre-t-elle dans le système ?
                 </Text>
 
-                <Text fontSize="sm" color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" color="textDescription">
                     La requête est le point de départ de l&apos;ensemble du flux de travail GenRAG.
                 </Text>
 
-                <Text fontSize="sm" mt={2} color={colorMode === "dark" ? "grey.400" : "grey.600"}>
+                <Text fontSize="sm" mt={2} color="textDescription">
                     <strong>Posez une question.</strong> Nous la propageons à travers le pipeline.
                 </Text>
             </Box>
@@ -28,10 +25,10 @@ const QueryOverviewTab = () => {
                 position="relative"
                 w="100%"
                 h="200px"
-                bg={bgColor}
+                bg="backgroundDefault"
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={borderColor}
+                borderColor="borderDivider"
                 overflow="hidden"
             >
                 <QueryAnimation />
@@ -41,15 +38,11 @@ const QueryOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.400" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             1. Entrée utilisateur
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         L&apos;utilisateur écrit une question ou une instruction en langage naturel.
                     </Text>
                 </Box>
@@ -57,15 +50,11 @@ const QueryOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.600" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             2. Injection de contexte
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         Les instructions système et les métadonnées sont attachées pour guider la récupération.
                     </Text>
                 </Box>
@@ -73,15 +62,11 @@ const QueryOverviewTab = () => {
                 <Box>
                     <HStack spacing={2} mb={1}>
                         <Box w="8px" h="8px" borderRadius="full" bg="green.700" />
-                        <Text
-                            fontSize="sm"
-                            fontWeight="semibold"
-                            color={colorMode === "dark" ? "grey.100" : "grey.900"}
-                        >
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary">
                             3. Déclenchement du pipeline
                         </Text>
                     </HStack>
-                    <Text fontSize="xs" color={colorMode === "dark" ? "grey.400" : "grey.600"} pl={5}>
+                    <Text fontSize="xs" color="textDescription" pl={5}>
                         La requête est envoyée en aval pour la récupération, le classement et la génération.
                     </Text>
                 </Box>
@@ -225,7 +210,7 @@ const UserInputStep = () => {
                                 style={{
                                     width: "2px",
                                     height: "20px",
-                                    backgroundColor: "#12B98C",
+                                    backgroundColor: STATUS_COLORS.success,
                                     borderRadius: "1px",
                                     marginLeft: "2px",
                                 }}
@@ -359,7 +344,7 @@ const QueryNormalizationStep = () => {
                                         top: "50%",
                                         left: 0,
                                         height: "2px",
-                                        backgroundColor: "#EF4444",
+                                        backgroundColor: STATUS_COLORS.error,
                                     }}
                                 />
                             )}

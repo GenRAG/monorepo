@@ -40,9 +40,9 @@ export const NOTICES_SECTIONS: SectionData[] = [
         title: "Moteur RAG & intelligence artificielle",
         table: [
             { key: "Moteur RAG", value: "API propriétaire — FastAPI (Python), développée dans le cadre du projet" },
-            { key: "Embeddings", value: "OpenRouter — openrouter.ai · Modèle : Qwen3-Embedding-8B (4096 dimensions)" },
-            { key: "Base vectorielle", value: "Qdrant — qdrant.tech · Similarité cosinus, isolation par organisation" },
-            { key: "Stockage documents", value: "MinIO (S3-compatible) — min.io · Fichiers isolés par organisation" },
+            { key: "Embeddings", value: "OpenRouter — openrouter.ai - Modèle : Qwen3-Embedding-8B (4096 dimensions)" },
+            { key: "Base vectorielle", value: "Qdrant — qdrant.tech - Similarité cosinus, isolation par organisation" },
+            { key: "Stockage documents", value: "MinIO (S3-compatible) — min.io - Fichiers isolés par organisation" },
             {
                 key: "Modèles de génération",
                 value: "Plus de 200 modèles disponibles via OpenRouter — openrouter.ai (OpenAI, Mistral AI, Meta, Google, Anthropic et d'autres fournisseurs)",

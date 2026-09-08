@@ -59,7 +59,12 @@ export class AgentRuntimeOrchestrator {
             instructionOverride,
         });
 
-        const { answer, costUsd } = await this.ragEngineService.sendQuery({ pipeline, query, orgId, mock: this.mock });
+        const { answer, costUsd, costByModel, costByType } = await this.ragEngineService.sendQuery({
+            pipeline,
+            query,
+            orgId,
+            mock: this.mock,
+        });
 
         if (!answer) {
             throw new Error('Failed to get an answer from the RAG engine.');
@@ -74,6 +79,8 @@ export class AgentRuntimeOrchestrator {
                     durationMs: Date.now() - startedAt,
                     status: QueryLogStatus.SUCCESS,
                     creditsUsed: costToCredits(costUsd),
+                    costByModel,
+                    costByType,
                 })
                 .catch((e: Error) => {
                     this.logger.error(`Failed to record query: ${e.message}`);

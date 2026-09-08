@@ -1,5 +1,5 @@
 import { backendApi } from "services/api";
-import { RagModel } from "types/models/models";
+import { RagModel, RagModelInfo } from "types/models/models";
 
 export const extendedModelsApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -11,7 +11,11 @@ export const extendedModelsApi = backendApi.injectEndpoints({
             query: () => ({ url: `/rag/models/rerank` }),
             keepUnusedDataFor: 300,
         }),
+        getModelInfo: builder.query<RagModelInfo, string>({
+            query: (modelId) => ({ url: `/rag/models/${encodeURIComponent(modelId)}/info` }),
+            keepUnusedDataFor: 300,
+        }),
     }),
 });
 
-export const { useGetModelsGenerationQuery, useGetModelsRerankQuery } = extendedModelsApi;
+export const { useGetModelsGenerationQuery, useGetModelsRerankQuery, useGetModelInfoQuery } = extendedModelsApi;

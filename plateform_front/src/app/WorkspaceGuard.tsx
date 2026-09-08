@@ -1,7 +1,7 @@
-import { Navigate, Outlet, useParams } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 import { useGetWorkspaceByIdQuery } from "services/workspace/workspace";
 import { useGetOnboardingSessionQuery } from "services/onboarding/onboarding";
-import { Spinner, Flex } from "@chakra-ui/react";
+import { AppLoader } from "components/ui/AppLoader";
 import NotFound from "pages/NotFound";
 
 export default function WorkspaceGuard() {
@@ -16,11 +16,7 @@ export default function WorkspaceGuard() {
     });
 
     if (isLoading || isOnboardingLoading) {
-        return (
-            <Flex h="100vh" align="center" justify="center">
-                <Spinner size="lg" />
-            </Flex>
-        );
+        return <AppLoader message="Chargement de votre espace..." />;
     }
 
     if (isError) {

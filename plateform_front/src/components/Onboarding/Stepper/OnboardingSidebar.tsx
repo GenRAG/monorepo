@@ -22,8 +22,8 @@ interface OnboardingSidebarProps {
     onDrawerClose: () => void;
 }
 
-const sidebarBgLight = "linear-gradient(135deg,rgba(250, 255, 254, 0.72) 0%,rgb(173, 252, 231) 100%)";
-const sidebarBgDark = "linear-gradient(135deg, #0505058a 0%, #363636ff 100%)";
+const sidebarBgLight = "linear-gradient(135deg,rgba(213, 248, 241, 0.72) 0%,rgb(173, 252, 231) 100%)";
+const sidebarBgDark = "linear-gradient(135deg, #0B0E118a 0%, #2E343Cff 100%)";
 
 const SidebarInner: React.FC<{
     justCompletedStep: number | null;
@@ -55,7 +55,6 @@ const SidebarInner: React.FC<{
 
 const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({ justCompletedStep, isDrawerOpen, onDrawerClose }) => {
     const bg = useColorModeValue(sidebarBgLight, sidebarBgDark);
-    const borderColor = useColorModeValue("#acacac81", currentDarkTheme.rgba.primary20);
     const closeButtonColor = useColorModeValue("grey.900", "white");
     const closeButtonBg = useColorModeValue("white", "grey.800");
     const headerBg = useColorModeValue("white", "grey.800");
@@ -68,14 +67,11 @@ const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({ justCompletedStep
                 display={{ base: "none", xl: "flex" }}
                 w={{ md: "350px", lg: "400px" }}
                 bg={bg}
-                borderTopLeftRadius="12px"
-                borderBottomLeftRadius="12px"
                 align="stretch"
                 spacing={6}
                 flex={1}
-                border="1px solid"
+                borderRadius="16px"
                 position="relative"
-                borderColor={borderColor}
             >
                 <SidebarInner justCompletedStep={justCompletedStep} />
             </VStack>

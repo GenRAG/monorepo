@@ -64,7 +64,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
 }) => {
     const { isOpen, onClose, onToggle } = useDisclosure();
 
-    const popoverBg = useColorModeValue("white", "#161616");
+    const popoverBg = useColorModeValue("white", "grey.950");
     const popoverBorder = useColorModeValue("grey.100", "#282828");
     const sectionLabelColor = useColorModeValue("grey.400", "grey.500");
     const itemColor = useColorModeValue("grey.800", "grey.100");

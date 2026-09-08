@@ -1,21 +1,18 @@
-export const DARK_THEME_ACCENT = "green" as "orange" | "green" | "blue";
+import colors from "themeNew/foundations/colors";
+
+export const DARK_THEME_ACCENT = "green";
+
+// Source unique pour les couleurs de statut/marque utilisées hors Chakra (Chart.js, styles inline, SVG).
+export const STATUS_COLORS = {
+    success: colors.green[500],
+    accent: colors.green[400],
+    error: colors.red[500],
+    warning: colors.orange[500],
+} as const;
+
+export const CHART_GREEN_SHADES = [colors.green[200], colors.green[400], colors.green[600], colors.green[800]] as const;
 
 export const darkThemeColors = {
-    orange: {
-        primary: "orange.400",
-        primary500: "orange.500",
-        primary900: "orange.900",
-        rgba: {
-            primary: "rgba(251, 146, 60, 1)",
-            primary20: "rgba(251, 146, 60, 0.2)",
-            primary30: "rgba(251, 146, 60, 0.3)",
-        },
-        completeColor: "rgba(251, 146, 60, 0.6)",
-        hex: {
-            primary: "#fb923c",
-        },
-        colorScheme: "orange",
-    },
     green: {
         primary: "green.400",
         primary100: "green.100",
@@ -38,22 +35,6 @@ export const darkThemeColors = {
         },
         colorScheme: "green",
     },
-    blue: {
-        primary: "blue.400",
-        primary500: "blue.500",
-        primary900: "blue.900",
-        rgba: {
-            primary: "rgba(109, 158, 255, 1)",
-            primary20: "rgba(109, 158, 255, 0.2)",
-            primary30: "rgba(109, 158, 255, 0.3)",
-        },
-        completeColor: "rgba(109, 158, 255, 0.6)",
-        hex: {
-            primary: "#6D9EFF",
-        },
-        colorScheme: "blue",
-    },
 } as const;
 
-// Couleur actuelle basée sur la configuration
 export const currentDarkTheme = darkThemeColors[DARK_THEME_ACCENT];

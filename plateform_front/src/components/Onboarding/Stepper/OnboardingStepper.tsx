@@ -11,7 +11,6 @@ import {
     StepTitle,
     Stepper,
     Text,
-    useColorMode,
 } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { Check } from "lucide-react";
@@ -25,11 +24,8 @@ interface OnboardingStepperProps {
 }
 
 const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ onStepClick }) => {
-    const { colorMode } = useColorMode();
     const isMobile = useAppResponsive({ base: true, lg: false });
     const { currentStep, goToStep } = useOnboarding();
-
-    const isDark = colorMode === "dark";
 
     return (
         <Stepper h="100%" index={currentStep} orientation="vertical" variant={currentDarkTheme.colorScheme}>
@@ -49,7 +45,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ onStepClick }) =>
                                     <Icon as={Check} color="white" boxSize={5} />
                                 </Circle>
                             }
-                            incomplete={<Icon as={step.icon} color={isDark ? "grey.900" : "grey.500"} boxSize={5} />}
+                            incomplete={<Icon as={step.icon} color="iconStepInactive" boxSize={5} />}
                             active={<Icon as={step.icon} color="white" boxSize={5} />}
                         />
                     </StepIndicator>

@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { AgentStatus, MessageSender } from 'generated/prisma';
+import { AgentStatus, MessageSender, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
+
+type PrismaClientOrTx = PrismaService | Prisma.TransactionClient;
 
 @Injectable()
 export class ConversationRepository {
     constructor(private readonly prisma: PrismaService) {}
+
+    transaction<T>(fn: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+        return this.prisma.$transaction(fn);
+    }
 
     findAssistants(userId: string) {
         return this.prisma.agent.findMany({
@@ -52,7 +58,10 @@ export class ConversationRepository {
     findAgent(id: string) {
         return this.prisma.agent.findUnique({
             where: { id },
-            include: { workspace: { select: { name: true } } },
+            include: {
+                workspace: { select: { name: true } },
+                deployments: { orderBy: { version: 'desc' }, take: 1, select: { version: true } },
+            },
         });
     }
 
@@ -63,12 +72,31 @@ export class ConversationRepository {
         });
     }
 
-    create(data: { agentId: string; workspaceId: string; title: string; userId?: string }) {
-        return this.prisma.conversation.create({ data });
+    create(
+        data: { agentId: string; workspaceId: string; title: string; userId?: string },
+        client: PrismaClientOrTx = this.prisma,
+    ) {
+        return client.conversation.create({ data });
     }
 
-    createMessage(data: { conversationId: string; sender: MessageSender; content: string }) {
-        return this.prisma.message.create({ data });
+    createMessage(
+        data: {
+            conversationId: string;
+            sender: MessageSender;
+            content: string;
+            metadata?: Prisma.InputJsonValue;
+        },
+        client: PrismaClientOrTx = this.prisma,
+    ) {
+        return client.message.create({ data });
+    }
+
+    findDocumentByAgentAndName(agentId: string, name: string) {
+        return this.prisma.document.findFirst({ where: { agentId, name } });
+    }
+
+    updateTimestamp(id: string) {
+        return this.prisma.conversation.update({ where: { id }, data: { updatedAt: new Date() } });
     }
 
     delete(id: string) {

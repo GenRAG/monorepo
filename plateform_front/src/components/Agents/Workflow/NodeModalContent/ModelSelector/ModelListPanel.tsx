@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Box, HStack, Input, InputGroup, InputLeftElement, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { ArrowDownUp, ArrowUpDown, Search } from "lucide-react";
-import { List, type RowComponentProps } from "react-window";
+import { List, useListRef, type RowComponentProps } from "react-window";
 import { RagModel } from "types/models/models";
 import { ModelListItem } from "./ModelListItem";
 import { ActionMenu } from "components/ui/ActionMenu";
@@ -44,9 +44,10 @@ const ModelRow = ({ index, style, models, selectedId, onSelect }: RowComponentPr
 export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelect }) => {
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortMode>("default");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
     const subColor = useColorModeValue("grey.400", "grey.500");
-    const bgColor = useColorModeValue("white", "grey.850");
+    const bgColor = useColorModeValue("white", "grey.950");
+    const listRef = useListRef(null);
+    const hasScrolledToSelection = useRef(false);
 
     const filtered = useMemo(() => {
         const list = models.filter((m) => m.name?.toLowerCase().includes(search.toLowerCase()));
@@ -54,6 +55,14 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
         if (sort === "price-desc") return [...list].sort((a, b) => getInputPrice(b) - getInputPrice(a));
         return list;
     }, [models, search, sort]);
+
+    useEffect(() => {
+        if (hasScrolledToSelection.current || !selectedModel) return;
+        const index = filtered.findIndex((m) => m.id === selectedModel.id);
+        if (index === -1) return;
+        listRef.current?.scrollToRow({ index, align: "center", behavior: "auto" });
+        hasScrolledToSelection.current = true;
+    }, [filtered, selectedModel, listRef]);
 
     const sortItems = (["default", "price-asc", "price-desc"] as SortMode[]).map((mode) => ({
         label: SORT_LABELS[mode],
@@ -70,9 +79,9 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
             flexShrink={0}
             borderRightWidth="1px"
             borderRightStyle="solid"
-            borderRightColor={borderColor}
+            borderRightColor="borderSubtle"
         >
-            <Box borderBottomWidth="1px" borderBottomStyle="solid" borderBottomColor={borderColor}>
+            <Box borderBottomWidth="1px" borderBottomStyle="solid" borderBottomColor="borderSubtle">
                 <HStack spacing={0}>
                     <InputGroup size="xs" flex={1}>
                         <InputLeftElement pointerEvents="none">
@@ -114,6 +123,7 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
                     </Text>
                 ) : (
                     <List
+                        listRef={listRef}
                         style={{ height: "100%" }}
                         rowCount={filtered.length}
                         rowHeight={ROW_HEIGHT}

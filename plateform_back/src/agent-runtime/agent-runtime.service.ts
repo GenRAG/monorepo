@@ -1,29 +1,24 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import type { MessageEvent } from '@nestjs/common';
-import type { IncomingMessage } from 'http';
 import { AgentStatus, MessageSender, QueryLogStatus } from 'generated/prisma';
 import { Observable, Subscriber } from 'rxjs';
 import * as Sentry from '@sentry/nestjs';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import { UsageTrackerService } from 'src/credit/usage-tracker.service';
-import { costToCredits } from 'src/credit/credit-pricing';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { NdjsonLineBuffer, RagCostSummary } from 'src/rag-engine/ndjson-line-buffer';
+import { ConversationRepository } from 'src/conversation/conversation.repository';
+import { RagStreamForwarderService } from 'src/agent-runtime/rag-stream-forwarder.service';
+import { toClientSafeErrorMessage } from 'src/agent-runtime/client-safe-error';
+import { RagStream } from 'src/agent-runtime/agent-runtime.types';
 
-type RagStream = IncomingMessage;
 type StartRagResult = { ok: true; stream: RagStream } | { ok: false; isOutOfCredits: boolean; error: string };
+
+type StreamRef = { current: RagStream | null };
 
 interface StreamOptions {
     orgIdOverride?: string;
     skipUsageTracking?: boolean;
     forceActiveWorkflow?: boolean;
-}
-
-interface LogCtx {
-    workspaceId: string;
-    agentId: string;
-    query: string;
-    startedAt: number;
 }
 
 @Injectable()
@@ -34,11 +29,22 @@ export class AgentRuntimeService {
         private readonly orchestrator: AgentRuntimeOrchestrator,
         private readonly prisma: PrismaService,
         private readonly usageTracker: UsageTrackerService,
+        private readonly conversationRepo: ConversationRepository,
+        private readonly streamForwarder: RagStreamForwarderService,
     ) {}
 
     playgroundStream(workspaceId: string, agentId: string, query: string): Observable<MessageEvent> {
         return new Observable((subscriber) => {
-            void this._dispatchStream(subscriber, workspaceId, agentId, query, { forceActiveWorkflow: true });
+            const streamRef: StreamRef = { current: null };
+            void this._dispatchStream(
+                subscriber,
+                workspaceId,
+                agentId,
+                query,
+                { forceActiveWorkflow: true },
+                streamRef,
+            );
+            return () => this._teardownStream(streamRef);
         });
     }
 
@@ -49,7 +55,9 @@ export class AgentRuntimeService {
         orgIdOverride: string,
     ): Observable<MessageEvent> {
         return new Observable((subscriber) => {
-            void this._dispatchStream(subscriber, workspaceId, agentId, query, { orgIdOverride });
+            const streamRef: StreamRef = { current: null };
+            void this._dispatchStream(subscriber, workspaceId, agentId, query, { orgIdOverride }, streamRef);
+            return () => this._teardownStream(streamRef);
         });
     }
 
@@ -60,8 +68,17 @@ export class AgentRuntimeService {
         userId?: string,
     ): Observable<MessageEvent> {
         return new Observable((subscriber) => {
-            void this._dispatchStreamWithPersistence(subscriber, agentId, query, conversationId, userId);
+            const streamRef: StreamRef = { current: null };
+            void this._dispatchStreamWithPersistence(subscriber, agentId, query, conversationId, userId, streamRef);
+            return () => this._teardownStream(streamRef);
         });
+    }
+
+    private _teardownStream(ref: StreamRef): void {
+        const stream = ref.current;
+        if (stream && !stream.destroyed) {
+            stream.destroy();
+        }
     }
 
     private async _dispatchStream(
@@ -70,6 +87,7 @@ export class AgentRuntimeService {
         agentId: string,
         query: string,
         options: StreamOptions = {},
+        streamRef: StreamRef,
     ) {
         const startedAt = Date.now();
         const result = await this._startRagStream(workspaceId, agentId, query, options);
@@ -92,10 +110,11 @@ export class AgentRuntimeService {
             }
             return;
         }
+        streamRef.current = result.stream;
         if (!options.skipUsageTracking) {
-            this._forwardStream(result.stream, subscriber, { workspaceId, agentId, query, startedAt });
+            this.streamForwarder.forward(result.stream, subscriber, { workspaceId, agentId, query, startedAt });
         } else {
-            this._forwardStream(result.stream, subscriber);
+            this.streamForwarder.forward(result.stream, subscriber);
         }
     }
 
@@ -103,8 +122,9 @@ export class AgentRuntimeService {
         subscriber: Subscriber<MessageEvent>,
         agentId: string,
         query: string,
-        conversationId?: string,
-        userId?: string,
+        conversationId: string | undefined,
+        userId: string | undefined,
+        streamRef: StreamRef,
     ) {
         const startedAt = Date.now();
         const workspaceId = await this._resolveWorkspaceId(agentId, subscriber);
@@ -117,6 +137,7 @@ export class AgentRuntimeService {
             return;
         }
         const ragStream = result.stream;
+        streamRef.current = ragStream;
 
         const convId = await this._initConversation(subscriber, workspaceId, agentId, query, conversationId, userId);
         if (!convId) {
@@ -124,7 +145,7 @@ export class AgentRuntimeService {
             return;
         }
 
-        this._forwardStreamWithPersistence(ragStream, convId, subscriber, {
+        this.streamForwarder.forwardWithPersistence(ragStream, convId, subscriber, {
             workspaceId,
             agentId,
             query,
@@ -165,18 +186,12 @@ export class AgentRuntimeService {
             return { ok: true, stream };
         } catch (err: unknown) {
             const isOutOfCredits = err instanceof ForbiddenException;
-            if (!isOutOfCredits) {
-                this.logger.error(`RAG stream error: ${err instanceof Error ? err.message : String(err)}`);
-                Sentry.captureException(err);
-            }
             return {
                 ok: false,
                 isOutOfCredits,
                 error: isOutOfCredits
-                    ? 'Pas de crédits disponibles.'
-                    : err instanceof Error
-                      ? err.message
-                      : 'Unknown error',
+                    ? 'Insufficient credits.'
+                    : toClientSafeErrorMessage(err, 'RAG stream error', this.logger),
             };
         }
     }
@@ -190,179 +205,37 @@ export class AgentRuntimeService {
         userId?: string,
     ): Promise<string | null> {
         try {
-            let convId: string;
-
             if (conversationId) {
-                const existing = await this.prisma.conversation.findUnique({ where: { id: conversationId } });
+                const existing = await this.conversationRepo.findOne(conversationId);
                 if (!existing || existing.agentId !== agentId) {
                     subscriber.next({ data: JSON.stringify({ error: 'Conversation not found' }) });
                     subscriber.complete();
                     return null;
                 }
-                convId = conversationId;
-            } else {
-                convId = (
-                    await this.prisma.conversation.create({
-                        data: { agentId, workspaceId, title: query.slice(0, 60), userId },
-                    })
-                ).id;
             }
 
-            await this.prisma.message.create({
-                data: { conversationId: convId, sender: MessageSender.USER, content: query },
-            });
+            return await this.conversationRepo.transaction(async (tx) => {
+                const convId = conversationId
+                    ? conversationId
+                    : (
+                          await this.conversationRepo.create(
+                              { agentId, workspaceId, title: query.slice(0, 60), userId },
+                              tx,
+                          )
+                      ).id;
 
-            return convId;
-        } catch (err: unknown) {
-            subscriber.next({
-                data: JSON.stringify({
-                    error: err instanceof Error ? err.message : 'Failed to initialize conversation',
-                }),
+                await this.conversationRepo.createMessage(
+                    { conversationId: convId, sender: MessageSender.USER, content: query },
+                    tx,
+                );
+
+                return convId;
             });
+        } catch (err: unknown) {
+            const message = toClientSafeErrorMessage(err, 'Failed to initialize conversation', this.logger);
+            subscriber.next({ data: JSON.stringify({ error: message }) });
             subscriber.complete();
             return null;
         }
-    }
-
-    private _forwardStream(ragStream: RagStream, subscriber: Subscriber<MessageEvent>, logCtx?: LogCtx) {
-        const lineBuffer = new NdjsonLineBuffer();
-        let costSummary: RagCostSummary | undefined;
-
-        ragStream.on('data', (chunk: Buffer) => {
-            for (const event of lineBuffer.push(chunk.toString('utf-8'))) {
-                if (event.type === 'token') {
-                    subscriber.next({ data: JSON.stringify({ chunk: event.data as string }) });
-                } else if (event.type === 'cost_summary') {
-                    costSummary = event.data as RagCostSummary;
-                }
-            }
-        });
-        ragStream.on('end', () => {
-            if (logCtx) {
-                void this.usageTracker
-                    .recordQuery({
-                        workspaceId: logCtx.workspaceId,
-                        agentId: logCtx.agentId,
-                        query: logCtx.query.slice(0, 500),
-                        durationMs: Date.now() - logCtx.startedAt,
-                        status: QueryLogStatus.SUCCESS,
-                        creditsUsed: costSummary ? costToCredits(costSummary.total_cost_usd) : undefined,
-                    })
-                    .catch((e: Error) => {
-                        this.logger.error(`Failed to record query: ${e.message}`);
-                        Sentry.captureException(e);
-                    });
-            }
-            subscriber.next({ data: JSON.stringify({ done: true }) });
-            subscriber.complete();
-        });
-        ragStream.on('error', (err: Error) => {
-            if (logCtx) {
-                void this.usageTracker
-                    .recordQuery({
-                        workspaceId: logCtx.workspaceId,
-                        agentId: logCtx.agentId,
-                        query: logCtx.query.slice(0, 500),
-                        durationMs: Date.now() - logCtx.startedAt,
-                        status: QueryLogStatus.ERROR,
-                    })
-                    .catch((e: Error) => {
-                        this.logger.error(`Failed to record query error: ${e.message}`);
-                        Sentry.captureException(e);
-                    });
-            }
-            subscriber.next({ data: JSON.stringify({ error: err.message }) });
-            subscriber.complete();
-        });
-    }
-
-    private _forwardStreamWithPersistence(
-        ragStream: RagStream,
-        convId: string,
-        subscriber: Subscriber<MessageEvent>,
-        logCtx: LogCtx,
-    ) {
-        let fullText = '';
-        const lineBuffer = new NdjsonLineBuffer();
-        let costSummary: RagCostSummary | undefined;
-
-        ragStream.on('data', (chunk: Buffer) => {
-            for (const event of lineBuffer.push(chunk.toString('utf-8'))) {
-                if (event.type === 'token') {
-                    const text = event.data as string;
-                    fullText += text;
-                    subscriber.next({ data: JSON.stringify({ chunk: text }) });
-                } else if (event.type === 'cost_summary') {
-                    costSummary = event.data as RagCostSummary;
-                }
-            }
-        });
-
-        ragStream.on('end', () => {
-            void this.usageTracker
-                .recordQuery({
-                    workspaceId: logCtx.workspaceId,
-                    agentId: logCtx.agentId,
-                    query: logCtx.query.slice(0, 500),
-                    durationMs: Date.now() - logCtx.startedAt,
-                    status: QueryLogStatus.SUCCESS,
-                    creditsUsed: costSummary ? costToCredits(costSummary.total_cost_usd) : undefined,
-                })
-                .catch((e: Error) => {
-                    this.logger.error(`Failed to record query: ${e.message}`);
-                    Sentry.captureException(e);
-                });
-
-            void this.prisma.message
-                .create({
-                    data: { conversationId: convId, sender: MessageSender.AGENT, content: fullText },
-                })
-                .then(() =>
-                    this.prisma.conversation.update({
-                        where: { id: convId },
-                        data: { updatedAt: new Date() },
-                    }),
-                )
-                .catch((e: Error) => {
-                    this.logger.error(`Failed to persist agent message for conv ${convId}: ${e.message}`);
-                    Sentry.captureException(e);
-                })
-                .finally(() => {
-                    subscriber.next({ data: JSON.stringify({ done: true, conversationId: convId }) });
-                    subscriber.complete();
-                });
-        });
-
-        ragStream.on('error', (err: Error) => {
-            void this.usageTracker
-                .recordQuery({
-                    workspaceId: logCtx.workspaceId,
-                    agentId: logCtx.agentId,
-                    query: logCtx.query.slice(0, 500),
-                    durationMs: Date.now() - logCtx.startedAt,
-                    status: QueryLogStatus.ERROR,
-                })
-                .catch((e: Error) => {
-                    this.logger.error(`Failed to record query error: ${e.message}`);
-                    Sentry.captureException(e);
-                });
-
-            void this.prisma.message
-                .create({
-                    data: {
-                        conversationId: convId,
-                        sender: MessageSender.AGENT,
-                        content: fullText || err.message,
-                    },
-                })
-                .catch((e: Error) => {
-                    this.logger.error(`Failed to persist error message for conv ${convId}: ${e.message}`);
-                    Sentry.captureException(e);
-                })
-                .finally(() => {
-                    subscriber.next({ data: JSON.stringify({ error: err.message }) });
-                    subscriber.complete();
-                });
-        });
     }
 }

@@ -1,4 +1,4 @@
-import { Box, VStack, Text, useColorModeValue, HStack } from "@chakra-ui/react";
+import { Box, Card, VStack, Text, HStack } from "@chakra-ui/react";
 import { ExternalLink, Globe } from "lucide-react";
 import Button from "components/ui/Button";
 import type { FC } from "react";
@@ -9,20 +9,14 @@ interface Props {
 }
 
 export const HeaderCardEmpty: FC<Props> = ({ onOpen }) => {
-    const bg = useColorModeValue("white", "grey.950");
-    const iconBg = useColorModeValue("grey.50", "grey.900");
-    const titleColor = useColorModeValue("grey.900", "grey.50");
-    const descColor = useColorModeValue("grey.600", "grey.400");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-
     return (
-        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} p={8} bg={bg}>
+        <Card size="none" p={8}>
             <VStack spacing={4} align="center">
                 <Box
                     w="44px"
                     h="44px"
                     borderRadius="full"
-                    bg={iconBg}
+                    bg="surfaceHover"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
@@ -30,11 +24,11 @@ export const HeaderCardEmpty: FC<Props> = ({ onOpen }) => {
                     <ExternalLink size={18} />
                 </Box>
 
-                <Text fontSize="lg" fontWeight={600} color={titleColor}>
+                <Text fontSize="lg" fontWeight={600} color="textPrimary">
                     Pas encore en production
                 </Text>
 
-                <Text fontSize="sm" color={descColor} textAlign="center" maxW="640px">
+                <Text variant="body-sm-muted" textAlign="center" maxW="640px">
                     Votre agent est prêt à être déployé en production. Cliquez sur le bouton ci-dessous pour le déployer
                     et commencer à l&apos;utiliser.
                 </Text>
@@ -45,7 +39,7 @@ export const HeaderCardEmpty: FC<Props> = ({ onOpen }) => {
                     </Button>
                 </HStack>
             </VStack>
-        </Box>
+        </Card>
     );
 };
 

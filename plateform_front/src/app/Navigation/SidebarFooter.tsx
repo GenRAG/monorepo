@@ -36,12 +36,12 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
     const subColor = useColorModeValue("grey.500", "grey.400");
     const dividerColor = useColorModeValue("grey.100", "#222");
     const cardBorder = useColorModeValue("grey.200", "grey.700");
-    const cardBg = useColorModeValue("grey.50", "#1c1c1c");
-    const cardActiveBg = useColorModeValue("green.50", "rgba(52,211,153,0.07)");
+    const cardBg = useColorModeValue("grey.50", "grey.900");
+    const cardActiveBg = useColorModeValue("green.50", "grey.900");
     const cardText = useColorModeValue("grey.500", "grey.400");
     const cardActiveText = useColorModeValue("green.700", "green.400");
     const dangerColor = useColorModeValue("red.500", "red.400");
-    const dangerHoverBg = useColorModeValue("red.50", "rgba(239,68,68,0.08)");
+    const dangerHoverBg = useColorModeValue("red.50", "grey.900");
     const triggerColor = useColorModeValue("grey.900", "white");
     const triggerHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
 

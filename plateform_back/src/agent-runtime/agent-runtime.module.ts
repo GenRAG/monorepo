@@ -5,6 +5,7 @@ import { AgentQueryLogRepository } from './agent-query-log.repository';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import { RagPipelineBuilder } from 'src/agent-runtime/agent-runtime.builder';
+import { RagStreamForwarderService } from 'src/agent-runtime/rag-stream-forwarder.service';
 import { RagEngineModule } from 'src/rag-engine/rag-engine.module';
 import { AgentModule } from 'src/agent/agent.module';
 import { WorkflowModule } from 'src/workflow/workflow.module';
@@ -13,10 +14,18 @@ import { CreditModule } from 'src/credit/credit.module';
 import { registerAgentListeners } from 'src/events/agent/agent-event.listener';
 import { Logger } from 'nestjs-pino';
 import { WorkspaceModule } from 'src/workspace/workspace.module';
+import { ConversationRepository } from 'src/conversation/conversation.repository';
 
 @Module({
     controllers: [AgentRuntimeController],
-    providers: [AgentRuntimeService, AgentRuntimeOrchestrator, RagPipelineBuilder, AgentQueryLogRepository],
+    providers: [
+        AgentRuntimeService,
+        AgentRuntimeOrchestrator,
+        RagPipelineBuilder,
+        RagStreamForwarderService,
+        AgentQueryLogRepository,
+        ConversationRepository,
+    ],
     exports: [AgentRuntimeOrchestrator, AgentRuntimeService],
     imports: [PrismaModule, CreditModule, AgentModule, WorkflowModule, RagEngineModule, ConfigModule, WorkspaceModule],
 })

@@ -25,14 +25,6 @@ const UploadProgressList: React.FC<UploadProgressListProps> = ({ sources }) => {
                             icon={done ? CheckCircle : failed ? X : Spinner}
                             color={failed ? "red.500" : "green.500"}
                         />
-                        {/*}>
-                            {done ? (
-                                <CheckCircle size={16} color="#10B981" />
-                            ) : failed ? (
-                                <X size={16} color="#EF4444" />
-                            ) : (
-                                <Spinner size="xs" color="grey.400" />
-                            )*/}
                         <Text fontSize="13px" color="textPrimary" flex={1} noOfLines={1}>
                             {source.name}
                         </Text>

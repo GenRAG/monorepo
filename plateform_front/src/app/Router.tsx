@@ -5,8 +5,9 @@ import OnBoarding from "pages/Onboarding/OnBoarding";
 import NotFound from "pages/NotFound";
 import { AuthRoutes } from "app/Routes/AuthRoutes";
 import { AgentRoutes } from "app/Routes/AgentRoutes";
-import { AppRoutes } from "app/Routes/AppRoutes";
+import { AppRoutes, ChatRoute } from "app/Routes/AppRoutes";
 import { LegalRoutes } from "app/Routes/LegalRoutes";
+import WorkspaceGuard from "app/WorkspaceGuard";
 
 const router = createBrowserRouter(
     createRoutesFromElements(
@@ -16,6 +17,10 @@ const router = createBrowserRouter(
                 <Route path="/" element={<DefaultRedirect />} />
                 <Route path="/onboarding/:workspaceId" element={<OnBoarding />} />
                 {AppRoutes()}
+                <Route element={<WorkspaceGuard />}>
+                    <Route path="/assistants/:assistantId" element={<ChatRoute />} />
+                    <Route path="/assistants/:assistantId/conversations/:conversationId" element={<ChatRoute />} />
+                </Route>
                 {AgentRoutes()}
                 {LegalRoutes()}
             </Route>

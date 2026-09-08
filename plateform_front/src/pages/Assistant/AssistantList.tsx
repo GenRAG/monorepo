@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+    Box,
+    Divider,
     Grid,
     HStack,
     Icon,
@@ -15,11 +17,44 @@ import {
 import { Bot, Clock, Search, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetAssistantsListQuery, AssistantPreview } from "services/chat/chat";
-import { useIsDark } from "hooks/useIsDark";
 import BoxIcon from "components/ui/BoxIcon";
 import { EntityCard } from "components/ui/EntityCard";
+import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { useAppResponsive } from "hooks/useAppResponsive";
 
 export type SortKey = string;
+
+const COLUMN_BREAKPOINTS = { base: 1, md: 2, lg: 3 };
+const GRID_TEMPLATE_COLUMNS = {
+    base: `repeat(${COLUMN_BREAKPOINTS.base}, 1fr)`,
+    md: `repeat(${COLUMN_BREAKPOINTS.md}, 1fr)`,
+    lg: `repeat(${COLUMN_BREAKPOINTS.lg}, 1fr)`,
+};
+
+const SKELETON_CARD_HEIGHT = 110;
+const GRID_GAP = 12;
+
+const useSkeletonCount = (columns: number) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [count, setCount] = useState(columns * 3);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const observer = new ResizeObserver(([entry]) => {
+            const rows = Math.max(
+                1,
+                Math.round((entry.contentRect.height + GRID_GAP) / (SKELETON_CARD_HEIGHT + GRID_GAP)),
+            );
+            setCount(Math.min(columns * rows, 60));
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [columns]);
+
+    return { containerRef, count };
+};
 
 const formatDate = (iso: string) => {
     const date = new Date(iso);
@@ -68,59 +103,14 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => 
     );
 };
 
-const CardSkeleton: React.FC = () => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
-    return (
-        <Skeleton
-            height="110px"
-            borderRadius="12px"
-            startColor={isDark ? "grey.800" : "grey.100"}
-            endColor={isDark ? "grey.700" : "grey.200"}
-        />
-    );
-};
-
-export const SortButton = (
-    key: SortKey,
-    label: string,
-    icon: React.ElementType,
-    sort: SortKey,
-    setSort: (key: SortKey) => void,
-    position?: "first" | "last",
-) => {
-    const isDark = useIsDark();
-
-    const sub = isDark ? "grey.400" : "grey.500";
-    const isFirst = position === "first";
-    const isLast = position === "last";
-    return (
-        <HStack
-            as="button"
-            px={3}
-            py={1.5}
-            spacing={1.5}
-            borderRadius={isFirst ? "8px 0 0 8px" : isLast ? "0 8px 8px 0" : "8px"}
-            borderRight={isFirst ? "1px solid" : undefined}
-            borderLeft={isLast ? "1px solid" : undefined}
-            borderColor={isFirst || isLast ? (isDark ? "grey.700" : "grey.200") : undefined}
-            cursor="pointer"
-            bg={sort === key ? (isDark ? "grey.700" : "grey.100") : "transparent"}
-            onClick={() => setSort(key)}
-            transition="background 0.15s"
-        >
-            <Icon as={icon} boxSize={3.5} color={sort === key ? (isDark ? "white" : "grey.900") : sub} />
-            <Text
-                fontSize="sm"
-                fontWeight={sort === key ? "600" : "400"}
-                color={sort === key ? (isDark ? "white" : "grey.900") : sub}
-                whiteSpace="nowrap"
-            >
-                {label}
-            </Text>
-        </HStack>
-    );
-};
+const CardSkeleton: React.FC = () => (
+    <Skeleton
+        height={`${SKELETON_CARD_HEIGHT}px`}
+        borderRadius="12px"
+        startColor="skeletonStart"
+        endColor="skeletonEnd"
+    />
+);
 
 export const AssistantsList = () => {
     const { colorMode } = useColorMode();
@@ -130,7 +120,9 @@ export const AssistantsList = () => {
     const [sort, setSort] = useState<SortKey>("recent");
 
     const sub = isDark ? "grey.400" : "grey.500";
-    const border = isDark ? "grey.700" : "grey.200";
+
+    const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.lg;
+    const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
 
     const { data: assistants = [], isLoading } = useGetAssistantsListQuery();
 
@@ -142,14 +134,14 @@ export const AssistantsList = () => {
     }, [assistants, search, sort]);
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" maxH="100vh">
+        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" h="100%">
             <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
                     <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>
                         Assistants
                     </Text>
                     <Text fontSize="sm" color={sub}>
-                        Agents déployés accessibles · {assistants.length} au total
+                        Agents déployés accessibles, vous avez {assistants.length} assistant(s) au total
                     </Text>
                 </VStack>
                 <InputGroup maxW="260px">
@@ -161,37 +153,32 @@ export const AssistantsList = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         size="sm"
-                        bg={isDark ? "grey.800" : "white"}
-                        border="1px solid"
-                        borderColor={border}
-                        borderRadius="8px"
-                        fontSize="sm"
-                        _placeholder={{ color: sub }}
-                        _focus={{ borderColor: "green.400", boxShadow: "none" }}
                     />
                 </InputGroup>
             </HStack>
 
-            <HStack
-                spacing={0}
-                bg={isDark ? "grey.900" : "grey.50"}
-                border="1px solid"
-                borderColor={border}
-                borderRadius="10px"
-                w="fit-content"
-            >
-                {SortButton("recent", "Récent", Clock, sort, setSort, "first")}
-                {SortButton("az", "A→Z", SortAsc, sort, setSort, "last")}
-            </HStack>
+            <MultiOptionButtons
+                options={[
+                    { value: "recent", label: "Récent", icon: Clock },
+                    { value: "az", label: "A→Z", icon: SortAsc },
+                ]}
+                value={sort}
+                onChange={setSort}
+                size="sm"
+            />
+
+            <Divider borderColor="borderSubtle" />
 
             {isLoading ? (
-                <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={3}>
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <CardSkeleton key={i} />
-                    ))}
-                </Grid>
+                <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
+                    <Grid templateColumns={GRID_TEMPLATE_COLUMNS} gap={3}>
+                        {Array.from({ length: skeletonCount }).map((_, i) => (
+                            <CardSkeleton key={i} />
+                        ))}
+                    </Grid>
+                </Box>
             ) : filtered.length > 0 ? (
-                <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={3}>
+                <Grid templateColumns={GRID_TEMPLATE_COLUMNS} gap={3}>
                     {filtered.map((a) => (
                         <AssistantCard key={a.id} assistant={a} onClick={() => navigate(`/assistants/${a.id}`)} />
                     ))}

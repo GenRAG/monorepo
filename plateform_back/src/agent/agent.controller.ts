@@ -10,7 +10,7 @@ import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { Agent, UserRole } from 'generated/prisma';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
-import { FindAllAgentResult } from 'src/agent/agent.repository';
+import { AgentListItem } from 'src/agent/agent.repository';
 
 @Controller('workspaces/:workspaceId/agents')
 @UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
@@ -28,7 +28,7 @@ export class AgentController {
     }
 
     @Get()
-    getAll(@Param('workspaceId') workspaceId: string): Promise<FindAllAgentResult[]> {
+    getAll(@Param('workspaceId') workspaceId: string): Promise<AgentListItem[]> {
         return this.agentService.findAll(workspaceId);
     }
 

@@ -108,15 +108,15 @@ const ModelPlaceholder = ({
 }) => {
     const borderColor = useColorModeValue(
         isHighlighted ? "#EF4444" : "#A8F3DF",
-        isHighlighted ? "#DC2626" : "#5D5D5D",
+        isHighlighted ? "#DC2626" : "#565D67",
     );
     const bgHover = useColorModeValue(
         isHighlighted ? "#FEE2E2" : "#ECFDF9",
-        isHighlighted ? "#3D0F0F" : "#4F4F4F",
+        isHighlighted ? "#3D0F0F" : "#454C56",
     );
     const bg = useColorModeValue(
         "#FFFFFF",
-        "#3D3D3D",
+        "#2E343C",
     );
     const iconColor = useColorModeValue(
         isHighlighted ? "#EF4444" : "#34D3A9",
@@ -124,7 +124,7 @@ const ModelPlaceholder = ({
     );
     const textColor = useColorModeValue(
         isHighlighted ? "#991B1B" : "#6D6D6D",
-        isHighlighted ? "#FCA5A5" : "#8F8F8F",
+        isHighlighted ? "#FCA5A5" : "#8B939D",
     );
 
     return (

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, HStack, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Card, HStack, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { DocumentStats } from "types/document/document";
 
 const DEFAULT_QUOTA_BYTES = 100 * 1024 * 1024;
@@ -31,12 +31,7 @@ interface StorageOverviewPanelProps {
 }
 
 export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stats }) => {
-    const bg = useColorModeValue("white", "grey.950");
-    const labelColor = useColorModeValue("grey.400", "grey.500");
-    const textColor = useColorModeValue("grey.900", "white");
-    const mutedColor = useColorModeValue("grey.500", "grey.400");
     const barTrack = useColorModeValue("grey.100", "grey.800");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
 
     const { byType, totalUsed, freeBytes, usedPct } = useMemo(() => {
         const sums: Record<string, number> = {
@@ -58,41 +53,21 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
     const pctColor = usedPct > 90 ? "red.400" : usedPct > 70 ? "orange.400" : "green.400";
 
     return (
-        <Box
-            bg={bg}
-            border="1px solid"
-            borderColor={borderColor}
-            borderTop="none"
-            borderBottomRadius="12px"
-            p={5}
-            pt={3}
-            display="flex"
-            flexDirection="column"
-            gap={3}
-            minW={0}
-        >
+        <Card size="none" variant="attachedBottom" p={5} pt={3} display="flex" flexDirection="column" gap={3} minW={0}>
             <Stack spacing="2px">
-                <Text
-                    fontSize="28px"
-                    fontWeight="700"
-                    letterSpacing="0.1em"
-                    textTransform="uppercase"
-                    color={labelColor}
-                >
-                    Stockage
-                </Text>
+                <Text variant="caption-xl">Stockage</Text>
                 <HStack align="flex-start">
                     <Box>
                         <HStack align="baseline" spacing={2}>
-                            <Text fontSize="28px" fontWeight="700" color={textColor} lineHeight="1">
+                            <Text fontSize="28px" fontWeight="700" color="textPrimary" lineHeight="1">
                                 {fmt(totalUsed)}
                             </Text>
                             <Text fontSize="13px" fontWeight="600" color={pctColor}>
                                 {usedPct.toFixed(1)}%
                             </Text>
                         </HStack>
-                        <Text fontSize="11px" color={mutedColor} mt={0.5}>
-                            / {fmt(DEFAULT_QUOTA_BYTES)} · {fmt(freeBytes)} libre
+                        <Text variant="body-2xs-muted" mt={0.5}>
+                            / {fmt(DEFAULT_QUOTA_BYTES)} - {fmt(freeBytes)} libre
                         </Text>
                     </Box>
                 </HStack>
@@ -112,10 +87,8 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                 {SEGMENTS.filter((s) => byType[s.key] > 0).map((seg) => (
                     <HStack key={seg.key} spacing={1.5}>
                         <Box w="8px" h="8px" borderRadius="2px" bg={seg.fill} flexShrink={0} />
-                        <Text fontSize="11px" color={mutedColor}>
-                            {seg.label}
-                        </Text>
-                        <Text fontSize="11px" color={textColor} fontWeight="500">
+                        <Text variant="body-2xs-muted">{seg.label}</Text>
+                        <Text fontSize="11px" color="textPrimary" fontWeight="500">
                             {fmt(byType[seg.key])}
                         </Text>
                     </HStack>
@@ -123,15 +96,13 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                 {freeBytes > 0 && (
                     <HStack spacing={1.5}>
                         <Box w="8px" h="8px" borderRadius="2px" bg={barTrack} flexShrink={0} />
-                        <Text fontSize="11px" color={mutedColor}>
-                            Libre
-                        </Text>
-                        <Text fontSize="11px" color={textColor} fontWeight="500">
+                        <Text variant="body-2xs-muted">Libre</Text>
+                        <Text fontSize="11px" color="textPrimary" fontWeight="500">
                             {fmt(freeBytes)}
                         </Text>
                     </HStack>
                 )}
             </HStack>
-        </Box>
+        </Card>
     );
 };

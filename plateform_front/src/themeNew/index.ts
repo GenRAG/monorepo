@@ -10,7 +10,6 @@ import Modal from "themeNew/components/modal";
 import Popover from "themeNew/components/popover";
 import Progress from "themeNew/components/progress";
 import { tableTheme } from "themeNew/components/table";
-// import Progress from 'theme/components/progress';
 import Tabs from "themeNew/components/tabs";
 import blur from "themeNew/foundations/blur";
 import borderRadius from "themeNew/foundations/borderRadius";
@@ -21,23 +20,15 @@ import Heading from "themeNew/foundations/heading";
 import { customsToken, spacing } from "themeNew/foundations/spacing";
 import Text from "themeNew/foundations/text";
 
-// import Badge from './components/badge';
-// import Button from './components/button';
-// import Card from './components/card';
 import Checkbox from "./components/checkbox";
 import Divider from "./components/divider";
 import Form from "./components/form";
 import FormError from "./components/form-error-message";
 import FormLabel from "./components/form-label";
 import Input from "./components/input";
-// import Link from './components/link';
-// import NumberInput from './components/number-input';
 import PinInput from "./components/pin-input";
 import Radio from "./components/radio";
 import { Slider } from "./components/slider";
-// import Select from './components/select';
-// import Slider from './components/slider';
-// import Stepper from './components/stepper';
 import Switch from "./components/switch";
 import Stepper from "themeNew/components/stepper";
 import Skeleton from "themeNew/components/skeleton";
@@ -69,7 +60,7 @@ const overrides = {
     blur,
     borderWidth,
     fonts,
-    boxShadow: shadow,
+    shadows: shadow,
 
     radii: borderRadius,
     space: spacing,
@@ -98,22 +89,16 @@ const overrides = {
         FormError,
         Form,
         Input,
-        // Link,
         Slider,
-        // NumberInput,
-        // Tag,
         Accordion,
         Menu,
         Tabs,
-        // Stepper,
         Switch,
-        // Progress,
         Drawer,
         Modal,
         Divider,
         Stepper,
         Skeleton,
-        // Tooltip,
         Textarea,
     },
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack, Text, Box, useColorModeValue } from "@chakra-ui/react";
+import { VStack, Text, Box, Card, useColorModeValue } from "@chakra-ui/react";
 import { File } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useGetDocumentContentQuery } from "services/document/document";
@@ -32,7 +32,6 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
         agentId: agentId!,
         id: documentId,
     });
-    const textColor = useColorModeValue("grey.800", "grey.100");
     const codeColor = useColorModeValue("grey.700", "grey.300");
     const codeBg = useColorModeValue("grey.100", "grey.800");
 
@@ -53,7 +52,7 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
         <Box
             fontSize="13px"
             lineHeight="1.7"
-            color={textColor}
+            color="textPrimary"
             sx={{
                 "h1,h2,h3,h4": { fontWeight: 700, marginTop: "0.8em", marginBottom: "0.3em" },
                 h1: { fontSize: "18px" },
@@ -77,31 +76,12 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, prev
 
     return (
         <VStack align="stretch" spacing={2}>
-            <Text
-                fontWeight="medium"
-                fontSize="11px"
-                color="textPrimary"
-                letterSpacing="0.08em"
-                textTransform="uppercase"
-            >
-                Aperçu du document
-            </Text>
+            <Text variant="caption-md">Aperçu du document</Text>
 
-            <Box
-                h={{ base: "250px", md: "400px" }}
-                bg="surfacePrimary"
-                borderRadius="12px"
-                borderWidth="1px"
-                borderStyle="solid"
-                borderColor="borderDefault"
-                overflow="auto"
-                p={3}
-            >
+            <Card size="none" h={{ base: "250px", md: "400px" }} bg="surfacePrimary" overflow="auto" p={3}>
                 {isLoading && (
                     <VStack h="100%" justify="center" align="center" spacing={3}>
-                        <Text fontSize="sm" color="textMuted">
-                            Chargement de l&apos;aperçu...
-                        </Text>
+                        <Text variant="body-sm-muted">Chargement de l&apos;aperçu...</Text>
                     </VStack>
                 )}
 
@@ -121,16 +101,12 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, prev
 
                 {!isLoading && (!previewUrl || isError) && (
                     <VStack h="100%" justify="center" align="center" spacing={3}>
-                        <Box as={File} fontSize="48px" color="gray.400" />
-                        <Text fontSize="sm" color="textMuted">
-                            Aperçu non disponible
-                        </Text>
-                        <Text fontSize="xs" color="textMuted">
-                            Téléchargez le fichier pour consulter son contenu
-                        </Text>
+                        <Box as={File} fontSize="48px" color="grey.400" />
+                        <Text variant="body-sm-muted">Aperçu non disponible</Text>
+                        <Text variant="body-xs-muted">Téléchargez le fichier pour consulter son contenu</Text>
                     </VStack>
                 )}
-            </Box>
+            </Card>
         </VStack>
     );
 };

@@ -1,17 +1,25 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MessageSender } from 'generated/prisma';
 import { ConversationRepository } from './conversation.repository';
+import { IStorageStrategy } from 'src/storage/storage.strategy';
+import { RagSources } from 'src/rag-engine/ndjson-line-buffer';
+import { sanitizeFilename } from 'src/lib/filename.util';
 
 export interface MessageSerialized {
     id: string;
     question: string;
     response: string;
     timestamp: number;
+    sources?: RagSources[];
+    durationMs?: number;
 }
 
 @Injectable()
 export class ConversationService {
-    constructor(private readonly repo: ConversationRepository) {}
+    constructor(
+        private readonly repo: ConversationRepository,
+        @Inject('STORAGE_STRATEGY') private readonly storage: IStorageStrategy,
+    ) {}
 
     async getAssistants(userId: string) {
         const agents = await this.repo.findAssistants(userId);
@@ -33,6 +41,7 @@ export class ConversationService {
             id: agent.id,
             title: agent.name,
             sharedBy: agent.workspace.name,
+            version: agent.deployments[0]?.version,
         };
     }
 
@@ -68,15 +77,30 @@ export class ConversationService {
             const agentMsg = next?.sender === MessageSender.AGENT ? next : null;
             if (agentMsg) i++;
 
+            const metadata = agentMsg?.metadata as { sources?: RagSources[]; durationMs?: number } | null;
+
             result.push({
                 id: msg.id,
                 question: msg.content,
-                response: agentMsg?.content ?? "",
+                response: agentMsg?.content ?? '',
                 timestamp: msg.createdAt.getTime(),
+                sources: metadata?.sources,
+                durationMs: metadata?.durationMs,
             });
         }
 
         return result;
+    }
+
+    async getSourceUrl(userId: string, agentId: string, title: string): Promise<{ url: string }> {
+        const hasAccess = await this.repo.hasAgentAccess(userId, agentId);
+        if (!hasAccess) throw new ForbiddenException('Access denied');
+
+        const document = await this.repo.findDocumentByAgentAndName(agentId, sanitizeFilename(title));
+        if (!document) throw new NotFoundException('Document not found');
+
+        const url = await this.storage.getSignedUrl(document.storageKey, 900);
+        return { url };
     }
 
     async deleteConversation(userId: string, conversationId: string) {

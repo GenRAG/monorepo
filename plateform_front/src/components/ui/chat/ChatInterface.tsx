@@ -120,7 +120,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                                 <Text fontSize="xs" color={labelColor}>
                                     Assistant
                                 </Text>
-                                <ThinkingBubble />
+                                <ThinkingBubble events={messages[messages.length - 1].thinkingEvents} />
                             </VStack>
                         )}
                     </VStack>

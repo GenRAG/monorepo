@@ -1,40 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Box, Card, HStack, Stack, Text, Tooltip as ChakraTooltip, Skeleton } from "@chakra-ui/react";
 import { Bar, BarChart, BarXAxis, ChartTooltip, useChart, Grid } from "components/charts";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
-import { useGetWorkspaceConsumptionQuery, type WorkspaceConsumption } from "services/credit/credit";
+import { useGetWorkspaceConsumptionQuery } from "services/credit/credit";
 import { useParams } from "react-router-dom";
-
-// TEMP: visual QA for the BarChart/BackgroundTrack rounding against non-empty data.
-// Remove once real consumption data is confirmed to render correctly.
-const DEBUG_USE_MOCK_CONSUMPTION = true;
-
-const MOCK_AGENTS = [
-    { agentId: "mock-1", agentName: "Demo Assistant" },
-    { agentId: "mock-2", agentName: "Agent Conversationnel Avancé" },
-    { agentId: "mock-3", agentName: "ZAgent Conversationnel Avancé" },
-];
-
-const buildMockConsumption = (days: number): WorkspaceConsumption => {
-    const byDay = Array.from({ length: days }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (days - 1 - i));
-        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-        const base = isWeekend ? 8 : 22;
-        return Math.max(0, Math.round(base + (Math.random() - 0.5) * 16));
-    });
-
-    const total = byDay.reduce((s, v) => s + v, 0);
-    const shares = [0.5, 0.32, 0.18];
-    const byAgent = MOCK_AGENTS.map((agent, i) => ({
-        ...agent,
-        creditsUsed: Math.max(1, Math.round(total * shares[i])),
-        queryCount: Math.max(1, Math.round((total * shares[i]) / 1.4)),
-    }));
-
-    return { byDay, byAgent, total };
-};
 
 const AGENT_COLORS = [
     currentDarkTheme.hex.primary,
@@ -47,20 +17,8 @@ const AGENT_COLORS = [
     "#10B981",
 ];
 
-/**
- * Same corner radius as the `<Bar lineCap={...} />` below, so the track matches the bars.
- * `rx`/`ry` round all 4 corners of the rect (the lib has no top-only option), so this must
- * stay small — anything much bigger than this makes tall bars look like floating capsules
- * and turns short bars into blobs.
- */
 const BAR_RADIUS = 6;
 
-/**
- * Faint full-height track behind each bar, matching the previous chart.js plugin.
- * Named `keyPrefix`, not `dataKey` — `BarChart`'s `extractBarConfigs` treats any child
- * with a `dataKey` prop as a real bar series, which would double the detected series
- * count and make the actual `<Bar>` render at half width to "group" with this track.
- */
 const BackgroundTrack = ({ keyPrefix }: { keyPrefix: string }) => {
     const { data, barScale, bandWidth, barXAccessor, innerHeight } = useChart();
     if (!(barScale && bandWidth && barXAccessor)) return null;
@@ -113,13 +71,10 @@ const ConsumptionCard: React.FC = () => {
     const [period, setPeriod] = useState<Period>("30j");
 
     const days = PERIOD_DAYS[period];
-    const { data: realConsumption, isLoading: isQueryLoading } = useGetWorkspaceConsumptionQuery(
+    const { data: consumption, isLoading } = useGetWorkspaceConsumptionQuery(
         { workspaceId: workspaceId ?? "", days },
-        { skip: !workspaceId || DEBUG_USE_MOCK_CONSUMPTION },
+        { skip: !workspaceId },
     );
-    const mockConsumption = useMemo(() => buildMockConsumption(days), [days]);
-    const consumption = DEBUG_USE_MOCK_CONSUMPTION ? mockConsumption : realConsumption;
-    const isLoading = DEBUG_USE_MOCK_CONSUMPTION ? false : isQueryLoading;
 
     const byDay = consumption?.byDay ?? [];
     const byAgent = consumption?.byAgent ?? [];

@@ -12,14 +12,17 @@ import {
     useColorMode,
     useColorModeValue,
     VStack,
+    Divider,
 } from "@chakra-ui/react";
 import { Clock, Plus, Search, SortAsc } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AgentCard } from "components/Agents/AgentCard";
+import { AgentsStatsRow } from "components/Agents/AgentsStatsRow";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
 import { SortKey } from "pages/Assistant/AssistantList";
+import { AgentStatus } from "types/deployment/deployment";
 import BoxIcon from "components/ui/BoxIcon";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useAppResponsive } from "hooks/useAppResponsive";
@@ -85,6 +88,16 @@ export const AgentsList = () => {
         });
     }, [agents, searchValue, sort]);
 
+    const stats = useMemo(
+        () => ({
+            total: agents.length,
+            production: agents.filter((agent) => agent.status === AgentStatus.PRODUCTION).length,
+            development: agents.filter((agent) => agent.status === AgentStatus.DEVELOPMENT).length,
+            totalDocuments: agents.reduce((sum, agent) => sum + (agent.documentsCount ?? 0), 0),
+        }),
+        [agents],
+    );
+
     const sub = useColorModeValue("grey.500", "grey.400");
     const titleColor = useColorModeValue("grey.900", "white");
 
@@ -116,6 +129,15 @@ export const AgentsList = () => {
                 </InputGroup>
             </HStack>
 
+            {!isLoading && (
+                <AgentsStatsRow
+                    total={stats.total}
+                    production={stats.production}
+                    development={stats.development}
+                    totalDocuments={stats.totalDocuments}
+                />
+            )}
+
             <MultiOptionButtons
                 options={[
                     { value: "recent", label: "Récent", icon: Clock },
@@ -125,6 +147,8 @@ export const AgentsList = () => {
                 onChange={setSort}
                 size="sm"
             />
+
+            <Divider borderColor="borderSubtle" />
 
             {isLoading ? (
                 <Box ref={containerRef} flex={1} minH={0} overflow="hidden">

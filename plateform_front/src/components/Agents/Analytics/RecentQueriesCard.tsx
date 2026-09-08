@@ -1,12 +1,14 @@
 import { Badge, Box, Card, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/react";
-import { fmtDateTime, mockRecentQueries } from "./mockData";
-import { STATUS_COLOR_SCHEME, STATUS_LABEL, type RecentQuery } from "./types";
+import { useGetRecentQueriesQuery, type QueryLogEntry } from "services/analytics/analytics";
+import { fmtDateTime } from "@/utils/analytics/dateUtils";
+import { STATUS_COLOR_SCHEME, STATUS_LABEL } from "./types";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
 import Button from "@/components/ui/Button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CardEmptyState } from "@/components/Dashboard/CardEmptyState";
 
-const RecentQueryItem = ({ query }: { query: RecentQuery }) => (
+const RecentQueryItem = ({ query }: { query: QueryLogEntry }) => (
     <Box p={3} bg="surfaceCard" borderBottomWidth="1px" borderStyle="solid" borderColor="borderDefault">
         <HStack justify="space-between" align="start" mb={2}>
             <Text fontSize="sm" color="textStrong" noOfLines={1} flex={1} minW={0} mr={2}>
@@ -42,9 +44,22 @@ const RecentQueryItem = ({ query }: { query: RecentQuery }) => (
 
 const MAX_PER_PAGE = 8;
 
-export const RecentQueriesCard = () => {
+interface RecentQueriesCardProps {
+    workspaceId: string;
+    agentId: string;
+}
+
+export const RecentQueriesCard = ({ workspaceId, agentId }: RecentQueriesCardProps) => {
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.ceil(mockRecentQueries.length / MAX_PER_PAGE);
+    const { data } = useGetRecentQueriesQuery(
+        { workspaceId, agentId, page: currentPage, limit: MAX_PER_PAGE },
+        { skip: !workspaceId || !agentId },
+    );
+    const queries = data?.data ?? [];
+    const total = data?.total ?? 0;
+    const totalPages = Math.max(1, Math.ceil(total / MAX_PER_PAGE));
+
+    const isEmpty = useMemo(() => !data || total === 0, [data, total]);
 
     return (
         <Stack spacing={0} h="100%">
@@ -59,20 +74,30 @@ export const RecentQueriesCard = () => {
             </Card>
             <Divider borderColor="borderStrong" />
             <Card size="none" variant="attachedBottom" flex={1} minH={0} display="flex" flexDirection="column">
-                <VStack spacing={0} align="stretch" flex={1} overflowY="auto">
-                    {mockRecentQueries.slice(0, MAX_PER_PAGE).map((query) => (
-                        <RecentQueryItem key={query.id} query={query} />
-                    ))}
-                </VStack>
-                {mockRecentQueries.length > MAX_PER_PAGE && (
+                {isEmpty ? (
+                    <CardEmptyState
+                        icon={Clock}
+                        title="Aucune requête récente"
+                        description="Les requêtes envoyées à votre agent apparaîtront ici."
+                    />
+                ) : (
+                    <VStack spacing={0} align="stretch" flex={1} overflowY="auto">
+                        {queries.map((query) => (
+                            <RecentQueryItem key={query.id} query={query} />
+                        ))}
+                    </VStack>
+                )}
+                {total > MAX_PER_PAGE && (
                     <HStack justify="space-between" px={4} pb={3}>
-                        <Text fontSize="xs">10 requêtes au total</Text>
+                        <Text fontSize="xs">
+                            {total} requête{total !== 1 ? "s" : ""} au total
+                        </Text>
                         <HStack spacing={2}>
                             <Button
                                 size="xs"
                                 variant="ghost"
-                                //onClick={() => setPage((p) => p - 1)}
-                                //isDisabled={page === 1}
+                                onClick={() => setCurrentPage((p) => p - 1)}
+                                isDisabled={currentPage === 1}
                             >
                                 <ChevronLeft size={14} />
                             </Button>
@@ -82,8 +107,8 @@ export const RecentQueriesCard = () => {
                             <Button
                                 size="xs"
                                 variant="ghost"
-                                //</HStack>onClick={() => setPage((p) => p + 1)}
-                                //isDisabled={page === totalPages}
+                                onClick={() => setCurrentPage((p) => p + 1)}
+                                isDisabled={currentPage === totalPages}
                             >
                                 <ChevronRight size={14} />
                             </Button>

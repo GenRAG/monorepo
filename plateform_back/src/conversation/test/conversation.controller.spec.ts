@@ -7,6 +7,7 @@ const mockConversationService: any = {
     getAssistantMetadata: jest.fn(),
     getConversations: jest.fn(),
     getMessages: jest.fn(),
+    getSourceUrl: jest.fn(),
     deleteConversation: jest.fn(),
 };
 
@@ -114,6 +115,22 @@ describe('ConversationController', () => {
 
             expect(mockConversationService.getMessages).toHaveBeenCalledWith('user-1', 'conv-1');
             expect(result).toEqual(messages);
+        });
+    });
+
+    describe('getSourceUrl', () => {
+        it('should throw BadRequestException when title is missing', () => {
+            expect(() => controller.getSourceUrl('agent-1', '', fakeUser)).toThrow(BadRequestException);
+            expect(mockConversationService.getSourceUrl).not.toHaveBeenCalled();
+        });
+
+        it('should delegate to service with user, agent id and title', async () => {
+            mockConversationService.getSourceUrl.mockResolvedValue({ url: 'https://s3.example.com/signed' });
+
+            const result = await controller.getSourceUrl('agent-1', 'doc.pdf', fakeUser);
+
+            expect(mockConversationService.getSourceUrl).toHaveBeenCalledWith('user-1', 'agent-1', 'doc.pdf');
+            expect(result).toEqual({ url: 'https://s3.example.com/signed' });
         });
     });
 

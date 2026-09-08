@@ -3,21 +3,30 @@ import { Box, Card, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/reac
 import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { Bar, BarChart, BarXAxis, ChartStatFlow, ChartTooltip, Grid, TooltipContent, YAxis } from "components/charts";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { useGetDailyMetricsQuery } from "services/analytics/analytics";
 import { ChartHoverBridge, type HoverState } from "./ChartHoverBridge";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import { baseMetrics } from "./mockData";
 import { PERIOD_DAYS, type Period } from "./types";
+import { toShortLabel } from "@/utils/analytics/dateUtils";
 
-export const ErrorsChart = () => {
+interface ErrorsChartProps {
+    workspaceId: string;
+    agentId: string;
+}
+
+export const ErrorsChart = ({ workspaceId, agentId }: ErrorsChartProps) => {
     const [period, setPeriod] = useState<Period>("30j");
     const [hover, setHover] = useState<HoverState>({ value: null, label: null });
     const days = PERIOD_DAYS[period];
-    const rows = useMemo(() => baseMetrics.slice(-days), [days]);
+    const { data: rows = [] } = useGetDailyMetricsQuery(
+        { workspaceId, agentId, days },
+        { skip: !workspaceId || !agentId },
+    );
     const errorRows = useMemo(
         () =>
             rows.map((r) => ({
                 date: r.date,
-                label: r.label,
+                label: toShortLabel(r.date),
                 value: r.errors + r.outOfCredits,
                 errors: r.errors,
                 outOfCredits: r.outOfCredits,

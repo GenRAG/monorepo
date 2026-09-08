@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useCallback } from "react";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
 import { useUserInfo } from "hooks/useUserInfo";
-import { useAgentQuery } from "hooks/chat";
+import { useAgentQuery, RagSource, ChatResponseMeta, ThinkingEvent } from "hooks/chat";
 import mixpanel from "lib/mixpanel";
 import WorkspaceHeader from "@/components/ui/WorkspaceHeader";
 
@@ -15,12 +15,18 @@ const ChatWorkspace = () => {
     }>();
 
     const playgroundUrl = `${(process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "")}/workspaces/${workspaceId}/agents/${agentId}/runtime/playground`;
-    const { sendQuery } = useAgentQuery(workspaceId, agentId, playgroundUrl);
+    const { sendQuery, isOutOfCredits } = useAgentQuery(workspaceId, agentId, playgroundUrl);
 
     const getResponse = useCallback(
-        (question: string, onChunk: (partial: string) => void) => {
+        (
+            question: string,
+            onChunk: (partial: string) => void,
+            onSources?: (sources: RagSource[]) => void,
+            _onMeta?: (meta: ChatResponseMeta) => void,
+            onThinking?: (event: ThinkingEvent) => void,
+        ) => {
             mixpanel.track("rag_query_sent", { agent_id: agentId });
-            return sendQuery(question, onChunk);
+            return sendQuery(question, onChunk, onSources, onThinking);
         },
         [sendQuery, agentId],
     );
@@ -47,6 +53,8 @@ const ChatWorkspace = () => {
                         fullHeight
                         title="Discussion"
                         getResponse={getResponse}
+                        disabled={isOutOfCredits}
+                        disabledMessage="Crédits épuisés"
                         placeholder="Entrez votre question"
                         welcomeMessage={
                             name

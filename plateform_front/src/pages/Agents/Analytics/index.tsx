@@ -17,10 +17,7 @@ import { ActivityHeatmapCard } from "@/components/Agents/Analytics/ActivityHeatm
 
 const AnalyticsWorkspace = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
-    const { data: agent, isLoading } = useGetAgentByIdQuery(
-        { workspaceId, id: agentId },
-        { skip: !workspaceId || !agentId },
-    );
+    const { data: agent } = useGetAgentByIdQuery({ workspaceId, id: agentId }, { skip: !workspaceId || !agentId });
 
     const [activeTab, setActiveTab] = useState<AnalyticsTab>(AnalyticsTab.Overview);
 
@@ -29,31 +26,31 @@ const AnalyticsWorkspace = () => {
             case AnalyticsTab.Overview:
                 return (
                     <VStack w="100%" align="stretch" spacing={5}>
-                        <ActivityHeatmapCard />
+                        <ActivityHeatmapCard workspaceId={workspaceId} agentId={agentId} />
 
                         <Grid templateColumns={{ base: "1fr", xl: "3fr 2fr" }} gap={5} alignItems="stretch">
-                            <VolumeChart isLoading={isLoading} />
-                            <DocumentHealthCard />
+                            <VolumeChart workspaceId={workspaceId} agentId={agentId} />
+                            <DocumentHealthCard workspaceId={workspaceId} agentId={agentId} />
                         </Grid>
 
                         <Grid templateColumns={{ base: "1fr", xl: "2fr 1fr" }} gap={5} alignItems="stretch">
                             <VStack spacing={5} align="stretch">
-                                <LatencyChart />
-                                <ErrorsChart />
+                                <LatencyChart workspaceId={workspaceId} agentId={agentId} />
+                                <ErrorsChart workspaceId={workspaceId} agentId={agentId} />
                             </VStack>
 
-                            <RecentQueriesCard />
+                            <RecentQueriesCard workspaceId={workspaceId} agentId={agentId} />
                         </Grid>
                     </VStack>
                 );
             case AnalyticsTab.Costs:
                 return (
                     <VStack w="100%" align="stretch" spacing={5}>
-                        <CostChart />
+                        <CostChart workspaceId={workspaceId} agentId={agentId} />
 
                         <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={5} alignItems="stretch">
-                            <CostByTypeCard />
-                            <CostByModelCard />
+                            <CostByTypeCard workspaceId={workspaceId} agentId={agentId} />
+                            <CostByModelCard workspaceId={workspaceId} agentId={agentId} />
                         </Grid>
                     </VStack>
                 );
@@ -69,7 +66,7 @@ const AnalyticsWorkspace = () => {
                 }
             />
 
-            <Box bg="secondBackgroundDefault" flexShrink={0}>
+            <Box bg="surfaceAppShell" flexShrink={0}>
                 <AnalyticsTabs activeTab={activeTab} onChange={setActiveTab} />
             </Box>
 

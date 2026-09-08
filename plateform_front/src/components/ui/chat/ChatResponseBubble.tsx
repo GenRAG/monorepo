@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, useColorMode } from "@chakra-ui/react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { getMarkdownStyles } from "./markdownStyles";
 
 interface ChatResponseBubbleProps {
@@ -25,7 +26,7 @@ const ChatResponseBubble: React.FC<ChatResponseBubbleProps> = ({ response, isErr
             bg={bg}
         >
             <Box fontSize="sm" color={textColor} sx={isError ? undefined : getMarkdownStyles(colorMode)}>
-                {isError ? response : <ReactMarkdown>{response}</ReactMarkdown>}
+                {isError ? response : <ReactMarkdown remarkPlugins={[remarkGfm]}>{response}</ReactMarkdown>}
             </Box>
         </Box>
     );

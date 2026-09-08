@@ -2,6 +2,7 @@ import React from "react";
 import { Badge, Box, HStack, Icon, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { Check, LucideIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { getMarkdownStyles } from "components/ui/chat/markdownStyles";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
@@ -63,7 +64,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                 </HStack>
 
                 <Box fontSize="sm" color="textBody" lineHeight="1.6" sx={getMarkdownStyles(colorMode)}>
-                    <ReactMarkdown>{responseText}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{responseText}</ReactMarkdown>
                 </Box>
 
                 <VStack align="stretch" spacing={1}>

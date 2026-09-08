@@ -6,11 +6,12 @@ import { getAgentAvatar } from "utils/agentAvatar";
 interface EntityCardProps {
     title: string;
     description?: string;
+    meta?: React.ReactNode;
     footer: React.ReactNode;
     onClick: () => void;
 }
 
-export const EntityCard: React.FC<EntityCardProps> = ({ title, description, footer, onClick }) => {
+export const EntityCard: React.FC<EntityCardProps> = ({ title, description, meta, footer, onClick }) => {
     const avatarStyle = getAgentAvatar(title);
 
     return (
@@ -40,6 +41,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({ title, description, foot
                             {description || "Aucune description renseignée."}
                         </Text>
                     )}
+                    {meta}
                 </VStack>
 
                 <Box

@@ -19,6 +19,8 @@ export class UsageTrackerService {
         durationMs,
         status,
         creditsUsed = UsageTrackerService.COST_PER_QUERY,
+        costByModel,
+        costByType,
     }: {
         workspaceId: string;
         agentId: string;
@@ -26,15 +28,17 @@ export class UsageTrackerService {
         durationMs: number;
         status: QueryLogStatus;
         creditsUsed?: number;
+        costByModel?: Record<string, number>;
+        costByType?: Record<string, number>;
     }): Promise<void> {
         const shouldDebit = status === QueryLogStatus.SUCCESS;
 
         await this.prisma.$transaction(async (tx) => {
             if (shouldDebit) {
-                const balance = await tx.creditBalance.findUnique({ where: { workspaceId } });
-                if (!balance || balance.balance < creditsUsed) {
-                    throw new ForbiddenException('Insufficient credits');
-                }
+                // The query already ran and its real cost is known — it must be debited even if it
+                // pushes the balance below zero, otherwise the balance freezes above zero and every
+                // later checkOrThrow() keeps passing, giving unlimited free queries once the balance
+                // is smaller than a single query's cost.
                 await tx.creditBalance.update({
                     where: { workspaceId },
                     data: { balance: { decrement: creditsUsed } },
@@ -48,6 +52,8 @@ export class UsageTrackerService {
                     durationMs,
                     status,
                     creditsUsed: shouldDebit ? creditsUsed : 0,
+                    costByModel,
+                    costByType,
                 },
             });
         });

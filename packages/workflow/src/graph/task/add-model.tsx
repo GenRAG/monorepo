@@ -7,7 +7,7 @@ export const AddModel = {
     type: TaskType.MODEL,
     label: "Modèle IA",
     shape: ShapeType.CIRCLE,
-    description: "Modèle d'intelligence artificielle",
+    description: "Comparez et sélectionnez un modèle d'IA pour votre bloc.",
     icon: (props: React.ComponentProps<LucideIcon>) => {
         return <Brain {...props} className="stroke-blue-500" />;
     },

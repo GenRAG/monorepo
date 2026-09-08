@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { Box, Stack, Text, chakra } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import { ChatMessage, useAgentQuery } from "hooks/chat";
+import { ChatMessage, RagSource, ChatResponseMeta, ThinkingEvent, useAgentQuery } from "hooks/chat";
 import { useOnboarding } from "hooks/useOnBoarding";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
@@ -28,8 +28,14 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
     const isAtLimit = messageCount >= MAX_EXCHANGES;
 
     const getResponse = useCallback(
-        async (question: string, onChunk: (partialText: string) => void) => {
-            const fullText = await sendQuery(question, onChunk);
+        async (
+            question: string,
+            onChunk: (partialText: string) => void,
+            onSources?: (sources: RagSource[]) => void,
+            _onMeta?: (meta: ChatResponseMeta) => void,
+            onThinking?: (event: ThinkingEvent) => void,
+        ) => {
+            const fullText = await sendQuery(question, onChunk, onSources, onThinking);
 
             const newCount = messageCount + 1;
             updateData({ messageCount: newCount, testQuestion: question });
@@ -76,9 +82,9 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
                         disabled={isOutOfCredits || isAtLimit}
                         disabledMessage={
                             isAtLimit
-                                ? `Limite atteinte (${MAX_EXCHANGES}/${MAX_EXCHANGES}) — passez à l'étape suivante`
+                                ? `Limite atteinte (${MAX_EXCHANGES}/${MAX_EXCHANGES})`
                                 : isOutOfCredits
-                                  ? "Crédits épuisés — passez à l'étape suivante"
+                                  ? "Crédits épuisés"
                                   : undefined
                         }
                         placeholder="Saisissez votre question"

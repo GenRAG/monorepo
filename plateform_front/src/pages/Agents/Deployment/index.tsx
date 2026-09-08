@@ -32,7 +32,7 @@ const DeploymentWorkspace = () => {
                 <DeploymentTabs activeTab={activeTab} onChange={setActiveTab} />
             </Box>
 
-            <Box flex={1} minW={0} display="flex" overflow="hidden">
+            <Box flex={1} minW={0} display="flex" overflow="hidden" bg="secondBackgroundDefault">
                 <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                         key={activeTab}

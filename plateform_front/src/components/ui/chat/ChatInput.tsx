@@ -18,7 +18,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     disabled = false,
     onSend,
 }) => {
-    const bgColor = useColorModeValue("grey.50", "grey.800");
     const isMobile = useAppResponsive({ base: true, lg: false });
     const [question, setQuestion] = useState("");
 
@@ -46,7 +45,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 size="sm"
                 borderRadius="8px"
                 placeholder={placeholder}
-                bg={bgColor}
                 isDisabled={isLoading || disabled}
             />
             <Button

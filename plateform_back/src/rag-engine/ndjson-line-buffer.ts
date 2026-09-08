@@ -1,5 +1,5 @@
 export interface RagStreamEvent {
-    type: string;
+    type: EventType;
     data: unknown;
 }
 
@@ -7,6 +7,28 @@ export interface RagCostSummary {
     total_cost_usd: number;
     by_model?: Record<string, number>;
     by_type?: Record<string, number>;
+}
+
+export interface RagSources {
+    index: number;
+    title: string;
+    score: number | null;
+    text_preview?: string;
+}
+
+export interface RagCitationCheck {
+    cited_indices: number[];
+    invalid_indices: number[];
+    cited_sources?: RagSources[];
+}
+
+export enum EventType {
+    Token = 'token',
+    CostSummary = 'cost_summary',
+    Error = 'error',
+    Sources = 'sources',
+    Status = 'status',
+    CitationCheck = 'citation_check',
 }
 
 export class NdjsonLineBuffer {

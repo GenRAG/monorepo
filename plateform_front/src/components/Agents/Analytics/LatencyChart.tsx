@@ -3,30 +3,38 @@ import { Box, Card, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/reac
 import { CHART_GREEN_SHADES, STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { ChartStatFlow, ChartTooltip, Grid, Line, LineChart, TooltipContent, XAxis, YAxis } from "components/charts";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { useGetLatencyQuery } from "services/analytics/analytics";
 import { LatencyHoverBridge, type LatencyHoverState } from "./ChartHoverBridge";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import { baseMetrics } from "./mockData";
+import { toShortLabel } from "@/utils/analytics/dateUtils";
 import { PERIOD_DAYS, type Period } from "./types";
 
 const P50_COLOR = STATUS_COLORS.success;
 const P95_COLOR = CHART_GREEN_SHADES[0];
 
-export const LatencyChart = () => {
+interface LatencyChartProps {
+    workspaceId: string;
+    agentId: string;
+}
+
+export const LatencyChart = ({ workspaceId, agentId }: LatencyChartProps) => {
     const [period, setPeriod] = useState<Period>("30j");
     const [hover, setHover] = useState<LatencyHoverState>({ p50: null, p95: null, label: null });
-    const rows = useMemo(() => baseMetrics.slice(-PERIOD_DAYS[period]), [period]);
+    const { data: rows = [] } = useGetLatencyQuery(
+        { workspaceId, agentId, days: PERIOD_DAYS[period] },
+        { skip: !workspaceId || !agentId },
+    );
     const latencyRows = useMemo(
-        () =>
-            rows.map((r) => ({
-                date: r.date,
-                p50: r.latencyP50,
-                p95: r.latencyP95,
-                label: r.label,
-            })),
+        () => rows.map((r) => ({ date: r.date, p50: r.p50, p95: r.p95, label: toShortLabel(r.date) })),
         [rows],
     );
-    const avgLatency = Math.round(rows.reduce((s, r) => s + r.latencyP50, 0) / rows.length);
-    const avgP95 = Math.round(rows.reduce((s, r) => s + r.latencyP95, 0) / rows.length);
+    const rowsWithData = useMemo(() => rows.filter((r) => r.p50 > 0 || r.p95 > 0), [rows]);
+    const avgLatency = rowsWithData.length
+        ? Math.round(rowsWithData.reduce((s, r) => s + r.p50, 0) / rowsWithData.length)
+        : 0;
+    const avgP95 = rowsWithData.length
+        ? Math.round(rowsWithData.reduce((s, r) => s + r.p95, 0) / rowsWithData.length)
+        : 0;
 
     return (
         <Stack spacing={0}>
@@ -91,7 +99,7 @@ export const LatencyChart = () => {
                         <LineChart
                             key={period}
                             data={latencyRows}
-                            margin={{ top: 8, right: 8, bottom: 40, left: 20 }}
+                            margin={{ top: 8, right: 8, bottom: 40, left: 25 }}
                             aspectRatio=""
                             className="h-full"
                         >
@@ -101,6 +109,7 @@ export const LatencyChart = () => {
                                 strokeWidth={2}
                                 showHighlight
                                 loadingStroke={P95_COLOR}
+                                fadeEdges={false}
                             />
                             <Line
                                 dataKey="p50"
@@ -108,6 +117,7 @@ export const LatencyChart = () => {
                                 strokeWidth={2.5}
                                 showHighlight
                                 loadingStroke={P50_COLOR}
+                                fadeEdges={false}
                             />
                             <Grid horizontal vertical />
                             <YAxis formatValue={(value: number) => (value === 0 ? "" : String(value))} />

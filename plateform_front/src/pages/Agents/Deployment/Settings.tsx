@@ -1,4 +1,4 @@
-import { Box, VStack } from "@chakra-ui/react";
+import { Box, VStack, Stack } from "@chakra-ui/react";
 import DataPrivacy from "components/Deployment/Settings/DataPrivacy";
 import RGPDBanner from "components/Deployment/Settings/RGPDBanner";
 import { UserRights } from "components/Deployment/Settings/UserRights";
@@ -7,6 +7,7 @@ import DangerZone from "components/ui/DangerZone";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteAgentMutation, useGetAgentByIdQuery, useUpdateAgentMutation } from "services/agent/agent";
+import WorkspaceHeader from "@/components/ui/WorkspaceHeader";
 
 const AgentDangerZone = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
@@ -51,20 +52,23 @@ export const Settings = () => {
     };
 
     return (
-        <Box flex={1} overflowY="auto" p={6}>
-            <VStack spacing={5} align="stretch" mx="auto">
-                <RGPDBanner />
-                {/* <HostingRegion /> */}
-                <DataPrivacy
-                    apiLogs={apiLogs}
-                    onApiLogsChange={setApiLogs}
-                    retentionDays={retentionDays}
-                    onRetentionDaysChange={handleRetentionDaysChange}
-                />
-                {apiLogs && <QueryLogsTable />}
-                <UserRights />
-                <AgentDangerZone />
-            </VStack>
-        </Box>
+        <Stack flex={1} minH={0} spacing={0} overflow="hidden">
+            <WorkspaceHeader title="Paramètres" description="Gérez les paramètres de votre agent." />
+            <Box flex={1} minH={0} overflowY="auto" p={6}>
+                <VStack spacing={5} align="stretch" mx="auto">
+                    <RGPDBanner />
+                    {/* <HostingRegion /> */}
+                    <DataPrivacy
+                        apiLogs={apiLogs}
+                        onApiLogsChange={setApiLogs}
+                        retentionDays={retentionDays}
+                        onRetentionDaysChange={handleRetentionDaysChange}
+                    />
+                    {apiLogs && <QueryLogsTable />}
+                    <UserRights />
+                    <AgentDangerZone />
+                </VStack>
+            </Box>
+        </Stack>
     );
 };

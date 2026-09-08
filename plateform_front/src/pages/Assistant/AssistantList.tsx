@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Box,
+    Divider,
     Grid,
     HStack,
     Icon,
@@ -165,6 +166,8 @@ export const AssistantsList = () => {
                 onChange={setSort}
                 size="sm"
             />
+
+            <Divider borderColor="borderSubtle" />
 
             {isLoading ? (
                 <Box ref={containerRef} flex={1} minH={0} overflow="hidden">

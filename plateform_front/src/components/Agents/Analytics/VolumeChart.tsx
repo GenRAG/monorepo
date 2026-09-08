@@ -3,20 +3,28 @@ import { Box, Card, HStack, Text, VStack, Stack, Divider } from "@chakra-ui/reac
 import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { Area, AreaChart, ChartStatFlow, ChartTooltip, Grid, TooltipContent, XAxis, YAxis } from "components/charts";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { useGetDailyMetricsQuery } from "services/analytics/analytics";
 import { ChartHoverBridge, type HoverState } from "./ChartHoverBridge";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import { baseMetrics, toChartRows } from "./mockData";
+import { toShortLabel } from "@/utils/analytics/dateUtils";
 import { PERIOD_DAYS, type Period } from "./types";
 
 interface VolumeChartProps {
-    isLoading?: boolean;
+    workspaceId: string;
+    agentId: string;
 }
 
-export const VolumeChart = ({ isLoading = false }: VolumeChartProps) => {
+export const VolumeChart = ({ workspaceId, agentId }: VolumeChartProps) => {
     const [period, setPeriod] = useState<Period>("30j");
     const [hover, setHover] = useState<HoverState>({ value: null, label: null });
-    const rows = useMemo(() => baseMetrics.slice(-PERIOD_DAYS[period]), [period]);
-    const volumeRows = useMemo(() => toChartRows(rows, "queries"), [rows]);
+    const { data: rows = [], isFetching } = useGetDailyMetricsQuery(
+        { workspaceId, agentId, days: PERIOD_DAYS[period] },
+        { skip: !workspaceId || !agentId },
+    );
+    const volumeRows = useMemo(
+        () => rows.map((r) => ({ date: r.date, value: r.queries, label: toShortLabel(r.date) })),
+        [rows],
+    );
     const totalQueries = rows.reduce((s, r) => s + r.queries, 0);
 
     return (
@@ -53,7 +61,7 @@ export const VolumeChart = ({ isLoading = false }: VolumeChartProps) => {
                     <Box position="absolute" p={0} inset={0}>
                         <AreaChart
                             key={period}
-                            status={isLoading ? "loading" : "ready"}
+                            status={isFetching ? "loading" : "ready"}
                             loadingLabel="Chargement..."
                             data={volumeRows}
                             margin={{ top: 8, right: 8, bottom: 40, left: 20 }}
@@ -69,7 +77,6 @@ export const VolumeChart = ({ isLoading = false }: VolumeChartProps) => {
                                 strokeWidth={2}
                                 showHighlight
                                 loadingStroke={STATUS_COLORS.success}
-                                fadeEdges
                             />
                             <Grid horizontal vertical />
                             <YAxis formatValue={(value: number) => (value === 0 ? "" : String(value))} />

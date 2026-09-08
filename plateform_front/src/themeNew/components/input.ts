@@ -19,7 +19,7 @@ const baseStyle = definePartsStyle({
             borderColor: "inputBorder",
         },
         _disabled: {
-            bg: "inputDisabledBg",
+            bg: "inputBg",
             color: "inputPlaceholder",
         },
         _placeholder: {

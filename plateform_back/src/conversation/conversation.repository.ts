@@ -58,7 +58,10 @@ export class ConversationRepository {
     findAgent(id: string) {
         return this.prisma.agent.findUnique({
             where: { id },
-            include: { workspace: { select: { name: true } } },
+            include: {
+                workspace: { select: { name: true } },
+                deployments: { orderBy: { version: 'desc' }, take: 1, select: { version: true } },
+            },
         });
     }
 
@@ -77,10 +80,19 @@ export class ConversationRepository {
     }
 
     createMessage(
-        data: { conversationId: string; sender: MessageSender; content: string },
+        data: {
+            conversationId: string;
+            sender: MessageSender;
+            content: string;
+            metadata?: Prisma.InputJsonValue;
+        },
         client: PrismaClientOrTx = this.prisma,
     ) {
         return client.message.create({ data });
+    }
+
+    findDocumentByAgentAndName(agentId: string, name: string) {
+        return this.prisma.document.findFirst({ where: { agentId, name } });
     }
 
     updateTimestamp(id: string) {

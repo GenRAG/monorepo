@@ -12,7 +12,12 @@ const mockConversationRepository: any = {
     findAllByAgent: jest.fn(),
     findOne: jest.fn(),
     findMessages: jest.fn(),
+    findDocumentByAgentAndName: jest.fn(),
     delete: jest.fn(),
+};
+
+const mockStorageStrategy: any = {
+    getSignedUrl: jest.fn(),
 };
 
 describe('ConversationService', () => {
@@ -20,7 +25,11 @@ describe('ConversationService', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [ConversationService, { provide: ConversationRepository, useValue: mockConversationRepository }],
+            providers: [
+                ConversationService,
+                { provide: ConversationRepository, useValue: mockConversationRepository },
+                { provide: 'STORAGE_STRATEGY', useValue: mockStorageStrategy },
+            ],
         }).compile();
 
         service = module.get<ConversationService>(ConversationService);
@@ -69,6 +78,7 @@ describe('ConversationService', () => {
                 id: 'agent-1',
                 name: 'Support Bot',
                 workspace: { name: 'Workspace A' },
+                deployments: [{ version: 3 }],
             };
             mockConversationRepository.findAgent.mockResolvedValue(agent);
 
@@ -78,7 +88,22 @@ describe('ConversationService', () => {
                 id: 'agent-1',
                 title: 'Support Bot',
                 sharedBy: 'Workspace A',
+                version: 3,
             });
+        });
+
+        it('should return metadata with undefined version when agent has no deployment', async () => {
+            const agent = {
+                id: 'agent-1',
+                name: 'Support Bot',
+                workspace: { name: 'Workspace A' },
+                deployments: [],
+            };
+            mockConversationRepository.findAgent.mockResolvedValue(agent);
+
+            const result = await service.getAssistantMetadata('agent-1');
+
+            expect(result.version).toBeUndefined();
         });
 
         it('should throw NotFoundException when agent not found', async () => {
@@ -213,6 +238,63 @@ describe('ConversationService', () => {
             ]);
         });
 
+        it('should expose sources from the agent message metadata', async () => {
+            const conversation = {
+                id: 'conv-1',
+                agent: { id: 'agent-1' },
+            };
+            mockConversationRepository.findOne.mockResolvedValue(conversation);
+            mockConversationRepository.hasAgentAccess.mockResolvedValue(true);
+
+            const date1 = new Date('2026-05-29T10:00:00Z');
+            const date2 = new Date('2026-05-29T10:01:00Z');
+            const sources = [{ index: 1, title: 'doc.pdf', score: 0.9, text_preview: 'preview' }];
+
+            const messages = [
+                { id: 'msg-1', sender: MessageSender.USER, content: 'Hello?', createdAt: date1 },
+                {
+                    id: 'msg-2',
+                    sender: MessageSender.AGENT,
+                    content: 'Hi there!',
+                    createdAt: date2,
+                    metadata: { sources },
+                },
+            ];
+            mockConversationRepository.findMessages.mockResolvedValue(messages);
+
+            const result = await service.getMessages('user-1', 'conv-1');
+
+            expect(result[0].sources).toEqual(sources);
+        });
+
+        it('should expose durationMs from the agent message metadata', async () => {
+            const conversation = {
+                id: 'conv-1',
+                agent: { id: 'agent-1' },
+            };
+            mockConversationRepository.findOne.mockResolvedValue(conversation);
+            mockConversationRepository.hasAgentAccess.mockResolvedValue(true);
+
+            const date1 = new Date('2026-05-29T10:00:00Z');
+            const date2 = new Date('2026-05-29T10:01:00Z');
+
+            const messages = [
+                { id: 'msg-1', sender: MessageSender.USER, content: 'Hello?', createdAt: date1 },
+                {
+                    id: 'msg-2',
+                    sender: MessageSender.AGENT,
+                    content: 'Hi there!',
+                    createdAt: date2,
+                    metadata: { durationMs: 1234 },
+                },
+            ];
+            mockConversationRepository.findMessages.mockResolvedValue(messages);
+
+            const result = await service.getMessages('user-1', 'conv-1');
+
+            expect(result[0].durationMs).toBe(1234);
+        });
+
         it('should ignore non-USER initial messages', async () => {
             const conversation = {
                 id: 'conv-1',
@@ -267,6 +349,38 @@ describe('ConversationService', () => {
             await service.deleteConversation('user-1', 'conv-1');
 
             expect(mockConversationRepository.delete).toHaveBeenCalledWith('conv-1');
+        });
+    });
+
+    describe('getSourceUrl', () => {
+        it('should throw ForbiddenException when user has no access', async () => {
+            mockConversationRepository.hasAgentAccess.mockResolvedValue(false);
+
+            await expect(service.getSourceUrl('user-1', 'agent-1', 'doc.pdf')).rejects.toThrow(ForbiddenException);
+            expect(mockConversationRepository.findDocumentByAgentAndName).not.toHaveBeenCalled();
+        });
+
+        it('should throw NotFoundException when document does not exist', async () => {
+            mockConversationRepository.hasAgentAccess.mockResolvedValue(true);
+            mockConversationRepository.findDocumentByAgentAndName.mockResolvedValue(null);
+
+            await expect(service.getSourceUrl('user-1', 'agent-1', 'missing.pdf')).rejects.toThrow(
+                NotFoundException,
+            );
+        });
+
+        it('should return a signed url for the resolved document', async () => {
+            mockConversationRepository.hasAgentAccess.mockResolvedValue(true);
+            mockConversationRepository.findDocumentByAgentAndName.mockResolvedValue({
+                id: 'doc-1',
+                storageKey: 'agents/agent-1/doc.pdf',
+            });
+            mockStorageStrategy.getSignedUrl.mockResolvedValue('https://s3.example.com/signed');
+
+            const result = await service.getSourceUrl('user-1', 'agent-1', 'doc.pdf');
+
+            expect(mockStorageStrategy.getSignedUrl).toHaveBeenCalledWith('agents/agent-1/doc.pdf', 900);
+            expect(result).toEqual({ url: 'https://s3.example.com/signed' });
         });
     });
 });

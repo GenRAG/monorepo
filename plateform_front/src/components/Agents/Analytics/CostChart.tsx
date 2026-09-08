@@ -3,26 +3,30 @@ import { Box, Card, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/reac
 import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { Area, AreaChart, ChartStatFlow, ChartTooltip, Grid, TooltipContent, XAxis, YAxis } from "components/charts";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { useGetDailyMetricsQuery } from "services/analytics/analytics";
 import { ChartHoverBridge, type HoverState } from "./ChartHoverBridge";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import { baseMetrics } from "./mockData";
-import { fmtCredits, sumCost, usdToCredits } from "./costUtils";
+import { toShortLabel } from "@/utils/analytics/dateUtils";
+import { fmtCredits } from "../../../utils/analytics/costUtils";
 import { PERIOD_DAYS, type Period } from "./types";
 
-export const CostChart = () => {
+interface CostChartProps {
+    workspaceId: string;
+    agentId: string;
+}
+
+export const CostChart = ({ workspaceId, agentId }: CostChartProps) => {
     const [period, setPeriod] = useState<Period>("30j");
     const [hover, setHover] = useState<HoverState>({ value: null, label: null });
-    const rows = useMemo(() => baseMetrics.slice(-PERIOD_DAYS[period]), [period]);
+    const { data: rows = [] } = useGetDailyMetricsQuery(
+        { workspaceId, agentId, days: PERIOD_DAYS[period] },
+        { skip: !workspaceId || !agentId },
+    );
     const costRows = useMemo(
-        () =>
-            rows.map((r) => ({
-                date: r.date,
-                value: usdToCredits(Object.values(r.costByModel).reduce((s, v) => s + v, 0)),
-                label: r.label,
-            })),
+        () => rows.map((r) => ({ date: r.date, value: r.creditsUsed, label: toShortLabel(r.date) })),
         [rows],
     );
-    const totalCredits = useMemo(() => usdToCredits(sumCost(rows)), [rows]);
+    const totalCredits = useMemo(() => rows.reduce((s, r) => s + r.creditsUsed, 0), [rows]);
 
     return (
         <Stack spacing={0}>
@@ -76,7 +80,6 @@ export const CostChart = () => {
                                 strokeWidth={2}
                                 showHighlight
                                 loadingStroke={STATUS_COLORS.success}
-                                fadeEdges
                             />
                             <Grid horizontal vertical />
                             <YAxis formatValue={(value: number) => (value === 0 ? "" : String(value))} />

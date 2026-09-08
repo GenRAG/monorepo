@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import type { Pipeline } from './pipeline.schema';
 import FormData from 'form-data';
 import type { IncomingMessage } from 'http';
-import { NdjsonLineBuffer, RagCostSummary } from './ndjson-line-buffer';
+import { EventType, NdjsonLineBuffer, RagCostSummary, RagSources } from './ndjson-line-buffer';
 
 enum JobStatus {
     COMPLETED = 'completed',
@@ -83,18 +83,42 @@ export class RagEngineService {
         query: string;
         orgId: string;
         mock?: boolean;
-    }): Promise<{ answer: string; costUsd: number }> {
+    }): Promise<{
+        answer: string;
+        costUsd: number;
+        costByModel?: Record<string, number>;
+        costByType?: Record<string, number>;
+        sources?: RagSources[];
+    }> {
         const stream = await this.getQueryStream({ pipeline, query, orgId, mock });
 
-        return new Promise<{ answer: string; costUsd: number }>((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const lineBuffer = new NdjsonLineBuffer();
-            let text = '';
-            let costSummary: RagCostSummary | undefined;
+            const state: {
+                text: string;
+                costSummary?: RagCostSummary;
+                streamError?: string;
+                sources?: RagSources[];
+            } = { text: '' };
+
+            const handlers: Partial<Record<EventType, (data: unknown) => void>> = {
+                [EventType.Token]: (data) => {
+                    state.text += data as string;
+                },
+                [EventType.CostSummary]: (data) => {
+                    state.costSummary = data as RagCostSummary;
+                },
+                [EventType.Error]: (data) => {
+                    state.streamError = typeof data === 'string' ? data : 'RAG engine error';
+                },
+                [EventType.Sources]: (data) => {
+                    state.sources = data as RagSources[];
+                },
+            };
 
             const handleEvents = (events: ReturnType<NdjsonLineBuffer['push']>) => {
                 for (const event of events) {
-                    if (event.type === 'token') text += event.data as string;
-                    else if (event.type === 'cost_summary') costSummary = event.data as RagCostSummary;
+                    handlers[event.type]?.(event.data);
                 }
             };
 
@@ -102,8 +126,19 @@ export class RagEngineService {
 
             stream.on('end', () => {
                 handleEvents(lineBuffer.flush());
-                this.logger.debug(`RAG stream completed, length: ${text.length}`);
-                resolve({ answer: text, costUsd: costSummary?.total_cost_usd ?? 0 });
+                if (state.streamError) {
+                    this.logger.error(`RAG stream returned an error event: ${state.streamError}`);
+                    reject(new Error(`RAG engine error: ${state.streamError}`));
+                    return;
+                }
+                this.logger.debug(`RAG stream completed, length: ${state.text.length}`);
+                resolve({
+                    answer: state.text,
+                    costUsd: state.costSummary?.total_cost_usd ?? 0,
+                    costByModel: state.costSummary?.by_model,
+                    costByType: state.costSummary?.by_type,
+                    sources: state.sources,
+                });
             });
 
             stream.on('error', (err: Error) => {
@@ -172,6 +207,17 @@ export class RagEngineService {
 
         const raw = response.data as { rerank_models?: { data?: unknown[] } };
         return raw?.rerank_models?.data ?? [];
+    }
+
+    async getModelInfo(modelId: string): Promise<unknown> {
+        const response = await firstValueFrom(
+            this.httpService.get(`${this.ragEngineUrl}/models/${modelId}/info`, {
+                headers: { 'X-API-Key': this.apiKey },
+                timeout: 10_000,
+            }),
+        );
+
+        return response.data;
     }
 
     async indexDocument(name: string, agentId: string, buffer: Buffer, mimeType: string): Promise<void> {

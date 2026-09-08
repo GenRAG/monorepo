@@ -43,7 +43,7 @@ const formatDate = (iso: string) =>
         minute: "2-digit",
     });
 
-const LIMIT = 1;
+const LIMIT = 8;
 
 export const QueryLogsTable = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();

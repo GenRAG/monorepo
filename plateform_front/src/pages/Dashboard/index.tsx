@@ -1,4 +1,4 @@
-import { Grid, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
+import { Divider, Grid, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { BookOpen, Plus, Bot, FileText, MessageSquare, Coins } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "hooks/useUserInfo";
@@ -8,42 +8,13 @@ import { ActivityChart } from "components/Dashboard/ActivityChart";
 import { AgentsCard } from "components/Dashboard/AgentsCard";
 import { RecentActivityCard } from "components/Dashboard/RecentActivityCard";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useGetWorkspaceStatsQuery } from "services/workspace/workspace";
-import { WorkspaceStats } from "types/workspace";
+import { useGetWorkspaceConsumptionQuery } from "services/credit/credit";
+import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
-const buildTrend = (value: number, points = 20): number[] => {
-    if (value === 0) return Array(points).fill(0);
-    return Array.from({ length: points }, (_, i) => {
-        const t = i / (points - 1);
-        return value * t * t * (3 - 2 * t);
-    });
-};
-
-// TEMP: visual QA for the redesigned MetricCard/ActivityChart against non-empty data.
-// Same shape as WorkspaceStats — remove once the new stat cards are confirmed.
-const DEBUG_USE_MOCK_STATS = true;
-const MOCK_STATS: WorkspaceStats = {
-    agents: { total: 5, production: 3, development: 2, items: [] },
-    documents: { total: 42, indexed: 38, processing: 2, failed: 2 },
-    conversations: { total: 1284, today: 37 },
-    credits: 2520,
-    recentActivity: [],
-    activityChart: {
-        "24h": {
-            labels: Array.from({ length: 24 }, (_, i) => `${i}h`),
-            values: [2, 1, 1, 1, 1, 3, 5, 8, 12, 15, 18, 14, 16, 19, 13, 11, 9, 10, 14, 17, 12, 8, 5, 3],
-        },
-        "7j": {
-            labels: ["Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam.", "Dim."],
-            values: [42, 58, 51, 67, 74, 39, 45],
-        },
-        "30j": {
-            labels: Array.from({ length: 30 }, (_, i) => String(i + 1)),
-            values: Array.from({ length: 30 }, (_, i) => Math.round(30 + 40 * Math.sin(i / 4) + i * 1.5)),
-        },
-    },
-};
+const CREDITS_HISTORY_DAYS = 14;
+const DEVELOPMENT_COLOR = "#6B7280";
 
 const Dashboard = () => {
     const { name } = useUserInfo();
@@ -53,16 +24,38 @@ const Dashboard = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
-    const { data: realStats, isLoading: isStatsLoading } = useGetWorkspaceStatsQuery(workspaceId, {
+    const { data: stats, isLoading: isStatsLoading } = useGetWorkspaceStatsQuery(workspaceId, {
         skip: !workspaceId,
     });
-    const stats = DEBUG_USE_MOCK_STATS ? MOCK_STATS : realStats;
+    const { data: consumption } = useGetWorkspaceConsumptionQuery(
+        { workspaceId, days: CREDITS_HISTORY_DAYS },
+        { skip: !workspaceId },
+    );
 
     const conversationsToday = stats?.conversations.today ?? 0;
     const conversationsTodayArr = stats?.activityChart["24h"].values ?? Array(24).fill(0);
     const agentsProd = stats?.agents.production ?? 0;
     const docsIndexed = stats?.documents.indexed ?? 0;
     const credits = stats?.credits ?? 0;
+
+    const creditBalanceArr = useMemo(() => {
+        if (!consumption) return undefined;
+        const { byDay } = consumption;
+        return byDay.map((_, i) => {
+            const consumedAfter = byDay.slice(i + 1).reduce((sum, used) => sum + used, 0);
+            return credits + consumedAfter;
+        });
+    }, [consumption, credits]);
+
+    const agentsComposition = [
+        { label: "Production", value: stats?.agents.production ?? 0, color: STATUS_COLORS.success },
+        { label: "Dev", value: stats?.agents.development ?? 0, color: DEVELOPMENT_COLOR },
+    ];
+    const documentsComposition = [
+        { label: "Indexés", value: stats?.documents.indexed ?? 0, color: STATUS_COLORS.success },
+        { label: "En cours", value: stats?.documents.processing ?? 0, color: STATUS_COLORS.warning },
+        { label: "Échoués", value: stats?.documents.failed ?? 0, color: STATUS_COLORS.error },
+    ];
 
     return (
         <Stack p={{ base: 4, lg: 6 }} gap={4} overflow="auto" maxH="100vh" minH="100vh">
@@ -99,6 +92,8 @@ const Dashboard = () => {
                 </VStack>
             </Stack>
 
+            <Divider borderColor="borderSubtle" />
+
             <Grid
                 templateColumns={{
                     base: "repeat(2, 1fr)",
@@ -121,7 +116,17 @@ const Dashboard = () => {
                     value={agentsProd}
                     trend={`${stats?.agents.total ?? 0} agent au total`}
                     trendPositive
-                    sparkData={buildTrend(agentsProd)}
+                    composition={agentsComposition}
+                    isLoading={isStatsLoading}
+                    defaultLabel="Agents"
+                />
+                <MetricCard
+                    icon={Coins}
+                    label="Crédits restants"
+                    value={credits}
+                    trend="disponibles"
+                    trendPositive
+                    sparkData={creditBalanceArr}
                     isLoading={isStatsLoading}
                 />
                 <MetricCard
@@ -130,16 +135,7 @@ const Dashboard = () => {
                     value={docsIndexed}
                     trend={`${stats?.documents.total ?? 0} au total`}
                     trendPositive
-                    sparkData={buildTrend(docsIndexed)}
-                    isLoading={isStatsLoading}
-                />
-                <MetricCard
-                    icon={Coins}
-                    label="Crédits restants"
-                    value={credits}
-                    trend="disponibles"
-                    trendPositive
-                    sparkData={buildTrend(credits, 24)}
+                    composition={documentsComposition}
                     isLoading={isStatsLoading}
                 />
             </Grid>

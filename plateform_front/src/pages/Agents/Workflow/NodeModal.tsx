@@ -27,16 +27,15 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
     const [contentReady, setContentReady] = useState(false);
     const toast = useThemedToast();
 
-    const bgColor = useColorModeValue("white", "grey.900");
+    const bgColor = useColorModeValue("white", "grey.950");
     const borderColor = useColorModeValue("grey.100", "grey.700");
-    const sectionBg = useColorModeValue("grey.25", "grey.900");
     const labelColor = useColorModeValue("grey.600", "grey.400");
 
     const parentNode = nodeData?.parentNodeId ? getNode(nodeData.parentNodeId) : undefined;
     const callbackFetchModels =
         parentNode?.data?.type === TaskType.RERANKER ? useGetModelsRerankQuery : useGetModelsGenerationQuery;
 
-    const modalWidth = task?.type === TaskType.MODEL ? "680px" : "420px";
+    const modalWidth = task?.type === TaskType.MODEL ? "550px" : "420px";
 
     const handleClose = () => {
         setContentReady(false);
@@ -78,21 +77,14 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                             width: modalWidth,
                         }}
                     >
-                        <Flex
-                            direction="column"
-                            w={modalWidth}
-                            h="100%"
-                            bg={bgColor}
-                            borderLeft="1px solid"
-                            borderColor={borderColor}
-                        >
+                        <Flex direction="column" w={modalWidth} h="100%" bg={bgColor}>
                             <Flex
                                 p={4}
                                 borderBottom="1px solid"
                                 borderColor={borderColor}
                                 align="center"
                                 justify="space-between"
-                                bg={sectionBg}
+                                bg="surfacePrimary"
                             >
                                 <HStack spacing={6}>
                                     <VStack alignItems="start" spacing={0}>
@@ -144,6 +136,7 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                                 <ModelSelectorContent
                                     onSelect={handleModelSelect}
                                     fetchModels={() => callbackFetchModels()}
+                                    currentModelId={nodeData?.modelName}
                                 />
                             )}
                         </Flex>

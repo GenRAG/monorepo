@@ -123,10 +123,10 @@ const OnboardingContent: React.FC = () => {
     }
 
     return (
-        <Stack h="100vh" bg="secondBackgroundDefault" spacing={0}>
+        <Stack h="100vh" bg="secondBackgroundDefault" spacing={0} overflow="hidden">
             <OnboardingHeader onOpenDrawer={onOpen} />
 
-            <HStack w="100%" h="100%" p={0} spacing={0} align="stretch">
+            <HStack w="100%" flex={1} minH={0} p={0} spacing={0} align="stretch">
                 <Stack p={4}>
                     <OnboardingSidebar
                         justCompletedStep={justCompletedStep}

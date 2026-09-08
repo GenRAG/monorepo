@@ -41,6 +41,10 @@ function costEvent(totalCostUsd: number): Buffer {
     return ndjson([{ type: 'cost_summary', data: { total_cost_usd: totalCostUsd } }]);
 }
 
+function statusEvent(text: string): Buffer {
+    return ndjson([{ type: 'status', data: text }]);
+}
+
 const fakeLogCtx = { workspaceId: 'ws-1', agentId: 'agent-1', query: 'hello', startedAt: Date.now() };
 
 const mockUsageTracker = { recordQuery: (jest.fn() as any).mockResolvedValue(undefined) };
@@ -80,14 +84,47 @@ describe('RagStreamForwarderService', () => {
             expect(parseData(events[0])).toEqual({ chunk: 'Hello world' });
         });
 
+        it('should forward status updates to the subscriber as they arrive', async () => {
+            const mockStream = createMockStream();
+            const { events, done } = collectEvents((subscriber) => service.forward(mockStream, subscriber));
+
+            mockStream.emit('data', statusEvent('Running block: retrieve'));
+            mockStream.emit('data', statusEvent('retrieve completed'));
+            mockStream.emit('data', tokenEvent('answer'));
+            mockStream.emit('end');
+            await done;
+
+            expect(parseData(events[0])).toEqual({ status: 'Running block: retrieve' });
+            expect(parseData(events[1])).toEqual({ status: 'retrieve completed' });
+        });
+
         it('should send done:true and complete on stream end', async () => {
             const mockStream = createMockStream();
             const { events, done } = collectEvents((subscriber) => service.forward(mockStream, subscriber));
 
+            mockStream.emit('data', tokenEvent('Hello world'));
             mockStream.emit('end');
             await done;
 
-            expect(parseData(events[0])).toEqual({ done: true });
+            expect(parseData(events[events.length - 1])).toEqual({ done: true });
+        });
+
+        it('should treat a stream that ends with no tokens as an error, without charging credits', async () => {
+            const mockStream = createMockStream();
+            const { events, done } = collectEvents((subscriber) =>
+                service.forward(mockStream, subscriber, fakeLogCtx),
+            );
+
+            mockStream.emit('end');
+            await done;
+            await flushPromises();
+
+            expect(parseData(events[events.length - 1])).toEqual({
+                error: "L'assistant n'a pas pu générer de réponse. Veuillez réessayer.",
+            });
+            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
+                expect.objectContaining({ status: QueryLogStatus.ERROR }),
+            );
         });
 
         it('should not record usage when no logCtx is passed (e.g. skipUsageTracking)', async () => {
@@ -105,6 +142,7 @@ describe('RagStreamForwarderService', () => {
             const mockStream = createMockStream();
             const { done } = collectEvents((subscriber) => service.forward(mockStream, subscriber, fakeLogCtx));
 
+            mockStream.emit('data', tokenEvent('answer'));
             mockStream.emit('end');
             await done;
             await flushPromises();
@@ -169,19 +207,25 @@ describe('RagStreamForwarderService', () => {
                 conversationId: 'conv-1',
                 sender: MessageSender.AGENT,
                 content: 'Hello world',
+                metadata: { durationMs: expect.any(Number) },
             });
         });
 
-        it('should send done with conversationId on stream end', async () => {
+        it('should send done with conversationId and durationMs on stream end', async () => {
             const mockStream = createMockStream();
             const { events, done } = collectEvents((subscriber) =>
                 service.forwardWithPersistence(mockStream, 'conv-1', subscriber, fakeLogCtx),
             );
 
+            mockStream.emit('data', tokenEvent('Hello world'));
             mockStream.emit('end');
             await done;
 
-            expect(parseData(events[events.length - 1])).toEqual({ done: true, conversationId: 'conv-1' });
+            expect(parseData(events[events.length - 1])).toEqual({
+                done: true,
+                conversationId: 'conv-1',
+                durationMs: expect.any(Number),
+            });
         });
 
         it('should bump the conversation updatedAt on success but not on error', async () => {
@@ -190,6 +234,7 @@ describe('RagStreamForwarderService', () => {
                 service.forwardWithPersistence(mockStream, 'conv-1', subscriber, fakeLogCtx),
             );
 
+            mockStream.emit('data', tokenEvent('Hello world'));
             mockStream.emit('end');
             await done;
             await flushPromises();
@@ -203,6 +248,7 @@ describe('RagStreamForwarderService', () => {
                 service.forwardWithPersistence(mockStream, 'conv-1', subscriber, fakeLogCtx),
             );
 
+            mockStream.emit('data', tokenEvent('Hello world'));
             mockStream.emit('end');
             await done;
             await flushPromises();
@@ -210,6 +256,27 @@ describe('RagStreamForwarderService', () => {
             expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
                 expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', status: QueryLogStatus.SUCCESS }),
             );
+        });
+
+        it('should treat a stream that ends with no tokens as an error and persist a friendly message', async () => {
+            const mockStream = createMockStream();
+            const { done } = collectEvents((subscriber) =>
+                service.forwardWithPersistence(mockStream, 'conv-1', subscriber, fakeLogCtx),
+            );
+
+            mockStream.emit('end');
+            await done;
+            await flushPromises();
+
+            expect(mockUsageTracker.recordQuery).toHaveBeenCalledWith(
+                expect.objectContaining({ status: QueryLogStatus.ERROR }),
+            );
+            expect(mockConversationRepo.createMessage).toHaveBeenLastCalledWith({
+                conversationId: 'conv-1',
+                sender: MessageSender.AGENT,
+                content: "L'assistant n'a pas pu générer de réponse. Veuillez réessayer.",
+                metadata: { durationMs: expect.any(Number) },
+            });
         });
 
         it('should send a sanitized error event and persist partial text on stream error', async () => {
@@ -229,6 +296,7 @@ describe('RagStreamForwarderService', () => {
                 conversationId: 'conv-1',
                 sender: MessageSender.AGENT,
                 content: 'Partial',
+                metadata: { durationMs: expect.any(Number) },
             });
         });
 
@@ -245,6 +313,7 @@ describe('RagStreamForwarderService', () => {
                 conversationId: 'conv-1',
                 sender: MessageSender.AGENT,
                 content: 'Une erreur est survenue. Veuillez réessayer.',
+                metadata: { durationMs: expect.any(Number) },
             });
         });
     });

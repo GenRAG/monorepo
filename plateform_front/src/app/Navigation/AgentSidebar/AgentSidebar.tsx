@@ -1,6 +1,5 @@
 import {
     Box,
-    Divider,
     Drawer,
     DrawerBody,
     DrawerContent,
@@ -91,7 +90,6 @@ const AgentSidebar = () => {
                         }}
                         icon={ToggleIcon}
                         flexShrink={0}
-                        color="white"
                     />
                 </HStack>
                 <Box h="1px" bg="borderSubtle" />

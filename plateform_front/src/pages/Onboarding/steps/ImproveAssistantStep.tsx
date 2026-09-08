@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
-import { ChatMessage, useAgentQuery } from "hooks/chat";
+import { ChatMessage, RagSource, ChatResponseMeta, ThinkingEvent, useAgentQuery } from "hooks/chat";
 import { HStack, Stack, Text, VStack, chakra } from "@chakra-ui/react";
 import { Upload } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
@@ -58,8 +58,14 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
     const showComparison = totalCompletedCount > 0;
 
     const getResponse = useCallback(
-        async (question: string, onChunk: (partialText: string) => void) => {
-            const fullText = await sendQuery(question, onChunk);
+        async (
+            question: string,
+            onChunk: (partialText: string) => void,
+            onSources?: (sources: RagSource[]) => void,
+            _onMeta?: (meta: ChatResponseMeta) => void,
+            onThinking?: (event: ThinkingEvent) => void,
+        ) => {
+            const fullText = await sendQuery(question, onChunk, onSources, onThinking);
             const newCount = messageCount + 1;
             updateData({ messageCount: newCount });
             void updateStepsData({ workspaceId, stepId: STEP_ID, data: { messageCount: newCount } });

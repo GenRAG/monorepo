@@ -57,6 +57,11 @@ const colorTokens = {
     skeletonStart: { default: "grey.100", _dark: "grey.800" },
     skeletonEnd: { default: "grey.200", _dark: "grey.700" },
 
+    // === TREND (indicateurs de variation) ===
+    trendPositive: { default: "green.600", _dark: "green.400" },
+    trendNeutral: { default: "orange.500", _dark: "orange.300" },
+    trendNegative: { default: "red.500", _dark: "red.400" },
+
     accentCardBg: { default: "green.50", _dark: "grey.850" }, // Carte sélectionnée/active
     accentIconBg: { default: "green.100", _dark: "grey.800" }, // Fond icône accent
     iconAccent: { default: "green.500", _dark: "green.400" }, // Icône accentuée (vert marque)

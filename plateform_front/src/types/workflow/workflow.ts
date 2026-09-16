@@ -1,15 +1,5 @@
 import type { WorkflowDefinition } from "@genrag/workflow";
 
-export type { WorkflowDefinition as WorkflowCanvas };
-
-export const WorkflowNodeTypes = {
-    WORKFLOW: "WORKFLOW",
-    PARAMETRE: "PARAMÈTRE",
-    MODELE: "MODÈLE",
-} as const;
-
-export type WorkflowNodeType = (typeof WorkflowNodeTypes)[keyof typeof WorkflowNodeTypes];
-
 export interface WorkflowEntity {
     id: string;
     agentId: string;

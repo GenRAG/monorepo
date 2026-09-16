@@ -9,23 +9,31 @@ import {
     SimpleGrid,
     Stack,
     Text,
-    useColorMode,
     useColorModeValue,
     VStack,
-    Divider,
 } from "@chakra-ui/react";
-import { Clock, Plus, Search, SortAsc } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AgentCard } from "components/Agents/AgentCard";
 import { AgentsStatsRow } from "components/Agents/AgentsStatsRow";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
-import { SortKey } from "pages/Assistant/AssistantList";
+import { AgentPreview } from "types/agent/agent";
 import { AgentStatus } from "types/deployment/deployment";
 import BoxIcon from "components/ui/BoxIcon";
-import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { getGlassInk } from "components/ui/GlassNav";
 import { useAppResponsive } from "hooks/useAppResponsive";
+
+const BOARD_COLUMNS: Array<{ status: AgentStatus; title: string; subtitle: string; tint: string }> = [
+    { status: AgentStatus.PRODUCTION, title: "Production", subtitle: "Agents déployés et actifs", tint: "#1c2527" },
+    {
+        status: AgentStatus.DEVELOPMENT,
+        title: "Développement",
+        subtitle: "Agents en cours de configuration",
+        tint: "#281e1f",
+    },
+];
 
 const COLUMN_BREAKPOINTS = { base: 1, sm: 2, xl: 4 };
 
@@ -63,30 +71,100 @@ const CardSkeleton: React.FC = () => (
     />
 );
 
+interface AgentBoardColumnProps {
+    status: AgentStatus;
+    title: string;
+    subtitle: string;
+    tint: string;
+    agents: AgentPreview[];
+    workspaceId: string;
+    onCreateAgent?: () => void;
+}
+
+const AgentBoardColumn: React.FC<AgentBoardColumnProps> = ({
+    title,
+    subtitle,
+    tint,
+    agents,
+    workspaceId,
+    onCreateAgent,
+}) => {
+    const ink = getGlassInk("dark");
+    const isEmpty = agents.length === 0 && !onCreateAgent;
+
+    return (
+        <Stack flex={1} spacing={3} w="100%" h="100%" bg={tint} borderRadius="16px" overflow="hidden" p={6}>
+            <Box flexShrink={0} mb={4}>
+                <HStack spacing={2}>
+                    <Text variant="body-xl">{title}</Text>
+                    <Box
+                        as="span"
+                        fontSize="xs"
+                        fontWeight="600"
+                        color={ink.muted}
+                        bg={ink.pillBg}
+                        borderRadius="full"
+                        px={2}
+                    >
+                        {agents.length}
+                    </Box>
+                </HStack>
+                <Text variant="body-sm" color={ink.muted}>
+                    {subtitle}
+                </Text>
+            </Box>
+
+            <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="auto">
+                {onCreateAgent && (
+                    <Box
+                        w="100%"
+                        minH="72px"
+                        borderRadius="16px"
+                        border="2px dashed"
+                        borderColor="rgba(255, 255, 255, 0.18)"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        gap={2}
+                        cursor="pointer"
+                        onClick={onCreateAgent}
+                        _hover={{ borderColor: "rgba(255, 255, 255, 0.35)" }}
+                        transition="border-color 0.15s"
+                    >
+                        <BoxIcon icon={Plus} />
+                        <Text fontSize="13px" color={ink.text}>
+                            Créer un nouvel agent
+                        </Text>
+                    </Box>
+                )}
+
+                {isEmpty && (
+                    <Text fontSize="sm" color={ink.muted} textAlign="center" py={6}>
+                        Aucun agent ici pour le moment.
+                    </Text>
+                )}
+
+                {agents.map((agent) => (
+                    <AgentCard key={agent.id} agent={agent} workspaceId={workspaceId} columnTint={tint} />
+                ))}
+            </VStack>
+        </Stack>
+    );
+};
+
 export const AgentsList = () => {
     const { workspaceId = "default" } = useParams<{ workspaceId: string }>();
     const { data: agents = [], isLoading } = useGetWorkspaceAgentsQuery(workspaceId);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
-    const [sort, setSort] = useState<SortKey>("recent");
-    const { colorMode } = useColorMode();
-
-    const textSecondary = useColorModeValue("grey.500", "white");
-    const borderColor = useColorModeValue("grey.100", "grey.500");
-    const bgColor = useColorModeValue("grey.25", "grey.900");
 
     const visibleAgents = useMemo(() => {
         const normalizedQuery = searchValue.trim().toLowerCase();
         const filtered = agents.filter(
             (agent) => normalizedQuery.length === 0 || agent.name.toLowerCase().includes(normalizedQuery),
         );
-        return filtered.sort((a, b) => {
-            if (sort === "az") return a.name.localeCompare(b.name);
-            const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-            const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-            return dateB - dateA;
-        });
-    }, [agents, searchValue, sort]);
+        return filtered;
+    }, [agents, searchValue]);
 
     const stats = useMemo(
         () => ({
@@ -105,7 +183,14 @@ export const AgentsList = () => {
     const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" h="100%">
+        <Stack
+            py={{ base: 4, lg: 6 }}
+            pl={{ base: 20, lg: 28 }}
+            pr={{ base: 28, lg: 40 }}
+            gap={4}
+            overflow="auto"
+            h="100%"
+        >
             <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
                     <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={titleColor}>
@@ -138,18 +223,6 @@ export const AgentsList = () => {
                 />
             )}
 
-            <MultiOptionButtons
-                options={[
-                    { value: "recent", label: "Récent", icon: Clock },
-                    { value: "az", label: "A→Z", icon: SortAsc },
-                ]}
-                value={sort}
-                onChange={setSort}
-                size="sm"
-            />
-
-            <Divider borderColor="borderSubtle" />
-
             {isLoading ? (
                 <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
                     <SimpleGrid spacing={3} columns={COLUMN_BREAKPOINTS}>
@@ -159,36 +232,19 @@ export const AgentsList = () => {
                     </SimpleGrid>
                 </Box>
             ) : (
-                <SimpleGrid spacing={3} columns={COLUMN_BREAKPOINTS}>
-                    <Box
-                        w="100%"
-                        minH="160px"
-                        borderRadius="12px"
-                        border="2px dashed"
-                        bg={bgColor}
-                        borderColor={borderColor}
-                        display="flex"
-                        flexDirection="column"
-                        justifyContent="center"
-                        alignItems="center"
-                        gap={2}
-                        cursor="pointer"
-                        onClick={() => setIsCreateModalOpen(true)}
-                        _hover={{
-                            borderColor: colorMode === "dark" ? "green.500" : "grey.200",
-                        }}
-                        transition="all 0.15s"
-                    >
-                        <BoxIcon icon={Plus} />
-                        <Text fontSize="13px" color={textSecondary}>
-                            Créer un nouvel agent
-                        </Text>
-                    </Box>
-
-                    {visibleAgents.map((agent) => (
-                        <AgentCard key={agent.id} agent={agent} workspaceId={workspaceId} />
+                <Stack direction={{ base: "column", lg: "row" }} spacing={4} align="stretch" flex={1} minH={0} h="100%">
+                    {BOARD_COLUMNS.map((column) => (
+                        <AgentBoardColumn
+                            key={column.status}
+                            {...column}
+                            agents={visibleAgents.filter((agent) => agent.status === column.status)}
+                            workspaceId={workspaceId}
+                            onCreateAgent={
+                                column.status === AgentStatus.DEVELOPMENT ? () => setIsCreateModalOpen(true) : undefined
+                            }
+                        />
                     ))}
-                </SimpleGrid>
+                </Stack>
             )}
 
             <CreateAgentModal

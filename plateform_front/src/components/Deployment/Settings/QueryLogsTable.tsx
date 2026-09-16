@@ -54,8 +54,6 @@ export const QueryLogsTable = () => {
         { skip: !workspaceId || !agentId },
     );
 
-    console.log(data);
-
     const borderColor = useColorModeValue("grey.100", "grey.800");
     const bgColor = useColorModeValue("white", "grey.900");
     const headerBg = useColorModeValue("grey.50", "grey.950");

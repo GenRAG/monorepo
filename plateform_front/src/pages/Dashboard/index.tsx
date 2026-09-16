@@ -58,12 +58,21 @@ const Dashboard = () => {
     ];
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={4} overflow="auto" maxH="100vh" minH="100vh">
+        <Stack
+            py={{ base: 4, lg: 6 }}
+            pl={{ base: 20, lg: 28 }}
+            pr={{ base: 28, lg: 40 }}
+            gap={4}
+            overflow="auto"
+            maxH="100vh"
+            minH="100vh"
+        >
             <Stack
                 direction={{ base: "column", md: "row" }}
                 justify="space-between"
                 align={{ base: "flex-start", md: "flex-end" }}
                 gap={3}
+                mb={8}
             >
                 <VStack align="start" spacing={1}>
                     <Heading variant="heading-md" color="textLabel" fontWeight="md" fontSize={{ base: "sm", md: "md" }}>
@@ -91,8 +100,6 @@ const Dashboard = () => {
                     )}
                 </VStack>
             </Stack>
-
-            <Divider borderColor="borderSubtle" />
 
             <Grid
                 templateColumns={{

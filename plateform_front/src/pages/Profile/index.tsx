@@ -8,6 +8,7 @@ import ProfileHero from "./ProfileHero";
 import ProfileSidebar, { ProfileSection } from "./ProfileSidebar";
 import PersonalInfoSection from "./sections/PersonalInfoSection";
 import SecuritySection from "./sections/SecuritySection";
+import AppearanceSection from "./sections/AppearanceSection";
 import DangerZone from "components/ui/DangerZone";
 
 export const ProfilePage = () => {
@@ -74,6 +75,7 @@ export const ProfilePage = () => {
                             {section === "security" && (
                                 <SecuritySection onChangePassword={handleChangePassword} isLoading={isChangingPw} />
                             )}
+                            {section === "appearance" && <AppearanceSection />}
                         </Box>
                     </Grid>
                 </Stack>

@@ -45,7 +45,7 @@ const Sidebar = () => {
     );
 
     const color = useColorModeValue("grey.300", "white");
-    const bg = useColorModeValue("white", "linear-gradient(135deg, #0B0E118a 0%, #2E343Cff 100%)");
+    const bg = useColorModeValue("white", "linear-gradient(135deg, #05050527 0%, rgba(19, 21, 24, 0.15) 100%)");
     const border = useColorModeValue("grey.100", "grey.800");
 
     const bgMobile = useColorModeValue("white", "linear-gradient(135deg, #0B0E11 0%, #2E343Cff 100%)");

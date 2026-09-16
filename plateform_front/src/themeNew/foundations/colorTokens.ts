@@ -50,6 +50,9 @@ const colorTokens = {
     borderAccentCardActive: { default: "green.400", _dark: "green.500" }, // Bordure de carte accentuée, état actif
     borderAccentCardMuted: { default: "green.200", _dark: "green.700" }, // Bordure de carte accentuée, état atténué
 
+    // === TOOLTIP ===
+    tooltipBg: { default: "grey.700", _dark: "green.600" }, // Fond de tooltip (déjà repris tel quel dans plusieurs sidebars)
+
     // === SKELETON ===
     skeletonStart: { default: "grey.100", _dark: "grey.800" },
     skeletonEnd: { default: "grey.200", _dark: "grey.700" },
@@ -65,6 +68,8 @@ const colorTokens = {
     listItemActiveBg: { default: "rgba(0,0,0,0.05)", _dark: "rgba(255,255,255,0.08)" }, // Fond d'item de liste actif
     listItemHoverBg: { default: "rgba(0,0,0,0.03)", _dark: "rgba(255,255,255,0.05)" }, // Fond d'item de liste survolé
     separatorDashAccent: { default: "#D1D5DB", _dark: "rgba(52, 211, 169, 0.3)" },
+
+    bgAgentProduction: { default: "#F0FDF4", _dark: "#68ffb871" },
 
     backgroundDefault: { default: "white", _dark: "grey.900" },
     secondBackgroundDefault: { default: "grey.25", _dark: "grey.950" },

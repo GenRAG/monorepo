@@ -45,7 +45,17 @@ interface ActionMenuProps {
     trigger?: React.ReactNode;
     tooltipLabel?: string;
     "aria-label"?: string;
-    placement?: "bottom-end" | "bottom-start" | "top-end" | "top-start" | "bottom" | "top" | "right-start";
+    placement?:
+        | "bottom-end"
+        | "bottom-start"
+        | "top-end"
+        | "top-start"
+        | "bottom"
+        | "top"
+        | "right-start"
+        | "right-end"
+        | "left-start"
+        | "left-end";
     width?: string | number;
     fullWidth?: boolean;
 }
@@ -70,7 +80,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
     const itemColor = useColorModeValue("grey.800", "grey.100");
     const itemHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
     const subColor = useColorModeValue("grey.500", "grey.400");
-    const dividerColor = useColorModeValue("grey.100", "#222");
+    const dividerColor = useColorModeValue("grey.100", "grey.700");
     const badgeBg = useColorModeValue("grey.100", "grey.800");
     const dangerColor = useColorModeValue("red.500", "red.400");
     const dangerHoverBg = useColorModeValue("red.50", "rgba(239,68,68,0.08)");
@@ -114,7 +124,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
     );
 
     return (
-        <Popover isOpen={isOpen} onClose={onClose} placement={placement} gutter={6}>
+        <Popover isOpen={isOpen} onClose={onClose} placement={placement} gutter={12}>
             <PopoverTrigger>
                 <Box display={fullWidth ? "flex" : "inline-flex"} w={fullWidth ? "100%" : undefined}>
                     {triggerEl}

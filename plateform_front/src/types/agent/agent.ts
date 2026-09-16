@@ -28,20 +28,6 @@ export interface Agent {
     updatedAt: string;
 }
 
-export interface AgentApiResponse {
-    id: string;
-    name: string;
-    description?: string;
-    workspaceId?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    documentsCount?: number;
-    deploymentStatus?: AgentStatus;
-    _count?: {
-        documents?: number;
-    };
-}
-
 export interface WorkspaceRouteParams {
     workspaceId: string;
 }

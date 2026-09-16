@@ -23,38 +23,7 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             action: () => onMenuToggle?.(),
             tool: null,
         },
-        /*{
-            label: "Frame",
-            icon: <Frame size={18} />,
-            action: () => setActiveTool("frame"),
-            tool: "frame" as Tool,
-        },
-        {
-            label: "Select",
-            icon: <MousePointer2 size={18} />,
-            action: () => setActiveTool("select"),
-            tool: "select" as Tool,
-        },
-        {
-            label: "Pan",
-            icon: <Hand size={18} />,
-            action: () => setActiveTool("pan"),
-            tool: "pan" as Tool,
-        },*/
     ];
-
-    /*const utilityButtons = [
-        {
-            label: "Add group",
-            icon: <LayoutGrid size={18} />,
-            action: () => {},
-        },
-        {
-            label: "Insert image",
-            icon: <Image size={18} />,
-            action: () => {},
-        },
-    ];*/
 
     const zoomButtons = [
         { label: "Agrandir", icon: <Plus size={18} />, action: () => zoomIn() },
@@ -109,14 +78,6 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                 boxShadow="lg"
             >
                 {toolButtons.map(({ label, icon, action, tool }) => renderButton(label, icon, action, tool !== null))}
-
-                {/*<Divider borderColor={dividerColor} width="20px" my="2px" />
-
-                utilityButtons.map(({ label, icon, action }) => renderButton(label, icon, action))}
-
-                <Divider borderColor={dividerColor} width="20px" my="2px" />
-
-                {renderButton("More options", <MoreHorizontal size={18} />, () => {})*/}
 
                 <Divider borderColor={dividerColor} width="20px" my="2px" />
 

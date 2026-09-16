@@ -9,7 +9,14 @@ export const BillingWorkspace = () => {
     const [currentTier, _setCurrentTier] = useState("free");
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={{ base: 4, lg: 6 }} h="100vh" overflow="hidden">
+        <Stack
+            py={{ base: 4, lg: 6 }}
+            pl={{ base: 20, lg: 28 }}
+            pr={{ base: 28, lg: 40 }}
+            gap={4}
+            overflow="auto"
+            h="100vh"
+        >
             <Stack spacing={0.5} flexShrink={0}>
                 <Heading fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textPrimary">
                     Crédits

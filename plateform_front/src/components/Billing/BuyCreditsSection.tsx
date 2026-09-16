@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import { CreditCard } from "lucide-react";
 import Button from "components/ui/Button";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 const MIN_CREDITS = 1;
 const MAX_CREDITS = 10000;
@@ -69,37 +68,33 @@ const BuyCreditsSection: React.FC = () => {
         setIsPurchasing(false);
     };
 
-    const border = isDark ? "grey.700" : "grey.200";
-    const sub = isDark ? "grey.400" : "grey.500";
-    const cardBg = isDark ? "grey.950" : "white";
-
     return (
-        <Box bg={cardBg} border="1px solid" borderColor={border} borderRadius="12px" p={6}>
+        <Box bg="surfacePrimary" border="1px solid" borderColor="borderDivider" borderRadius="12px" p={6}>
             <HStack justify="space-between" mb={5} flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
-                    <Text fontSize="md" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize="md" fontWeight="bold" color="textStrong">
                         Acheter des crédits
                     </Text>
-                    <Text fontSize="xs" color={sub}>
+                    <Text fontSize="xs" color="textLabel">
                         Crédits à la demande, sans expiration. Partagés entre tous vos agents.
                     </Text>
                 </VStack>
                 <HStack
-                    bg={isDark ? "grey.800" : "grey.50"}
+                    bg="surfaceSubtle"
                     border="1px solid"
-                    borderColor={border}
+                    borderColor="borderDivider"
                     px={3}
                     py={1.5}
                     borderRadius="8px"
                     spacing={1}
                 >
-                    <Text fontSize="sm" color={sub}>
+                    <Text fontSize="sm" color="textLabel">
                         €
                     </Text>
-                    <Text fontSize="sm" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize="sm" fontWeight="bold" color="textStrong">
                         {PRICE_PER_CREDIT.toFixed(2)}
                     </Text>
-                    <Text fontSize="xs" color={sub}>
+                    <Text fontSize="xs" color="textLabel">
                         / crédit
                     </Text>
                 </HStack>
@@ -118,17 +113,17 @@ const BuyCreditsSection: React.FC = () => {
                                 >
                                     {credits.toLocaleString("fr-FR")}
                                 </Text>
-                                <Text fontSize="sm" color={sub}>
+                                <Text fontSize="sm" color="textLabel">
                                     crédits
                                 </Text>
                             </HStack>
                             <HStack
                                 border="1px solid"
-                                borderColor={border}
+                                borderColor="borderDivider"
                                 borderRadius="8px"
                                 px={2}
                                 py={1}
-                                bg={isDark ? "grey.800" : "grey.50"}
+                                bg="surfaceSubtle"
                                 spacing={1}
                                 flexShrink={0}
                             >
@@ -145,12 +140,12 @@ const BuyCreditsSection: React.FC = () => {
                                     bg="transparent"
                                     fontSize="sm"
                                     fontWeight="semibold"
-                                    color={isDark ? "white" : "grey.900"}
+                                    color="textStrong"
                                     textAlign="right"
                                     p={0}
                                     _focus={{ boxShadow: "none" }}
                                 />
-                                <Text fontSize="xs" color={sub} flexShrink={0}>
+                                <Text fontSize="xs" color="textLabel" flexShrink={0}>
                                     crédits
                                 </Text>
                             </HStack>
@@ -166,7 +161,7 @@ const BuyCreditsSection: React.FC = () => {
                                 onChange={handleSliderChange}
                                 focusThumbOnChange={false}
                             >
-                                <SliderTrack h="10px" borderRadius="full" bg={isDark ? "grey.700" : "grey.200"}>
+                                <SliderTrack h="10px" borderRadius="full" bg="borderDivider">
                                     <SliderFilledTrack bgGradient="linear(to-r, green.400, green.600)" />
                                 </SliderTrack>
                                 <SliderThumb
@@ -174,7 +169,7 @@ const BuyCreditsSection: React.FC = () => {
                                     h="20px"
                                     boxShadow="0 2px 8px rgba(52,211,169,0.4)"
                                     border={0}
-                                    bgColor={currentDarkTheme.primary}
+                                    bgColor="iconAccent"
                                 />
                             </Slider>
 
@@ -183,7 +178,7 @@ const BuyCreditsSection: React.FC = () => {
                                     <Text
                                         key={m.value}
                                         fontSize="9px"
-                                        color={sub}
+                                        color="textLabel"
                                         cursor="pointer"
                                         onClick={() => handleSliderChange(m.value)}
                                         _hover={{
@@ -201,41 +196,36 @@ const BuyCreditsSection: React.FC = () => {
 
                 <Box
                     w={{ base: "100%", lg: "260px" }}
-                    bg={isDark ? "grey.800" : "grey.50"}
+                    bg="surfaceSubtle"
                     border="1px solid"
-                    borderColor={border}
+                    borderColor="borderDivider"
                     borderRadius="10px"
                     p={4}
                     flexShrink={0}
                 >
                     <VStack align="stretch" spacing={2} mb={4}>
                         <HStack justify="space-between">
-                            <Text fontSize="sm" color={sub}>
+                            <Text fontSize="sm" color="textLabel">
                                 {credits.toLocaleString("fr-FR")} crédits
                             </Text>
-                            <Text fontSize="sm" color={isDark ? "grey.200" : "grey.800"}>
+                            <Text fontSize="sm" color="textSecondary">
                                 {ht.toFixed(2)} €
                             </Text>
                         </HStack>
                         <HStack justify="space-between">
-                            <Text fontSize="sm" color={sub}>
+                            <Text fontSize="sm" color="textLabel">
                                 TVA (20%)
                             </Text>
-                            <Text fontSize="sm" color={isDark ? "grey.200" : "grey.800"}>
+                            <Text fontSize="sm" color="textSecondary">
                                 {tva.toFixed(2)} €
                             </Text>
                         </HStack>
-                        <Divider borderColor={border} my={1} />
+                        <Divider borderColor="borderDivider" my={1} />
                         <HStack justify="space-between">
-                            <Text fontSize="sm" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                            <Text fontSize="sm" fontWeight="bold" color="textStrong">
                                 Total TTC
                             </Text>
-                            <Text
-                                fontSize="xl"
-                                fontWeight="bold"
-                                color={isDark ? "white" : "grey.900"}
-                                letterSpacing="-0.02em"
-                            >
+                            <Text fontSize="xl" fontWeight="bold" color="textStrong" letterSpacing="-0.02em">
                                 {ttc.toFixed(2).replace(".", ",")} €
                             </Text>
                         </HStack>
@@ -251,7 +241,7 @@ const BuyCreditsSection: React.FC = () => {
                     >
                         Acheter avec {MOCK_PAYMENT.brand} •• {MOCK_PAYMENT.last4}
                     </Button>
-                    <Text fontSize="10px" color={sub} textAlign="center" lineHeight="1.4">
+                    <Text fontSize="10px" color="textLabel" textAlign="center" lineHeight="1.4">
                         Paiement sécurisé via Stripe · facture envoyée par email.
                     </Text>
                 </Box>

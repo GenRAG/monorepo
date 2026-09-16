@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Divider, Grid, HStack, Icon, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { Building2, Check, Rocket, Sparkles, Zap } from "lucide-react";
 import Button from "components/ui/Button";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 const TIERS = [
     {
@@ -67,17 +66,15 @@ interface ChangePlanSectionProps {
 const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSelectTier }) => {
     const { colorMode } = useColorMode();
     const isDark = colorMode === "dark";
-    const sub = isDark ? "grey.400" : "grey.500";
-    const border = isDark ? "grey.700" : "grey.200";
 
     return (
         <Box>
             <HStack justify="space-between" mb={5} flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
-                    <Text fontSize="md" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize="md" fontWeight="bold" color="textStrong">
                         Changer de plan
                     </Text>
-                    <Text fontSize="xs" color={sub}>
+                    <Text fontSize="xs" color="textLabel">
                         Vous pouvez upgrader / downgrader à tout moment. La facturation est calculée au prorata.
                     </Text>
                 </VStack>
@@ -104,26 +101,24 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSe
                                     ? isDark
                                         ? "rgba(52,211,169,0.06)"
                                         : "rgba(52,211,169,0.04)"
-                                    : isDark
-                                      ? "grey.900"
-                                      : "white"
+                                    : "surfaceCard"
                             }
                             border="1px solid"
                             borderColor={
                                 isSelected
-                                    ? currentDarkTheme.primary
+                                    ? "iconAccent"
                                     : tier.popular
                                       ? isDark
                                           ? "grey.600"
                                           : "grey.300"
-                                      : border
+                                      : "borderDivider"
                             }
                             borderRadius="12px"
                             p={5}
                             cursor="pointer"
                             transition="all 0.15s"
                             onClick={() => onSelectTier(tier.id)}
-                            _hover={{ borderColor: currentDarkTheme.primary }}
+                            _hover={{ borderColor: "iconAccent" }}
                         >
                             {tier.popular && (
                                 <Box
@@ -131,7 +126,7 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSe
                                     top="-11px"
                                     left="50%"
                                     transform="translateX(-50%)"
-                                    bg={currentDarkTheme.primary}
+                                    bg="iconAccent"
                                     color="grey.900"
                                     px={3}
                                     py="2px"
@@ -153,8 +148,8 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSe
                                     left="50%"
                                     transform="translateX(-50%)"
                                     border="1px solid"
-                                    borderColor={currentDarkTheme.primary}
-                                    color={currentDarkTheme.primary}
+                                    borderColor="iconAccent"
+                                    color="iconAccent"
                                     px={3}
                                     py="2px"
                                     borderRadius="full"
@@ -163,7 +158,7 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSe
                                     letterSpacing="0.08em"
                                     textTransform="uppercase"
                                     whiteSpace="nowrap"
-                                    bg={isDark ? "grey.900" : "white"}
+                                    bg="surfaceCard"
                                 >
                                     Plan actuel
                                 </Box>
@@ -175,21 +170,21 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSe
                                         w="30px"
                                         h="30px"
                                         borderRadius="8px"
-                                        bg={isDark ? "grey.800" : "grey.50"}
+                                        bg="surfaceSubtle"
                                         display="flex"
                                         alignItems="center"
                                         justifyContent="center"
                                     >
                                         <Icon as={tier.icon} boxSize={4} color={isDark ? "green.400" : "green.600"} />
                                     </Box>
-                                    <Text fontSize="sm" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                                    <Text fontSize="sm" fontWeight="bold" color="textStrong">
                                         {tier.name}
                                     </Text>
                                 </HStack>
 
                                 <Box>
                                     {tier.monthlyPrice === null ? (
-                                        <Text fontSize="xl" fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                                        <Text fontSize="xl" fontWeight="bold" color="textStrong">
                                             Sur-mesure
                                         </Text>
                                     ) : (
@@ -197,24 +192,24 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSe
                                             <Text
                                                 fontSize="xl"
                                                 fontWeight="bold"
-                                                color={isDark ? "white" : "grey.900"}
+                                                color="textStrong"
                                                 letterSpacing="-0.02em"
                                             >
                                                 {tier.monthlyPrice === 0 ? "Gratuit" : `${price} €`}
                                             </Text>
                                             {tier.monthlyPrice > 0 && (
-                                                <Text fontSize="xs" color={sub}>
+                                                <Text fontSize="xs" color="textLabel">
                                                     /mois
                                                 </Text>
                                             )}
                                         </HStack>
                                     )}
-                                    <Text fontSize="11px" color={sub} mt={0.5} lineHeight={1.4}>
+                                    <Text fontSize="11px" color="textLabel" mt={0.5} lineHeight={1.4}>
                                         {tier.description}
                                     </Text>
                                 </Box>
 
-                                <Divider borderColor={border} />
+                                <Divider borderColor="borderDivider" />
 
                                 <Button
                                     w="100%"
@@ -238,9 +233,9 @@ const ChangePlanSection: React.FC<ChangePlanSectionProps> = ({ currentTier, onSe
                                                 borderRadius="full"
                                                 flexShrink={0}
                                             >
-                                                <Check size={10} color={currentDarkTheme.primary} strokeWidth={3} />
+                                                <Check size={10} color="iconAccent" strokeWidth={3} />
                                             </Box>
-                                            <Text fontSize="11px" color={sub} lineHeight={1.4}>
+                                            <Text fontSize="11px" color="textLabel" lineHeight={1.4}>
                                                 {f}
                                             </Text>
                                         </HStack>

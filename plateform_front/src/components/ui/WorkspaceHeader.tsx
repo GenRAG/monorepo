@@ -1,5 +1,5 @@
 import React from "react";
-import { Heading, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Heading, HStack, Text, VStack } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
 
 interface ChatWorkspaceHeaderProps {
@@ -9,7 +9,6 @@ interface ChatWorkspaceHeaderProps {
 }
 
 const WorkspaceHeader = ({ title, description, actions }: ChatWorkspaceHeaderProps) => {
-    const bg = useColorModeValue("white", "grey.900");
     const isMobile = useAppResponsive({ base: true, lg: false });
 
     return (
@@ -17,7 +16,7 @@ const WorkspaceHeader = ({ title, description, actions }: ChatWorkspaceHeaderPro
             w="100%"
             p={2}
             borderBottom="1px solid"
-            bg={bg}
+            bg="surfaceCard"
             borderColor="borderSubtle"
             flexShrink={0}
             justify="space-between"

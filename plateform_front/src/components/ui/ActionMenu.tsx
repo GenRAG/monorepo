@@ -12,7 +12,6 @@ import {
     Portal,
     Text,
     Tooltip,
-    useColorModeValue,
     useDisclosure,
 } from "@chakra-ui/react";
 import { ExternalLink, MoreVertical } from "lucide-react";
@@ -74,18 +73,6 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
 }) => {
     const { isOpen, onClose, onToggle } = useDisclosure();
 
-    const popoverBg = useColorModeValue("white", "grey.950");
-    const popoverBorder = useColorModeValue("grey.100", "#282828");
-    const sectionLabelColor = useColorModeValue("grey.400", "grey.500");
-    const itemColor = useColorModeValue("grey.800", "grey.100");
-    const itemHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const dividerColor = useColorModeValue("grey.100", "grey.700");
-    const badgeBg = useColorModeValue("grey.100", "grey.800");
-    const dangerColor = useColorModeValue("red.500", "red.400");
-    const dangerHoverBg = useColorModeValue("red.50", "rgba(239,68,68,0.08)");
-    const tooltipBg = useColorModeValue("grey.700", "grey.900");
-
     const resolveSlot = (slot: React.ReactNode | SlotRenderer) =>
         typeof slot === "function" ? slot({ onClose }) : slot;
 
@@ -108,7 +95,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             {trigger}
         </Box>
     ) : (
-        <Tooltip label={tooltipLabel} bg={tooltipBg} color="white" placement="top" borderRadius="8px" hasArrow>
+        <Tooltip label={tooltipLabel} bg="tooltipBg" color="white" placement="top" borderRadius="8px" hasArrow>
             <IconButton
                 aria-label={ariaLabel}
                 icon={<MoreVertical size={16} />}
@@ -132,10 +119,10 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             </PopoverTrigger>
             <Portal>
                 <PopoverContent
-                    bg={popoverBg}
+                    bg="surfaceModal"
                     borderWidth="1px"
                     borderStyle="solid"
-                    borderColor={popoverBorder}
+                    borderColor="borderDefault"
                     borderRadius="12px"
                     boxShadow="0 8px 32px rgba(0,0,0,0.24), 0 2px 8px rgba(0,0,0,0.10)"
                     w={width}
@@ -147,13 +134,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                         {header && (
                             <>
                                 {resolveSlot(header)}
-                                <Divider borderColor={dividerColor} />
+                                <Divider borderColor="borderDivider" />
                             </>
                         )}
 
                         {visibleSections.map((section, si) => (
                             <React.Fragment key={si}>
-                                {si > 0 && <Divider borderColor={dividerColor} />}
+                                {si > 0 && <Divider borderColor="borderDivider" />}
                                 <Box px={2} pt={2} pb={2}>
                                     {section.label && (
                                         <Text
@@ -163,7 +150,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                                             fontWeight="600"
                                             textTransform="uppercase"
                                             letterSpacing="0.7px"
-                                            color={sectionLabelColor}
+                                            color="textFaint"
                                         >
                                             {section.label}
                                         </Text>
@@ -175,7 +162,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                                             py="7px"
                                             borderRadius="8px"
                                             cursor="pointer"
-                                            _hover={{ bg: item.danger ? dangerHoverBg : itemHoverBg }}
+                                            _hover={{ bg: item.danger ? "bubbleErrorBg" : "surfaceHover" }}
                                             transition="background 0.12s"
                                             justify="space-between"
                                             onClick={() => {
@@ -186,7 +173,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                                             <HStack spacing={2}>
                                                 {item.icon && (
                                                     <Box
-                                                        color={item.danger ? dangerColor : subColor}
+                                                        color={item.danger ? "textError" : "textLabel"}
                                                         display="flex"
                                                         alignItems="center"
                                                         flexShrink={0}
@@ -196,7 +183,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                                                 )}
                                                 <Text
                                                     fontSize="13px"
-                                                    color={item.danger ? dangerColor : itemColor}
+                                                    color={item.danger ? "textError" : "textPrimary"}
                                                     fontWeight="400"
                                                 >
                                                     {item.label}
@@ -210,20 +197,20 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                                                         py={0.5}
                                                         borderRadius="5px"
                                                         variant="subtle"
-                                                        color={subColor}
-                                                        bg={badgeBg}
+                                                        color="textLabel"
+                                                        bg="surfaceThumbnail"
                                                         fontWeight="500"
                                                     >
                                                         {item.badge}
                                                     </Badge>
                                                 )}
                                                 {item.shortcut && (
-                                                    <Text fontSize="11px" color={subColor} fontFamily="monospace">
+                                                    <Text fontSize="11px" color="textLabel" fontFamily="monospace">
                                                         {item.shortcut}
                                                     </Text>
                                                 )}
                                                 {item.external && (
-                                                    <Icon as={ExternalLink} boxSize="11px" color={subColor} />
+                                                    <Icon as={ExternalLink} boxSize="11px" color="textLabel" />
                                                 )}
                                             </HStack>
                                         </HStack>
@@ -234,7 +221,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
 
                         {footer && (
                             <>
-                                <Divider borderColor={dividerColor} />
+                                <Divider borderColor="borderDivider" />
                                 {resolveSlot(footer)}
                             </>
                         )}

@@ -1,55 +1,50 @@
-import { Box, HStack, Icon, IconButton, Text, useColorModeValue, useDisclosure } from "@chakra-ui/react";
+import { Box, HStack, Icon, IconButton, Text, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AgentPreview } from "types/agent/agent";
-import { AgentStatus } from "types/deployment/deployment";
-import { Clock, FileText, Trash2 } from "lucide-react";
+import { Clock, FileText } from "lucide-react";
 import { DeleteAgentModal } from "components/Agents/DeleteAgentModal";
 import { EntityCard } from "components/ui/EntityCard";
-import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
+import { getGlassInk, lightenHex } from "components/ui/GlassNav";
 import { formatDate } from "utils/documentFormatters";
 
 interface AgentCardProps {
     agent: AgentPreview;
     workspaceId: string;
+    columnTint: string;
 }
 
-const STATUS_CONFIG: Record<AgentStatus, { label: string; color: string }> = {
-    [AgentStatus.DEVELOPMENT]: { label: "Développement", color: STATUS_COLORS.warning },
-    [AgentStatus.PRODUCTION]: { label: "Production", color: STATUS_COLORS.success },
-};
-
-export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
+export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId, columnTint }) => {
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const descColor = useColorModeValue("grey.500", "grey.400");
-    const deleteColor = useColorModeValue("grey.400", "grey.600");
-
-    const statusStyle = STATUS_CONFIG[agent.status] ?? STATUS_CONFIG[AgentStatus.DEVELOPMENT];
+    const ink = getGlassInk("dark");
+    const cardBg = lightenHex(columnTint, 0.05);
 
     const hasMeta = typeof agent.documentsCount === "number" || Boolean(agent.updatedAt);
 
     return (
         <>
             <EntityCard
+                variant="tinted"
+                bg={cardBg}
                 title={agent.name}
                 description={agent.description ?? ""}
                 meta={
                     hasMeta && (
                         <HStack spacing={3}>
                             {typeof agent.documentsCount === "number" && (
-                                <HStack spacing={1}>
-                                    <Icon as={FileText} boxSize={3} color={descColor} />
-                                    <Text fontSize="xs" color={descColor}>
+                                <HStack spacing={1} borderRadius="4px" px={2} py={1} bg={lightenHex(columnTint, 0.1)}>
+                                    <Icon as={FileText} boxSize={3} color={ink.muted} />
+                                    <Text fontSize="xs" color={ink.muted}>
                                         {agent.documentsCount} document{agent.documentsCount !== 1 ? "s" : ""}
                                     </Text>
                                 </HStack>
                             )}
                             {agent.updatedAt && (
-                                <HStack spacing={1}>
-                                    <Icon as={Clock} boxSize={3} color={descColor} />
-                                    <Text fontSize="xs" color={descColor}>
+                                <HStack spacing={1} borderRadius="4px" px={2} py={1} bg={lightenHex(columnTint, 0.1)}>
+                                    <Icon as={Clock} boxSize={3} color={ink.muted} />
+                                    <Text fontSize="xs" color={ink.muted}>
                                         {formatDate(agent.updatedAt)}
                                     </Text>
                                 </HStack>
@@ -58,32 +53,6 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId }) => {
                     )
                 }
                 onClick={() => navigate(`/workspaces/${workspaceId}/agents/${agent.id}/playground`)}
-                footer={
-                    <>
-                        <HStack spacing="6px">
-                            <Box w="6px" h="6px" borderRadius="full" bg={statusStyle.color} flexShrink={0} />
-                            <Text fontSize="xs" fontWeight="500" color={descColor}>
-                                {statusStyle.label}
-                            </Text>
-                        </HStack>
-
-                        <IconButton
-                            aria-label="Supprimer l'agent"
-                            icon={<Icon as={Trash2} boxSize={3.5} />}
-                            size="xs"
-                            variant="ghost"
-                            color={deleteColor}
-                            opacity={0}
-                            _groupHover={{ opacity: 1 }}
-                            _hover={{ color: "red.500", bg: "red.50" }}
-                            transition="all 0.15s"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onOpen();
-                            }}
-                        />
-                    </>
-                }
             />
 
             <DeleteAgentModal

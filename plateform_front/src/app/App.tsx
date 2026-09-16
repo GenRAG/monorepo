@@ -5,7 +5,7 @@ import { AppLoader } from "components/ui/AppLoader";
 
 const App: React.FC = () => {
     const [isInitializing, setIsInitializing] = useState(true);
-    const backgroundColor = useColorModeValue("white", "grey.975");
+    const backgroundColor = useColorModeValue("grey.25", "grey.975");
 
     useEffect(() => {
         const timer = setTimeout(() => {

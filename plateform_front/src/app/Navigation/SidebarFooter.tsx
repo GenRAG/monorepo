@@ -1,6 +1,6 @@
 import { Box, Divider, HStack, Icon, Stack, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { LogOut, MessageSquare, Monitor, Moon, Scale, Sun, User } from "lucide-react";
-import { useState } from "react";
+import { ComponentProps, ReactNode, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch } from "store";
 import { setLastWorkspaceId } from "store/navigationSlice";
@@ -17,11 +17,31 @@ interface SidebarFooterProps {
     name?: string;
     email?: string;
     supportMenu: { id: string; icon: any; label: string }[];
+    /**
+     * Fourni par un consommateur flottant (ex: GlassNav) qui veut son propre déclencheur (avatar
+     * dans une bulle de verre) plutôt que la ligne pleine largeur par défaut : dans ce cas, on
+     * saute aussi le chrome (Divider + fond au survol) pensé pour la sidebar dépliable classique,
+     * et on ouvre le menu vers le bas plutôt que vers la droite.
+     */
+    compactTrigger?: ReactNode;
+    /**
+     * Côté d'ouverture du menu pour `compactTrigger` — "left-end" (défaut) pour un déclencheur
+     * ancré à droite de l'écran (GlassNav), "right-start" pour un déclencheur ancré à gauche
+     * (ex: AgentSidebar) où ouvrir vers la gauche sortirait de l'écran.
+     */
+    compactPlacement?: ComponentProps<typeof ActionMenu>["placement"];
 }
 
 type ThemeMode = "light" | "dark" | "system";
 
-export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFooterProps) => {
+export const SidebarFooter = ({
+    isOpen,
+    name,
+    email,
+    supportMenu,
+    compactTrigger,
+    compactPlacement = "left-end",
+}: SidebarFooterProps) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -36,7 +56,7 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
     const subColor = useColorModeValue("grey.500", "grey.400");
     const dividerColor = useColorModeValue("grey.100", "#222");
     const cardBorder = useColorModeValue("grey.200", "grey.700");
-    const cardBg = useColorModeValue("grey.50", "grey.900");
+    const cardBg = useColorModeValue("grey.50", "grey.850");
     const cardActiveBg = useColorModeValue("green.50", "grey.900");
     const cardText = useColorModeValue("grey.500", "grey.400");
     const cardActiveText = useColorModeValue("green.700", "green.400");
@@ -169,52 +189,66 @@ export const SidebarFooter = ({ isOpen, name, email, supportMenu }: SidebarFoote
         </Box>
     );
 
+    const sections = [
+        {
+            label: "Compte",
+            items: [
+                {
+                    label: "Mon profil",
+                    icon: <User size={14} />,
+                    onClick: () => void navigate("/profile"),
+                    shortcut: "⌘ P",
+                },
+            ],
+        },
+        {
+            label: "Aide & Ressources",
+            items: [
+                ...supportMenu.map(({ id, icon, label }) => ({
+                    label,
+                    icon: <Icon as={icon} boxSize="14px" />,
+                    onClick: () => {
+                        if (id === "help") void navigate("/help");
+                        else void navigate("/docs");
+                    },
+                    external: true,
+                })),
+                {
+                    label: "Contacter le support",
+                    icon: <MessageSquare size={14} />,
+                    onClick: () => void navigate("/legal/contact"),
+                },
+                {
+                    label: "Données & Légal",
+                    icon: <Scale size={14} />,
+                    onClick: () => {
+                        if (workspaceId) dispatch(setLastWorkspaceId(workspaceId));
+                        void navigate("/legal");
+                    },
+                },
+            ],
+        },
+    ];
+
+    if (compactTrigger) {
+        return (
+            <ActionMenu
+                trigger={compactTrigger}
+                sections={sections}
+                footer={footer}
+                placement={compactPlacement}
+                width="250px"
+            />
+        );
+    }
+
     return (
         <VStack align="stretch" gap={0} w="100%">
             <Divider w="100%" borderColor="borderDefault" borderWidth="1px" />
             <Stack p={2} _hover={{ bg: triggerHoverBg }} transition="background 0.12s" cursor="pointer" w="100%">
                 <ActionMenu
                     trigger={trigger}
-                    sections={[
-                        {
-                            label: "Compte",
-                            items: [
-                                {
-                                    label: "Mon profil",
-                                    icon: <User size={14} />,
-                                    onClick: () => void navigate("/profile"),
-                                    shortcut: "⌘ P",
-                                },
-                            ],
-                        },
-                        {
-                            label: "Aide & Ressources",
-                            items: [
-                                ...supportMenu.map(({ id, icon, label }) => ({
-                                    label,
-                                    icon: <Icon as={icon} boxSize="14px" />,
-                                    onClick: () => {
-                                        if (id === "help") void navigate("/help");
-                                        else void navigate("/docs");
-                                    },
-                                    external: true,
-                                })),
-                                {
-                                    label: "Contacter le support",
-                                    icon: <MessageSquare size={14} />,
-                                    onClick: () => void navigate("/legal/contact"),
-                                },
-                                {
-                                    label: "Données & Légal",
-                                    icon: <Scale size={14} />,
-                                    onClick: () => {
-                                        if (workspaceId) dispatch(setLastWorkspaceId(workspaceId));
-                                        void navigate("/legal");
-                                    },
-                                },
-                            ],
-                        },
-                    ]}
+                    sections={sections}
                     footer={footer}
                     placement="right-start"
                     width="250px"

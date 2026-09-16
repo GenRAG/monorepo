@@ -134,7 +134,14 @@ export const AssistantsList = () => {
     }, [assistants, search, sort]);
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" h="100%">
+        <Stack
+            py={{ base: 4, lg: 6 }}
+            pl={{ base: 20, lg: 28 }}
+            pr={{ base: 28, lg: 40 }}
+            gap={4}
+            overflow="auto"
+            h="100%"
+        >
             <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
                     <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>

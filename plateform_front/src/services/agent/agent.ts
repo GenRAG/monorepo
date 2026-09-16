@@ -1,6 +1,6 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
-import { Agent, AgentApiResponse, AgentByIdParams, CreateAgentParams, UpdateAgentParams } from "types/agent/agent";
+import { Agent, AgentByIdParams, CreateAgentParams, UpdateAgentParams } from "types/agent/agent";
 import { AgentPreview } from "types/agent/agent";
 
 const getWorkspaceAgentsTagId = (workspaceId: string) => `workspace-${workspaceId}`;

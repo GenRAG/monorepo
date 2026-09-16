@@ -57,7 +57,6 @@ export const Settings = () => {
             <Box flex={1} minH={0} overflowY="auto" p={6}>
                 <VStack spacing={5} align="stretch" mx="auto">
                     <RGPDBanner />
-                    {/* <HostingRegion /> */}
                     <DataPrivacy
                         apiLogs={apiLogs}
                         onApiLogsChange={setApiLogs}

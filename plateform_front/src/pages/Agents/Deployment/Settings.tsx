@@ -7,7 +7,7 @@ import DangerZone from "components/ui/DangerZone";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteAgentMutation, useGetAgentByIdQuery, useUpdateAgentMutation } from "services/agent/agent";
-import WorkspaceHeader from "@/components/ui/WorkspaceHeader";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 
 const AgentDangerZone = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();

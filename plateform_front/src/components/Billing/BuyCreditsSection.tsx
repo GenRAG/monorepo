@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
     Box,
-    Divider,
     HStack,
     Input,
     Slider,
@@ -13,8 +12,7 @@ import {
     VStack,
     useColorMode,
 } from "@chakra-ui/react";
-import { CreditCard } from "lucide-react";
-import Button from "components/ui/Button";
+import { CreditsOrderSummary } from "components/Billing/CreditsOrderSummary";
 
 const MIN_CREDITS = 1;
 const MAX_CREDITS = 10000;
@@ -194,57 +192,16 @@ const BuyCreditsSection: React.FC = () => {
                     </Box>
                 </VStack>
 
-                <Box
-                    w={{ base: "100%", lg: "260px" }}
-                    bg="surfaceSubtle"
-                    border="1px solid"
-                    borderColor="borderDivider"
-                    borderRadius="10px"
-                    p={4}
-                    flexShrink={0}
-                >
-                    <VStack align="stretch" spacing={2} mb={4}>
-                        <HStack justify="space-between">
-                            <Text fontSize="sm" color="textLabel">
-                                {credits.toLocaleString("fr-FR")} crédits
-                            </Text>
-                            <Text fontSize="sm" color="textSecondary">
-                                {ht.toFixed(2)} €
-                            </Text>
-                        </HStack>
-                        <HStack justify="space-between">
-                            <Text fontSize="sm" color="textLabel">
-                                TVA (20%)
-                            </Text>
-                            <Text fontSize="sm" color="textSecondary">
-                                {tva.toFixed(2)} €
-                            </Text>
-                        </HStack>
-                        <Divider borderColor="borderDivider" my={1} />
-                        <HStack justify="space-between">
-                            <Text fontSize="sm" fontWeight="bold" color="textStrong">
-                                Total TTC
-                            </Text>
-                            <Text fontSize="xl" fontWeight="bold" color="textStrong" letterSpacing="-0.02em">
-                                {ttc.toFixed(2).replace(".", ",")} €
-                            </Text>
-                        </HStack>
-                    </VStack>
-
-                    <Button
-                        w="100%"
-                        leftIcon={CreditCard}
-                        isLoading={isPurchasing}
-                        loadingText="Traitement..."
-                        onClick={handlePurchase}
-                        mb={2}
-                    >
-                        Acheter avec {MOCK_PAYMENT.brand} •• {MOCK_PAYMENT.last4}
-                    </Button>
-                    <Text fontSize="10px" color="textLabel" textAlign="center" lineHeight="1.4">
-                        Paiement sécurisé via Stripe · facture envoyée par email.
-                    </Text>
-                </Box>
+                <CreditsOrderSummary
+                    credits={credits}
+                    ht={ht}
+                    tva={tva}
+                    ttc={ttc}
+                    isPurchasing={isPurchasing}
+                    onPurchase={handlePurchase}
+                    paymentBrand={MOCK_PAYMENT.brand}
+                    paymentLast4={MOCK_PAYMENT.last4}
+                />
             </Stack>
         </Box>
     );

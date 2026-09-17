@@ -1,4 +1,4 @@
-import { Box, HStack, Icon, IconButton, Text, useDisclosure } from "@chakra-ui/react";
+import { HStack, Icon, Text, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AgentPreview } from "types/agent/agent";
@@ -6,7 +6,7 @@ import { Clock, FileText } from "lucide-react";
 import { DeleteAgentModal } from "components/Agents/DeleteAgentModal";
 import { EntityCard } from "components/ui/EntityCard";
 import { getGlassInk, lightenHex } from "components/ui/GlassNav";
-import { formatDate } from "utils/documentFormatters";
+import { formatRelativeDate } from "utils/date";
 
 interface AgentCardProps {
     agent: AgentPreview;
@@ -45,7 +45,7 @@ export const AgentCard: React.FC<AgentCardProps> = ({ agent, workspaceId, column
                                 <HStack spacing={1} borderRadius="4px" px={2} py={1} bg={lightenHex(columnTint, 0.1)}>
                                     <Icon as={Clock} boxSize={3} color={ink.muted} />
                                     <Text fontSize="xs" color={ink.muted}>
-                                        {formatDate(agent.updatedAt)}
+                                        {formatRelativeDate(agent.updatedAt)}
                                     </Text>
                                 </HStack>
                             )}

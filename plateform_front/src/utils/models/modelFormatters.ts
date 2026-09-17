@@ -61,14 +61,3 @@ export const formatPriceConversionTooltip = (pricePerMillion: number, direction:
     const per1000Words = (pricePerMillion / WORDS_PER_MILLION_TOKENS) * 1_000;
     return `${explanation} Environ $${formatUsdAmount(per1000Words)} pour 1 000 mots (soit $${formatUsdAmount(pricePerMillion)} pour 750 000 mots, ~1M tokens).`;
 };
-
-export const MODEL_BADGE_CONFIG: Record<string, { label: string; hue: string }> = {
-    smart: { label: "Intelligent", hue: "purple" },
-    fast: { label: "Rapide", hue: "blue" },
-    cheap: { label: "Économique", hue: "green" },
-    excellent: { label: "Excellent", hue: "gold" },
-    value: { label: "Bon rapport qualité-prix", hue: "teal" },
-    premium: { label: "Premium", hue: "pink" },
-    efficient: { label: "Efficace", hue: "cyan" },
-    balanced: { label: "Équilibré", hue: "grey" },
-};

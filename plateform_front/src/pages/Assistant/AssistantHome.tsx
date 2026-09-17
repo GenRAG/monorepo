@@ -9,7 +9,7 @@ import Button from "components/ui/Button";
 
 const MAX_RECENT_CONVERSATIONS = 3;
 
-const formatRelativeDate = (iso: string) => {
+const formatConversationDate = (iso: string) => {
     const date = new Date(iso);
     const days = Math.floor((Date.now() - date.getTime()) / 86400000);
     if (days < 1) return "Aujourd'hui";
@@ -136,7 +136,7 @@ const AssistantHome: React.FC<AssistantHomeProps> = ({
                                                     </HStack>
                                                     {conv.updatedAt && (
                                                         <Text fontSize="xs" color="textFaint" flexShrink={0}>
-                                                            {formatRelativeDate(conv.updatedAt)}
+                                                            {formatConversationDate(conv.updatedAt)}
                                                         </Text>
                                                     )}
                                                 </HStack>

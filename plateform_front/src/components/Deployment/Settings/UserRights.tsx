@@ -1,9 +1,10 @@
-import { useState } from "react";
 import { Box, HStack } from "@chakra-ui/react";
 import { Download } from "lucide-react";
 import { ExportCard } from "components/Deployment/ExportCard";
 import SectionHeader from "components/Deployment/SectionHeader";
 import { useParams } from "react-router-dom";
+import { useLazyExportConversationsQuery, useLazyExportApiLogsQuery } from "services/deployment/deployment";
+import useThemedToast from "hooks/useThemedToast";
 
 const downloadBlob = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
@@ -16,38 +17,22 @@ const downloadBlob = (blob: Blob, filename: string) => {
 
 export const UserRights = () => {
     const { workspaceId, agentId } = useParams<{ workspaceId: string; agentId: string }>();
-    const [isExportingConversations, setIsExportingConversations] = useState(false);
-    const [isExportingLogs, setIsExportingLogs] = useState(false);
+    const toast = useThemedToast();
+    const [exportConversations, { isFetching: isExportingConversations }] = useLazyExportConversationsQuery();
+    const [exportApiLogs, { isFetching: isExportingLogs }] = useLazyExportApiLogsQuery();
 
-    const baseUrl = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
-
-    const handleExportConversations = async () => {
+    const handleExport = async (trigger: typeof exportConversations | typeof exportApiLogs, filename: string) => {
         if (!workspaceId || !agentId) return;
-        setIsExportingConversations(true);
         try {
-            const res = await fetch(`${baseUrl}/workspaces/${workspaceId}/agents/${agentId}/export/conversations`, {
-                credentials: "include",
+            const blob = await trigger({ workspaceId, agentId }).unwrap();
+            downloadBlob(blob, filename);
+        } catch {
+            toast({
+                title: "Erreur lors de l'export",
+                description: "Une erreur est survenue lors de l'export. Veuillez réessayer.",
+                status: "error",
+                duration: 5000,
             });
-            if (!res.ok) throw new Error();
-            const blob = await res.blob();
-            downloadBlob(blob, `conversations-${agentId}.json`);
-        } finally {
-            setIsExportingConversations(false);
-        }
-    };
-
-    const handleExportApiLogs = async () => {
-        if (!workspaceId || !agentId) return;
-        setIsExportingLogs(true);
-        try {
-            const res = await fetch(`${baseUrl}/workspaces/${workspaceId}/agents/${agentId}/export/api-logs`, {
-                credentials: "include",
-            });
-            if (!res.ok) throw new Error();
-            const blob = await res.blob();
-            downloadBlob(blob, `api-logs-${agentId}.csv`);
-        } finally {
-            setIsExportingLogs(false);
         }
     };
 
@@ -62,14 +47,14 @@ export const UserRights = () => {
                     icon={<Download size={15} />}
                     title="Export des conversations"
                     subtitle="Format JSON - 1 client par fichier"
-                    onClick={handleExportConversations}
+                    onClick={() => handleExport(exportConversations, `conversations-${agentId}.json`)}
                     isLoading={isExportingConversations}
                 />
                 <ExportCard
                     icon={<Download size={15} />}
                     title="Export des logs API"
                     subtitle="Format CSV - 90 derniers jours"
-                    onClick={handleExportApiLogs}
+                    onClick={() => handleExport(exportApiLogs, `api-logs-${agentId}.csv`)}
                     isLoading={isExportingLogs}
                 />
             </HStack>

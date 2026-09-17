@@ -34,10 +34,8 @@ interface DataPrivacyProps {
 }
 
 export const DataPrivacy = ({ apiLogs, onApiLogsChange, retentionDays, onRetentionDaysChange }: DataPrivacyProps) => {
-    const [anonymize, setAnonymize] = useState(true);
     const [retention, setRetention] = useState(retentionDays !== null);
     const [retentionDuration, setRetentionDuration] = useState<RetentionDuration>(toDuration(retentionDays));
-    const [auditLog, setAuditLog] = useState(true);
 
     useEffect(() => {
         setRetention(retentionDays !== null);
@@ -64,8 +62,8 @@ export const DataPrivacy = ({ apiLogs, onApiLogsChange, retentionDays, onRetenti
                 <PrivacyRow
                     title="Anonymisation des données personnelles"
                     description="Détection et masquage automatique des PII (emails, noms, IBAN, numéros de sécurité sociale)."
-                    checked={anonymize}
-                    onChange={setAnonymize}
+                    checked
+                    onChange={() => {}}
                     disabled
                     comingSoon
                 />
@@ -102,8 +100,8 @@ export const DataPrivacy = ({ apiLogs, onApiLogsChange, retentionDays, onRetenti
                 <PrivacyRow
                     title="Journal d'audit"
                     description="Trace toutes les actions admin pour la conformité ISO 27001 et SOC 2."
-                    checked={auditLog}
-                    onChange={setAuditLog}
+                    checked
+                    onChange={() => {}}
                     disabled
                     comingSoon
                 />

@@ -5,14 +5,13 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
-    Skeleton,
     SimpleGrid,
     Stack,
     Text,
     VStack,
 } from "@chakra-ui/react";
 import { Plus, Search } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { AgentCard } from "components/Agents/AgentCard";
 import { AgentsStatsRow } from "components/Agents/AgentsStatsRow";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
@@ -21,8 +20,10 @@ import { useParams } from "react-router-dom";
 import { AgentPreview } from "types/agent/agent";
 import { AgentStatus } from "types/deployment/deployment";
 import BoxIcon from "components/ui/BoxIcon";
+import { CardSkeleton } from "components/ui/CardSkeleton";
 import { getGlassInk } from "components/ui/GlassNav";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { useSkeletonCount } from "hooks/useSkeletonCount";
 
 const BOARD_COLUMNS: Array<{ status: AgentStatus; title: string; subtitle: string; tint: string }> = [
     { status: AgentStatus.PRODUCTION, title: "Production", subtitle: "Agents déployés et actifs", tint: "#1c2527" },
@@ -37,38 +38,6 @@ const BOARD_COLUMNS: Array<{ status: AgentStatus; title: string; subtitle: strin
 const COLUMN_BREAKPOINTS = { base: 1, sm: 2, xl: 4 };
 
 const SKELETON_CARD_HEIGHT = 160;
-const GRID_GAP = 12;
-
-const useSkeletonCount = (columns: number) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [count, setCount] = useState(columns * 2);
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-
-        const observer = new ResizeObserver(([entry]) => {
-            const rows = Math.max(
-                1,
-                Math.round((entry.contentRect.height + GRID_GAP) / (SKELETON_CARD_HEIGHT + GRID_GAP)),
-            );
-            setCount(Math.min(columns * rows, 60));
-        });
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [columns]);
-
-    return { containerRef, count };
-};
-
-const CardSkeleton: React.FC = () => (
-    <Skeleton
-        height={`${SKELETON_CARD_HEIGHT}px`}
-        borderRadius="12px"
-        startColor="skeletonStart"
-        endColor="skeletonEnd"
-    />
-);
 
 interface AgentBoardColumnProps {
     status: AgentStatus;
@@ -176,7 +145,7 @@ export const AgentsList = () => {
     );
 
     const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.xl;
-    const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
+    const { containerRef, count: skeletonCount } = useSkeletonCount(columns, { cardHeight: SKELETON_CARD_HEIGHT });
 
     return (
         <Stack
@@ -223,7 +192,7 @@ export const AgentsList = () => {
                 <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
                     <SimpleGrid spacing={3} columns={COLUMN_BREAKPOINTS}>
                         {Array.from({ length: skeletonCount }).map((_, i) => (
-                            <CardSkeleton key={i} />
+                            <CardSkeleton key={i} height={SKELETON_CARD_HEIGHT} />
                         ))}
                     </SimpleGrid>
                 </Box>

@@ -1,37 +1,19 @@
 import { Box, Card, Skeleton } from "@chakra-ui/react";
 import { BarChart2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { type Period } from "pages/Dashboard/data";
 import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { ActivityHeader } from "components/Dashboard/ActivityChart/ActivityHeader";
 import { ActivityLegend } from "components/Dashboard/ActivityChart/ActivityLegend";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { WorkspaceStats } from "types/workspace";
-import { Area, AreaChart, ChartStatFlow, ChartTooltip, TooltipContent, useChart } from "components/charts";
+import { Area, AreaChart, ChartStatFlow, ChartTooltip, TooltipContent } from "components/charts";
+import { ChartHoverBridge, type HoverState } from "components/ui/ChartHoverBridge";
 
 /** AreaChart is time-scaled — the x-axis is hidden here, so evenly-spaced
  * placeholder dates only drive point spacing, never displayed to the user. */
 const toChartRows = (labels: string[], values: number[]) =>
     labels.map((label, i) => ({ date: new Date(2020, 0, 1 + i), value: values[i] ?? 0, label }));
-
-interface HoverState {
-    value: number | null;
-    label: string | null;
-}
-
-/** Reads the chart's hover context and lifts the scrubbed point up to the card. */
-const ChartHoverBridge = ({ onHoverChange }: { onHoverChange: (state: HoverState) => void }) => {
-    const { tooltipData } = useChart();
-
-    useEffect(() => {
-        const point = tooltipData?.point;
-        const value = typeof point?.value === "number" ? point.value : null;
-        const label = typeof point?.label === "string" ? point.label : null;
-        onHoverChange({ value, label });
-    }, [tooltipData, onHoverChange]);
-
-    return null;
-};
 
 interface ActivityChartProps {
     chartData?: WorkspaceStats["activityChart"];

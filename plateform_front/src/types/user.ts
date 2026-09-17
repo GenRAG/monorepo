@@ -1,19 +1,3 @@
-export type UserRole = "ADMIN" | "EDITOR" | "VIEWER";
-
-export interface UserWorkspace {
-    workspaceId: string;
-    role: UserRole;
-    workspace?: Workspace;
-}
-
-export interface Workspace {
-    id: string;
-    name: string;
-    description?: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
 export interface User {
     id: string;
     email: string;
@@ -21,7 +5,6 @@ export interface User {
     createdAt: string;
     updatedAt: string;
     isEmailVerified: boolean;
-    workspaces?: UserWorkspace[];
 }
 
 export interface LoginParams {

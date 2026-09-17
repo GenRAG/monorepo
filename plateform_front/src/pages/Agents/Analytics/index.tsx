@@ -13,7 +13,7 @@ import { CostChart } from "components/Agents/Analytics/CostChart";
 import { CostByTypeCard } from "components/Agents/Analytics/CostByTypeCard";
 import { CostByModelCard } from "components/Agents/Analytics/CostByModelCard";
 import { AnalyticsTab, AnalyticsTabs } from "components/Agents/Analytics/AnalyticsTabs";
-import { ActivityHeatmapCard } from "@/components/Agents/Analytics/ActivityHeatmapCard";
+import { ActivityHeatmapCard } from "components/Agents/Analytics/ActivityHeatmapCard";
 
 const AnalyticsWorkspace = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();

@@ -27,6 +27,8 @@ export interface Deployment {
 }
 
 export interface CurrentDeployment {
+    // Same concept as AgentPreview.status (types/agent/agent.ts), named differently here because
+    // this endpoint is scoped to the agent's current deployment rather than the agent itself.
     deploymentStatus: AgentStatus;
     name: string;
     latestDeployment: Deployment | null;

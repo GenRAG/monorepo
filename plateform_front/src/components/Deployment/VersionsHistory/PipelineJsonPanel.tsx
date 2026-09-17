@@ -40,7 +40,11 @@ export const PipelineJsonPanel = ({
     deploymentName,
     deploymentChangelog,
 }: PipelineJsonPanelProps) => {
-    const { data: workflow, isLoading } = useGetWorkflowByVersionQuery(
+    const {
+        data: workflow,
+        isLoading,
+        isError,
+    } = useGetWorkflowByVersionQuery(
         { workspaceId, agentId, version: workflowVersion ?? 0 },
         { skip: workflowVersion === null },
     );
@@ -78,6 +82,10 @@ export const PipelineJsonPanel = ({
             <Box p={5} bg="secondBackgroundDefault" flex="1" maxW="100%" overflowY="scroll" overflowX="hidden">
                 {isLoading ? (
                     <Skeleton h="200px" borderRadius="6px" />
+                ) : isError ? (
+                    <Text fontSize="sm" color="textError">
+                        Impossible de charger le workflow de ce déploiement.
+                    </Text>
                 ) : pipeline ? (
                     <Box
                         as="pre"

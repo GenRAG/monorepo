@@ -2,7 +2,7 @@ export { GlassSurface } from "./GlassSurface";
 export type { GlassSurfaceProps, GlassVariant } from "./GlassSurface";
 
 export { GlassNav } from "./GlassNav";
-export type { GlassNavProps, GlassNavItem, GlassNavAction } from "./GlassNav";
+export type { GlassNavProps, GlassNavItem } from "./GlassNav";
 
 export { GlassNavAppExample } from "./GlassNavAppExample";
 export { useNavLayoutMode } from "./useNavLayoutMode";

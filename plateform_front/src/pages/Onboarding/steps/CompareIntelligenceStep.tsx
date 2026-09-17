@@ -1,49 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Box, Skeleton, Stack, Text, VStack, chakra } from "@chakra-ui/react";
-import { MessageCircle, RotateCcw, Search, Zap } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
 import ChatInput from "components/ui/chat/ChatInput";
 import Button from "components/ui/Button";
 import ResponseCard from "components/Onboarding/CompareIntelligence/ResponseDetailPanel";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import { useOnboarding } from "hooks/useOnBoarding";
+import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import {
     CompareOnboardingResponse,
     useCompareOnboardingMutation,
     useUpdateOnboardingStepsDataMutation,
 } from "services/onboarding/onboarding";
 import Banner from "components/ui/Banner";
+import { CARD_META } from "pages/Onboarding/steps/compareIntelligenceCards";
 
 const MAX_COMPARES = 2;
 const STEP_ID = "compare-intelligence";
-
-const CARD_META = [
-    {
-        key: "standard" as const,
-        title: "STANDARD",
-        badge: "Rapide",
-        isRecommended: false,
-        icon: Zap,
-        advantages: ["Réponse instantanée", "Idéal pour les questions simples"],
-    },
-    {
-        key: "precise" as const,
-        title: "PRÉCIS",
-        badge: "Recommandé",
-        isRecommended: true,
-        icon: Search,
-        advantages: ["Citations et articles précis", "Analyse approfondie des documents"],
-    },
-    {
-        key: "creative" as const,
-        title: "CRÉATIF",
-        badge: "Convivial",
-        isRecommended: false,
-        icon: MessageCircle,
-        advantages: ["Ton chaleureux et engageant", "Meilleure expérience utilisateur"],
-    },
-];
 
 export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({ data, updateData }) => {
     const isMobile = useAppResponsive({ base: true, lg: false });

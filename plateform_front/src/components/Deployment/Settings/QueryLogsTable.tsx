@@ -20,7 +20,7 @@ const STATUS_LABEL: Record<QueryLogStatus, string> = {
 
 const formatDuration = (ms: number) => (ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`);
 
-const formatDate = (iso: string) =>
+const formatLogDateTime = (iso: string) =>
     new Date(iso).toLocaleString("fr-FR", {
         day: "2-digit",
         month: "2-digit",
@@ -35,7 +35,7 @@ export const QueryLogsTable = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
     const [page, setPage] = useState(1);
 
-    const { data, isLoading } = useGetQueryLogsQuery(
+    const { data, isLoading, isError } = useGetQueryLogsQuery(
         { workspaceId, agentId, page, limit: LIMIT },
         { skip: !workspaceId || !agentId },
     );
@@ -51,6 +51,12 @@ export const QueryLogsTable = () => {
             {isLoading ? (
                 <VStack py={8}>
                     <Spinner size="sm" />
+                </VStack>
+            ) : isError ? (
+                <VStack py={8}>
+                    <Text fontSize="sm" color="textMuted">
+                        Impossible de charger les logs.
+                    </Text>
                 </VStack>
             ) : !data?.data.length ? (
                 <VStack py={8}>
@@ -118,7 +124,7 @@ export const QueryLogsTable = () => {
                                         </Td>
                                         <Td>
                                             <Text fontSize="xs" color="textMuted">
-                                                {formatDate(log.createdAt)}
+                                                {formatLogDateTime(log.createdAt)}
                                             </Text>
                                         </Td>
                                     </Tr>

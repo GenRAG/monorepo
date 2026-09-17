@@ -1,14 +1,8 @@
 import React from "react";
-import { Skeleton, Stack, VStack, useColorMode } from "@chakra-ui/react";
+import { Skeleton, Stack, VStack } from "@chakra-ui/react";
 
 const HistoryLoadingSkeleton: React.FC = () => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
-    const skeletonProps = {
-        startColor: isDark ? "grey.800" : "grey.100",
-        endColor: isDark ? "grey.700" : "grey.200",
-        borderRadius: "12px",
-    };
+    const skeletonProps = { borderRadius: "12px" };
 
     return (
         <VStack spacing={4} align="stretch">

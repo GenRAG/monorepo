@@ -1,13 +1,6 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
-
-export interface AgentMember {
-    id: string;
-    userId: string;
-    email: string;
-    name: string | null;
-    createdAt: string;
-}
+import type { AgentMember } from "types/agent/agent";
 
 interface AgentMemberParams {
     workspaceId: string;

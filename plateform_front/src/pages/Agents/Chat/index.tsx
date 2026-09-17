@@ -5,7 +5,7 @@ import { ChatInterface } from "components/ui/chat/ChatInterface";
 import { useUserInfo } from "hooks/useUserInfo";
 import { useAgentQuery, RagSource, ChatResponseMeta, ThinkingEvent } from "hooks/chat";
 import mixpanel from "lib/mixpanel";
-import WorkspaceHeader from "@/components/ui/WorkspaceHeader";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 
 const ChatWorkspace = () => {
     const { name } = useUserInfo();

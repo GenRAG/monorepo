@@ -1,5 +1,6 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
+import { workspaceStatsTag } from "services/workspace/workspace";
 import { Agent, AgentByIdParams, CreateAgentParams, UpdateAgentParams } from "types/agent/agent";
 import { AgentPreview } from "types/agent/agent";
 
@@ -48,6 +49,7 @@ export const extendedAgentApi = backendApi.injectEndpoints({
             }),
             invalidatesTags: (_result, _error, { workspaceId }) => [
                 { type: Tag.Agents, id: getWorkspaceAgentsTagId(workspaceId) },
+                workspaceStatsTag(workspaceId),
             ],
         }),
 
@@ -71,6 +73,7 @@ export const extendedAgentApi = backendApi.injectEndpoints({
             invalidatesTags: (_result, _error, { workspaceId, id }) => [
                 { type: Tag.Agents, id },
                 { type: Tag.Agents, id: getWorkspaceAgentsTagId(workspaceId) },
+                workspaceStatsTag(workspaceId),
             ],
         }),
     }),

@@ -1,30 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import "pages/Onboarding/onboardingAnimations.css";
-import { Box, Button, HStack, Spinner, Stack, Text, VStack, useDisclosure } from "@chakra-ui/react";
-import { AlertTriangle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Box, HStack, Spinner, Stack, Text, VStack, useDisclosure } from "@chakra-ui/react";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
-import { useOnboarding } from "hooks/useOnBoarding";
+import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 import StepFooter from "components/Onboarding/StepFooter";
 import OnboardingHeader from "components/Onboarding/Stepper/OnboardingHeader";
 import OnboardingSidebar from "components/Onboarding/Stepper/OnboardingSidebar";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-
-const SESSION_ERROR_MESSAGES = {
-    not_found: {
-        title: "Workspace introuvable",
-        description: "Ce workspace n'existe pas ou a été supprimé. Vérifiez l'URL ou retournez au tableau de bord.",
-    },
-    unauthorized: {
-        title: "Accès non autorisé",
-        description: "Vous n'avez pas accès à ce workspace. Contactez un administrateur.",
-    },
-    unknown: {
-        title: "Une erreur est survenue",
-        description: "Impossible de charger la session d'onboarding. Réessayez plus tard.",
-    },
-};
+import { OnboardingSessionError } from "pages/Onboarding/OnboardingSessionError";
 
 const OnboardingContent: React.FC = () => {
     const {
@@ -39,7 +22,6 @@ const OnboardingContent: React.FC = () => {
         sessionError,
     } = useOnboarding();
 
-    const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const containerStyles = {
@@ -87,39 +69,7 @@ const OnboardingContent: React.FC = () => {
     }
 
     if (sessionError) {
-        const { title, description } = SESSION_ERROR_MESSAGES[sessionError];
-        return (
-            <Stack h="100vh" align="center" justify="center" p={8}>
-                <VStack
-                    spacing={6}
-                    maxW="480px"
-                    h="100%"
-                    w="100%"
-                    p={8}
-                    bg="surfaceModal"
-                    border="1px solid"
-                    borderColor="borderDivider"
-                    borderRadius="16px"
-                    align="center"
-                    textAlign="center"
-                >
-                    <Box p={4} bg="borderDefault" borderRadius="12px">
-                        <AlertTriangle size={32} color="var(--chakra-colors-errorIconAccent)" />
-                    </Box>
-                    <VStack spacing={2}>
-                        <Text fontSize="xl" fontWeight="semibold" color="textStrong">
-                            {title}
-                        </Text>
-                        <Text fontSize="sm" color="textDescription">
-                            {description}
-                        </Text>
-                    </VStack>
-                    <Button colorScheme={currentDarkTheme.colorScheme} onClick={() => void navigate("/dashboard")}>
-                        Retour au tableau de bord
-                    </Button>
-                </VStack>
-            </Stack>
-        );
+        return <OnboardingSessionError sessionError={sessionError} />;
     }
 
     return (

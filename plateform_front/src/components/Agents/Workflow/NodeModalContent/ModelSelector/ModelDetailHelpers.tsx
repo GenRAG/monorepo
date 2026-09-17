@@ -25,7 +25,7 @@ import {
     Zap,
 } from "lucide-react";
 import { ChartInfoTooltip } from "components/Agents/Analytics/ChartInfoTooltip";
-import { MODEL_BADGE_CONFIG } from "./modelUtils";
+import { MODEL_BADGE_CONFIG } from "constants/models/modelBadges";
 
 const MODALITY_CONFIG: Record<string, { label: string; icon: LucideIcon }> = {
     text: { label: "Texte", icon: Type },

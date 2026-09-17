@@ -1,22 +1,16 @@
-import AuthLayout, { AuthStepType, LoginFormSteps } from "pages/Auth/Layout/AuthLayout";
-import { useAuthLayout } from "pages/Auth/Layout/AuthLayoutContext";
+import { AuthStepType, LoginFormSteps } from "pages/Auth/Layout/AuthLayout";
 import { LoginForm } from "pages/Auth/Login/LoginForm";
-import { FC, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { FC, useState } from "react";
+import { useAuthStepConfig } from "hooks/useAuthStepConfig";
 
 const Login: FC = () => {
     const [step, setStep] = useState<AuthStepType>(LoginFormSteps.LOGIN_EMAIL);
-    const { setConfig } = useAuthLayout();
-
-    useEffect(() => {
-        setConfig({
-            canGoBack:
-                step === LoginFormSteps.LOGIN_PASSWORD || step === LoginFormSteps.LOGIN_PASSKEY
-                    ? () => setStep(LoginFormSteps.LOGIN_EMAIL)
-                    : undefined,
-            showBackground: step === LoginFormSteps.LOGIN_EMAIL,
-        });
-    }, [step, setConfig]);
+    useAuthStepConfig(
+        step,
+        LoginFormSteps.LOGIN_EMAIL,
+        [LoginFormSteps.LOGIN_PASSWORD, LoginFormSteps.LOGIN_PASSKEY],
+        setStep,
+    );
 
     return <LoginForm onStepChange={setStep} currentStep={step} />;
 };

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
     Badge,
     Box,
@@ -16,9 +16,9 @@ import {
     useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
-import { ChevronDown, Info, Mail } from "lucide-react";
+import { Info, Mail } from "lucide-react";
 import { User } from "types/user";
-import { ActionMenu } from "components/ui/ActionMenu";
+import { ProfileSelectField } from "pages/Profile/sections/ProfileSelectField";
 
 const LANG_OPTIONS = [{ value: "fr", label: "Français" }];
 
@@ -32,8 +32,6 @@ const splitName = (name: string): [string, string] => {
 interface FormValues {
     firstName: string;
     lastName: string;
-    phone: string;
-    role: string;
     lang: string;
     tz: string;
 }
@@ -49,12 +47,12 @@ const PersonalInfoSection = ({ user, onSave, isLoading }: Props) => {
     const inputBg = useColorModeValue("white", "grey.900");
 
     const { register, handleSubmit, reset, control } = useForm<FormValues>({
-        defaultValues: { firstName, lastName, phone: "", role: "", lang: "fr", tz: "Europe/Paris" },
+        defaultValues: { firstName, lastName, lang: "fr", tz: "Europe/Paris" },
     });
 
     useEffect(() => {
         const [fn, ln] = splitName(user.name ?? "");
-        reset({ firstName: fn, lastName: ln, phone: "", role: "", lang: "fr", tz: "Europe/Paris" });
+        reset({ firstName: fn, lastName: ln, lang: "fr", tz: "Europe/Paris" });
     }, [user.name, reset]);
 
     const onSubmit = (values: FormValues) => onSave([values.firstName, values.lastName].filter(Boolean).join(" "));
@@ -74,9 +72,16 @@ const PersonalInfoSection = ({ user, onSave, isLoading }: Props) => {
                 <Grid templateColumns="1fr 1fr" gap={4} w="100%">
                     <FormControl>
                         <FormLabel fontSize="xs" color="textLabel">
-                            Nom
+                            Prénom
                         </FormLabel>
                         <Input bg={inputBg} {...register("firstName")} />
+                    </FormControl>
+
+                    <FormControl>
+                        <FormLabel fontSize="xs" color="textLabel">
+                            Nom
+                        </FormLabel>
+                        <Input bg={inputBg} {...register("lastName")} />
                     </FormControl>
 
                     <FormControl gridColumn="1 / -1">
@@ -108,85 +113,20 @@ const PersonalInfoSection = ({ user, onSave, isLoading }: Props) => {
                         </Text>
                     </FormControl>
 
-                    <FormControl w="100%">
-                        <FormLabel fontSize="xs" color="textLabel">
-                            Langue de l&apos;interface
-                        </FormLabel>
-                        <Controller
-                            name="lang"
-                            control={control}
-                            render={({ field }) => (
-                                <ActionMenu
-                                    placement="bottom-start"
-                                    fullWidth
-                                    trigger={
-                                        <HStack
-                                            h="40px"
-                                            px={3}
-                                            w="100%"
-                                            justify="space-between"
-                                            borderWidth="1px"
-                                            borderStyle="solid"
-                                            borderColor="inputBorder"
-                                            bg={inputBg}
-                                            borderRadius="8px"
-                                            cursor="pointer"
-                                            _hover={{ borderColor: "inputActiveBorder" }}
-                                        >
-                                            <Text fontSize="sm" color="inputText">
-                                                {LANG_OPTIONS.find((o) => o.value === field.value)?.label}
-                                            </Text>
-                                            <Icon as={ChevronDown} boxSize={4} color="textLabel" />
-                                        </HStack>
-                                    }
-                                    items={LANG_OPTIONS.map((o) => ({
-                                        label: o.label,
-                                        onClick: () => field.onChange(o.value),
-                                    }))}
-                                />
-                            )}
-                        />
-                    </FormControl>
-                    <FormControl>
-                        <FormLabel fontSize="xs" color="textLabel">
-                            Fuseau horaire
-                        </FormLabel>
-                        <Controller
-                            name="tz"
-                            control={control}
-                            render={({ field }) => (
-                                <ActionMenu
-                                    placement="bottom-start"
-                                    fullWidth
-                                    width="100%"
-                                    trigger={
-                                        <HStack
-                                            h="40px"
-                                            px={3}
-                                            w="100%"
-                                            justify="space-between"
-                                            borderWidth="1px"
-                                            borderStyle="solid"
-                                            borderColor="inputBorder"
-                                            bg={inputBg}
-                                            borderRadius="8px"
-                                            cursor="pointer"
-                                            _hover={{ borderColor: "inputActiveBorder" }}
-                                        >
-                                            <Text fontSize="sm" color="inputText">
-                                                {TZ_OPTIONS.find((o) => o.value === field.value)?.label}
-                                            </Text>
-                                            <Icon as={ChevronDown} boxSize={4} color="textLabel" />
-                                        </HStack>
-                                    }
-                                    items={TZ_OPTIONS.map((o) => ({
-                                        label: o.label,
-                                        onClick: () => field.onChange(o.value),
-                                    }))}
-                                />
-                            )}
-                        />
-                    </FormControl>
+                    <ProfileSelectField
+                        name="lang"
+                        control={control}
+                        label="Langue de l'interface"
+                        options={LANG_OPTIONS}
+                        inputBg={inputBg}
+                    />
+                    <ProfileSelectField
+                        name="tz"
+                        control={control}
+                        label="Fuseau horaire"
+                        options={TZ_OPTIONS}
+                        inputBg={inputBg}
+                    />
                 </Grid>
             </Stack>
 

@@ -1,4 +1,4 @@
-import { Badge, Box, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Badge, Box, HStack, Text, VStack } from "@chakra-ui/react";
 import Button from "components/ui/Button";
 import { useDeploymentEnvGetter } from "hooks/useGetEnv";
 import { useIsDark } from "hooks/useIsDark";
@@ -28,8 +28,6 @@ export const VersionHeaderActions = ({ deployment, workspaceId, agentId }: Versi
     const getDeploymentEnv = useDeploymentEnvGetter(deployments);
     const isDark = useIsDark();
 
-    const textColor = useColorModeValue("grey.900", "grey.50");
-    const dateColor = useColorModeValue("grey.300", "grey.500");
     const buttonType = isDark ? "superPrimary" : "primary";
 
     if (!deployment) return <Box p={4}>Pas de déploiement en production trouvé pour cet agent.</Box>;
@@ -42,14 +40,14 @@ export const VersionHeaderActions = ({ deployment, workspaceId, agentId }: Versi
         <HStack justify="space-between" align="flex-start" flexWrap="wrap" p={6} gap={3}>
             <VStack align="start" spacing={1}>
                 <HStack>
-                    <Text fontSize="2xl" fontWeight={500} color={textColor} fontFamily="mono" lineHeight={1}>
+                    <Text fontSize="2xl" fontWeight={500} color="textStrong" fontFamily="mono" lineHeight={1}>
                         v{deployment.version}
                     </Text>
                     <Badge colorScheme={badge.color} fontSize="sm" fontWeight={500}>
                         {env === VersionStatus.PRODUCTION ? "EN PROD" : badge.label}
                     </Badge>
                 </HStack>
-                <Text fontSize="14px" color={dateColor}>
+                <Text fontSize="14px" color="textSubtle">
                     {formatDate(deployment.createdAt)}, deployé par{" "}
                     {deployment.createdByUser?.name ?? deployment.createdBy}
                 </Text>

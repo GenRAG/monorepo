@@ -1,4 +1,4 @@
-import { Box, Collapse, HStack, VStack, Text, Badge, useColorModeValue, Switch } from "@chakra-ui/react";
+import { Box, Collapse, HStack, VStack, Text, Badge, Switch } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
 interface PrivacyRowProps {
@@ -22,14 +22,12 @@ export const PrivacyRow = ({
     comingSoon,
     children,
 }: PrivacyRowProps) => {
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const titleColor = useColorModeValue(disabled ? "grey.400" : "grey.900", disabled ? "grey.600" : "grey.50");
-    const descriptionColor = useColorModeValue("grey.400", "grey.500");
+    const titleColor = disabled ? "textMuted" : "textStrong";
 
     return (
         <Box
             borderBottom="1px solid"
-            borderBottomColor={borderColor}
+            borderBottomColor="borderDefault"
             _last={{ borderBottom: "none" }}
             opacity={disabled ? 0.6 : 1}
         >
@@ -50,7 +48,7 @@ export const PrivacyRow = ({
                             </Badge>
                         )}
                     </HStack>
-                    <Text fontSize="xs" color={descriptionColor}>
+                    <Text fontSize="xs" color="textFaint">
                         {description}
                     </Text>
                 </VStack>

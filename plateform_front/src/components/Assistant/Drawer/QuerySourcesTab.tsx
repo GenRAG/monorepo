@@ -22,10 +22,8 @@ const SourcePreview: React.FC<{ source: QuerySource; url?: string; isLoading: bo
     url,
     isLoading,
 }) => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
-
     if (isLoading) {
-        return <Skeleton {...skeletonProps} w="100%" h={PREVIEW_HEIGHT} borderRadius="8px" />;
+        return <Skeleton w="100%" h={PREVIEW_HEIGHT} borderRadius="8px" />;
     }
 
     if (!url) {

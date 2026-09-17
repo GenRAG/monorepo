@@ -1,4 +1,4 @@
-import { Box, Skeleton, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Box, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { VersionListItem } from "components/Deployment/VersionListItem";
 import { ENV_BADGE } from "pages/Agents/Deployment/data";
 import { useGetDeploymentsQuery } from "services/deployment/deployment";
@@ -24,24 +24,21 @@ export const VersionsSidebar = ({ selectedId, onSelect, workspaceId, agentId }: 
         agentId,
     });
     const getDeploymentEnv = useDeploymentEnvGetter(deployments);
-    const bgColor = useColorModeValue("white", "grey.950");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const textColor = useColorModeValue("grey.600", "grey.300");
 
     return (
         <Box
             w="320px"
             flexShrink={0}
-            bg={bgColor}
+            bg="surfacePrimary"
             borderRight="1px solid"
-            borderRightColor={borderColor}
+            borderRightColor="borderDefault"
             h="100%"
             display="flex"
             flexDirection="column"
         >
             <VStack align="stretch" spacing={0}>
-                <Box borderBottom="1px solid" borderBottomColor={borderColor} w="full" p={4}>
-                    <Text fontSize="sm" color={textColor} px={1}>
+                <Box borderBottom="1px solid" borderBottomColor="borderDefault" w="full" p={4}>
+                    <Text fontSize="sm" color="textDescription" px={1}>
                         {deployments.length} VERSIONS
                     </Text>
                 </Box>

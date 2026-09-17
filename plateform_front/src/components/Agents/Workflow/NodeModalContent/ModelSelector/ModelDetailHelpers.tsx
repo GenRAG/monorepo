@@ -49,15 +49,13 @@ export const StatBadge: React.FC<{ label: string; value: string; tooltip?: React
     value,
     tooltip,
 }) => {
-    const bg = useColorModeValue("grey.50", "grey.850");
-    const valueColor = useColorModeValue("grey.800", "grey.100");
     return (
-        <Box bg={bg} borderRadius="8px" px={3} py={2} flex={1} minW="90px">
+        <Box bg="surfaceThumbnail" borderRadius="8px" px={3} py={2} flex={1} minW="90px">
             <HStack spacing={1}>
                 <Text variant="body-sm-muted">{label}</Text>
                 {tooltip && <ChartInfoTooltip label={tooltip} />}
             </HStack>
-            <Text fontSize="12px" fontWeight={700} color={valueColor} mt={0.5} noOfLines={1}>
+            <Text fontSize="12px" fontWeight={700} color="textOnBubble" mt={0.5} noOfLines={1}>
                 {value}
             </Text>
         </Box>
@@ -91,15 +89,13 @@ export const ModelBadge: React.FC<{ badge: string }> = ({ badge }) => {
 };
 
 export const CapabilityBadge: React.FC<{ label: string }> = ({ label }) => {
-    const bg = useColorModeValue("grey.50", "grey.850");
-    const color = useColorModeValue("grey.600", "grey.200");
-    const [iconColor] = useToken("colors", [color]);
+    const [iconColor] = useToken("colors", ["textDescription"]);
     const config = MODALITY_CONFIG[label.toLowerCase()];
     const Icon = config?.icon;
 
     return (
         <Badge
-            bg={bg}
+            bg="surfaceThumbnail"
             border="1px solid"
             borderColor="borderSubtle"
             fontSize="10px"
@@ -110,7 +106,7 @@ export const CapabilityBadge: React.FC<{ label: string }> = ({ label }) => {
         >
             <HStack spacing={1}>
                 {Icon && <Icon size={10} color={iconColor} strokeWidth={2} />}
-                <Text fontSize="12px" color={color} textTransform="capitalize">
+                <Text fontSize="12px" color="textDescription" textTransform="capitalize">
                     {config?.label ?? label}
                 </Text>
             </HStack>
@@ -125,7 +121,6 @@ export const LatencyIndicator: React.FC<{ label: string; latencyMs: number }> = 
     const iconBg = useColorModeValue(`${config.hue}.100`, `${config.hue}.700`);
     const iconColorToken = useColorModeValue(`${config.hue}.600`, `${config.hue}.100`);
     const [iconColor] = useToken("colors", [iconColorToken]);
-    const trackBg = useColorModeValue("grey.100", "grey.800");
     const activeBg = useColorModeValue(`${config.hue}.400`, `${config.hue}.400`);
 
     const seconds = (latencyMs / 1000).toFixed(1);
@@ -147,7 +142,7 @@ export const LatencyIndicator: React.FC<{ label: string; latencyMs: number }> = 
                             h="4px"
                             flex={1}
                             borderRadius="2px"
-                            bg={tier <= config.tier ? activeBg : trackBg}
+                            bg={tier <= config.tier ? activeBg : "borderDefault"}
                             transition="background-color 0.3s"
                         />
                     ))}
@@ -158,8 +153,6 @@ export const LatencyIndicator: React.FC<{ label: string; latencyMs: number }> = 
 };
 
 export const ScoreBar: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => {
-    const trackBg = useColorModeValue("grey.100", "grey.800");
-    const labelColor = useColorModeValue("grey.500", "grey.400");
     const pct = Math.min(100, Math.max(0, Math.round(value)));
     const barColor = color;
 
@@ -167,14 +160,14 @@ export const ScoreBar: React.FC<{ label: string; value: number; color: string }>
         return (
             <VStack align="stretch" spacing={0.5}>
                 <HStack justify="space-between">
-                    <Text fontSize="10px" color={labelColor}>
+                    <Text fontSize="10px" color="textLabel">
                         {label}
                     </Text>
-                    <Text fontSize="10px" color={labelColor} fontWeight={600}>
+                    <Text fontSize="10px" color="textLabel" fontWeight={600}>
                         N/A
                     </Text>
                 </HStack>
-                <Box h="4px" bg={trackBg} borderRadius="2px">
+                <Box h="4px" bg="borderDefault" borderRadius="2px">
                     <Box h="100%" w={`0%`} bg={barColor} borderRadius="2px" transition="width 0.3s" />
                 </Box>
             </VStack>
@@ -184,14 +177,14 @@ export const ScoreBar: React.FC<{ label: string; value: number; color: string }>
     return (
         <VStack align="stretch" spacing={0.5}>
             <HStack justify="space-between">
-                <Text fontSize="10px" color={labelColor}>
+                <Text fontSize="10px" color="textLabel">
                     {label}
                 </Text>
-                <Text fontSize="10px" color={labelColor} fontWeight={600}>
+                <Text fontSize="10px" color="textLabel" fontWeight={600}>
                     {pct}/100
                 </Text>
             </HStack>
-            <Box h="4px" bg={trackBg} borderRadius="2px">
+            <Box h="4px" bg="borderDefault" borderRadius="2px">
                 <Box h="100%" w={`${pct}%`} bg={barColor} borderRadius="2px" transition="width 0.3s" />
             </Box>
         </VStack>
@@ -199,8 +192,6 @@ export const ScoreBar: React.FC<{ label: string; value: number; color: string }>
 };
 
 export const ModelDetailPanelSkeleton: React.FC = () => {
-    const dividerColor = useColorModeValue("grey.100", "grey.700");
-
     return (
         <VStack flex={1} align="stretch" overflowY="auto" bg="surfacePrimary">
             <Stack px={4} py={4} pb={2} spacing={3}>
@@ -217,7 +208,7 @@ export const ModelDetailPanelSkeleton: React.FC = () => {
                 </VStack>
             </Stack>
 
-            <Box borderTopWidth="1px" borderTopStyle="solid" borderTopColor={dividerColor} />
+            <Box borderTopWidth="1px" borderTopStyle="solid" borderTopColor="borderSubtle" />
             <Stack px={4} py={2} spacing={4}>
                 <SimpleGrid columns={2} spacing={2}>
                     {Array.from({ length: 4 }).map((_, i) => (

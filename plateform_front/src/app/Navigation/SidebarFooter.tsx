@@ -53,17 +53,8 @@ export const SidebarFooter = ({
         () => (localStorage.getItem("themeMode") as ThemeMode) ?? colorMode,
     );
 
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const dividerColor = useColorModeValue("grey.100", "#222");
-    const cardBorder = useColorModeValue("grey.200", "grey.700");
-    const cardBg = useColorModeValue("grey.50", "grey.850");
-    const cardActiveBg = useColorModeValue("green.50", "grey.900");
-    const cardText = useColorModeValue("grey.500", "grey.400");
     const cardActiveText = useColorModeValue("green.700", "green.400");
-    const dangerColor = useColorModeValue("red.500", "red.400");
     const dangerHoverBg = useColorModeValue("red.50", "grey.900");
-    const triggerColor = useColorModeValue("grey.900", "white");
-    const triggerHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
 
     if (!name && !email) return null;
 
@@ -99,7 +90,7 @@ export const SidebarFooter = ({
             <BoxIcon letters={name?.slice(0, 2) || email?.slice(0, 2)} />
             {isOpen && (
                 <VStack align="start" spacing={0}>
-                    <Text fontSize="sm" color={triggerColor} noOfLines={1} flex={1}>
+                    <Text fontSize="sm" color="textStrong" noOfLines={1} flex={1}>
                         {truncated}
                     </Text>
                     <Text fontSize="xs" color="textSecondary" noOfLines={1} flex={1}>
@@ -120,7 +111,7 @@ export const SidebarFooter = ({
                     fontWeight="600"
                     textTransform="uppercase"
                     letterSpacing="0.7px"
-                    color={subColor}
+                    color="textLabel"
                 >
                     Apparence
                 </Text>
@@ -138,17 +129,17 @@ export const SidebarFooter = ({
                                 borderRadius="8px"
                                 borderWidth="1.5px"
                                 borderStyle="solid"
-                                borderColor={active ? "green.400" : cardBorder}
-                                bg={active ? cardActiveBg : cardBg}
+                                borderColor={active ? "borderAccentCardActive" : "borderDivider"}
+                                bg={active ? "accentCardBg" : "surfaceHover"}
                                 onClick={() => handleTheme(id)}
                                 transition="all 0.15s"
-                                _hover={{ borderColor: active ? "green.400" : "grey.500" }}
+                                _hover={{ borderColor: active ? "borderAccentCardActive" : "grey.500" }}
                             >
-                                <Icon as={icon} boxSize="13px" color={active ? cardActiveText : cardText} />
+                                <Icon as={icon} boxSize="13px" color={active ? cardActiveText : "textLabel"} />
                                 <Text
                                     fontSize="11px"
                                     fontWeight={active ? "600" : "400"}
-                                    color={active ? cardActiveText : cardText}
+                                    color={active ? cardActiveText : "textLabel"}
                                 >
                                     {label}
                                 </Text>
@@ -157,7 +148,7 @@ export const SidebarFooter = ({
                     })}
                 </HStack>
             </Box>
-            <Divider borderColor={dividerColor} />
+            <Divider borderColor="borderSubtle" />
             <Box px={2} pt={1} pb={2}>
                 <HStack
                     px={2}
@@ -180,8 +171,8 @@ export const SidebarFooter = ({
                         void navigate("/login");
                     }}
                 >
-                    <Icon as={LogOut} boxSize="14px" color={dangerColor} />
-                    <Text fontSize="13px" color={dangerColor} fontWeight="400">
+                    <Icon as={LogOut} boxSize="14px" color="textError" />
+                    <Text fontSize="13px" color="textError" fontWeight="400">
                         Se déconnecter
                     </Text>
                 </HStack>
@@ -245,7 +236,7 @@ export const SidebarFooter = ({
     return (
         <VStack align="stretch" gap={0} w="100%">
             <Divider w="100%" borderColor="borderDefault" borderWidth="1px" />
-            <Stack p={2} _hover={{ bg: triggerHoverBg }} transition="background 0.12s" cursor="pointer" w="100%">
+            <Stack p={2} _hover={{ bg: "surfaceHover" }} transition="background 0.12s" cursor="pointer" w="100%">
                 <ActionMenu
                     trigger={trigger}
                     sections={sections}

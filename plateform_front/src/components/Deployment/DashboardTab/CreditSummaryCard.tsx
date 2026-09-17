@@ -34,7 +34,7 @@ export const CreditSummaryCard = ({ workspaceId }: CreditSummaryCardProps) => {
                             </Text>
                         </VStack>
                         <Box h="16px" borderRadius="12px" bg="surfaceSubtle" overflow="hidden">
-                            <Box h="100%" borderRadius="12px" bg="green.500" w={`${usedRatio * 100}%`} />
+                            <Box h="100%" borderRadius="12px" bg="iconAccent" w={`${usedRatio * 100}%`} />
                         </Box>
                     </VStack>
                 )}

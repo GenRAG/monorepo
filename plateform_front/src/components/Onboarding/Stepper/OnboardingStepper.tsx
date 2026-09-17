@@ -57,7 +57,7 @@ const OnboardingStepper: React.FC<OnboardingStepperProps> = ({ onStepClick }) =>
                             </Text>
                         </StepTitle>
                         <StepDescription>
-                            <Text fontWeight="semibold" fontSize="xs" color="textmuted">
+                            <Text fontWeight="semibold" fontSize="xs" color="textMuted">
                                 {step.description}
                             </Text>
                         </StepDescription>

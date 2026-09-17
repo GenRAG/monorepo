@@ -4,7 +4,6 @@ import { Check, LucideIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getMarkdownStyles } from "components/ui/chat/markdownStyles";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface ResponseCardProps {
     title: string;
@@ -33,21 +32,21 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
         <Box
             flex={1}
             border="1px solid"
-            borderColor={isSelected ? currentDarkTheme.primary : "borderDivider"}
+            borderColor={isSelected ? "borderAccentCardActive" : "borderDivider"}
             borderRadius="12px"
             p={4}
             cursor="pointer"
             onClick={onClick}
             bg="surfaceAction"
             _hover={{
-                borderColor: currentDarkTheme.primary,
+                borderColor: "borderAccentCardActive",
             }}
             transition="border-color 0.15s"
         >
             <VStack align="stretch" spacing={3}>
                 <HStack justify="space-between" align="center">
                     <HStack spacing={2}>
-                        <Icon as={icon} boxSize={4} color={currentDarkTheme.primary} />
+                        <Icon as={icon} boxSize={4} color="iconAccent" />
                         <Text fontWeight="bold" fontSize="xs" letterSpacing="wider" color="textStrong">
                             {title}
                         </Text>
@@ -70,7 +69,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
                 <VStack align="stretch" spacing={1}>
                     {advantages.map((adv, i) => (
                         <HStack key={i} spacing={2}>
-                            <Icon as={Check} boxSize={3} color={currentDarkTheme.primary} flexShrink={0} />
+                            <Icon as={Check} boxSize={3} color="iconAccent" flexShrink={0} />
                             <Text fontSize="xs" color="textDescription">
                                 {adv}
                             </Text>

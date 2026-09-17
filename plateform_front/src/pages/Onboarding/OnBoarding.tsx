@@ -78,7 +78,7 @@ const OnboardingContent: React.FC = () => {
     if (isSessionLoading) {
         return (
             <Stack h="100vh" align="center" justify="center" spacing={4}>
-                <Spinner size="lg" color={currentDarkTheme.primary} />
+                <Spinner size="lg" color="iconAccent" />
                 <Text color="textDescription" fontSize="sm">
                     Chargement de votre session...
                 </Text>
@@ -152,12 +152,13 @@ const OnboardingContent: React.FC = () => {
                         <Stack w="100%" spacing={4} flex={1} minH={0} overflow="hidden">
                             <Text
                                 fontSize="2xl"
-                                color={currentDarkTheme.primary}
+                                color="iconAccent"
                                 fontWeight="semibold"
                                 key={`step-text-${currentStep}`}
                                 className="step-text-animation"
                             >
-                                {`ETAPE ${currentStep + 1} / ${stepsConfig.length}`} <br /> {`${currentStepConfig.title}`}
+                                {`ETAPE ${currentStep + 1} / ${stepsConfig.length}`} <br />{" "}
+                                {`${currentStepConfig.title}`}
                             </Text>
                             <Box
                                 key={`step-content-${currentStep}`}

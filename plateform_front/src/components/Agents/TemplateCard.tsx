@@ -12,7 +12,7 @@ export const TemplateCard: FC<Props> = ({ title, description, isSelected, onClic
     const selectedTitleColor = useColorModeValue("green.600", "grey.50");
     const titleColor = isSelected ? selectedTitleColor : "textPrimary";
 
-    const borderColor = isSelected ? "green.400" : "borderDefault";
+    const borderColor = isSelected ? "borderAccentCardActive" : "borderDefault";
     const bgColor = isSelected ? "accentCardBg" : "surfaceModal";
     const hoverBgColor = isSelected ? "accentCardBg" : "surfaceHover";
     const hoverBorderColor = isSelected ? "green.500" : "grey.400";

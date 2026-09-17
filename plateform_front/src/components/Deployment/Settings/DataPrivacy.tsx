@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Box, Button, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { PrivacyRow } from "components/Deployment/PrivacyRow";
 import SectionHeader from "components/Deployment/SectionHeader";
+import Button from "components/ui/Button";
 
 type RetentionDuration = "30d" | "90d" | "1y";
 
@@ -53,13 +54,8 @@ export const DataPrivacy = ({ apiLogs, onApiLogsChange, retentionDays, onRetenti
         onRetentionDaysChange(DURATION_TO_DAYS[d]);
     };
 
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const bgColor = useColorModeValue("white", "grey.900");
-    const segmentBg = useColorModeValue("grey.100", "grey.800");
-    const segmentLabelColor = useColorModeValue("grey.600", "grey.400");
-
     return (
-        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={bgColor}>
+        <Box borderRadius="12px" border="1px solid" borderColor="borderDefault" bg="surfaceCard">
             <SectionHeader
                 title="Confidentialité des données"
                 subtitle="Gérez les paramètres de confidentialité et de sécurité de votre application"
@@ -81,10 +77,10 @@ export const DataPrivacy = ({ apiLogs, onApiLogsChange, retentionDays, onRetenti
                     onChange={handleRetentionToggle}
                 >
                     <HStack spacing={3} align="center">
-                        <Text fontSize="xs" color={segmentLabelColor} whiteSpace="nowrap">
+                        <Text fontSize="xs" color="textDescription" whiteSpace="nowrap">
                             Durée
                         </Text>
-                        <HStack spacing={0} bg={segmentBg} borderRadius="8px" p="2px" w="fit-content">
+                        <HStack spacing={0} bg="surfaceThumbnail" borderRadius="8px" p="2px" w="fit-content">
                             {RETENTION_OPTIONS.map((opt) => {
                                 const isActive = retentionDuration === opt.value;
                                 return (

@@ -32,7 +32,6 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
         agentId: agentId!,
         id: documentId,
     });
-    const codeColor = useColorModeValue("grey.700", "grey.300");
     const codeBg = useColorModeValue("grey.100", "grey.800");
 
     if (isLoading)
@@ -60,7 +59,7 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
                 h3: { fontSize: "13px" },
                 p: { marginBottom: "0.5em" },
                 "ul,ol": { paddingLeft: "1.2em", marginBottom: "0.5em" },
-                code: { bg: codeBg, color: codeColor, px: "3px", borderRadius: "3px", fontSize: "12px" },
+                code: { bg: codeBg, color: "textBody", px: "3px", borderRadius: "3px", fontSize: "12px" },
                 pre: { bg: codeBg, p: 2, borderRadius: "6px", overflowX: "auto", marginBottom: "0.5em" },
                 blockquote: { borderLeft: "3px solid", borderColor: "green.300", pl: 3, color: "textMuted" },
                 a: { color: "green.500", textDecoration: "underline" },
@@ -101,7 +100,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, prev
 
                 {!isLoading && (!previewUrl || isError) && (
                     <VStack h="100%" justify="center" align="center" spacing={3}>
-                        <Box as={File} fontSize="48px" color="grey.400" />
+                        <Box as={File} fontSize="48px" color="textFaint" />
                         <Text variant="body-sm-muted">Aperçu non disponible</Text>
                         <Text variant="body-xs-muted">Téléchargez le fichier pour consulter son contenu</Text>
                     </VStack>

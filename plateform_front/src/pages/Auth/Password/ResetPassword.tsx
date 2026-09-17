@@ -28,8 +28,6 @@ const ResetPasswordForm: FC = () => {
     const toast = useThemedToast();
     const [resetPasswordQuery, { isLoading }] = useResetPasswordMutation();
     const buttonType = useColorModeValue("superSecondary", "superPrimary");
-    const labelColor = useColorModeValue("grey.900", "whites.offwhite");
-    const fieldTextColor = useColorModeValue("black", "whites.offwhite");
 
     const {
         formState: { errors },
@@ -66,19 +64,19 @@ const ResetPasswordForm: FC = () => {
 
     return (
         <VStack gap="24px">
-            <Heading variant="display-lg" color="whites.offwhite" textAlign="center">
+            <Heading variant="display-lg" color="textStrong" textAlign="center">
                 Reset your password
             </Heading>
 
             <chakra.form w="100%" onSubmit={onSubmit}>
                 <VStack gap={6}>
                     <FormControl isInvalid={!!errors.email}>
-                        <FormLabel color={labelColor}>Adresse mail du compte perdu</FormLabel>
+                        <FormLabel color="textStrong">Adresse mail du compte perdu</FormLabel>
                         <Input
                             {...register("email", { validate: validateEmail })}
                             placeholder="john.smith@gmail.com"
                             autoComplete="email"
-                            color={fieldTextColor}
+                            color="textStrong"
                         />
                         {errors.email && <FormErrorMessage>{errors.email.message}</FormErrorMessage>}
                     </FormControl>
@@ -89,7 +87,7 @@ const ResetPasswordForm: FC = () => {
 
                     <Flex justify="space-between">
                         <Link as={ReachLink} to={"/login"}>
-                            <Text variant="body-sm" color="whites.offwhite">
+                            <Text variant="body-sm" color="textStrong">
                                 I know my password
                             </Text>
                         </Link>

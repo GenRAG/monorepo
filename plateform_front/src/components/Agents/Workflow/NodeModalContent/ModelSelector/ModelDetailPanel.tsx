@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, HStack, SimpleGrid, Stack, Text, VStack, Wrap, WrapItem, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, SimpleGrid, Stack, Text, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import { RagModel } from "types/models/models";
 import { useGetModelInfoQuery } from "services/models/models";
 import {
@@ -41,11 +41,15 @@ interface Props {
 }
 
 const SectionLabel: React.FC<{ children: string; tooltip?: React.ReactNode }> = ({ children, tooltip }) => {
-    const sectionColor = useColorModeValue("grey.600", "grey.400");
-
     return (
         <HStack spacing={1} px={3} pt={3}>
-            <Text fontSize="9px" fontWeight={700} color={sectionColor} textTransform="uppercase" letterSpacing="0.06em">
+            <Text
+                fontSize="9px"
+                fontWeight={700}
+                color="textDescription"
+                textTransform="uppercase"
+                letterSpacing="0.06em"
+            >
                 {children}
             </Text>
             {tooltip && <ChartInfoTooltip label={tooltip} />}
@@ -75,11 +79,6 @@ const getPricePerMillion = (detailsValue: number | undefined, fallback: string |
 };
 
 export const ModelDetailPanel: React.FC<Props> = ({ model, onConfirm }) => {
-    const nameColor = useColorModeValue("grey.900", "grey.50");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const descColor = useColorModeValue("grey.600", "grey.400");
-    const dividerColor = useColorModeValue("grey.100", "grey.700");
-
     const { currentData: modelInfo, isFetching: isModelInfoLoading } = useGetModelInfoQuery(model?.id ?? "", {
         skip: !model,
     });
@@ -87,7 +86,7 @@ export const ModelDetailPanel: React.FC<Props> = ({ model, onConfirm }) => {
     if (!model) {
         return (
             <VStack flex={1} align="center" justify="center">
-                <Text fontSize="12px" color={subColor}>
+                <Text fontSize="12px" color="textLabel">
                     Sélectionnez un modèle
                 </Text>
             </VStack>
@@ -161,11 +160,11 @@ export const ModelDetailPanel: React.FC<Props> = ({ model, onConfirm }) => {
                             color={avatarStyle.color}
                         />
                         <VStack align="stretch" spacing={0.5} flex={1} minW={0}>
-                            <Text fontSize="15px" fontWeight={700} color={nameColor} noOfLines={2} lineHeight="1.3">
+                            <Text fontSize="15px" fontWeight={700} color="textStrong" noOfLines={2} lineHeight="1.3">
                                 {model.name}
                             </Text>
                             {provider && (
-                                <Text fontSize="11px" color={subColor}>
+                                <Text fontSize="11px" color="textLabel">
                                     par {provider}
                                 </Text>
                             )}
@@ -175,13 +174,13 @@ export const ModelDetailPanel: React.FC<Props> = ({ model, onConfirm }) => {
                 </HStack>
 
                 {model.description && (
-                    <Text fontSize="12px" color={descColor} lineHeight="1.6" noOfLines={4}>
+                    <Text fontSize="12px" color="textDescription" lineHeight="1.6" noOfLines={4}>
                         {model.description}
                     </Text>
                 )}
             </Stack>
 
-            <Box borderTopWidth="1px" borderTopStyle="solid" borderTopColor={dividerColor} />
+            <Box borderTopWidth="1px" borderTopStyle="solid" borderTopColor="borderSubtle" />
             <Stack px={4} py={2} spacing={2}>
                 <SimpleGrid columns={2} spacing={2}>
                     {stats.map((s) => (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, HStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 import { Download } from "lucide-react";
 import { ExportCard } from "components/Deployment/ExportCard";
 import SectionHeader from "components/Deployment/SectionHeader";
@@ -18,9 +18,6 @@ export const UserRights = () => {
     const { workspaceId, agentId } = useParams<{ workspaceId: string; agentId: string }>();
     const [isExportingConversations, setIsExportingConversations] = useState(false);
     const [isExportingLogs, setIsExportingLogs] = useState(false);
-
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const bgColor = useColorModeValue("white", "grey.900");
 
     const baseUrl = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
 
@@ -55,7 +52,7 @@ export const UserRights = () => {
     };
 
     return (
-        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={bgColor}>
+        <Box borderRadius="12px" border="1px solid" borderColor="borderDefault" bg="surfaceCard">
             <SectionHeader
                 title="Droits d'exportation"
                 subtitle="Gérez les droits d'exportation des données de votre application"

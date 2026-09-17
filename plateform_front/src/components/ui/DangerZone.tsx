@@ -16,11 +16,6 @@ import {
 import { AlertTriangle, Trash2 } from "lucide-react";
 import BoxIcon from "components/ui/BoxIcon";
 
-const DANGER_BORDER = "rgba(239,68,68,0.2)";
-const DANGER_BG_SUBTLE = "rgba(239,68,68,0.06)";
-const DANGER_BORDER_SUBTLE = "rgba(239,68,68,0.15)";
-const DANGER_ICON_BG = "rgba(239,68,68,0.18)";
-
 interface DangerZoneProps {
     title: string;
     description: string;
@@ -62,19 +57,19 @@ const DestructiveModal = ({
                 <AlertDialogContent
                     bg="surfaceModal"
                     border="1.5px solid"
-                    borderColor={DANGER_BORDER}
+                    borderColor="dangerBorder"
                     borderRadius="16px"
                     overflow="hidden"
                 >
                     <VStack
-                        bg={DANGER_BG_SUBTLE}
+                        bg="dangerBgSubtle"
                         borderBottom="1px solid"
-                        borderColor={DANGER_BORDER_SUBTLE}
+                        borderColor="dangerBorderSubtle"
                         px={6}
                         py={5}
                         textAlign="center"
                     >
-                        <BoxIcon icon={Trash2} bg={DANGER_ICON_BG} color="red.500" />
+                        <BoxIcon icon={Trash2} bg="dangerIconBg" color="red.500" />
                         <Text fontSize="md" fontWeight="700" color="red.500">
                             {title}
                         </Text>
@@ -150,8 +145,8 @@ const DangerZone = ({
 
     return (
         <>
-            <Box border="2px solid" borderColor={DANGER_BORDER} borderRadius="12px" overflow="hidden" bg="surfaceCard">
-                <HStack px={5} py={4} borderBottom="2px solid" borderColor={DANGER_BORDER} spacing={2}>
+            <Box border="2px solid" borderColor="dangerBorder" borderRadius="12px" overflow="hidden" bg="surfaceCard">
+                <HStack px={5} py={4} borderBottom="2px solid" borderColor="dangerBorder" spacing={2}>
                     <Icon as={AlertTriangle} boxSize={4} color="red.400" />
                     <Text fontSize="sm" fontWeight="600" color="red.400">
                         Zone de danger

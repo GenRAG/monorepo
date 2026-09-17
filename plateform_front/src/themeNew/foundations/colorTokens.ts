@@ -50,6 +50,12 @@ const colorTokens = {
     borderAccentCardActive: { default: "green.400", _dark: "green.500" }, // Bordure de carte accentuée, état actif
     borderAccentCardMuted: { default: "green.200", _dark: "green.700" }, // Bordure de carte accentuée, état atténué
 
+    // === DANGER (confirmation de suppression, zones destructrices) ===
+    dangerBorder: { default: "red.100", _dark: "rgba(239,68,68,0.2)" },
+    dangerBgSubtle: { default: "red.50", _dark: "rgba(239,68,68,0.06)" },
+    dangerBorderSubtle: { default: "red.100", _dark: "rgba(239,68,68,0.15)" },
+    dangerIconBg: { default: "red.100", _dark: "rgba(239,68,68,0.18)" },
+
     // === TOOLTIP ===
     tooltipBg: { default: "grey.700", _dark: "green.600" }, // Fond de tooltip (déjà repris tel quel dans plusieurs sidebars)
 

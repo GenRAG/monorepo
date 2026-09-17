@@ -31,7 +31,7 @@ export const KnowledgeBaseStatus: React.FC<KnowledgeBaseStatusProps> = ({ docume
             )}
 
             {document.status === DocumentStatus.UPLOADED && (
-                <Box p={4} bg="grey.50" borderRadius="12px" borderLeft="4px solid" borderColor="grey.400">
+                <Box p={4} bg="surfaceHover" borderRadius="12px" borderLeft="4px solid" borderColor="borderStrong">
                     <Text variant="body-sm">Ce document est en file d&apos;attente pour le traitement.</Text>
                 </Box>
             )}

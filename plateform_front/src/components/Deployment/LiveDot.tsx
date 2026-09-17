@@ -17,9 +17,9 @@ export const LiveDot = () => (
             position="absolute"
             inset={0}
             borderRadius="full"
-            bg="green.500"
+            bg="iconAccent"
             sx={{ animation: "livePulse 1.8s ease-in-out infinite" }}
         />
-        <Box w="7px" h="7px" borderRadius="full" bg="green.500" />
+        <Box w="7px" h="7px" borderRadius="full" bg="iconAccent" />
     </Box>
 );

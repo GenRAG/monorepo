@@ -14,7 +14,6 @@ import {
     Text,
 } from "@chakra-ui/react";
 import Button from "components/ui/Button";
-import { useIsDark } from "hooks/useIsDark";
 import useThemedToast from "hooks/useThemedToast";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -32,7 +31,6 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
         workspaceId: string;
         agentId: string;
     }>();
-    const isDark = useIsDark();
     const [name, setName] = useState("");
     const [changelog, setChangelog] = useState("");
     const [deploy, { isLoading: isDeploying }] = useCreateDeploymentMutation();
@@ -70,20 +68,20 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
         <Modal isOpen={isOpen} onClose={handleClose} size="md" isCentered>
             <ModalOverlay backdropFilter="blur(4px)" />
             <ModalContent
-                bg={isDark ? "grey.900" : "white"}
+                bg="surfaceCard"
                 borderWidth="1px"
                 borderStyle="solid"
-                borderColor={isDark ? "grey.700" : "grey.150"}
+                borderColor="borderDivider"
                 borderRadius="14px"
             >
-                <ModalHeader fontSize="2xl" fontWeight={600} color={isDark ? "grey.50" : "grey.900"} pb={1}>
+                <ModalHeader fontSize="2xl" fontWeight={600} color="textStrong" pb={1}>
                     {title}
                 </ModalHeader>
                 <ModalCloseButton />
 
                 <ModalBody>
                     <VStack spacing={4} align="stretch">
-                        <Text fontSize="sm" color="textmuted">
+                        <Text fontSize="sm" color="textMuted">
                             Cette version sera mise en production et accessible a vous et aux membres ajoutés
                         </Text>
 

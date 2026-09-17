@@ -10,6 +10,7 @@ import {
     MessageSquare,
     TriangleAlert,
     X,
+    type LucideIcon,
 } from "lucide-react";
 
 import { useAppResponsive } from "hooks/useAppResponsive";
@@ -18,18 +19,50 @@ import colors from "themeNew/foundations/colors";
 
 import Button from "./Button";
 
+export type BannerSizeKey = "xs" | "sm" | "md" | "lg";
+export type BannerVariantKey = "gold" | "orange" | "blue" | "red" | "green" | "grey" | "olive" | "transparent" | "dark";
+
 export type GenragBannerProps = {
-    variant?: string;
+    variant?: BannerVariantKey;
+    size?: BannerSizeKey;
     isCloseable?: boolean;
     children?: React.ReactNode;
     buttonText?: string;
     onClick?: () => void;
     title?: string;
     image?: string;
-} & Omit<CardProps, "title"> &
+} & Omit<CardProps, "title" | "variant" | "size"> &
     StyleProps;
 
-export const SizeBannerVariants: Record<string, any> = {
+interface BannerSizeStyle {
+    padding: string;
+    iconBoxSize: string;
+    iconSize: number;
+    titleFontSize: string;
+    childrenFontSize: string;
+    spacing: string;
+    badgeSize: string;
+}
+
+interface BannerVariantDarkOverrides {
+    bg: string;
+    borderColor: string;
+    badgeBg: string;
+    iconColor: string;
+}
+
+interface BannerVariantStyle {
+    icon: LucideIcon;
+    bg: string;
+    borderColor: string;
+    badgeBg: string;
+    iconColor: string;
+    glowColor: string;
+    _active: { bg: string };
+    _dark: BannerVariantDarkOverrides;
+}
+
+export const SizeBannerVariants: Record<BannerSizeKey, BannerSizeStyle> = {
     xs: {
         padding: "8px 10px",
         iconBoxSize: "32px",
@@ -68,7 +101,7 @@ export const SizeBannerVariants: Record<string, any> = {
     },
 };
 
-export const StyleBannerVariants: Record<string, any> = {
+export const StyleBannerVariants: Record<BannerVariantKey, BannerVariantStyle> = {
     gold: {
         icon: Lightbulb,
         bg: "gold.50",
@@ -214,7 +247,7 @@ const Banner = ({
     onClick,
     title,
     image,
-    size = "md" as "xs" | "sm" | "md" | "lg",
+    size = "md",
     ...props
 }: GenragBannerProps) => {
     const [coords, setCoords] = useState({ x: 0, y: 0 });
@@ -227,7 +260,7 @@ const Banner = ({
     const isVariantDark = variant === "dark";
     const isDarkMode = colorMode === "dark";
 
-    const sizeStyle = SizeBannerVariants[size as string] ?? SizeBannerVariants.md;
+    const sizeStyle = SizeBannerVariants[size] ?? SizeBannerVariants.md;
     const baseStyle = StyleBannerVariants[variant] ?? StyleBannerVariants.grey;
     const variantStyle = {
         ...baseStyle,
@@ -326,7 +359,7 @@ const Banner = ({
                             <Button
                                 variant={isVariantDark ? "ghost" : "secondary"}
                                 icon={ArrowRight}
-                                size={size === "lg" ? "md" : ("sm" as any)}
+                                size={size === "lg" ? "md" : "sm"}
                                 btnType={isMobile ? "icon" : "default"}
                                 rightIcon={ArrowRight}
                             >

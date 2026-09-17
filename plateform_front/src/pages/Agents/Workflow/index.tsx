@@ -176,7 +176,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
             onCloseComplete: () => {
                 if (blockerRef.current.state === "blocked") blockerRef.current.reset?.();
             },
-        } as any);
+        });
     }, [blocker.state, toast]);
 
     const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.800"]);

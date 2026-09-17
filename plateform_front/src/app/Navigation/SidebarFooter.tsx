@@ -1,5 +1,5 @@
 import { Box, Divider, HStack, Icon, Stack, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
-import { LogOut, MessageSquare, Monitor, Moon, Scale, Sun, User } from "lucide-react";
+import { LogOut, MessageSquare, Monitor, Moon, Scale, Sun, User, type LucideIcon } from "lucide-react";
 import { ComponentProps, ReactNode, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch } from "store";
@@ -16,7 +16,7 @@ interface SidebarFooterProps {
     activeItem: string | null;
     name?: string;
     email?: string;
-    supportMenu: { id: string; icon: any; label: string }[];
+    supportMenu: { id: string; icon: LucideIcon; label: string }[];
     /**
      * Fourni par un consommateur flottant (ex: GlassNav) qui veut son propre déclencheur (avatar
      * dans une bulle de verre) plutôt que la ligne pleine largeur par défaut : dans ce cas, on
@@ -72,7 +72,7 @@ export const SidebarFooter = ({
         }
     };
 
-    const themeOptions: { id: ThemeMode; label: string; icon: any }[] = [
+    const themeOptions: { id: ThemeMode; label: string; icon: LucideIcon }[] = [
         { id: "light", label: "Clair", icon: Sun },
         { id: "dark", label: "Sombre", icon: Moon },
         { id: "system", label: "Système", icon: Monitor },

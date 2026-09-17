@@ -10,7 +10,7 @@ import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 
 const STATUS_DOT: Record<string, string> = {
     PRODUCTION: STATUS_COLORS.success,
-    DEVELOPMENT: "#6B7280",
+    DEVELOPMENT: "dotInactive",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -43,7 +43,7 @@ const AgentRow = ({ agent }: { agent: WorkspaceStatsAgentItem }) => {
                         w="5px"
                         h="5px"
                         borderRadius="full"
-                        bg={STATUS_DOT[agent.status] ?? "#6B7280"}
+                        bg={STATUS_DOT[agent.status] ?? "dotInactive"}
                         flexShrink={0}
                     />
                     <Text fontSize="11px" color="textLabel">

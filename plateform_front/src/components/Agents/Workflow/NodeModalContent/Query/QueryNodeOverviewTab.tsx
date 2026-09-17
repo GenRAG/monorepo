@@ -139,8 +139,6 @@ const QueryAnimation = () => {
 const UserInputStep = () => {
     const [displayedText, setDisplayedText] = useState("");
     const fullText = "What is a vector DB?";
-    const bgColor = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.800", "grey.200");
     const borderColor = useColorModeValue("green.100", "green.600");
 
     useEffect(() => {
@@ -178,7 +176,14 @@ const UserInputStep = () => {
                 </Text>
             </HStack>
 
-            <Box w="85%" bg={bgColor} border="2px solid" borderColor={borderColor} borderRadius="48px" boxShadow="sm">
+            <Box
+                w="85%"
+                bg="surfaceAction"
+                border="2px solid"
+                borderColor={borderColor}
+                borderRadius="48px"
+                boxShadow="sm"
+            >
                 <HStack spacing={3} p={1} align="center">
                     <Box
                         w="36px"
@@ -195,7 +200,7 @@ const UserInputStep = () => {
 
                     <Box flex={1} display="flex" alignItems="center" minH="36px">
                         <HStack spacing={0}>
-                            <Text fontSize="sm" color={textColor}>
+                            <Text fontSize="sm" color="textSecondary">
                                 {displayedText}
                             </Text>
                             <motion.div
@@ -238,8 +243,6 @@ const UserInputStep = () => {
 
 const QueryNormalizationStep = () => {
     const [phase, setPhase] = useState<"initial" | "lowercase" | "deleting" | "replacing" | "complete">("initial");
-    const bgColor = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.800", "grey.200");
 
     useEffect(() => {
         const timer1 = setTimeout(() => setPhase("lowercase"), 400);
@@ -281,7 +284,7 @@ const QueryNormalizationStep = () => {
 
             <Box
                 w="85%"
-                bg={bgColor}
+                bg="surfaceAction"
                 border="2px solid"
                 borderColor="green.300"
                 borderRadius="24px"
@@ -301,7 +304,7 @@ const QueryNormalizationStep = () => {
                         >
                             <Text
                                 fontSize="sm"
-                                color={isLowercase ? "green.400" : textColor}
+                                color={isLowercase ? "green.400" : "textSecondary"}
                                 fontWeight={isLowercase ? "medium" : "normal"}
                             >
                                 {isLowercase ? "what" : "What"}
@@ -309,13 +312,13 @@ const QueryNormalizationStep = () => {
                         </motion.div>
                     </Box>
 
-                    <Text fontSize="sm" color={textColor}>
+                    <Text fontSize="sm" color="textSecondary">
                         is
                     </Text>
-                    <Text fontSize="sm" color={textColor}>
+                    <Text fontSize="sm" color="textSecondary">
                         a
                     </Text>
-                    <Text fontSize="sm" color={textColor}>
+                    <Text fontSize="sm" color="textSecondary">
                         vector
                     </Text>
                     <Box position="relative" display="inline-block" minW="70px">
@@ -330,7 +333,7 @@ const QueryNormalizationStep = () => {
                             }}
                         >
                             <HStack spacing={0}>
-                                <Text fontSize="sm" color={textColor} display="inline">
+                                <Text fontSize="sm" color="textSecondary" display="inline">
                                     DB?
                                 </Text>
                             </HStack>
@@ -408,9 +411,6 @@ const QueryNormalizationStep = () => {
 
 const ContextInjectionStep = () => {
     const [merged, setMerged] = useState(false);
-    const bgColor = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.800", "grey.200");
-    const enrichieBg = useColorModeValue("green.50", "green.900");
 
     const contextItems = [
         {
@@ -476,7 +476,7 @@ const ContextInjectionStep = () => {
                     >
                         <Box
                             w="100%"
-                            bg={merged ? enrichieBg : bgColor}
+                            bg={merged ? "accentCardBg" : "surfaceAction"}
                             border="2px solid"
                             borderColor="green.400"
                             borderRadius="18px"
@@ -485,7 +485,7 @@ const ContextInjectionStep = () => {
                             transition="all 0.6s"
                         >
                             <VStack spacing={1}>
-                                <Text fontSize="sm" color={textColor} fontWeight="medium" textAlign="center">
+                                <Text fontSize="sm" color="textSecondary" fontWeight="medium" textAlign="center">
                                     what is a vector database
                                 </Text>
                                 <AnimatePresence>
@@ -563,8 +563,6 @@ const ContextInjectionStep = () => {
 
 const PipelineTriggerStep = () => {
     const particles = Array.from({ length: 12 });
-    const bgColor = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.600", "grey.400");
 
     const pipelineSteps = [
         { label: "Récupération", color: "green.400" },
@@ -598,14 +596,14 @@ const PipelineTriggerStep = () => {
                 <motion.div animate={{ opacity: [1, 0.4] }} transition={{ duration: 2 }}>
                     <Box
                         w="120px"
-                        bg={bgColor}
+                        bg="surfaceAction"
                         border="2px solid"
                         borderColor="green.300"
                         borderRadius="18px"
                         p={2}
                         boxShadow="sm"
                     >
-                        <Text fontSize="xs" color={textColor} textAlign="center">
+                        <Text fontSize="xs" color="textDescription" textAlign="center">
                             what is a vector database
                         </Text>
                         <HStack spacing={1} justify="center">

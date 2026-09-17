@@ -18,14 +18,8 @@ const BADGE_CONFIG_DARK: Record<string, { label: string; bg: string; color: stri
 };
 
 const ModelCard = ({ model, onSelect }: { model: ModelOption; onSelect: (id: string) => void }) => {
-    const bg = useColorModeValue("white", "grey.800");
-    const bgHover = useColorModeValue("green.50", "grey.750");
-    const border = useColorModeValue("grey.200", "grey.700");
+    const bgHover = useColorModeValue("green.50", "grey.800");
     const borderHover = useColorModeValue("green.300", "green.600");
-    const labelColor = useColorModeValue("grey.800", "grey.100");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const priceColor = useColorModeValue("grey.400", "grey.500");
-    const providerColor = useColorModeValue("grey.400", "grey.500");
 
     const isFree = model.priceInput === 0 && model.priceOutput === 0;
 
@@ -39,9 +33,9 @@ const ModelCard = ({ model, onSelect }: { model: ModelOption; onSelect: (id: str
             as="button"
             w="100%"
             textAlign="left"
-            bg={bg}
+            bg="surfaceAction"
             border="1px solid"
-            borderColor={border}
+            borderColor="borderDivider"
             borderRadius="10px"
             p={3}
             cursor="pointer"
@@ -58,10 +52,10 @@ const ModelCard = ({ model, onSelect }: { model: ModelOption; onSelect: (id: str
             <VStack align="stretch" spacing={1.5}>
                 <HStack justify="space-between" align="center">
                     <HStack spacing={1.5} align="baseline">
-                        <Text fontSize="13px" fontWeight={700} color={labelColor} letterSpacing="-0.01em">
+                        <Text fontSize="13px" fontWeight={700} color="textOnBubble" letterSpacing="-0.01em">
                             {model.label}
                         </Text>
-                        <Text fontSize="10px" color={providerColor}>
+                        <Text fontSize="10px" color="textFaint">
                             {model.provider}
                         </Text>
                     </HStack>
@@ -84,27 +78,27 @@ const ModelCard = ({ model, onSelect }: { model: ModelOption; onSelect: (id: str
                     )}
                 </HStack>
 
-                <Text fontSize="11px" color={subColor} lineHeight={1.4} noOfLines={2}>
+                <Text fontSize="11px" color="textLabel" lineHeight={1.4} noOfLines={2}>
                     {model.description}
                 </Text>
 
                 <HStack spacing={3} pt={0.5}>
                     {isFree ? (
-                        <Text fontSize="10px" color="green.500" fontWeight={600}>
+                        <Text fontSize="10px" color="iconAccent" fontWeight={600}>
                             Free
                         </Text>
                     ) : (
                         <>
-                            <Text fontSize="10px" color={priceColor}>
+                            <Text fontSize="10px" color="textFaint">
                                 In{" "}
-                                <Box as="span" fontWeight={600} color={subColor}>
+                                <Box as="span" fontWeight={600} color="textLabel">
                                     ${model.priceInput}
                                 </Box>
                                 /1M
                             </Text>
-                            <Text fontSize="10px" color={priceColor}>
+                            <Text fontSize="10px" color="textFaint">
                                 Out{" "}
-                                <Box as="span" fontWeight={600} color={subColor}>
+                                <Box as="span" fontWeight={600} color="textLabel">
                                     ${model.priceOutput}
                                 </Box>
                                 /1M
@@ -156,11 +150,11 @@ export default function SettingPlaceholderContent({ nodeData, onSelect }: Settin
                               py={2}
                               borderRadius="8px"
                               border="1px solid"
-                              borderColor="textSecondary"
+                              borderColor="borderDivider"
                               fontSize="13px"
                               fontWeight={600}
                               color="textSecondary"
-                              _hover="textSecondary"
+                              _hover={{ borderColor: "borderAccentCardMuted" }}
                               transition="all 0.15s"
                               onClick={() => onSelect(item)}
                           >

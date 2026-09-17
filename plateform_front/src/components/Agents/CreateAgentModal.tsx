@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid, Modal, ModalContent, ModalOverlay, useColorModeValue } from "@chakra-ui/react";
+import { Grid, Modal, ModalContent, ModalOverlay } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { AgentFormPanel, type Template } from "components/Agents/AgentFormPanel";
 import { AgentPreviewPanel } from "components/Agents/AgentPreviewPanel";
@@ -50,8 +50,6 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
     const [createAgent, { isLoading }] = useCreateAgentMutation();
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
 
-    const modalBg = useColorModeValue("white", "grey.950");
-
     const handleCreate = useCallback(
         async (name: string, description: string) => {
             try {
@@ -91,7 +89,15 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="full" motionPreset="slideInBottom">
             <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(4px)" />
-            <ModalContent bg={modalBg} borderRadius={0} overflow="hidden" m={0} maxW="100vw" maxH="100vh" h="100vh">
+            <ModalContent
+                bg="surfacePrimary"
+                borderRadius={0}
+                overflow="hidden"
+                m={0}
+                maxW="100vw"
+                maxH="100vh"
+                h="100vh"
+            >
                 <Grid templateColumns="1fr 1fr" h="100%">
                     <AgentFormPanel
                         isOpen={isOpen}

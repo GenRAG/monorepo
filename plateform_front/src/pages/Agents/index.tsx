@@ -9,7 +9,6 @@ import {
     SimpleGrid,
     Stack,
     Text,
-    useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
 import { Plus, Search } from "lucide-react";
@@ -176,9 +175,6 @@ export const AgentsList = () => {
         [agents],
     );
 
-    const sub = useColorModeValue("grey.500", "grey.400");
-    const titleColor = useColorModeValue("grey.900", "white");
-
     const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.xl;
     const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
 
@@ -193,17 +189,17 @@ export const AgentsList = () => {
         >
             <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
-                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={titleColor}>
+                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textStrong">
                         Agents
                     </Text>
-                    <Text fontSize="sm" color={sub}>
+                    <Text fontSize="sm" color="textLabel">
                         Creez et gérez vos agents, vous avez {agents.length} agent(s) au total
                     </Text>
                 </VStack>
 
                 <InputGroup maxW="260px">
                     <InputLeftElement pointerEvents="none" h="full">
-                        <Icon as={Search} boxSize={4} color={sub} />
+                        <Icon as={Search} boxSize={4} color="textLabel" />
                     </InputLeftElement>
                     <Input
                         placeholder="Rechercher un assistant..."

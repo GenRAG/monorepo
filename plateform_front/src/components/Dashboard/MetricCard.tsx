@@ -1,22 +1,20 @@
-import {
-    Badge,
-    Box,
-    Card,
-    HStack,
-    Icon,
-    Skeleton,
-    SkeletonCircle,
-    Text,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Badge, Box, Card, HStack, Icon, Skeleton, SkeletonCircle, Text, VStack } from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { curveCardinal } from "@visx/curve";
 import { LinearGradient } from "@visx/gradient";
 import { useEffect, useId, useState } from "react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import { Area, AreaChart, ChartStatFlow, PieCenter, PieChart, PieSlice, useChart, type PieData } from "components/charts";
+import {
+    Area,
+    AreaChart,
+    ChartStatFlow,
+    PieCenter,
+    PieChart,
+    PieSlice,
+    useChart,
+    type PieData,
+} from "components/charts";
 import { PatternLines } from "@/components/charts/visx-pattern";
 
 const toSparkRows = (values: number[]) => values.map((value, i) => ({ date: new Date(2020, 0, 1 + i), value }));
@@ -56,7 +54,15 @@ export interface CompositionSegment {
 
 const COMPOSITION_PIE_SIZE = 160;
 
-const CompositionPie = ({ segments, isLoading, defaultLabel }: { segments: CompositionSegment[]; isLoading: boolean; defaultLabel: string }) => {
+const CompositionPie = ({
+    segments,
+    isLoading,
+    defaultLabel,
+}: {
+    segments: CompositionSegment[];
+    isLoading: boolean;
+    defaultLabel: string;
+}) => {
     const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
     const patternIdBase = `metric-pie-pattern-${useId()}`;
     const total = segments.reduce((sum, segment) => sum + segment.value, 0);
@@ -138,10 +144,7 @@ export const MetricCard = ({
     isLoading = false,
     defaultLabel = "Documents",
 }: MetricCardProps) => {
-    const trendGreen = useColorModeValue("green.600", "green.400");
-    const trendOrange = useColorModeValue("orange.500", "orange.300");
-    const trendRed = useColorModeValue("red.500", "red.400");
-    const trendCol = trendNeutral ? trendOrange : trendPositive ? trendGreen : trendRed;
+    const trendCol = trendNeutral ? "trendNeutral" : trendPositive ? "trendPositive" : "trendNegative";
     const accentColor = sparkColor ?? currentDarkTheme.hex.primary;
 
     const gradientId = `metric-spark-fill-${useId()}`;
@@ -172,7 +175,7 @@ export const MetricCard = ({
                             py={0.5}
                             borderRadius="full"
                             bg={trendPercentPositive ? "rgba(52,211,169,0.12)" : "rgba(239,68,68,0.12)"}
-                            color={trendPercentPositive ? trendGreen : trendRed}
+                            color={trendPercentPositive ? "trendPositive" : "trendNegative"}
                         >
                             <Icon as={trendPercentPositive ? TrendingUp : TrendingDown} boxSize={2.5} />
                             {trendPercentPositive ? "+" : ""}

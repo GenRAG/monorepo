@@ -1,4 +1,4 @@
-import { HStack, useColorModeValue, VStack } from "@chakra-ui/react";
+import { HStack, VStack } from "@chakra-ui/react";
 import Button from "components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -11,8 +11,6 @@ interface StepFooterProps {
 }
 
 const StepFooter = ({ currentStep, goNext, goPrevious, onValidateAndGoNext, onSkip }: StepFooterProps) => {
-    const skipHoverColor = useColorModeValue("grey.600", "grey.300");
-
     const handleNext = async () => {
         if (onValidateAndGoNext) {
             await onValidateAndGoNext();
@@ -30,11 +28,11 @@ const StepFooter = ({ currentStep, goNext, goPrevious, onValidateAndGoNext, onSk
                 </Button>
                 <HStack spacing={4}>
                     {onSkip && (
-                        <Button variant="outline" size="lg" _hover={{ color: skipHoverColor }} onClick={onSkip}>
+                        <Button variant="outline" size="lg" _hover={{ color: "textBody" }} onClick={onSkip}>
                             Passer le tutoriel
                         </Button>
                     )}
-                    <Button rightIcon={ArrowRight} colorScheme="pink" size="lg" px={8} onClick={handleNext}>
+                    <Button rightIcon={ArrowRight} size="lg" px={8} onClick={handleNext}>
                         Sauvegarder et continuer
                     </Button>
                 </HStack>

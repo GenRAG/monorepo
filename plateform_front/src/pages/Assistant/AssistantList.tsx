@@ -12,7 +12,6 @@ import {
     Stack,
     Text,
     VStack,
-    useColorMode,
 } from "@chakra-ui/react";
 import { Bot, Clock, Search, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -72,10 +71,6 @@ interface AssistantCardProps {
 }
 
 const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
-    const sub = isDark ? "grey.400" : "grey.500";
-
     return (
         <EntityCard
             title={assistant.title}
@@ -84,15 +79,15 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => 
                 <>
                     <HStack spacing={2}>
                         <BoxIcon letters={assistant.sharedBy ? assistant.sharedBy.charAt(0).toUpperCase() : "?"} />
-                        <Text fontSize="xs" color={isDark ? "grey.300" : "grey.700"}>
+                        <Text fontSize="xs" color="textBody">
                             {assistant.sharedBy}
                         </Text>
                     </HStack>
 
                     {assistant.updatedAt && (
                         <HStack spacing={1}>
-                            <Icon as={Clock} boxSize={3} color={sub} />
-                            <Text fontSize="10px" color={sub}>
+                            <Icon as={Clock} boxSize={3} color="textLabel" />
+                            <Text fontSize="10px" color="textLabel">
                                 Dernière modification : {formatDate(assistant.updatedAt)}
                             </Text>
                         </HStack>
@@ -113,13 +108,9 @@ const CardSkeleton: React.FC = () => (
 );
 
 export const AssistantsList = () => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("recent");
-
-    const sub = isDark ? "grey.400" : "grey.500";
 
     const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.lg;
     const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
@@ -144,16 +135,16 @@ export const AssistantsList = () => {
         >
             <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
-                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textStrong">
                         Assistants
                     </Text>
-                    <Text fontSize="sm" color={sub}>
+                    <Text fontSize="sm" color="textLabel">
                         Agents déployés accessibles, vous avez {assistants.length} assistant(s) au total
                     </Text>
                 </VStack>
                 <InputGroup maxW="260px">
                     <InputLeftElement pointerEvents="none" h="full">
-                        <Icon as={Search} boxSize={4} color={sub} />
+                        <Icon as={Search} boxSize={4} color="textLabel" />
                     </InputLeftElement>
                     <Input
                         placeholder="Rechercher un assistant..."
@@ -192,12 +183,12 @@ export const AssistantsList = () => {
                 </Grid>
             ) : (
                 <VStack py={16} spacing={3}>
-                    <Icon as={search ? Search : Bot} boxSize={10} color={sub} />
-                    <Text fontSize="sm" color={sub}>
+                    <Icon as={search ? Search : Bot} boxSize={10} color="textLabel" />
+                    <Text fontSize="sm" color="textLabel">
                         {search ? "Aucun assistant trouvé" : "Aucun agent déployé pour l'instant"}
                     </Text>
                     {!search && (
-                        <Text fontSize="xs" color={sub} textAlign="center" maxW="300px">
+                        <Text fontSize="xs" color="textLabel" textAlign="center" maxW="300px">
                             Déployez un agent en production pour le voir apparaître ici
                         </Text>
                     )}

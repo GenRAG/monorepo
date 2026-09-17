@@ -5,7 +5,6 @@ import { ConversationPreview } from "services/chat/chat";
 import { useGroupedConversations } from "hooks/useGroupedConversations";
 import BoxIcon from "components/ui/BoxIcon";
 import Button from "components/ui/Button";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 const formatDateShort = (iso: string) => {
     const date = new Date(iso);
@@ -58,12 +57,13 @@ const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
             minW="260px"
             h="100%"
             bg="secondBackgroundDefault"
-            borderRight="1px solid var(--chakra-colors-sidebarBorder)"
+            borderRight="1px solid"
+            borderColor="sidebarBorder"
             display="flex"
             flexDirection="column"
             overflow="hidden"
         >
-            <Box px={3} pt={4} pb={3} borderBottom="1px solid var(--chakra-colors-sidebarBorder)">
+            <Box px={3} pt={4} pb={3} borderBottom="1px solid" borderColor="sidebarBorder">
                 <HStack justify="space-between" mb={3}>
                     <HStack spacing={2.5} minW={0}>
                         <BoxIcon icon={Bot} />
@@ -72,7 +72,7 @@ const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                                 {title}
                             </Text>
                             {sharedBy && (
-                                <Text fontSize="10px" color="grey.500" noOfLines={1}>
+                                <Text fontSize="10px" color="textLabel" noOfLines={1}>
                                     partagé par {sharedBy}
                                 </Text>
                             )}
@@ -127,7 +127,7 @@ const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                                         <HStack spacing={2} flex={1} minW={0}>
                                             <Circle
                                                 size="6px"
-                                                bg={isActive ? currentDarkTheme.hex.primary : "dotInactive"}
+                                                bg={isActive ? "iconAccent" : "dotInactive"}
                                                 flexShrink={0}
                                             />
                                             <Text
@@ -143,7 +143,7 @@ const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                                             </Text>
                                         </HStack>
                                         {conv.updatedAt && (
-                                            <Text fontSize="9px" color="grey.400" flexShrink={0}>
+                                            <Text fontSize="9px" color="textFaint" flexShrink={0}>
                                                 {formatDateShort(conv.updatedAt)}
                                             </Text>
                                         )}

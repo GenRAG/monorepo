@@ -41,9 +41,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     maxMessages,
 }) => {
     const iconBoxBg = useColorModeValue("rgba(40, 158, 87, 0.1)", "rgba(72, 187, 120, 0.12)");
-    const iconBoxBorderColor = useColorModeValue("green.300", "green.700");
-    const iconColor = useColorModeValue("green.500", "green.400");
-    const labelColor = useColorModeValue("grey.400", "grey.500");
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     const { messages, sendMessage, isLoading } = useChat({ getResponse, initialMessages });
@@ -81,13 +78,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         borderWidth="1px"
                         borderStyle="solid"
                         borderRadius="8px"
-                        borderColor={iconBoxBorderColor}
+                        borderColor="borderAccentCardMuted"
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                         flexShrink={0}
                     >
-                        <Box as={IconComponent} boxSize={8} color={iconColor} />
+                        <Box as={IconComponent} boxSize={8} color="iconAccent" />
                     </Box>
                     <VStack spacing={1}>
                         <Text variant="body-md-semibold" textAlign="center">
@@ -117,7 +114,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                         ))}
                         {isThinking && (
                             <VStack align="flex-start" spacing={1}>
-                                <Text fontSize="xs" color={labelColor}>
+                                <Text fontSize="xs" color="textFaint">
                                     Assistant
                                 </Text>
                                 <ThinkingBubble events={messages[messages.length - 1].thinkingEvents} />

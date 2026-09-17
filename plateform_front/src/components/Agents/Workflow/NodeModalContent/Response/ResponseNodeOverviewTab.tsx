@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, HStack, Icon, Tag, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Tag, Text, VStack } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BookOpen, Check, Copy, ExternalLink, FileText, Sparkles } from "lucide-react";
 
@@ -156,8 +156,6 @@ const AggregationStep = () => {
         { id: 4, label: "Ranking", color: "green.400", angle: 60, distance: 100 },
     ];
 
-    const bgColor = useColorModeValue("white", "grey.800");
-
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -186,7 +184,7 @@ const AggregationStep = () => {
                     transform="translate(-50%, -50%)"
                     w="60px"
                     h="60px"
-                    bg={bgColor}
+                    bg="surfaceAction"
                     border="2px solid"
                     borderColor="green.300"
                     borderRadius="24px"
@@ -237,8 +235,6 @@ const AggregationStep = () => {
 const GenerationStep = () => {
     const [displayedText, setDisplayedText] = useState("");
     const fullText = "Une base vectorielle stocke des embeddings\n pour la recherche sémantique.";
-    const bgColor = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.800", "grey.200");
 
     useEffect(() => {
         let currentIndex = 0;
@@ -277,7 +273,7 @@ const GenerationStep = () => {
             </HStack>
             <Box
                 w="85%"
-                bg={bgColor}
+                bg="surfaceAction"
                 border="2px solid"
                 borderColor="green.300"
                 borderRadius="24px"
@@ -288,7 +284,7 @@ const GenerationStep = () => {
                 <VStack align="start" spacing={1}>
                     {displayedLines.map((line, lineIndex) => (
                         <HStack key={lineIndex} spacing={0} align="start">
-                            <Text fontSize="sm" color={textColor} lineHeight="1.6">
+                            <Text fontSize="sm" color="textSecondary" lineHeight="1.6">
                                 {line}
                             </Text>
                         </HStack>
@@ -301,8 +297,6 @@ const GenerationStep = () => {
 
 const RefinementStep = () => {
     const [phase, setPhase] = useState<"initial" | "refining1" | "refining2" | "refining3" | "complete">("initial");
-    const bgColor = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.800", "grey.200");
 
     useEffect(() => {
         const timer1 = setTimeout(() => setPhase("refining1"), 500);
@@ -339,7 +333,7 @@ const RefinementStep = () => {
             </HStack>
             <Box
                 w="85%"
-                bg={bgColor}
+                bg="surfaceAction"
                 border="2px solid"
                 borderColor="green.400"
                 borderRadius="24px"
@@ -348,7 +342,7 @@ const RefinementStep = () => {
                 boxShadow={phase === "complete" ? "0 0 20px rgba(34, 197, 94, 0.4)" : "md"}
                 position="relative"
             >
-                <Text fontSize="sm" color={textColor} lineHeight="1.8">
+                <Text fontSize="sm" color="textSecondary" lineHeight="1.8">
                     Une base vectorielle stocke des embeddings pour la recherche sémantique.
                 </Text>
                 <AnimatePresence>
@@ -370,9 +364,6 @@ const RefinementStep = () => {
 
 const OutputStep = () => {
     const [sourcesVisible, setSourcesVisible] = useState(false);
-    const bgColor = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.800", "grey.200");
-    const sourcesBg = useColorModeValue("grey.50", "grey.900");
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -404,7 +395,7 @@ const OutputStep = () => {
             <VStack w="90%" spacing={3} align="stretch">
                 <Box
                     w="100%"
-                    bg={bgColor}
+                    bg="surfaceAction"
                     border="2px solid"
                     borderColor="green.300"
                     borderRadius="24px"
@@ -413,7 +404,7 @@ const OutputStep = () => {
                 >
                     <VStack align="start" spacing={1}>
                         <HStack spacing={1} align="baseline">
-                            <Text fontSize="sm" color={textColor} lineHeight="1.6">
+                            <Text fontSize="sm" color="textSecondary" lineHeight="1.6">
                                 Une base vectorielle stocke efficacement des embeddings haute dimension permettant
                             </Text>
                             <AnimatePresence>
@@ -431,7 +422,7 @@ const OutputStep = () => {
                             </AnimatePresence>
                         </HStack>
                         <HStack spacing={1} align="baseline">
-                            <Text fontSize="sm" color={textColor} lineHeight="1.6">
+                            <Text fontSize="sm" color="textSecondary" lineHeight="1.6">
                                 une recherche sémantique rapide et une récupération intelligente.
                             </Text>
                         </HStack>
@@ -444,7 +435,7 @@ const OutputStep = () => {
                             animate={{ opacity: 1, height: "auto" }}
                             transition={{ duration: 0.5, delay: 0.8 }}
                         >
-                            <VStack spacing={2} align="stretch" p={3} bg={sourcesBg} borderRadius="18px">
+                            <VStack spacing={2} align="stretch" p={3} bg="surfaceHover" borderRadius="18px">
                                 <HStack spacing={2}>
                                     <Icon as={BookOpen} color="green.500" boxSize={4} />
                                     <Text fontSize="xs" fontWeight="semibold" color="green.600">
@@ -455,7 +446,7 @@ const OutputStep = () => {
                                     <Tag size="sm" colorScheme="green" variant="solid" borderRadius="999px">
                                         1
                                     </Tag>
-                                    <Text fontSize="xs" color={textColor}>
+                                    <Text fontSize="xs" color="textSecondary">
                                         Guide Base Vectorielle
                                     </Text>
                                     <Icon as={ExternalLink} color="green.400" boxSize={3} ml="auto" />

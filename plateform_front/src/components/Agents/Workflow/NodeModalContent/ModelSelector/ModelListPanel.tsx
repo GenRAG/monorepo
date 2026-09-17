@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Box, HStack, Input, InputGroup, InputLeftElement, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Input, InputGroup, InputLeftElement, Text, VStack, useToken } from "@chakra-ui/react";
 import { ArrowDownUp, ArrowUpDown, Search } from "lucide-react";
 import { List, useListRef, type RowComponentProps } from "react-window";
 import { RagModel } from "types/models/models";
@@ -44,8 +44,7 @@ const ModelRow = ({ index, style, models, selectedId, onSelect }: RowComponentPr
 export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelect }) => {
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortMode>("default");
-    const subColor = useColorModeValue("grey.400", "grey.500");
-    const bgColor = useColorModeValue("white", "grey.950");
+    const [searchIconColor] = useToken("colors", ["textFaint"]);
     const listRef = useListRef(null);
     const hasScrolledToSelection = useRef(false);
 
@@ -74,7 +73,7 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
         <VStack
             align="stretch"
             spacing={0}
-            bg={bgColor}
+            bg="surfacePrimary"
             w="200px"
             flexShrink={0}
             borderRightWidth="1px"
@@ -85,7 +84,7 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
                 <HStack spacing={0}>
                     <InputGroup size="xs" flex={1}>
                         <InputLeftElement pointerEvents="none">
-                            <Search size={10} color="grey" />
+                            <Search size={10} color={searchIconColor} />
                         </InputLeftElement>
                         <Input
                             placeholder="Rechercher..."
@@ -102,7 +101,7 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
                             <Box
                                 px={1.5}
                                 py={1}
-                                color={sort !== "default" ? "green.500" : subColor}
+                                color={sort !== "default" ? "iconAccent" : "textFaint"}
                                 display="flex"
                                 alignItems="center"
                             >
@@ -118,7 +117,7 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
             </Box>
             <Box flex={1} minH={0} pt={2}>
                 {filtered.length === 0 ? (
-                    <Text fontSize="11px" color={subColor} textAlign="center" pt={4}>
+                    <Text fontSize="11px" color="textFaint" textAlign="center" pt={4}>
                         Aucun modèle
                     </Text>
                 ) : (

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, HStack, Text, VStack, useColorMode } from "@chakra-ui/react";
+import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { ChatMessage } from "hooks/chat";
 import ChatResponseBubble from "./ChatResponseBubble";
 
@@ -8,18 +8,14 @@ interface ChatMessageItemProps {
 }
 
 const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
-    const labelColor = isDark ? "grey.500" : "grey.400";
-
     return (
         <React.Fragment>
             <VStack align="flex-end" spacing={1} alignSelf="flex-end" maxW="80%">
-                <Text fontSize="xs" color={labelColor}>
+                <Text fontSize="xs" color="textLabel">
                     Vous
                 </Text>
-                <Box p={3} bg={isDark ? "green.700" : "green.100"} borderRadius="12px" borderBottomRightRadius="2px">
-                    <Text fontSize="sm" color={isDark ? "grey.100" : "green.800"}>
+                <Box p={3} bg="bubbleAccentBg" borderRadius="12px" borderBottomRightRadius="2px">
+                    <Text fontSize="sm" color="bubbleAccentText">
                         {message.question}
                     </Text>
                 </Box>
@@ -27,7 +23,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
 
             {message.response !== "" && (
                 <VStack align="flex-start" spacing={1} maxW="80%">
-                    <Text fontSize="xs" color={labelColor}>
+                    <Text fontSize="xs" color="textLabel">
                         Assistant
                     </Text>
                     <ChatResponseBubble response={message.response} isError={message.error} />

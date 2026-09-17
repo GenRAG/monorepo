@@ -48,27 +48,19 @@ const NodeCard = ({ nodeType, alreadyUsed, isSelected, onClick, tooltipContent }
     const task = getTaskDef(nodeType)!;
     const isDraggable = !alreadyUsed;
 
-    const cardBg = useColorModeValue("white", "grey.850");
-    const cardActiveBg = useColorModeValue("green.50", "grey.700");
-    const borderColor = useColorModeValue("green.200", "grey.700");
-    const borderActive = useColorModeValue("green.300", "green.500");
-    const textColor = useColorModeValue("grey.900", "grey.100");
-    const subColor = useColorModeValue("grey.500", "grey.400");
     const tooltipBg = useColorModeValue("green.50", "grey.700");
-    const badgeBg = useColorModeValue("grey.100", "grey.700");
-    const badgeColor = useColorModeValue("grey.500", "grey.400");
 
     return (
         <Box
             onClick={isDraggable ? () => onClick(nodeType) : undefined}
-            bg={isSelected ? cardActiveBg : cardBg}
+            bg={isSelected ? "accentCardBg" : "surfaceCard"}
             border="1px solid"
-            borderColor={isSelected ? borderActive : borderColor}
+            borderColor={isSelected ? "borderAccentCardActive" : "borderAccentCardMuted"}
             borderRadius="10px"
             p={2}
             transition="all 0.15s"
             opacity={alreadyUsed ? 0.5 : 1}
-            _hover={isDraggable ? { bg: cardActiveBg, borderColor: borderActive } : {}}
+            _hover={isDraggable ? { bg: "accentCardBg", borderColor: "borderAccentCardActive" } : {}}
         >
             <Flex align="center" gap={3}>
                 <Box flexShrink={0}>
@@ -77,16 +69,16 @@ const NodeCard = ({ nodeType, alreadyUsed, isSelected, onClick, tooltipContent }
 
                 <VStack align="start" spacing={0} flex={1} minW={0}>
                     <HStack spacing={2}>
-                        <Text fontSize="sm" fontWeight="semibold" color={textColor} noOfLines={1}>
+                        <Text fontSize="sm" fontWeight="semibold" color="textPrimary" noOfLines={1}>
                             {task.label}
                         </Text>
                         {alreadyUsed && (
-                            <Badge bg={badgeBg} color={badgeColor} size="sm">
+                            <Badge bg="borderSubtle" color="textLabel" size="sm">
                                 UTILISE
                             </Badge>
                         )}
                     </HStack>
-                    <Text fontSize="xs" color={subColor} noOfLines={1}>
+                    <Text fontSize="xs" color="textLabel" noOfLines={1}>
                         {task.description}
                     </Text>
                 </VStack>
@@ -106,7 +98,7 @@ const NodeCard = ({ nodeType, alreadyUsed, isSelected, onClick, tooltipContent }
                             as={Info}
                             boxSize={4}
                             cursor="pointer"
-                            color={subColor}
+                            color="textLabel"
                             flexShrink={0}
                             onClick={(e) => e.stopPropagation()}
                         />
@@ -123,14 +115,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
     const inputRef = useRef<HTMLInputElement>(null);
     const { fitView } = useReactFlow();
 
-    const bgColor = useColorModeValue("white", "grey.900");
-    const borderColor = useColorModeValue("green.200", "grey.700");
     const dividerColor = useColorModeValue("green.100", "grey.700");
-    const iconColor = useColorModeValue("grey.600", "grey.300");
-    const hoverBg = useColorModeValue("grey.100", "grey.700");
-    const textColor = useColorModeValue("grey.900", "grey.100");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const sectionColor = useColorModeValue("grey.400", "grey.600");
     const overlayBg = useColorModeValue("blackAlpha.500", "blackAlpha.700");
 
     const presentTypes = useMemo(() => usedNodes.map((n) => n.data.type), [usedNodes]);
@@ -216,9 +201,9 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
             <Modal isOpen={isOpen} onClose={handleClose} isCentered motionPreset="scale">
                 <ModalOverlay bg={overlayBg} backdropFilter="blur(4px)" />
                 <ModalContent
-                    bg={bgColor}
+                    bg="surfaceCard"
                     border="1px solid"
-                    borderColor={borderColor}
+                    borderColor="borderAccentCardMuted"
                     borderRadius="14px"
                     boxShadow="0 20px 60px rgba(0,0,0,0.15)"
                     overflow="hidden"
@@ -227,7 +212,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                 >
                     <ModalBody p={0}>
                         <HStack px={4} py={3} borderBottom="1px solid" borderColor={dividerColor} spacing={3}>
-                            <Icon as={Search} boxSize={4} color={iconColor} flexShrink={0} />
+                            <Icon as={Search} boxSize={4} color="textBody" flexShrink={0} />
                             <Input
                                 ref={inputRef}
                                 value={query}
@@ -235,8 +220,8 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                 onKeyDown={handleKeyDown}
                                 placeholder="Chercher des blocs…"
                                 fontSize="sm"
-                                color={textColor}
-                                _placeholder={{ color: subColor }}
+                                color="textPrimary"
+                                _placeholder={{ color: "textLabel" }}
                                 flex={1}
                                 size="sm"
                             />
@@ -245,8 +230,8 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                 icon={<X size={14} />}
                                 size="xs"
                                 variant="ghost"
-                                color={iconColor}
-                                _hover={{ bg: hoverBg }}
+                                color="textBody"
+                                _hover={{ bg: "borderSubtle" }}
                                 onClick={handleClose}
                             />
                         </HStack>
@@ -259,7 +244,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                             sx={{
                                 "&::-webkit-scrollbar": { width: "4px" },
                                 "&::-webkit-scrollbar-thumb": {
-                                    bg: borderColor,
+                                    bg: "borderAccentCardMuted",
                                     borderRadius: "4px",
                                 },
                             }}
@@ -271,7 +256,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                         fontWeight={700}
                                         letterSpacing="0.08em"
                                         textTransform="uppercase"
-                                        color={sectionColor}
+                                        color="textMuted"
                                         px={2}
                                         pt={2}
                                         pb={1}
@@ -293,9 +278,9 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
 
                             {filteredAvailable.length === 0 && availableNodes.length > 0 && (
                                 <Flex justify="center" py={8} px={2}>
-                                    <Text fontSize="sm" color={subColor}>
+                                    <Text fontSize="sm" color="textLabel">
                                         Aucun nœud ne correspond à &quot;
-                                        <Text as="span" color={textColor}>
+                                        <Text as="span" color="textPrimary">
                                             {query}
                                         </Text>
                                         &quot;
@@ -305,7 +290,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
 
                             {availableNodes.length === 0 && filteredAvailable.length === 0 && (
                                 <Flex justify="center" py={8} px={2}>
-                                    <Text fontSize="sm" color={subColor}>
+                                    <Text fontSize="sm" color="textLabel">
                                         Pas de blocs disponibles.
                                     </Text>
                                 </Flex>
@@ -319,7 +304,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                         fontWeight={700}
                                         letterSpacing="0.08em"
                                         textTransform="uppercase"
-                                        color={sectionColor}
+                                        color="textMuted"
                                         px={2}
                                         pt={2}
                                         pb={1}
@@ -351,7 +336,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
                                     {keys.map((k) => (
                                         <StyledKbd key={k}>{k}</StyledKbd>
                                     ))}
-                                    <Text fontSize="11px" color={subColor}>
+                                    <Text fontSize="11px" color="textLabel">
                                         {label}
                                     </Text>
                                 </HStack>

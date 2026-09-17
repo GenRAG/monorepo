@@ -50,12 +50,23 @@ const colorTokens = {
     borderAccentCardActive: { default: "green.400", _dark: "green.500" }, // Bordure de carte accentuée, état actif
     borderAccentCardMuted: { default: "green.200", _dark: "green.700" }, // Bordure de carte accentuée, état atténué
 
+    // === DANGER (confirmation de suppression, zones destructrices) ===
+    dangerBorder: { default: "red.100", _dark: "rgba(239,68,68,0.2)" },
+    dangerBgSubtle: { default: "red.50", _dark: "rgba(239,68,68,0.06)" },
+    dangerBorderSubtle: { default: "red.100", _dark: "rgba(239,68,68,0.15)" },
+    dangerIconBg: { default: "red.100", _dark: "rgba(239,68,68,0.18)" },
+
     // === TOOLTIP ===
     tooltipBg: { default: "grey.700", _dark: "green.600" }, // Fond de tooltip (déjà repris tel quel dans plusieurs sidebars)
 
     // === SKELETON ===
     skeletonStart: { default: "grey.100", _dark: "grey.800" },
     skeletonEnd: { default: "grey.200", _dark: "grey.700" },
+
+    // === TREND (indicateurs de variation) ===
+    trendPositive: { default: "green.600", _dark: "green.400" },
+    trendNeutral: { default: "orange.500", _dark: "orange.300" },
+    trendNegative: { default: "red.500", _dark: "red.400" },
 
     accentCardBg: { default: "green.50", _dark: "grey.850" }, // Carte sélectionnée/active
     accentIconBg: { default: "green.100", _dark: "grey.800" }, // Fond icône accent

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { HStack, IconButton, Text, VStack, useColorMode, useDisclosure } from "@chakra-ui/react";
+import { HStack, IconButton, Text, VStack, useDisclosure } from "@chakra-ui/react";
 import { DocumentList } from "components/Document/Table/DocumentList";
 import { PreviewDrawer } from "components/Document/Drawer/PreviewDrawer";
 import { UploadModal } from "components/Document/Modal/UploadModal";
@@ -49,7 +49,6 @@ export const DocumentWorkspace: React.FC = () => {
 
     const uploadModal = useDisclosure();
     const previewDrawer = useDisclosure();
-    const { colorMode } = useColorMode();
 
     const handleDocumentDelete = async (id: string) => {
         if (!workspaceId || !agentId) return;
@@ -134,7 +133,7 @@ export const DocumentWorkspace: React.FC = () => {
                     isLoading={isLoading}
                     footer={
                         totalPages > 1 && documents.length > 0 ? (
-                            <HStack p={3} justify="space-between" bg={colorMode === "dark" ? "grey.950" : "white"}>
+                            <HStack p={3} justify="space-between" bg="tableBg">
                                 <Text fontSize="sm">
                                     Page {currentPage} sur {totalPages}
                                 </Text>

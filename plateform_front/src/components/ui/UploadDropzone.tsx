@@ -43,7 +43,7 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({
             size="none"
             borderWidth="1.5px"
             borderStyle="dashed"
-            borderColor={disabled ? "borderDefault" : isDragging ? "green.400" : "borderDefault"}
+            borderColor={disabled ? "borderDefault" : isDragging ? "inputActiveBorder" : "borderDefault"}
             bg={disabled ? "surfaceSubtle" : isDragging ? "accentCardBg" : "surfaceHover"}
             borderRadius="14px"
             p={6}
@@ -56,14 +56,14 @@ const UploadDropzone: React.FC<UploadDropzoneProps> = ({
             onDragLeave={disabled ? undefined : onDragLeave}
         >
             <VStack spacing={2}>
-                <BoxIcon icon={CloudUpload} size="xl" color={disabled ? "textMuted" : "green.500"} />
+                <BoxIcon icon={CloudUpload} size="xl" color={disabled ? "textMuted" : "iconAccent"} />
                 <Text fontWeight="600" fontSize="15px" color={disabled ? "textMuted" : "textPrimary"}>
                     {disabled && disabledMessage ? disabledMessage : title}
                 </Text>
                 {!disabled && (
                     <Text fontSize="13px" color="textMuted">
                         ou{" "}
-                        <Box as="span" color="green.500" textDecoration="underline" fontWeight="500">
+                        <Box as="span" color="iconAccent" textDecoration="underline" fontWeight="500">
                             parcourez votre ordinateur
                         </Box>
                     </Text>

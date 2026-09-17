@@ -1,9 +1,7 @@
 import React from "react";
 import { Box, Card, HStack, Stack, Text, VStack } from "@chakra-ui/react";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { useParams } from "react-router-dom";
 import { useGetCreditBalanceQuery } from "services/credit/credit";
-import { useIsDark } from "hooks/useIsDark";
 
 const TIER_DATA: Record<string, { displayName: string }> = {
     free: { displayName: "Découverte" },
@@ -22,7 +20,6 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
         skip: !workspaceId,
     });
 
-    const isDark = useIsDark();
     const data = TIER_DATA[tier] ?? TIER_DATA.free;
 
     const now = new Date();
@@ -45,8 +42,8 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
                             {data.displayName}
                         </Text>
                         <HStack bg="rgba(52,211,169,0.12)" px={2} py={0.5} borderRadius="full" spacing={1}>
-                            <Box w={1.5} h={1.5} borderRadius="full" bg={currentDarkTheme.primary} />
-                            <Text fontSize="xs" color={currentDarkTheme.primary} fontWeight="semibold">
+                            <Box w={1.5} h={1.5} borderRadius="full" bg="iconAccent" />
+                            <Text fontSize="xs" color="iconAccent" fontWeight="semibold">
                                 Actif
                             </Text>
                         </HStack>
@@ -66,7 +63,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
                             </Text>
                             <Text variant="body-md-muted">/ {total.toLocaleString("fr-FR")} consommés</Text>
                         </HStack>
-                        <Box h="10px" bg={isDark ? "grey.700" : "grey.200"} borderRadius="full" overflow="hidden">
+                        <Box h="10px" bg="borderDivider" borderRadius="full" overflow="hidden">
                             <Box
                                 h="10px"
                                 w={`${progress}%`}

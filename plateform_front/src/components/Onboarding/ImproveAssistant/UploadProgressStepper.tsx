@@ -64,13 +64,14 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                     <Step key={index}>
                         <StepIndicator
                             flexShrink={0}
-                            border={index <= activeStepIndex ? "none" : "1px solid #E7E7E7"}
-                            bg={index <= activeStepIndex ? currentDarkTheme.primary : "white"}
+                            border={index <= activeStepIndex ? "none" : "1px solid"}
+                            borderColor="borderDefault"
+                            bg={index <= activeStepIndex ? "iconAccent" : "surfaceCard"}
                         >
                             <StepStatus
                                 complete={
                                     <Box
-                                        bg={currentDarkTheme.primary}
+                                        bg="iconAccent"
                                         borderRadius="full"
                                         w="28px"
                                         h="28px"
@@ -90,12 +91,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                                             w="28px"
                                             h="28px"
                                         >
-                                            <Icon
-                                                as={Loader2}
-                                                color={currentDarkTheme.primary}
-                                                boxSize={4}
-                                                className="spinning"
-                                            />
+                                            <Icon as={Loader2} color="iconAccent" boxSize={4} className="spinning" />
                                         </Box>
                                     ) : (
                                         <Icon as={step.icon} color="textFaint" boxSize={4} />
@@ -138,7 +134,7 @@ const UploadProgressStepper: React.FC<UploadProgressStepperProps> = ({
                             style={{
                                 backgroundColor: "transparent",
                                 borderLeft: showComparison
-                                    ? `2px solid ${currentDarkTheme.primary}`
+                                    ? `2px solid ${currentDarkTheme.hex.primary}`
                                     : "2px dashed var(--chakra-colors-separatorDashAccent)",
                                 transition: "all 0.3s ease-in-out",
                             }}

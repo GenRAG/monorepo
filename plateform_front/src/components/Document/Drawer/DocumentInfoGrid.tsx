@@ -19,7 +19,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                     <GridItem p={4} borderRight="0.5px solid" borderColor="borderDefault">
                         <Text variant="body-xs-muted">Type</Text>
                         <HStack spacing={2} mt={2}>
-                            <BoxIcon icon={File} size="sm" color="grey.400" />
+                            <BoxIcon icon={File} size="sm" color="textFaint" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {getFileTypeLabel(document.mimeType)}
                             </Text>
@@ -28,7 +28,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                     <GridItem p={4}>
                         <Text variant="body-xs-muted">Taille</Text>
                         <HStack spacing={2} mt={2}>
-                            <BoxIcon icon={Database} size="sm" color="grey.400" />
+                            <BoxIcon icon={Database} size="sm" color="textFaint" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatFileSize(document.size)}
                             </Text>
@@ -39,7 +39,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                     <GridItem p={4} borderRight="0.5px solid" borderColor="borderDefault">
                         <Text variant="body-xs-muted">Téléversé</Text>
                         <HStack spacing={2} mt={2}>
-                            <BoxIcon icon={Clock} size="sm" color="grey.400" />
+                            <BoxIcon icon={Clock} size="sm" color="textFaint" />
                             <Text fontSize="13px" fontWeight="medium">
                                 {formatDateTime(document.createdAt)}
                             </Text>
@@ -49,7 +49,7 @@ export const DocumentInfoGrid: React.FC<DocumentInfoGridProps> = ({ document }) 
                         <GridItem p={4}>
                             <Text variant="body-xs-muted">Indexé</Text>
                             <HStack spacing={2} mt={2}>
-                                <BoxIcon icon={Clock} size="sm" color="grey.400" />
+                                <BoxIcon icon={Clock} size="sm" color="textFaint" />
                                 <Text fontSize="13px" fontWeight="medium">
                                     {formatDateTime(document.indexedAt)}
                                 </Text>

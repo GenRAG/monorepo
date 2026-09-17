@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, Card, HStack, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Card, HStack, Stack, Text } from "@chakra-ui/react";
 import { DocumentStats } from "types/document/document";
 
 const DEFAULT_QUOTA_BYTES = 100 * 1024 * 1024;
@@ -31,8 +31,6 @@ interface StorageOverviewPanelProps {
 }
 
 export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stats }) => {
-    const barTrack = useColorModeValue("grey.100", "grey.800");
-
     const { byType, totalUsed, freeBytes, usedPct } = useMemo(() => {
         const sums: Record<string, number> = {
             pdf: 0,
@@ -73,7 +71,7 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                 </HStack>
             </Stack>
 
-            <Box position="relative" h="8px" borderRadius="full" bg={barTrack} overflow="hidden">
+            <Box position="relative" h="8px" borderRadius="full" bg="borderDefault" overflow="hidden">
                 <HStack spacing={0} h="100%" position="absolute" inset={0}>
                     {SEGMENTS.map((seg) => {
                         const pct = (byType[seg.key] / DEFAULT_QUOTA_BYTES) * 100;
@@ -95,7 +93,7 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                 ))}
                 {freeBytes > 0 && (
                     <HStack spacing={1.5}>
-                        <Box w="8px" h="8px" borderRadius="2px" bg={barTrack} flexShrink={0} />
+                        <Box w="8px" h="8px" borderRadius="2px" bg="borderDefault" flexShrink={0} />
                         <Text variant="body-2xs-muted">Libre</Text>
                         <Text fontSize="11px" color="textPrimary" fontWeight="500">
                             {fmt(freeBytes)}

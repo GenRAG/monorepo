@@ -57,13 +57,7 @@ const ROW_HEIGHT = CARD_HEIGHT + 8;
 
 const ModelPickerCard = memo(
     ({ model, isSelected, onSelect }: { model: RagModel; isSelected: boolean; onSelect: () => void }) => {
-        const defaultBg = useColorModeValue("white", "grey.800");
         const selectedBg = useColorModeValue("green.50", "rgba(52,211,153,0.08)");
-        const defaultBorder = useColorModeValue("grey.200", "grey.700");
-        const labelColor = useColorModeValue("grey.800", "grey.100");
-        const subColor = useColorModeValue("grey.500", "grey.400");
-        const priceColor = useColorModeValue("grey.400", "grey.500");
-        const providerColor = useColorModeValue("grey.400", "grey.500");
 
         const hasPrice = model.pricing?.prompt || model.pricing?.completion;
 
@@ -74,17 +68,17 @@ const ModelPickerCard = memo(
                 h={`${CARD_HEIGHT}px`}
                 textAlign="left"
                 overflow="hidden"
-                bg={isSelected ? selectedBg : defaultBg}
+                bg={isSelected ? selectedBg : "surfaceAction"}
                 borderWidth="1px"
                 borderStyle="solid"
-                borderColor={isSelected ? "green.400" : defaultBorder}
+                borderColor={isSelected ? "borderAccentCardActive" : "borderDivider"}
                 borderRadius="10px"
                 p={3}
                 cursor="pointer"
                 transition="all 0.15s ease"
                 _hover={{
                     bg: selectedBg,
-                    borderColor: "green.400",
+                    borderColor: "borderAccentCardActive",
                     boxShadow: "0 4px 12px rgba(52,211,169,0.1)",
                 }}
                 onClick={onSelect}
@@ -95,23 +89,23 @@ const ModelPickerCard = memo(
                             <Text
                                 fontSize="13px"
                                 fontWeight={700}
-                                color={labelColor}
+                                color="textOnBubble"
                                 letterSpacing="-0.01em"
                                 isTruncated
                             >
                                 {model.name}
                             </Text>
                             {model.provider && (
-                                <Text fontSize="10px" color={providerColor} flexShrink={0}>
+                                <Text fontSize="10px" color="textFaint" flexShrink={0}>
                                     {model.provider}
                                 </Text>
                             )}
                         </HStack>
-                        {isSelected && <Icon as={Check} boxSize="14px" color="green.500" flexShrink={0} />}
+                        {isSelected && <Icon as={Check} boxSize="14px" color="iconAccent" flexShrink={0} />}
                     </HStack>
 
                     {model.description && (
-                        <Text fontSize="11px" color={subColor} lineHeight={1.4} noOfLines={2}>
+                        <Text fontSize="11px" color="textLabel" lineHeight={1.4} noOfLines={2}>
                             {model.description}
                         </Text>
                     )}
@@ -119,18 +113,18 @@ const ModelPickerCard = memo(
                     {hasPrice && (
                         <HStack spacing={3} pt={0.5}>
                             {model.pricing?.prompt && (
-                                <Text fontSize="10px" color={priceColor}>
+                                <Text fontSize="10px" color="textFaint">
                                     In{" "}
-                                    <Box as="span" fontWeight={600} color={subColor}>
+                                    <Box as="span" fontWeight={600} color="textLabel">
                                         {model.pricing.prompt}
                                     </Box>
                                     /1M
                                 </Text>
                             )}
                             {model.pricing?.completion && (
-                                <Text fontSize="10px" color={priceColor}>
+                                <Text fontSize="10px" color="textFaint">
                                     Out{" "}
-                                    <Box as="span" fontWeight={600} color={subColor}>
+                                    <Box as="span" fontWeight={600} color="textLabel">
                                         {model.pricing.completion}
                                     </Box>
                                     /1M
@@ -169,7 +163,6 @@ const ModelRow = ({ index, style, models, selectedId, onSelect }: RowComponentPr
 
 const InstructionEditor = ({ stringValue, onChange }: { stringValue?: string; onChange: (value: string) => void }) => {
     const [value, setValue] = useState(stringValue ?? "");
-    const borderColor = useColorModeValue("grey.200", "grey.700");
 
     useEffect(() => {
         setValue(stringValue ?? "");
@@ -187,8 +180,8 @@ const InstructionEditor = ({ stringValue, onChange }: { stringValue?: string; on
             fontSize="13px"
             resize="vertical"
             borderRadius="10px"
-            borderColor={borderColor}
-            _focus={{ borderColor: "green.400", boxShadow: "0 0 0 1px var(--chakra-colors-green-400)" }}
+            borderColor="borderDivider"
+            _focus={{ borderColor: "inputActiveBorder", boxShadow: "0 0 0 1px var(--chakra-colors-green-400)" }}
         />
     );
 };
@@ -206,10 +199,6 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
     const selector = useCallback((s: ReactFlowState) => selectSettingsViews(s, mainNodeId), [mainNodeId]);
     const settingsViews = useStore(selector, areViewsEqual);
 
-    const sectionLabelColor = useColorModeValue("grey.500", "grey.400");
-    const dividerColor = useColorModeValue("grey.100", "grey.700");
-    const emptyColor = useColorModeValue("grey.400", "grey.600");
-
     const modelNodes = settingsViews.filter((v) => v.type === TaskType.MODEL);
     const instructionNodes = settingsViews.filter((v) => v.type === TaskType.INSTRUCTION);
 
@@ -223,7 +212,7 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
 
     if (modelNodes.length === 0 && instructionNodes.length === 0) {
         return (
-            <Text fontSize="sm" color={emptyColor} fontStyle="italic">
+            <Text fontSize="sm" color="textMuted" fontStyle="italic">
                 Aucun paramètre configurable.
             </Text>
         );
@@ -239,7 +228,7 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
                             fontWeight="700"
                             textTransform="uppercase"
                             letterSpacing="0.08em"
-                            color={sectionLabelColor}
+                            color="textLabel"
                             mb={3}
                             flexShrink={0}
                         >
@@ -247,7 +236,7 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
                         </Text>
                         {isLoadingModels ? (
                             <HStack justify="center" py={4}>
-                                <Spinner size="sm" color="green.500" />
+                                <Spinner size="sm" color="iconAccent" />
                             </HStack>
                         ) : (
                             <Box flex={1} minH={0}>
@@ -270,7 +259,7 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
             })}
 
             {modelNodes.length > 0 && instructionNodes.length > 0 && (
-                <Box borderTopWidth="1px" borderStyle="solid" borderColor={dividerColor} flexShrink={0} />
+                <Box borderTopWidth="1px" borderStyle="solid" borderColor="borderSubtle" flexShrink={0} />
             )}
 
             {instructionNodes.map((node) => (
@@ -280,7 +269,7 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
                         fontWeight="700"
                         textTransform="uppercase"
                         letterSpacing="0.08em"
-                        color={sectionLabelColor}
+                        color="textLabel"
                         mb={2}
                     >
                         Prompt Système

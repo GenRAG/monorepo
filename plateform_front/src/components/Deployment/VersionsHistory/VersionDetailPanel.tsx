@@ -1,4 +1,4 @@
-import { Box, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Box, VStack } from "@chakra-ui/react";
 import { PipelineJsonPanel } from "components/Deployment/VersionsHistory/PipelineJsonPanel";
 import { VersionHeaderActions } from "components/Deployment/VersionsHistory/VersionHeaderActions";
 import { useGetDeploymentByIdQuery } from "services/deployment/deployment";
@@ -14,12 +14,10 @@ export const VersionDetailPanel = ({ selectedId, workspaceId, agentId }: Version
         { workspaceId, agentId, id: selectedId! },
         { skip: !selectedId },
     );
-    const bg = useColorModeValue("white", "grey.975");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
 
     return (
-        <Box flex="1 1 0" p={6} bg={bg}>
-            <VStack align="stretch" h="full" border="1px solid" borderColor={borderColor} borderRadius="12px">
+        <Box flex="1 1 0" p={6} bg="surfacePrimary">
+            <VStack align="stretch" h="full" border="1px solid" borderColor="borderDefault" borderRadius="12px">
                 <VersionHeaderActions deployment={deployment ?? null} workspaceId={workspaceId} agentId={agentId} />
                 <PipelineJsonPanel
                     workflowVersion={deployment?.workflowVersion ?? null}

@@ -64,8 +64,8 @@ const AssistantHome: React.FC<AssistantHomeProps> = ({
                         >
                             Tout les assistants
                         </Button>
-                        <Icon as={ChevronRight} boxSize={3.5} color={isDark ? "grey.600" : "grey.400"} />
-                        <Text fontSize="sm" fontWeight="medium" color={isDark ? "grey.300" : "grey.700"}>
+                        <Icon as={ChevronRight} boxSize={3.5} color="textFaint" />
+                        <Text fontSize="sm" fontWeight="medium" color="textBody">
                             {title}
                         </Text>
                     </HStack>

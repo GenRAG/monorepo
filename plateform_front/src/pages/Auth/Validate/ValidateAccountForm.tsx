@@ -68,30 +68,30 @@ const ValidateAccountForm: FC = () => {
                 <AuthHeader currentStep={RegisterFormSteps.REGISTER_VALIDATE} />
                 <VStack w="100%" gap="8px">
                     <HStack w="100%" gap="8px">
-                        <MailIcon color="white" />
-                        <Text variant="body-sm" w="100%" color="whites.offwhite">
+                        <MailIcon color="textStrong" />
+                        <Text variant="body-sm" w="100%" color="textStrong">
                             Vous devriez avoir reçu un code de vérification par email
                         </Text>
                     </HStack>
 
                     <HStack w="100%" gap="8px">
-                        <TimerIcon color="white" />
-                        <Text variant="body-sm" w="100%" color="whites.offwhite">
+                        <TimerIcon color="textStrong" />
+                        <Text variant="body-sm" w="100%" color="textStrong">
                             Le code expire dans 20 minutes
                         </Text>
                     </HStack>
 
                     <HStack w="100%" gap="8px">
-                        <FileWarningIcon color="white" />
-                        <Text variant="body-sm" w="100%" color="whites.offwhite">
+                        <FileWarningIcon color="textStrong" />
+                        <Text variant="body-sm" w="100%" color="textStrong">
                             Impossible de trouver l&apos;email? Vérifiez votre dossier de spam ou de courrier
                             indésirable.
                         </Text>
                     </HStack>
 
                     <HStack w="100%" gap="8px">
-                        <RepeatIcon color="white" />
-                        <Text variant="body-sm" w="100%" color="whites.offwhite">
+                        <RepeatIcon color="textStrong" />
+                        <Text variant="body-sm" w="100%" color="textStrong">
                             Vous ne recevez pas le code?{" "}
                             <Button
                                 isDisabled={isResending}

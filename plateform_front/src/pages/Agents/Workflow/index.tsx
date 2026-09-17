@@ -1,13 +1,11 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import { useColorMode, VStack, Box, useDisclosure, useToken, Spinner, Center } from "@chakra-ui/react";
-import { useBlocker } from "react-router-dom";
-import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider, useReactFlow } from "@xyflow/react";
+import { useRef, useState, useCallback } from "react";
+import { useColorMode, VStack, Box, useDisclosure, useToken, Spinner, Center, Text } from "@chakra-ui/react";
+import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider } from "@xyflow/react";
 import {
     useNodeSelection,
     useWorkflowCanvas,
     sanitizeWorkflowEdges,
     serializeWorkflow,
-    getTaskDef,
     TaskType,
     type AppNode,
     type WorkflowDefinition,
@@ -25,6 +23,8 @@ import {
 } from "services/workflow/workflow";
 import { useGetModelsGenerationQuery } from "services/models/models";
 import useThemedToast from "hooks/useThemedToast";
+import { useIncompleteNodesGuard } from "hooks/useIncompleteNodesGuard";
+import { useUnsavedChangesBlocker } from "hooks/useUnsavedChangesBlocker";
 import mixpanel from "lib/mixpanel";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
@@ -72,41 +72,13 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         initialEdges,
     });
 
-    const { updateNodeData } = useReactFlow();
+    const { checkIncompleteNodes } = useIncompleteNodesGuard();
     const [updateWorkflow, { isLoading: isUpdating }] = useUpdateWorkflowMutation();
     const [createWorkflow, { isLoading: isCreating }] = useCreateWorkflowMutation();
     const isSaving = isUpdating || isCreating;
 
     const handleSave = async () => {
-        const incompleteNodes = nodes.filter((n) => n.data.isPlaceholder);
-        if (incompleteNodes.length > 0) {
-            const names = incompleteNodes.map((n) => {
-                const parent = nodes.find((p) => p.id === n.data.parentNodeId);
-                const parentLabel = parent ? (getTaskDef(parent.data.type)?.label ?? parent.data.type) : null;
-                const settingLabel =
-                    n.data.settingLabel ?? (n.data.type === TaskType.MODEL ? "Modèle IA" : "Instructions");
-                return parentLabel ? `${parentLabel} - ${settingLabel}` : settingLabel;
-            });
-            incompleteNodes.forEach((n) => updateNodeData(n.id, { isHighlighted: true }));
-            setTimeout(() => {
-                incompleteNodes.forEach((n) => updateNodeData(n.id, { isHighlighted: false }));
-            }, 2000);
-
-            toast({
-                title: "Configuration incomplète",
-                description: (
-                    <div>
-                        {names.map((name, i) => (
-                            <div key={i}>{name}</div>
-                        ))}
-                    </div>
-                ),
-                status: "warning",
-                duration: 5000,
-                isClosable: true,
-            });
-            return;
-        }
+        if (!checkIncompleteNodes(nodes)) return;
 
         const definition: WorkflowDefinition = serializeWorkflow(nodes, edges);
         const params = { workspaceId, agentId, definition };
@@ -153,30 +125,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         [handleAddChainNode, markDirty],
     );
 
-    const blocker = useBlocker(
-        ({ currentLocation, nextLocation }) => isDirty && currentLocation.pathname !== nextLocation.pathname,
-    );
-    const blockerRef = useRef(blocker);
-    blockerRef.current = blocker;
-
-    useEffect(() => {
-        if (blocker.state !== "blocked") return;
-        if (toast.isActive("workflow-unsaved")) return;
-        toast({
-            id: "workflow-unsaved",
-            title: "Modifications non enregistrées",
-            status: "warning",
-            description: "Vous avez des modifications non enregistrées. Quitter la page ?",
-            actionLabel: "Quitter sans enregistrer",
-            onAction: () => {
-                toast.close("workflow-unsaved");
-                blockerRef.current.proceed?.();
-            },
-            onCloseComplete: () => {
-                if (blockerRef.current.state === "blocked") blockerRef.current.reset?.();
-            },
-        });
-    }, [blocker.state, toast]);
+    useUnsavedChangesBlocker(isDirty);
 
     const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.800"]);
     const lineColor = applyAlphaToColor(colorMode === "dark" ? gridLineDark : gridLineLight, 0.8);
@@ -266,10 +215,13 @@ const WorkflowWorkspace = () => {
         agentId: string;
     }>();
 
-    const { data: workflow, isLoading } = useGetActiveWorkflowQuery(
-        { workspaceId: workspaceId!, agentId: agentId! },
-        { skip: !workspaceId || !agentId },
-    );
+    const {
+        data: workflow,
+        isLoading,
+        isError,
+        error,
+    } = useGetActiveWorkflowQuery({ workspaceId: workspaceId!, agentId: agentId! }, { skip: !workspaceId || !agentId });
+    const is404 = typeof error === "object" && error !== null && "status" in error && error.status === 404;
 
     // Legacy workflows may have a `definition` that doesn't (yet) match the current WorkflowDefinition shape.
     const canvas = workflow?.definition as Partial<WorkflowDefinition> | undefined;
@@ -283,6 +235,10 @@ const WorkflowWorkspace = () => {
             {isLoading ? (
                 <Center flex={1}>
                     <Spinner size="lg" color="green.500" />
+                </Center>
+            ) : isError && !is404 ? (
+                <Center flex={1}>
+                    <Text color="textError">Impossible de charger le workflow de cet agent. Réessayez plus tard.</Text>
                 </Center>
             ) : (
                 <ReactFlowProvider>

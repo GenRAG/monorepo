@@ -9,4 +9,5 @@ export enum Tag {
     Onboarding = "Onboarding",
     Credits = "Credits",
     AgentMembers = "AgentMembers",
+    Analytics = "Analytics",
 }

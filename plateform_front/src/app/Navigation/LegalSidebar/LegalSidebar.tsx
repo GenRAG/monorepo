@@ -1,20 +1,6 @@
-import {
-    Box,
-    Collapse,
-    Drawer,
-    DrawerBody,
-    DrawerContent,
-    DrawerOverlay,
-    HStack,
-    Icon,
-    IconButton,
-    Text,
-    VStack,
-    useColorModeValue,
-    useDisclosure,
-} from "@chakra-ui/react";
+import { Box, Collapse, HStack, Icon, Text, VStack, useColorModeValue, useDisclosure } from "@chakra-ui/react";
 import { useEffect, useMemo } from "react";
-import { ArrowLeft, Menu } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useGetUserWorkspacesQuery } from "services/workspace/workspace";
 import { useAppSelector } from "store";
@@ -22,6 +8,7 @@ import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { LEGAL_NAV } from "pages/Legal/data/legalNav";
 import { useActiveSection } from "hooks/useActiveSection";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { MobileSidebarDrawer } from "components/ui/MobileSidebarDrawer";
 
 const SubList = ({
     subsections,
@@ -169,36 +156,18 @@ export const LegalSidebar = () => {
 
     if (isMobile) {
         return (
-            <>
-                <Box
-                    w="48px"
-                    minW="48px"
-                    h="100vh"
-                    bg={bgMobile}
-                    borderRight="1px solid"
-                    borderColor={border}
-                    display="flex"
-                    justifyContent="center"
-                    pt={4}
-                    flexShrink={0}
-                >
-                    <IconButton
-                        aria-label="Ouvrir le menu légal"
-                        icon={<Menu size={20} />}
-                        variant="ghost"
-                        color={iconColor}
-                        onClick={onToggle}
-                    />
-                </Box>
-                <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="xs">
-                    <DrawerOverlay />
-                    <DrawerContent bg={bgMobile} maxW="220px" borderRadius={0}>
-                        <DrawerBody p={0} display="flex" flexDirection="column">
-                            {sidebarContent}
-                        </DrawerBody>
-                    </DrawerContent>
-                </Drawer>
-            </>
+            <MobileSidebarDrawer
+                isOpen={isOpen}
+                onToggle={onToggle}
+                onClose={onClose}
+                ariaLabel="Ouvrir le menu légal"
+                bg={bgMobile}
+                border={border}
+                iconColor={iconColor}
+                drawerMaxW="220px"
+            >
+                {sidebarContent}
+            </MobileSidebarDrawer>
         );
     }
 

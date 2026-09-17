@@ -2,6 +2,11 @@ import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
 import { Workspace, WorkspaceCreateRequest, WorkspaceDetail, WorkspaceStats } from "types/workspace";
 
+export const workspaceStatsTag = (workspaceId: string) => ({
+    type: Tag.Workspaces as const,
+    id: `${workspaceId}-stats`,
+});
+
 export const workspaceApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
         getUserWorkspaces: builder.query<Workspace[], void>({
@@ -54,7 +59,7 @@ export const workspaceApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}/stats`,
                 method: "GET",
             }),
-            providesTags: (_result, _error, workspaceId) => [{ type: Tag.Workspaces, id: `${workspaceId}-stats` }],
+            providesTags: (_result, _error, workspaceId) => [workspaceStatsTag(workspaceId)],
         }),
     }),
 });

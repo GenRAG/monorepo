@@ -1,9 +1,9 @@
-import { Box, HStack, Icon, Text, Tooltip, useDisclosure, useToken, VStack, Stack } from "@chakra-ui/react";
-import { ChevronsLeft, ChevronsRight, LucideIcon } from "lucide-react";
+import { Box, HStack, Skeleton, Text, useDisclosure, VStack, Stack } from "@chakra-ui/react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { agentNavItems, agentNavSections } from "app/Navigation/sidebarConfig";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
+import { AgentSidebarItem, CollapseToggle } from "app/Navigation/AgentSidebar/AgentSidebarItems";
 import BoxIcon from "components/ui/BoxIcon";
 import { getGlassInk, GlassSurface } from "components/ui/GlassNav";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
@@ -14,100 +14,6 @@ import { getAgentAvatar } from "utils/agentAvatar";
 
 const EXPANDED_WIDTH = "236px";
 const COLLAPSED_WIDTH = "76px";
-
-interface AgentSidebarItemProps {
-    icon: LucideIcon;
-    label: string;
-    active: boolean;
-    isOpen: boolean;
-    onClick: () => void;
-}
-
-// Même logique que GlassNav (encre fixe dérivée de la surface plutôt que du colorMode, tooltip
-// quand replié), déclinée en ligne pleine largeur plutôt qu'en badge — la sidebar agent a des
-// sections avec labels, pas juste une liste plate d'icônes.
-const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({ icon: ItemIcon, label, active, isOpen, onClick }) => {
-    const ink = getGlassInk("dark");
-    const [activeColor] = useToken("colors", ["green.400"]);
-
-    const row = (
-        <Box
-            as="button"
-            type="button"
-            aria-label={label}
-            aria-current={active ? "page" : undefined}
-            onClick={onClick}
-            display="flex"
-            alignItems="center"
-            justifyContent={isOpen ? "flex-start" : "center"}
-            gap={3}
-            w="100%"
-            px={isOpen ? 3 : 0}
-            py="10px"
-            borderRadius="12px"
-            bg={active ? ink.pillBg : "transparent"}
-            cursor="pointer"
-            border="none"
-            outline="none"
-            transition="background 0.15s"
-            _hover={{ bg: ink.pillBg }}
-        >
-            <Icon as={ItemIcon} boxSize="18px" color={active ? activeColor : ink.muted} flexShrink={0} />
-            {isOpen && (
-                <Text fontSize="sm" fontWeight={active ? 600 : 500} color={active ? ink.text : ink.muted} noOfLines={1}>
-                    {label}
-                </Text>
-            )}
-        </Box>
-    );
-
-    if (isOpen) return row;
-
-    return (
-        <Tooltip placement="right" color="white" borderRadius="8px" hasArrow bg="tooltipBg" label={label}>
-            {row}
-        </Tooltip>
-    );
-};
-
-interface CollapseToggleProps {
-    isOpen: boolean;
-    ink: ReturnType<typeof getGlassInk>;
-    onClick: () => void;
-}
-
-const CollapseToggle: React.FC<CollapseToggleProps> = ({ isOpen, ink, onClick }) => (
-    <Tooltip
-        placement="right"
-        color="white"
-        borderRadius="8px"
-        hasArrow
-        bg="tooltipBg"
-        label={isOpen ? "Réduire" : "Agrandir"}
-    >
-        <Box
-            as="button"
-            type="button"
-            aria-label={isOpen ? "Réduire la sidebar" : "Agrandir la sidebar"}
-            onClick={onClick}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            w="28px"
-            h="28px"
-            borderRadius="full"
-            bg={ink.pillBg}
-            color={ink.muted}
-            flexShrink={0}
-            border="none"
-            cursor="pointer"
-            transition="color 0.15s"
-            _hover={{ color: ink.text }}
-        >
-            {isOpen ? <ChevronsLeft size={14} /> : <ChevronsRight size={14} />}
-        </Box>
-    </Tooltip>
-);
 
 /**
  * Sidebar agent en verre dépoli — même matériau que la nav principale (`GlassSurface`), mais
@@ -124,7 +30,10 @@ const AgentSidebar = () => {
         agentId: string;
     }>();
 
-    const { data: agent } = useGetAgentByIdQuery({ workspaceId, id: agentId }, { skip: !workspaceId || !agentId });
+    const { data: agent, isLoading: isAgentLoading } = useGetAgentByIdQuery(
+        { workspaceId, id: agentId },
+        { skip: !workspaceId || !agentId },
+    );
     const { name, email } = useUserInfo();
 
     const isMobile = useAppResponsive({ base: true, lg: false });
@@ -187,17 +96,42 @@ const AgentSidebar = () => {
             >
                 <HStack justify="space-between" align="center" mb={3} px={isOpen ? 1 : 0}>
                     <HStack spacing={2} minW={0} flex={1} justify={isOpen ? "flex-start" : "center"}>
-                        <BoxIcon
-                            size="sm"
-                            letters={(agent?.name ?? "A").charAt(0).toUpperCase()}
-                            color={avatarStyle.color}
-                            bg={avatarStyle.bg}
-                        />
-                        {isOpen && (
-                            <Text fontSize="xs" fontWeight="700" letterSpacing="0.5px" color={ink.text} noOfLines={1}>
-                                {agent?.name?.toUpperCase() ?? ""}
-                            </Text>
+                        {isAgentLoading ? (
+                            <Skeleton
+                                startColor="skeletonStart"
+                                endColor="skeletonEnd"
+                                boxSize="28px"
+                                borderRadius="8px"
+                                flexShrink={0}
+                            />
+                        ) : (
+                            <BoxIcon
+                                size="sm"
+                                letters={(agent?.name ?? "A").charAt(0).toUpperCase()}
+                                color={avatarStyle.color}
+                                bg={avatarStyle.bg}
+                            />
                         )}
+                        {isOpen &&
+                            (isAgentLoading ? (
+                                <Skeleton
+                                    startColor="skeletonStart"
+                                    endColor="skeletonEnd"
+                                    h="12px"
+                                    w="90px"
+                                    borderRadius="4px"
+                                />
+                            ) : (
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="700"
+                                    letterSpacing="0.5px"
+                                    color={ink.text}
+                                    noOfLines={1}
+                                >
+                                    {agent?.name?.toUpperCase() ?? ""}
+                                </Text>
+                            ))}
                     </HStack>
                     {isOpen && <CollapseToggle isOpen={isOpen} ink={ink} onClick={onToggle} />}
                 </HStack>

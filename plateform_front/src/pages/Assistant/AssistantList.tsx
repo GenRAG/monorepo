@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
     Box,
     Divider,
@@ -8,7 +8,6 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
-    Skeleton,
     Stack,
     Text,
     VStack,
@@ -17,9 +16,11 @@ import { Bot, Clock, Search, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetAssistantsListQuery, AssistantPreview } from "services/chat/chat";
 import BoxIcon from "components/ui/BoxIcon";
+import { CardSkeleton } from "components/ui/CardSkeleton";
 import { EntityCard } from "components/ui/EntityCard";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { useSkeletonCount } from "hooks/useSkeletonCount";
 
 export type SortKey = string;
 
@@ -31,31 +32,8 @@ const GRID_TEMPLATE_COLUMNS = {
 };
 
 const SKELETON_CARD_HEIGHT = 110;
-const GRID_GAP = 12;
 
-const useSkeletonCount = (columns: number) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [count, setCount] = useState(columns * 3);
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-
-        const observer = new ResizeObserver(([entry]) => {
-            const rows = Math.max(
-                1,
-                Math.round((entry.contentRect.height + GRID_GAP) / (SKELETON_CARD_HEIGHT + GRID_GAP)),
-            );
-            setCount(Math.min(columns * rows, 60));
-        });
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [columns]);
-
-    return { containerRef, count };
-};
-
-const formatDate = (iso: string) => {
+const formatRecentDate = (iso: string) => {
     const date = new Date(iso);
     const now = new Date();
     const days = Math.floor((now.getTime() - date.getTime()) / 86400000);
@@ -88,7 +66,7 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => 
                         <HStack spacing={1}>
                             <Icon as={Clock} boxSize={3} color="textLabel" />
                             <Text fontSize="10px" color="textLabel">
-                                Dernière modification : {formatDate(assistant.updatedAt)}
+                                Dernière modification : {formatRecentDate(assistant.updatedAt)}
                             </Text>
                         </HStack>
                     )}
@@ -98,22 +76,16 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => 
     );
 };
 
-const CardSkeleton: React.FC = () => (
-    <Skeleton
-        height={`${SKELETON_CARD_HEIGHT}px`}
-        borderRadius="12px"
-        startColor="skeletonStart"
-        endColor="skeletonEnd"
-    />
-);
-
 export const AssistantsList = () => {
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("recent");
 
     const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.lg;
-    const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
+    const { containerRef, count: skeletonCount } = useSkeletonCount(columns, {
+        cardHeight: SKELETON_CARD_HEIGHT,
+        initialMultiplier: 3,
+    });
 
     const { data: assistants = [], isLoading } = useGetAssistantsListQuery();
 
@@ -171,7 +143,7 @@ export const AssistantsList = () => {
                 <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
                     <Grid templateColumns={GRID_TEMPLATE_COLUMNS} gap={3}>
                         {Array.from({ length: skeletonCount }).map((_, i) => (
-                            <CardSkeleton key={i} />
+                            <CardSkeleton key={i} height={SKELETON_CARD_HEIGHT} />
                         ))}
                     </Grid>
                 </Box>

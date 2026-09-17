@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react";
-import { Box, Card, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Stack, Text } from "@chakra-ui/react";
 import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { Bar, BarChart, BarXAxis, ChartStatFlow, ChartTooltip, Grid, TooltipContent, YAxis } from "components/charts";
-import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useGetDailyMetricsQuery } from "services/analytics/analytics";
-import { ChartHoverBridge, type HoverState } from "./ChartHoverBridge";
-import { ChartInfoTooltip } from "./ChartInfoTooltip";
+import { AnalyticsChartCard } from "./AnalyticsChartCard";
+import { ChartHoverBridge, type HoverState } from "components/ui/ChartHoverBridge";
 import { PERIOD_DAYS, type Period } from "./types";
 import { toShortLabel } from "utils/analytics/dateUtils";
 
@@ -18,7 +17,7 @@ export const ErrorsChart = ({ workspaceId, agentId }: ErrorsChartProps) => {
     const [period, setPeriod] = useState<Period>("30j");
     const [hover, setHover] = useState<HoverState>({ value: null, label: null });
     const days = PERIOD_DAYS[period];
-    const { data: rows = [] } = useGetDailyMetricsQuery(
+    const { data: rows = [], isFetching } = useGetDailyMetricsQuery(
         { workspaceId, agentId, days },
         { skip: !workspaceId || !agentId },
     );
@@ -37,26 +36,13 @@ export const ErrorsChart = ({ workspaceId, agentId }: ErrorsChartProps) => {
     const totalOutOfCredits = rows.reduce((s, r) => s + r.outOfCredits, 0);
 
     return (
-        <Stack spacing={0}>
-            <Card size="sm" variant="attachedTop">
-                <HStack spacing={2} mb={1} justify="space-between" flexWrap="wrap" rowGap={1}>
-                    <VStack align="flex-start" spacing={0} flex={1} minW="180px">
-                        <HStack spacing={1.5}>
-                            <Text variant="body-md-semibold">Erreurs & incidents</Text>
-                            <ChartInfoTooltip label="Requêtes en erreur ou refusées faute de crédits, sur la période sélectionnée." />
-                        </HStack>
-                        <Text variant="body-xs-muted">Vous permet de suivre les incidents sur votre agent</Text>
-                    </VStack>
-                    <VStack spacing={2} align="flex-end" flexShrink={0}>
-                        <MultiOptionButtons
-                            options={(["7j", "30j", "90j"] as Period[]).map((p) => ({ value: p, label: p }))}
-                            value={period}
-                            onChange={setPeriod}
-                            size="sm"
-                            color="surfaceSubtle"
-                        />
-                    </VStack>
-                </HStack>
+        <AnalyticsChartCard
+            title="Erreurs & incidents"
+            tooltip="Requêtes en erreur ou refusées faute de crédits, sur la période sélectionnée."
+            subtitle="Vous permet de suivre les incidents sur votre agent"
+            period={period}
+            onPeriodChange={setPeriod}
+            headerExtra={
                 <Box display="flex" justifyContent="space-between" gap={0}>
                     <Stack spacing={0}>
                         <ChartStatFlow
@@ -81,52 +67,51 @@ export const ErrorsChart = ({ workspaceId, agentId }: ErrorsChartProps) => {
                         </HStack>
                     </HStack>
                 </Box>
-            </Card>
-            <Divider borderColor="borderStrong" />
-            <Card size="none" variant="attachedBottom" px={{ base: 5, md: 6 }} pt={{ base: 2, md: 3 }}>
-                <Box h="180px" position="relative" p={0} minW={0}>
-                    <Box position="absolute" p={0} inset={0}>
-                        <BarChart
-                            key={period}
-                            data={errorRows}
-                            xDataKey="label"
-                            margin={{ top: 8, right: 8, bottom: 45, left: 20 }}
-                            aspectRatio=""
-                            className="h-full"
-                        >
-                            <Bar dataKey="value" fill={STATUS_COLORS.error} />
-                            <Grid horizontal vertical />
-                            <YAxis formatValue={(value: number) => (value === 0 ? "" : String(value))} />
-                            <BarXAxis maxLabels={period === "90j" ? 4 : period === "30j" ? 10 : 7} />
-                            <ChartHoverBridge onHoverChange={setHover} />
-                            <ChartTooltip
-                                showDatePill
-                                content={({ point }) => {
-                                    const { label, errors, outOfCredits } =
-                                        point as unknown as (typeof errorRows)[number];
-                                    return (
-                                        <TooltipContent
-                                            title={label}
-                                            rows={[
-                                                {
-                                                    color: STATUS_COLORS.error,
-                                                    label: "Erreurs",
-                                                    value: errors,
-                                                },
-                                                {
-                                                    color: STATUS_COLORS.warning,
-                                                    label: "Crédits épuisés",
-                                                    value: outOfCredits,
-                                                },
-                                            ]}
-                                        />
-                                    );
-                                }}
-                            />
-                        </BarChart>
-                    </Box>
+            }
+            contentCardProps={{ px: { base: 5, md: 6 }, pt: { base: 2, md: 3 } }}
+        >
+            <Box h="180px" position="relative" p={0} minW={0}>
+                <Box position="absolute" p={0} inset={0}>
+                    <BarChart
+                        key={period}
+                        status={isFetching ? "loading" : "ready"}
+                        data={errorRows}
+                        xDataKey="label"
+                        margin={{ top: 8, right: 8, bottom: 45, left: 20 }}
+                        aspectRatio=""
+                        className="h-full"
+                    >
+                        <Bar dataKey="value" fill={STATUS_COLORS.error} />
+                        <Grid horizontal vertical />
+                        <YAxis formatValue={(value: number) => (value === 0 ? "" : String(value))} />
+                        <BarXAxis maxLabels={period === "90j" ? 4 : period === "30j" ? 10 : 7} />
+                        <ChartHoverBridge onHoverChange={setHover} />
+                        <ChartTooltip
+                            showDatePill
+                            content={({ point }) => {
+                                const { label, errors, outOfCredits } = point as unknown as (typeof errorRows)[number];
+                                return (
+                                    <TooltipContent
+                                        title={label}
+                                        rows={[
+                                            {
+                                                color: STATUS_COLORS.error,
+                                                label: "Erreurs",
+                                                value: errors,
+                                            },
+                                            {
+                                                color: STATUS_COLORS.warning,
+                                                label: "Crédits épuisés",
+                                                value: outOfCredits,
+                                            },
+                                        ]}
+                                    />
+                                );
+                            }}
+                        />
+                    </BarChart>
                 </Box>
-            </Card>
-        </Stack>
+            </Box>
+        </AnalyticsChartCard>
     );
 };

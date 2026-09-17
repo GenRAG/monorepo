@@ -1,6 +1,7 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
 import { workflowTag } from "services/workflow/workflow";
+import { workspaceStatsTag } from "services/workspace/workspace";
 import {
     Deployment,
     CurrentDeployment,
@@ -52,10 +53,11 @@ export const extendedDeploymentApi = backendApi.injectEndpoints({
                 method: "POST",
                 body,
             }),
-            invalidatesTags: (_result, _error, { agentId }) => [
+            invalidatesTags: (_result, _error, { workspaceId, agentId }) => [
                 listTag(agentId),
                 currentTag(agentId),
                 { type: Tag.Agents, id: agentId },
+                workspaceStatsTag(workspaceId),
             ],
         }),
 
@@ -65,20 +67,13 @@ export const extendedDeploymentApi = backendApi.injectEndpoints({
                 method: "POST",
                 body,
             }),
-            invalidatesTags: (_result, _error, { agentId }) => [
+            invalidatesTags: (_result, _error, { workspaceId, agentId }) => [
                 listTag(agentId),
                 currentTag(agentId),
                 workflowTag(agentId),
                 { type: Tag.Agents as const, id: agentId },
+                workspaceStatsTag(workspaceId),
             ],
-            async onQueryStarted({ agentId }, { dispatch, queryFulfilled }) {
-                try {
-                    await queryFulfilled;
-                    dispatch(backendApi.util.invalidateTags([{ type: Tag.Workflow, id: agentId }]));
-                } catch {
-                    // ignore
-                }
-            },
         }),
 
         stopDeployment: builder.mutation<Deployment, StopParams>({
@@ -86,11 +81,28 @@ export const extendedDeploymentApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/deployments/stop`,
                 method: "POST",
             }),
-            invalidatesTags: (_result, _error, { agentId }) => [
+            invalidatesTags: (_result, _error, { workspaceId, agentId }) => [
                 listTag(agentId),
                 currentTag(agentId),
                 { type: Tag.Agents as const, id: agentId },
+                workspaceStatsTag(workspaceId),
             ],
+        }),
+
+        exportConversations: builder.query<Blob, DeploymentRouteParams>({
+            query: ({ workspaceId, agentId }) => ({
+                url: `/workspaces/${workspaceId}/agents/${agentId}/export/conversations`,
+                method: "GET",
+                responseHandler: (response: Response) => response.blob(),
+            }),
+        }),
+
+        exportApiLogs: builder.query<Blob, DeploymentRouteParams>({
+            query: ({ workspaceId, agentId }) => ({
+                url: `/workspaces/${workspaceId}/agents/${agentId}/export/api-logs`,
+                method: "GET",
+                responseHandler: (response: Response) => response.blob(),
+            }),
         }),
     }),
 });
@@ -102,4 +114,6 @@ export const {
     useCreateDeploymentMutation,
     useRollbackDeploymentMutation,
     useStopDeploymentMutation,
+    useLazyExportConversationsQuery,
+    useLazyExportApiLogsQuery,
 } = extendedDeploymentApi;

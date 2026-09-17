@@ -4,6 +4,7 @@ import { ChatMessage } from "hooks/chat";
 import { ConversationPreview } from "services/chat/chat";
 import AssistantInput from "./AssistantInput";
 import ConversationSidebar from "./ConversationSidebar";
+import HistoryLoadingSkeleton from "./HistoryLoadingSkeleton";
 import MessageItem from "./MessageItem";
 
 interface AssistantChatLayoutProps {
@@ -64,16 +65,20 @@ const AssistantChatLayout: React.FC<AssistantChatLayoutProps> = ({
             <Box flex={1} h="100%" display="flex" flexDirection="column" minW={0} overflow="hidden">
                 <Box flex={1} overflowY="auto" display="flex" flexDirection="column" alignItems="center">
                     <Box w="60%" px={6} py={6}>
-                        {messages.map((msg) => (
-                            <MessageItem
-                                key={msg.id}
-                                assistantId={assistantId}
-                                agentVersion={agentVersion}
-                                msg={msg}
-                                agentTitle={title}
-                                isLoading={isLoading}
-                            />
-                        ))}
+                        {isHistoryLoading ? (
+                            <HistoryLoadingSkeleton />
+                        ) : (
+                            messages.map((msg) => (
+                                <MessageItem
+                                    key={msg.id}
+                                    assistantId={assistantId}
+                                    agentVersion={agentVersion}
+                                    msg={msg}
+                                    agentTitle={title}
+                                    isLoading={isLoading}
+                                />
+                            ))
+                        )}
                         <div ref={messagesEndRef} />
                     </Box>
                 </Box>

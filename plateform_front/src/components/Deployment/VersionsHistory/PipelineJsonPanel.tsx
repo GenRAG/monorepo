@@ -40,41 +40,52 @@ export const PipelineJsonPanel = ({
     deploymentName,
     deploymentChangelog,
 }: PipelineJsonPanelProps) => {
-    const { data: workflow, isLoading } = useGetWorkflowByVersionQuery(
-        { workspaceId, agentId, version: workflowVersion! },
+    const {
+        data: workflow,
+        isLoading,
+        isError,
+    } = useGetWorkflowByVersionQuery(
+        { workspaceId, agentId, version: workflowVersion ?? 0 },
         { skip: workflowVersion === null },
     );
     const isDark = useIsDark();
 
-    const bgColor = useColorModeValue("white", "grey.950");
     const textColor = useColorModeValue("grey.600", "grey.200");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const jsonBgColor = useColorModeValue("grey.25", "grey.975");
-    const fallbackTextColor = useColorModeValue("grey.300", "grey.600");
 
     const pipeline = workflow?.definition.blocks ?? null;
 
     return (
-        <Box borderBottomRadius="12px" bg={bgColor} overflow="hidden" display="flex" flexDirection="column" h="full">
+        <Box
+            borderBottomRadius="12px"
+            bg="surfacePrimary"
+            overflow="hidden"
+            display="flex"
+            flexDirection="column"
+            h="full"
+        >
             <HStack
                 justify="space-between"
                 p={4}
                 borderBottom="1px solid"
                 borderTop="1px solid"
-                borderColor={borderColor}
+                borderColor="borderDefault"
             >
                 <Text fontSize="lg" textTransform="uppercase" color={textColor}>
                     {deploymentName}
                     {workflowVersion !== null && (
-                        <Box as="span" ml={2} color="green.500">
+                        <Box as="span" ml={2} color="iconAccent">
                             / {deploymentChangelog}
                         </Box>
                     )}
                 </Text>
             </HStack>
-            <Box p={5} bg={jsonBgColor} flex="1" maxW="100%" overflowY="scroll" overflowX="hidden">
+            <Box p={5} bg="secondBackgroundDefault" flex="1" maxW="100%" overflowY="scroll" overflowX="hidden">
                 {isLoading ? (
                     <Skeleton h="200px" borderRadius="6px" />
+                ) : isError ? (
+                    <Text fontSize="sm" color="textError">
+                        Impossible de charger le workflow de ce déploiement.
+                    </Text>
                 ) : pipeline ? (
                     <Box
                         as="pre"
@@ -88,7 +99,7 @@ export const PipelineJsonPanel = ({
                         }}
                     />
                 ) : (
-                    <Text fontSize="sm" color={fallbackTextColor}>
+                    <Text fontSize="sm" color="textSubtle">
                         Aucun workflow associé à ce déploiement.
                     </Text>
                 )}

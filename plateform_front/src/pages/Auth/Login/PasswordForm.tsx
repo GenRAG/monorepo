@@ -16,11 +16,11 @@ import {
 import { AuthHeader } from "components/Auth/AuthHeader";
 import { LoginFormSteps } from "pages/Auth/Layout/AuthLayout";
 import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
-import colors from "themeNew/foundations/colors";
 import { useLoginMutation, useGetMeQuery } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
 import { useAuth } from "app/AuthContext";
 import mixpanel from "lib/mixpanel";
+import { getApiErrorMessage } from "utils/apiError";
 
 type PasswordFormType = {
     password: string;
@@ -37,7 +37,6 @@ export const PasswordForm: FC<{
     const navigate = useNavigate();
     const { login: setLoggedIn } = useAuth();
     const { refetch: refetchMe } = useGetMeQuery();
-    const fieldTextColor = useColorModeValue("grey.800", "grey.100");
 
     const {
         formState: { errors },
@@ -79,8 +78,8 @@ export const PasswordForm: FC<{
             setTimeout(async () => {
                 await navigate("/");
             }, 100);
-        } catch (err: any) {
-            const serverMessage: string = err?.data?.error?.message ?? "";
+        } catch (err: unknown) {
+            const serverMessage = getApiErrorMessage(err) ?? "";
 
             if (serverMessage === "Account not verified") {
                 toast({
@@ -111,7 +110,7 @@ export const PasswordForm: FC<{
             <chakra.form w="100%" onSubmit={onSubmit}>
                 <VStack align="start" gap="24px" w="100%">
                     <FormControl>
-                        <FormLabel color={colors.font.disabled}>Adresse Email</FormLabel>
+                        <FormLabel color="textSubtle">Adresse Email</FormLabel>
                         <Input
                             type="email"
                             name="email"
@@ -123,7 +122,7 @@ export const PasswordForm: FC<{
                     </FormControl>
                     <VStack align="start" w="100%" gap="24px">
                         <FormControl isInvalid={!!errors.password}>
-                            <FormLabel color={useColorModeValue("grey.900", "whites.offwhite")}>Mot de passe</FormLabel>
+                            <FormLabel color="textStrong">Mot de passe</FormLabel>
                             <ShowHidePasswordInput
                                 {...register("password", {
                                     required: true,
@@ -132,13 +131,13 @@ export const PasswordForm: FC<{
                                 })}
                                 placeholder="Minimum 8 characters"
                                 autoComplete="new-password"
-                                color={fieldTextColor}
+                                color="textOnBubble"
                             />
                             {!!errors.password && <FormErrorMessage>{errors.password?.message}</FormErrorMessage>}
                         </FormControl>
                     </VStack>
                     <Button
-                        color={useColorModeValue("white", "whites")}
+                        color="white"
                         variant={buttonType}
                         w="100%"
                         size="lg"
@@ -150,7 +149,7 @@ export const PasswordForm: FC<{
                     </Button>
                     <VStack w="100%" justifyContent="center">
                         <Link as={ReachLink} to={"/reset-password" + location.search}>
-                            <Text variant="body-sm-semibold" color={useColorModeValue("grey.900", "whites.offwhite")}>
+                            <Text variant="body-sm-semibold" color="textStrong">
                                 Mot de passe oublié ?
                             </Text>
                         </Link>

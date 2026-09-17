@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { Box, Stack, Text, chakra } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { ChatMessage, RagSource, ChatResponseMeta, ThinkingEvent, useAgentQuery } from "hooks/chat";
-import { useOnboarding } from "hooks/useOnBoarding";
+import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
 import OnboardingStepBanner from "components/ui/OnboardingStepBanner";

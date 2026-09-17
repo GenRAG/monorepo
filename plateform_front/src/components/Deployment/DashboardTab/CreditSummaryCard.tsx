@@ -6,7 +6,7 @@ interface CreditSummaryCardProps {
 }
 
 export const CreditSummaryCard = ({ workspaceId }: CreditSummaryCardProps) => {
-    const { data, isLoading } = useGetCreditBalanceQuery(workspaceId, { skip: !workspaceId });
+    const { data, isLoading, isError } = useGetCreditBalanceQuery(workspaceId, { skip: !workspaceId });
     const balance = data?.balance ?? 0;
     const totalGranted = data?.totalGranted ?? 0;
     const usedRatio = totalGranted > 0 ? Math.min(1, Math.max(0, 1 - balance / totalGranted)) : 0;
@@ -23,6 +23,10 @@ export const CreditSummaryCard = ({ workspaceId }: CreditSummaryCardProps) => {
             <Card variant="attachedBottom" size="none" p={4} flex={1}>
                 {isLoading ? (
                     <Skeleton h="72px" borderRadius="8px" />
+                ) : isError ? (
+                    <VStack align="center" justify="center" h="72px">
+                        <Text variant="body-sm-muted">Impossible de charger le solde de crédits.</Text>
+                    </VStack>
                 ) : (
                     <VStack align="stretch" spacing={4}>
                         <VStack align="baseline" spacing={0}>
@@ -34,7 +38,7 @@ export const CreditSummaryCard = ({ workspaceId }: CreditSummaryCardProps) => {
                             </Text>
                         </VStack>
                         <Box h="16px" borderRadius="12px" bg="surfaceSubtle" overflow="hidden">
-                            <Box h="100%" borderRadius="12px" bg="green.500" w={`${usedRatio * 100}%`} />
+                            <Box h="100%" borderRadius="12px" bg="iconAccent" w={`${usedRatio * 100}%`} />
                         </Box>
                     </VStack>
                 )}

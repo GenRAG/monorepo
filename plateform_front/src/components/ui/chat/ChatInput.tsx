@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { HStack, Icon, Input, useColorModeValue } from "@chakra-ui/react";
-import { ArrowUp, Send } from "lucide-react";
+import { HStack, Input } from "@chakra-ui/react";
+import { ArrowUp } from "lucide-react";
 import Button from "components/ui/Button";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { useAppResponsive } from "hooks/useAppResponsive";
 
 interface ChatInputProps {

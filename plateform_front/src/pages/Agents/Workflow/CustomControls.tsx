@@ -1,4 +1,4 @@
-import { Box, IconButton, Divider, Tooltip, useColorModeValue, Spinner } from "@chakra-ui/react";
+import { Box, IconButton, Divider, Tooltip, Spinner } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
 import { Plus, Minus, Expand, Save } from "lucide-react";
 
@@ -10,11 +10,6 @@ interface CustomControlsProps {
 
 const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps) => {
     const { zoomIn, zoomOut, fitView } = useReactFlow();
-    const bgColor = useColorModeValue("white", "grey.800");
-    const iconColor = useColorModeValue("grey.900", "grey.100");
-    const hoverBg = useColorModeValue("green.100", "green.800");
-    const activeBg = useColorModeValue("green.100", "green.800");
-    const dividerColor = useColorModeValue("grey.200", "grey.700");
 
     const toolButtons = [
         {
@@ -23,38 +18,7 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             action: () => onMenuToggle?.(),
             tool: null,
         },
-        /*{
-            label: "Frame",
-            icon: <Frame size={18} />,
-            action: () => setActiveTool("frame"),
-            tool: "frame" as Tool,
-        },
-        {
-            label: "Select",
-            icon: <MousePointer2 size={18} />,
-            action: () => setActiveTool("select"),
-            tool: "select" as Tool,
-        },
-        {
-            label: "Pan",
-            icon: <Hand size={18} />,
-            action: () => setActiveTool("pan"),
-            tool: "pan" as Tool,
-        },*/
     ];
-
-    /*const utilityButtons = [
-        {
-            label: "Add group",
-            icon: <LayoutGrid size={18} />,
-            action: () => {},
-        },
-        {
-            label: "Insert image",
-            icon: <Image size={18} />,
-            action: () => {},
-        },
-    ];*/
 
     const zoomButtons = [
         { label: "Agrandir", icon: <Plus size={18} />, action: () => zoomIn() },
@@ -70,10 +34,8 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
         },
     ];
 
-    const tooltipBg = useColorModeValue("grey.700", "green.600");
-
     const renderButton = (label: string, icon: React.ReactElement, action: () => void, isActive = false) => (
-        <Tooltip bg={tooltipBg} key={label} label={label} placement="right" color="white" borderRadius="8px" hasArrow>
+        <Tooltip bg="tooltipBg" key={label} label={label} placement="right" color="white" borderRadius="8px" hasArrow>
             <IconButton
                 aria-label={label}
                 icon={icon}
@@ -81,10 +43,10 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                 size="sm"
                 variant="ghost"
                 borderRadius="8px"
-                color={iconColor}
-                bg={isActive ? activeBg : "transparent"}
-                _hover={{ bg: isActive ? activeBg : hoverBg }}
-                _active={{ bg: activeBg }}
+                color="textPrimary"
+                bg={isActive ? "bubbleAccentBg" : "transparent"}
+                _hover={{ bg: "bubbleAccentBg" }}
+                _active={{ bg: "bubbleAccentBg" }}
             />
         </Tooltip>
     );
@@ -99,10 +61,10 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                 display="flex"
                 flexDirection="column"
                 alignItems="center"
-                bg={bgColor}
+                bg="surfaceAction"
                 borderRadius="12px"
                 border="1px solid"
-                borderColor={dividerColor}
+                borderColor="borderDivider"
                 p="6px"
                 gap="2px"
                 zIndex={5}
@@ -110,18 +72,10 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             >
                 {toolButtons.map(({ label, icon, action, tool }) => renderButton(label, icon, action, tool !== null))}
 
-                {/*<Divider borderColor={dividerColor} width="20px" my="2px" />
-
-                utilityButtons.map(({ label, icon, action }) => renderButton(label, icon, action))}
-
-                <Divider borderColor={dividerColor} width="20px" my="2px" />
-
-                {renderButton("More options", <MoreHorizontal size={18} />, () => {})*/}
-
-                <Divider borderColor={dividerColor} width="20px" my="2px" />
+                <Divider borderColor="borderDivider" width="20px" my="2px" />
 
                 <Tooltip
-                    bg={tooltipBg}
+                    bg="tooltipBg"
                     label="Enregistrer l'architecture"
                     placement="right"
                     color="white"
@@ -135,10 +89,10 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                         size="sm"
                         variant="ghost"
                         borderRadius="8px"
-                        color={iconColor}
+                        color="textPrimary"
                         bg="transparent"
-                        _hover={{ bg: hoverBg }}
-                        _active={{ bg: activeBg }}
+                        _hover={{ bg: "bubbleAccentBg" }}
+                        _active={{ bg: "bubbleAccentBg" }}
                         isDisabled={isSaving}
                     />
                 </Tooltip>
@@ -152,10 +106,10 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                 display="flex"
                 flexDirection="row"
                 alignItems="center"
-                bg={bgColor}
+                bg="surfaceAction"
                 borderRadius="8px"
                 border="1px solid"
-                borderColor={dividerColor}
+                borderColor="borderDivider"
                 px="4px"
                 py="4px"
                 gap="2px"
@@ -164,9 +118,9 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
             >
                 {zoomButtons.map(({ label, icon, action }, i) => (
                     <>
-                        {i > 0 && <Box key={`div-${i}`} w="0.5px" h="20px" bg={dividerColor} mx="2px" />}
+                        {i > 0 && <Box key={`div-${i}`} w="0.5px" h="20px" bg="borderDivider" mx="2px" />}
                         <Tooltip
-                            bg={tooltipBg}
+                            bg="tooltipBg"
                             key={label}
                             label={label}
                             placement="top"
@@ -181,10 +135,10 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                                 size="sm"
                                 variant="ghost"
                                 borderRadius="8px"
-                                color={iconColor}
+                                color="textPrimary"
                                 bg="transparent"
-                                _hover={{ bg: hoverBg }}
-                                _active={{ bg: activeBg }}
+                                _hover={{ bg: "bubbleAccentBg" }}
+                                _active={{ bg: "bubbleAccentBg" }}
                             />
                         </Tooltip>
                     </>

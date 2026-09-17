@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
-import { Box, Card, HStack, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Card, HStack, Stack, Text } from "@chakra-ui/react";
 import { DocumentStats } from "types/document/document";
+import { formatFileSize } from "utils/documentFormatters";
 
 const DEFAULT_QUOTA_BYTES = 100 * 1024 * 1024;
 
@@ -19,20 +20,11 @@ function getTypeKey(mimeType: string): "pdf" | "text" | "markdown" | "word" | "o
     return "other";
 }
 
-function fmt(bytes: number): string {
-    if (bytes < 1024) return `${bytes} o`;
-    if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} Ko`;
-    if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} Mo`;
-    return `${(bytes / 1024 ** 3).toFixed(2)} Go`;
-}
-
 interface StorageOverviewPanelProps {
     stats: DocumentStats | null;
 }
 
 export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stats }) => {
-    const barTrack = useColorModeValue("grey.100", "grey.800");
-
     const { byType, totalUsed, freeBytes, usedPct } = useMemo(() => {
         const sums: Record<string, number> = {
             pdf: 0,
@@ -60,20 +52,20 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                     <Box>
                         <HStack align="baseline" spacing={2}>
                             <Text fontSize="28px" fontWeight="700" color="textPrimary" lineHeight="1">
-                                {fmt(totalUsed)}
+                                {formatFileSize(totalUsed)}
                             </Text>
                             <Text fontSize="13px" fontWeight="600" color={pctColor}>
                                 {usedPct.toFixed(1)}%
                             </Text>
                         </HStack>
                         <Text variant="body-2xs-muted" mt={0.5}>
-                            / {fmt(DEFAULT_QUOTA_BYTES)} - {fmt(freeBytes)} libre
+                            / {formatFileSize(DEFAULT_QUOTA_BYTES)} - {formatFileSize(freeBytes)} libre
                         </Text>
                     </Box>
                 </HStack>
             </Stack>
 
-            <Box position="relative" h="8px" borderRadius="full" bg={barTrack} overflow="hidden">
+            <Box position="relative" h="8px" borderRadius="full" bg="borderDefault" overflow="hidden">
                 <HStack spacing={0} h="100%" position="absolute" inset={0}>
                     {SEGMENTS.map((seg) => {
                         const pct = (byType[seg.key] / DEFAULT_QUOTA_BYTES) * 100;
@@ -89,16 +81,16 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                         <Box w="8px" h="8px" borderRadius="2px" bg={seg.fill} flexShrink={0} />
                         <Text variant="body-2xs-muted">{seg.label}</Text>
                         <Text fontSize="11px" color="textPrimary" fontWeight="500">
-                            {fmt(byType[seg.key])}
+                            {formatFileSize(byType[seg.key])}
                         </Text>
                     </HStack>
                 ))}
                 {freeBytes > 0 && (
                     <HStack spacing={1.5}>
-                        <Box w="8px" h="8px" borderRadius="2px" bg={barTrack} flexShrink={0} />
+                        <Box w="8px" h="8px" borderRadius="2px" bg="borderDefault" flexShrink={0} />
                         <Text variant="body-2xs-muted">Libre</Text>
                         <Text fontSize="11px" color="textPrimary" fontWeight="500">
-                            {fmt(freeBytes)}
+                            {formatFileSize(freeBytes)}
                         </Text>
                     </HStack>
                 )}

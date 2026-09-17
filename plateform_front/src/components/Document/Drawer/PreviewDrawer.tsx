@@ -1,13 +1,5 @@
 import React from "react";
-import {
-    Drawer,
-    DrawerBody,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerCloseButton,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Drawer, DrawerBody, DrawerOverlay, DrawerContent, DrawerCloseButton, VStack } from "@chakra-ui/react";
 import Banner from "components/ui/Banner";
 import { DocumentEntity } from "types/document/document";
 import { useGetDocumentUrlQuery } from "services/document/document";
@@ -27,7 +19,6 @@ interface PreviewDrawerProps {
 
 export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, document }) => {
     const { workspaceId, agentId } = useParams();
-    const btnColor = useColorModeValue("green.100", "green.700");
     const shouldFetchUrl = Boolean(document && workspaceId && agentId && isOpen);
 
     const {
@@ -36,8 +27,8 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, d
         isError: isDocumentUrlError,
     } = useGetDocumentUrlQuery(
         {
-            workspaceId: workspaceId!,
-            agentId: agentId!,
+            workspaceId: workspaceId ?? "",
+            agentId: agentId ?? "",
             id: document?.id ?? "",
         },
         { skip: !shouldFetchUrl },
@@ -51,7 +42,7 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, d
         <Drawer isOpen={isOpen} placement="right" onClose={onClose} size={{ base: "full", md: "lg" }}>
             <DrawerOverlay />
             <DrawerContent bg="surfacePrimary">
-                <DrawerCloseButton bg={btnColor} />
+                <DrawerCloseButton bg="bubbleAccentBg" />
                 <PreviewDrawerHeader document={document} />
 
                 <DrawerBody pb="14px" bg="surfacePrimary">

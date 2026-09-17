@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
     Box,
     Divider,
@@ -8,19 +8,19 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
-    Skeleton,
     Stack,
     Text,
     VStack,
-    useColorMode,
 } from "@chakra-ui/react";
 import { Bot, Clock, Search, SortAsc } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetAssistantsListQuery, AssistantPreview } from "services/chat/chat";
 import BoxIcon from "components/ui/BoxIcon";
+import { CardSkeleton } from "components/ui/CardSkeleton";
 import { EntityCard } from "components/ui/EntityCard";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { useSkeletonCount } from "hooks/useSkeletonCount";
 
 export type SortKey = string;
 
@@ -32,31 +32,8 @@ const GRID_TEMPLATE_COLUMNS = {
 };
 
 const SKELETON_CARD_HEIGHT = 110;
-const GRID_GAP = 12;
 
-const useSkeletonCount = (columns: number) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [count, setCount] = useState(columns * 3);
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-
-        const observer = new ResizeObserver(([entry]) => {
-            const rows = Math.max(
-                1,
-                Math.round((entry.contentRect.height + GRID_GAP) / (SKELETON_CARD_HEIGHT + GRID_GAP)),
-            );
-            setCount(Math.min(columns * rows, 60));
-        });
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [columns]);
-
-    return { containerRef, count };
-};
-
-const formatDate = (iso: string) => {
+const formatRecentDate = (iso: string) => {
     const date = new Date(iso);
     const now = new Date();
     const days = Math.floor((now.getTime() - date.getTime()) / 86400000);
@@ -72,10 +49,6 @@ interface AssistantCardProps {
 }
 
 const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
-    const sub = isDark ? "grey.400" : "grey.500";
-
     return (
         <EntityCard
             title={assistant.title}
@@ -84,16 +57,16 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => 
                 <>
                     <HStack spacing={2}>
                         <BoxIcon letters={assistant.sharedBy ? assistant.sharedBy.charAt(0).toUpperCase() : "?"} />
-                        <Text fontSize="xs" color={isDark ? "grey.300" : "grey.700"}>
+                        <Text fontSize="xs" color="textBody">
                             {assistant.sharedBy}
                         </Text>
                     </HStack>
 
                     {assistant.updatedAt && (
                         <HStack spacing={1}>
-                            <Icon as={Clock} boxSize={3} color={sub} />
-                            <Text fontSize="10px" color={sub}>
-                                Dernière modification : {formatDate(assistant.updatedAt)}
+                            <Icon as={Clock} boxSize={3} color="textLabel" />
+                            <Text fontSize="10px" color="textLabel">
+                                Dernière modification : {formatRecentDate(assistant.updatedAt)}
                             </Text>
                         </HStack>
                     )}
@@ -103,26 +76,16 @@ const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => 
     );
 };
 
-const CardSkeleton: React.FC = () => (
-    <Skeleton
-        height={`${SKELETON_CARD_HEIGHT}px`}
-        borderRadius="12px"
-        startColor="skeletonStart"
-        endColor="skeletonEnd"
-    />
-);
-
 export const AssistantsList = () => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
     const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("recent");
 
-    const sub = isDark ? "grey.400" : "grey.500";
-
     const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.lg;
-    const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
+    const { containerRef, count: skeletonCount } = useSkeletonCount(columns, {
+        cardHeight: SKELETON_CARD_HEIGHT,
+        initialMultiplier: 3,
+    });
 
     const { data: assistants = [], isLoading } = useGetAssistantsListQuery();
 
@@ -134,19 +97,26 @@ export const AssistantsList = () => {
     }, [assistants, search, sort]);
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" h="100%">
+        <Stack
+            py={{ base: 4, lg: 6 }}
+            pl={{ base: 20, lg: 28 }}
+            pr={{ base: 28, lg: 40 }}
+            gap={4}
+            overflow="auto"
+            h="100%"
+        >
             <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
                 <VStack align="start" spacing={0.5}>
-                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textStrong">
                         Assistants
                     </Text>
-                    <Text fontSize="sm" color={sub}>
+                    <Text fontSize="sm" color="textLabel">
                         Agents déployés accessibles, vous avez {assistants.length} assistant(s) au total
                     </Text>
                 </VStack>
                 <InputGroup maxW="260px">
                     <InputLeftElement pointerEvents="none" h="full">
-                        <Icon as={Search} boxSize={4} color={sub} />
+                        <Icon as={Search} boxSize={4} color="textLabel" />
                     </InputLeftElement>
                     <Input
                         placeholder="Rechercher un assistant..."
@@ -173,7 +143,7 @@ export const AssistantsList = () => {
                 <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
                     <Grid templateColumns={GRID_TEMPLATE_COLUMNS} gap={3}>
                         {Array.from({ length: skeletonCount }).map((_, i) => (
-                            <CardSkeleton key={i} />
+                            <CardSkeleton key={i} height={SKELETON_CARD_HEIGHT} />
                         ))}
                     </Grid>
                 </Box>
@@ -185,12 +155,12 @@ export const AssistantsList = () => {
                 </Grid>
             ) : (
                 <VStack py={16} spacing={3}>
-                    <Icon as={search ? Search : Bot} boxSize={10} color={sub} />
-                    <Text fontSize="sm" color={sub}>
+                    <Icon as={search ? Search : Bot} boxSize={10} color="textLabel" />
+                    <Text fontSize="sm" color="textLabel">
                         {search ? "Aucun assistant trouvé" : "Aucun agent déployé pour l'instant"}
                     </Text>
                     {!search && (
-                        <Text fontSize="xs" color={sub} textAlign="center" maxW="300px">
+                        <Text fontSize="xs" color="textLabel" textAlign="center" maxW="300px">
                             Déployez un agent en production pour le voir apparaître ici
                         </Text>
                     )}

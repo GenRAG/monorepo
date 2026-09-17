@@ -7,9 +7,6 @@ import Button from "components/ui/Button";
 export const ApiKeysSection = () => {
     const [revealed, setRevealed] = useState(false);
 
-    const containerBg = useColorModeValue("white", "grey.950");
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const titleColor = useColorModeValue("grey.900", "grey.50");
     const keyColor = useColorModeValue("grey.400", "grey.300");
     const metaColor = useColorModeValue("grey.300", "grey.500");
 
@@ -17,7 +14,7 @@ export const ApiKeysSection = () => {
     const realKey = "sk_live_xK7mBp2nR4vL9qZ3a9f";
 
     return (
-        <Box borderRadius="12px" border="1px solid" borderColor={borderColor} bg={containerBg}>
+        <Box borderRadius="12px" border="1px solid" borderColor="borderDefault" bg="surfacePrimary">
             <SectionHeader
                 icon={Key}
                 title="Clés API"
@@ -25,7 +22,7 @@ export const ApiKeysSection = () => {
             />
             <HStack spacing={4} p={4} justifyContent="space-between">
                 <VStack align="start" spacing={0.5}>
-                    <Text fontSize="sm" fontWeight={500} color={titleColor}>
+                    <Text fontSize="sm" fontWeight={500} color="textStrong">
                         Clé production
                     </Text>
                     <Text fontSize="md" color={keyColor} letterSpacing="0.04em">

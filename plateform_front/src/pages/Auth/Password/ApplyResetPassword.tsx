@@ -19,6 +19,7 @@ import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 
 import useThemedToast from "hooks/useThemedToast";
 import { useApplyResetPasswordMutation } from "services/auth/auth";
+import { getApiErrorMessage } from "utils/apiError";
 
 type ApplyResetFormType = {
     password: string;
@@ -30,8 +31,6 @@ const ApplyResetPassword: FC = () => {
     const navigate = useNavigate();
     const toast = useThemedToast();
     const buttonType = useColorModeValue("superSecondary", "superPrimary");
-    const labelColor = useColorModeValue("grey.900", "whites.offwhite");
-    const fieldTextColor = useColorModeValue("black", "whites.offwhite");
     const token = searchParams.get("token");
     const email = searchParams.get("email");
     const [applyResetPassword, { isLoading }] = useApplyResetPasswordMutation();
@@ -61,11 +60,11 @@ const ApplyResetPassword: FC = () => {
                 });
                 await navigate("/login");
             })
-            .catch((error) => {
-                if ("status" in error) {
+            .catch((error: unknown) => {
+                if (typeof error === "object" && error !== null && "status" in error) {
                     toast({
                         title: "An error occurred.",
-                        description: error.data.error.message || "Please try again later.",
+                        description: getApiErrorMessage(error) || "Please try again later.",
                         status: "error",
                         duration: 9000,
                         isClosable: true,
@@ -76,7 +75,7 @@ const ApplyResetPassword: FC = () => {
 
     return (
         <VStack gap="24px">
-            <Heading variant="display-lg" color="whites.offwhite" textAlign="center">
+            <Heading variant="display-lg" color="textStrong" textAlign="center">
                 Reinitialiser votre mot de passe
             </Heading>
 
@@ -84,7 +83,7 @@ const ApplyResetPassword: FC = () => {
                 <VStack align="start" gap="16px" w="100%">
                     <VStack align="left" gap="8px" w="100%">
                         <FormControl isInvalid={!!errors.password}>
-                            <FormLabel color={labelColor}>Mot de passe</FormLabel>
+                            <FormLabel color="textStrong">Mot de passe</FormLabel>
                             <ShowHidePasswordInput
                                 {...register("password", {
                                     required: true,
@@ -94,7 +93,7 @@ const ApplyResetPassword: FC = () => {
                                 placeholder="Minimum 8 characters"
                                 autoComplete="new-password"
                                 type="password"
-                                color={fieldTextColor}
+                                color="textStrong"
                             />
                             {errors.password?.type === "required" && (
                                 <FormErrorMessage>Ce champ est requis</FormErrorMessage>
@@ -110,7 +109,7 @@ const ApplyResetPassword: FC = () => {
 
                     <VStack align="left" gap="8px" w="100%">
                         <FormControl isInvalid={!!errors.confirmPassword}>
-                            <FormLabel color={labelColor}>Confirmer le mot de passe</FormLabel>
+                            <FormLabel color="textStrong">Confirmer le mot de passe</FormLabel>
                             <ShowHidePasswordInput
                                 {...register("confirmPassword", {
                                     required: true,
@@ -120,7 +119,7 @@ const ApplyResetPassword: FC = () => {
                                 placeholder="Minimum 8 characters"
                                 type="password"
                                 autoComplete="new-password"
-                                color={fieldTextColor}
+                                color="textStrong"
                             />
                             {errors.confirmPassword?.type === "required" && (
                                 <FormErrorMessage>This field is required</FormErrorMessage>
@@ -141,7 +140,7 @@ const ApplyResetPassword: FC = () => {
             </chakra.form>
             <Flex justify="space-between">
                 <Link as={ReachLink} to={"/login"}>
-                    <Text variant="body-sm" color="whites.offwhite">
+                    <Text variant="body-sm" color="textStrong">
                         Je connais mon mot de passe
                     </Text>
                 </Link>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { HStack, IconButton, Text, VStack, useColorMode, useDisclosure } from "@chakra-ui/react";
+import { HStack, IconButton, Text, VStack, useDisclosure } from "@chakra-ui/react";
 import { DocumentList } from "components/Document/Table/DocumentList";
 import { PreviewDrawer } from "components/Document/Drawer/PreviewDrawer";
 import { UploadModal } from "components/Document/Modal/UploadModal";
@@ -16,6 +16,7 @@ import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import useThemedToast from "hooks/useThemedToast";
 import WorkspaceHeader from "components/ui/WorkspaceHeader";
+import { getApiErrorMessage } from "utils/apiError";
 
 const PAGE_SIZE = 8;
 
@@ -49,7 +50,6 @@ export const DocumentWorkspace: React.FC = () => {
 
     const uploadModal = useDisclosure();
     const previewDrawer = useDisclosure();
-    const { colorMode } = useColorMode();
 
     const handleDocumentDelete = async (id: string) => {
         if (!workspaceId || !agentId) return;
@@ -75,11 +75,11 @@ export const DocumentWorkspace: React.FC = () => {
         if (!workspaceId || !agentId) return;
         await retryDocument({ workspaceId, agentId, id })
             .unwrap()
-            .catch((error: any) => {
+            .catch((error: unknown) => {
                 toast({
                     title: "Erreur lors de la réindexation",
                     description:
-                        error.data?.error?.message ||
+                        getApiErrorMessage(error) ||
                         "Une erreur est survenue lors de la réindexation du document. Veuillez réessayer plus tard.",
                     status: "error",
                     duration: 9000,
@@ -134,7 +134,7 @@ export const DocumentWorkspace: React.FC = () => {
                     isLoading={isLoading}
                     footer={
                         totalPages > 1 && documents.length > 0 ? (
-                            <HStack p={3} justify="space-between" bg={colorMode === "dark" ? "grey.950" : "white"}>
+                            <HStack p={3} justify="space-between" bg="tableBg">
                                 <Text fontSize="sm">
                                     Page {currentPage} sur {totalPages}
                                 </Text>

@@ -36,7 +36,7 @@ const CustomTooltip: FC<
                             strokeWidth: "1.5px",
                             cursor: "pointer",
                         }}
-                        color={isOpen ? "grey.500" : color}
+                        color={isOpen ? "textLabel" : color}
                     />
                 </PopoverTrigger>
                 {(text || content) && isOpen && (
@@ -45,7 +45,7 @@ const CustomTooltip: FC<
                             <PopoverContent p="16px" maxW="88vw" bg="grey.900" border="0" borderRadius="4px">
                                 <PopoverArrow bg="grey.900" shadow="none" />
                                 <PopoverBody p="0">
-                                    <Text as="span" color="red">
+                                    <Text as="span" color="textError">
                                         {text}
                                     </Text>
                                     {content}

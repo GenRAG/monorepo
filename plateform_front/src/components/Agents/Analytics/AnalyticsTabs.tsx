@@ -17,5 +17,5 @@ interface AnalyticsTabsProps {
 }
 
 export const AnalyticsTabs = ({ activeTab, onChange }: AnalyticsTabsProps) => (
-    <TabBar tabs={TABS} activeTab={activeTab} onChange={(v) => onChange(v as AnalyticsTab)} />
+    <TabBar tabs={TABS} activeTab={activeTab} onChange={onChange} />
 );

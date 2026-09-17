@@ -4,7 +4,9 @@
 
 GenRAG est une plateforme SaaS B2B permettant à des entreprises de créer et gérer des agents RAG (Retrieval-Augmented Generation) personnalisés. L'utilisateur configure ses agents via une interface no-code, y upload ses documents, et déploie un chatbot IA qui répond aux questions en se basant exclusivement sur ces documents.
 
-**Périmètre de ce repo :** la plateforme de gestion (création de compte, workspace, agent, workflow, documents, déploiement). La partie IA (modèles LLM, vector store, RAG engine) est une **API externe** développée séparément, à laquelle on communique via HTTP.
+**Périmètre de ce repo :** la plateforme de gestion (création de compte, workspace, agent, workflow, documents, déploiement). La partie IA (modèles LLM, vector store, RAG engine) est conceptuellement une **API externe** développée séparément (`RAGENGINE_URL`) ; une copie est cependant vendue dans ce repo à `rag-engine/` (avec son propre `CLAUDE.md`) pour le dev local — hors périmètre de cette doc.
+
+**Conventions détaillées et à jour :** voir `plateform_front/CLAUDE.md` (frontend) et `plateform_back/CLAUDE.md` (backend). Ce fichier racine reste la référence pour l'architecture globale, le modèle de données et les flux fonctionnels.
 
 ---
 
@@ -15,14 +17,63 @@ monorepo/
 ├── packages/
 │   └── workflow/          # Package NPM partagé (@genrag/workflow)
 │                          # Composants React du builder de workflow (ReactFlow)
-├── plateform_back/        # Backend NestJS
-├── plateform_front/       # Frontend React (Vite + Chakra UI)
+├── plateform_back/        # Backend NestJS — voir plateform_back/CLAUDE.md
+├── plateform_front/       # Frontend React (CRA/craco + Chakra UI) — voir plateform_front/CLAUDE.md
 ├── vitrine_front/         # Landing page Next.js
 ├── architecture/          # Diagrammes Mermaid
+├── rag-engine/            # Copie locale de l'API RAG externe (hors périmètre, CLAUDE.md propre)
 ├── docker-compose.yml
 ├── dev.sh                 # Script de démarrage dev
 └── migrate.sh             # Helper migration DB
 ```
+
+---
+
+## Carte des features
+
+| Feature | Rôle | Front | Back | API slice |
+|---|---|---|---|---|
+| Authentification | Register/login/logout/reset password, JWT cookie | `pages/Auth`, `app/AuthContext.tsx` | `auth/` | `services/auth/auth.ts` |
+| Onboarding | Setup guidé en 3 étapes à la création d'un workspace/agent | `pages/Onboarding` | `onboarding/` | `services/onboarding/onboarding.ts` |
+| Workspaces | Multi-tenant, rôles ADMIN/EDITOR/VIEWER | `app/WorkspaceGuard.tsx`, `app/Navigation/MainSidebar/` | `workspace/` | `services/workspace/workspace.ts` |
+| Agents (CRUD + membres) | Gestion des agents RAG et de leur partage | `pages/Agents`, `components/Agents` | `agent/` | `services/agent/agent.ts`, `agentMembers.ts` |
+| Workflow builder | Pipeline RAG drag-and-drop (ReactFlow) | `pages/Agents/Workflow`, `packages/workflow` | `workflow/` | `services/workflow/workflow.ts` |
+| Documents | Upload, indexation async, statuts | `components/Document` | `document/` | `services/document/document.ts` |
+| Agent Runtime / Playground | Exécution query RAG en SSE (stream + playground) | `components/ui/chat`, `hooks/chat/*` | `agent-runtime/` | `services/agentRuntime/agentRuntime.ts`, `services/chat/chat.ts` |
+| Déploiement | Versioning + rollback d'agent | `components/Deployment` | `deployment/` | `services/deployment/deployment.ts` |
+| Crédits & Billing | Solde, transactions, Stripe | `pages/Billing`, `components/Billing` | `credit/` | `services/credit/credit.ts`, `services/billing/billing.ts` |
+| Analytics | Stats par agent et par workspace | `components/Agents/Analytics`, `components/Dashboard`, `components/charts` | `agent-analytics/`, `workspace/workspace-stats.service.ts` | `services/analytics/analytics.ts` |
+| Conversations / Assistant public | Historique de chat, UI utilisateur final | `pages/Assistant` | `conversation/` | `services/chat/chat.ts` |
+| Rétention des logs | Purge planifiée des `AgentQueryLog` | — | `retention/` | — |
+
+---
+
+## Commandes utiles
+
+```bash
+# Backend (plateform_back/)
+yarn start:dev            # dev (nodemon + ts-node)
+yarn test / test:e2e       # unitaires / e2e (nécessite postgres_test)
+yarn build:production
+
+# Frontend (plateform_front/)
+yarn start                 # dev (build Tailwind + craco start)
+yarn build
+yarn test
+yarn lint
+
+# Package workflow (packages/workflow/)
+yarn build / yarn typecheck
+
+# Landing page (vitrine_front/)
+yarn dev / yarn build
+
+# Racine
+./dev.sh [clean|build|rebuild|deps|e2e|unit]   # orchestration docker-compose
+./migrate.sh [-reset] <nom_migration>          # migration Prisma dans le container `server`
+```
+
+`plateform_back`, `vitrine_front` et `rag-engine` ne font pas partie des workspaces yarn racine (`package.json` ne liste que `packages/*` et `plateform_front`) — chaque dossier s'installe indépendamment (`yarn install` dans le dossier concerné).
 
 ---
 
@@ -34,16 +85,16 @@ monorepo/
 - **Auth :** JWT via cookies HttpOnly + Passport (strategies Local + JWT) + blacklist de tokens
 - **Queue :** BullMQ + Redis (traitement asynchrone des documents)
 - **Storage :** AWS S3 (stockage des fichiers uploadés)
-- **Emails :** Brevo (vérification email, reset password)
+- **Emails :** Resend (`auth/resend.service.ts`) — vérification email, reset password. (Le paquet `@getbrevo/brevo` est encore une dépendance mais n'est plus utilisé par le code d'auth.)
 - **API Docs :** Swagger + Scalar
 - **Logs :** nestjs-pino
 - **Monitoring :** Sentry
 
 ### Frontend — `plateform_front/`
-- **Framework :** React + Vite (TypeScript)
-- **UI :** Chakra UI v2 + thème custom (couleurs `grey` et `green` étendues)
+- **Framework :** React 19 + Create React App via `@craco/craco` (TypeScript) — **pas Vite**
+- **UI :** Chakra UI v2.10 + thème custom (`src/themeNew/`, couleurs `grey` et `green` étendues) ; Tailwind CSS v4 scopé aux composants `components/charts/` uniquement
 - **State / API :** Redux Toolkit Query (RTK Query)
-- **Routing :** React Router v6
+- **Routing :** React Router v7
 - **Workflow builder :** ReactFlow via `@genrag/workflow`
 - **Animations :** Framer Motion
 
@@ -156,7 +207,7 @@ CreditTransaction
 ## Flux fonctionnels clés
 
 ### 1. Authentification
-- Register → envoi email de vérification (token 6 chiffres via Brevo)
+- Register → envoi email de vérification (token 6 chiffres via Resend, `ResendService`)
 - Login → JWT dans cookie HttpOnly `Authentication`
 - Logout → JWT ajouté à la blacklist (`JwtBlacklistService`) pour révocation immédiate
 - Reset password → token 6 chiffres par email
@@ -306,18 +357,23 @@ src/
 │   ├── agent-member.repository.ts
 │   ├── agent.service.ts / .repository.ts
 │   └── dto/, guard/, test/
+├── agent-analytics/   # Stats par agent (distinct de workspace-stats)
+│   ├── agent-analytics.controller.ts / .service.ts / .repository.ts
+│   └── dto/analytics-period.query.ts, dto/analytics-pagination.query.ts
 ├── agent-runtime/     # Exécution des queries RAG (SSE)
 │   ├── agent-runtime.controller.ts
 │   ├── agent-runtime.service.ts
 │   ├── agent-runtime.orchestrator.ts
 │   ├── agent-runtime.builder.ts     # Construit le pipeline depuis le workflow
+│   ├── rag-stream-forwarder.service.ts  # Relaie le stream SSE de l'API RAG externe
+│   ├── client-safe-error.ts
 │   └── agent-query-log.repository.ts
 ├── auth/              # JWT, Passport, email, sécurité
 │   ├── auth.controller.ts / .service.ts
 │   ├── token.service.ts
 │   ├── jwt-blacklist.service.ts     # Révocation tokens JWT
 │   ├── login-attempt.service.ts     # Protection brute-force
-│   ├── brevo.service.ts             # Envoi emails via Brevo
+│   ├── resend.service.ts            # Envoi emails via Resend
 │   └── strategies/
 ├── conversation/      # Conversations et messages
 ├── credit/            # Solde crédits + transactions + usage tracker
@@ -662,7 +718,7 @@ await updateWorkflow({ workspaceId, agentId, definition });
 - Filtre selon les `chainOutputs` des nodes déjà présents dans le canvas
 - Appelle `handleAddChainNode(nodeType)` au clic ou à l'Enter
 
-**WorkflowPreview** (`components/System/Molecules/WorkflowPreview/WorkflowPreview.tsx`) :
+**WorkflowPreview** (`components/ui/workflow-preview/WorkflowPreview.tsx`) :
 Utilisé sur le Dashboard et dans `CreateAgentModal` pour afficher un aperçu read-only :
 ```tsx
 <WorkflowCanvas
@@ -745,24 +801,35 @@ export function WorkflowPackagePreview({ isDark }) {
 
 ## Frontend — Structure des pages
 
+Définies dans `app/Routes/{AppRoutes,AgentRoutes,AuthRoutes,LegalRoutes}.tsx` (montées par `app/Router.tsx`) :
+
 ```
-/login, /register, /validate, /reset-password    → Auth (non protégé)
-/onboarding                                       → Onboarding (3 étapes)
-/dashboard                                        → Dashboard principal
-/workspaces                                       → Liste des workspaces
-/workspaces/:workspaceId/agents                   → Liste des agents
-/workspaces/:workspaceId/agents/:agentId/playground  → Chat de test
-/workspaces/:workspaceId/agents/:agentId/workflow    → Builder de workflow
-/workspaces/:workspaceId/agents/:agentId/documents   → Gestion documents
-/workspaces/:workspaceId/agents/:agentId/deploy      → Déploiement
-/workspaces/:workspaceId/agents/:agentId/settings    → Paramètres agent
-/assistants, /assistants/:assistantId             → Interface utilisateur final
-/billing                                          → Facturation
+/login, /register, /validate, /reset-password, /new-password   → Auth (non protégé)
+/onboarding/:workspaceId                                        → Onboarding (3 étapes)
+/profile                                                        → Profil utilisateur
+/assistants, /assistants/:assistantId                           → Interface utilisateur final (hors workspace)
+/billing                                                         → Facturation (hors workspace)
+/workspaces/:workspaceId/dashboard                               → Dashboard du workspace
+/workspaces/:workspaceId/assistants[/:assistantId]               → Assistants du workspace
+/workspaces/:workspaceId/billing                                 → Facturation du workspace
+/workspaces/:workspaceId/agents                                  → Liste des agents
+/workspaces/:workspaceId/agents/:agentId                         → redirect → .../playground
+/workspaces/:workspaceId/agents/:agentId/playground              → Chat de test
+/workspaces/:workspaceId/agents/:agentId/workflow                → Builder de workflow
+/workspaces/:workspaceId/agents/:agentId/documents               → Gestion documents
+/workspaces/:workspaceId/agents/:agentId/deploy                  → Déploiement
+/workspaces/:workspaceId/agents/:agentId/access-control          → Membres/accès de l'agent
+/workspaces/:workspaceId/agents/:agentId/analytics               → Analytics de l'agent
+/workspaces/:workspaceId/agents/:agentId/settings                → Paramètres agent
+/legal/{privacy,terms,notices,contact}                           → Pages légales
 ```
 
+Il n'y a plus de route `/dashboard` ni `/workspaces` (liste) hors contexte d'un `workspaceId` — tout est scopé sous `/workspaces/:workspaceId/...` sauf `/profile`, `/assistants`, `/billing` (top-level, sans sélection de workspace) et l'auth.
+
 ### Layouts
-- `PrivateAppLayout` — sidebar principale (Dashboard, Workspaces, Billing…)
-- `PrivateAgentAppLayout` — sidebar agent (Playground, Workflow, Documents, Deploy…)
+- `PrivateAppLayout` — sidebar principale (`app/Navigation/MainSidebar/`)
+- `PrivateAgentAppLayout` — sidebar agent (`app/Navigation/AgentSidebar/`) : Playground, Workflow, Documents, Deploy, Access Control, Analytics, Settings
+- `WorkspaceGuard` — vérifie l'accès au `workspaceId` de l'URL avant de monter les routes scopées workspace
 
 ---
 
@@ -781,12 +848,20 @@ export function WorkflowPackagePreview({ isDark }) {
 | `services/models/models.ts` | Récupère les modèles LLM / rerankers disponibles |
 | `services/credit/credit.ts` | getBalance, getTransactions |
 | `services/onboarding/onboarding.ts` | getSession, updateStep, complete |
+| `services/agentRuntime/agentRuntime.ts` | Endpoints d'exécution runtime (hors SSE, géré à part — voir `hooks/chat/useSSEStream.ts`) |
+| `services/analytics/analytics.ts` | Analytics agent/workspace (`agent-analytics`, `workspace-stats`) |
+| `services/billing/billing.ts` | Endpoints Stripe/billing |
+| `services/tags/tag.ts` | Registre `Tag` (tagTypes RTK Query) — pas un slice d'endpoints |
+
+Toutes les endpoints sont injectés dans une seule base API : `services/api.ts` (`backendApi`, `injectEndpoints`).
 
 **Config API :** `REACT_APP_BACKEND_URL` → baseUrl, credentials: `include` (cookies cross-origin)
 
 ---
 
 ## Conventions de code
+
+Conventions détaillées et à jour : `plateform_back/CLAUDE.md` et `plateform_front/CLAUDE.md`. Résumé :
 
 ### Backend (NestJS)
 - Architecture en couches : Controller → Service → Repository → Prisma
@@ -797,13 +872,13 @@ export function WorkflowPackagePreview({ isDark }) {
 - Gestion des erreurs : `NotFoundException`, `ForbiddenException`, `UnauthorizedException` de NestJS
 
 ### Frontend (React)
-- Composants UI atomiques dans `components/Atoms/`, moléculaires dans `components/Molecules/`
+- Composants organisés **par feature** (`components/Agents/`, `components/Document/`…) ; `components/Atoms/`/`components/Molecules/` n'existent plus — les composants génériques partagés vivent dans `components/ui/`.
 - Pages dans `pages/`
-- Hooks custom dans `hooks/`
-- **Jamais de logique API directement dans les composants** — toujours via RTK Query
+- Hooks custom dans `hooks/`, avec sous-dossier par feature quand pertinent (`hooks/chat/`, `hooks/sidebar/`)
+- **Jamais de logique API directement dans les composants** — toujours via RTK Query (deux exceptions existantes à ne pas reproduire : voir `plateform_front/CLAUDE.md`)
 - `useAppResponsive` (wrapper de `useBreakpointValue`) pour le responsive
-- Thème Chakra : couleurs `grey.X` et `green.X` du thème custom
-- `useColorModeValue(light, dark)` systématiquement pour le dark mode
+- Thème Chakra : semantic tokens de `themeNew/foundations/colorTokens.ts` (`textPrimary`, `surfaceCard`, `borderDefault`…), jamais de couleur en dur
+- `useColorModeValue(light, dark)` en dernier recours seulement — la plupart des cas sont déjà couverts par les semantic tokens
 
 ### Package @genrag/workflow
 - Ne jamais importer depuis `plateform_front` ou `vitrine_front` — le package est autonome
@@ -830,7 +905,8 @@ TOKEN_RESEND_INTERVAL=1m
 FRONTEND_URL=http://localhost:3000
 PORT=8080
 SEND_EMAILS=false
-BREVO_API_KEY=...
+RESEND_API_KEY=...
+RESEND_FROM_EMAIL=...
 AWS_REGION=...
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
@@ -855,22 +931,21 @@ REACT_APP_BACKEND_URL=http://localhost:8080
 
 ```yaml
 # docker-compose.yml
-postgres:    port 5433:5432  (DB principale)
+postgres:      port 5433:5432  (DB principale)
 postgres_test: port 5434:5432  (DB tests)
-pgadmin:     port 5050:80
-server:      port 8080:8080   (NestJS)
-# Redis: non défini dans compose, à lancer séparément ou ajouter
+pgadmin:       port 5050:80
+redis:         port 6379:6379  (avec healthcheck)
+server:        port 8080:8080  (NestJS, monté en volume, yarn start:dev)
 ```
+
+`rag-engine/` a son propre `docker-compose.yml` (non intégré à celui de la racine).
 
 ---
 
 ## Tests
 
-- **Backend :** Jest, tests unitaires sur les Services (mocks des Repositories)
-- Fichiers de test : `src/**/*.spec.ts` et `src/**/test/*.spec.ts`
-- Couverture actuelle : `AgentService`, `AgentMemberService`, `WorkflowService`, `WorkspaceService`, `UsersService`, `AuthService`, `CreditService`, `DeploymentService`, `ConversationService`, `OnboardingService`, `AgentRuntimeService`, `AgentRuntimeOrchestrator`, `JwtBlacklistService`, `LoginAttemptService`
-- Pattern : mock du Repository → tester uniquement la logique du Service
-- Commande : `yarn test` dans `plateform_back/`
+- **Backend :** Jest. Fichiers de test : `src/<module>/test/*.spec.ts`. Couvre surtout les Services, mais aussi certains Controllers et Repositories (`agent`, `agent-member`, `credit-balance`, `credit-transaction`, `deployment`, `conversation`). Couverture actuelle par service : `AgentService`, `AgentMemberService`, `WorkflowService`, `WorkspaceService`, `UsersService`, `AuthService`, `CreditService`, `DeploymentService`, `ConversationService`, `OnboardingService`, `AgentRuntimeService`, `AgentRuntimeOrchestrator`, `RagStreamForwarderService`, `JwtBlacklistService`, `LoginAttemptService`, `TokenService`. Pattern dominant : mock du Repository → tester la logique du Service. Commande : `yarn test` dans `plateform_back/`.
+- **Frontend :** aucun test n'existe actuellement, malgré `@testing-library/react`/`jest-dom`/`user-event` installés et `craco test` configuré. Voir `plateform_front/CLAUDE.md`.
 
 ---
 
@@ -894,7 +969,7 @@ server:      port 8080:8080   (NestJS)
 
 8. **Email verification** : en dev, mettre `SEND_EMAILS=false` pour bypasser la vérification email (l'utilisateur peut se connecter sans vérifier).
 
-9. **Prisma schema splitté** : le schema est dans plusieurs fichiers sous `plateform_back/prisma/schema/`. Il y a deux dossiers de migrations : `plateform_back/prisma/migrations/` (incrémental) et `plateform_back/prisma/schema/migrations/` (migration consolidée from scratch).
+9. **Prisma schema splitté** : le schema est dans plusieurs fichiers sous `plateform_back/prisma/schema/`. Il n'y a plus qu'**un seul dossier de migrations** : `plateform_back/prisma/schema/migrations/` (l'ancien `plateform_back/prisma/migrations/` a été supprimé — ne pas le recréer).
 
 10. **handleRemoveChainNode et reconnexion** : quand on supprime un node chaîné (REWRITER, RERANKER), le hook trouve l'edge entrant et l'edge sortant du node supprimé, supprime aussi tous ses settings nodes (edges `type: "settings"`), et recrée un edge direct entre le précédent et le suivant. Ne jamais supprimer un node ReactFlow manuellement sans passer par ce handler.
 
@@ -909,3 +984,11 @@ server:      port 8080:8080   (NestJS)
 15. **AgentQueryLog et rétention** : `retentionDays` sur `Agent` contrôle combien de jours les `AgentQueryLog` sont conservés. `RetentionCleanupService` tourne sur un schedule pour supprimer les logs expirés. Un agent avec `retentionDays: null` conserve les logs indéfiniment.
 
 16. **Typo dans le nom du dossier** : `plateform_back/src/exeptions/` (manque un 'c'). Ne pas renommer sans vérifier tous les imports.
+
+17. **ValidationPipe incomplet** : le `ValidationPipe` global (`src/main.ts`) n'active que `whitelist: true` — ni `forbidNonWhitelisted` ni `transform`. Les DTO de query qui utilisent `@Type(() => Number)` (pagination) supposent implicitement `transform: true` ; vérifier ce point avant d'ajouter un nouveau DTO qui en dépend. Voir `plateform_back/CLAUDE.md`.
+
+18. **Emails : Resend, pas Brevo** : le service actif est `auth/resend.service.ts` (env `RESEND_API_KEY`/`RESEND_FROM_EMAIL`). La dépendance `@getbrevo/brevo` est encore dans `package.json` mais n'est plus utilisée par le flux d'auth.
+
+---
+
+<!-- claude-md: commit=c21dfcaf48cf128e1abb2fe6223470206952a8a0 date=2026-09-16 -->

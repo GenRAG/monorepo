@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
-import { Box, Card, HStack, Text, VStack, Stack, Divider } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { Area, AreaChart, ChartStatFlow, ChartTooltip, Grid, TooltipContent, XAxis, YAxis } from "components/charts";
-import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useGetDailyMetricsQuery } from "services/analytics/analytics";
-import { ChartHoverBridge, type HoverState } from "./ChartHoverBridge";
-import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import { toShortLabel } from "@/utils/analytics/dateUtils";
+import { AnalyticsChartCard } from "./AnalyticsChartCard";
+import { ChartHoverBridge, type HoverState } from "components/ui/ChartHoverBridge";
+import { toShortLabel } from "utils/analytics/dateUtils";
 import { PERIOD_DAYS, type Period } from "./types";
 
 interface VolumeChartProps {
@@ -28,24 +27,13 @@ export const VolumeChart = ({ workspaceId, agentId }: VolumeChartProps) => {
     const totalQueries = rows.reduce((s, r) => s + r.queries, 0);
 
     return (
-        <Stack spacing={0}>
-            <Card size="sm" variant="attachedTop">
-                <HStack spacing={2} mb={1} justify="space-between" flexWrap="wrap" rowGap={1}>
-                    <VStack align="flex-start" spacing={0} flex={1} minW="180px">
-                        <HStack spacing={1.5}>
-                            <Text variant="body-md-semibold">Volume de requêtes</Text>
-                            <ChartInfoTooltip label="Nombre de requêtes RAG exécutées par jour sur la période sélectionnée." />
-                        </HStack>
-                        <Text variant="body-xs-muted">Vous permet de suivre l&apos;évolution de votre activité</Text>
-                    </VStack>
-                    <MultiOptionButtons
-                        options={(["7j", "30j", "90j"] as Period[]).map((p) => ({ value: p, label: p }))}
-                        value={period}
-                        onChange={setPeriod}
-                        size="sm"
-                        color="surfaceSubtle"
-                    />
-                </HStack>
+        <AnalyticsChartCard
+            title="Volume de requêtes"
+            tooltip="Nombre de requêtes RAG exécutées par jour sur la période sélectionnée."
+            subtitle="Vous permet de suivre l'évolution de votre activité"
+            period={period}
+            onPeriodChange={setPeriod}
+            headerExtra={
                 <Box display="flex" flexDirection="column">
                     <ChartStatFlow
                         value={hover.value ?? totalQueries}
@@ -54,52 +42,54 @@ export const VolumeChart = ({ workspaceId, agentId }: VolumeChartProps) => {
                         labelClassName="text-xs -mt-1"
                     />
                 </Box>
-            </Card>
-            <Divider borderColor="borderStrong" />
-            <Card size="none" variant="attachedBottom" px={{ base: 5, md: 6 }} pt={{ base: 2, md: 3 }}>
-                <Box h="220px" position="relative" p={0} minW={0}>
-                    <Box position="absolute" p={0} inset={0}>
-                        <AreaChart
-                            key={period}
-                            status={isFetching ? "loading" : "ready"}
-                            loadingLabel="Chargement..."
-                            data={volumeRows}
-                            margin={{ top: 8, right: 8, bottom: 40, left: 20 }}
-                            aspectRatio=""
-                            className="h-full"
-                        >
-                            <ChartHoverBridge onHoverChange={setHover} />
-                            <Area
-                                dataKey="value"
-                                stroke={STATUS_COLORS.success}
-                                fill={STATUS_COLORS.success}
-                                fillOpacity={0.28}
-                                strokeWidth={2}
-                                showHighlight
-                                loadingStroke={STATUS_COLORS.success}
-                            />
-                            <Grid horizontal vertical />
-                            <YAxis formatValue={(value: number) => (value === 0 ? "" : String(value))} />
-                            <XAxis />
-                            <ChartTooltip
-                                showDatePill
-                                content={({ point }) => (
+            }
+            contentCardProps={{ px: { base: 5, md: 6 }, pt: { base: 2, md: 3 } }}
+        >
+            <Box h="220px" position="relative" p={0} minW={0}>
+                <Box position="absolute" p={0} inset={0}>
+                    <AreaChart
+                        key={period}
+                        status={isFetching ? "loading" : "ready"}
+                        loadingLabel="Chargement..."
+                        data={volumeRows}
+                        margin={{ top: 8, right: 8, bottom: 40, left: 20 }}
+                        aspectRatio=""
+                        className="h-full"
+                    >
+                        <ChartHoverBridge onHoverChange={setHover} />
+                        <Area
+                            dataKey="value"
+                            stroke={STATUS_COLORS.success}
+                            fill={STATUS_COLORS.success}
+                            fillOpacity={0.28}
+                            strokeWidth={2}
+                            showHighlight
+                            loadingStroke={STATUS_COLORS.success}
+                        />
+                        <Grid horizontal vertical />
+                        <YAxis formatValue={(value: number) => (value === 0 ? "" : String(value))} />
+                        <XAxis />
+                        <ChartTooltip
+                            showDatePill
+                            content={({ point }) => {
+                                const { label, value } = point as unknown as (typeof volumeRows)[number];
+                                return (
                                     <TooltipContent
-                                        title={point.label as string}
+                                        title={label}
                                         rows={[
                                             {
                                                 color: STATUS_COLORS.success,
                                                 label: "Requêtes",
-                                                value: point.value as number,
+                                                value,
                                             },
                                         ]}
                                     />
-                                )}
-                            />
-                        </AreaChart>
-                    </Box>
+                                );
+                            }}
+                        />
+                    </AreaChart>
                 </Box>
-            </Card>
-        </Stack>
+            </Box>
+        </AnalyticsChartCard>
     );
 };

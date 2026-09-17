@@ -1,21 +1,11 @@
-import {
-    Box,
-    Drawer,
-    DrawerBody,
-    DrawerContent,
-    DrawerOverlay,
-    IconButton,
-    useColorModeValue,
-    useDisclosure,
-    Stack,
-} from "@chakra-ui/react";
-import { Menu } from "lucide-react";
+import { Box, useColorModeValue, useDisclosure, Stack } from "@chakra-ui/react";
 import WorkspaceDropdown from "app/Navigation/MainSidebar/WorkspaceDropdown";
 import { mainMenu, supportMenu } from "app/Navigation/sidebarConfig";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
 import { SidebarHeader } from "app/Navigation/SidebarHeader";
 import { SidebarItem } from "app/Navigation/SidebarItem";
 import { SidebarSection } from "app/Navigation/SidebarSection";
+import { MobileSidebarDrawer } from "components/ui/MobileSidebarDrawer";
 import { useUserInfo } from "hooks/useUserInfo";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { useEffect, useMemo, useState } from "react";
@@ -45,8 +35,8 @@ const Sidebar = () => {
     );
 
     const color = useColorModeValue("grey.300", "white");
-    const bg = useColorModeValue("white", "linear-gradient(135deg, #0B0E118a 0%, #2E343Cff 100%)");
-    const border = useColorModeValue("grey.100", "grey.800");
+    const bg = useColorModeValue("white", "linear-gradient(135deg, #05050527 0%, rgba(19, 21, 24, 0.15) 100%)");
+    const border = "borderDefault";
 
     const bgMobile = useColorModeValue("white", "linear-gradient(135deg, #0B0E11 0%, #2E343Cff 100%)");
 
@@ -139,36 +129,18 @@ const Sidebar = () => {
 
     if (isMobile) {
         return (
-            <>
-                <Box
-                    w="48px"
-                    minW="48px"
-                    h="100vh"
-                    bg={bgMobile}
-                    borderRight="1px solid"
-                    borderColor={border}
-                    display="flex"
-                    justifyContent="center"
-                    pt={4}
-                    flexShrink={0}
-                >
-                    <IconButton
-                        aria-label="Ouvrir le menu"
-                        icon={<Menu size={20} />}
-                        variant="ghost"
-                        color={color}
-                        onClick={onToggle}
-                    />
-                </Box>
-                <Drawer isOpen={isOpen} placement="left" onClose={onToggle} size="xs">
-                    <DrawerOverlay />
-                    <DrawerContent bg={bgMobile} maxW="280px" borderRadius={0}>
-                        <DrawerBody p={0} display="flex" flexDirection="column">
-                            {sidebarContent}
-                        </DrawerBody>
-                    </DrawerContent>
-                </Drawer>
-            </>
+            <MobileSidebarDrawer
+                isOpen={isOpen}
+                onToggle={onToggle}
+                onClose={onToggle}
+                ariaLabel="Ouvrir le menu"
+                bg={bgMobile}
+                border={border}
+                iconColor={color}
+                drawerMaxW="280px"
+            >
+                {sidebarContent}
+            </MobileSidebarDrawer>
         );
     }
 

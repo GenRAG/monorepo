@@ -23,7 +23,7 @@ const UploadProgressList: React.FC<UploadProgressListProps> = ({ sources }) => {
                         <BoxIcon
                             size="sm"
                             icon={done ? CheckCircle : failed ? X : Spinner}
-                            color={failed ? "red.500" : "green.500"}
+                            color={failed ? "errorIconAccent" : "iconAccent"}
                         />
                         <Text fontSize="13px" color="textPrimary" flex={1} noOfLines={1}>
                             {source.name}
@@ -33,7 +33,7 @@ const UploadProgressList: React.FC<UploadProgressListProps> = ({ sources }) => {
                                 <Box
                                     h="100%"
                                     w={`${pct}%`}
-                                    bg={failed ? "red.500" : "green.500"}
+                                    bg={failed ? "errorIconAccent" : "iconAccent"}
                                     transition="width 0.3s ease"
                                     borderRadius="full"
                                 />
@@ -41,7 +41,7 @@ const UploadProgressList: React.FC<UploadProgressListProps> = ({ sources }) => {
                         </Box>
                         <Text
                             fontSize="12px"
-                            color={done ? "green.500" : failed ? "red.400" : "textMuted"}
+                            color={done ? "iconAccent" : failed ? "errorIconAccent" : "textMuted"}
                             fontWeight="500"
                             w="36px"
                             textAlign="right"

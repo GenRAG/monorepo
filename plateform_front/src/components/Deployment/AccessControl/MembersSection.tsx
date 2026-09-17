@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, HStack, Input, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Input, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { UserPlus, Trash2 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import SectionHeader from "components/Deployment/SectionHeader";
@@ -11,28 +11,25 @@ import {
 } from "services/agent/agentMembers";
 import useThemedToast from "hooks/useThemedToast";
 import BoxIcon from "components/ui/BoxIcon";
+import { getApiErrorMessage } from "utils/apiError";
 
 const MemberRowSkeleton = () => {
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const startColor = useColorModeValue("grey.100", "grey.800");
-    const endColor = useColorModeValue("grey.200", "grey.700");
-
     return (
         <HStack
             p={3}
             borderTop="1px solid"
             _first={{ borderTop: "none" }}
-            borderTopColor={borderColor}
+            borderTopColor="borderDefault"
             justify="space-between"
         >
             <HStack spacing={3} py={1}>
-                <Skeleton w="36px" h="36px" borderRadius="8px" startColor={startColor} endColor={endColor} />
+                <Skeleton w="36px" h="36px" borderRadius="8px" />
                 <VStack align="start" spacing={1.5}>
-                    <Skeleton h="10px" w="110px" borderRadius="4px" startColor={startColor} endColor={endColor} />
-                    <Skeleton h="9px" w="150px" borderRadius="4px" startColor={startColor} endColor={endColor} />
+                    <Skeleton h="10px" w="110px" borderRadius="4px" />
+                    <Skeleton h="9px" w="150px" borderRadius="4px" />
                 </VStack>
             </HStack>
-            <Skeleton w="32px" h="32px" borderRadius="8px" startColor={startColor} endColor={endColor} />
+            <Skeleton w="32px" h="32px" borderRadius="8px" />
         </HStack>
     );
 };
@@ -50,10 +47,6 @@ export const MembersSection = () => {
     const [addMember, { isLoading: isAddingMember }] = useAddAgentMemberMutation();
     const [removeMember] = useRemoveAgentMemberMutation();
 
-    const borderColor = useColorModeValue("grey.100", "grey.800");
-    const containerBg = useColorModeValue("white", "grey.950");
-    const textMuted = useColorModeValue("grey.400", "grey.500");
-
     const handleAdd = async () => {
         if (!email.trim()) return;
         try {
@@ -61,10 +54,10 @@ export const MembersSection = () => {
             setEmail("");
             setIsAdding(false);
             toast({ title: "Membre ajouté", status: "success", duration: 3000 });
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast({
                 title: "Impossible d'ajouter ce membre",
-                description: err?.data?.message ?? "Une erreur est survenue",
+                description: getApiErrorMessage(err) ?? "Une erreur est survenue",
                 status: "error",
                 duration: 4000,
             });
@@ -85,8 +78,8 @@ export const MembersSection = () => {
             borderRadius="12px"
             borderWidth="1px"
             borderStyle="solid"
-            borderColor={borderColor}
-            bg={containerBg}
+            borderColor="borderDefault"
+            bg="surfacePrimary"
             w="100%"
         >
             <SectionHeader
@@ -101,7 +94,7 @@ export const MembersSection = () => {
             />
 
             {isAdding && (
-                <HStack p={3} borderBottom="1px solid" borderColor={borderColor} spacing={2}>
+                <HStack p={3} borderBottom="1px solid" borderColor="borderDefault" spacing={2}>
                     <Input
                         placeholder="Email de l'utilisateur"
                         value={email}
@@ -133,7 +126,7 @@ export const MembersSection = () => {
                     ))}
                 </VStack>
             ) : members.length === 0 && !isAdding ? (
-                <Text fontSize="sm" color={textMuted} p={4} textAlign="center">
+                <Text fontSize="sm" color="textFaint" p={4} textAlign="center">
                     Aucun membre invité pour l&apos;instant.
                 </Text>
             ) : (
@@ -144,7 +137,7 @@ export const MembersSection = () => {
                             p={3}
                             borderTop="1px solid"
                             _first={{ borderTop: "none" }}
-                            borderTopColor={borderColor}
+                            borderTopColor="borderDefault"
                             justify="space-between"
                         >
                             <HStack spacing={3} py={1}>

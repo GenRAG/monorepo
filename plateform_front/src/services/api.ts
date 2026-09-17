@@ -12,6 +12,7 @@ const BACKEND_TAG_TYPES = [
     Tag.Onboarding,
     Tag.Credits,
     Tag.AgentMembers,
+    Tag.Analytics,
 ] as const;
 
 const rawBaseQuery = fetchBaseQuery({

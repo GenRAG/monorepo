@@ -1,23 +1,15 @@
-import {
-    Badge,
-    Box,
-    Card,
-    HStack,
-    Icon,
-    Skeleton,
-    SkeletonCircle,
-    Text,
-    VStack,
-    useColorModeValue,
-} from "@chakra-ui/react";
+import { Badge, Box, Card, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { curveCardinal } from "@visx/curve";
 import { LinearGradient } from "@visx/gradient";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import { Area, AreaChart, ChartStatFlow, PieCenter, PieChart, PieSlice, useChart, type PieData } from "components/charts";
-import { PatternLines } from "@/components/charts/visx-pattern";
+import { Area, AreaChart, ChartStatFlow } from "components/charts";
+import { ChartHoverBridge, type HoverState } from "components/ui/ChartHoverBridge";
+import { MetricCompositionPie, type CompositionSegment } from "components/Dashboard/MetricCompositionPie";
+
+export type { CompositionSegment };
 
 const toSparkRows = (values: number[]) => values.map((value, i) => ({ date: new Date(2020, 0, 1 + i), value }));
 
@@ -31,84 +23,6 @@ const computeTrendPercent = (data: number[]): number | null => {
     if (reference === undefined || reference === 0) return null;
 
     return ((last - reference) / reference) * 100;
-};
-
-interface HoverState {
-    value: number | null;
-}
-
-const SparkHoverBridge = ({ onHoverChange }: { onHoverChange: (state: HoverState) => void }) => {
-    const { tooltipData } = useChart();
-
-    useEffect(() => {
-        const raw = tooltipData?.point?.value;
-        onHoverChange({ value: typeof raw === "number" ? raw : null });
-    }, [tooltipData, onHoverChange]);
-
-    return null;
-};
-
-export interface CompositionSegment {
-    label: string;
-    value: number;
-    color: string;
-}
-
-const COMPOSITION_PIE_SIZE = 160;
-
-const CompositionPie = ({ segments, isLoading, defaultLabel }: { segments: CompositionSegment[]; isLoading: boolean; defaultLabel: string }) => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
-    const patternIdBase = `metric-pie-pattern-${useId()}`;
-    const total = segments.reduce((sum, segment) => sum + segment.value, 0);
-
-    if (isLoading) {
-        return (
-            <VStack spacing={2} flexShrink={0}>
-                <SkeletonCircle {...skeletonProps} boxSize={`${COMPOSITION_PIE_SIZE}px`} />
-                <Skeleton {...skeletonProps} h="8px" w="70px" borderRadius="4px" />
-            </VStack>
-        );
-    }
-
-    const pieData: PieData[] = segments.map((segment) => ({
-        label: segment.label,
-        value: segment.value,
-        color: segment.color,
-    }));
-
-    return (
-        <VStack spacing={2} flexShrink={0} align="center" pt={4} pb={1}>
-            <Box boxSize={`${COMPOSITION_PIE_SIZE}px`} flexShrink={0}>
-                {total > 0 ? (
-                    <PieChart data={pieData} size={COMPOSITION_PIE_SIZE} innerRadius={50} hoverOffset={0}>
-                        {segments.map((segment, index) => (
-                            <PatternLines
-                                key={`pattern-${index}`}
-                                id={`${patternIdBase}-${index}`}
-                                height={6}
-                                width={6}
-                                orientation={["diagonal"]}
-                                stroke={segment.color}
-                            />
-                        ))}
-                        {pieData.map((_, index) => (
-                            <PieSlice
-                                key={index}
-                                index={index}
-                                fill={`url(#${patternIdBase}-${index})`}
-                                animate={false}
-                                showGlow={false}
-                                hoverEffect="none"
-                            />
-                        ))}
-                        <PieCenter defaultLabel={defaultLabel} />
-                    </PieChart>
-                ) : (
-                    <Box boxSize="full" borderRadius="full" bg="surfaceHover" />
-                )}
-            </Box>
-        </VStack>
-    );
 };
 
 interface MetricCardProps {
@@ -138,14 +52,11 @@ export const MetricCard = ({
     isLoading = false,
     defaultLabel = "Documents",
 }: MetricCardProps) => {
-    const trendGreen = useColorModeValue("green.600", "green.400");
-    const trendOrange = useColorModeValue("orange.500", "orange.300");
-    const trendRed = useColorModeValue("red.500", "red.400");
-    const trendCol = trendNeutral ? trendOrange : trendPositive ? trendGreen : trendRed;
+    const trendCol = trendNeutral ? "trendNeutral" : trendPositive ? "trendPositive" : "trendNegative";
     const accentColor = sparkColor ?? currentDarkTheme.hex.primary;
 
     const gradientId = `metric-spark-fill-${useId()}`;
-    const [hover, setHover] = useState<HoverState>({ value: null });
+    const [hover, setHover] = useState<HoverState>({ value: null, label: null });
     const displayValue = hover.value ?? value;
 
     const trendPercent = sparkData ? computeTrendPercent(sparkData) : null;
@@ -172,7 +83,7 @@ export const MetricCard = ({
                             py={0.5}
                             borderRadius="full"
                             bg={trendPercentPositive ? "rgba(52,211,169,0.12)" : "rgba(239,68,68,0.12)"}
-                            color={trendPercentPositive ? trendGreen : trendRed}
+                            color={trendPercentPositive ? "trendPositive" : "trendNegative"}
                         >
                             <Icon as={trendPercentPositive ? TrendingUp : TrendingDown} boxSize={2.5} />
                             {trendPercentPositive ? "+" : ""}
@@ -220,7 +131,7 @@ export const MetricCard = ({
                     {headerRow}
                     {valueBlock}
                 </VStack>
-                <CompositionPie segments={composition} isLoading={isLoading} defaultLabel={defaultLabel} />
+                <MetricCompositionPie segments={composition} isLoading={isLoading} defaultLabel={defaultLabel} />
             </Card>
         );
     }
@@ -241,7 +152,7 @@ export const MetricCard = ({
                             aspectRatio=""
                             className="h-full"
                         >
-                            <SparkHoverBridge onHoverChange={setHover} />
+                            <ChartHoverBridge onHoverChange={setHover} />
                             <LinearGradient
                                 id={gradientId}
                                 from={accentColor}

@@ -144,7 +144,7 @@ const AssistantInput: React.FC<AssistantInputProps> = ({
             boxShadow={isDark ? "none" : "0px 4px 16px rgba(0,0,0,0.06), 0px 1px 2px rgba(0,0,0,0.04)"}
             sx={{ transition: "border-color 0.2s ease, box-shadow 0.2s ease" }}
             _focusWithin={{
-                borderColor: "green.400",
+                borderColor: "inputActiveBorder",
                 boxShadow: "outline",
             }}
         >

@@ -13,7 +13,7 @@ export const RegionCard = ({ flag, name, description, badge, isSelected, onClick
     const bgSelectedColor = useColorModeValue("green.50", "green.950");
     const bgColor = useColorModeValue("white", "grey.900");
 
-    const borderColorSelected = useColorModeValue("green.500", "green.500");
+    const borderColorSelected = "green.500";
     const borderSelected = useColorModeValue("grey.500", "grey.200");
 
     const bg = isSelected ? bgSelectedColor : bgColor;

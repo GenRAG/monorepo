@@ -1,4 +1,4 @@
-import { Divider, Grid, Heading, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
+import { Grid, Stack, VStack } from "@chakra-ui/react";
 import { BookOpen, Plus, Bot, FileText, MessageSquare, Coins } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserInfo } from "hooks/useUserInfo";
@@ -8,6 +8,7 @@ import { ActivityChart } from "components/Dashboard/ActivityChart";
 import { AgentsCard } from "components/Dashboard/AgentsCard";
 import { RecentActivityCard } from "components/Dashboard/RecentActivityCard";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
+import { DashboardHeader } from "pages/Dashboard/DashboardHeader";
 import { useMemo, useState } from "react";
 import { useGetWorkspaceStatsQuery } from "services/workspace/workspace";
 import { useGetWorkspaceConsumptionQuery } from "services/credit/credit";
@@ -22,7 +23,6 @@ const Dashboard = () => {
     const { workspaceId = "" } = useParams<{ workspaceId: string }>();
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     const { data: stats, isLoading: isStatsLoading } = useGetWorkspaceStatsQuery(workspaceId, {
         skip: !workspaceId,
@@ -58,41 +58,16 @@ const Dashboard = () => {
     ];
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={4} overflow="auto" maxH="100vh" minH="100vh">
-            <Stack
-                direction={{ base: "column", md: "row" }}
-                justify="space-between"
-                align={{ base: "flex-start", md: "flex-end" }}
-                gap={3}
-            >
-                <VStack align="start" spacing={1}>
-                    <Heading variant="heading-md" color="textLabel" fontWeight="md" fontSize={{ base: "sm", md: "md" }}>
-                        {new Date().toLocaleDateString("fr-FR", {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                        })}
-                    </Heading>
-                    <Heading
-                        variant="heading-3xl"
-                        color="textPrimary"
-                        fontWeight="semibold"
-                        fontSize={{ base: "xl", md: "3xl" }}
-                    >
-                        Bonjour {name}
-                    </Heading>
-                    {stats ? (
-                        <Text variant="body-sm-muted">
-                            {`${stats.agents.total} agent${stats.agents.total > 1 ? "s" : ""} / ${stats.agents.production} en production / ${stats.documents.indexed} document${stats.documents.indexed > 1 ? "s" : ""} indexé${stats.documents.indexed > 1 ? "s" : ""}`}
-                        </Text>
-                    ) : (
-                        <Skeleton height="17px" width="320px" maxW="80vw" borderRadius="4px" {...skeletonProps} />
-                    )}
-                </VStack>
-            </Stack>
-
-            <Divider borderColor="borderSubtle" />
+        <Stack
+            py={{ base: 4, lg: 6 }}
+            pl={{ base: 20, lg: 28 }}
+            pr={{ base: 28, lg: 40 }}
+            gap={4}
+            overflow="auto"
+            maxH="100vh"
+            minH="100vh"
+        >
+            <DashboardHeader name={name} stats={stats} />
 
             <Grid
                 templateColumns={{

@@ -1,27 +1,27 @@
-import {
-    Box,
-    Drawer,
-    DrawerBody,
-    DrawerContent,
-    DrawerOverlay,
-    HStack,
-    IconButton,
-    Stack,
-    Text,
-    useColorModeValue,
-    useDisclosure,
-    VStack,
-} from "@chakra-ui/react";
-import { Menu, PanelRightClose, PanelRightOpen } from "lucide-react";
-import { agentNavItems, agentNavSections } from "app/Navigation/sidebarConfig";
-import { SidebarItem } from "app/Navigation/SidebarItem";
-import { SidebarFooter } from "app/Navigation/SidebarFooter";
-import { useAppResponsive } from "hooks/useAppResponsive";
+import { Box, HStack, Skeleton, Text, useDisclosure, VStack, Stack } from "@chakra-ui/react";
+import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { agentNavItems, agentNavSections } from "app/Navigation/sidebarConfig";
+import { SidebarFooter } from "app/Navigation/SidebarFooter";
+import { AgentSidebarItem, CollapseToggle } from "app/Navigation/AgentSidebar/AgentSidebarItems";
+import BoxIcon from "components/ui/BoxIcon";
+import { getGlassInk, GlassSurface } from "components/ui/GlassNav";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
+import { useAppResponsive } from "hooks/useAppResponsive";
+import { useUserInfo } from "hooks/useUserInfo";
 import { useGetAgentByIdQuery } from "services/agent/agent";
-import Button from "components/ui/Button";
+import { getAgentAvatar } from "utils/agentAvatar";
 
+const EXPANDED_WIDTH = "236px";
+const COLLAPSED_WIDTH = "76px";
+
+/**
+ * Sidebar agent en verre dépoli — même matériau que la nav principale (`GlassSurface`), mais
+ * toujours en colonne flottante (jamais en bottom bar : ce contexte n'a pas d'équivalent
+ * "orientation horizontale"). Repliable en rail d'icônes façon GlassNav plutôt qu'en Drawer
+ * plein écran sur mobile : un seul panneau, une seule largeur qui s'anime, sur tous les
+ * breakpoints — replié par défaut sur mobile via `defaultIsOpen`.
+ */
 const AgentSidebar = () => {
     const navigate = useNavigate();
 
@@ -30,71 +30,121 @@ const AgentSidebar = () => {
         agentId: string;
     }>();
 
-    const { data: agent } = useGetAgentByIdQuery({ workspaceId, id: agentId }, { skip: !workspaceId || !agentId });
+    const { data: agent, isLoading: isAgentLoading } = useGetAgentByIdQuery(
+        { workspaceId, id: agentId },
+        { skip: !workspaceId || !agentId },
+    );
+    const { name, email } = useUserInfo();
 
     const isMobile = useAppResponsive({ base: true, lg: false });
+    const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: !isMobile });
 
     const activePath = useActiveSidebarItem(agentNavItems.map((i) => i.id));
-
-    const bg = useColorModeValue("white", "grey.900");
-    const bgMobile = useColorModeValue("white", "linear-gradient(135deg,rgb(46, 52, 60) 0%,rgb(69, 76, 86) 100%)");
-    const border = useColorModeValue("grey.100", "grey.700");
-    const color = useColorModeValue("grey.900", "white");
-    const labelColor = useColorModeValue("grey.500", "grey.400");
-
-    const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: !isMobile });
+    const ink = getGlassInk("dark");
+    const avatarStyle = getAgentAvatar(agent?.name ?? "");
 
     const handleItemClick = async (id: string) => {
         if (workspaceId && agentId) {
             await navigate(`/workspaces/${workspaceId}/agents/${agentId}/${id}`);
-            if (isMobile) onToggle();
         }
     };
 
     const handleBackToDashboard = async () => {
         await navigate(`/workspaces/${workspaceId}/dashboard`);
-        if (isMobile) onToggle();
     };
 
-    const agentName = agent?.name?.toUpperCase() ?? "";
-    const ToggleIcon = isOpen ? PanelRightClose : PanelRightOpen;
-
-    const sidebarContent = (
-        <Stack gap={0} flex={1} overflow="hidden" justify="space-between">
-            <Stack gap={0}>
-                <HStack
-                    justify={isOpen ? "space-between" : "center"}
-                    align="center"
-                    px={isOpen ? 3 : 0}
-                    py={3}
-                    minH="48px"
-                >
-                    {isOpen && (
-                        <Text
-                            fontSize="xs"
-                            fontWeight="semibold"
-                            letterSpacing="0.8px"
-                            color={labelColor}
-                            noOfLines={1}
-                            flex={1}
-                            minW={0}
-                        >
-                            {agentName}
+    const footerTrigger = (
+        <HStack
+            w="100%"
+            spacing={3}
+            justify={isOpen ? "flex-start" : "center"}
+            px={isOpen ? 3 : 0}
+            py="10px"
+            borderRadius="12px"
+            cursor="pointer"
+            transition="background 0.15s"
+            _hover={{ bg: ink.pillBg }}
+        >
+            <BoxIcon size="sm" letters={name?.slice(0, 2) || email?.slice(0, 2)} />
+            {isOpen && (
+                <VStack align="start" spacing={0} minW={0} flex={1}>
+                    <Text fontSize="sm" color={ink.text} noOfLines={1}>
+                        {name || email}
+                    </Text>
+                    {email && (
+                        <Text fontSize="xs" color={ink.muted} noOfLines={1}>
+                            {email}
                         </Text>
                     )}
-                    <Button
-                        size="md"
-                        btnType="icon"
-                        onClick={() => {
-                            onToggle();
-                        }}
-                        icon={ToggleIcon}
-                        flexShrink={0}
-                    />
-                </HStack>
-                <Box h="1px" bg="borderSubtle" />
+                </VStack>
+            )}
+        </HStack>
+    );
 
-                <VStack align="stretch" spacing={2} mt={4}>
+    return (
+        <Box p={3} h="100vh" flexShrink={0}>
+            <GlassSurface
+                variant="dark"
+                h="100%"
+                w={isOpen ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
+                borderRadius="24px"
+                px={4}
+                py={3}
+                display="flex"
+                flexDirection="column"
+                transition="width 0.25s ease"
+            >
+                <HStack justify="space-between" align="center" mb={3} px={isOpen ? 1 : 0}>
+                    <HStack spacing={2} minW={0} flex={1} justify={isOpen ? "flex-start" : "center"}>
+                        {isAgentLoading ? (
+                            <Skeleton
+                                startColor="skeletonStart"
+                                endColor="skeletonEnd"
+                                boxSize="28px"
+                                borderRadius="8px"
+                                flexShrink={0}
+                            />
+                        ) : (
+                            <BoxIcon
+                                size="sm"
+                                letters={(agent?.name ?? "A").charAt(0).toUpperCase()}
+                                color={avatarStyle.color}
+                                bg={avatarStyle.bg}
+                            />
+                        )}
+                        {isOpen &&
+                            (isAgentLoading ? (
+                                <Skeleton
+                                    startColor="skeletonStart"
+                                    endColor="skeletonEnd"
+                                    h="12px"
+                                    w="90px"
+                                    borderRadius="4px"
+                                />
+                            ) : (
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="700"
+                                    letterSpacing="0.5px"
+                                    color={ink.text}
+                                    noOfLines={1}
+                                >
+                                    {agent?.name?.toUpperCase() ?? ""}
+                                </Text>
+                            ))}
+                    </HStack>
+                    {isOpen && <CollapseToggle isOpen={isOpen} ink={ink} onClick={onToggle} />}
+                </HStack>
+
+                {!isOpen && (
+                    <Box mx="auto" mb={3}>
+                        <CollapseToggle isOpen={isOpen} ink={ink} onClick={onToggle} />
+                    </Box>
+                )}
+
+                <Box h="1px" bg="rgba(255, 255, 255, 0.1)" mb={3} flexShrink={0} />
+
+                <VStack align="stretch" spacing={1} flex={1} minH={0} overflow="auto">
                     {agentNavSections.map((section, i) => (
                         <Box key={section.label}>
                             {i > 0 && <Box h={3} />}
@@ -104,101 +154,43 @@ const AgentSidebar = () => {
                                     fontWeight="700"
                                     letterSpacing="0.1em"
                                     textTransform="uppercase"
-                                    color={labelColor}
-                                    px={5}
-                                    pt={i > 0 ? 2 : 1}
+                                    color={ink.muted}
+                                    px={3}
                                     pb={1}
                                 >
                                     {section.label}
                                 </Text>
                             )}
-                            {section.items.map(({ id, icon, label }) => {
-                                if (id === "retour") {
-                                    return (
-                                        <SidebarItem
-                                            key={id}
-                                            active={activePath === id}
-                                            onClick={() => void handleBackToDashboard()}
-                                            icon={icon}
-                                            label={label}
-                                            open={isOpen}
-                                            size="md"
-                                        />
-                                    );
-                                }
-
-                                return (
-                                    <SidebarItem
+                            <Stack spacing={1}>
+                                {section.items.map(({ id, icon, label }) => (
+                                    <AgentSidebarItem
                                         key={id}
-                                        active={activePath === id}
-                                        onClick={() => void handleItemClick(id)}
                                         icon={icon}
                                         label={label}
-                                        open={isOpen}
-                                        size="md"
+                                        active={activePath === id}
+                                        isOpen={isOpen}
+                                        onClick={() =>
+                                            void (id === "retour" ? handleBackToDashboard() : handleItemClick(id))
+                                        }
                                     />
-                                );
-                            })}
+                                ))}
+                            </Stack>
                         </Box>
                     ))}
                 </VStack>
-            </Stack>
 
-            <SidebarFooter isOpen={isOpen} activeItem={activePath ?? ""} supportMenu={[]} />
-        </Stack>
-    );
-
-    if (isMobile) {
-        return (
-            <>
-                <Box
-                    w="48px"
-                    minW="48px"
-                    h="100vh"
-                    bg={bgMobile}
-                    borderRight="1px solid"
-                    borderColor={border}
-                    display="flex"
-                    alignItems="flex-start"
-                    justifyContent="center"
-                    pt={4}
-                    flexShrink={0}
-                >
-                    <IconButton
-                        aria-label="Ouvrir le menu agent"
-                        icon={<Menu size={20} />}
-                        variant="ghost"
-                        color={color}
-                        onClick={onToggle}
+                <Box mt={2} flexShrink={0}>
+                    <SidebarFooter
+                        isOpen={isOpen}
+                        activeItem={activePath ?? ""}
+                        name={name}
+                        email={email}
+                        supportMenu={[]}
+                        compactTrigger={footerTrigger}
+                        compactPlacement="right-start"
                     />
                 </Box>
-                <Drawer isOpen={isOpen} placement="left" onClose={onToggle} size="xs">
-                    <DrawerOverlay />
-                    <DrawerContent bg={bgMobile} maxW="220px" borderRadius={0}>
-                        <DrawerBody p={0} display="flex" flexDirection="column">
-                            {sidebarContent}
-                        </DrawerBody>
-                    </DrawerContent>
-                </Drawer>
-            </>
-        );
-    }
-
-    return (
-        <Box
-            h="100vh"
-            w={isOpen ? "200px" : "60px"}
-            bg={bg}
-            borderRight="1px solid"
-            borderColor="borderSubtle"
-            display="flex"
-            flexDirection="column"
-            transition="width 0.3s ease"
-            zIndex={10}
-            flexShrink={0}
-            overflow="hidden"
-        >
-            {sidebarContent}
+            </GlassSurface>
         </Box>
     );
 };

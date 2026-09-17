@@ -2,10 +2,10 @@ import { Box, Card, HStack, Stack, Text, VStack, Divider, Skeleton, SkeletonCirc
 import { CHART_GREEN_SHADES, STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { PieChart, PieSlice, type PieData, PieCenter } from "components/charts";
 import { useGetDocumentHealthQuery } from "services/analytics/analytics";
-import { PatternLines } from "@/components/charts/visx-pattern";
+import { PatternLines } from "components/charts/visx-pattern";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
 import { PieLegendSwatch } from "./PieLegendSwatch";
-import { CardEmptyState } from "@/components/Dashboard/CardEmptyState";
+import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { PieChart as PieChartIcon } from "lucide-react";
 
 const DOCUMENT_HEALTH_COLORS = [

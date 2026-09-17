@@ -2,7 +2,6 @@ import React from "react";
 import { Box, HStack, Progress, Text, VStack } from "@chakra-ui/react";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Status, UploadedSource } from "hooks/useUploadDocuments";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import BoxIcon from "components/ui/BoxIcon";
 
 interface DocumentFileListProps {
@@ -12,28 +11,28 @@ interface DocumentFileListProps {
 const statusConfig = {
     [Status.UPLOADING]: {
         icon: Loader2,
-        color: currentDarkTheme.primary,
+        color: "iconAccent",
         showProgress: true,
         progressValue: 25,
         spin: true,
     },
     [Status.PROCESSING]: {
         icon: Loader2,
-        color: currentDarkTheme.primary,
+        color: "iconAccent",
         showProgress: true,
         progressValue: 60,
         spin: true,
     },
     [Status.COMPLETED]: {
         icon: CheckCircle2,
-        color: "green.500",
+        color: "iconAccent",
         showProgress: false,
         progressValue: 100,
         spin: false,
     },
     [Status.ERROR]: {
         icon: AlertCircle,
-        color: "red.400",
+        color: "errorIconAccent",
         showProgress: false,
         progressValue: 0,
         spin: false,

@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useChangePasswordMutation, useDeleteMeMutation, useGetMeQuery, useUpdateMeMutation } from "services/auth/auth";
 import { useAuth } from "app/AuthContext";
 import useThemedToast from "hooks/useThemedToast";
+import { getApiErrorMessage } from "utils/apiError";
 import ProfileHero from "./ProfileHero";
 import ProfileSidebar, { ProfileSection } from "./ProfileSidebar";
 import PersonalInfoSection from "./sections/PersonalInfoSection";
 import SecuritySection from "./sections/SecuritySection";
+import AppearanceSection from "./sections/AppearanceSection";
 import DangerZone from "components/ui/DangerZone";
 
 export const ProfilePage = () => {
@@ -36,8 +38,8 @@ export const ProfilePage = () => {
         try {
             await changePassword({ currentPassword: current, newPassword: next }).unwrap();
             toast({ title: "Mot de passe modifié", status: "success" });
-        } catch (err: any) {
-            toast({ title: err?.data?.message ?? "Erreur", status: "error" });
+        } catch (err: unknown) {
+            toast({ title: getApiErrorMessage(err) ?? "Erreur", status: "error" });
         }
     };
 
@@ -74,6 +76,7 @@ export const ProfilePage = () => {
                             {section === "security" && (
                                 <SecuritySection onChangePassword={handleChangePassword} isLoading={isChangingPw} />
                             )}
+                            {section === "appearance" && <AppearanceSection />}
                         </Box>
                     </Grid>
                 </Stack>

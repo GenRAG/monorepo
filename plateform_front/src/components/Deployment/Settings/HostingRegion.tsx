@@ -1,20 +1,13 @@
 import { useState } from "react";
 import { Box, HStack } from "@chakra-ui/react";
-import { useIsDark } from "hooks/useIsDark";
 import { RegionCard } from "components/Deployment/RegionCard";
 import SectionHeader from "components/Deployment/SectionHeader";
 
 export const HostingRegion = () => {
-    const isDark = useIsDark();
     const [region, setRegion] = useState("eu");
 
     return (
-        <Box
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={isDark ? "grey.800" : "grey.100"}
-            bg={isDark ? "grey.950" : "white"}
-        >
+        <Box borderRadius="12px" border="1px solid" borderColor="borderDefault" bg="surfacePrimary">
             <SectionHeader
                 title="Région d'hébergement"
                 subtitle="Sélectionnez la région où vous souhaitez héberger votre application"

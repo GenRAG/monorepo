@@ -1,7 +1,8 @@
 import { Badge, Card, Divider, HStack, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { useGetDeploymentsQuery } from "services/deployment/deployment";
-import { useDeploymentEnvGetter } from "hooks/useGetEnv";
+import { useDeploymentEnvGetter } from "hooks/deployment/useGetEnv";
 import { ENV_BADGE } from "pages/Agents/Deployment/data";
+import { formatAbsoluteDate } from "utils/date";
 
 interface RecentDeploymentsCardProps {
     workspaceId: string;
@@ -9,9 +10,6 @@ interface RecentDeploymentsCardProps {
 }
 
 const MAX_ITEMS = 5;
-
-const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
 
 export const RecentDeploymentsCard = ({ workspaceId, agentId }: RecentDeploymentsCardProps) => {
     const { data: deployments = [], isLoading } = useGetDeploymentsQuery(
@@ -59,7 +57,7 @@ export const RecentDeploymentsCard = ({ workspaceId, agentId }: RecentDeployment
                                         </Text>
                                     </HStack>
                                     <Text variant="body-xs-muted" flexShrink={0}>
-                                        {formatDate(d.createdAt)}
+                                        {formatAbsoluteDate(d.createdAt)}
                                     </Text>
                                 </HStack>
                             );

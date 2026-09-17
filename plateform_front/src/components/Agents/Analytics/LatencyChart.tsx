@@ -6,7 +6,7 @@ import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useGetLatencyQuery } from "services/analytics/analytics";
 import { LatencyHoverBridge, type LatencyHoverState } from "./ChartHoverBridge";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import { toShortLabel } from "@/utils/analytics/dateUtils";
+import { toShortLabel } from "utils/analytics/dateUtils";
 import { PERIOD_DAYS, type Period } from "./types";
 
 const P50_COLOR = STATUS_COLORS.success;

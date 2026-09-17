@@ -3,7 +3,7 @@ import { AuthStepFormProps, LoginFormSteps } from "pages/Auth/Layout/AuthLayout"
 import { EmailForm } from "pages/Auth/Login/EmailForm";
 import { PasswordForm } from "pages/Auth/Login/PasswordForm";
 import { FC, useEffect, useState } from "react";
-import { LocalStorageKeys } from "types/localStorage";
+import { LocalStorageKeys } from "constants/localStorage";
 import { useLocalStorage } from "usehooks-ts";
 
 export const LoginForm: FC<AuthStepFormProps> = ({ onStepChange, currentStep }) => {

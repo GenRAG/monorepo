@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, HStack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { RagModel } from "types/models/models";
-import { formatContextLength, getProviderName } from "./modelUtils";
+import { formatContextLength, getProviderName } from "utils/models/modelFormatters";
 import { getAgentAvatar } from "utils/agentAvatar";
 import BoxIcon from "components/ui/BoxIcon";
 

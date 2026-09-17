@@ -4,7 +4,7 @@ import { BarChart2 } from "lucide-react";
 import { CHART_GREEN_SHADES } from "themeNew/foundations/themeConfig";
 import { Bar, BarChart, BarYAxis, ChartTooltip, TooltipContent } from "components/charts";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
-import { CardEmptyState } from "@/components/Dashboard/CardEmptyState";
+import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { useGetCostByModelQuery } from "services/analytics/analytics";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
 import { fmtCredits, usdToCredits } from "../../../utils/analytics/costUtils";

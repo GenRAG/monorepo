@@ -16,7 +16,7 @@ import { useAppResponsive } from "hooks/useAppResponsive";
 import { Check } from "lucide-react";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import { useOnboarding } from "hooks/useOnBoarding";
+import { useOnboarding } from "hooks/onboarding/useOnboarding";
 
 interface OnboardingStepperProps {
     justCompletedStep: number | null;

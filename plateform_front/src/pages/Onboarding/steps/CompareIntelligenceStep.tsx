@@ -7,7 +7,7 @@ import ChatInput from "components/ui/chat/ChatInput";
 import Button from "components/ui/Button";
 import ResponseCard from "components/Onboarding/CompareIntelligence/ResponseDetailPanel";
 import { useAppResponsive } from "hooks/useAppResponsive";
-import { useOnboarding } from "hooks/useOnBoarding";
+import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import {
     CompareOnboardingResponse,
     useCompareOnboardingMutation,

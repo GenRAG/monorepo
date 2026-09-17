@@ -4,7 +4,7 @@ import { ExternalLink, FileWarning } from "lucide-react";
 import Banner from "components/ui/Banner";
 import { useGetSourceUrlQuery } from "services/chat/chat";
 import { getPreviewUrl } from "utils/documentFormatters";
-import { QuerySource, SourceFileType } from "./types";
+import { QuerySource, SourceFileType } from "types/assistant/assistant";
 
 const FILE_TYPE_MIME: Record<SourceFileType, string> = {
     PDF: "application/pdf",

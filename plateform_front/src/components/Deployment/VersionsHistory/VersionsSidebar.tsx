@@ -2,7 +2,7 @@ import { Box, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { VersionListItem } from "components/Deployment/VersionListItem";
 import { ENV_BADGE } from "pages/Agents/Deployment/data";
 import { useGetDeploymentsQuery } from "services/deployment/deployment";
-import { useDeploymentEnvGetter } from "hooks/useGetEnv";
+import { useDeploymentEnvGetter } from "hooks/deployment/useGetEnv";
 
 interface VersionsSidebarProps {
     selectedId: string | null;

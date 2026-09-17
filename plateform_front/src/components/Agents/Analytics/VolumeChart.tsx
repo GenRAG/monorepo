@@ -6,7 +6,7 @@ import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useGetDailyMetricsQuery } from "services/analytics/analytics";
 import { ChartHoverBridge, type HoverState } from "./ChartHoverBridge";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import { toShortLabel } from "@/utils/analytics/dateUtils";
+import { toShortLabel } from "utils/analytics/dateUtils";
 import { PERIOD_DAYS, type Period } from "./types";
 
 interface VolumeChartProps {

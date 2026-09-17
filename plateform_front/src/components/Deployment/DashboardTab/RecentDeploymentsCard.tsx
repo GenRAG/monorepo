@@ -1,6 +1,6 @@
 import { Badge, Card, Divider, HStack, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { useGetDeploymentsQuery } from "services/deployment/deployment";
-import { useDeploymentEnvGetter } from "hooks/useGetEnv";
+import { useDeploymentEnvGetter } from "hooks/deployment/useGetEnv";
 import { ENV_BADGE } from "pages/Agents/Deployment/data";
 
 interface RecentDeploymentsCardProps {

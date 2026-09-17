@@ -1,6 +1,6 @@
 import { Badge, Box, HStack, Text, VStack } from "@chakra-ui/react";
 import Button from "components/ui/Button";
-import { useDeploymentEnvGetter } from "hooks/useGetEnv";
+import { useDeploymentEnvGetter } from "hooks/deployment/useGetEnv";
 import { useIsDark } from "hooks/useIsDark";
 import { ENV_BADGE } from "pages/Agents/Deployment/data";
 import { useGetDeploymentsQuery, useRollbackDeploymentMutation } from "services/deployment/deployment";

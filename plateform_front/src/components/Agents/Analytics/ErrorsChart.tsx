@@ -7,7 +7,7 @@ import { useGetDailyMetricsQuery } from "services/analytics/analytics";
 import { ChartHoverBridge, type HoverState } from "./ChartHoverBridge";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
 import { PERIOD_DAYS, type Period } from "./types";
-import { toShortLabel } from "@/utils/analytics/dateUtils";
+import { toShortLabel } from "utils/analytics/dateUtils";
 
 interface ErrorsChartProps {
     workspaceId: string;

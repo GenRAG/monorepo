@@ -15,7 +15,7 @@ import {
     useChart,
     type PieData,
 } from "components/charts";
-import { PatternLines } from "@/components/charts/visx-pattern";
+import { PatternLines } from "components/charts/visx-pattern";
 
 const toSparkRows = (values: number[]) => values.map((value, i) => ({ date: new Date(2020, 0, 1 + i), value }));
 

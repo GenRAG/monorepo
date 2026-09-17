@@ -10,7 +10,7 @@ import {
     formatPriceConversionTooltip,
     formatPricePerMillion,
     getProviderName,
-} from "./modelUtils";
+} from "utils/models/modelFormatters";
 import {
     CapabilityBadge,
     LatencyIndicator,

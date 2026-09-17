@@ -1,12 +1,12 @@
 import { Badge, Box, Card, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import { useGetRecentQueriesQuery, type QueryLogEntry } from "services/analytics/analytics";
-import { fmtDateTime } from "@/utils/analytics/dateUtils";
+import { fmtDateTime } from "utils/analytics/dateUtils";
 import { STATUS_COLOR_SCHEME, STATUS_LABEL } from "./types";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import Button from "@/components/ui/Button";
+import Button from "components/ui/Button";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useMemo, useState } from "react";
-import { CardEmptyState } from "@/components/Dashboard/CardEmptyState";
+import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 
 const RecentQueryItem = ({ query }: { query: QueryLogEntry }) => (
     <Box p={3} bg="surfaceCard" borderBottomWidth="1px" borderStyle="solid" borderColor="borderDefault">

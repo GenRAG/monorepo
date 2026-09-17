@@ -4,7 +4,7 @@ import { Box, Button, HStack, Spinner, Stack, Text, VStack, useDisclosure } from
 import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
-import { useOnboarding } from "hooks/useOnBoarding";
+import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 import StepFooter from "components/Onboarding/StepFooter";
 import OnboardingHeader from "components/Onboarding/Stepper/OnboardingHeader";

@@ -1,5 +1,5 @@
 import useThemedToast from "hooks/useThemedToast";
-import React, { createContext, useState, useEffect, useCallback, ReactNode, useRef } from "react";
+import React, { useState, useEffect, useCallback, ReactNode, useRef } from "react";
 import { LucideIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -8,10 +8,7 @@ import {
     useCompleteOnboardingMutation,
     useSkipOnboardingMutation,
 } from "services/onboarding/onboarding";
-
-export interface StepData {
-    [key: string]: unknown;
-}
+import { OnboardingContext, type StepData, type SessionError } from "hooks/onboarding/useOnboarding";
 
 export interface StepConfig {
     id: string;
@@ -36,32 +33,6 @@ export interface OnboardingState {
     completedSteps: number[];
     stepsData: Record<string, StepData>;
 }
-
-export type SessionError = "not_found" | "unauthorized" | "unknown";
-
-interface OnboardingContextType {
-    currentStep: number;
-    completedSteps: number[];
-    stepsData: Record<string, StepData>;
-    totalSteps: number;
-    goToStep: (step: number) => void;
-    goNext: () => void;
-    goPrevious: () => void;
-    updateStepData: (stepId: string, data: Partial<StepData>) => void;
-    getStepData: (stepId: string) => StepData;
-    isStepValid: (stepIndex: number) => boolean;
-    isStepCompleted: (stepIndex: number) => boolean;
-    canNavigateToStep: (stepIndex: number) => boolean;
-    resetOnboarding: () => void;
-    skip: () => Promise<void>;
-    workspaceId: string;
-    agentId: string;
-    sessionId: string | null;
-    isSessionLoading: boolean;
-    sessionError: SessionError | null;
-}
-
-export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 export const OnboardingProvider: React.FC<{
     children: ReactNode;

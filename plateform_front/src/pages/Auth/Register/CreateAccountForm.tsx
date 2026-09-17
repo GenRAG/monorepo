@@ -16,6 +16,7 @@ import useThemedToast from "hooks/useThemedToast";
 import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 import { validateEmail } from "utils/validateEmail";
 import mixpanel from "lib/mixpanel";
+import { getApiErrorMessage } from "utils/apiError";
 
 type RegisterFormType = {
     email: string;
@@ -66,11 +67,11 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
                 mixpanel.track("user_signed_up", { method: "email" });
                 await navigate(`/validate?email=${data.email}`, { replace: true });
             })
-            .catch((error) => {
-                if ("status" in error) {
+            .catch((error: unknown) => {
+                if (typeof error === "object" && error !== null && "status" in error) {
                     toast({
                         title: "An error occurred.",
-                        description: error.data.error.message || "Please try again later.",
+                        description: getApiErrorMessage(error) || "Please try again later.",
                         status: "error",
                         duration: 9000,
                         isClosable: true,

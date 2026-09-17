@@ -1,9 +1,9 @@
 import { Box, Button, ButtonGroup, HStack, Icon, Text, VStack } from "@chakra-ui/react";
-import { LayoutGrid, PanelBottom, PanelLeft } from "lucide-react";
+import { LayoutGrid, PanelBottom, PanelLeft, type LucideIcon } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "store";
 import { setSidebarLayoutMode, SidebarLayoutMode } from "store/navigationSlice";
 
-const OPTIONS: { id: SidebarLayoutMode; label: string; description: string; icon: any }[] = [
+const OPTIONS: { id: SidebarLayoutMode; label: string; description: string; icon: LucideIcon }[] = [
     { id: "auto", label: "Auto", description: "Sidebar sur desktop, bottom bar sur mobile", icon: LayoutGrid },
     { id: "sidebar", label: "Sidebar", description: "Toujours en barre latérale", icon: PanelLeft },
     { id: "bottombar", label: "Bottom bar", description: "Toujours en barre du bas", icon: PanelBottom },

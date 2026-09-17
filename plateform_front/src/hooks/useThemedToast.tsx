@@ -41,8 +41,13 @@ const getIconFromStatus = (status: string | undefined) => {
     return <Info color={color} size={20} />;
 };
 
+export interface ThemedToastOptions extends UseToastOptions {
+    actionLabel?: string;
+    onAction?: () => void;
+}
+
 type ThemedToastProps = {
-    options: UseToastOptions;
+    options: ThemedToastOptions;
     onClose: () => void;
 };
 
@@ -131,9 +136,9 @@ const ThemedToastComponent = ({ options, onClose }: ThemedToastProps) => {
                         {options.description}
                     </Text>
 
-                    {(options as any).actionLabel && (
-                        <Button size="sm" variant="superPrimary" onClick={(options as any).onAction}>
-                            {(options as any).actionLabel}
+                    {options.actionLabel && (
+                        <Button size="sm" variant="superPrimary" onClick={options.onAction}>
+                            {options.actionLabel}
                         </Button>
                     )}
                 </VStack>
@@ -158,7 +163,7 @@ const useThemedToast = () => {
     const toast = useToast();
 
     const returnFunction = useCallback(
-        (options: UseToastOptions) =>
+        (options: ThemedToastOptions) =>
             toast({
                 id: options.id,
                 duration: options.duration ?? 5000,
@@ -172,7 +177,7 @@ const useThemedToast = () => {
 };
 
 export const createStandaloneThemedToast = () => {
-    const returnFunction = (options: UseToastOptions) =>
+    const returnFunction = (options: ThemedToastOptions) =>
         standaloneToast({
             id: options.id,
             render: ({ onClose }) => <ThemedToastComponent options={options} onClose={onClose} />,

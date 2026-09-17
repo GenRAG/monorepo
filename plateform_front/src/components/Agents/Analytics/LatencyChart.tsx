@@ -125,15 +125,18 @@ export const LatencyChart = ({ workspaceId, agentId }: LatencyChartProps) => {
                             <LatencyHoverBridge onHoverChange={setHover} />
                             <ChartTooltip
                                 showDatePill
-                                content={({ point }) => (
-                                    <TooltipContent
-                                        title={point.label as string}
-                                        rows={[
-                                            { color: P50_COLOR, label: "p50", value: `${point.p50 as number} ms` },
-                                            { color: P95_COLOR, label: "p95", value: `${point.p95 as number} ms` },
-                                        ]}
-                                    />
-                                )}
+                                content={({ point }) => {
+                                    const { label, p50, p95 } = point as unknown as (typeof latencyRows)[number];
+                                    return (
+                                        <TooltipContent
+                                            title={label}
+                                            rows={[
+                                                { color: P50_COLOR, label: "p50", value: `${p50} ms` },
+                                                { color: P95_COLOR, label: "p95", value: `${p95} ms` },
+                                            ]}
+                                        />
+                                    );
+                                }}
                             />
                         </LineChart>
                     </Box>

@@ -27,8 +27,8 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, d
         isError: isDocumentUrlError,
     } = useGetDocumentUrlQuery(
         {
-            workspaceId: workspaceId!,
-            agentId: agentId!,
+            workspaceId: workspaceId ?? "",
+            agentId: agentId ?? "",
             id: document?.id ?? "",
         },
         { skip: !shouldFetchUrl },

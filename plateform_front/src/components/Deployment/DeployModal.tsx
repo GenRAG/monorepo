@@ -19,6 +19,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useCreateDeploymentMutation } from "services/deployment/deployment";
 import mixpanel from "lib/mixpanel";
+import { getApiErrorMessage } from "utils/apiError";
 
 interface DeployModalProps {
     isOpen: boolean;
@@ -46,8 +47,8 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
                 status: "success",
             });
             onClose();
-        } catch (err) {
-            const isIncomplete = (err as any)?.data?.message === "Workflow has unconfigured nodes";
+        } catch (err: unknown) {
+            const isIncomplete = getApiErrorMessage(err) === "Workflow has unconfigured nodes";
             toast({
                 title: isIncomplete ? "Workflow incomplet" : "Erreur",
                 description: isIncomplete

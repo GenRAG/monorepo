@@ -41,7 +41,7 @@ export const PipelineJsonPanel = ({
     deploymentChangelog,
 }: PipelineJsonPanelProps) => {
     const { data: workflow, isLoading } = useGetWorkflowByVersionQuery(
-        { workspaceId, agentId, version: workflowVersion! },
+        { workspaceId, agentId, version: workflowVersion ?? 0 },
         { skip: workflowVersion === null },
     );
     const isDark = useIsDark();

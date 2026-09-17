@@ -9,7 +9,7 @@ export const store = configureStore({
         [backendApi.reducerPath]: backendApi.reducer,
         navigation: navigationReducer,
     },
-    middleware: (getDefaultMiddleware: () => any) => getDefaultMiddleware().concat(backendApi.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(backendApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

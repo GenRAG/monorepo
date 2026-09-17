@@ -20,6 +20,7 @@ import { useLoginMutation, useGetMeQuery } from "services/auth/auth";
 import useThemedToast from "hooks/useThemedToast";
 import { useAuth } from "app/AuthContext";
 import mixpanel from "lib/mixpanel";
+import { getApiErrorMessage } from "utils/apiError";
 
 type PasswordFormType = {
     password: string;
@@ -77,8 +78,8 @@ export const PasswordForm: FC<{
             setTimeout(async () => {
                 await navigate("/");
             }, 100);
-        } catch (err: any) {
-            const serverMessage: string = err?.data?.error?.message ?? "";
+        } catch (err: unknown) {
+            const serverMessage = getApiErrorMessage(err) ?? "";
 
             if (serverMessage === "Account not verified") {
                 toast({

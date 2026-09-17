@@ -80,15 +80,16 @@ export const CostByModelCard = ({ workspaceId, agentId }: CostByModelCardProps) 
                                 <ChartTooltip
                                     showDatePill={false}
                                     content={({ point }) => {
-                                        const index = modelRows.findIndex((row) => row.name === point.name);
+                                        const { name, value } = point as unknown as (typeof modelRows)[number];
+                                        const index = modelRows.findIndex((row) => row.name === name);
                                         return (
                                             <TooltipContent
-                                                title={point.name as string}
+                                                title={name}
                                                 rows={[
                                                     {
                                                         color: barColors[index] ?? MODEL_COLORS[0],
                                                         label: "Crédits",
-                                                        value: fmtCredits(point.value as number),
+                                                        value: fmtCredits(value),
                                                     },
                                                 ]}
                                             />

@@ -101,23 +101,27 @@ export const ErrorsChart = ({ workspaceId, agentId }: ErrorsChartProps) => {
                             <ChartHoverBridge onHoverChange={setHover} />
                             <ChartTooltip
                                 showDatePill
-                                content={({ point }) => (
-                                    <TooltipContent
-                                        title={point.label as string}
-                                        rows={[
-                                            {
-                                                color: STATUS_COLORS.error,
-                                                label: "Erreurs",
-                                                value: point.errors as number,
-                                            },
-                                            {
-                                                color: STATUS_COLORS.warning,
-                                                label: "Crédits épuisés",
-                                                value: point.outOfCredits as number,
-                                            },
-                                        ]}
-                                    />
-                                )}
+                                content={({ point }) => {
+                                    const { label, errors, outOfCredits } =
+                                        point as unknown as (typeof errorRows)[number];
+                                    return (
+                                        <TooltipContent
+                                            title={label}
+                                            rows={[
+                                                {
+                                                    color: STATUS_COLORS.error,
+                                                    label: "Erreurs",
+                                                    value: errors,
+                                                },
+                                                {
+                                                    color: STATUS_COLORS.warning,
+                                                    label: "Crédits épuisés",
+                                                    value: outOfCredits,
+                                                },
+                                            ]}
+                                        />
+                                    );
+                                }}
                             />
                         </BarChart>
                     </Box>

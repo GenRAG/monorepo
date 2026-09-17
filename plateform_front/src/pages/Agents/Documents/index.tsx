@@ -16,6 +16,7 @@ import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import useThemedToast from "hooks/useThemedToast";
 import WorkspaceHeader from "components/ui/WorkspaceHeader";
+import { getApiErrorMessage } from "utils/apiError";
 
 const PAGE_SIZE = 8;
 
@@ -74,11 +75,11 @@ export const DocumentWorkspace: React.FC = () => {
         if (!workspaceId || !agentId) return;
         await retryDocument({ workspaceId, agentId, id })
             .unwrap()
-            .catch((error: any) => {
+            .catch((error: unknown) => {
                 toast({
                     title: "Erreur lors de la réindexation",
                     description:
-                        error.data?.error?.message ||
+                        getApiErrorMessage(error) ||
                         "Une erreur est survenue lors de la réindexation du document. Veuillez réessayer plus tard.",
                     status: "error",
                     duration: 9000,

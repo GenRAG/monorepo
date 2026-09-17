@@ -27,11 +27,14 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
         data: content,
         isLoading,
         isError,
-    } = useGetDocumentContentQuery({
-        workspaceId: workspaceId!,
-        agentId: agentId!,
-        id: documentId,
-    });
+    } = useGetDocumentContentQuery(
+        {
+            workspaceId: workspaceId ?? "",
+            agentId: agentId ?? "",
+            id: documentId,
+        },
+        { skip: !workspaceId || !agentId },
+    );
     const codeBg = useColorModeValue("grey.100", "grey.800");
 
     if (isLoading)

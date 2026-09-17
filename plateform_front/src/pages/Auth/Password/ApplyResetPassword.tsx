@@ -19,6 +19,7 @@ import { ShowHidePasswordInput } from "components/ui/ShowHidePasswordInput";
 
 import useThemedToast from "hooks/useThemedToast";
 import { useApplyResetPasswordMutation } from "services/auth/auth";
+import { getApiErrorMessage } from "utils/apiError";
 
 type ApplyResetFormType = {
     password: string;
@@ -59,11 +60,11 @@ const ApplyResetPassword: FC = () => {
                 });
                 await navigate("/login");
             })
-            .catch((error) => {
-                if ("status" in error) {
+            .catch((error: unknown) => {
+                if (typeof error === "object" && error !== null && "status" in error) {
                     toast({
                         title: "An error occurred.",
-                        description: error.data.error.message || "Please try again later.",
+                        description: getApiErrorMessage(error) || "Please try again later.",
                         status: "error",
                         duration: 9000,
                         isClosable: true,

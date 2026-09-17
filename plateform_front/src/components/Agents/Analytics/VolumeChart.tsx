@@ -83,18 +83,21 @@ export const VolumeChart = ({ workspaceId, agentId }: VolumeChartProps) => {
                             <XAxis />
                             <ChartTooltip
                                 showDatePill
-                                content={({ point }) => (
-                                    <TooltipContent
-                                        title={point.label as string}
-                                        rows={[
-                                            {
-                                                color: STATUS_COLORS.success,
-                                                label: "Requêtes",
-                                                value: point.value as number,
-                                            },
-                                        ]}
-                                    />
-                                )}
+                                content={({ point }) => {
+                                    const { label, value } = point as unknown as (typeof volumeRows)[number];
+                                    return (
+                                        <TooltipContent
+                                            title={label}
+                                            rows={[
+                                                {
+                                                    color: STATUS_COLORS.success,
+                                                    label: "Requêtes",
+                                                    value,
+                                                },
+                                            ]}
+                                        />
+                                    );
+                                }}
                             />
                         </AreaChart>
                     </Box>

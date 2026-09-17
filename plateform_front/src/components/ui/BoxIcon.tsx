@@ -11,7 +11,7 @@ const BoxIcon = ({
     onClick,
     spin = false,
 }: {
-    icon?: LucideIcon | React.ComponentType<React.ComponentProps<any>>;
+    icon?: LucideIcon | React.ElementType;
     letters?: string;
     color?: string;
     bg?: string;

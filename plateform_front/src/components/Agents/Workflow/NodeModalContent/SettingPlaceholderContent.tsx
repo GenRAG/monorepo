@@ -118,7 +118,7 @@ interface SettingPlaceholderContentProps {
 }
 
 export default function SettingPlaceholderContent({ nodeData, onSelect }: SettingPlaceholderContentProps) {
-    const configItems = nodeData.configItems ?? [];
+    const configItems: (ModelOption | string)[] = nodeData.configItems ?? [];
     const settingLabel = nodeData.settingLabel ?? "Setting";
     const isLegacy = configItems.length > 0 && typeof configItems[0] === "string";
 
@@ -140,28 +140,32 @@ export default function SettingPlaceholderContent({ nodeData, onSelect }: Settin
 
             <VStack spacing={2} align="stretch" px={4} pb={4}>
                 {isLegacy
-                    ? (configItems as unknown as string[]).map((item) => (
-                          <Box
-                              as="button"
-                              key={item}
-                              w="100%"
-                              textAlign="left"
-                              px={3}
-                              py={2}
-                              borderRadius="8px"
-                              border="1px solid"
-                              borderColor="borderDivider"
-                              fontSize="13px"
-                              fontWeight={600}
-                              color="textSecondary"
-                              _hover={{ borderColor: "borderAccentCardMuted" }}
-                              transition="all 0.15s"
-                              onClick={() => onSelect(item)}
-                          >
-                              {item}
-                          </Box>
-                      ))
-                    : configItems.map((model) => <ModelCard key={model.id} model={model} onSelect={onSelect} />)}
+                    ? configItems
+                          .filter((item): item is string => typeof item === "string")
+                          .map((item) => (
+                              <Box
+                                  as="button"
+                                  key={item}
+                                  w="100%"
+                                  textAlign="left"
+                                  px={3}
+                                  py={2}
+                                  borderRadius="8px"
+                                  border="1px solid"
+                                  borderColor="borderDivider"
+                                  fontSize="13px"
+                                  fontWeight={600}
+                                  color="textSecondary"
+                                  _hover={{ borderColor: "borderAccentCardMuted" }}
+                                  transition="all 0.15s"
+                                  onClick={() => onSelect(item)}
+                              >
+                                  {item}
+                              </Box>
+                          ))
+                    : configItems
+                          .filter((item): item is ModelOption => typeof item !== "string")
+                          .map((model) => <ModelCard key={model.id} model={model} onSelect={onSelect} />)}
             </VStack>
         </VStack>
     );

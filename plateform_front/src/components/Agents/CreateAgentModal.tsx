@@ -62,9 +62,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
                     description: description.trim() || undefined,
                     workflow: {
                         name: selectedTemplate?.name ?? "Workflow initial",
-                        definition: serializeWorkflow(nodes, edges) as unknown as {
-                            [key: string]: unknown;
-                        },
+                        definition: serializeWorkflow(nodes, edges),
                     },
                 }).unwrap();
 

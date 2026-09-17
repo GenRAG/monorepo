@@ -1,16 +1,16 @@
 import { Badge, Box, Collapse, HStack, Icon, Text, Tooltip, useColorModeValue, VStack } from "@chakra-ui/react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface SidebarItemProps {
-    icon: any;
+    icon: LucideIcon;
     label: string;
     badge?: string;
     tag?: string;
     active?: boolean;
     open: boolean;
-    childrenItems?: { label: string; icon?: any; onClick?: () => void }[];
+    childrenItems?: { label: string; icon?: LucideIcon; onClick?: () => void }[];
     badgeColor?: string;
     size?: "sm" | "md" | "lg";
     onClick?: () => void;

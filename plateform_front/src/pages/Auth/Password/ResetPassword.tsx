@@ -19,6 +19,7 @@ import { Button } from "@chakra-ui/react";
 import useThemedToast from "hooks/useThemedToast";
 import { validateEmail } from "utils/validateEmail";
 import { useResetPasswordMutation } from "services/auth/auth";
+import { getApiErrorMessage } from "utils/apiError";
 
 type ResetPasswordFormType = {
     email: string;
@@ -49,11 +50,11 @@ const ResetPasswordForm: FC = () => {
                     isClosable: true,
                 });
             })
-            .catch((error) => {
-                if ("status" in error) {
+            .catch((error: unknown) => {
+                if (typeof error === "object" && error !== null && "status" in error) {
                     toast({
                         title: "Une erreur est survenue.",
-                        description: error.data.error.message || "Veuillez réessayer plus tard.",
+                        description: getApiErrorMessage(error) || "Veuillez réessayer plus tard.",
                         status: "error",
                         duration: 9000,
                         isClosable: true,

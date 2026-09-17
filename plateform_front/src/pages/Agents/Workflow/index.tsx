@@ -10,7 +10,6 @@ import {
     getTaskDef,
     TaskType,
     type AppNode,
-    type AppNodeData,
     type WorkflowDefinition,
 } from "@genrag/workflow";
 import type { Edge } from "@xyflow/react";
@@ -209,13 +208,13 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                     fitView
                     onDragOver={onDragOver}
                 >
-                    <MiniMap
+                    <MiniMap<AppNode>
                         position="bottom-left"
                         nodeBorderRadius={12}
                         nodeStrokeWidth={6}
                         nodeColor={(node) => {
-                            if ((node.data as AppNodeData).isPlaceholder) return "transparent";
-                            switch ((node.data as AppNodeData).type) {
+                            if (node.data.isPlaceholder) return "transparent";
+                            switch (node.data.type) {
                                 case TaskType.QUERY:
                                     return currentDarkTheme.hex.primary;
                                 case TaskType.RESPONSE:
@@ -229,10 +228,8 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                             }
                         }}
                         nodeStrokeColor={(node) => {
-                            if ((node.data as AppNodeData).isPlaceholder) return "transparent";
-                            return (node.data as AppNodeData).type === TaskType.MODEL
-                                ? "#8b5cf6"
-                                : currentDarkTheme.hex.primary;
+                            if (node.data.isPlaceholder) return "transparent";
+                            return node.data.type === TaskType.MODEL ? "#8b5cf6" : currentDarkTheme.hex.primary;
                         }}
                         maskColor={colorMode === "dark" ? "rgba(74, 74, 75, 0)" : "rgba(240, 253, 250, 0)"}
                         style={{
@@ -274,7 +271,8 @@ const WorkflowWorkspace = () => {
         { skip: !workspaceId || !agentId },
     );
 
-    const canvas = workflow?.definition as WorkflowDefinition | undefined;
+    // Legacy workflows may have a `definition` that doesn't (yet) match the current WorkflowDefinition shape.
+    const canvas = workflow?.definition as Partial<WorkflowDefinition> | undefined;
     const { nodes: initialNodes, edges: initialEdges } =
         canvas?.nodes && canvas?.edges
             ? sanitizeWorkflowEdges(canvas.nodes, canvas.edges)

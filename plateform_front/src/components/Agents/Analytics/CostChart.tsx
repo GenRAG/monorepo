@@ -86,18 +86,21 @@ export const CostChart = ({ workspaceId, agentId }: CostChartProps) => {
                             <XAxis />
                             <ChartTooltip
                                 showDatePill
-                                content={({ point }) => (
-                                    <TooltipContent
-                                        title={point.label as string}
-                                        rows={[
-                                            {
-                                                color: STATUS_COLORS.success,
-                                                label: "Crédits",
-                                                value: fmtCredits(point.value as number),
-                                            },
-                                        ]}
-                                    />
-                                )}
+                                content={({ point }) => {
+                                    const { label, value } = point as unknown as (typeof costRows)[number];
+                                    return (
+                                        <TooltipContent
+                                            title={label}
+                                            rows={[
+                                                {
+                                                    color: STATUS_COLORS.success,
+                                                    label: "Crédits",
+                                                    value: fmtCredits(value),
+                                                },
+                                            ]}
+                                        />
+                                    );
+                                }}
                             />
                         </AreaChart>
                     </Box>

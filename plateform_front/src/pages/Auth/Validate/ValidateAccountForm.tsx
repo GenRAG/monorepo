@@ -9,6 +9,7 @@ import { useResendEmailTokenMutation, useVerifyEmailTokenMutation, useGetMeQuery
 import colors from "themeNew/foundations/colors";
 import { useAuth } from "app/AuthContext";
 import Button from "components/ui/Button";
+import { getApiErrorMessage } from "utils/apiError";
 
 const ValidateAccountForm: FC = () => {
     const [searchParams] = useSearchParams();
@@ -31,11 +32,11 @@ const ValidateAccountForm: FC = () => {
                 setLoggedIn();
                 void navigate("/");
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
                 toast({
                     status: "error",
                     title: "Verification failed",
-                    description: error?.data?.error?.message || "Failed to verify email. Please try again.",
+                    description: getApiErrorMessage(error) || "Failed to verify email. Please try again.",
                     isClosable: true,
                 });
             });
@@ -52,11 +53,11 @@ const ValidateAccountForm: FC = () => {
                     description: "A new verification code has been sent to your email.",
                 });
             })
-            .catch((error) => {
+            .catch((error: unknown) => {
                 toast({
                     status: "error",
                     title: "Resend failed",
-                    description: error.data.error.message || "Failed to resend verification email. Please try again.",
+                    description: getApiErrorMessage(error) || "Failed to resend verification email. Please try again.",
                     isClosable: true,
                 });
             });

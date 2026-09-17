@@ -11,7 +11,7 @@ interface VersionDetailPanelProps {
 
 export const VersionDetailPanel = ({ selectedId, workspaceId, agentId }: VersionDetailPanelProps) => {
     const { data: deployment } = useGetDeploymentByIdQuery(
-        { workspaceId, agentId, id: selectedId! },
+        { workspaceId, agentId, id: selectedId ?? "" },
         { skip: !selectedId },
     );
 

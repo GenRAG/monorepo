@@ -11,6 +11,7 @@ import {
 } from "services/agent/agentMembers";
 import useThemedToast from "hooks/useThemedToast";
 import BoxIcon from "components/ui/BoxIcon";
+import { getApiErrorMessage } from "utils/apiError";
 
 const MemberRowSkeleton = () => {
     return (
@@ -53,10 +54,10 @@ export const MembersSection = () => {
             setEmail("");
             setIsAdding(false);
             toast({ title: "Membre ajouté", status: "success", duration: 3000 });
-        } catch (err: any) {
+        } catch (err: unknown) {
             toast({
                 title: "Impossible d'ajouter ce membre",
-                description: err?.data?.message ?? "Une erreur est survenue",
+                description: getApiErrorMessage(err) ?? "Une erreur est survenue",
                 status: "error",
                 duration: 4000,
             });

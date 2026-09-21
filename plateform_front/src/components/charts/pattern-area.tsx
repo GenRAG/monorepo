@@ -8,40 +8,36 @@ import { useChartStable } from "./chart-context";
 type CurveFactory = any;
 
 export interface PatternAreaProps {
-  /** Key in data to use for y values */
-  dataKey: string;
-  /** Fill color or pattern URL (e.g. `url(#pattern-id)`) */
-  fill: string;
-  /** Curve function. Default: curveMonotoneX */
-  curve?: CurveFactory;
-  /** @deprecated Pattern fill is not clip-revealed; only the stroke `Area` animates. */
-  animate?: boolean;
+    /** Key in data to use for y values */
+    dataKey: string;
+    /** Fill color or pattern URL (e.g. `url(#pattern-id)`) */
+    fill: string;
+    /** Curve function. Default: curveMonotoneX */
+    curve?: CurveFactory;
+    /** @deprecated Pattern fill is not clip-revealed; only the stroke `Area` animates. */
+    animate?: boolean;
 }
 
 /**
  * Filled area using an SVG pattern (`url(#id)`).
  * Pair with `PatternLines` in `AreaChart` children and an `Area` with `fillOpacity={0}` for the stroke line.
  */
-export function PatternArea({
-  dataKey,
-  fill,
-  curve = curveMonotoneX,
-}: PatternAreaProps) {
-  const { renderData, xScale, yScale, xAccessor } = useChartStable();
+export function PatternArea({ dataKey, fill, curve = curveMonotoneX }: PatternAreaProps) {
+    const { renderData, xScale, yScale, xAccessor } = useChartStable();
 
-  return (
-    <AreaClosed
-      curve={curve}
-      data={renderData}
-      fill={fill}
-      x={(d) => xScale(xAccessor(d)) ?? 0}
-      y={(d) => {
-        const v = d[dataKey];
-        return typeof v === "number" ? (yScale(v) ?? 0) : 0;
-      }}
-      yScale={yScale}
-    />
-  );
+    return (
+        <AreaClosed
+            curve={curve}
+            data={renderData}
+            fill={fill}
+            x={(d) => xScale(xAccessor(d)) ?? 0}
+            y={(d) => {
+                const v = d[dataKey];
+                return typeof v === "number" ? (yScale(v) ?? 0) : 0;
+            }}
+            yScale={yScale}
+        />
+    );
 }
 
 PatternArea.displayName = "PatternArea";

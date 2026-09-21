@@ -1,3 +1,4 @@
+export { Gauge, type GaugeProps, type GaugeOrientation } from "./gauge";
 export { PieChart, type PieChartProps, DEFAULT_HOVER_OFFSET } from "./pie-chart";
 export { PieCenter, type PieCenterProps } from "./pie-center";
 export { PieCenterShell, type PieCenterShellProps } from "./pie-center-shell";
@@ -9,6 +10,8 @@ export { LineChart, type LineChartProps } from "./line-chart";
 export { Line, type LineProps } from "./line";
 export { BarChart, type BarChartProps, type BarOrientation } from "./bar-chart";
 export { Bar, type BarProps } from "./bar";
+export { ComposedChart, type ComposedChartProps } from "./composed-chart";
+export { SeriesBar, type SeriesBarProps } from "./series-bar";
 export { BarXAxis, type BarXAxisProps } from "./bar-x-axis";
 export { BarYAxis, type BarYAxisProps } from "./bar-y-axis";
 export { Grid, type GridProps } from "./grid";

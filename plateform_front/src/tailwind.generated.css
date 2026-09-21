@@ -107,6 +107,9 @@
       max-width: 96rem;
     }
   }
+  .mx-auto {
+    margin-inline: auto;
+  }
   .my-2 {
     margin-block: calc(var(--spacing) * 2);
   }
@@ -121,6 +124,9 @@
   }
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
+  }
+  .ml-2 {
+    margin-left: calc(var(--spacing) * 2);
   }
   .block {
     display: block;
@@ -145,6 +151,9 @@
   }
   .table {
     display: table;
+  }
+  .aspect-\[21\/16\] {
+    aspect-ratio: 21/16;
   }
   .aspect-square {
     aspect-ratio: 1 / 1;
@@ -177,6 +186,9 @@
   .w-full {
     width: 100%;
   }
+  .max-w-\[560px\] {
+    max-width: 560px;
+  }
   .max-w-full {
     max-width: 100%;
   }
@@ -185,6 +197,9 @@
   }
   .min-w-\[140px\] {
     min-width: 140px;
+  }
+  .flex-1 {
+    flex: 1;
   }
   .shrink {
     flex-shrink: 1;
@@ -207,6 +222,12 @@
   .items-center {
     align-items: center;
   }
+  .items-end {
+    align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
+  }
   .justify-between {
     justify-content: space-between;
   }
@@ -228,6 +249,9 @@
   .gap-2 {
     gap: calc(var(--spacing) * 2);
   }
+  .gap-3 {
+    gap: calc(var(--spacing) * 3);
+  }
   .gap-4 {
     gap: calc(var(--spacing) * 4);
   }
@@ -235,6 +259,15 @@
     --tw-space-y-reverse: 0;
     margin-block-start: calc(calc(var(--spacing) * 1.5) * var(--tw-space-y-reverse));
     margin-block-end: calc(calc(var(--spacing) * 1.5) * calc(1 - var(--tw-space-y-reverse)));
+  }
+  .self-center {
+    align-self: center;
+  }
+  .self-end {
+    align-self: flex-end;
+  }
+  .self-start {
+    align-self: flex-start;
   }
   .truncate {
     overflow: hidden;
@@ -250,8 +283,8 @@
   .rounded {
     border-radius: 0.25rem;
   }
-  .rounded-full {
-    border-radius: calc(infinity * 1px);
+  .rounded-\[9999px\] {
+    border-radius: 9999px;
   }
   .rounded-lg {
     border-radius: var(--radius-lg);
@@ -321,6 +354,12 @@
   }
   .text-\[clamp\(0\.625rem\,9cqw\,0\.75rem\)\] {
     font-size: clamp(0.625rem, 9cqw, 0.75rem);
+  }
+  .text-\[length\:var\(--chart-foreground\)\] {
+    font-size: var(--chart-foreground);
+  }
+  .text-\[length\:var\(--chart-foreground-muted\)\] {
+    font-size: var(--chart-foreground-muted);
   }
   .leading-none {
     --tw-leading: 1;

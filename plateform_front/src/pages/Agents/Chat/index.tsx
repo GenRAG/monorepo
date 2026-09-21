@@ -32,23 +32,13 @@ const ChatWorkspace = () => {
     );
 
     return (
-        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
+        <VStack w="100%" h="100%" align="stretch" spacing={0} overflow="hidden">
             <WorkspaceHeader
                 title="Bac à sable"
                 description="Testez votre agent dans un environnement de démonstration"
             />
-            <Box
-                p={8}
-                px={{ base: 4, xl: 52, lg: 24, md: 16, sm: 8 }}
-                w="70%"
-                flex={1}
-                minH={0}
-                display="flex"
-                flexDirection="column"
-                overflow="hidden"
-                alignSelf="center"
-            >
-                <Box flex={1} minH={0} display="flex" flexDirection="column">
+            <Box p={4} h="100%" flex={1} minH={0}>
+                <Box h="100%" flex={1} minH={0} display="flex" flexDirection="column">
                     <ChatInterface
                         fullHeight
                         title="Discussion"

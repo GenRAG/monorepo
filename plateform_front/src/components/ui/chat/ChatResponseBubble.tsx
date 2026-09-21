@@ -16,15 +16,7 @@ const ChatResponseBubble: React.FC<ChatResponseBubbleProps> = ({ response, isErr
     const textColor = isError ? "textError" : "textSecondary";
 
     return (
-        <Box
-            p={4}
-            borderRadius="12px"
-            borderBottomLeftRadius="2px"
-            borderWidth="1px"
-            borderStyle="solid"
-            borderColor={borderColor}
-            bg={bg}
-        >
+        <Box p={4} borderRadius="12px" borderBottomLeftRadius="2px">
             <Box fontSize="sm" color={textColor} sx={isError ? undefined : getMarkdownStyles(colorMode)}>
                 {isError ? response : <ReactMarkdown remarkPlugins={[remarkGfm]}>{response}</ReactMarkdown>}
             </Box>

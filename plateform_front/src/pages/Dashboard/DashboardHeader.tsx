@@ -15,7 +15,6 @@ export const DashboardHeader = ({ name, stats }: DashboardHeaderProps) => {
             justify="space-between"
             align={{ base: "flex-start", md: "flex-end" }}
             gap={3}
-            mb={8}
         >
             <VStack align="start" spacing={1}>
                 <Heading variant="heading-md" color="textLabel" fontWeight="md" fontSize={{ base: "sm", md: "md" }}>

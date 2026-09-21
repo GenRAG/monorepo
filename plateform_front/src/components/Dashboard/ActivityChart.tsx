@@ -1,4 +1,4 @@
-import { Box, Card, Skeleton } from "@chakra-ui/react";
+import { Box, Card, Skeleton, Text } from "@chakra-ui/react";
 import { BarChart2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { type Period } from "pages/Dashboard/data";
@@ -7,13 +7,21 @@ import { ActivityHeader } from "components/Dashboard/ActivityChart/ActivityHeade
 import { ActivityLegend } from "components/Dashboard/ActivityChart/ActivityLegend";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { WorkspaceStats } from "types/workspace";
-import { Area, AreaChart, ChartStatFlow, ChartTooltip, TooltipContent } from "components/charts";
+import { ChartStatFlow, ChartTooltip, ComposedChart, SeriesBar, TooltipContent } from "components/charts";
 import { ChartHoverBridge, type HoverState } from "components/ui/ChartHoverBridge";
 
-/** AreaChart is time-scaled — the x-axis is hidden here, so evenly-spaced
+// Barre volontairement plus basse que la hauteur totale du chart, pour garder de l'air
+// au-dessus même sur le jour le plus chargé de la période.
+const BAR_MAX_HEIGHT_RATIO = 0.55;
+
+/** ComposedChart is time-scaled — the x-axis is hidden here, so evenly-spaced
  * placeholder dates only drive point spacing, never displayed to the user. */
 const toChartRows = (labels: string[], values: number[]) =>
-    labels.map((label, i) => ({ date: new Date(2020, 0, 1 + i), value: values[i] ?? 0, label }));
+    labels.map((label, i) => ({
+        date: new Date(2020, 0, 1 + i),
+        value: values[i] ?? 0,
+        label,
+    }));
 
 interface ActivityChartProps {
     chartData?: WorkspaceStats["activityChart"];
@@ -53,7 +61,7 @@ export const ActivityChart = ({
                 />
             ) : (
                 <>
-                    <Box px={4} mt={3} pb={2} display="flex" flexDirection="column">
+                    <Box px={4} mt={3} pb={2}>
                         {isLoading ? (
                             <Skeleton
                                 startColor="skeletonStart"
@@ -65,15 +73,18 @@ export const ActivityChart = ({
                         ) : (
                             <ChartStatFlow
                                 value={hover.value ?? defaultValue}
-                                label={hover.label ?? defaultLabel}
+                                label={defaultLabel}
                                 valueClassName="text-3xl font-bold"
-                                labelClassName="text-xs"
+                                labelClassName="ml-2 text-xs"
                             />
                         )}
+                        <Text variant="body-xs-muted" h="16px" mb={1}>
+                            {hover.label ?? ""}
+                        </Text>
                     </Box>
                     <Box flex={1} minH="200px" position="relative" minW={0}>
                         <Box position="absolute" inset={0}>
-                            <AreaChart
+                            <ComposedChart
                                 key={period}
                                 status={isLoading ? "loading" : "ready"}
                                 loadingLabel="Chargement..."
@@ -83,14 +94,11 @@ export const ActivityChart = ({
                                 className="h-full"
                             >
                                 <ChartHoverBridge onHoverChange={setHover} />
-                                <Area
+                                <SeriesBar
                                     dataKey="value"
-                                    stroke={STATUS_COLORS.success}
                                     fill={STATUS_COLORS.success}
-                                    fillOpacity={0.28}
-                                    strokeWidth={2}
-                                    showHighlight
-                                    loadingStroke={STATUS_COLORS.success}
+                                    radius={4}
+                                    maxHeightRatio={BAR_MAX_HEIGHT_RATIO}
                                 />
                                 <ChartTooltip
                                     showDatePill={false}
@@ -107,7 +115,7 @@ export const ActivityChart = ({
                                         />
                                     )}
                                 />
-                            </AreaChart>
+                            </ComposedChart>
                         </Box>
                     </Box>
                     <ActivityLegend />

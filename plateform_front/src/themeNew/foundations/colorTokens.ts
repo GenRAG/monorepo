@@ -4,7 +4,7 @@ const colorTokens = {
     inputBorder: { default: "grey.100", _dark: "grey.700" },
     inputPlaceholder: { default: "grey.500", _dark: "grey.400" },
     inputActiveBorder: { default: "green.400", _dark: "green.400" },
-    inputBg: { default: "white", _dark: "grey.950" },
+    inputBg: { default: "grey.50", _dark: "grey.950" },
     inputDisabledBg: { default: "grey.50", _dark: "grey.800" },
 
     // === TEXT ===
@@ -26,8 +26,8 @@ const colorTokens = {
     // en dark (grey.975 vs grey.950), c'est la valeur réellement utilisée à la racine de l'app.
     surfaceAppShell: { default: "white", _dark: "grey.950" },
     surfacePrimary: { default: "white", _dark: "grey.950" }, // Page principale
-    surfaceCard: { default: "white", _dark: "grey.900" }, // Cartes
-    surfaceModal: { default: "white", _dark: "grey.900" }, // Modales
+    surfaceCard: { default: "grey.50", _dark: "grey.950" }, // Cartes
+    surfaceModal: { default: "grey.50", _dark: "grey.900" }, // Modales
     surfaceSubtle: { default: "grey.25", _dark: "grey.800" }, // Fond subtil, inputs désactivés
     surfaceHover: { default: "grey.50", _dark: "grey.900" }, // Survol de lignes/cartes
     surfaceThumbnail: { default: "grey.100", _dark: "grey.850" }, // Miniatures, avatars
@@ -38,7 +38,7 @@ const colorTokens = {
     bubbleAccentBg: { default: "green.100", _dark: "green.700" }, // Bulle de message accentuée (onboarding)
 
     // === BORDERS ===
-    borderSubtle: { default: "grey.100", _dark: "grey.700" }, // Bordure légère
+    borderSubtle: { default: "grey.100", _dark: "grey.900" }, // Bordure légère
     borderDefault: { default: "grey.100", _dark: "grey.800" }, // Bordure standard (cartes, séparateurs)
     borderStrong: { default: "grey.200", _dark: "grey.600" }, // Bordure marquée (kbd, inputs)
     borderDivider: { default: "grey.200", _dark: "grey.700" }, // Séparateurs de section
@@ -84,6 +84,7 @@ const colorTokens = {
 
     backgroundDefault: { default: "white", _dark: "grey.900" },
     secondBackgroundDefault: { default: "grey.25", _dark: "grey.950" },
+    agentBackgroundDefault: { default: "grey.25", _dark: "liquidGlass.black" },
 };
 
 export default colorTokens;

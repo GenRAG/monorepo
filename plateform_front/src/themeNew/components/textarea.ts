@@ -4,8 +4,6 @@ import { textStyles } from "themeNew/foundations/typography";
 
 const fieldStyles = {
     ...textStyles?.["body-md"],
-    borderWidth: "1px",
-    borderStyle: "solid",
     bg: "inputBg",
     borderRadius: borderRadius.md,
     borderColor: "inputBorder",

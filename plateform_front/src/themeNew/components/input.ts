@@ -10,8 +10,6 @@ const baseStyle = definePartsStyle({
     field: {
         ...textStyles?.["body-md"],
         bg: "inputBg",
-        borderWidth: "1px",
-        borderStyle: "solid",
         borderRadius: borderRadius.sm,
         borderColor: "inputBorder",
         color: "inputText",

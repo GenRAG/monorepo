@@ -11,11 +11,12 @@ const Card = defineMultiStyleConfig({
     baseStyle: {
         container: {
             bg: "surfaceCard",
-            borderColor: "borderDefault",
-            borderWidth: "1px",
             borderRadius: "12px",
             boxShadow: "none",
             position: "relative",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "borderSubtle",
         },
     },
 

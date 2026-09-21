@@ -52,10 +52,10 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
     border: _border = true,
 }: WorkflowPreviewProps) => {
     const { colorMode } = useColorMode();
-    const borderColor = useColorModeValue("grey.50", "grey.700");
+    const borderColor = useColorModeValue("grey.100", "grey.800");
 
-    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.800"]);
-    const lineColor = colorMode === "dark" ? gridLineDark : gridLineLight;
+    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.200", "grey.800"]);
+    const lineColor = applyAlphaToColor(colorMode === "dark" ? gridLineDark : gridLineLight, 0.8);
 
     return (
         <Box
@@ -66,7 +66,7 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
             border={_border ? "1px solid" : undefined}
             borderColor={borderColor}
             overflow="hidden"
-            bg={useColorModeValue("white", "grey.900")}
+            bg="agentBackgroundDefault"
         >
             <WorkflowCanvas
                 nodeComponent={NodeComponent as NodeComponentType}
@@ -75,9 +75,9 @@ export const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({
                 initialNodes={propNodes}
                 initialEdges={propEdges}
                 fitViewOptions={{ padding, minZoom: zoom, maxZoom: 1 }}
-                colorMode={colorMode === "dark" ? "dark" : "light"}
+                colorMode={colorMode === "dark" ? "light" : "light"}
             >
-                <Background variant={BackgroundVariant.Lines} gap={50} size={1} color={lineColor} />
+                <Background variant={BackgroundVariant.Lines} gap={36} size={1} color={lineColor} />
             </WorkflowCanvas>
         </Box>
     );

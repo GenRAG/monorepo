@@ -22,17 +22,18 @@ const DeploymentWorkspace = () => {
     };
 
     return (
-        <VStack h="100vh" align="stretch" spacing={0} overflow="hidden" bg="surfaceAppShell">
+        <VStack h="100%" align="stretch" spacing={0} overflow="hidden" position="relative">
             <WorkspaceHeader
                 title="Déploiement"
                 description="Promouvoir, surveiller, et gérer les différentes versions de votre agent."
             />
+            {/* Position absolute (pas fixed) : centrée sur cette page (relative), pas sur l'écran
+            entier. Rendue en dehors du flux, sous forme de pilule flottante permanente au-dessus
+            du contenu — voir GlassTabBar. Pas de padding-bottom réservé : le fond de la carte de
+            contenu (PrivateAgentAppLayout) va jusqu'au bout, la pilule flotte par-dessus. */}
+            <DeploymentTabs activeTab={activeTab} onChange={setActiveTab} />
 
-            <Box bg="surfaceAppShell" flexShrink={0}>
-                <DeploymentTabs activeTab={activeTab} onChange={setActiveTab} />
-            </Box>
-
-            <Box flex={1} minW={0} display="flex" overflow="hidden" bg="secondBackgroundDefault">
+            <Box flex={1} minW={0} display="flex" overflow="hidden">
                 <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                         key={activeTab}

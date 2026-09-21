@@ -42,8 +42,15 @@ export const VersionDetailPanel = ({ selectedId, workspaceId, agentId }: Version
     }
 
     return (
-        <Box flex="1 1 0" p={6} bg="surfacePrimary">
-            <VStack align="stretch" h="full" border="1px solid" borderColor="borderDefault" borderRadius="12px">
+        <Box flex="1 1 0" p={6}>
+            <VStack
+                spacing={0}
+                align="stretch"
+                h="full"
+                border="1px solid"
+                borderColor="borderDefault"
+                borderRadius="12px"
+            >
                 <VersionHeaderActions deployment={deployment ?? null} workspaceId={workspaceId} agentId={agentId} />
                 <PipelineJsonPanel
                     workflowVersion={deployment?.workflowVersion ?? null}

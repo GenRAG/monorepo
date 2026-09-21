@@ -22,8 +22,6 @@ export const MenuNodeCard = ({ nodeType, alreadyUsed, isSelected, onClick, toolt
         <Box
             onClick={isDraggable ? () => onClick(nodeType) : undefined}
             bg={isSelected ? "accentCardBg" : "surfaceCard"}
-            border="1px solid"
-            borderColor={isSelected ? "borderAccentCardActive" : "borderAccentCardMuted"}
             borderRadius="10px"
             p={2}
             transition="all 0.15s"

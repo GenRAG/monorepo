@@ -106,7 +106,7 @@ export const DocumentWorkspace: React.FC = () => {
     const isMobile = useAppResponsive({ base: true, lg: false }) ?? false;
 
     return (
-        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden" position="relative">
+        <VStack w="100%" h="100%" align="stretch" spacing={0} overflow="hidden" position="relative">
             <WorkspaceHeader title="Documents" description="Gérez vos documents et consultez leur statut." />
             <VStack
                 align="stretch"

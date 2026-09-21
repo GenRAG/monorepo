@@ -96,7 +96,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
             borderColor="borderDefault"
             overflowY="auto"
         >
-            <Stack p={6} bg="secondBackgroundDefault">
+            <Stack p={6}>
                 <Heading variant="heading-xl" mb={8}>
                     Créer à partir de zéro
                 </Heading>
@@ -161,7 +161,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                     Ou partir d&apos;un modèle
                 </Text>
 
-                <SimpleGrid columns={3} spacing={3} mb={6}>
+                <SimpleGrid columns={2} spacing={3} mb={6}>
                     {templates.map((tpl) => (
                         <TemplateCard
                             key={tpl.id}

@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Box } from "@chakra-ui/react";
 import { BarChart2 } from "lucide-react";
 import { CHART_GREEN_SHADES } from "themeNew/foundations/themeConfig";
 import { Bar, BarChart, BarYAxis, ChartTooltip, TooltipContent } from "components/charts";
+import { PatternLines } from "components/charts/visx-pattern";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { useGetCostByModelQuery } from "services/analytics/analytics";
 import { AnalyticsChartCard } from "./AnalyticsChartCard";
@@ -12,6 +13,12 @@ import { PERIOD_DAYS, type Period } from "./types";
 // Most-expensive model first, most vivid shade first.
 const MODEL_COLORS = [CHART_GREEN_SHADES[3], CHART_GREEN_SHADES[2], CHART_GREEN_SHADES[1], CHART_GREEN_SHADES[0]];
 
+const colorForIndex = (index: number) => MODEL_COLORS[index % MODEL_COLORS.length];
+// Même convention que la pie chart (CostByTypeCard) : le modèle le plus coûteux (index 0) en
+// couleur pleine, tous les autres en motif hachuré — reste distinguable même quand la couleur de
+// base se répète au-delà de la palette (4 teintes).
+const isPatternedIndex = (index: number) => index > 0;
+
 interface CostByModelCardProps {
     workspaceId: string;
     agentId: string;
@@ -19,6 +26,7 @@ interface CostByModelCardProps {
 
 export const CostByModelCard = ({ workspaceId, agentId }: CostByModelCardProps) => {
     const [period, setPeriod] = useState<Period>("30j");
+    const patternIdBase = `cost-by-model-pattern-${useId()}`;
     const { data: entries = [], isLoading } = useGetCostByModelQuery(
         { workspaceId, agentId, days: PERIOD_DAYS[period] },
         { skip: !workspaceId || !agentId },
@@ -31,7 +39,12 @@ export const CostByModelCard = ({ workspaceId, agentId }: CostByModelCardProps) 
                 .map((entry) => ({ name: entry.key, value: usdToCredits(entry.costUsd) })),
         [entries],
     );
-    const barColors = modelRows.map((_, index) => MODEL_COLORS[index % MODEL_COLORS.length]);
+    // Couleur "pleine" pour le point du tooltip (toujours résolue même sur une barre patternée,
+    // où `barColors` contient une référence `url(#...)` inutilisable comme background-color CSS).
+    const dotColors = modelRows.map((_, index) => colorForIndex(index));
+    const barColors = modelRows.map((_, index) =>
+        isPatternedIndex(index) ? `url(#${patternIdBase}-${index})` : colorForIndex(index),
+    );
 
     return (
         <AnalyticsChartCard
@@ -61,6 +74,18 @@ export const CostByModelCard = ({ workspaceId, agentId }: CostByModelCardProps) 
                             aspectRatio=""
                             className="h-full"
                         >
+                            {modelRows.map((_, index) =>
+                                isPatternedIndex(index) ? (
+                                    <PatternLines
+                                        key={`pattern-${index}`}
+                                        height={6}
+                                        id={`${patternIdBase}-${index}`}
+                                        orientation={["diagonal"]}
+                                        stroke={colorForIndex(index)}
+                                        width={6}
+                                    />
+                                ) : null,
+                            )}
                             <Bar dataKey="value" colors={barColors} fill={MODEL_COLORS[0]} />
                             <BarYAxis maxLabelWidth={150} />
                             <ChartTooltip
@@ -73,7 +98,7 @@ export const CostByModelCard = ({ workspaceId, agentId }: CostByModelCardProps) 
                                             title={name}
                                             rows={[
                                                 {
-                                                    color: barColors[index] ?? MODEL_COLORS[0],
+                                                    color: dotColors[index] ?? MODEL_COLORS[0],
                                                     label: "Crédits",
                                                     value: fmtCredits(value),
                                                 },

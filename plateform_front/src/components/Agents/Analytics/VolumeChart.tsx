@@ -50,7 +50,6 @@ export const VolumeChart = ({ workspaceId, agentId }: VolumeChartProps) => {
                     <AreaChart
                         key={period}
                         status={isFetching ? "loading" : "ready"}
-                        loadingLabel="Chargement..."
                         data={volumeRows}
                         margin={{ top: 8, right: 8, bottom: 40, left: 20 }}
                         aspectRatio=""
@@ -63,6 +62,7 @@ export const VolumeChart = ({ workspaceId, agentId }: VolumeChartProps) => {
                             fill={STATUS_COLORS.success}
                             fillOpacity={0.28}
                             strokeWidth={2}
+                            loadingStyle="sweep"
                             showHighlight
                             loadingStroke={STATUS_COLORS.success}
                         />

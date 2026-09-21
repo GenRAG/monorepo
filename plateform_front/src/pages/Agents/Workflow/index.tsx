@@ -127,7 +127,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
 
     useUnsavedChangesBlocker(isDirty);
 
-    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.50", "grey.800"]);
+    const [gridLineLight, gridLineDark] = useToken("colors", ["grey.200", "grey.800"]);
     const lineColor = applyAlphaToColor(colorMode === "dark" ? gridLineDark : gridLineLight, 0.8);
 
     const snapGrid: [number, number] = [50, 50];
@@ -145,7 +145,7 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
 
             <Box flex={1} position="relative">
                 <ReactFlow
-                    colorMode={colorMode === "dark" ? "dark" : "light"}
+                    colorMode={colorMode === "dark" ? "light" : "light"}
                     nodes={nodes}
                     edges={edges}
                     onNodesChange={onNodesChange}
@@ -231,7 +231,7 @@ const WorkflowWorkspace = () => {
             : { nodes: canvas?.nodes, edges: canvas?.edges };
 
     return (
-        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
+        <VStack w="100%" h="100%" align="stretch" spacing={0} overflow="hidden">
             {isLoading ? (
                 <Center flex={1}>
                     <Spinner size="lg" color="green.500" />

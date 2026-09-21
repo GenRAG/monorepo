@@ -42,7 +42,9 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
     const { fitView } = useReactFlow();
 
     const dividerColor = useColorModeValue("green.100", "grey.700");
-    const overlayBg = useColorModeValue("blackAlpha.500", "blackAlpha.700");
+    // Voile clair en light mode : un blackAlpha assombrit le fond flouté et donne un
+    // rendu gris/terne. whiteAlpha garde l'effet "verre dépoli" clair derrière la modal.
+    const overlayBg = useColorModeValue("whiteAlpha.600", "blackAlpha.400");
 
     const presentTypes = useMemo(() => usedNodes.map((n) => n.data.type), [usedNodes]);
 
@@ -116,11 +118,15 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
     return (
         <Box>
             <Modal isOpen={isOpen} onClose={handleClose} isCentered motionPreset="scale">
-                <ModalOverlay bg={overlayBg} backdropFilter="blur(4px)" />
+                {/* Pas de blur ici : un backdropFilter sur l'overlay plein écran floute tout le fond,
+                partout. Le flou vit sur ModalContent ci-dessous à la place, pour rester confiné à la
+                zone couverte par la modal elle-même. */}
+                <ModalOverlay bg={overlayBg} />
                 <ModalContent
-                    bg="surfaceCard"
+                    bg="transparent"
+                    backdropFilter="blur(20px)"
                     border="1px solid"
-                    borderColor="borderAccentCardMuted"
+                    borderColor="borderSubtle"
                     borderRadius="14px"
                     boxShadow="0 20px 60px rgba(0,0,0,0.15)"
                     overflow="hidden"

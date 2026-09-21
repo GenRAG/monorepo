@@ -53,6 +53,7 @@ export const CostChart = ({ workspaceId, agentId }: CostChartProps) => {
                     <AreaChart
                         key={period}
                         status={isFetching ? "loading" : "ready"}
+                        loadingLabel="Chargement de la consommation..."
                         data={costRows}
                         margin={{ top: 8, right: 8, bottom: 40, left: 30 }}
                         aspectRatio=""
@@ -66,6 +67,7 @@ export const CostChart = ({ workspaceId, agentId }: CostChartProps) => {
                             fillOpacity={0.28}
                             strokeWidth={2}
                             showHighlight
+                            loadingStyle="sweep"
                             loadingStroke={STATUS_COLORS.success}
                         />
                         <Grid horizontal vertical />

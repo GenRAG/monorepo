@@ -4,27 +4,30 @@ import { useReducedMotion } from "framer-motion";
 export type IconAnimationLabel = "initial" | "hover" | "active";
 
 /**
- * État partagé par toutes les icônes animées du nav : combine le hover local de l'icône
- * (indépendant du hover Chakra du bouton parent, pour un contrôle précis des variants)
- * et l'état actif reçu en prop, en un seul label de variant framer-motion.
+ * État partagé par toutes les icônes animées du nav : combine le hover et l'état actif reçus en
+ * props en un seul label de variant framer-motion.
+ *
+ * `isHovered` est contrôlé par le bouton parent (toute la zone cliquable, bien plus grande que
+ * l'icône elle-même) — sans ça, le survol ne se déclenchait qu'en pointant exactement les ~20px
+ * du glyphe. `hoverHandlers` reste exposé pour un fallback local (icône utilisée hors bouton),
+ * mais n'a aucun effet tant que `isHovered` est fourni.
  *
  * Centralise aussi la lecture de `prefers-reduced-motion` : chaque icône peut ainsi se
  * contenter de vérifier `reduceMotion` pour retomber sur un rendu statique.
  */
-export const useIconAnimationState = (isActive: boolean) => {
+export const useIconAnimationState = (isActive: boolean, isHovered?: boolean) => {
     const reduceMotion = Boolean(useReducedMotion());
-    const [hovered, setHovered] = useState(false);
+    const [localHovered, setLocalHovered] = useState(false);
+    const hovered = isHovered ?? localHovered;
 
     const label: IconAnimationLabel = hovered ? "hover" : isActive ? "active" : "initial";
 
     return {
         reduceMotion,
         label,
-        // Evénements DOM natifs (pas whileHover/onHoverStart de framer-motion) : la racine de
-        // l'icône est un <svg> normal, pas systématiquement un motion.svg.
         hoverHandlers: {
-            onMouseEnter: () => setHovered(true),
-            onMouseLeave: () => setHovered(false),
+            onMouseEnter: () => setLocalHovered(true),
+            onMouseLeave: () => setLocalHovered(false),
         },
     };
 };

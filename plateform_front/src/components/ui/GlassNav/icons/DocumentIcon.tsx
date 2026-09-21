@@ -3,15 +3,10 @@ import { AnimatedIconProps } from "./types";
 import { useIconAnimationState } from "./useIconAnimationState";
 import { iconScaleVariants } from "./iconScaleVariants";
 
-export const ChatIcon = ({ size = 20, isActive = false, isHovered }: AnimatedIconProps) => {
+export const DocumentIcon = ({ size = 20, isActive = false, isHovered }: AnimatedIconProps) => {
     const { reduceMotion, label, hoverHandlers } = useIconAnimationState(isActive, isHovered);
 
-    const content = (
-        <>
-            <rect x={2} y={4} width={20} height={14} rx={6} fill="currentColor" />
-            <polygon points="7,17 7,22 12,17" fill="currentColor" />
-        </>
-    );
+    const content = <rect x={5} y={2} width={14} height={20} rx={2} fill="currentColor" />;
 
     if (reduceMotion) {
         return (

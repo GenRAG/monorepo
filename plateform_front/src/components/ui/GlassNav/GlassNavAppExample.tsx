@@ -123,9 +123,10 @@ export const GlassNavAppExample = () => {
                     selectedId={workspaceId ?? ""}
                     onSelect={handleWorkspaceChange}
                     compactTrigger={
-                        <GlassSurface variant={variant} borderRadius="full" p="6px" display="flex">
+                        <GlassSurface variant={variant} borderRadius="12px" p="6px" display="flex">
                             <BoxIcon
                                 size="sm"
+                                clickable
                                 letters={workspaces.find((w) => w.id === workspaceId)?.name.slice(0, 2)}
                             />
                         </GlassSurface>
@@ -141,12 +142,12 @@ export const GlassNavAppExample = () => {
                     compactTrigger={
                         <GlassSurface
                             variant={variant}
-                            borderRadius="full"
+                            borderRadius="12px"
                             p="6px"
                             display="flex"
                             aria-label="Mon compte"
                         >
-                            <BoxIcon size="sm" letters={name?.slice(0, 2) || email?.slice(0, 2)} />
+                            <BoxIcon clickable size="sm" letters={name?.slice(0, 2) || email?.slice(0, 2)} />
                         </GlassSurface>
                     }
                 />
@@ -165,8 +166,13 @@ export const GlassNavAppExample = () => {
                         aria-label={isVertical ? "Passer en bottom bar" : "Passer en sidebar"}
                         onClick={toggleLayoutMode}
                     >
-                        <GlassSurface variant={variant} borderRadius="full" p="10px" display="flex">
-                            <Icon as={isVertical ? PanelBottom : PanelLeft} boxSize="18px" color={iconColor} />
+                        <GlassSurface variant={variant} borderRadius="12px" p="10px" display="flex">
+                            <Icon
+                                cursor="pointer"
+                                as={isVertical ? PanelBottom : PanelLeft}
+                                boxSize="18px"
+                                color={iconColor}
+                            />
                         </GlassSurface>
                     </Box>
                 </Tooltip>

@@ -12,7 +12,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      echo "Usage: ./migrate.sh [-reset] <migration_name>"
+      echo "Usage: ./scripts/migrate.sh [-reset] <migration_name>"
       exit 0
       ;;
     -*)
@@ -31,7 +31,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ -z "$MIGRATION_NAME" ]; then
-  echo "Usage: ./migrate.sh [-reset] <migration_name>"
+  echo "Usage: ./scripts/migrate.sh [-reset] <migration_name>"
   exit 1
 fi
 

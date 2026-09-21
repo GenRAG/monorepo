@@ -39,7 +39,7 @@ Le service d'envoi d'email est **`auth/resend.service.ts`** (`ResendService`, li
 
 - Schema splitté dans `plateform_back/prisma/schema/*.prisma` (`agent.prisma`, `workspace.prisma`, `document.prisma`, etc.), assemblé via `prisma.config.ts` (`schema: path.join('prisma', 'schema')`).
 - **Un seul dossier de migrations** : `plateform_back/prisma/schema/migrations/`. (Une ancienne version de cette doc mentionnait un second dossier `prisma/migrations/` à la racine de `prisma/` — il n'existe plus, ne pas le recréer.)
-- Toute modification de schéma passe par une migration (`./migrate.sh <nom>`, ou `-reset` pour repartir de zéro) — jamais de sync automatique hors dev local.
+- Toute modification de schéma passe par une migration (`./scripts/migrate.sh <nom>`, ou `-reset` pour repartir de zéro) — jamais de sync automatique hors dev local.
 - Client généré dans `prisma/generated/` ; `prisma.config.ts` charge le `.env` manuellement (Prisma 6 ne le fait plus automatiquement quand `prisma.config.ts` est présent).
 - Toujours `prisma.$transaction()` pour les opérations atomiques (ex. déduction de crédits + création de `CreditTransaction`).
 
@@ -48,7 +48,7 @@ Le service d'envoi d'email est **`auth/resend.service.ts`** (`ResendService`, li
 - Jest, config inline dans `package.json` (`rootDir: src`, pattern `*.spec.ts`).
 - Convention : `src/<module>/test/<nom>.spec.ts`.
 - Pas seulement des Services : plusieurs modules testent aussi Controller et Repository (`agent/test/agent.controller.spec.ts`, `agent/test/agent-member.controller.spec.ts`, `credit/test/credit-balance.repository.spec.ts`, `deployment/test/deployment.repository.spec.ts`, `conversation/test/conversation.repository.spec.ts`). Pattern dominant : mock du Repository pour tester le Service ; mock du Service pour tester le Controller.
-- `yarn test` (unit), `yarn test:e2e` (charge `.env.test`, nécessite `postgres_test` — voir `dev.sh e2e`), `yarn test:cov`.
+- `yarn test` (unit), `yarn test:e2e` (charge `.env.test`, nécessite `postgres_test` — voir `scripts/dev.sh e2e`), `yarn test:cov`.
 - Toute nouvelle logique métier ajoutée à un Service doit être accompagnée d'un test unitaire, en suivant le pattern des modules déjà couverts (liste à jour : voir `../CLAUDE.md#tests`).
 
 ## Commandes (depuis `plateform_back/`)

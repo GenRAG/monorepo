@@ -22,9 +22,12 @@ monorepo/
 ├── vitrine_front/         # Landing page Next.js
 ├── architecture/          # Diagrammes Mermaid
 ├── rag-engine/            # Copie locale de l'API RAG externe (hors périmètre, CLAUDE.md propre)
+├── docs/                  # Docs projet (plans de test, audits, business)
+├── scripts/
+│   ├── dev.sh             # Script de démarrage dev
+│   ├── migrate.sh         # Helper migration DB
+│   └── start.sh
 ├── docker-compose.yml
-├── dev.sh                 # Script de démarrage dev
-└── migrate.sh             # Helper migration DB
 ```
 
 ---
@@ -69,8 +72,8 @@ yarn build / yarn typecheck
 yarn dev / yarn build
 
 # Racine
-./dev.sh [clean|build|rebuild|deps|e2e|unit]   # orchestration docker-compose
-./migrate.sh [-reset] <nom_migration>          # migration Prisma dans le container `server`
+./scripts/dev.sh [clean|build|rebuild|deps|e2e|unit]   # orchestration docker-compose
+./scripts/migrate.sh [-reset] <nom_migration>          # migration Prisma dans le container `server`
 ```
 
 `plateform_back`, `vitrine_front` et `rag-engine` ne font pas partie des workspaces yarn racine (`package.json` ne liste que `packages/*` et `plateform_front`) — chaque dossier s'installe indépendamment (`yarn install` dans le dossier concerné).

@@ -32,23 +32,19 @@ const NotFound: React.FC = () => {
                         fontSize={{ base: "120px", md: "180px" }}
                         fontWeight="bold"
                         lineHeight="1"
-                        color={currentDarkTheme.primary}
+                        color="iconAccent"
                         opacity={0.9}
                         letterSpacing="-0.05em"
                     >
                         404
                     </Heading>
-                    <Box w="80px" h="4px" bg={currentDarkTheme.primary} borderRadius="full" />
+                    <Box w="80px" h="4px" bg="iconAccent" borderRadius="full" />
                 </VStack>
                 <VStack spacing={4} maxW="500px">
-                    <Heading
-                        variant="heading-2xl"
-                        fontWeight="bold"
-                        color={colorMode === "dark" ? "white" : "grey.900"}
-                    >
+                    <Heading variant="heading-2xl" fontWeight="bold" color="textStrong">
                         Page pas trouvée
                     </Heading>
-                    <Text fontSize="lg" color={colorMode === "dark" ? "grey.400" : "grey.600"} lineHeight="1.6">
+                    <Text fontSize="lg" color="textDescription" lineHeight="1.6">
                         La page que vous recherchez n&apos;existe pas ou a été déplacée. Retournons-vous sur la bonne
                         voie.
                     </Text>

@@ -23,11 +23,11 @@ const GenRAGLogo = () => <Image src={logoGreen} alt="GenRAG" position="absolute"
 
 const SuccessBadge = () => (
     <HStack spacing={3} align="center">
-        <Box flex={1} h="1px" bg="grey.700" w="60px" />
-        <Text fontSize="10px" fontWeight="600" letterSpacing="0.15em" color="grey.400" textTransform="uppercase">
+        <Box flex={1} h="1px" bg="borderDivider" w="60px" />
+        <Text fontSize="10px" fontWeight="600" letterSpacing="0.15em" color="textLabel" textTransform="uppercase">
             Compte créé avec succès
         </Text>
-        <Box flex={1} h="1px" bg="grey.700" w="60px" />
+        <Box flex={1} h="1px" bg="borderDivider" w="60px" />
     </HStack>
 );
 
@@ -41,7 +41,7 @@ export const WelcomeScreen = ({ onDone }: WelcomeScreenProps) => (
             position="fixed"
             inset={0}
             zIndex={9999}
-            bg="grey.950"
+            bg="surfaceAppShell"
             sx={{
                 backgroundImage: `
                 repeating-linear-gradient(45deg, transparent, transparent 22px, rgba(255,255,255,0.015) 22px, rgba(255,255,255,0.015) 23px),
@@ -69,16 +69,16 @@ export const WelcomeScreen = ({ onDone }: WelcomeScreenProps) => (
                 </MotionBox>
 
                 <MotionBox variants={itemVariants} textAlign="center">
-                    <Text fontSize="4xl" fontWeight="700" color="white" letterSpacing="-0.03em" lineHeight={1.15}>
+                    <Text fontSize="4xl" fontWeight="700" color="textStrong" letterSpacing="-0.03em" lineHeight={1.15}>
                         Bienvenue sur{" "}
-                        <Box as="span" color="green.400">
+                        <Box as="span" color="iconAccent">
                             GenRAG
                         </Box>
                     </Text>
                 </MotionBox>
 
                 <MotionBox variants={itemVariants}>
-                    <Text fontSize="sm" color="grey.400" textAlign="center" maxW="360px" lineHeight={1.7}>
+                    <Text fontSize="sm" color="textLabel" textAlign="center" maxW="360px" lineHeight={1.7}>
                         Votre espace est prêt. Il ne reste plus qu&apos;à le configurer selon vos besoins.
                     </Text>
                 </MotionBox>

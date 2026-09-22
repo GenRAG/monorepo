@@ -1,20 +1,8 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
+import type { OnboardingSession, CompareOnboardingResponse } from "types/onboarding/onboarding";
 
-export interface OnboardingSession {
-    sessionId: string;
-    agentId: string;
-    step: number;
-    completed: boolean;
-    instruction: string | null;
-    stepsData: Record<string, Record<string, unknown>>;
-}
-
-export interface CompareOnboardingResponse {
-    standard: string;
-    precise: string;
-    creative: string;
-}
+export type { OnboardingSession, CompareOnboardingResponse };
 
 interface StartOnboardingParams {
     workspaceId: string;

@@ -87,7 +87,9 @@ export function ChartStatFlow({
     return (
         <>
             {icon ? (
-                <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">{icon}</div>
+                <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-[9999px] bg-muted/50">
+                    {icon}
+                </div>
             ) : null}
             <span className={cn("text-foreground tabular-nums", valueClassName)}>
                 {numberFlowReady ? (

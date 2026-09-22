@@ -1,12 +1,29 @@
-import { Badge, Box, Card, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+import { Badge, Box, Card, Divider, HStack, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { useGetRecentQueriesQuery, type QueryLogEntry } from "services/analytics/analytics";
-import { fmtDateTime } from "@/utils/analytics/dateUtils";
+import { fmtDateTime } from "utils/analytics/dateUtils";
 import { STATUS_COLOR_SCHEME, STATUS_LABEL } from "./types";
 import { ChartInfoTooltip } from "./ChartInfoTooltip";
-import Button from "@/components/ui/Button";
+import Button from "components/ui/Button";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useMemo, useState } from "react";
-import { CardEmptyState } from "@/components/Dashboard/CardEmptyState";
+import { CardEmptyState } from "components/Dashboard/CardEmptyState";
+
+const RecentQueryItemSkeleton = () => {
+    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
+    return (
+        <Box p={3} bg="surfaceCard" borderBottomWidth="1px" borderStyle="solid" borderColor="borderDefault">
+            <HStack justify="space-between" align="start" mb={2}>
+                <Skeleton {...skeletonProps} h="14px" w="60%" borderRadius="4px" />
+                <Skeleton {...skeletonProps} h="16px" w="60px" borderRadius="full" flexShrink={0} />
+            </HStack>
+            <HStack spacing={4}>
+                <Skeleton {...skeletonProps} h="12px" w="90px" borderRadius="4px" />
+                <Skeleton {...skeletonProps} h="12px" w="70px" borderRadius="4px" />
+                <Skeleton {...skeletonProps} h="12px" w="70px" borderRadius="4px" />
+            </HStack>
+        </Box>
+    );
+};
 
 const RecentQueryItem = ({ query }: { query: QueryLogEntry }) => (
     <Box p={3} bg="surfaceCard" borderBottomWidth="1px" borderStyle="solid" borderColor="borderDefault">
@@ -51,7 +68,7 @@ interface RecentQueriesCardProps {
 
 export const RecentQueriesCard = ({ workspaceId, agentId }: RecentQueriesCardProps) => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data } = useGetRecentQueriesQuery(
+    const { data, isLoading } = useGetRecentQueriesQuery(
         { workspaceId, agentId, page: currentPage, limit: MAX_PER_PAGE },
         { skip: !workspaceId || !agentId },
     );
@@ -59,7 +76,7 @@ export const RecentQueriesCard = ({ workspaceId, agentId }: RecentQueriesCardPro
     const total = data?.total ?? 0;
     const totalPages = Math.max(1, Math.ceil(total / MAX_PER_PAGE));
 
-    const isEmpty = useMemo(() => !data || total === 0, [data, total]);
+    const isEmpty = useMemo(() => !isLoading && (!data || total === 0), [isLoading, data, total]);
 
     return (
         <Stack spacing={0} h="100%">
@@ -74,7 +91,13 @@ export const RecentQueriesCard = ({ workspaceId, agentId }: RecentQueriesCardPro
             </Card>
             <Divider borderColor="borderStrong" />
             <Card size="none" variant="attachedBottom" flex={1} minH={0} display="flex" flexDirection="column">
-                {isEmpty ? (
+                {isLoading ? (
+                    <VStack spacing={0} align="stretch" flex={1} overflowY="auto">
+                        {[1, 2, 3].map((i) => (
+                            <RecentQueryItemSkeleton key={i} />
+                        ))}
+                    </VStack>
+                ) : isEmpty ? (
                     <CardEmptyState
                         icon={Clock}
                         title="Aucune requête récente"

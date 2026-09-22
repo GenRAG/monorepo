@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack, Text, Box, Card, useColorModeValue } from "@chakra-ui/react";
+import { VStack, Text, Box, Card, Skeleton, useColorModeValue } from "@chakra-ui/react";
 import { File } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useGetDocumentContentQuery } from "services/document/document";
@@ -27,19 +27,23 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
         data: content,
         isLoading,
         isError,
-    } = useGetDocumentContentQuery({
-        workspaceId: workspaceId!,
-        agentId: agentId!,
-        id: documentId,
-    });
-    const codeColor = useColorModeValue("grey.700", "grey.300");
+    } = useGetDocumentContentQuery(
+        {
+            workspaceId: workspaceId ?? "",
+            agentId: agentId ?? "",
+            id: documentId,
+        },
+        { skip: !workspaceId || !agentId },
+    );
     const codeBg = useColorModeValue("grey.100", "grey.800");
 
     if (isLoading)
         return (
-            <Text fontSize="sm" color="textMuted">
-                Chargement...
-            </Text>
+            <VStack align="stretch" spacing={2}>
+                <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="14px" w="90%" borderRadius="4px" />
+                <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="14px" w="75%" borderRadius="4px" />
+                <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="14px" w="80%" borderRadius="4px" />
+            </VStack>
         );
     if (isError || !content)
         return (
@@ -60,7 +64,7 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
                 h3: { fontSize: "13px" },
                 p: { marginBottom: "0.5em" },
                 "ul,ol": { paddingLeft: "1.2em", marginBottom: "0.5em" },
-                code: { bg: codeBg, color: codeColor, px: "3px", borderRadius: "3px", fontSize: "12px" },
+                code: { bg: codeBg, color: "textBody", px: "3px", borderRadius: "3px", fontSize: "12px" },
                 pre: { bg: codeBg, p: 2, borderRadius: "6px", overflowX: "auto", marginBottom: "0.5em" },
                 blockquote: { borderLeft: "3px solid", borderColor: "green.300", pl: 3, color: "textMuted" },
                 a: { color: "green.500", textDecoration: "underline" },
@@ -80,8 +84,8 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, prev
 
             <Card size="none" h={{ base: "250px", md: "400px" }} bg="surfacePrimary" overflow="auto" p={3}>
                 {isLoading && (
-                    <VStack h="100%" justify="center" align="center" spacing={3}>
-                        <Text variant="body-sm-muted">Chargement de l&apos;aperçu...</Text>
+                    <VStack h="100%" align="stretch" justify="center" spacing={2}>
+                        <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="100%" borderRadius="8px" />
                     </VStack>
                 )}
 
@@ -101,7 +105,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, prev
 
                 {!isLoading && (!previewUrl || isError) && (
                     <VStack h="100%" justify="center" align="center" spacing={3}>
-                        <Box as={File} fontSize="48px" color="grey.400" />
+                        <Box as={File} fontSize="48px" color="textFaint" />
                         <Text variant="body-sm-muted">Aperçu non disponible</Text>
                         <Text variant="body-xs-muted">Téléchargez le fichier pour consulter son contenu</Text>
                     </VStack>

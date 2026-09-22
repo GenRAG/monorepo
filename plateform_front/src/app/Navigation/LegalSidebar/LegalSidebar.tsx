@@ -1,20 +1,6 @@
-import {
-    Box,
-    Collapse,
-    Drawer,
-    DrawerBody,
-    DrawerContent,
-    DrawerOverlay,
-    HStack,
-    Icon,
-    IconButton,
-    Text,
-    VStack,
-    useColorModeValue,
-    useDisclosure,
-} from "@chakra-ui/react";
+import { Box, Collapse, HStack, Icon, Text, VStack, useColorModeValue, useDisclosure } from "@chakra-ui/react";
 import { useEffect, useMemo } from "react";
-import { ArrowLeft, Menu } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useGetUserWorkspacesQuery } from "services/workspace/workspace";
 import { useAppSelector } from "store";
@@ -22,6 +8,7 @@ import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { LEGAL_NAV } from "pages/Legal/data/legalNav";
 import { useActiveSection } from "hooks/useActiveSection";
 import { useAppResponsive } from "hooks/useAppResponsive";
+import { MobileSidebarDrawer } from "components/ui/MobileSidebarDrawer";
 
 const SubList = ({
     subsections,
@@ -32,12 +19,9 @@ const SubList = ({
     activeHash: string;
     onSelect: (hash: string) => void;
 }) => {
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const borderColor = useColorModeValue("grey.100", "grey.600");
-
     return (
         <HStack align="stretch" pl={4} spacing={0} mt={1} mb={2}>
-            <Box w="1.5px" bg={borderColor} borderRadius="0px" alignSelf="stretch" mr={2} />
+            <Box w="1.5px" bg="borderSubtle" borderRadius="0px" alignSelf="stretch" mr={2} />
             <VStack align="stretch" w="100%" spacing={0}>
                 {subsections.map((sub) => {
                     const isActive = activeHash === sub.hash;
@@ -55,7 +39,7 @@ const SubList = ({
                         >
                             <Text
                                 fontSize="xs"
-                                color={isActive ? currentDarkTheme.primary500 : subColor}
+                                color={isActive ? "iconAccent" : "textLabel"}
                                 fontWeight={isActive ? "semibold" : "normal"}
                                 transition="color 0.1s"
                                 noOfLines={1}
@@ -78,10 +62,6 @@ export const LegalSidebar = () => {
     const bg = useColorModeValue("white", "linear-gradient(135deg,rgba(44, 44, 44, 0.54) 0%,rgb(69, 69, 69) 100%)");
     const bgMobile = useColorModeValue("white", "linear-gradient(135deg,rgb(5, 5, 5) 0%, #363636ff 100%)");
     const border = useColorModeValue("grey.100", "grey.500");
-    const itemColor = useColorModeValue("grey.900", "white");
-    const labelColor = useColorModeValue("grey.500", "grey.400");
-    const backColor = useColorModeValue("grey.500", "grey.400");
-    const backHoverBg = useColorModeValue("grey.50", "grey.800");
     const iconColor = useColorModeValue("grey.300", "white");
 
     const isMobile = useAppResponsive({ base: true, lg: false });
@@ -102,7 +82,7 @@ export const LegalSidebar = () => {
                     fontSize="xs"
                     fontWeight="semibold"
                     letterSpacing="0.8px"
-                    color={labelColor}
+                    color="textLabel"
                     textTransform="uppercase"
                 >
                     Légal
@@ -115,8 +95,8 @@ export const LegalSidebar = () => {
                 cursor="pointer"
                 borderBottom="1px solid"
                 borderColor={border}
-                color={backColor}
-                _hover={{ bg: backHoverBg }}
+                color="textLabel"
+                _hover={{ bg: "surfaceHover" }}
                 onClick={() => {
                     const id = lastWorkspaceId ?? workspaces?.[0]?.id;
                     void navigate(id ? `/workspaces/${id}/dashboard` : "/workspaces");
@@ -140,7 +120,7 @@ export const LegalSidebar = () => {
                                     spacing={3}
                                     overflow="hidden"
                                     bg={isActive ? currentDarkTheme.rgba.primary20 : "transparent"}
-                                    color={isActive ? currentDarkTheme.primary500 : itemColor}
+                                    color={isActive ? "iconAccent" : "textStrong"}
                                     _hover={{ bg: currentDarkTheme.rgba.primary20, cursor: "pointer" }}
                                     _before={{
                                         content: '""',
@@ -149,7 +129,7 @@ export const LegalSidebar = () => {
                                         top: 0,
                                         bottom: 0,
                                         width: "4px",
-                                        bg: isActive ? currentDarkTheme.primary : "transparent",
+                                        bg: isActive ? "iconAccent" : "transparent",
                                         borderTopRightRadius: "9999px",
                                         borderBottomRightRadius: "9999px",
                                     }}
@@ -176,36 +156,18 @@ export const LegalSidebar = () => {
 
     if (isMobile) {
         return (
-            <>
-                <Box
-                    w="48px"
-                    minW="48px"
-                    h="100vh"
-                    bg={bgMobile}
-                    borderRight="1px solid"
-                    borderColor={border}
-                    display="flex"
-                    justifyContent="center"
-                    pt={4}
-                    flexShrink={0}
-                >
-                    <IconButton
-                        aria-label="Ouvrir le menu légal"
-                        icon={<Menu size={20} />}
-                        variant="ghost"
-                        color={iconColor}
-                        onClick={onToggle}
-                    />
-                </Box>
-                <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="xs">
-                    <DrawerOverlay />
-                    <DrawerContent bg={bgMobile} maxW="220px" borderRadius={0}>
-                        <DrawerBody p={0} display="flex" flexDirection="column">
-                            {sidebarContent}
-                        </DrawerBody>
-                    </DrawerContent>
-                </Drawer>
-            </>
+            <MobileSidebarDrawer
+                isOpen={isOpen}
+                onToggle={onToggle}
+                onClose={onClose}
+                ariaLabel="Ouvrir le menu légal"
+                bg={bgMobile}
+                border={border}
+                iconColor={iconColor}
+                drawerMaxW="220px"
+            >
+                {sidebarContent}
+            </MobileSidebarDrawer>
         );
     }
 

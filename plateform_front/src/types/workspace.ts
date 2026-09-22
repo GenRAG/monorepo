@@ -7,8 +7,8 @@ export enum UserRole {
 export interface Workspace {
     id: string;
     name: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
     description: string | null;
     users: {
         userId: string;
@@ -25,7 +25,7 @@ export interface WorkspaceDetail extends Workspace {
         id: string;
         name: string;
         description: string | null;
-        createdAt: Date;
+        createdAt: string;
         workflows: {
             id: string;
             definition: unknown;

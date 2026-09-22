@@ -1,4 +1,4 @@
-import { VStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { VStack, Text } from "@chakra-ui/react";
 import { DocSection } from "./DocSection";
 import { DocBulletList } from "./DocBulletList";
 import { DocInfoBox } from "./DocInfoBox";
@@ -6,10 +6,9 @@ import { DocTable } from "./DocTable";
 import type { SectionData } from "pages/Legal/data/types";
 
 const SubpartBlock = ({ title, items }: { title: string; items: string[] }) => {
-    const color = useColorModeValue("grey.800", "grey.100");
     return (
         <VStack align="start" spacing={2.5} w="full">
-            <Text fontSize="sm" fontWeight={700} color={color}>
+            <Text fontSize="sm" fontWeight={700} color="textPrimary">
                 {title}
             </Text>
             <DocBulletList items={items} />
@@ -22,18 +21,16 @@ interface Props {
 }
 
 export const DocSectionRenderer = ({ section }: Props) => {
-    const textColor = useColorModeValue("grey.600", "grey.400");
-
     return (
         <DocSection number={section.number} title={section.title} id={section.id}>
             <VStack align="start" spacing={4} w="full">
                 {section.intro && (
-                    <Text fontSize="sm" color={textColor} lineHeight={1.7}>
+                    <Text fontSize="sm" color="textDescription" lineHeight={1.7}>
                         {section.intro}
                     </Text>
                 )}
                 {section.text && (
-                    <Text fontSize="sm" color={textColor} lineHeight={1.7}>
+                    <Text fontSize="sm" color="textDescription" lineHeight={1.7}>
                         {section.text}
                     </Text>
                 )}

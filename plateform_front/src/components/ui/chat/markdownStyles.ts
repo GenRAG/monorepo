@@ -27,7 +27,7 @@ export const getMarkdownStyles = (colorMode: string) => ({
     "& blockquote": {
         borderLeft: "3px solid var(--chakra-colors-primary)",
         paddingLeft: "12px",
-        color: colorMode === "dark" ? "grey.400" : "grey.500",
+        color: "textLabel",
         fontStyle: "italic",
     },
     "& table": {
@@ -39,7 +39,7 @@ export const getMarkdownStyles = (colorMode: string) => ({
     },
     "& th, & td": {
         border: "1px solid",
-        borderColor: colorMode === "dark" ? "grey.700" : "grey.200",
+        borderColor: "borderDivider",
         padding: "6px 10px",
         textAlign: "left",
     },

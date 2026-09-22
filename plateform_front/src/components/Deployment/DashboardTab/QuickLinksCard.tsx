@@ -46,7 +46,7 @@ export const QuickLinksCard = ({ workspaceId, agentId }: QuickLinksCardProps) =>
                         _hover={{ bg: "surfaceSubtle" }}
                         transition="background 0.12s"
                     >
-                        <Box as={link.icon} boxSize={4} color="green.500" flexShrink={0} mt={0.5} />
+                        <Box as={link.icon} boxSize={4} color="iconAccent" flexShrink={0} mt={0.5} />
                         <VStack align="flex-start" spacing={0} minW={0}>
                             <Text variant="body-sm-semibold" noOfLines={1}>
                                 {link.label}

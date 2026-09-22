@@ -1,52 +1,26 @@
 import { backendApi } from "services/api";
+import { Tag } from "services/tags/tag";
+import type {
+    DailyMetricPoint,
+    LatencyPoint,
+    HeatmapDay,
+    DocumentHealthBreakdown,
+    CostBreakdownEntry,
+    QueryLogStatus,
+    QueryLogEntry,
+    QueryLogPage,
+} from "types/analytics/analytics";
 
-export interface DailyMetricPoint {
-    date: string;
-    queries: number;
-    errors: number;
-    outOfCredits: number;
-    creditsUsed: number;
-}
-
-export interface LatencyPoint {
-    date: string;
-    p50: number;
-    p95: number;
-}
-
-export interface HeatmapDay {
-    date: string;
-    count: number;
-}
-
-export interface DocumentHealthBreakdown {
-    uploaded: number;
-    processing: number;
-    indexed: number;
-    failed: number;
-    total: number;
-}
-
-export interface CostBreakdownEntry {
-    key: string;
-    costUsd: number;
-}
-
-export type QueryLogStatus = "SUCCESS" | "ERROR" | "OUT_OF_CREDITS";
-
-export interface QueryLogEntry {
-    id: string;
-    query: string;
-    status: QueryLogStatus;
-    durationMs: number;
-    creditsUsed: number;
-    createdAt: string;
-}
-
-export interface QueryLogPage {
-    data: QueryLogEntry[];
-    total: number;
-}
+export type {
+    DailyMetricPoint,
+    LatencyPoint,
+    HeatmapDay,
+    DocumentHealthBreakdown,
+    CostBreakdownEntry,
+    QueryLogStatus,
+    QueryLogEntry,
+    QueryLogPage,
+};
 
 interface AgentRouteParams {
     workspaceId: string;
@@ -72,6 +46,7 @@ export const analyticsApi = backendApi.injectEndpoints({
                 url: `${analyticsBaseUrl(params)}/daily-metrics`,
                 params: { days },
             }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
 
         getLatency: builder.query<LatencyPoint[], AnalyticsPeriodParams>({
@@ -79,14 +54,17 @@ export const analyticsApi = backendApi.injectEndpoints({
                 url: `${analyticsBaseUrl(params)}/latency`,
                 params: { days },
             }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
 
         getDocumentHealth: builder.query<DocumentHealthBreakdown, AgentRouteParams>({
             query: (params) => ({ url: `${analyticsBaseUrl(params)}/document-health` }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
 
         getActivityHeatmap: builder.query<HeatmapDay[], AgentRouteParams>({
             query: (params) => ({ url: `${analyticsBaseUrl(params)}/activity-heatmap` }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
 
         getCostByModel: builder.query<CostBreakdownEntry[], AnalyticsPeriodParams>({
@@ -94,6 +72,7 @@ export const analyticsApi = backendApi.injectEndpoints({
                 url: `${analyticsBaseUrl(params)}/cost-by-model`,
                 params: { days },
             }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
 
         getCostByType: builder.query<CostBreakdownEntry[], AnalyticsPeriodParams>({
@@ -101,6 +80,7 @@ export const analyticsApi = backendApi.injectEndpoints({
                 url: `${analyticsBaseUrl(params)}/cost-by-type`,
                 params: { days },
             }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
 
         getRecentQueries: builder.query<QueryLogPage, RecentQueriesParams>({
@@ -108,6 +88,7 @@ export const analyticsApi = backendApi.injectEndpoints({
                 url: `${analyticsBaseUrl(params)}/query-logs`,
                 params: { page, limit },
             }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
     }),
 });

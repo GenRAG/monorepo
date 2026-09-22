@@ -102,6 +102,7 @@ export const extendedUserApi = backendApi.injectEndpoints({
                 url: "/auth/logout",
                 method: "POST",
             }),
+            invalidatesTags: [Tag.Users],
         }),
 
         googleLogin: builder.mutation<AuthResponse, { credential: string }>({

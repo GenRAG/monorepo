@@ -1,6 +1,6 @@
 import React from "react";
 import { Divider, HStack, Text, VStack } from "@chakra-ui/react";
-import { QueryDetailsInfo } from "./types";
+import { QueryDetailsInfo } from "types/assistant/assistant";
 
 const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
     <HStack justify="space-between" py={2.5}>

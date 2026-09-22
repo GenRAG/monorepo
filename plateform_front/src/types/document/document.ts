@@ -15,12 +15,12 @@ export interface DocumentEntity {
     storageKey: string;
     mimeType: string;
     status: DocumentStatus;
-    indexedAt?: Date | null;
-    failedAt?: Date | null;
+    indexedAt?: string | null;
+    failedAt?: string | null;
     indexError?: string | null;
     retryCount?: number;
-    createdAt: Date;
-    updatedAt?: Date;
+    createdAt: string;
+    updatedAt?: string;
 }
 
 export interface UploadDocumentParams {

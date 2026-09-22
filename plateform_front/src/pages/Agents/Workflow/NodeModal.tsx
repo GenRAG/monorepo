@@ -1,4 +1,4 @@
-import { Flex, HStack, IconButton, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { Flex, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,10 +26,6 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
     const { fitView, getNode } = useReactFlow();
     const [contentReady, setContentReady] = useState(false);
     const toast = useThemedToast();
-
-    const bgColor = useColorModeValue("white", "grey.950");
-    const borderColor = useColorModeValue("grey.100", "grey.700");
-    const labelColor = useColorModeValue("grey.600", "grey.400");
 
     const parentNode = nodeData?.parentNodeId ? getNode(nodeData.parentNodeId) : undefined;
     const callbackFetchModels =
@@ -77,11 +73,11 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                             width: modalWidth,
                         }}
                     >
-                        <Flex direction="column" w={modalWidth} h="100%" bg={bgColor}>
+                        <Flex direction="column" w={modalWidth} h="100%" bg="surfacePrimary">
                             <Flex
                                 p={4}
                                 borderBottom="1px solid"
-                                borderColor={borderColor}
+                                borderColor="borderSubtle"
                                 align="center"
                                 justify="space-between"
                                 bg="surfacePrimary"
@@ -91,7 +87,7 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                                         <Text fontWeight="semibold" fontSize="md">
                                             {task.label || task.type}
                                         </Text>
-                                        <Text fontSize="xs" color={labelColor}>
+                                        <Text fontSize="xs" color="textDescription">
                                             {task.description}
                                         </Text>
                                     </VStack>

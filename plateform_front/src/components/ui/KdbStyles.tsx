@@ -5,7 +5,6 @@ interface StyledKbdProps {
 }
 
 export const StyledKbd = ({ children }: StyledKbdProps) => {
-    const bg = useColorModeValue("white", "grey.750");
     const shadow = useColorModeValue("0 2px 0 0 #CBD5E0", "0 2px 0 0 #2D3748");
 
     return (
@@ -17,7 +16,7 @@ export const StyledKbd = ({ children }: StyledKbdProps) => {
             minW="20px"
             h="20px"
             px="6px"
-            bg={bg}
+            bg="surfaceCard"
             color="textLabel"
             fontSize="10px"
             fontWeight={600}

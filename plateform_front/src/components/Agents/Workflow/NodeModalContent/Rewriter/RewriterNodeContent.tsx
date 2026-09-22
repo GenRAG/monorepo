@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useColorModeValue } from "@chakra-ui/react";
 import { VStack, Box, HStack, Text, Icon } from "@chakra-ui/react";
 import { PencilLine, Sparkles, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -124,9 +123,6 @@ const STEPS = [
 export const RewriterAnimation = () => {
     const [stepIdx, setStepIdx] = useState(0);
     const [phase, setPhase] = useState<"original" | "rewriting" | "rewritten">("original");
-    const cardBg = useColorModeValue("white", "grey.800");
-    const textColor = useColorModeValue("grey.800", "grey.200");
-    const borderColor = useColorModeValue("grey.200", "grey.600");
 
     useEffect(() => {
         const t1 = setTimeout(() => setPhase("rewriting"), 1000);
@@ -176,8 +172,14 @@ export const RewriterAnimation = () => {
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <Box bg={cardBg} border="1.5px solid" borderColor={borderColor} borderRadius="12px" p={3}>
-                                <Text fontSize="13px" color={textColor} fontStyle="italic">
+                            <Box
+                                bg="surfaceAction"
+                                border="1.5px solid"
+                                borderColor="borderStrong"
+                                borderRadius="12px"
+                                p={3}
+                            >
+                                <Text fontSize="13px" color="textSecondary" fontStyle="italic">
                                     &quot;{step.original}&quot;
                                 </Text>
                             </Box>
@@ -190,7 +192,13 @@ export const RewriterAnimation = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                         >
-                            <Box bg={cardBg} border="1.5px dashed" borderColor="green.400" borderRadius="12px" p={3}>
+                            <Box
+                                bg="surfaceAction"
+                                border="1.5px dashed"
+                                borderColor="green.400"
+                                borderRadius="12px"
+                                p={3}
+                            >
                                 <HStack spacing={2}>
                                     <motion.div
                                         animate={{ rotate: 360 }}
@@ -223,7 +231,7 @@ export const RewriterAnimation = () => {
                             transition={{ duration: 0.3 }}
                         >
                             <Box
-                                bg={cardBg}
+                                bg="surfaceAction"
                                 border="1.5px solid"
                                 borderColor="green.400"
                                 borderRadius="12px"
@@ -232,7 +240,7 @@ export const RewriterAnimation = () => {
                             >
                                 <HStack align="start" spacing={2}>
                                     <Icon as={CheckCircle2} color="green.500" boxSize={4} mt={0.5} flexShrink={0} />
-                                    <Text fontSize="13px" color={textColor}>
+                                    <Text fontSize="13px" color="textSecondary">
                                         &quot;{step.rewritten}&quot;
                                     </Text>
                                 </HStack>

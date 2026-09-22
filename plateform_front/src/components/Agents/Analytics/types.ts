@@ -3,14 +3,6 @@ import { type QueryLogStatus } from "services/analytics/analytics";
 export type Period = "7j" | "30j" | "90j";
 export const PERIOD_DAYS: Record<Period, number> = { "7j": 7, "30j": 30, "90j": 90 };
 
-export type CostType = "recherche" | "réponse" | "classement";
-
-export interface CostModel {
-    id: string;
-    label: string;
-    type: CostType;
-}
-
 export const STATUS_LABEL: Record<QueryLogStatus, string> = {
     SUCCESS: "Succès",
     ERROR: "Erreur",

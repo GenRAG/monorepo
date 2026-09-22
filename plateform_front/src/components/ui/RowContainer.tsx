@@ -1,10 +1,9 @@
-import { HStack } from "@chakra-ui/react";
+import { HStack, type StackProps } from "@chakra-ui/react";
 import { ReactNode } from "react";
 
-interface RowContainerProps {
+interface RowContainerProps extends StackProps {
     children: ReactNode;
     withBorder?: boolean;
-    [key: string]: any;
 }
 
 const RowContainer = ({ children, withBorder = true, ...props }: RowContainerProps) => {

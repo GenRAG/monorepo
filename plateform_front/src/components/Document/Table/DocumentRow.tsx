@@ -2,7 +2,8 @@ import React from "react";
 import { HStack, Td, Text, Tr } from "@chakra-ui/react";
 import { DocumentStatusBadge } from "components/ui/DocumentStatusBadge";
 import { DocumentEntity } from "types/document/document";
-import { formatFileSize, formatDate, getFileTypeLabel, getFileTypeBadgeConfig } from "utils/documentFormatters";
+import { formatFileSize, getFileTypeLabel, getFileTypeBadgeConfig } from "utils/documentFormatters";
+import { formatRelativeDate } from "utils/date";
 import { DocumentActionsMenu } from "./DocumentActionsMenu";
 import BoxIcon from "components/ui/BoxIcon";
 
@@ -37,7 +38,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({ document, onPreview, o
                 <DocumentStatusBadge status={document.status} retryCount={document.retryCount} />
             </Td>
             <Td>
-                <Text variant="body-xs-muted">{formatDate(document.createdAt)}</Text>
+                <Text variant="body-xs-muted">{formatRelativeDate(document.createdAt)}</Text>
             </Td>
             <Td onClick={(e) => e.stopPropagation()}>
                 <HStack spacing={1} justify="flex-end">

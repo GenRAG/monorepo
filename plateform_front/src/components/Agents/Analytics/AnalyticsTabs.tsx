@@ -1,5 +1,5 @@
 import { BarChart3, CreditCard } from "lucide-react";
-import { TabBar } from "components/ui/TabBar";
+import { GlassTabBar } from "components/ui/GlassTabBar";
 
 export enum AnalyticsTab {
     Overview = "overview",
@@ -17,5 +17,5 @@ interface AnalyticsTabsProps {
 }
 
 export const AnalyticsTabs = ({ activeTab, onChange }: AnalyticsTabsProps) => (
-    <TabBar tabs={TABS} activeTab={activeTab} onChange={(v) => onChange(v as AnalyticsTab)} />
+    <GlassTabBar tabs={TABS} activeTab={activeTab} onChange={onChange} />
 );

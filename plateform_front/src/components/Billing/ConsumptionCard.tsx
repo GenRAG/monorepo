@@ -1,7 +1,19 @@
 import React, { useState } from "react";
-import { Box, Card, HStack, Stack, Text, Tooltip as ChakraTooltip, Skeleton } from "@chakra-ui/react";
-import { Bar, BarChart, BarXAxis, ChartTooltip, useChart, Grid } from "components/charts";
+import { Box, Card, HStack, SkeletonCircle, Stack, Text } from "@chakra-ui/react";
+import { BarChart2 } from "lucide-react";
+import {
+    Bar,
+    BarChart,
+    BarXAxis,
+    ChartTooltip,
+    Grid,
+    PieCenter,
+    PieChart,
+    PieSlice,
+    type PieData,
+} from "components/charts";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { useGetWorkspaceConsumptionQuery } from "services/credit/credit";
 import { useParams } from "react-router-dom";
@@ -18,30 +30,7 @@ const AGENT_COLORS = [
 ];
 
 const BAR_RADIUS = 6;
-
-const BackgroundTrack = ({ keyPrefix }: { keyPrefix: string }) => {
-    const { data, barScale, bandWidth, barXAccessor, innerHeight } = useChart();
-    if (!(barScale && bandWidth && barXAccessor)) return null;
-    return (
-        <>
-            {data.map((d, i) => {
-                const x = barScale(barXAccessor(d)) ?? 0;
-                return (
-                    <rect
-                        key={`${keyPrefix}-track-${i}`}
-                        x={x}
-                        y={0}
-                        width={bandWidth}
-                        height={innerHeight}
-                        rx={BAR_RADIUS}
-                        ry={BAR_RADIUS}
-                        fill="var(--chart-grid)"
-                    />
-                );
-            })}
-        </>
-    );
-};
+const PIE_SIZE = 230;
 
 type Period = "7j" | "30j" | "90j";
 
@@ -79,112 +68,129 @@ const ConsumptionCard: React.FC = () => {
     const byDay = consumption?.byDay ?? [];
     const byAgent = consumption?.byAgent ?? [];
     const agentTotal = byAgent.reduce((s, a) => s + a.creditsUsed, 0);
+    const totalPeriodCredits = byDay.reduce((s, v) => s + v, 0);
+    const isEmpty = !isLoading && totalPeriodCredits === 0;
 
     const chartRows = getChartLabels(period).map((name, i) => ({
         name,
         value: byDay[i] ?? 0,
     }));
 
+    const pieData: PieData[] = byAgent.map((a, i) => ({
+        label: a.agentName,
+        value: a.creditsUsed,
+        color: AGENT_COLORS[i % AGENT_COLORS.length],
+    }));
+
     return (
-        <Card size="none" variant="attachedBottom" h="100%" display="flex" flexDirection="column">
-            <Stack p={{ base: 3, md: 4 }} spacing={0} flex={1} minH={0} display="flex" flexDirection="column">
-                <HStack justify="space-between" flexWrap="wrap" gap={0} flexShrink={0}>
-                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="textPrimary">
-                        Consommation
-                    </Text>
-                    <MultiOptionButtons
-                        options={(["7j", "30j", "90j"] as Period[]).map((p) => ({
-                            value: p,
-                            label: p,
-                        }))}
-                        value={period}
-                        onChange={setPeriod}
+        <Stack spacing={0} flex={1} minH={0} display="flex" flexDirection="column">
+            <HStack justify="space-between" flexWrap="wrap" gap={0} flexShrink={0}>
+                <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="textPrimary">
+                    Consommation
+                </Text>
+                <MultiOptionButtons
+                    options={(["7j", "30j"] as Period[]).map((p) => ({
+                        value: p,
+                        label: p,
+                    }))}
+                    value={period}
+                    onChange={setPeriod}
+                />
+            </HStack>
+
+            <Text variant="body-xs-muted" mb={3} flexShrink={0}>
+                {period === "7j" ? "7 derniers jours" : period === "30j" ? "30 derniers jours" : "90 derniers jours"}{" "}
+                crédits utilisés
+            </Text>
+
+            {isEmpty ? (
+                <Card size="none" flex={1} minH="180px" display="flex">
+                    <CardEmptyState
+                        icon={BarChart2}
+                        title="Aucune consommation"
+                        description={`Aucun crédit consommé sur ${period === "7j" ? "les 7 derniers jours" : period === "30j" ? "les 30 derniers jours" : "les 90 derniers jours"}.`}
                     />
-                </HStack>
-
-                <Text variant="body-xs-muted" mb={3} flexShrink={0}>
-                    {period === "7j"
-                        ? "7 derniers jours"
-                        : period === "30j"
-                          ? "30 derniers jours"
-                          : "90 derniers jours"}{" "}
-                    crédits utilisés
-                </Text>
-
-                <Box flex={1} minH="80px" position="relative" w="100%" minW={0}>
-                    <Box position="absolute" inset={0}>
-                        <BarChart
-                            status={isLoading ? "loading" : "ready"}
-                            data={chartRows}
-                            xDataKey="name"
-                            margin={{ top: 8, right: 0, bottom: 32, left: 0 }}
-                            aspectRatio=""
-                            className="h-full"
-                        >
-                            <Grid horizontal />
-                            <BackgroundTrack keyPrefix="value" />
-                            <Bar dataKey="value" fill="var(--chart-line-primary)" lineCap={BAR_RADIUS} />
-                            <BarXAxis maxLabels={period === "90j" ? 4 : period === "30j" ? 10 : 7} />
-                            <ChartTooltip showDatePill={false} showDots={false} />
-                        </BarChart>
-                    </Box>
-                </Box>
-            </Stack>
-
-            <Box borderTop="1px solid" borderColor="borderDefault" p={{ base: 4, md: 5 }} flexShrink={0}>
-                <Text variant="body-xs-muted" mb={3}>
-                    PAR AGENT
-                </Text>
-
-                {isLoading ? (
-                    <Skeleton h="10px" borderRadius="full" mb={3} />
-                ) : byAgent.length === 0 ? (
-                    <Text variant="body-xs-muted" mb={3}>
-                        Aucune consommation sur cette période.
-                    </Text>
-                ) : (
-                    <>
-                        <HStack spacing={0} borderRadius="full" overflow="hidden" h="10px" mb={3}>
-                            {byAgent.map((a, i) => (
-                                <ChakraTooltip
-                                    key={a.agentId}
-                                    label={`${a.agentName}: ${agentTotal > 0 ? Math.round((a.creditsUsed / agentTotal) * 100) : 0}%`}
-                                    bg={AGENT_COLORS[i % AGENT_COLORS.length]}
-                                    placement="top"
-                                    color="white"
-                                    borderRadius="8px"
-                                    hasArrow
-                                >
-                                    <Box
-                                        flex={a.creditsUsed}
-                                        h="full"
-                                        bg={AGENT_COLORS[i % AGENT_COLORS.length]}
-                                        cursor="pointer"
-                                    />
-                                </ChakraTooltip>
-                            ))}
-                        </HStack>
-
-                        <Box display="flex" flexWrap="wrap" gap={2}>
-                            {byAgent.map((a, i) => (
-                                <HStack key={a.agentId} spacing={1.5}>
-                                    <Box
-                                        w={2}
-                                        h={2}
-                                        borderRadius="full"
-                                        bg={AGENT_COLORS[i % AGENT_COLORS.length]}
-                                        flexShrink={0}
-                                    />
-                                    <Text fontSize="10px" color="textLabel">
-                                        {a.agentName} - {a.creditsUsed}
-                                    </Text>
-                                </HStack>
-                            ))}
+                </Card>
+            ) : (
+                <Stack direction={{ base: "column", lg: "row" }} spacing={4} flex={1} minH={0} align="stretch">
+                    <Card size="none" flex={6} minH={0} position="relative" overflow="hidden">
+                        <Box position="absolute" inset={3}>
+                            <BarChart
+                                status={isLoading ? "loading" : "ready"}
+                                data={chartRows}
+                                xDataKey="name"
+                                margin={{ top: 8, right: 0, bottom: 32, left: 0 }}
+                                aspectRatio=""
+                                className="h-full"
+                            >
+                                <Grid horizontal />
+                                <Bar dataKey="value" fill="var(--chart-line-primary)" lineCap={BAR_RADIUS} />
+                                <BarXAxis maxLabels={period === "90j" ? 4 : period === "30j" ? 10 : 7} />
+                                <ChartTooltip
+                                    showDatePill={false}
+                                    showDots={false}
+                                    rows={(point) => [
+                                        {
+                                            color: "var(--chart-line-primary)",
+                                            label: "Crédits",
+                                            value: (point.value as number) ?? 0,
+                                        },
+                                    ]}
+                                />
+                            </BarChart>
                         </Box>
-                    </>
-                )}
-            </Box>
-        </Card>
+                    </Card>
+
+                    <Card size="md" flexShrink={0} flex={2} display="flex" flexDirection="column">
+                        <Text variant="body-xs-muted" flexShrink={0}>
+                            PAR AGENT
+                        </Text>
+
+                        <Box flex={1} minH={0} display="flex" alignItems="center" justifyContent="center">
+                            {isLoading ? (
+                                <SkeletonCircle
+                                    startColor="skeletonStart"
+                                    endColor="skeletonEnd"
+                                    boxSize={`${PIE_SIZE}px`}
+                                />
+                            ) : (
+                                <Box boxSize={`${PIE_SIZE}px`} flexShrink={0}>
+                                    {agentTotal > 0 ? (
+                                        <PieChart data={pieData} size={PIE_SIZE} innerRadius={70}>
+                                            {pieData.map((_, i) => (
+                                                <PieSlice key={i} index={i} />
+                                            ))}
+                                            <PieCenter defaultLabel="Crédits" />
+                                        </PieChart>
+                                    ) : (
+                                        <Box boxSize="full" borderRadius="full" bg="borderDefault" />
+                                    )}
+                                </Box>
+                            )}
+                        </Box>
+
+                        {!isLoading && byAgent.length > 0 && (
+                            <Box display="flex" flexWrap="wrap" justifyContent="center" gap={2} flexShrink={0}>
+                                {byAgent.map((a, i) => (
+                                    <HStack key={a.agentId} spacing={1.5}>
+                                        <Box
+                                            w={2}
+                                            h={2}
+                                            borderRadius="full"
+                                            bg={AGENT_COLORS[i % AGENT_COLORS.length]}
+                                            flexShrink={0}
+                                        />
+                                        <Text fontSize="10px" color="textLabel">
+                                            {a.agentName} - {a.creditsUsed}
+                                        </Text>
+                                    </HStack>
+                                ))}
+                            </Box>
+                        )}
+                    </Card>
+                </Stack>
+            )}
+        </Stack>
     );
 };
 

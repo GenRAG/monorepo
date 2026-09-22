@@ -6,7 +6,7 @@ import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
 import useUploadDocuments, { ACCEPTED_EXTENSIONS, ACCEPTED_TYPES, Status } from "hooks/useUploadDocuments";
 import useDragDrop from "hooks/useDragDrop";
-import { useOnboarding } from "hooks/useOnBoarding";
+import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import UploadDropzone from "components/ui/UploadDropzone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";

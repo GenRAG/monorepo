@@ -5,9 +5,9 @@ import remarkGfm from "remark-gfm";
 import { ChatMessage, RagSource } from "hooks/chat";
 import { getMarkdownStyles } from "components/ui/chat/markdownStyles";
 import ThinkingBubble from "components/ui/chat/ThinkingBubble";
-import Button from "@/components/ui/Button";
+import Button from "components/ui/Button";
 import { QueryDetailsDrawer } from "./Drawer/QueryDetailsDrawer";
-import { QuerySource, QueryDetailsInfo, SourceFileType } from "./Drawer/types";
+import { QuerySource, QueryDetailsInfo, SourceFileType } from "types/assistant/assistant";
 import { formatDateTime } from "utils/documentFormatters";
 
 const formatTime = (ts: number) => new Date(ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });

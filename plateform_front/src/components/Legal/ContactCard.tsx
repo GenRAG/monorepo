@@ -1,4 +1,4 @@
-import { Card, VStack, HStack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Card, VStack, HStack, Text } from "@chakra-ui/react";
 import BoxIcon from "components/ui/BoxIcon";
 import { LucideIcon } from "lucide-react";
 
@@ -10,13 +10,10 @@ interface ContactCardProps {
 }
 
 export const ContactCard = ({ icon, category, contact, description }: ContactCardProps) => {
-    const iconBg = useColorModeValue("green.50", "green.900");
-    const iconColor = useColorModeValue("green.600", "green.400");
-
     return (
         <Card size="none" borderRadius="10px" bg="secondBackgroundDefault" p={4} w="100%">
             <HStack spacing={3} align="start" w="100%">
-                <BoxIcon bg={iconBg} color={iconColor} icon={icon} />
+                <BoxIcon bg="accentIconBg" color="iconAccent" icon={icon} />
                 <VStack align="start" spacing={0.5}>
                     <Text
                         fontSize="10px"

@@ -55,11 +55,7 @@ const SidebarInner: React.FC<{
 
 const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({ justCompletedStep, isDrawerOpen, onDrawerClose }) => {
     const bg = useColorModeValue(sidebarBgLight, sidebarBgDark);
-    const closeButtonColor = useColorModeValue("grey.900", "white");
-    const closeButtonBg = useColorModeValue("white", "grey.800");
-    const headerBg = useColorModeValue("white", "grey.800");
     const headerBorderColor = useColorModeValue("grey.200", currentDarkTheme.rgba.primary20);
-    const headerColor = useColorModeValue("grey.900", "white");
 
     return (
         <>
@@ -78,12 +74,12 @@ const OnboardingSidebar: React.FC<OnboardingSidebarProps> = ({ justCompletedStep
             <Drawer isOpen={isDrawerOpen} placement="left" onClose={onDrawerClose}>
                 <DrawerOverlay />
                 <DrawerContent bg={bg}>
-                    <DrawerCloseButton color={closeButtonColor} bg={closeButtonBg} />
+                    <DrawerCloseButton color="textStrong" bg="surfaceAction" />
                     <DrawerHeader
                         borderBottomWidth="1px"
-                        bg={headerBg}
+                        bg="surfaceAction"
                         borderColor={headerBorderColor}
-                        color={headerColor}
+                        color="textStrong"
                     >
                         Navigation
                     </DrawerHeader>

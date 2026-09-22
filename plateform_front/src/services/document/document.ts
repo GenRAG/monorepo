@@ -1,5 +1,6 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
+import { workspaceStatsTag } from "services/workspace/workspace";
 import {
     DocumentByIdParams,
     DocumentEntity,
@@ -31,6 +32,7 @@ export const extendedDocumentApi = backendApi.injectEndpoints({
                     type: Tag.Documents,
                     id: getAgentDocumentsTagId(workspaceId, agentId),
                 },
+                workspaceStatsTag(workspaceId),
             ],
         }),
 
@@ -107,6 +109,7 @@ export const extendedDocumentApi = backendApi.injectEndpoints({
                     type: Tag.Documents,
                     id: getAgentDocumentsTagId(workspaceId, agentId),
                 },
+                workspaceStatsTag(workspaceId),
             ],
         }),
     }),

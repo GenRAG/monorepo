@@ -4,7 +4,7 @@ const colorTokens = {
     inputBorder: { default: "grey.100", _dark: "grey.700" },
     inputPlaceholder: { default: "grey.500", _dark: "grey.400" },
     inputActiveBorder: { default: "green.400", _dark: "green.400" },
-    inputBg: { default: "white", _dark: "grey.950" },
+    inputBg: { default: "grey.50", _dark: "grey.950" },
     inputDisabledBg: { default: "grey.50", _dark: "grey.800" },
 
     // === TEXT ===
@@ -26,8 +26,8 @@ const colorTokens = {
     // en dark (grey.975 vs grey.950), c'est la valeur réellement utilisée à la racine de l'app.
     surfaceAppShell: { default: "white", _dark: "grey.950" },
     surfacePrimary: { default: "white", _dark: "grey.950" }, // Page principale
-    surfaceCard: { default: "white", _dark: "grey.900" }, // Cartes
-    surfaceModal: { default: "white", _dark: "grey.900" }, // Modales
+    surfaceCard: { default: "grey.50", _dark: "grey.950" }, // Cartes
+    surfaceModal: { default: "grey.50", _dark: "grey.900" }, // Modales
     surfaceSubtle: { default: "grey.25", _dark: "grey.800" }, // Fond subtil, inputs désactivés
     surfaceHover: { default: "grey.50", _dark: "grey.900" }, // Survol de lignes/cartes
     surfaceThumbnail: { default: "grey.100", _dark: "grey.850" }, // Miniatures, avatars
@@ -38,7 +38,7 @@ const colorTokens = {
     bubbleAccentBg: { default: "green.100", _dark: "green.700" }, // Bulle de message accentuée (onboarding)
 
     // === BORDERS ===
-    borderSubtle: { default: "grey.100", _dark: "grey.700" }, // Bordure légère
+    borderSubtle: { default: "grey.100", _dark: "grey.900" }, // Bordure légère
     borderDefault: { default: "grey.100", _dark: "grey.800" }, // Bordure standard (cartes, séparateurs)
     borderStrong: { default: "grey.200", _dark: "grey.600" }, // Bordure marquée (kbd, inputs)
     borderDivider: { default: "grey.200", _dark: "grey.700" }, // Séparateurs de section
@@ -50,9 +50,23 @@ const colorTokens = {
     borderAccentCardActive: { default: "green.400", _dark: "green.500" }, // Bordure de carte accentuée, état actif
     borderAccentCardMuted: { default: "green.200", _dark: "green.700" }, // Bordure de carte accentuée, état atténué
 
+    // === DANGER (confirmation de suppression, zones destructrices) ===
+    dangerBorder: { default: "red.100", _dark: "rgba(239,68,68,0.2)" },
+    dangerBgSubtle: { default: "red.50", _dark: "rgba(239,68,68,0.06)" },
+    dangerBorderSubtle: { default: "red.100", _dark: "rgba(239,68,68,0.15)" },
+    dangerIconBg: { default: "red.100", _dark: "rgba(239,68,68,0.18)" },
+
+    // === TOOLTIP ===
+    tooltipBg: { default: "grey.700", _dark: "green.600" }, // Fond de tooltip (déjà repris tel quel dans plusieurs sidebars)
+
     // === SKELETON ===
     skeletonStart: { default: "grey.100", _dark: "grey.800" },
     skeletonEnd: { default: "grey.200", _dark: "grey.700" },
+
+    // === TREND (indicateurs de variation) ===
+    trendPositive: { default: "green.600", _dark: "green.400" },
+    trendNeutral: { default: "orange.500", _dark: "orange.300" },
+    trendNegative: { default: "red.500", _dark: "red.400" },
 
     accentCardBg: { default: "green.50", _dark: "grey.850" }, // Carte sélectionnée/active
     accentIconBg: { default: "green.100", _dark: "grey.800" }, // Fond icône accent
@@ -66,8 +80,11 @@ const colorTokens = {
     listItemHoverBg: { default: "rgba(0,0,0,0.03)", _dark: "rgba(255,255,255,0.05)" }, // Fond d'item de liste survolé
     separatorDashAccent: { default: "#D1D5DB", _dark: "rgba(52, 211, 169, 0.3)" },
 
+    bgAgentProduction: { default: "#F0FDF4", _dark: "#68ffb871" },
+
     backgroundDefault: { default: "white", _dark: "grey.900" },
     secondBackgroundDefault: { default: "grey.25", _dark: "grey.950" },
+    agentBackgroundDefault: { default: "grey.25", _dark: "liquidGlass.black" },
 };
 
 export default colorTokens;

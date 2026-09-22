@@ -11,7 +11,7 @@ export const QueryDetailsDrawerHeader: React.FC<QueryDetailsDrawerHeaderProps> =
 
     return (
         <DrawerHeader bg="surfacePrimary" borderBottomWidth="1px" pb={3}>
-        <DrawerCloseButton />
+            <DrawerCloseButton />
             <HStack spacing={3} pr={8}>
                 <VStack align="start" spacing={0} minW={0}>
                     <Text fontSize="md" fontWeight="semibold" color="textStrong" noOfLines={1}>

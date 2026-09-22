@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -24,6 +25,11 @@ jobs:
           filters: |
             backend:
               - 'plateform_back/**'
+              - '.github/workflows/jobs.yml'
+            frontend:
+              - 'plateform_front/**'
+              - 'packages/**'
+              - 'yarn.lock'
               - '.github/workflows/jobs.yml'
 
   backend:
@@ -93,6 +99,34 @@ jobs:
 
       - name: E2E tests
         run: yarn test:e2e
+
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Pre-existing lint debt in components/charts (not TS-aware react/prop-types
+      # rules) — surfaced but not blocking until that's cleaned up separately.
+      - name: Lint
+        working-directory: plateform_front
+        run: yarn lint
+        continue-on-error: true
+
+      - name: Build
+        working-directory: plateform_front
+        run: yarn build
 
   mirror:
     runs-on: ubuntu-latest

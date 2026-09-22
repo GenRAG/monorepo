@@ -58,9 +58,7 @@ export const useChat = ({ getResponse, initialMessages = [] }: UseChatOptions) =
                     (event) => {
                         setMessages((prev) =>
                             prev.map((m) =>
-                                m.id === id
-                                    ? { ...m, thinkingEvents: [...(m.thinkingEvents ?? []), event] }
-                                    : m,
+                                m.id === id ? { ...m, thinkingEvents: [...(m.thinkingEvents ?? []), event] } : m,
                             ),
                         );
                     },

@@ -14,32 +14,29 @@ import {
 } from "@chakra-ui/react";
 import BoxIcon from "components/ui/BoxIcon";
 import { Check, ChevronDown, Plus } from "lucide-react";
+import { ReactNode } from "react";
 import { Workspace } from "types/workspace";
 
 interface WorkspaceDropdownProps {
     workspaces: Workspace[];
     selectedId: string;
     onSelect: (id: string) => void;
+    /**
+     * Fourni par un consommateur flottant (ex: GlassNav) qui veut son propre déclencheur (avatar
+     * dans une bulle de verre) plutôt que la pastille pleine largeur par défaut — le menu s'ouvre
+     * alors vers le bas-gauche (`bottom-end`) plutôt que vers le bas-droite, pour rester dans
+     * l'écran depuis un coin.
+     */
+    compactTrigger?: ReactNode;
 }
 
-const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdownProps) => {
+const WorkspaceDropdown = ({ workspaces, selectedId, onSelect, compactTrigger }: WorkspaceDropdownProps) => {
     const { isOpen, onClose, onToggle } = useDisclosure();
 
     const selectedWorkspace = workspaces.find((w) => w.id === selectedId) ?? workspaces[0];
 
     const triggerBg = useColorModeValue("whiteAlpha.100", "whiteAlpha.50");
     const triggerHoverBg = useColorModeValue("blackAlpha.100", "whiteAlpha.100");
-    const popoverBg = useColorModeValue("white", "grey.900");
-    const popoverBorder = useColorModeValue("grey.100", "#333");
-    const headingColor = useColorModeValue("grey.400", "grey.500");
-    const nameColor = useColorModeValue("grey.900", "white");
-    const titleColor = useColorModeValue("grey.900", "white");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-    const itemHoverBg = useColorModeValue("grey.50", "whiteAlpha.100");
-    const dividerColor = useColorModeValue("grey.100", "grey.700");
-    const actionColor = useColorModeValue("grey.700", "grey.300");
-    const activeCheckColor = useColorModeValue("green.500", "green.300");
-    const borderColor = useColorModeValue("grey.100", "grey.700");
 
     const handleSelect = (id: string) => {
         onSelect(id);
@@ -47,40 +44,46 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
     };
 
     return (
-        <Popover isOpen={isOpen} onClose={onClose} placement="bottom-start" gutter={4}>
+        <Popover isOpen={isOpen} onClose={onClose} placement={compactTrigger ? "left-end" : "left-start"} gutter={12}>
             <PopoverTrigger>
-                <HStack
-                    m={2}
-                    px={2}
-                    py={2}
-                    borderRadius="8px"
-                    border="1px solid"
-                    borderColor={borderColor}
-                    bg={triggerBg}
-                    cursor="pointer"
-                    _hover={{ bg: triggerHoverBg }}
-                    transition="background 0.15s"
-                    justify="space-between"
-                    onClick={onToggle}
-                    role="button"
-                    aria-label="Switch workspace"
-                >
-                    <HStack spacing={2} minW={0}>
-                        {selectedWorkspace && <BoxIcon letters={selectedWorkspace.name.slice(0, 2)} />}
-                        <Text fontSize="13px" fontWeight="500" color={titleColor} noOfLines={1} isTruncated>
-                            {selectedWorkspace?.name ?? "Select workspace"}
-                        </Text>
-                    </HStack>
-                    <Box flexShrink={0} color={subColor}>
-                        <ChevronDown size={14} />
+                {compactTrigger ? (
+                    <Box onClick={onToggle} role="button" aria-label="Switch workspace" cursor="pointer">
+                        {compactTrigger}
                     </Box>
-                </HStack>
+                ) : (
+                    <HStack
+                        m={2}
+                        px={2}
+                        py={2}
+                        borderRadius="8px"
+                        border="1px solid"
+                        borderColor="borderSubtle"
+                        bg={triggerBg}
+                        cursor="pointer"
+                        _hover={{ bg: triggerHoverBg }}
+                        transition="background 0.15s"
+                        justify="space-between"
+                        onClick={onToggle}
+                        role="button"
+                        aria-label="Switch workspace"
+                    >
+                        <HStack spacing={2} minW={0}>
+                            {selectedWorkspace && <BoxIcon letters={selectedWorkspace.name.slice(0, 2)} />}
+                            <Text fontSize="13px" fontWeight="500" color="textStrong" noOfLines={1} isTruncated>
+                                {selectedWorkspace?.name ?? "Select workspace"}
+                            </Text>
+                        </HStack>
+                        <Box flexShrink={0} color="textLabel">
+                            <ChevronDown size={14} />
+                        </Box>
+                    </HStack>
+                )}
             </PopoverTrigger>
             <Portal>
                 <PopoverContent
-                    bg={popoverBg}
+                    bg="surfacePrimary"
                     border="1px solid"
-                    borderColor={popoverBorder}
+                    borderColor="borderDefault"
                     borderRadius="12px"
                     boxShadow="0 8px 32px rgba(0,0,0,0.24)"
                     w="260px"
@@ -97,7 +100,7 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                                         <Text
                                             fontSize="13px"
                                             fontWeight="600"
-                                            color={nameColor}
+                                            color="textStrong"
                                             isTruncated
                                             noOfLines={1}
                                         >
@@ -108,7 +111,7 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                             </Box>
                         )}
 
-                        <Divider borderColor={dividerColor} />
+                        <Divider borderColor="borderSubtle" />
 
                         <Box px={2} py={2}>
                             <Text
@@ -118,7 +121,7 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                                 fontWeight="600"
                                 textTransform="uppercase"
                                 letterSpacing="0.6px"
-                                color={headingColor}
+                                color="textFaint"
                             >
                                 Tout les workspaces
                             </Text>
@@ -133,19 +136,19 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                                             py="7px"
                                             borderRadius="8px"
                                             cursor="pointer"
-                                            _hover={{ bg: itemHoverBg }}
+                                            _hover={{ bg: "surfaceHover" }}
                                             transition="background 0.12s"
                                             onClick={() => handleSelect(ws.id)}
                                             justify="space-between"
                                         >
                                             <HStack spacing={2} minW={0}>
                                                 <BoxIcon size="sm" letters={ws.name.slice(0, 2)} />
-                                                <Text fontSize="13px" color={nameColor} isTruncated noOfLines={1}>
+                                                <Text fontSize="13px" color="textStrong" isTruncated noOfLines={1}>
                                                     {ws.name}
                                                 </Text>
                                             </HStack>
                                             {isActive && (
-                                                <Box color={activeCheckColor} flexShrink={0}>
+                                                <Box color="iconAccent" flexShrink={0}>
                                                     <Check size={14} />
                                                 </Box>
                                             )}
@@ -155,7 +158,7 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                             </VStack>
                         </Box>
 
-                        <Divider borderColor={dividerColor} />
+                        <Divider borderColor="borderSubtle" />
 
                         <Box px={2} py={2}>
                             <HStack
@@ -168,10 +171,10 @@ const WorkspaceDropdown = ({ workspaces, selectedId, onSelect }: WorkspaceDropdo
                                 spacing={2}
                                 aria-disabled="true"
                             >
-                                <Box color={actionColor}>
+                                <Box color="textBody">
                                     <Plus size={14} />
                                 </Box>
-                                <Text fontSize="13px" color={actionColor}>
+                                <Text fontSize="13px" color="textBody">
                                     Crée un nouveau workspace
                                 </Text>
                             </HStack>

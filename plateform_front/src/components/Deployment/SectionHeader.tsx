@@ -12,7 +12,13 @@ interface SectionHeaderProps {
 
 export const SectionHeader = ({ title, subtitle, action, icon }: SectionHeaderProps) => {
     return (
-        <HStack justify="space-between" p={4} borderBottom="1px solid" borderBottomColor="borderDefault">
+        <HStack
+            justify="space-between"
+            p={4}
+            borderBottom="1px solid"
+            borderBottomColor="borderDefault"
+            bg="surfacePrimary"
+        >
             <HStack spacing={3}>
                 {icon && <BoxIcon icon={icon} />}
                 <VStack align="start" spacing={0.5}>

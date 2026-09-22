@@ -7,7 +7,7 @@ const StepDone = ({ label }: { label: string }) => (
             w="24px"
             h="24px"
             borderRadius="full"
-            bg="green.400"
+            bg="iconAccent"
             display="flex"
             alignItems="center"
             justifyContent="center"
@@ -15,7 +15,7 @@ const StepDone = ({ label }: { label: string }) => (
         >
             <Check size={12} color="#0a0a0a" strokeWidth={3} />
         </Box>
-        <Text fontSize="sm" color="green.400" fontWeight="500">
+        <Text fontSize="sm" color="iconAccent" fontWeight="500">
             {label}
         </Text>
     </HStack>
@@ -29,17 +29,17 @@ const StepCurrent = ({ num, label }: { num: number; label: string }) => (
             borderRadius="full"
             borderWidth="2px"
             borderStyle="solid"
-            borderColor="green.400"
+            borderColor="iconAccent"
             display="flex"
             alignItems="center"
             justifyContent="center"
             flexShrink={0}
         >
-            <Text fontSize="11px" fontWeight="700" color="green.400" lineHeight={1}>
+            <Text fontSize="11px" fontWeight="700" color="iconAccent" lineHeight={1}>
                 {num}
             </Text>
         </Box>
-        <Text fontSize="sm" color="white" fontWeight="500">
+        <Text fontSize="sm" color="textStrong" fontWeight="500">
             {label}
         </Text>
     </HStack>
@@ -53,23 +53,23 @@ const StepFuture = ({ num, label }: { num: number; label: string }) => (
             borderRadius="full"
             borderWidth="2px"
             borderStyle="solid"
-            borderColor="grey.600"
+            borderColor="borderStrong"
             display="flex"
             alignItems="center"
             justifyContent="center"
             flexShrink={0}
         >
-            <Text fontSize="11px" fontWeight="700" color="grey.500" lineHeight={1}>
+            <Text fontSize="11px" fontWeight="700" color="textSubtle" lineHeight={1}>
                 {num}
             </Text>
         </Box>
-        <Text fontSize="sm" color="grey.500">
+        <Text fontSize="sm" color="textSubtle">
             {label}
         </Text>
     </HStack>
 );
 
-const Connector = () => <Box w="40px" h="1px" bg="grey.700" flexShrink={0} />;
+const Connector = () => <Box w="40px" h="1px" bg="borderDivider" flexShrink={0} />;
 
 export const WelcomeStepper = () => (
     <HStack spacing={2} align="center">

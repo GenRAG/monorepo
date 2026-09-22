@@ -4,7 +4,7 @@ import { ExternalLink, FileWarning } from "lucide-react";
 import Banner from "components/ui/Banner";
 import { useGetSourceUrlQuery } from "services/chat/chat";
 import { getPreviewUrl } from "utils/documentFormatters";
-import { QuerySource, SourceFileType } from "./types";
+import { QuerySource, SourceFileType } from "types/assistant/assistant";
 
 const FILE_TYPE_MIME: Record<SourceFileType, string> = {
     PDF: "application/pdf",
@@ -22,10 +22,8 @@ const SourcePreview: React.FC<{ source: QuerySource; url?: string; isLoading: bo
     url,
     isLoading,
 }) => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
-
     if (isLoading) {
-        return <Skeleton {...skeletonProps} w="100%" h={PREVIEW_HEIGHT} borderRadius="8px" />;
+        return <Skeleton w="100%" h={PREVIEW_HEIGHT} borderRadius="8px" />;
     }
 
     if (!url) {

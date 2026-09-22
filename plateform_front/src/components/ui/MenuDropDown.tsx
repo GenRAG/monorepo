@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { Menu, MenuButton, MenuList, Portal, Box, useColorModeValue, HStack, Text } from "@chakra-ui/react";
+import { Menu, MenuButton, MenuList, Portal, Box, HStack, Text } from "@chakra-ui/react";
 import Button, { GenragButtonProps } from "components/ui/Button";
 import { ChevronDown } from "lucide-react";
 
@@ -12,10 +12,6 @@ interface MenuDropDownProps extends Omit<GenragButtonProps, "children"> {
 
 export const MenuDropDown = forwardRef<HTMLButtonElement, MenuDropDownProps>(
     ({ label, children, variant = "secondary", triggerContent, ...props }, ref) => {
-        const chevronColor = useColorModeValue("grey.500", "grey.400");
-        const menuBg = useColorModeValue("white", "grey.700");
-        const menuBorder = useColorModeValue("white", "grey.700");
-
         return (
             <Menu matchWidth>
                 {({ isOpen }) => (
@@ -31,7 +27,7 @@ export const MenuDropDown = forwardRef<HTMLButtonElement, MenuDropDownProps>(
                                     <Box
                                         as={ChevronDown}
                                         size={16}
-                                        color={chevronColor}
+                                        color="textLabel"
                                         transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
                                         transition="transform 0.2s ease-in-out"
                                         flexShrink={0}
@@ -45,8 +41,8 @@ export const MenuDropDown = forwardRef<HTMLButtonElement, MenuDropDownProps>(
                                 zIndex="popover"
                                 w="auto"
                                 minW="fit-content"
-                                bg={menuBg}
-                                borderColor={menuBorder}
+                                bg="surfaceModal"
+                                borderColor="surfaceModal"
                                 boxShadow="lg"
                             >
                                 {children}

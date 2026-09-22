@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Divider, Heading, Stack, Text } from "@chakra-ui/react";
+import { Heading, Stack, Text } from "@chakra-ui/react";
 import PlanCard from "components/Billing/PlanCard";
 import ConsumptionCard from "components/Billing/ConsumptionCard";
+import { MainLayoutContainer } from "components/ui/MainLayoutContainer";
 //import BuyCreditsSection from "components/Billing/BuyCreditsSection";
 //import ChangePlanSection from "components/Billing/ChangePlanSection";
 
@@ -9,24 +10,26 @@ export const BillingWorkspace = () => {
     const [currentTier, _setCurrentTier] = useState("free");
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={{ base: 4, lg: 6 }} h="100vh" overflow="hidden">
-            <Stack spacing={0.5} flexShrink={0}>
-                <Heading fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textPrimary">
-                    Crédits
-                </Heading>
-                <Text variant="body-sm-muted">Gérez vos crédits et consultez votre consommation.</Text>
-            </Stack>
+        <MainLayoutContainer
+            header={
+                <Stack spacing={0.5} flexShrink={0}>
+                    <Heading fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textPrimary">
+                        Crédits
+                    </Heading>
+                    <Text variant="body-sm-muted">Gérez vos crédits et consultez votre consommation.</Text>
+                </Stack>
+            }
+            body={
+                <Stack spacing={6} h="100%" w="100%" mx="auto">
+                    <PlanCard tier={currentTier} />
+                    <ConsumptionCard />
+                    {/*}
+                    <BuyCreditsSection />
 
-            <Stack spacing={0} h="100%" w="100%" mx="auto">
-                <PlanCard tier={currentTier} />
-                <Divider borderColor="borderStrong" />
-                <ConsumptionCard />
-            </Stack>
-            {/*}
-            <BuyCreditsSection />
-
-            <ChangePlanSection currentTier={currentTier} onSelectTier={setCurrentTier} />
-            */}
-        </Stack>
+                    <ChangePlanSection currentTier={currentTier} onSelectTier={setCurrentTier} />
+                    */}
+                </Stack>
+            }
+        />
     );
 };

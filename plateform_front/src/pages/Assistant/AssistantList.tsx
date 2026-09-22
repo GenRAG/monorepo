@@ -1,128 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-    Box,
-    Divider,
-    Grid,
-    HStack,
-    Icon,
-    Input,
-    InputGroup,
-    InputLeftElement,
-    Skeleton,
-    Stack,
-    Text,
-    VStack,
-    useColorMode,
-} from "@chakra-ui/react";
-import { Bot, Clock, Search, SortAsc } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useGetAssistantsListQuery, AssistantPreview } from "services/chat/chat";
-import BoxIcon from "components/ui/BoxIcon";
-import { EntityCard } from "components/ui/EntityCard";
+import { useMemo, useState } from "react";
+import { HStack, Icon, Input, InputGroup, InputLeftElement, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
+import { Clock, Search, SortAsc } from "lucide-react";
+import { AssistantsTable } from "components/Assistant/AssistantsTable";
+import { useGetAssistantsListQuery } from "services/chat/chat";
+import { MainLayoutContainer } from "components/ui/MainLayoutContainer";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
-import { useAppResponsive } from "hooks/useAppResponsive";
 
 export type SortKey = string;
 
-const COLUMN_BREAKPOINTS = { base: 1, md: 2, lg: 3 };
-const GRID_TEMPLATE_COLUMNS = {
-    base: `repeat(${COLUMN_BREAKPOINTS.base}, 1fr)`,
-    md: `repeat(${COLUMN_BREAKPOINTS.md}, 1fr)`,
-    lg: `repeat(${COLUMN_BREAKPOINTS.lg}, 1fr)`,
-};
-
-const SKELETON_CARD_HEIGHT = 110;
-const GRID_GAP = 12;
-
-const useSkeletonCount = (columns: number) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [count, setCount] = useState(columns * 3);
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-
-        const observer = new ResizeObserver(([entry]) => {
-            const rows = Math.max(
-                1,
-                Math.round((entry.contentRect.height + GRID_GAP) / (SKELETON_CARD_HEIGHT + GRID_GAP)),
-            );
-            setCount(Math.min(columns * rows, 60));
-        });
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [columns]);
-
-    return { containerRef, count };
-};
-
-const formatDate = (iso: string) => {
-    const date = new Date(iso);
-    const now = new Date();
-    const days = Math.floor((now.getTime() - date.getTime()) / 86400000);
-    if (days === 0) return "Aujourd'hui";
-    if (days === 1) return "Hier";
-    if (days < 7) return `Il y a ${days} j`;
-    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
-};
-
-interface AssistantCardProps {
-    assistant: AssistantPreview;
-    onClick: () => void;
-}
-
-const AssistantCard: React.FC<AssistantCardProps> = ({ assistant, onClick }) => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
-    const sub = isDark ? "grey.400" : "grey.500";
-
-    return (
-        <EntityCard
-            title={assistant.title}
-            onClick={onClick}
-            footer={
-                <>
-                    <HStack spacing={2}>
-                        <BoxIcon letters={assistant.sharedBy ? assistant.sharedBy.charAt(0).toUpperCase() : "?"} />
-                        <Text fontSize="xs" color={isDark ? "grey.300" : "grey.700"}>
-                            {assistant.sharedBy}
-                        </Text>
-                    </HStack>
-
-                    {assistant.updatedAt && (
-                        <HStack spacing={1}>
-                            <Icon as={Clock} boxSize={3} color={sub} />
-                            <Text fontSize="10px" color={sub}>
-                                Dernière modification : {formatDate(assistant.updatedAt)}
-                            </Text>
-                        </HStack>
-                    )}
-                </>
-            }
-        />
-    );
-};
-
-const CardSkeleton: React.FC = () => (
-    <Skeleton
-        height={`${SKELETON_CARD_HEIGHT}px`}
-        borderRadius="12px"
-        startColor="skeletonStart"
-        endColor="skeletonEnd"
-    />
-);
+const SKELETON_ROWS = 4;
 
 export const AssistantsList = () => {
-    const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
-    const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortKey>("recent");
-
-    const sub = isDark ? "grey.400" : "grey.500";
-
-    const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.lg;
-    const { containerRef, count: skeletonCount } = useSkeletonCount(columns);
 
     const { data: assistants = [], isLoading } = useGetAssistantsListQuery();
 
@@ -134,68 +24,58 @@ export const AssistantsList = () => {
     }, [assistants, search, sort]);
 
     return (
-        <Stack p={{ base: 4, lg: 6 }} gap={5} overflow="auto" h="100%">
-            <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
+        <MainLayoutContainer
+            header={
                 <VStack align="start" spacing={0.5}>
-                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={isDark ? "white" : "grey.900"}>
+                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textStrong">
                         Assistants
                     </Text>
-                    <Text fontSize="sm" color={sub}>
+                    <Text fontSize="sm" color="textLabel">
                         Agents déployés accessibles, vous avez {assistants.length} assistant(s) au total
                     </Text>
                 </VStack>
-                <InputGroup maxW="260px">
-                    <InputLeftElement pointerEvents="none" h="full">
-                        <Icon as={Search} boxSize={4} color={sub} />
-                    </InputLeftElement>
-                    <Input
-                        placeholder="Rechercher un assistant..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        size="sm"
-                    />
-                </InputGroup>
-            </HStack>
+            }
+            body={
+                <>
+                    <HStack justify="space-between" flexWrap="wrap" gap={3}>
+                        <MultiOptionButtons
+                            options={[
+                                { value: "recent", label: "Récent", icon: Clock },
+                                { value: "az", label: "A→Z", icon: SortAsc },
+                            ]}
+                            value={sort}
+                            onChange={setSort}
+                            size="sm"
+                        />
 
-            <MultiOptionButtons
-                options={[
-                    { value: "recent", label: "Récent", icon: Clock },
-                    { value: "az", label: "A→Z", icon: SortAsc },
-                ]}
-                value={sort}
-                onChange={setSort}
-                size="sm"
-            />
+                        <InputGroup maxW="260px">
+                            <InputLeftElement pointerEvents="none" h="full">
+                                <Icon as={Search} boxSize={4} color="textLabel" />
+                            </InputLeftElement>
+                            <Input
+                                placeholder="Rechercher un assistant..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                size="sm"
+                            />
+                        </InputGroup>
+                    </HStack>
 
-            <Divider borderColor="borderSubtle" />
-
-            {isLoading ? (
-                <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
-                    <Grid templateColumns={GRID_TEMPLATE_COLUMNS} gap={3}>
-                        {Array.from({ length: skeletonCount }).map((_, i) => (
-                            <CardSkeleton key={i} />
-                        ))}
-                    </Grid>
-                </Box>
-            ) : filtered.length > 0 ? (
-                <Grid templateColumns={GRID_TEMPLATE_COLUMNS} gap={3}>
-                    {filtered.map((a) => (
-                        <AssistantCard key={a.id} assistant={a} onClick={() => navigate(`/assistants/${a.id}`)} />
-                    ))}
-                </Grid>
-            ) : (
-                <VStack py={16} spacing={3}>
-                    <Icon as={search ? Search : Bot} boxSize={10} color={sub} />
-                    <Text fontSize="sm" color={sub}>
-                        {search ? "Aucun assistant trouvé" : "Aucun agent déployé pour l'instant"}
-                    </Text>
-                    {!search && (
-                        <Text fontSize="xs" color={sub} textAlign="center" maxW="300px">
-                            Déployez un agent en production pour le voir apparaître ici
-                        </Text>
+                    {isLoading ? (
+                        <Stack spacing={2}>
+                            {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                                <Skeleton key={i} h="64px" borderRadius="12px" />
+                            ))}
+                        </Stack>
+                    ) : (
+                        <AssistantsTable
+                            assistants={filtered}
+                            hasAnyAssistant={assistants.length > 0}
+                            isSearching={search.trim().length > 0}
+                        />
                     )}
-                </VStack>
-            )}
-        </Stack>
+                </>
+            }
+        />
     );
 };

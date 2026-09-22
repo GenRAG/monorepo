@@ -11,7 +11,7 @@ export default function WorkspaceGuard() {
         skip: !workspaceId,
     });
 
-    const { data: onboardingSession, isLoading: isOnboardingLoading } = useGetOnboardingSessionQuery(workspaceId!, {
+    const { isLoading: isOnboardingLoading } = useGetOnboardingSessionQuery(workspaceId!, {
         skip: !workspaceId,
     });
 
@@ -22,10 +22,6 @@ export default function WorkspaceGuard() {
     if (isError) {
         return <NotFound />;
     }
-
-    /*if (onboardingSession && !onboardingSession.completed) {
-        return <Navigate to={`/onboarding/${workspaceId}`} replace />;
-    }*/
 
     return <Outlet />;
 }

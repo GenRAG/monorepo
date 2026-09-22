@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { VStack, HStack, Input, Textarea, FormControl, FormLabel, Button, useColorModeValue } from "@chakra-ui/react";
+import { VStack, HStack, Input, Textarea, FormControl, FormLabel, Button } from "@chakra-ui/react";
 
 interface FormState {
     firstName: string;
@@ -20,8 +20,6 @@ export const ContactForm = () => {
         message: "",
     });
 
-    const labelColor = useColorModeValue("grey.700", "grey.300");
-
     const update = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
         setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -29,20 +27,20 @@ export const ContactForm = () => {
         <VStack align="stretch" spacing={4} w="100%">
             <HStack spacing={4} w="100%">
                 <FormControl>
-                    <FormLabel fontSize="sm" color={labelColor} mb={1}>
+                    <FormLabel fontSize="sm" color="textBody" mb={1}>
                         Prénom *
                     </FormLabel>
                     <Input placeholder="Votre prénom" value={form.firstName} onChange={update("firstName")} size="sm" />
                 </FormControl>
                 <FormControl>
-                    <FormLabel fontSize="sm" color={labelColor} mb={1}>
+                    <FormLabel fontSize="sm" color="textBody" mb={1}>
                         Nom *
                     </FormLabel>
                     <Input placeholder="Votre nom" value={form.lastName} onChange={update("lastName")} size="sm" />
                 </FormControl>
             </HStack>
             <FormControl>
-                <FormLabel fontSize="sm" color={labelColor} mb={1}>
+                <FormLabel fontSize="sm" color="textBody" mb={1}>
                     Objet *
                 </FormLabel>
                 <Input
@@ -53,7 +51,7 @@ export const ContactForm = () => {
                 />
             </FormControl>
             <FormControl>
-                <FormLabel fontSize="sm" color={labelColor} mb={1}>
+                <FormLabel fontSize="sm" color="textBody" mb={1}>
                     Message *
                 </FormLabel>
                 <Textarea

@@ -1,4 +1,4 @@
-import { Box, HStack, VStack, Text, Skeleton, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, VStack, Text, Skeleton } from "@chakra-ui/react";
 import Button from "components/ui/Button";
 import { DeploymentBadge } from "components/Deployment/DashboardTab/DeploymentBadge";
 import type { FC } from "react";
@@ -14,25 +14,22 @@ interface Props {
 }
 
 export const HeaderCardMain: FC<Props> = ({ data, isLoading, onOpen, onStop, isStopping, deployLabel }) => {
-    const bgColor = useColorModeValue("white", "grey.950");
-    const borderColor = useColorModeValue("green.300", "green.500");
-    const textColor = useColorModeValue("grey.900", "grey.50");
     const isProduction = data.deploymentStatus === AgentStatus.PRODUCTION;
 
     return (
-        <Box borderRadius="12px" border="2px solid" borderColor={borderColor} bg={bgColor} p={4}>
+        <Box borderRadius="12px" border="2px solid" borderColor="borderAccentCardActive" bg="surfacePrimary" p={4}>
             <HStack justify="space-between" align="flex-start">
                 <VStack align="start">
                     <DeploymentBadge status={data.deploymentStatus} isLoading={isLoading} />
                     <HStack align="end">
                         <Skeleton isLoaded={!isLoading} borderRadius="4px">
-                            <Text fontSize="xl" fontWeight={700} color={textColor} fontFamily="mono">
+                            <Text fontSize="xl" fontWeight={700} color="textStrong" fontFamily="mono">
                                 {data?.latestDeployment ? `v${data.latestDeployment.version}` : "—"}
                             </Text>
                         </Skeleton>
                     </HStack>
                     <HStack spacing={1.5}>
-                        <Text fontSize="xs" fontFamily="mono" color={textColor}>
+                        <Text fontSize="xs" fontFamily="mono" color="textStrong">
                             {data?.latestDeployment?.name ?? data?.name ?? "—"}
                         </Text>
                     </HStack>

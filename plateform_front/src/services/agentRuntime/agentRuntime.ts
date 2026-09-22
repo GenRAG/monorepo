@@ -1,4 +1,11 @@
 import { backendApi } from "services/api";
+import { Tag } from "services/tags/tag";
+import type { QueryLogStatus, QueryLogEntry, QueryLogPage } from "types/analytics/analytics";
+
+export type { QueryLogStatus, QueryLogPage };
+// `QueryLog` is the pre-existing name in this file's public API; kept as an alias of the type
+// shared with services/analytics/analytics.ts (same shape, previously duplicated).
+export type { QueryLogEntry as QueryLog };
 
 interface ExecuteRuntimeParams {
     workspaceId: string;
@@ -10,22 +17,6 @@ interface ExecuteRuntimeResponse {
     answer: string;
 }
 
-export type QueryLogStatus = "SUCCESS" | "ERROR" | "OUT_OF_CREDITS";
-
-export interface QueryLog {
-    id: string;
-    query: string;
-    durationMs: number;
-    status: QueryLogStatus;
-    createdAt: string;
-    creditsUsed?: number;
-}
-
-export interface QueryLogPage {
-    data: QueryLog[];
-    total: number;
-}
-
 export const agentRuntimeApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
         executeAgentRuntime: builder.mutation<ExecuteRuntimeResponse, ExecuteRuntimeParams>({
@@ -34,6 +25,7 @@ export const agentRuntimeApi = backendApi.injectEndpoints({
                 method: "POST",
                 body: { query },
             }),
+            invalidatesTags: [Tag.Credits],
         }),
         getQueryLogs: builder.query<
             QueryLogPage,
@@ -43,6 +35,7 @@ export const agentRuntimeApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}/agents/${agentId}/runtime/query-logs`,
                 params: { page, limit },
             }),
+            providesTags: (_result, _error, { agentId }) => [{ type: Tag.Analytics, id: agentId }],
         }),
     }),
 });

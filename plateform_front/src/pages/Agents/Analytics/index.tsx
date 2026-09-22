@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Grid, VStack } from "@chakra-ui/react";
+import { Grid, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import WorkspaceHeader from "components/ui/WorkspaceHeader";
@@ -13,7 +13,7 @@ import { CostChart } from "components/Agents/Analytics/CostChart";
 import { CostByTypeCard } from "components/Agents/Analytics/CostByTypeCard";
 import { CostByModelCard } from "components/Agents/Analytics/CostByModelCard";
 import { AnalyticsTab, AnalyticsTabs } from "components/Agents/Analytics/AnalyticsTabs";
-import { ActivityHeatmapCard } from "@/components/Agents/Analytics/ActivityHeatmapCard";
+import { ActivityHeatmapCard } from "components/Agents/Analytics/ActivityHeatmapCard";
 
 const AnalyticsWorkspace = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
@@ -58,7 +58,7 @@ const AnalyticsWorkspace = () => {
     };
 
     return (
-        <VStack w="100%" h="100vh" align="stretch" spacing={0} overflow="hidden">
+        <VStack w="100%" h="100%" align="stretch" spacing={0} overflow="hidden" position="relative">
             <WorkspaceHeader
                 title="Analytics"
                 description={
@@ -66,20 +66,14 @@ const AnalyticsWorkspace = () => {
                 }
             />
 
-            <Box bg="surfaceAppShell" flexShrink={0}>
-                <AnalyticsTabs activeTab={activeTab} onChange={setActiveTab} />
-            </Box>
+            {/* Position absolute (pas fixed) : centrée sur cette page (relative), pas sur l'écran
+            entier. Rendue en dehors du flux, sous forme de pilule flottante permanente qui flotte
+            au-dessus du contenu — voir GlassTabBar. Pas de padding-bottom réservé ici : le fond de
+            la carte de contenu (PrivateAgentAppLayout) va jusqu'au bout, et un padding ici ferait
+            s'arrêter la zone de contenu avant, créant un décalage visuel entre les deux. */}
+            <AnalyticsTabs activeTab={activeTab} onChange={setActiveTab} />
 
-            <VStack
-                w="100%"
-                flex={1}
-                align="stretch"
-                spacing={5}
-                overflowY="auto"
-                overflowX="hidden"
-                bg="secondBackgroundDefault"
-                p={6}
-            >
+            <VStack w="100%" flex={1} align="stretch" spacing={5} overflowY="auto" overflowX="hidden" p={6}>
                 <motion.div
                     key={activeTab}
                     initial={{ opacity: 0, y: 5 }}

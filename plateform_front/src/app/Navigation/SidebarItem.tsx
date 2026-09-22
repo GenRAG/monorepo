@@ -1,16 +1,16 @@
 import { Badge, Box, Collapse, HStack, Icon, Text, Tooltip, useColorModeValue, VStack } from "@chakra-ui/react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 interface SidebarItemProps {
-    icon: any;
+    icon: LucideIcon;
     label: string;
     badge?: string;
     tag?: string;
     active?: boolean;
     open: boolean;
-    childrenItems?: { label: string; icon?: any; onClick?: () => void }[];
+    childrenItems?: { label: string; icon?: LucideIcon; onClick?: () => void }[];
     badgeColor?: string;
     size?: "sm" | "md" | "lg";
     onClick?: () => void;
@@ -27,17 +27,13 @@ export const SidebarItem = ({
     onClick,
     size = "lg",
 }: SidebarItemProps) => {
-    const activeBg = useColorModeValue(currentDarkTheme.rgba.primary20, currentDarkTheme.rgba.primary20);
+    const activeBg = currentDarkTheme.rgba.primary20;
     const hoverBg = useColorModeValue(currentDarkTheme.rgba.primary20, currentDarkTheme.rgba.primary30);
-    const color = useColorModeValue("grey.900", "white");
-    const activeColor = currentDarkTheme.primary500;
-    const beforeColor = currentDarkTheme.primary;
-    const badgeColorValue = useColorModeValue("grey.500", "grey.300");
-    const childLineColor = useColorModeValue("grey.800", "grey.800");
-    const childTextColor = useColorModeValue("grey.300", "grey.300");
-    const tooltipBg = useColorModeValue("grey.700", "green.600");
-    const chevronColor = useColorModeValue("grey.500", "grey.300");
-    const iconColorValue = useColorModeValue("grey.900", active ? currentDarkTheme.primary : "grey.300");
+    const badgeColorValue = "textLabel";
+    const childLineColor = "grey.800";
+    const childTextColor = "grey.300";
+    const chevronColor = "textLabel";
+    const iconColorValue = useColorModeValue("grey.900", "grey.300");
 
     const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
@@ -67,20 +63,20 @@ export const SidebarItem = ({
                     top: 0,
                     bottom: 0,
                     width: size === "sm" ? "3px" : "4px",
-                    bg: active ? beforeColor : "transparent",
+                    bg: active ? "iconAccent" : "transparent",
                     borderTopRightRadius: "9999px",
                     borderBottomRightRadius: "9999px",
                 }}
             >
                 <HStack spacing={open ? 3 : 0} alignItems="center">
-                    <Icon as={icon} size="18" color={active ? activeColor : iconColorValue} />
+                    <Icon as={icon} size="18" color={active ? "iconAccent" : iconColorValue} />
                     {open && (
                         <Text
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (onClick) onClick();
                             }}
-                            color={active ? activeColor : color}
+                            color={active ? "iconAccent" : "textStrong"}
                             fontSize="sm"
                             fontWeight={active ? "semibold" : "medium"}
                         >
@@ -146,7 +142,7 @@ export const SidebarItem = ({
                                     }}
                                     _hover={{ cursor: "pointer", bg: hoverBg }}
                                 >
-                                    {child.icon && <Icon as={child.icon} boxSize={4} color={"grey.200"} />}
+                                    {child.icon && <Icon as={child.icon} boxSize={4} color="grey.200" />}
                                     <Text fontSize="sm" textAlign="center" color={childTextColor}>
                                         {child.label}
                                     </Text>
@@ -162,7 +158,7 @@ export const SidebarItem = ({
     return open ? (
         content
     ) : (
-        <Tooltip placement="right" color="white" borderRadius="8px" hasArrow bg={tooltipBg} label={label}>
+        <Tooltip placement="right" color="white" borderRadius="8px" hasArrow bg="tooltipBg" label={label}>
             {content}
         </Tooltip>
     );

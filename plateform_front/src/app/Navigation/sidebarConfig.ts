@@ -23,9 +23,9 @@ export interface NavSection {
 }
 
 export const mainMenu = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
+    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { id: "agents", icon: Folder, label: "Agents" },
-    { id: "assistants", icon: MessageCircle, label: "Assistants" },
+    { id: "assistants", icon: MessageCircle, label: "Chats" },
     { id: "billing", icon: CreditCard, label: "Crédits" },
 ];
 

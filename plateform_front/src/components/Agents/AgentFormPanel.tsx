@@ -11,7 +11,6 @@ import {
     Stack,
     Text,
     Textarea,
-    useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
@@ -64,8 +63,6 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
         defaultValues: { name: "", description: "" },
         mode: "onChange",
     });
-    const headerBg = useColorModeValue("grey.25", "grey.900");
-
     const name = watch("name");
     const description = watch("description");
 
@@ -99,7 +96,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
             borderColor="borderDefault"
             overflowY="auto"
         >
-            <Stack p={6} bg={headerBg}>
+            <Stack p={6}>
                 <Heading variant="heading-xl" mb={8}>
                     Créer à partir de zéro
                 </Heading>
@@ -112,7 +109,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                     p={4}
                     borderRadius="10px"
                     border="1.5px solid"
-                    borderColor="green.400"
+                    borderColor="inputActiveBorder"
                     bg="accentCardBg"
                     maxW="300px"
                     cursor="pointer"
@@ -164,7 +161,7 @@ export const AgentFormPanel: React.FC<AgentFormPanelProps> = ({
                     Ou partir d&apos;un modèle
                 </Text>
 
-                <SimpleGrid columns={3} spacing={3} mb={6}>
+                <SimpleGrid columns={2} spacing={3} mb={6}>
                     {templates.map((tpl) => (
                         <TemplateCard
                             key={tpl.id}

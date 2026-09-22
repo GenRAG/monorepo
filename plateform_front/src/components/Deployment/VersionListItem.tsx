@@ -1,4 +1,4 @@
-import { Box, HStack, VStack, Text, Badge, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, VStack, Text, Badge } from "@chakra-ui/react";
 import { VersionStatus } from "types/deployment/deployment";
 
 interface EnvBadge {
@@ -17,25 +17,18 @@ interface VersionListItemProps {
 }
 
 export const VersionListItem = ({ id, env, badge, description, date, isSelected, onClick }: VersionListItemProps) => {
-    const selectedBg = useColorModeValue("grey.50", "grey.900");
-    const borderBottomColor = useColorModeValue("grey.100", "grey.900");
-    const hoverBg = useColorModeValue("grey.25", "grey.950");
-    const idColor = useColorModeValue("grey.900", "grey.50");
-    const dateColor = useColorModeValue("grey.300", "grey.600");
-    const descriptionColor = useColorModeValue("grey.500", "grey.400");
-
     return (
         <Box
-            bg={isSelected ? selectedBg : "transparent"}
+            bg={isSelected ? "surfaceHover" : "transparent"}
             borderBottom="1px solid"
             py="12px"
             px="16px"
-            borderBottomColor={borderBottomColor}
+            borderBottomColor="borderDefault"
             cursor="pointer"
             onClick={onClick}
             transition="all 0.12s"
             _hover={{
-                bg: isSelected ? undefined : hoverBg,
+                bg: isSelected ? undefined : "secondBackgroundDefault",
             }}
             mb={0}
             position="relative"
@@ -46,14 +39,14 @@ export const VersionListItem = ({ id, env, badge, description, date, isSelected,
                 top: 0,
                 bottom: 0,
                 width: "2px",
-                bg: isSelected ? "green.500" : "transparent",
+                bg: isSelected ? "iconAccent" : "transparent",
                 borderRadius: "2px",
             }}
         >
             <VStack align="stretch" spacing={0.5} minW={0}>
                 <HStack justify="space-between" align="center" minW={0}>
                     <HStack spacing={1.5} minW={0}>
-                        <Text fontSize="md" fontWeight={500} color={idColor} fontFamily="mono">
+                        <Text fontSize="md" fontWeight={500} color="textStrong" fontFamily="mono">
                             {id}
                         </Text>
                         {env === "prod" && (
@@ -62,12 +55,12 @@ export const VersionListItem = ({ id, env, badge, description, date, isSelected,
                             </Badge>
                         )}
                     </HStack>
-                    <Text flexShrink={0} fontSize="xs" color={dateColor}>
+                    <Text flexShrink={0} fontSize="xs" color="textSubtle">
                         {date}
                     </Text>
                 </HStack>
 
-                <Text fontSize="sm" color={descriptionColor} noOfLines={1}>
+                <Text fontSize="sm" color="textLabel" noOfLines={1}>
                     {description}
                 </Text>
             </VStack>

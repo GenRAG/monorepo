@@ -49,8 +49,9 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
     const toast = useThemedToast();
     const [createAgent, { isLoading }] = useCreateAgentMutation();
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
-
-    const modalBg = useColorModeValue("white", "grey.950");
+    // Voile clair en light mode : un blackAlpha assombrit le fond flouté et donne un
+    // rendu gris/terne. whiteAlpha garde l'effet "verre dépoli" clair derrière la modal.
+    const overlayBg = useColorModeValue("whiteAlpha.600", "blackAlpha.400");
 
     const handleCreate = useCallback(
         async (name: string, description: string) => {
@@ -64,9 +65,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
                     description: description.trim() || undefined,
                     workflow: {
                         name: selectedTemplate?.name ?? "Workflow initial",
-                        definition: serializeWorkflow(nodes, edges) as unknown as {
-                            [key: string]: unknown;
-                        },
+                        definition: serializeWorkflow(nodes, edges),
                     },
                 }).unwrap();
 
@@ -89,9 +88,18 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} size="full" motionPreset="slideInBottom">
-            <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(4px)" />
-            <ModalContent bg={modalBg} borderRadius={0} overflow="hidden" m={0} maxW="100vw" maxH="100vh" h="100vh">
+        <Modal isOpen={isOpen} onClose={onClose} motionPreset="slideInBottom" isCentered>
+            <ModalOverlay bg={overlayBg} />
+            <ModalContent
+                borderRadius="16px"
+                overflow="hidden"
+                w="90vw"
+                maxW="1100px"
+                h="82vh"
+                maxH="820px"
+                bg="transparent"
+                backdropFilter="blur(20px)"
+            >
                 <Grid templateColumns="1fr 1fr" h="100%">
                     <AgentFormPanel
                         isOpen={isOpen}

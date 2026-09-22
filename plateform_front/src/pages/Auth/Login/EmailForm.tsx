@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { AuthHeader } from "components/Auth/AuthHeader";
 import { AuthStepType } from "pages/Auth/Layout/AuthLayout";
-import { LocalStorageKeys } from "types/localStorage";
+import { LocalStorageKeys } from "constants/localStorage";
 import { useLocalStorage } from "usehooks-ts";
 import Button from "components/ui/Button";
 import GoogleLoginButton from "components/Auth/GoogleLoginButton";
@@ -51,7 +51,6 @@ export const EmailForm: FC<{
         else forget();
         setEmail(data.email);
     });
-
 
     return (
         <VStack gap="32px" w="100%">

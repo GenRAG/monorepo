@@ -10,6 +10,7 @@ import {
     Button,
     VStack,
     HStack,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import { Check } from "lucide-react";
 import { ACCEPTED_TYPES, ACCEPTED_EXTENSIONS } from "hooks/useUploadDocuments";
@@ -37,6 +38,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 }) => {
     const [isDragging, setIsDragging] = useState(false);
     const toast = useThemedToast();
+    const overlayBg = useColorModeValue("whiteAlpha.600", "blackAlpha.400");
 
     const { selectedFiles, sources, isUploading, isDone, allDone, addFiles, removeSelectedFile, handleUpload, reset } =
         useUploadDocuments(workspaceId, agentId);
@@ -101,8 +103,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={handleClose} scrollBehavior="inside">
-            <ModalOverlay backdropFilter="blur(2px)" />
-            <ModalContent bg="surfacePrimary" borderRadius="16px">
+            <ModalOverlay bg={overlayBg} />
+            <ModalContent bg="transparent" backdropFilter="blur(20px)" borderRadius="16px">
                 <ModalHeader fontSize="16px" fontWeight="600" color="textPrimary">
                     Téléverser des documents
                 </ModalHeader>

@@ -1,23 +1,8 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
+import type { AgentConsumption, WorkspaceConsumption, CreditBalanceSummary } from "types/credit/credit";
 
-export interface AgentConsumption {
-    agentId: string;
-    agentName: string;
-    creditsUsed: number;
-    queryCount: number;
-}
-
-export interface WorkspaceConsumption {
-    byAgent: AgentConsumption[];
-    byDay: number[];
-    total: number;
-}
-
-export interface CreditBalanceSummary {
-    balance: number;
-    totalGranted: number;
-}
+export type { AgentConsumption, WorkspaceConsumption, CreditBalanceSummary };
 
 export const creditApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -33,6 +18,7 @@ export const creditApi = backendApi.injectEndpoints({
                 url: `/workspaces/${workspaceId}/consumption`,
                 params: { days },
             }),
+            providesTags: (_result, _error, { workspaceId }) => [{ type: Tag.Credits, id: workspaceId }],
         }),
     }),
 });

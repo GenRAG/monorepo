@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Drawer, DrawerBody, DrawerOverlay, DrawerContent, DrawerCloseButton } from "@chakra-ui/react";
-import { TabBar } from "@/components/ui/TabBar";
+import { TabBar } from "components/ui/TabBar";
 import { QueryDetailsDrawerHeader } from "./QueryDetailsDrawerHeader";
 import { QuerySourcesTab } from "./QuerySourcesTab";
 import { QueryDetailsTab } from "./QueryDetailsTab";
-import { QuerySource, QueryDetailsInfo } from "./types";
+import { QuerySource, QueryDetailsInfo } from "types/assistant/assistant";
 
 interface QueryDetailsDrawerProps {
     isOpen: boolean;

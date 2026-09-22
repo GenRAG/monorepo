@@ -16,7 +16,7 @@ const fixSplineCanvas = (spline: Application) => {
 
 const AuthDesktopLayout = ({ children, canGoBack }: { children: React.ReactNode; canGoBack?: () => void }) => (
     <DarkMode>
-        <HStack w="100vw" h="100vh" spacing={0} overflow="hidden" align="stretch" bg="grey.950">
+        <HStack w="100vw" h="100vh" spacing={0} overflow="hidden" align="stretch" bg="grey.975">
             <Box flex={7} minW={0} h="100%" position="relative" overflow="hidden">
                 <Spline
                     scene="https://prod.spline.design/6wq8PVEEPfkxrIjs/scene.splinecode"
@@ -32,7 +32,7 @@ const AuthDesktopLayout = ({ children, canGoBack }: { children: React.ReactNode;
                 direction="column"
                 justify="center"
                 align="center"
-                bg="grey.950"
+                bg="grey.975"
                 position="relative"
                 borderLeft="1px solid"
                 borderColor="grey.800"

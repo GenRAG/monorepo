@@ -80,7 +80,7 @@
     "tailwind:watch": "tailwindcss -i src/tailwind.src.css -o src/tailwind.generated.css --watch",
     "dev": "yarn tailwind:build && concurrently \"yarn tailwind:watch\" \"craco start\"",
     "start": "yarn tailwind:build && concurrently \"yarn tailwind:watch\" \"craco start\"",
-    "build": "yarn tailwind:build && craco build",
+    "build": "yarn tailwind:build && DISABLE_ESLINT_PLUGIN=true craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",

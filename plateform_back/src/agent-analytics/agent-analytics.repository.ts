@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DocumentStatus, Prisma, QueryLogStatus } from 'generated/prisma';
+import { DocumentStatus, QueryLogStatus } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { QueryLogPage } from './agent-analytics.types';
 
@@ -79,6 +79,13 @@ export class AgentAnalyticsRepository {
         return this._getCostBreakdown(agentId, since, 'costByType');
     }
 
+    /**
+     * Sums a JSON cost-breakdown column (e.g. { "gpt-4o": 0.02, "mistral": 0.01 } per row) across
+     * every matching query log. Done in JS rather than SQL's jsonb_each_text: the row set is
+     * already bounded by the agentId+createdAt index, so unnesting a small JSON object per row
+     * in JS is cheap, and it keeps this one query on the ORM like the rest of the codebase.
+     */
+
     async getDocumentStatusCounts(agentId: string): Promise<DocumentStatusCounts> {
         const rows = await this.prisma.document.groupBy({
             by: ['status'],
@@ -104,16 +111,27 @@ export class AgentAnalyticsRepository {
         return { data, total };
     }
 
-    private _getCostBreakdown(agentId: string, since: Date, column: CostBreakdownColumn): Promise<CostBreakdownRow[]> {
-        const jsonColumn = Prisma.raw(`"${column}"`);
+    private async _getCostBreakdown(
+        agentId: string,
+        since: Date,
+        column: CostBreakdownColumn,
+    ): Promise<CostBreakdownRow[]> {
+        const rows = await this.prisma.agentQueryLog.findMany({
+            where: { agentId, createdAt: { gte: since } },
+            select: { [column]: true },
+        });
 
-        return this.prisma.$queryRaw<CostBreakdownRow[]>`
-            SELECT key, SUM(value::numeric)::float AS cost
-            FROM "AgentQueryLog", jsonb_each_text(${jsonColumn})
-            WHERE "agentId" = ${agentId} AND "createdAt" >= ${since} AND ${jsonColumn} IS NOT NULL
-            GROUP BY key
-            ORDER BY cost DESC
-        `;
+        const totals = new Map<string, number>();
+        for (const row of rows) {
+            const breakdown = row[column] as Record<string, number> | null;
+            if (!breakdown) continue;
+
+            for (const [key, value] of Object.entries(breakdown)) {
+                totals.set(key, (totals.get(key) ?? 0) + value);
+            }
+        }
+
+        return Array.from(totals, ([key, cost]) => ({ key, cost })).sort((a, b) => b.cost - a.cost);
     }
 
     private _toDocumentStatusCounts(rows: { status: DocumentStatus; _count: number }[]): DocumentStatusCounts {

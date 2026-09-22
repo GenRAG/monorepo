@@ -45,6 +45,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 borderRadius="8px"
                 placeholder={placeholder}
                 isDisabled={isLoading || disabled}
+                bg="surfaceModal"
             />
             <Button
                 aria-label="Envoyer"

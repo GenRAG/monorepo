@@ -47,12 +47,12 @@ export const DashboardTab = () => {
                 <HeaderCard data={data} isLoading={isLoading} />
 
                 <Grid h="100%" templateColumns={{ base: "1fr", xl: "3fr 2fr" }} gap={5}>
-                    <RecentDeploymentsCard workspaceId={workspaceId} agentId={agentId} />
+                    <CreditSummaryCard workspaceId={workspaceId} />
                     <DocumentHealthCard workspaceId={workspaceId} agentId={agentId} />
                 </Grid>
 
                 <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={5} alignItems="stretch">
-                    <CreditSummaryCard workspaceId={workspaceId} />
+                    <RecentDeploymentsCard workspaceId={workspaceId} agentId={agentId} />
                     <QuickLinksCard workspaceId={workspaceId} agentId={agentId} />
                 </Grid>
             </VStack>

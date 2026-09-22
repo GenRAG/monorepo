@@ -118,6 +118,7 @@ const baseColors = {
         warning: "rgba(236, 201, 75, 0.99)",
         info: "rgba(66, 153, 225, 1)",
         favorite: "rgba(246, 174, 85, 1)",
+        black: "#0b0e118a",
         default: "rgba(255, 255, 255, 1)",
     },
 

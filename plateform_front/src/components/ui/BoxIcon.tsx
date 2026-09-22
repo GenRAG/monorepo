@@ -10,6 +10,7 @@ const BoxIcon = ({
     size = "md",
     onClick,
     spin = false,
+    clickable = false,
 }: {
     icon?: LucideIcon | React.ElementType;
     letters?: string;
@@ -18,12 +19,15 @@ const BoxIcon = ({
     size?: "sm" | "md" | "lg" | "xl";
     onClick?: () => void;
     spin?: boolean;
+    clickable?: boolean;
 }) => {
     const iconSize = size === "sm" ? 14 : size === "md" ? 16 : size === "lg" ? 20 : 24;
     const IconComp = icon as React.ComponentType<{ size?: number }> | undefined;
 
     const width = size === "sm" ? "28px" : size === "md" ? "36px" : size === "lg" ? "44px" : "52px";
     const height = size === "sm" ? "28px" : size === "md" ? "36px" : size === "lg" ? "44px" : "52px";
+
+    clickable = clickable || !!onClick;
 
     return (
         <Box
@@ -37,7 +41,7 @@ const BoxIcon = ({
             flexShrink={0}
             color={color}
             onClick={onClick}
-            cursor={onClick ? "pointer" : "default"}
+            cursor={clickable ? "pointer" : "default"}
         >
             {IconComp ? (
                 <Box

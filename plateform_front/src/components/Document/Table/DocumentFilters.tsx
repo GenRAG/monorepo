@@ -1,18 +1,18 @@
 import React from "react";
-import { HStack, Icon, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
+import { Box, HStack, Icon, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { Search } from "lucide-react";
 import Button from "components/ui/Button";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 
 const TYPE_FILTERS = [
-    { label: "Tous", value: null },
-    { label: "PDF", value: "PDF" },
-    { label: "Markdown", value: "Markdown" },
-    { label: "Texte", value: "Texte" },
-    { label: "Word", value: "Word" },
+    { value: "all", label: "Tous" },
+    { value: "PDF", label: "PDF" },
+    { value: "Markdown", label: "Markdown" },
+    { value: "Texte", label: "Texte" },
+    { value: "Word", label: "Word" },
 ] as const;
 
-type TypeFilter = (typeof TYPE_FILTERS)[number]["value"];
+export type TypeFilter = (typeof TYPE_FILTERS)[number]["value"];
 type ViewMode = "list" | "grid";
 
 interface DocumentFiltersProps {
@@ -53,18 +53,9 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
                 />
             </InputGroup>
 
-            <HStack spacing={2} flex={1} flexWrap="wrap" align="center">
-                {TYPE_FILTERS.map((f) => (
-                    <Button
-                        key={f.value}
-                        size="sm"
-                        variant={activeType === f.value ? "superPrimary" : "outline"}
-                        onClick={() => onTypeChange(f.value)}
-                    >
-                        {f.label}
-                    </Button>
-                ))}
-            </HStack>
+            <MultiOptionButtons options={[...TYPE_FILTERS]} value={activeType} onChange={onTypeChange} size="sm" />
+
+            <Box flex={1} />
 
             <Button size="sm" variant="superPrimary" onClick={() => onOpenUpload?.()}>
                 Téléverser un document

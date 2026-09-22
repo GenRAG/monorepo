@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Text, Tooltip, chakra } from "@chakra-ui/react";
 import { motion, Variants } from "framer-motion";
 import { GlassNavItem } from "./GlassNav";
@@ -37,6 +38,7 @@ export const NavItemButton = ({
 }: NavItemButtonProps) => {
     const Icon = item.icon;
     const badgeSize = isVertical ? "22px" : "20px";
+    const [isHovered, setIsHovered] = useState(false);
 
     const iconNode = isActive ? (
         <MotionBox
@@ -51,11 +53,11 @@ export const NavItemButton = ({
             justifyContent="center"
             color={activeIconColor}
         >
-            <Icon size={isVertical ? 22 : 20} isActive />
+            <Icon size={isVertical ? 22 : 20} isActive isHovered={isHovered} />
         </MotionBox>
     ) : (
         <Box display="flex" alignItems="center" justifyContent="center" color={mutedColor}>
-            <Icon size={isVertical ? 22 : 20} isActive={false} />
+            <Icon size={isVertical ? 22 : 20} isActive={false} isHovered={isHovered} />
         </Box>
     );
 
@@ -65,6 +67,8 @@ export const NavItemButton = ({
             aria-label={item.label}
             aria-current={isActive ? "page" : undefined}
             onClick={onSelect}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             whileTap={{ scale: 0.94 }}
             position="relative"
             display="flex"

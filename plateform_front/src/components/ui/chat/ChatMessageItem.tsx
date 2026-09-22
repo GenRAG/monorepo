@@ -14,7 +14,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
                 <Text fontSize="xs" color="textLabel">
                     Vous
                 </Text>
-                <Box p={3} bg="bubbleAccentBg" borderRadius="12px" borderBottomRightRadius="2px">
+                <Box p={3} borderRadius="12px" borderBottomRightRadius="2px">
                     <Text fontSize="sm" color="bubbleAccentText">
                         {message.question}
                     </Text>

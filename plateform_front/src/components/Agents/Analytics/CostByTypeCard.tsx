@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Box, Divider, HStack, Skeleton, SkeletonCircle, Text, VStack } from "@chakra-ui/react";
 import { PieChart as PieChartIcon } from "lucide-react";
 import { CHART_GREEN_SHADES } from "themeNew/foundations/themeConfig";
@@ -13,7 +13,11 @@ import { PERIOD_DAYS, type Period } from "./types";
 
 const TYPE_COLORS = [CHART_GREEN_SHADES[3], CHART_GREEN_SHADES[2], CHART_GREEN_SHADES[0]];
 
-const PATTERNED_INDEXES = new Set([1, 2]);
+// Nombre de types indéterminé (dépend des étapes du pipeline) : la couleur cycle sur TYPE_COLORS
+// via modulo (pas d'accès direct par index, qui deviendrait `undefined` au-delà de 3 types et
+// rendrait la part invisible), et le motif hachuré est généré pour chaque part à partir de la
+// première (index 0 en plein, le reste en motif pour rester distinguable en plus petit).
+const colorForIndex = (index: number) => TYPE_COLORS[index % TYPE_COLORS.length];
 
 interface CostByTypeCardProps {
     workspaceId: string;
@@ -22,6 +26,7 @@ interface CostByTypeCardProps {
 
 export const CostByTypeCard = ({ workspaceId, agentId }: CostByTypeCardProps) => {
     const [period, setPeriod] = useState<Period>("30j");
+    const patternIdBase = `cost-by-type-pattern-${useId()}`;
     const { data: entries = [], isLoading } = useGetCostByTypeQuery(
         { workspaceId, agentId, days: PERIOD_DAYS[period] },
         { skip: !workspaceId || !agentId },
@@ -39,7 +44,7 @@ export const CostByTypeCard = ({ workspaceId, agentId }: CostByTypeCardProps) =>
                         label: entry.key,
                         value: rawValue,
                         rawValue,
-                        color: TYPE_COLORS[index % TYPE_COLORS.length],
+                        color: colorForIndex(index),
                     };
                 }),
         [entries],
@@ -87,27 +92,25 @@ export const CostByTypeCard = ({ workspaceId, agentId }: CostByTypeCardProps) =>
                                     />
                                 ) : (
                                     <PieChart data={pieData} innerRadius={55}>
-                                        <PatternLines
-                                            height={6}
-                                            id="ct-1"
-                                            orientation={["diagonal"]}
-                                            stroke={TYPE_COLORS[0]}
-                                            width={6}
-                                        />
-                                        <PatternLines
-                                            height={6}
-                                            id="ct-2"
-                                            orientation={["diagonal"]}
-                                            stroke={TYPE_COLORS[1]}
-                                            width={6}
-                                        />
+                                        {pieData.map((_, index) =>
+                                            index === 0 ? null : (
+                                                <PatternLines
+                                                    key={`pattern-${index}`}
+                                                    height={6}
+                                                    id={`${patternIdBase}-${index}`}
+                                                    orientation={["diagonal"]}
+                                                    stroke={colorForIndex(index)}
+                                                    width={6}
+                                                />
+                                            ),
+                                        )}
                                         {pieData.map((_, index) => (
                                             <PieSlice
                                                 key={index}
                                                 fill={
-                                                    PATTERNED_INDEXES.has(index)
-                                                        ? `url(#ct-${index + 1})`
-                                                        : TYPE_COLORS[index]
+                                                    index === 0
+                                                        ? colorForIndex(index)
+                                                        : `url(#${patternIdBase}-${index})`
                                                 }
                                                 index={index}
                                             />
@@ -159,10 +162,7 @@ export const CostByTypeCard = ({ workspaceId, agentId }: CostByTypeCardProps) =>
                                     : pieData.map((item, index) => (
                                           <HStack h="100%" key={index} justify="space-between" p={2} minW={0}>
                                               <HStack spacing={2} minW={0}>
-                                                  <PieLegendSwatch
-                                                      color={TYPE_COLORS[index]}
-                                                      patterned={PATTERNED_INDEXES.has(index)}
-                                                  />
+                                                  <PieLegendSwatch color={colorForIndex(index)} patterned={index > 0} />
                                                   <Text variant="body-sm" noOfLines={1}>
                                                       {item.label}
                                                   </Text>

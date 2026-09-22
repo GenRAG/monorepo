@@ -9,5 +9,5 @@ export { useNavLayoutMode } from "./useNavLayoutMode";
 export { getGlassInk, lightenHex } from "./utils";
 export type { GlassInk } from "./utils";
 
-export { DashboardIcon, FolderIcon, ChatIcon, CreditCardIcon, SparklesIcon } from "./icons";
+export { DashboardIcon, FolderIcon, ChatIcon, CreditCardIcon, DocumentIcon, SparklesIcon } from "./icons";
 export type { AnimatedIconProps } from "./icons";

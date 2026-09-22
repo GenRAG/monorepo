@@ -8,20 +8,22 @@ interface AgentSidebarItemProps {
     label: string;
     active: boolean;
     isOpen: boolean;
+    ink: ReturnType<typeof getGlassInk>;
     onClick: () => void;
 }
 
-// Même logique que GlassNav (encre fixe dérivée de la surface plutôt que du colorMode, tooltip
-// quand replié), déclinée en ligne pleine largeur plutôt qu'en badge — la sidebar agent a des
-// sections avec labels, pas juste une liste plate d'icônes.
+// Contrairement à GlassNav (encre fixe "dark", posée sur son propre panneau glass toujours sombre
+// quel que soit le colorMode), la sidebar agent est flush sur le fond ambiant partagé, qui lui suit
+// le colorMode — l'encre doit donc suivre aussi. Reçue en prop plutôt que recalculée ici pour ne pas
+// dupliquer la logique de bascule déjà faite dans AgentSidebar (source unique de vérité).
 export const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({
     icon: ItemIcon,
     label,
     active,
     isOpen,
+    ink,
     onClick,
 }) => {
-    const ink = getGlassInk("dark");
     const [activeColor] = useToken("colors", ["green.400"]);
 
     const row = (

@@ -1,162 +1,47 @@
-import {
-    Box,
-    HStack,
-    Icon,
-    Input,
-    InputGroup,
-    InputLeftElement,
-    SimpleGrid,
-    Stack,
-    Text,
-    VStack,
-} from "@chakra-ui/react";
+import { HStack, Icon, Input, InputGroup, InputLeftElement, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { Plus, Search } from "lucide-react";
-import React, { useMemo, useState } from "react";
-import { AgentCard } from "components/Agents/AgentCard";
-import { AgentsStatsRow } from "components/Agents/AgentsStatsRow";
+import { useMemo, useState } from "react";
+import { AgentsTable } from "components/Agents/AgentsTable";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
-import { AgentPreview } from "types/agent/agent";
 import { AgentStatus } from "types/deployment/deployment";
-import BoxIcon from "components/ui/BoxIcon";
-import { CardSkeleton } from "components/ui/CardSkeleton";
-import { getGlassInk } from "components/ui/GlassNav";
-import { useAppResponsive } from "hooks/useAppResponsive";
-import { useSkeletonCount } from "hooks/useSkeletonCount";
+import Button from "components/ui/Button";
+import { MainLayoutContainer } from "components/ui/MainLayoutContainer";
+import MultiOptionButtons from "components/ui/MultiOptionButtons";
 
-const BOARD_COLUMNS: Array<{ status: AgentStatus; title: string; subtitle: string; tint: string }> = [
-    { status: AgentStatus.PRODUCTION, title: "Production", subtitle: "Agents déployés et actifs", tint: "#1c2527" },
-    {
-        status: AgentStatus.DEVELOPMENT,
-        title: "Développement",
-        subtitle: "Agents en cours de configuration",
-        tint: "#281e1f",
-    },
-];
+type StatusFilter = "all" | AgentStatus;
 
-const COLUMN_BREAKPOINTS = { base: 1, sm: 2, xl: 4 };
-
-const SKELETON_CARD_HEIGHT = 160;
-
-interface AgentBoardColumnProps {
-    status: AgentStatus;
-    title: string;
-    subtitle: string;
-    tint: string;
-    agents: AgentPreview[];
-    workspaceId: string;
-    onCreateAgent?: () => void;
-}
-
-const AgentBoardColumn: React.FC<AgentBoardColumnProps> = ({
-    title,
-    subtitle,
-    tint,
-    agents,
-    workspaceId,
-    onCreateAgent,
-}) => {
-    const ink = getGlassInk("dark");
-    const isEmpty = agents.length === 0 && !onCreateAgent;
-
-    return (
-        <Stack flex={1} spacing={3} w="100%" h="100%" bg={tint} borderRadius="16px" overflow="hidden" p={6}>
-            <Box flexShrink={0} mb={4}>
-                <HStack spacing={2}>
-                    <Text variant="body-xl">{title}</Text>
-                    <Box
-                        as="span"
-                        fontSize="xs"
-                        fontWeight="600"
-                        color={ink.muted}
-                        bg={ink.pillBg}
-                        borderRadius="full"
-                        px={2}
-                    >
-                        {agents.length}
-                    </Box>
-                </HStack>
-                <Text variant="body-sm" color={ink.muted}>
-                    {subtitle}
-                </Text>
-            </Box>
-
-            <VStack align="stretch" spacing={3} flex={1} minH={0} overflow="auto">
-                {onCreateAgent && (
-                    <Box
-                        w="100%"
-                        minH="72px"
-                        borderRadius="16px"
-                        border="2px dashed"
-                        borderColor="rgba(255, 255, 255, 0.18)"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        gap={2}
-                        cursor="pointer"
-                        onClick={onCreateAgent}
-                        _hover={{ borderColor: "rgba(255, 255, 255, 0.35)" }}
-                        transition="border-color 0.15s"
-                    >
-                        <BoxIcon icon={Plus} />
-                        <Text fontSize="13px" color={ink.text}>
-                            Créer un nouvel agent
-                        </Text>
-                    </Box>
-                )}
-
-                {isEmpty && (
-                    <Text fontSize="sm" color={ink.muted} textAlign="center" py={6}>
-                        Aucun agent ici pour le moment.
-                    </Text>
-                )}
-
-                {agents.map((agent) => (
-                    <AgentCard key={agent.id} agent={agent} workspaceId={workspaceId} columnTint={tint} />
-                ))}
-            </VStack>
-        </Stack>
-    );
-};
+const SKELETON_ROWS = 4;
 
 export const AgentsList = () => {
     const { workspaceId = "default" } = useParams<{ workspaceId: string }>();
     const { data: agents = [], isLoading } = useGetWorkspaceAgentsQuery(workspaceId);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
-
-    const visibleAgents = useMemo(() => {
-        const normalizedQuery = searchValue.trim().toLowerCase();
-        const filtered = agents.filter(
-            (agent) => normalizedQuery.length === 0 || agent.name.toLowerCase().includes(normalizedQuery),
-        );
-        return filtered;
-    }, [agents, searchValue]);
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
     const stats = useMemo(
         () => ({
             total: agents.length,
             production: agents.filter((agent) => agent.status === AgentStatus.PRODUCTION).length,
             development: agents.filter((agent) => agent.status === AgentStatus.DEVELOPMENT).length,
-            totalDocuments: agents.reduce((sum, agent) => sum + (agent.documentsCount ?? 0), 0),
         }),
         [agents],
     );
 
-    const columns = useAppResponsive(COLUMN_BREAKPOINTS) ?? COLUMN_BREAKPOINTS.xl;
-    const { containerRef, count: skeletonCount } = useSkeletonCount(columns, { cardHeight: SKELETON_CARD_HEIGHT });
+    const visibleAgents = useMemo(() => {
+        const normalizedQuery = searchValue.trim().toLowerCase();
+        return agents.filter((agent) => {
+            const matchesSearch = normalizedQuery.length === 0 || agent.name.toLowerCase().includes(normalizedQuery);
+            const matchesStatus = statusFilter === "all" || agent.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [agents, searchValue, statusFilter]);
 
     return (
-        <Stack
-            py={{ base: 4, lg: 6 }}
-            pl={{ base: 20, lg: 28 }}
-            pr={{ base: 28, lg: 40 }}
-            gap={4}
-            overflow="auto"
-            h="100%"
-        >
-            <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
+        <MainLayoutContainer
+            header={
                 <VStack align="start" spacing={0.5}>
                     <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textStrong">
                         Agents
@@ -165,58 +50,68 @@ export const AgentsList = () => {
                         Creez et gérez vos agents, vous avez {agents.length} agent(s) au total
                     </Text>
                 </VStack>
-
-                <InputGroup maxW="260px">
-                    <InputLeftElement pointerEvents="none" h="full">
-                        <Icon as={Search} boxSize={4} color="textLabel" />
-                    </InputLeftElement>
-                    <Input
-                        placeholder="Rechercher un assistant..."
-                        value={searchValue}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                        size="sm"
-                    />
-                </InputGroup>
-            </HStack>
-
-            {!isLoading && (
-                <AgentsStatsRow
-                    total={stats.total}
-                    production={stats.production}
-                    development={stats.development}
-                    totalDocuments={stats.totalDocuments}
-                />
-            )}
-
-            {isLoading ? (
-                <Box ref={containerRef} flex={1} minH={0} overflow="hidden">
-                    <SimpleGrid spacing={3} columns={COLUMN_BREAKPOINTS}>
-                        {Array.from({ length: skeletonCount }).map((_, i) => (
-                            <CardSkeleton key={i} height={SKELETON_CARD_HEIGHT} />
-                        ))}
-                    </SimpleGrid>
-                </Box>
-            ) : (
-                <Stack direction={{ base: "column", lg: "row" }} spacing={4} align="stretch" flex={1} minH={0} h="100%">
-                    {BOARD_COLUMNS.map((column) => (
-                        <AgentBoardColumn
-                            key={column.status}
-                            {...column}
-                            agents={visibleAgents.filter((agent) => agent.status === column.status)}
-                            workspaceId={workspaceId}
-                            onCreateAgent={
-                                column.status === AgentStatus.DEVELOPMENT ? () => setIsCreateModalOpen(true) : undefined
-                            }
+            }
+            body={
+                <>
+                    <HStack justify="space-between" flexWrap="wrap" gap={3}>
+                        <MultiOptionButtons
+                            options={[
+                                { value: "all", label: `Tous (${stats.total})` },
+                                { value: AgentStatus.PRODUCTION, label: `Prod (${stats.production})` },
+                                { value: AgentStatus.DEVELOPMENT, label: `Dév (${stats.development})` },
+                            ]}
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                            size="sm"
                         />
-                    ))}
-                </Stack>
-            )}
 
-            <CreateAgentModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                workspaceId={workspaceId}
-            />
-        </Stack>
+                        <HStack spacing={3}>
+                            <InputGroup maxW="260px">
+                                <InputLeftElement pointerEvents="none" h="full">
+                                    <Icon as={Search} boxSize={4} color="textLabel" />
+                                </InputLeftElement>
+                                <Input
+                                    placeholder="Rechercher un agent..."
+                                    value={searchValue}
+                                    onChange={(e) => setSearchValue(e.target.value)}
+                                    size="sm"
+                                />
+                            </InputGroup>
+                            <Button
+                                size="sm"
+                                variant="superPrimary"
+                                leftIcon={Plus}
+                                onClick={() => setIsCreateModalOpen(true)}
+                            >
+                                Nouvel agent
+                            </Button>
+                        </HStack>
+                    </HStack>
+
+                    {isLoading ? (
+                        <Stack spacing={2}>
+                            {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                                <Skeleton key={i} h="64px" borderRadius="12px" />
+                            ))}
+                        </Stack>
+                    ) : (
+                        <AgentsTable
+                            agents={visibleAgents}
+                            groupByStatus={statusFilter === "all"}
+                            workspaceId={workspaceId}
+                            hasAnyAgent={agents.length > 0}
+                            isSearching={searchValue.trim().length > 0}
+                            onCreateAgent={() => setIsCreateModalOpen(true)}
+                        />
+                    )}
+
+                    <CreateAgentModal
+                        isOpen={isCreateModalOpen}
+                        onClose={() => setIsCreateModalOpen(false)}
+                        workspaceId={workspaceId}
+                    />
+                </>
+            }
+        />
     );
 };

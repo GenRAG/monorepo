@@ -25,11 +25,19 @@ function MultiOptionButtons<T extends string>({
     size = "xs",
     color,
 }: MultiOptionButtonsProps<T>) {
-    const defaultBgColor = useColorModeValue("grey.50", "grey.900");
+    const defaultBgColor = useColorModeValue("grey.50", "grey.950");
     const bgColor = color || defaultBgColor;
 
     return (
-        <HStack spacing={2} p={1} bg={bgColor} borderRadius="8px" flexShrink={0}>
+        <HStack
+            border="1px solid"
+            borderColor="borderDefault"
+            spacing={2}
+            p={1}
+            bg={bgColor}
+            borderRadius="8px"
+            flexShrink={0}
+        >
             {options.map((opt) => {
                 const isActive = opt.value === value;
                 return (

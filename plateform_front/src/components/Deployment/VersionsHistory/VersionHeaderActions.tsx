@@ -50,7 +50,15 @@ export const VersionHeaderActions = ({ deployment, workspaceId, agentId }: Versi
     };
 
     return (
-        <HStack justify="space-between" align="flex-start" flexWrap="wrap" p={6} gap={3}>
+        <HStack
+            justify="space-between"
+            align="flex-start"
+            flexWrap="wrap"
+            p={6}
+            gap={3}
+            bg="surfacePrimary"
+            borderRadius="12px 12px 0 0"
+        >
             <VStack align="start" spacing={1}>
                 <HStack>
                     <Text fontSize="2xl" fontWeight={500} color="textStrong" fontFamily="mono" lineHeight={1}>

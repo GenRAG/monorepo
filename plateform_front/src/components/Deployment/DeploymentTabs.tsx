@@ -1,5 +1,5 @@
 import { Activity, Clock, Lock } from "lucide-react";
-import { TabBar } from "components/ui/TabBar";
+import { GlassTabBar } from "components/ui/GlassTabBar";
 
 export enum DeploymentTab {
     Dashboard = "dashboard",
@@ -19,5 +19,5 @@ interface DeploymentTabsProps {
 }
 
 export const DeploymentTabs = ({ activeTab, onChange }: DeploymentTabsProps) => (
-    <TabBar tabs={TABS} activeTab={activeTab} onChange={(v) => onChange(v as DeploymentTab)} />
+    <GlassTabBar tabs={TABS} activeTab={activeTab} onChange={(v) => onChange(v as DeploymentTab)} />
 );

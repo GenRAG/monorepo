@@ -43,7 +43,6 @@ export const AnalyticsChartCard = ({
                         value={period}
                         onChange={onPeriodChange}
                         size="sm"
-                        color="surfaceSubtle"
                     />
                 )}
             </HStack>

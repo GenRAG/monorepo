@@ -119,7 +119,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
             </PopoverTrigger>
             <Portal>
                 <PopoverContent
-                    bg="surfaceModal"
+                    bg="surfaceCard"
                     borderWidth="1px"
                     borderStyle="solid"
                     borderColor="borderDefault"

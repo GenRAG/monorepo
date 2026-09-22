@@ -1,15 +1,21 @@
 import { Badge, Box, Card, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { curveCardinal } from "@visx/curve";
 import { LinearGradient } from "@visx/gradient";
 import { useId, useState } from "react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 import { Area, AreaChart, ChartStatFlow } from "components/charts";
 import { ChartHoverBridge, type HoverState } from "components/ui/ChartHoverBridge";
+import { MetricBarChart } from "components/Dashboard/MetricBarChart";
 import { MetricCompositionPie, type CompositionSegment } from "components/Dashboard/MetricCompositionPie";
 
 export type { CompositionSegment };
+
+export interface BarDatum {
+    label: string;
+    value: number;
+    [key: string]: unknown;
+}
 
 const toSparkRows = (values: number[]) => values.map((value, i) => ({ date: new Date(2020, 0, 1 + i), value }));
 
@@ -33,6 +39,7 @@ interface MetricCardProps {
     trendPositive: boolean;
     trendNeutral?: boolean;
     sparkData?: number[];
+    barData?: BarDatum[];
     sparkColor?: string;
     composition?: CompositionSegment[];
     isLoading?: boolean;
@@ -47,6 +54,7 @@ export const MetricCard = ({
     trendPositive,
     trendNeutral,
     sparkData,
+    barData,
     sparkColor,
     composition,
     isLoading = false,
@@ -59,17 +67,18 @@ export const MetricCard = ({
     const [hover, setHover] = useState<HoverState>({ value: null, label: null });
     const displayValue = hover.value ?? value;
 
-    const trendPercent = sparkData ? computeTrendPercent(sparkData) : null;
+    const trendSourceValues = sparkData ?? barData?.map((d) => d.value);
+    const trendPercent = trendSourceValues ? computeTrendPercent(trendSourceValues) : null;
     const trendPercentPositive = (trendPercent ?? 0) >= 0;
 
     const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
 
     const headerRow = (
-        <HStack justify="space-between" align="start">
+        <HStack justify="space-between" align="start" w="100%">
             {isLoading ? (
                 <Skeleton {...skeletonProps} h="10px" w="110px" borderRadius="4px" />
             ) : (
-                <>
+                <HStack justify="space-between" w="100%">
                     <HStack spacing={1.5}>
                         <Icon as={icon} boxSize={3} color="textLabel" />
                         <Text variant="body-sm-muted">{label}</Text>
@@ -90,7 +99,7 @@ export const MetricCard = ({
                             {trendPercent.toFixed(1)}%
                         </Badge>
                     )}
-                </>
+                </HStack>
             )}
         </HStack>
     );
@@ -117,7 +126,7 @@ export const MetricCard = ({
                         color={trendCol}
                     />
                     <Text fontSize="xs" fontWeight="600" color={trendCol}>
-                        {hover.value !== null ? "Survolé" : trend}
+                        {hover.value !== null ? (hover.label ?? "Survolé") : trend}
                     </Text>
                 </HStack>
             )}
@@ -126,12 +135,28 @@ export const MetricCard = ({
 
     if (composition) {
         return (
-            <Card size="none" p={4} display="flex" flexDirection="row" gap={3} overflow="hidden">
-                <VStack align="stretch" spacing={2} flex={1} minW={0}>
-                    {headerRow}
-                    {valueBlock}
-                </VStack>
-                <MetricCompositionPie segments={composition} isLoading={isLoading} defaultLabel={defaultLabel} />
+            <Card size="none" p={4} display="flex" flexDirection="column" gap={2} overflow="hidden">
+                {headerRow}
+                <HStack align="stretch" spacing={3} flex={1} minW={0}>
+                    <VStack align="stretch" justify="center" spacing={2} flex={1} minW={0}>
+                        {valueBlock}
+                    </VStack>
+                    <MetricCompositionPie segments={composition} isLoading={isLoading} defaultLabel={defaultLabel} />
+                </HStack>
+            </Card>
+        );
+    }
+
+    if (barData) {
+        return (
+            <Card size="none" p={4} display="flex" flexDirection="column" gap={2} overflow="hidden">
+                {headerRow}
+                <HStack align="stretch" spacing={3} flex={1} minW={0}>
+                    <VStack align="stretch" justify="center" spacing={2} flex={1} minW={0}>
+                        {valueBlock}
+                    </VStack>
+                    <MetricBarChart data={barData} color={accentColor} isLoading={isLoading} onHoverChange={setHover} />
+                </HStack>
             </Card>
         );
     }
@@ -162,7 +187,6 @@ export const MetricCard = ({
                             />
                             <Area
                                 dataKey="value"
-                                curve={curveCardinal.tension(0.65)}
                                 stroke={accentColor}
                                 fill={`url(#${gradientId})`}
                                 fillOpacity={1}

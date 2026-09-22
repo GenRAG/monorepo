@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Box, HStack, Stack, Text } from "@chakra-ui/react";
+import { curveMonotoneX } from "@visx/curve";
 import { CHART_GREEN_SHADES, STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { ChartStatFlow, ChartTooltip, Grid, Line, LineChart, TooltipContent, XAxis, YAxis } from "components/charts";
 import { useGetLatencyQuery } from "services/analytics/analytics";
@@ -85,6 +86,7 @@ export const LatencyChart = ({ workspaceId, agentId }: LatencyChartProps) => {
                     <LineChart
                         key={period}
                         status={isFetching ? "loading" : "ready"}
+                        loadingLabel="Chargement de la latence..."
                         data={latencyRows}
                         margin={{ top: 8, right: 8, bottom: 40, left: 25 }}
                         aspectRatio=""
@@ -92,18 +94,24 @@ export const LatencyChart = ({ workspaceId, agentId }: LatencyChartProps) => {
                     >
                         <Line
                             dataKey="p95"
+                            curve={curveMonotoneX}
                             stroke={P95_COLOR}
                             strokeWidth={2}
+                            loadingStyle="sweep"
                             showHighlight
                             loadingStroke={P95_COLOR}
+                            loadingStrokeOpacity={0.5}
                             fadeEdges={false}
                         />
                         <Line
                             dataKey="p50"
+                            curve={curveMonotoneX}
                             stroke={P50_COLOR}
                             strokeWidth={2.5}
+                            loadingStyle="sweep"
                             showHighlight
                             loadingStroke={P50_COLOR}
+                            loadingStrokeOpacity={0.5}
                             fadeEdges={false}
                         />
                         <Grid horizontal vertical />

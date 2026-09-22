@@ -7,11 +7,9 @@ import { DocumentCard } from "./DocumentCard";
 import { DocumentRow } from "./DocumentRow";
 import { DocumentEmptyState } from "../DocumentEmptyState";
 import { DocumentTableHeader } from "./DocumentTableHeader";
-import { DocumentFilters } from "./DocumentFilters";
+import { DocumentFilters, type TypeFilter } from "./DocumentFilters";
 import { DocumentSkeletonRow } from "./DocumentSkeletonRow";
-import WorkspaceHeader from "components/ui/WorkspaceHeader";
 
-type TypeFilter = "PDF" | "Markdown" | "Texte" | "Word" | null;
 type ViewMode = "list" | "grid";
 
 interface DocumentListProps {
@@ -50,13 +48,13 @@ export const DocumentList: React.FC<DocumentListProps> = ({
     footer,
 }) => {
     const [search, setSearch] = useState("");
-    const [activeType, setActiveType] = useState<TypeFilter>(null);
+    const [activeType, setActiveType] = useState<TypeFilter>("all");
     const [viewMode, setViewMode] = useState<ViewMode>("list");
 
     const filtered = useMemo(() => {
         return documents.filter((doc) => {
             const matchSearch = doc.name.toLowerCase().includes(search.toLowerCase());
-            const matchType = activeType === null || getFileTypeLabel(doc.mimeType) === activeType;
+            const matchType = activeType === "all" || getFileTypeLabel(doc.mimeType) === activeType;
             return matchSearch && matchType;
         });
     }, [documents, search, activeType]);

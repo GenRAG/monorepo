@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Build output
+/build
+/dist
+/coverage
+
+# Environment variables — never commit real secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# This is a yarn workspace — an npm lockfile here means someone ran `npm install`
+# by mistake and risks dependency drift with yarn.lock.
+package-lock.json
+
+# Prisma generated client
+/generated/prisma
+/prisma/generated

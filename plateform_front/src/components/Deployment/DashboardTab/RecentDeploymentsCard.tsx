@@ -9,7 +9,7 @@ interface RecentDeploymentsCardProps {
     agentId: string;
 }
 
-const MAX_ITEMS = 5;
+const MAX_ITEMS = 3;
 
 export const RecentDeploymentsCard = ({ workspaceId, agentId }: RecentDeploymentsCardProps) => {
     const { data: deployments = [], isLoading } = useGetDeploymentsQuery(

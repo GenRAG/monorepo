@@ -138,7 +138,7 @@ export const MetricCard = ({
             <Card size="none" p={4} display="flex" flexDirection="column" gap={2} overflow="hidden">
                 {headerRow}
                 <HStack align="stretch" spacing={3} flex={1} minW={0}>
-                    <VStack align="stretch" justify="center" spacing={2} flex={1} minW={0}>
+                    <VStack align="stretch" spacing={2} flex={1} minW={0}>
                         {valueBlock}
                     </VStack>
                     <MetricCompositionPie segments={composition} isLoading={isLoading} defaultLabel={defaultLabel} />
@@ -152,7 +152,7 @@ export const MetricCard = ({
             <Card size="none" p={4} display="flex" flexDirection="column" gap={2} overflow="hidden">
                 {headerRow}
                 <HStack align="stretch" spacing={3} flex={1} minW={0}>
-                    <VStack align="stretch" justify="center" spacing={2} flex={1} minW={0}>
+                    <VStack align="stretch" spacing={2} flex={1} minW={0}>
                         {valueBlock}
                     </VStack>
                     <MetricBarChart data={barData} color={accentColor} isLoading={isLoading} onHoverChange={setHover} />

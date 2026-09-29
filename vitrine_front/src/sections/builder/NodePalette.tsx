@@ -1,29 +1,55 @@
-import { Search, X, Pencil, Sparkles, Info, MessageSquareText, Database } from "lucide-react";
+import {
+  Search,
+  X,
+  Pencil,
+  Sparkles,
+  Info,
+  MessageSquareText,
+  Database,
+  Globe,
+  History,
+  ShieldCheck,
+  Languages,
+  ListCollapse,
+} from "lucide-react";
 import { builder } from "../../content";
 import { BLOCK_ORDER, type BuilderDemoState } from "./useBuilderDemo";
 import styles from "./NodePalette.module.css";
 
-const icons = { rewrite: Pencil, rank: Sparkles, answer: MessageSquareText, search: Database, question: Search };
+const icons = {
+  rewrite: Pencil,
+  rank: Sparkles,
+  answer: MessageSquareText,
+  search: Database,
+  question: Search,
+  web: Globe,
+  memory: History,
+  guard: ShieldCheck,
+  translate: Languages,
+  summary: ListCollapse,
+};
 
-type Item = { id: keyof typeof icons; description: string };
+type Item = { id: keyof typeof icons; label: string; description: string };
 
-const matches = (id: Item["id"], query: string) =>
-  !query || builder.nodes[id].toLowerCase().startsWith(query.toLowerCase());
+const matches = (item: Item, query: string) => !query || item.label.toLowerCase().startsWith(query.toLowerCase());
+const label = (id: keyof typeof builder.nodes) => builder.nodes[id];
 
 /** Palette « Chercher des blocs » de l'app (MenuNodeModal). */
 export function NodePalette({ state }: { state: BuilderDemoState }) {
   const { palette, blocks, hover } = state;
   const t = builder.palette;
 
-  const available: Item[] = BLOCK_ORDER.filter((id) => !blocks[id]).map((id) => ({
+  const demoBlock = (id: (typeof BLOCK_ORDER)[number]): Item => ({
     id,
+    label: label(id),
     description: builder.blocks[id].description,
-  }));
+  });
+  const available: Item[] = [...BLOCK_ORDER.filter((id) => !blocks[id]).map(demoBlock), ...(t.extraBlocks as Item[])];
   const used: Item[] = [
-    ...BLOCK_ORDER.filter((id) => blocks[id]).map((id) => ({ id, description: builder.blocks[id].description })),
-    ...(t.usedBlocks as Item[]),
+    ...BLOCK_ORDER.filter((id) => blocks[id]).map(demoBlock),
+    ...t.usedBlocks.map((b) => ({ ...b, label: label(b.id as keyof typeof builder.nodes) }) as Item),
   ];
-  const shownAvailable = available.filter((item) => matches(item.id, palette.query));
+  const shownAvailable = available.filter((item) => matches(item, palette.query));
   const highlighted = hover?.startsWith("palette-") ? hover.slice(8) : palette.query ? shownAvailable[0]?.id : null;
 
   return (
@@ -50,7 +76,7 @@ export function NodePalette({ state }: { state: BuilderDemoState }) {
           <div className={styles.divider} />
           <p className={styles.group}>{t.used}</p>
           {used.map((item) => (
-            <Row key={item.id} item={item} used hidden={!matches(item.id, palette.query)} />
+            <Row key={item.id} item={item} used hidden={!matches(item, palette.query)} />
           ))}
         </div>
 
@@ -81,7 +107,7 @@ function Row({ item, used, hidden, active }: { item: Item; used?: boolean; hidde
       </span>
       <span className={styles.rowText}>
         <span className={styles.rowTitle}>
-          {builder.nodes[item.id]}
+          {item.label}
           {used && <span className={styles.usedTag}>{builder.palette.usedTag}</span>}
         </span>
         <span className={styles.rowDesc}>{item.description}</span>

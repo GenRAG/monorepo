@@ -261,6 +261,14 @@ export const builder = {
       { keys: ["↵"], label: "ajouter" },
       { keys: ["⌘", "K"], label: "fermer" },
     ],
+    /** Blocs affichés dans la palette pour montrer le catalogue ; la démo ne les ajoute pas. */
+    extraBlocks: [
+      { id: "web", label: "Recherche web", description: "Complète vos documents avec des résultats du web" },
+      { id: "memory", label: "Mémoire", description: "Garde le contexte des échanges précédents" },
+      { id: "guard", label: "Filtre de sécurité", description: "Bloque les questions et réponses hors périmètre" },
+      { id: "translate", label: "Traduction", description: "Répond dans la langue de l'utilisateur" },
+      { id: "summary", label: "Synthèse", description: "Résume les passages trouvés avant la réponse" },
+    ],
     usedBlocks: [
       { id: "answer", description: "Génère la réponse finale à partir des documents trouvés" },
       { id: "search", description: "Recherche les passages pertinents dans vos documents" },

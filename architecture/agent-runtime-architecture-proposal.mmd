@@ -1,0 +1,95 @@
+---
+config:
+  layout: elk
+---
+flowchart TD
+    subgraph ENTRY["Entrées HTTP/SSE — inchangé"]
+        C1["AgentRuntimeController<br/>/runtime/playground"]
+        C2["ConversationController<br/>/assistants/:id/stream"]
+        C3["OnboardingController<br/>/onboarding/stream"]
+    end
+
+    subgraph FACADE["Façade — AgentRuntimeService"]
+        F1["playgroundStream()"]
+        F2["streamWithPersistence()"]
+        F3["streamWithOrgOverride()"]
+        CORE[["runStream(request)<br/>—— cœur unique, avant dupliqué x3 ——"]]
+    end
+
+    subgraph EXEC["Exécution RAG — inchangé"]
+        ORC["AgentRuntimeOrchestrator"]
+        BUILD["RagPipelineBuilder"]
+        RAGSVC["RagEngineService"]
+    end
+
+    subgraph STREAM["Streaming &amp; parsing NDJSON"]
+        FWD["RagStreamForwarderService<br/>(ne connaît plus SSE ni la persistance)"]
+        ACC[["RagStreamAccumulator<br/>état NDJSON typé, remplace les closures"]]
+    end
+
+    subgraph SINK["Sinks — Strategy pattern"]
+        IFACE{{"RuntimeResultSink"}}
+        TSINK["TransientResultSink<br/>playground / onboarding"]
+        PSINK["PersistingResultSink<br/>conversation"]
+    end
+
+    subgraph OUT["Contrat de sortie"]
+        EVT[["RuntimeSseEvent<br/>+ encodeSseEvent() — type unique et partagé"]]
+    end
+
+    subgraph SIDE["Effets de bord partagés"]
+        REC["RuntimeUsageRecorder<br/>(remplace 5x le même .catch())"]
+        UT["UsageTrackerService"]
+        QLOG["AgentQueryLogRepository"]
+        CONVREPO["ConversationRepository<br/>hasAgentAccess() + ownership check"]
+    end
+
+    EXT[["RAG Engine — API externe"]]
+    CLIENT(["Client (SSE)"])
+
+    C1 --> F1
+    C2 --> F2
+    C3 --> F3
+    F1 --> CORE
+    F2 --> CORE
+    F3 --> CORE
+
+    CORE -->|"contrôle d'accès avant tout streaming"| CONVREPO
+    CORE --> ORC
+    ORC --> BUILD
+    ORC --> RAGSVC
+    RAGSVC -->|"POST /rag/stream"| EXT
+    EXT -->|"NDJSON stream"| RAGSVC
+    RAGSVC -->|"IncomingMessage brut"| ORC
+    ORC -->|"stream brut"| CORE
+
+    CORE -->|"injecte le sink choisi par la façade"| FWD
+    FWD --> ACC
+    ACC -->|"push d'events typés (token, sources, cost, status...)"| IFACE
+    IFACE -.->|"implémente"| TSINK
+    IFACE -.->|"implémente"| PSINK
+
+    TSINK --> EVT
+    PSINK --> EVT
+    EVT -->|"SSE"| CLIENT
+
+    TSINK --> REC
+    PSINK --> REC
+    PSINK --> CONVREPO
+    REC --> UT --> QLOG
+
+    classDef entry fill:#e6f1fb,stroke:#5b9bd5
+    classDef facade fill:#eaf3de,stroke:#8fbc5a
+    classDef exec fill:#eeedfe,stroke:#8a7fd6
+    classDef stream fill:#faece7,stroke:#e08a5f
+    classDef sink fill:#fff3cd,stroke:#d4a017
+    classDef side fill:#f0f0f0,stroke:#999999
+    classDef ext fill:#fde2e2,stroke:#c0392b
+
+    class C1,C2,C3 entry
+    class F1,F2,F3,CORE facade
+    class ORC,BUILD,RAGSVC exec
+    class FWD,ACC stream
+    class IFACE,TSINK,PSINK,EVT sink
+    class REC,UT,QLOG,CONVREPO side
+    class EXT,CLIENT ext

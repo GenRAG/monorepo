@@ -422,7 +422,7 @@
 }
 
 /* Fenêtres basses : on garde la scène, la liste d'étapes est déjà résumée par la pastille */
-@media (max-height: 850px), (max-width: 1023px) {
+@media (max-height: 850px) and (min-width: 768px) {
   .steps {
     display: none;
   }

@@ -51,9 +51,11 @@ export function ModelPicker({
           <Avatar name={model.name} index={preview} large />
           <span className={styles.detailTitle}>
             <span className={styles.detailName}>{model.name}</span>
-            <span className={styles.itemHint}>{model.hint}</span>
+            <span className={styles.detailMeta}>
+              <span className={styles.badge}>{model.badge}</span>
+              <span className={styles.itemHint}>{model.hint}</span>
+            </span>
           </span>
-          <span className={styles.badge}>{model.badge}</span>
         </div>
 
         <p className={styles.perfTitle}>{t.perf}</p>

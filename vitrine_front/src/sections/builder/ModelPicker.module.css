@@ -123,11 +123,22 @@
   font-size: 12.5px;
   font-weight: 700;
   color: var(--grey-50);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge et indication sous le nom : rien ne se chevauche, même dans un panneau étroit */
+.detailMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 4px;
 }
 
 .badge {
   flex: none;
-  margin-left: auto;
   padding: 2px 7px;
   border-radius: 5px;
   background: var(--accent-soft);
@@ -218,4 +229,40 @@
 .selectHover {
   transform: scale(1.03);
   box-shadow: 0 6px 20px -6px rgba(52, 211, 169, 0.6);
+}
+
+/* Panneau étroit (mobile) : liste compacte sur deux colonnes, détail en dessous */
+@container panel (max-width: 360px) {
+  .picker {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px 4px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .search {
+    grid-column: 1 / -1;
+    padding-bottom: 6px;
+  }
+  .item {
+    margin: 0;
+    padding: 6px;
+  }
+  .itemHint {
+    display: none;
+  }
+  .detailMeta .itemHint {
+    display: block;
+  }
+  .detail {
+    gap: 7px;
+  }
+  /* Le bouton suit le benchmark au lieu d'être repoussé en bas du panneau */
+  .select {
+    margin-top: 10px;
+  }
 }

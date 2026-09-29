@@ -492,3 +492,108 @@
     padding: 8px;
   }
 }
+
+/* ---------- Disposition verticale (écrans étroits) : le canvas prend la hauteur du schéma ---------- */
+.canvas[data-layout="tall"] {
+  height: auto;
+  align-self: flex-start;
+}
+
+.canvas[data-layout="tall"] .scroller {
+  padding: 0;
+  place-items: center;
+}
+
+.canvas[data-layout="tall"] .toolbar {
+  top: auto;
+  bottom: 12px;
+  left: 12px;
+  flex-direction: row;
+  transform: none;
+}
+
+.canvas[data-layout="tall"] .controls,
+.canvas[data-layout="tall"] .minimap {
+  display: none;
+}
+
+/* Nodes compacts en disposition verticale : mêmes proportions que builderGraph `tall` */
+.canvas[data-layout="tall"] .node {
+  font-size: 10px;
+  border-radius: 10px;
+}
+.canvas[data-layout="tall"] .nodeHead {
+  height: 30px;
+  gap: 7px;
+  padding: 0 8px;
+  border-radius: 9px 9px 0 0;
+}
+.canvas[data-layout="tall"] .nodeIcon {
+  width: 19px;
+  height: 19px;
+  border-radius: 5px;
+}
+.canvas[data-layout="tall"] .nodeIcon svg {
+  width: 11px;
+  height: 11px;
+}
+.canvas[data-layout="tall"] .nodeTitle {
+  font-size: 10px;
+}
+.canvas[data-layout="tall"] .tag {
+  padding: 2px 4px;
+  font-size: 7.5px;
+}
+.canvas[data-layout="tall"] .trash {
+  width: 11px;
+}
+.canvas[data-layout="tall"] .row {
+  height: 22px;
+  padding: 0 9px;
+}
+.canvas[data-layout="tall"] .row:last-child {
+  border-radius: 0 0 9px 9px;
+}
+.canvas[data-layout="tall"] .model {
+  width: 150px;
+  height: 48px;
+  gap: 8px;
+  padding: 0 9px;
+  border-radius: 10px;
+}
+.canvas[data-layout="tall"] .modelIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+.canvas[data-layout="tall"] .modelIcon svg {
+  width: 12px;
+  height: 12px;
+}
+.canvas[data-layout="tall"] .modelLabel {
+  font-size: 7px;
+}
+.canvas[data-layout="tall"] .modelName {
+  font-size: 10.5px;
+}
+.canvas[data-layout="tall"] .modelHint,
+.canvas[data-layout="tall"] .chev,
+.canvas[data-layout="tall"] .instrEdit {
+  display: none;
+}
+.canvas[data-layout="tall"] .instruction {
+  width: 150px;
+  border-radius: 10px;
+}
+.canvas[data-layout="tall"] .instruction .handleIn {
+  top: 14px;
+}
+.canvas[data-layout="tall"] .instrHead {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 7.5px;
+}
+.canvas[data-layout="tall"] .instrText {
+  padding: 7px 8px 9px;
+  font-size: 9.5px;
+}

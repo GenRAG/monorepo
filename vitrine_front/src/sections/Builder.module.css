@@ -144,6 +144,11 @@
   background: var(--grey-975);
 }
 
+/* Le canvas en disposition verticale fixe lui-même sa hauteur */
+.window:has([data-layout="tall"]) {
+  height: auto;
+}
+
 @media (max-width: 1023px) {
   .bridge {
     --pad: clamp(72px, 12vw, 104px);

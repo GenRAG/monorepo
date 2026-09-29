@@ -15,22 +15,13 @@ import {
   Save,
 } from "lucide-react";
 import { builder } from "../content";
-import {
-  CANVAS,
-  NODE_W,
-  isShown,
-  mainEdges,
-  mainNodes,
-  settingEdges,
-  settingNodes,
-  type MainNode,
-  type OptionalBlock,
-  type SettingNode,
-} from "./builderGraph";
+import { GRAPHS, isShown, type GraphLayout, type MainNode, type OptionalBlock, type SettingNode } from "./builderGraph";
 import styles from "./BuilderCanvas.module.css";
 
 const nodeIcons = { question: Search, rewrite: Pencil, search: Database, rank: Sparkles, answer: MessageSquareText };
 const MIN_SCALE = 0.56;
+/** En dessous de cette largeur de canvas, le schéma passe en disposition verticale. */
+const TALL_BELOW = 560;
 
 export interface CanvasView {
   blocks: Record<OptionalBlock, boolean>;
@@ -43,7 +34,7 @@ export interface CanvasView {
 
 const cls = (...names: (string | false | null | undefined)[]) => names.filter(Boolean).join(" ");
 
-function Node({ node, view }: { node: MainNode; view: CanvasView }) {
+function Node({ node, view, width }: { node: MainNode; view: CanvasView; width: number }) {
   const Icon = nodeIcons[node.id];
   const t = builder.nodes;
   return (
@@ -53,7 +44,7 @@ function Node({ node, view }: { node: MainNode; view: CanvasView }) {
         !isShown(node, view.blocks) && styles.hidden,
         view.selected === node.id && styles.selected,
       )}
-      style={{ left: node.x, top: node.y, width: NODE_W }}
+      style={{ left: node.x, top: node.y, width }}
     >
       <div className={styles.nodeHead} data-demo={`node-${node.id}`}>
         <span className={styles.nodeIcon}>
@@ -114,14 +105,20 @@ interface BuilderCanvasProps {
 
 export function BuilderCanvas({ view, rootRef, children }: BuilderCanvasProps) {
   const frame = useRef<HTMLDivElement>(null);
+  const [layout, setLayout] = useState<GraphLayout>("wide");
   const [scale, setScale] = useState(1);
+  const { canvas: CANVAS, node: metrics, mainNodes, settingNodes, mainEdges, settingEdges } = GRAPHS[layout];
 
   useLayoutEffect(() => {
     const el = frame.current;
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
-      setScale(Math.max(MIN_SCALE, Math.min(width / CANVAS.w, height / CANVAS.h, 1.1)));
+      const next: GraphLayout = width < TALL_BELOW ? "tall" : "wide";
+      const { w, h } = GRAPHS[next].canvas;
+      setLayout(next);
+      // En vertical, la hauteur du canvas suit le schéma : seule la largeur compte.
+      setScale(next === "tall" ? width / w : Math.max(MIN_SCALE, Math.min(width / w, height / h, 1.1)));
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -134,6 +131,8 @@ export function BuilderCanvas({ view, rootRef, children }: BuilderCanvasProps) {
         if (rootRef) rootRef.current = el;
       }}
       className={styles.canvas}
+      data-layout={layout}
+      style={layout === "tall" ? { aspectRatio: `${CANVAS.w} / ${CANVAS.h}` } : undefined}
     >
       <div className={cls(styles.scroller, view.fading && styles.fading)}>
         <div className={styles.sizer} style={{ width: CANVAS.w * scale, height: CANVAS.h * scale }}>
@@ -158,7 +157,7 @@ export function BuilderCanvas({ view, rootRef, children }: BuilderCanvasProps) {
             </svg>
 
             {mainNodes.map((n) => (
-              <Node key={n.id} node={n} view={view} />
+              <Node key={n.id} node={n} view={view} width={metrics.w} />
             ))}
 
             {settingNodes.map((s) =>

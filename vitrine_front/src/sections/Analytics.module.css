@@ -1,29 +1,24 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
-  align-items: center;
-  gap: clamp(40px, 5vw, 80px);
+  align-items: stretch;
 }
 
-.dash {
-  position: relative;
+/* Bande de l'intro : mêmes bordures haute et basse que le bento, prolongées jusqu'au bord gauche */
+.side {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-  border-radius: var(--r-xl);
-  background: var(--grey-975);
-  border: 1px solid var(--border-strong);
-  box-shadow: 0 50px 100px -50px rgba(0, 0, 0, 0.9);
+  align-items: center;
+  margin-left: calc(-1 * var(--gutter));
+  padding: 40px clamp(40px, 5vw, 80px) 40px var(--gutter);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
+/* Petite mention sous l'intro : les chiffres sont fictifs */
 .demo {
-  position: absolute;
-  top: -12px;
-  right: 18px;
+  align-self: flex-start;
   padding: 4px 10px;
   border-radius: 999px;
-  background: var(--grey-850);
   border: 1px solid var(--border-strong);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -31,51 +26,117 @@
   color: var(--text-label);
 }
 
-.kpis {
+/* ---------- Bento à bordures partagées (même langage que « Comment ça marche ») ---------- */
+.bento {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-areas:
+    "k1 e1 k2"
+    "ch ch k3"
+    "e2 tp tp";
+  /* Rejoint la ligne de structure verticale à droite de la section */
+  margin-right: calc(-1 * var(--gutter));
+  border-top: 1px solid var(--border);
 }
 
-.card {
-  padding: 16px;
-  border-radius: 14px;
-  background: var(--grey-950);
-  border: 1px solid var(--border);
+.cell {
+  position: relative;
+  min-width: 0;
+  padding: 28px;
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
 }
 
-.cardLabel {
+.cell:not(.empty):hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+[data-area="k1"] {
+  grid-area: k1;
+}
+[data-area="k2"] {
+  grid-area: k2;
+}
+[data-area="k3"] {
+  grid-area: k3;
+}
+[data-area="e1"] {
+  grid-area: e1;
+}
+[data-area="e2"] {
+  grid-area: e2;
+}
+[data-area="ch"] {
+  grid-area: ch;
+}
+[data-area="tp"] {
+  grid-area: tp;
+}
+
+/* Trait vert au survol, sur la bordure haute */
+.cell:not(.empty)::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--green-400);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.cell:not(.empty):hover::before {
+  transform: scaleX(1);
+}
+
+/* Case vide : juste une trame très discrète pour qu'elle reste une case, pas un trou */
+.empty {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.cellLabel {
   display: flex;
   align-items: center;
   gap: 7px;
   font-size: 0.8125rem;
   color: var(--text-label);
-  white-space: nowrap;
+}
+
+.cellLabel svg {
+  flex: none;
+  color: var(--green-400);
 }
 
 .kpiValue {
-  margin-top: 10px;
-  font-size: clamp(1.4rem, 1rem + 1vw, 1.9rem);
+  margin-top: 14px;
+  font-size: clamp(1.6rem, 1rem + 1.4vw, 2.3rem);
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text-strong);
   font-variant-numeric: tabular-nums;
 }
 
-.charts {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-  gap: 12px;
+.unit {
+  margin-left: 6px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-label);
 }
 
-.cardHead {
+.cellHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-.cardTitle {
+.cellTitle {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -84,7 +145,7 @@
   color: var(--text-primary);
 }
 
-.cardTitle svg {
+.cellTitle svg {
   color: var(--text-faint);
 }
 
@@ -114,6 +175,9 @@
   width: 100%;
   height: clamp(110px, 18vh, 170px);
   overflow: visible;
+  /* Bords estompés : la courbe naît et s'éteint dans le fond au lieu d'être coupée net */
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
 }
 
 .gridLine {
@@ -201,24 +265,35 @@
 @media (max-width: 1023px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .side {
+    margin-left: 0;
+    padding: 0;
+    border: 0;
   }
 }
 
 @media (max-width: 640px) {
-  .kpis {
+  .bento {
     grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "k1 k2"
+      "k3 k3"
+      "ch ch"
+      "tp tp";
+    margin-inline: calc(-1 * var(--gutter));
   }
-  .kpis > :last-child {
-    grid-column: 1 / -1;
+  .empty {
+    display: none;
   }
-  .cardLabel {
-    white-space: normal;
-    align-items: flex-start;
+  .cell {
+    padding: 22px var(--gutter);
   }
-  .dash {
-    padding: 8px;
+  .cell {
+    border-left: 0;
   }
-  .charts {
-    grid-template-columns: minmax(0, 1fr);
+  [data-area="k2"] {
+    border-left: 1px solid var(--border);
   }
 }

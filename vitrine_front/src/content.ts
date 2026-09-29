@@ -369,12 +369,13 @@ export const share = {
 export const analytics = {
   eyebrow: "Suivi",
   title: "Sachez ce que votre équipe demande.",
-  text: "Volume de questions, sujets fréquents, temps de réponse et coûts, assistant par assistant.",
+  text: "Volume de questions, sujets fréquents, temps de réponse et crédits consommés, assistant par assistant.",
   kpis: [
     { label: "Questions ce mois", value: 1284, format: "int" },
     { label: "Temps de réponse moyen", value: 2.1, format: "sec" },
-    { label: "Coût du mois", value: 18.4, format: "eur" },
+    { label: "Crédits consommés ce mois", value: 1284, format: "credits" },
   ],
+  creditUnit: "crédits",
   chartTitle: "Volume de questions",
   chartPeriod: "30 derniers jours",
   topicsTitle: "Questions fréquentes",

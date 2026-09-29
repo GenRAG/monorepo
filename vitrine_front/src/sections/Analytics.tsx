@@ -16,8 +16,6 @@ const CHART = { w: 640, h: 200, pad: 8 };
 const fmt = (value: number, format: string) => {
   if (format === "sec")
     return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} s`;
-  if (format === "eur")
-    return `${value.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   return Math.round(value).toLocaleString("fr-FR");
 };
 
@@ -77,11 +75,14 @@ function Kpi({
   const v = useCountUp(value, start);
   const Icon = kpiIcons[index];
   return (
-    <div className={styles.card}>
-      <p className={styles.cardLabel}>
+    <div className={styles.cell} data-area={`k${index + 1}`}>
+      <p className={styles.cellLabel}>
         <Icon size={14} aria-hidden /> {label}
       </p>
-      <p className={styles.kpiValue}>{fmt(v, format)}</p>
+      <p className={styles.kpiValue}>
+        {fmt(v, format)}
+        {format === "credits" && <span className={styles.unit}>{analytics.creditUnit}</span>}
+      </p>
     </div>
   );
 }
@@ -90,77 +91,81 @@ export function Analytics() {
   const entered = useHasEntered(INDEX);
   return (
     <Panel id="suivi" label="Suivi" tone="open" className={styles.layout}>
-      <SectionIntro index={8} eyebrow={analytics.eyebrow} title={analytics.title} text={analytics.text} />
+      <div className={styles.side}>
+        <SectionIntro index={8} eyebrow={analytics.eyebrow} title={analytics.title} text={analytics.text}>
+          <p className={styles.demo} {...reveal(3)}>
+            {site.demoLabel}
+          </p>
+        </SectionIntro>
+      </div>
 
+      {/* Grille « bento » à bordures partagées ; deux cases volontairement vides cassent la régularité */}
       <div
-        className={`${styles.dash} ${entered ? styles.live : ""}`}
+        className={`${styles.bento} ${entered ? styles.live : ""}`}
         {...reveal(3)}
         role="img"
-        aria-label="Tableau de bord d'exemple : nombre de questions, temps de réponse, coût du mois, évolution sur 30 jours et questions fréquentes"
+        aria-label="Tableau de bord d'exemple : nombre de questions, temps de réponse, crédits consommés ce mois, évolution sur 30 jours et questions fréquentes"
       >
-        <span className={styles.demo}>{site.demoLabel}</span>
-        <div className={styles.kpis} aria-hidden>
-          {analytics.kpis.map((k, i) => (
-            <Kpi key={k.label} {...k} index={i} start={entered} />
-          ))}
+        {analytics.kpis.map((k, i) => (
+          <Kpi key={k.label} {...k} index={i} start={entered} />
+        ))}
+        <span className={`${styles.cell} ${styles.empty}`} data-area="e1" aria-hidden />
+        <span className={`${styles.cell} ${styles.empty}`} data-area="e2" aria-hidden />
+
+        <div className={styles.cell} data-area="ch" aria-hidden>
+          <div className={styles.cellHead}>
+            <p className={styles.cellTitle}>
+              {analytics.chartTitle} <Info size={12} />
+            </p>
+            <span className={styles.periods}>
+              <i>7j</i>
+              <i className={styles.periodOn}>30j</i>
+              <i>90j</i>
+            </span>
+          </div>
+          <svg className={styles.chart} viewBox={`0 0 ${CHART.w} ${CHART.h}`} preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="area" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#34D3A9" stopOpacity="0.28" />
+                <stop offset="100%" stopColor="#34D3A9" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {[0.25, 0.5, 0.75].map((f) => (
+              <line
+                key={f}
+                x1="0"
+                x2={CHART.w}
+                y1={CHART.h * f}
+                y2={CHART.h * f}
+                className={styles.gridLine}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+            <path d={area} fill="url(#area)" className={styles.area} />
+            <path d={line} pathLength={1} className={styles.line} vectorEffect="non-scaling-stroke" />
+          </svg>
+          <div className={styles.axis}>
+            <span>30 août</span>
+            <span>7 sept.</span>
+            <span>14 sept.</span>
+            <span>21 sept.</span>
+            <span>28 sept.</span>
+          </div>
         </div>
 
-        <div className={styles.charts} aria-hidden>
-          <div className={`${styles.card} ${styles.chartCard}`}>
-            <div className={styles.cardHead}>
-              <p className={styles.cardTitle}>
-                {analytics.chartTitle} <Info size={12} />
-              </p>
-              <span className={styles.periods}>
-                <i>7j</i>
-                <i className={styles.periodOn}>30j</i>
-                <i>90j</i>
-              </span>
-            </div>
-            <svg className={styles.chart} viewBox={`0 0 ${CHART.w} ${CHART.h}`} preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="area" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#34D3A9" stopOpacity="0.28" />
-                  <stop offset="100%" stopColor="#34D3A9" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              {[0.25, 0.5, 0.75].map((f) => (
-                <line
-                  key={f}
-                  x1="0"
-                  x2={CHART.w}
-                  y1={CHART.h * f}
-                  y2={CHART.h * f}
-                  className={styles.gridLine}
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
-              <path d={area} fill="url(#area)" className={styles.area} />
-              <path d={line} pathLength={1} className={styles.line} vectorEffect="non-scaling-stroke" />
-            </svg>
-            <div className={styles.axis}>
-              <span>30 août</span>
-              <span>7 sept.</span>
-              <span>14 sept.</span>
-              <span>21 sept.</span>
-              <span>28 sept.</span>
-            </div>
+        <div className={styles.cell} data-area="tp" aria-hidden>
+          <div className={styles.cellHead}>
+            <p className={styles.cellTitle}>{analytics.topicsTitle}</p>
           </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHead}>
-              <p className={styles.cardTitle}>{analytics.topicsTitle}</p>
-            </div>
-            <ul className={styles.topics}>
-              {analytics.topics.map((t, i) => (
-                <li key={t.label} style={{ "--w": t.value / topicMax, "--d": `${i * 90}ms` } as CSSProperties}>
-                  <span className={styles.topicLabel}>{t.label}</span>
-                  <span className={styles.topicValue}>{t.value}</span>
-                  <span className={styles.bar} />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className={styles.topics}>
+            {analytics.topics.map((t, i) => (
+              <li key={t.label} style={{ "--w": t.value / topicMax, "--d": `${i * 90}ms` } as CSSProperties}>
+                <span className={styles.topicLabel}>{t.label}</span>
+                <span className={styles.topicValue}>{t.value}</span>
+                <span className={styles.bar} />
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </Panel>

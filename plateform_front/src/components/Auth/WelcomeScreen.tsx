@@ -2,7 +2,7 @@ import { Box, DarkMode, HStack, Image, Text, VStack } from "@chakra-ui/react";
 import { motion, type Variants } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { WelcomeStepper } from "./welcome/WelcomeStepper";
-import logoGreen from "assets/logo/logoGreen.png";
+import logoGreen from "assets/logo/mainLogo.png";
 import Button from "components/ui/Button";
 
 const MotionVStack = motion(VStack);

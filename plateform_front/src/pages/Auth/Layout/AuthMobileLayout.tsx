@@ -1,6 +1,6 @@
 import { Box, Icon, Image, Stack, VStack, useColorModeValue, IconButton, HStack, DarkMode } from "@chakra-ui/react";
 import { ArrowLeft } from "lucide-react";
-import logoGreen from "assets/logo/logoGreen.png";
+import logoGreen from "assets/logo/mainLogo.png";
 
 const AuthMobileLayout = ({
     canGoBack,

@@ -1,4 +1,4 @@
-import { RewriterAnimation } from "components/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeContent";
+import { RewriterAnimation } from "components/Agents/Workflow/NodeModalContent/Rewriter/RewriterAnimation";
 import { NodeInformationLayout } from "components/Agents/Workflow/NodeInformation/NodeInformationLayout";
 
 export const RewriterInformation = () => (

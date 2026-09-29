@@ -41,8 +41,18 @@ export function Builder() {
 
   return (
     <Panel id="editeur" label="Éditeur sans code" tone="open" className={styles.layout}>
+      <div className={styles.bridge} aria-hidden {...reveal(0)}>
+        <span>{builder.bridge}</span>
+      </div>
       <div className={styles.head}>
-        <SectionIntro index={6} eyebrow={builder.eyebrow} title={builder.title} text={builder.text} />
+        <SectionIntro
+          index={5}
+          eyebrow={builder.eyebrow}
+          title={builder.title}
+          text={builder.text}
+          align="center"
+          wide
+        />
       </div>
 
       <div className={styles.demo} {...reveal(4)}>

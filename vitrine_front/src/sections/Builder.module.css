@@ -4,11 +4,40 @@
   gap: clamp(24px, 3.5vh, 40px);
 }
 
+/* Transition depuis « Assistants métier » : un trait descend du haut de la section jusqu'au mot de liaison */
+.bridge {
+  /* Remonte à travers le padding bas de la section précédente et le padding haut de celle-ci */
+  --pad: clamp(96px, 13vh, 160px);
+  --reach: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: calc(-2 * var(--pad) + var(--reach));
+}
+
+.bridge::before {
+  content: "";
+  width: 1px;
+  height: calc(var(--pad) + clamp(72px, 10vh, 128px) - var(--reach));
+  background: linear-gradient(180deg, rgba(52, 211, 169, 0), var(--green-400));
+}
+
+.bridge span {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 169, 0.4);
+  background: var(--accent-soft);
+  box-shadow: 0 0 24px -4px rgba(52, 211, 169, 0.45);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-300);
+}
+
 .head {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  align-items: end;
-  gap: 48px;
+  display: flex;
+  justify-content: center;
 }
 
 .head h2 {
@@ -116,9 +145,8 @@
 }
 
 @media (max-width: 1023px) {
-  .head {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
+  .bridge {
+    --pad: clamp(72px, 12vw, 104px);
   }
   .window {
     height: 420px;

@@ -19,8 +19,8 @@ export const nav = [
   { id: "constat", label: "Le constat", short: "Constat" },
   { id: "etapes", label: "Comment ça marche", short: "Étapes" },
   { id: "assistants", label: "Assistants métier", short: "Assistants" },
-  { id: "connecteurs", label: "Vos documents", short: "Documents" },
   { id: "editeur", label: "Éditeur", short: "Éditeur" },
+  { id: "connecteurs", label: "Vos documents", short: "Documents" },
   { id: "partage", label: "Partage", short: "Partage" },
   { id: "suivi", label: "Suivi", short: "Suivi" },
   { id: "pourquoi", label: "Pourquoi GenRAG", short: "Pourquoi" },
@@ -216,6 +216,8 @@ export const connectors = {
 export const builder = {
   eyebrow: "Éditeur sans code",
   title: "Construisez votre assistant comme un schéma.",
+  /** Mot de liaison avec la section précédente (« Un assistant prêt pour chaque service »). */
+  bridge: "ou",
   text: "Reliez des blocs entre eux. Chaque étape est visible, chaque réglage à portée de clic.",
   sidebar: {
     agent: "Assistant RH",

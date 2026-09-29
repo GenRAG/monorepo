@@ -51,8 +51,8 @@ export default function App() {
         <Problem />
         <Steps />
         <Assistants />
-        <Connectors />
         <Builder />
+        <Connectors />
         <Share />
         <Analytics />
         <Why />

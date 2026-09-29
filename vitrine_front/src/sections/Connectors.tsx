@@ -169,7 +169,7 @@ export function Connectors() {
 
   return (
     <Panel id="connecteurs" label="Vos documents" tone="light" className={styles.grid}>
-      <SectionIntro index={5} eyebrow={connectors.eyebrow} title={connectors.title} text={connectors.text} />
+      <SectionIntro index={6} eyebrow={connectors.eyebrow} title={connectors.title} text={connectors.text} />
 
       <div className={styles.demo} {...reveal(3)}>
         <div

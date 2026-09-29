@@ -1,0 +1,346 @@
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: 2px;
+  pointer-events: none;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--green-400);
+  box-shadow: 0 0 12px rgba(52, 211, 169, 0.7);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+/* Flou progressif : le contenu se floute en passant sous le header au lieu d'être coupé net */
+.veil {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 45;
+  height: 112px;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  mask-image: linear-gradient(180deg, #000 35%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 35%, transparent);
+}
+
+/* ---------- Header : panneau verre (GlassSurface) ---------- */
+.header {
+  position: fixed;
+  inset: 12px 0 auto 0;
+  z-index: 50;
+  padding: 0 var(--gutter);
+  pointer-events: none;
+}
+
+.headerInner {
+  position: relative;
+  max-width: calc(var(--maxw) + 32px);
+  height: 56px;
+  margin: 0 auto;
+  padding: 0 10px 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--text-primary);
+  pointer-events: auto;
+  overflow: hidden;
+  transition:
+    background-color 0.5s,
+    border-color 0.5s,
+    color 0.5s,
+    box-shadow 0.5s;
+}
+
+.headerInner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-sheen);
+  pointer-events: none;
+}
+
+:global(body[data-header-theme="light"]) .headerInner {
+  background: rgba(231, 231, 231, 0.62);
+  border-color: rgba(15, 23, 42, 0.14);
+  color: var(--grey-900);
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.1);
+}
+
+.brand {
+  position: relative;
+  text-decoration: none;
+  display: inline-flex;
+}
+
+.headerCta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--green-400);
+  color: var(--grey-975);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s;
+}
+.headerCta:hover {
+  background: var(--green-300);
+  box-shadow: 0 6px 24px rgba(52, 211, 169, 0.35);
+}
+
+/* ---------- Liens de sections ---------- */
+.links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.link {
+  position: relative;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.68;
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
+}
+
+.link:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.link[aria-current="true"] {
+  opacity: 1;
+}
+
+.link[aria-current="true"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--green-400);
+  box-shadow: 0 0 8px rgba(52, 211, 169, 0.8);
+}
+
+:global(body[data-header-theme="light"]) .link:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+:global(body[data-header-theme="light"]) .link[aria-current="true"]::after {
+  background: var(--green-600);
+  box-shadow: none;
+}
+
+.actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menuButton {
+  display: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+}
+
+.menu {
+  max-width: calc(var(--maxw) + 32px);
+  margin: 8px auto 0;
+  padding: 8px;
+  display: grid;
+  gap: 2px;
+  border-radius: 16px;
+  background: rgba(11, 14, 17, 0.82);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--text-primary);
+  pointer-events: auto;
+  animation: menuIn 0.25s var(--ease-out);
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menuLink {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 500;
+  text-decoration: none;
+  color: inherit;
+}
+
+.menuLink:hover,
+.menuLink[aria-current="true"] {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.menuLink[aria-current="true"] {
+  color: var(--green-300);
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (max-width: 1099px) {
+  .links {
+    display: none;
+  }
+  .menuButton {
+    display: grid;
+  }
+}
+
+@media (min-width: 1100px) {
+  .menu {
+    display: none;
+  }
+}
+
+/* ---------- Navigation latérale ---------- */
+.sideNav {
+  position: fixed;
+  right: 22px;
+  top: 50%;
+  z-index: 50;
+  transform: translateY(-50%);
+}
+
+.sideNav ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+}
+
+.dot::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  transition:
+    height 0.4s var(--ease-out),
+    background-color 0.4s;
+}
+
+.dot:hover::before {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.dot[aria-current="true"]::before {
+  height: 18px;
+  background: var(--green-400);
+  box-shadow: 0 0 10px rgba(52, 211, 169, 0.6);
+}
+
+:global(body[data-panel-theme="light"]) .dot::before {
+  background: rgba(15, 23, 42, 0.25);
+}
+:global(body[data-panel-theme="light"]) .dot[aria-current="true"]::before {
+  background: var(--green-600);
+  box-shadow: none;
+}
+
+.dotLabel {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--green-600);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(6px, -50%);
+  pointer-events: none;
+  transition:
+    opacity 0.2s,
+    transform 0.2s var(--ease-out);
+}
+
+.dot:hover .dotLabel,
+.dot:focus-visible .dotLabel {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+@media (max-width: 1023px) {
+  .sideNav {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    inset: 8px 0 auto 0;
+    padding: 0 12px;
+  }
+  .headerInner {
+    height: 52px;
+    padding-left: 14px;
+  }
+  .headerCta {
+    padding: 0 12px;
+    font-size: 0.8125rem;
+  }
+  .headerCta svg {
+    display: none;
+  }
+}

@@ -1,0 +1,56 @@
+.cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  width: 22px;
+  height: 24px;
+  margin: -2px 0 0 -2px;
+  opacity: 0;
+  pointer-events: none;
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.45, 0.05, 0.25, 1), ease;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55));
+}
+
+.on {
+  opacity: 1;
+}
+
+.cursor svg {
+  position: relative;
+  z-index: 1;
+  transform-origin: 2px 2px;
+  transition: transform 0.12s;
+}
+
+.press svg {
+  transform: scale(0.82);
+}
+
+.ripple {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--green-400);
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+.press .ripple {
+  animation: ripple 0.5s var(--ease-out);
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}

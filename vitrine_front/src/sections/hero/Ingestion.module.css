@@ -1,0 +1,286 @@
+/* Trajectoire en spirale : le document tourne autour du cœur (--a) en s'en rapprochant (--r). */
+@property --a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@property --r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.frame {
+  position: relative;
+  width: min(100%, 560px);
+  aspect-ratio: 1;
+}
+
+/* Desktop : le visuel déborde de sa colonne vers la droite, pour prendre de la place sans gêner le texte */
+@media (min-width: 1024px) {
+  .frame {
+    width: min(130%, 740px, calc(100vh - 140px));
+    margin-right: -18%;
+  }
+}
+
+.stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.paused *,
+.paused *::before,
+.paused *::after {
+  animation-play-state: paused !important;
+}
+
+/* ---------- Ambiance ---------- */
+.halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 480px;
+  height: 480px;
+  margin: -240px 0 0 -240px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(52, 211, 169, 0.3) 0%,
+    rgba(18, 185, 140, 0.1) 32%,
+    rgba(18, 185, 140, 0) 68%
+  );
+  animation: halo var(--gap) ease-out var(--flash-delay) infinite;
+}
+
+@keyframes halo {
+  0% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+.rings i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  animation: spin 80s linear infinite;
+}
+
+.rings i:first-child {
+  width: 230px;
+  height: 230px;
+  margin: -115px 0 0 -115px;
+}
+
+.rings i:last-child {
+  width: 380px;
+  height: 380px;
+  margin: -190px 0 0 -190px;
+  border-color: rgba(52, 211, 169, 0.12);
+  border-style: dotted;
+  animation-duration: 140s;
+  animation-direction: reverse;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Documents aspirés ---------- */
+.flow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  transform: rotate(var(--a)) translateX(var(--r)) rotate(calc(-1 * var(--a)));
+  animation-name: ingest;
+  animation-duration: var(--travel);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes ingest {
+  0% {
+    --a: var(--a0);
+    --r: var(--r0);
+  }
+  45% {
+    --a: calc(var(--a0) + 22deg);
+    --r: calc(var(--r0) * 0.62);
+  }
+  70% {
+    --a: calc(var(--a0) + 46deg);
+    --r: calc(var(--r0) * 0.3);
+  }
+  88%,
+  100% {
+    --a: calc(var(--a0) + 75deg);
+    --r: 0px;
+  }
+}
+
+.doc {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 12px;
+  background: rgba(18, 22, 28, 0.86);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 10px 30px -12px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--grey-200);
+  white-space: nowrap;
+  animation-name: ingest, docLife;
+}
+
+/* Arrive en fondu, reste lisible, puis se contracte et se dissout avant d'atteindre le cœur */
+@keyframes docLife {
+  0% {
+    opacity: 0;
+    scale: 0.9;
+    filter: blur(0);
+  }
+  8%,
+  52% {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+    border-color: var(--glass-border);
+  }
+  64% {
+    opacity: 1;
+    scale: 0.82;
+    border-color: rgba(110, 231, 199, 0.7);
+  }
+  74% {
+    opacity: 0;
+    scale: 0.45;
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 0;
+    scale: 0.45;
+  }
+}
+
+/* ---------- Cœur : icosaèdre sombre, arêtes et facettes émissives ---------- */
+.core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200px;
+  height: 191px;
+  margin: -95px 0 0 -100px;
+  animation: hover 7s ease-in-out infinite;
+}
+
+.ico {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 18px rgba(52, 211, 169, 0.45)) drop-shadow(0 12px 30px rgba(0, 0, 0, 0.7));
+  animation: turn 14s ease-in-out infinite;
+}
+
+.face {
+  /* Faces mates : du gris-vert très sombre au vert profond selon l'éclairage d'origine */
+  fill: color-mix(in srgb, #0b3a2d calc(var(--shade) * 100%), #0d1512);
+  stroke: var(--green-300);
+  stroke-width: 7;
+  stroke-opacity: 0.85;
+  stroke-linejoin: round;
+}
+
+.glow {
+  fill: var(--green-400);
+  opacity: 0.04;
+  mix-blend-mode: screen;
+  animation: emit 4.8s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.47s);
+  pointer-events: none;
+}
+
+@keyframes emit {
+  0%,
+  100% {
+    opacity: 0.04;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* Onde émise à chaque document absorbé */
+.shock {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 180px;
+  height: 180px;
+  margin: -90px 0 0 -90px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(110, 231, 199, 0.8);
+  opacity: 0;
+  animation: shock var(--gap) cubic-bezier(0.2, 0.7, 0.3, 1) var(--flash-delay) infinite;
+}
+
+@keyframes shock {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.55);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes hover {
+  0%,
+  100% {
+    translate: 0 -5px;
+  }
+  50% {
+    translate: 0 5px;
+  }
+}
+
+@keyframes turn {
+  0%,
+  100% {
+    transform: perspective(700px) rotateY(-16deg) rotateX(6deg) rotate(-4deg);
+  }
+  50% {
+    transform: perspective(700px) rotateY(16deg) rotateX(-4deg) rotate(4deg);
+  }
+}
+
+/* ---------- Animations réduites : composition figée, documents autour du cœur ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .frame * {
+    animation: none !important;
+  }
+  .flow {
+    --a: var(--a0);
+    --r: calc(var(--r0) * 0.72);
+  }
+}

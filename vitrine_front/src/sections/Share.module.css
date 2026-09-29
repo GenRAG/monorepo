@@ -74,197 +74,53 @@
   outline-offset: 6px;
 }
 
-/* ---------- Navigateur ---------- */
-.browser {
-  --brand-soft: color-mix(in srgb, var(--brand) 14%, white);
-  border-radius: var(--r-xl);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    var(--glass-shadow),
-    0 50px 100px -40px rgba(0, 0, 0, 0.9);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  overflow: hidden;
-}
-
-.chrome {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  height: 48px;
-  padding: 0 16px;
-}
-
-.lights {
-  display: flex;
-  gap: 7px;
-}
-
-.lights i {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.url {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 360px;
-  height: 30px;
-  margin: 0 auto;
-  padding: 0 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 0.8125rem;
-  color: var(--grey-100);
-}
-
-.url svg {
-  color: var(--green-400);
-  flex: none;
-}
-
-.caret {
-  display: inline-block;
-  width: 1.5px;
-  height: 14px;
-  margin-left: 1px;
-  vertical-align: -2px;
-  background: var(--grey-100);
-  animation: blink 1s steps(1) infinite;
-}
-
-.reload {
-  color: var(--grey-500);
-}
-
-.app {
-  margin: 0 8px 8px;
-  border-radius: 14px;
-  background: #fbfbf9;
-  color: var(--grey-900);
-  overflow: hidden;
-  opacity: 0.35;
-  filter: blur(3px);
-  transition:
-    opacity 0.6s,
-    filter 0.6s;
-}
-
-.appIn {
-  opacity: 1;
-  filter: none;
-}
-
-.appHead {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
-  box-shadow: inset 0 3px 0 var(--brand);
-  transition: box-shadow 0.4s;
-}
-
-.brandMark {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: var(--brand);
-  color: var(--brand-ink);
-  font-weight: 800;
-  transition: background-color 0.4s;
-}
-
-.appName {
-  font-weight: 700;
-  font-size: 0.9375rem;
-}
-
-.appSub {
-  font-size: 0.75rem;
-  color: var(--grey-500);
-}
-
-.thread {
+.points {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 18px;
-  font-size: 0.875rem;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.welcome {
-  color: var(--grey-500);
-}
-
-.user {
-  align-self: flex-end;
-  max-width: 78%;
-  padding: 10px 14px;
-  border-radius: 14px 14px 4px 14px;
-  background: var(--brand);
-  color: var(--brand-ink);
-  font-weight: 500;
-  transition: background-color 0.4s;
-}
-
-.bot {
-  max-width: 88%;
-  padding: 12px 14px;
-  border-radius: 14px 14px 14px 4px;
-  background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-}
-
-.source {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 10px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: var(--brand-soft);
-  color: var(--grey-800);
-  font-size: 0.75rem;
-  transition: background-color 0.4s;
-}
-
-.input {
+.points li {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin: 0 14px 14px;
-  height: 42px;
-  padding: 0 6px 0 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  background: #fff;
-  font-size: 0.875rem;
-  color: var(--grey-400);
+  gap: 10px;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
-.send {
+.points svg {
+  flex: none;
+  padding: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--green-400);
+}
+
+.demo {
+  position: relative;
+}
+
+.pause {
+  position: absolute;
+  right: 4px;
+  bottom: -44px;
   display: grid;
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  background: var(--brand);
-  color: var(--brand-ink);
-  transition: background-color 0.4s;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--grey-300);
 }
 
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
+.pause:hover {
+  color: var(--grey-50);
 }
 
 @media (max-width: 1023px) {

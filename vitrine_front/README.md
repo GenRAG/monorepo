@@ -15,9 +15,7 @@ npm run lint
 
 ## Modifier le contenu
 
-- **Tous les textes** : `src/content.ts` (une constante par section).
-- **Statut des fonctionnalités** (`available` / `soon` → badge « Bientôt ») : objet `features` en haut de `src/content.ts`.
-  Les connecteurs et les blocs de l'éditeur ont aussi un `status` individuel.
+- **Tous les textes** : `src/content.ts` (une constante par section ; `nav` définit l'ordre des sections).
 - **Couleurs, typo, rayons** : `src/styles/tokens.css` (repris de `plateform_front/src/themeNew`).
 - Une section = un composant dans `src/sections/`. Les maquettes réutilisables sont dans `src/mockups/`.
 

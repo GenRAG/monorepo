@@ -56,5 +56,4 @@ Aucun test automatisé. La vérification se fait visuellement avec `scripts/shot
 ## Points d'attention
 
 - Contenu marketing : pas d'affirmation sécurité / conformité / RGPD non validée (TODO dans `sections/Why.tsx`).
-- Le `README.md` mentionne un objet `features` (statuts `available` / `soon`) dans `content.ts` : il n'existe plus, ne pas s'y fier.
 - Le déploiement Vercel du dossier est séparé de celui de l'app (le `vercel.json` racine build `plateform_front`) : Root Directory `vitrine_front`, output `dist`.

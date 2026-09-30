@@ -63,7 +63,7 @@ Particularités :
   - `AgentAccessGuard` et `ConversationAccessGuard` (`conversation/guard/`) pour l'assistant final.
 - Filtre global : `exeptions/interceptor.service.ts` (`AllExceptionsFilter`) — log pino, Sentry si `status >= 500`, réponse `{ statusCode, timestamp, path, error }`. **Le front dépend de ce format** (`plateform_front/src/services/api.ts`).
 - Logger `nestjs-pino` / `Logger` NestJS, pas de `console.log`. CORS limité à `FRONTEND_URL` (plusieurs origines séparées par `,`), `credentials: true`.
-- Emails : `auth/resend.service.ts` (Resend). `@getbrevo/brevo` est encore dans `package.json` mais n'est plus utilisé. `SEND_EMAILS=false` en dev (connexion possible sans vérifier l'email).
+- Emails : `auth/resend.service.ts` (Resend). `SEND_EMAILS=false` en dev (connexion possible sans vérifier l'email).
 
 ## Tests
 

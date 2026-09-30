@@ -68,6 +68,36 @@ describe('TransientResultSink', () => {
         );
     });
 
+    it('reports an error event of the RAG engine as a generic error, billing the reported cost', () => {
+        const sink = new TransientResultSink(
+            subscriber as any,
+            usageRecorder as unknown as RuntimeUsageRecorder,
+            logger,
+            fakeLogCtx,
+        );
+
+        sink.onCompleted({
+            kind: 'end',
+            fullText: 'Partial answer',
+            streamError: 'upstream model timeout',
+            costSummary: { total_cost_usd: 0.0004, by_model: { 'gpt-4o': 0.0004 }, by_type: { answer: 0.0004 } },
+        });
+
+        expect(parseData(subscriber.next.mock.calls[0][0])).toEqual({
+            error: 'Une erreur est survenue. Veuillez réessayer.',
+        });
+        expect(subscriber.complete).toHaveBeenCalled();
+        expect(usageRecorder.recordSafely).toHaveBeenCalledWith(
+            expect.objectContaining({
+                status: QueryLogStatus.ERROR,
+                creditsUsed: 3,
+                costByModel: { 'gpt-4o': 0.0004 },
+                costByType: { answer: 0.0004 },
+            }),
+        );
+        expect(Sentry.captureException).toHaveBeenCalled();
+    });
+
     it('does not record usage when no logCtx is passed (e.g. skipUsageTracking)', () => {
         const sink = new TransientResultSink(
             subscriber as any,

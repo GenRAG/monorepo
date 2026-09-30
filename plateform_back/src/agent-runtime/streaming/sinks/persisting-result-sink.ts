@@ -3,7 +3,6 @@ import { Logger } from '@nestjs/common';
 import type { Subscriber } from 'rxjs';
 import { MessageSender, Prisma, QueryLogStatus } from 'generated/prisma';
 import * as Sentry from '@sentry/nestjs';
-import { costToCredits } from 'src/credit/credit-pricing';
 import { RagSources } from 'src/rag-engine/ndjson-line-buffer';
 import { ConversationRepository } from 'src/conversation/conversation.repository';
 import { toClientSafeErrorMessage } from 'src/agent-runtime/client-safe-error';
@@ -14,8 +13,6 @@ import {
     BaseResultSink,
     StreamCompletionOutcome,
 } from 'src/agent-runtime/streaming/sinks/runtime-result-sink.interface';
-
-const EMPTY_ANSWER_MESSAGE = "L'assistant n'a pas pu générer de réponse. Veuillez réessayer.";
 
 interface PersistParams {
     fullText: string;
@@ -42,7 +39,7 @@ export class PersistingResultSink extends BaseResultSink {
 
     async onCompleted(outcome: StreamCompletionOutcome): Promise<void> {
         const durationMs = Date.now() - this.logCtx.startedAt;
-        const creditsUsed = outcome.costSummary ? costToCredits(outcome.costSummary.total_cost_usd) : undefined;
+        const creditsUsed = this.creditsUsed(outcome);
 
         if (outcome.kind === 'error') {
             await this._persistAndRecord({
@@ -57,12 +54,7 @@ export class PersistingResultSink extends BaseResultSink {
             return;
         }
 
-        const isEmptyAnswer = !outcome.streamError && !outcome.fullText;
-        const errorMessage = outcome.streamError
-            ? toClientSafeErrorMessage(new Error(outcome.streamError), 'RAG stream error', this.logger)
-            : isEmptyAnswer
-              ? EMPTY_ANSWER_MESSAGE
-              : undefined;
+        const errorMessage = this.endedStreamErrorMessage(outcome, this.logger);
 
         await this._persistAndRecord({
             fullText: outcome.fullText,

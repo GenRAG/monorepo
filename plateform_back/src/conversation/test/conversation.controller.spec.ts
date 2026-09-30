@@ -40,7 +40,7 @@ describe('ConversationController', () => {
     });
 
     describe('getAssistantMetadata', () => {
-        it('should delegate to service', async () => {
+        it('should delegate to service (access is enforced by AgentAccessGuard)', async () => {
             const metadata = { id: 'agent-1', title: 'Support Bot', sharedBy: 'Workspace A' };
             mockConversationService.getAssistantMetadata.mockResolvedValue(metadata);
 
@@ -75,6 +75,13 @@ describe('ConversationController', () => {
             expect(() => controller.stream('agent-1', undefined as any, fakeUser)).toThrow(BadRequestException);
         });
 
+        it('should throw BadRequestException when query exceeds the max length', () => {
+            const tooLong = 'a'.repeat(4001);
+
+            expect(() => controller.stream('agent-1', tooLong, fakeUser)).toThrow(BadRequestException);
+            expect(mockAgentRuntimeService.streamWithPersistence).not.toHaveBeenCalled();
+        });
+
         it('should delegate to agentRuntimeService with all parameters', () => {
             const stream = { on: jest.fn() };
             mockAgentRuntimeService.streamWithPersistence.mockReturnValue(stream);
@@ -107,40 +114,40 @@ describe('ConversationController', () => {
     });
 
     describe('getMessages', () => {
-        it('should delegate to service with user and conversation ids', async () => {
+        it('should delegate to service (access is enforced by ConversationAccessGuard)', async () => {
             const messages = [{ id: 'msg-1', question: 'Hello?', response: 'Hi!', timestamp: 1000 }];
             mockConversationService.getMessages.mockResolvedValue(messages);
 
-            const result = await controller.getMessages('conv-1', fakeUser);
+            const result = await controller.getMessages('conv-1');
 
-            expect(mockConversationService.getMessages).toHaveBeenCalledWith('user-1', 'conv-1');
+            expect(mockConversationService.getMessages).toHaveBeenCalledWith('conv-1');
             expect(result).toEqual(messages);
         });
     });
 
     describe('getSourceUrl', () => {
         it('should throw BadRequestException when title is missing', () => {
-            expect(() => controller.getSourceUrl('agent-1', '', fakeUser)).toThrow(BadRequestException);
+            expect(() => controller.getSourceUrl('agent-1', '')).toThrow(BadRequestException);
             expect(mockConversationService.getSourceUrl).not.toHaveBeenCalled();
         });
 
-        it('should delegate to service with user, agent id and title', async () => {
+        it('should delegate to service with agent id and title (access is enforced by AgentAccessGuard)', async () => {
             mockConversationService.getSourceUrl.mockResolvedValue({ url: 'https://s3.example.com/signed' });
 
-            const result = await controller.getSourceUrl('agent-1', 'doc.pdf', fakeUser);
+            const result = await controller.getSourceUrl('agent-1', 'doc.pdf');
 
-            expect(mockConversationService.getSourceUrl).toHaveBeenCalledWith('user-1', 'agent-1', 'doc.pdf');
+            expect(mockConversationService.getSourceUrl).toHaveBeenCalledWith('agent-1', 'doc.pdf');
             expect(result).toEqual({ url: 'https://s3.example.com/signed' });
         });
     });
 
     describe('deleteConversation', () => {
-        it('should delegate to service with user and conversation ids', async () => {
+        it('should delegate to service (access is enforced by ConversationAccessGuard)', async () => {
             mockConversationService.deleteConversation.mockResolvedValue(undefined);
 
-            await controller.deleteConversation('conv-1', fakeUser);
+            await controller.deleteConversation('conv-1');
 
-            expect(mockConversationService.deleteConversation).toHaveBeenCalledWith('user-1', 'conv-1');
+            expect(mockConversationService.deleteConversation).toHaveBeenCalledWith('conv-1');
         });
     });
 });

@@ -13,12 +13,14 @@ import {
 import type { MessageEvent } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { AgentRuntimeService } from 'src/agent-runtime/agent-runtime.service';
+import { MAX_RUNTIME_QUERY_LENGTH } from 'src/agent-runtime/agent-runtime.types';
 import { OnboardingService } from './onboarding.service';
 import { UpdateStepRequest } from './dto/update-step.request';
 import { CompleteOnboardingRequest } from './dto/complete-onboarding.request';
@@ -92,6 +94,8 @@ export class OnboardingController {
     }
 
     @Sse('stream')
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 20, ttl: 60_000 } })
     stream(
         @Param('workspaceId') workspaceId: string,
         @Query('query') query: string,
@@ -101,6 +105,9 @@ export class OnboardingController {
     ): Observable<MessageEvent> {
         if (!query || !agentId) {
             throw new BadRequestException('query and agentId parameters required');
+        }
+        if (query.length > MAX_RUNTIME_QUERY_LENGTH) {
+            throw new BadRequestException(`Query must not exceed ${MAX_RUNTIME_QUERY_LENGTH} characters`);
         }
         const { resolvedStepId, orgId } = this.onboardingService.resolveStreamParams(agentId, stepId);
         return from(this.onboardingService.checkAndIncrementQueryCount(user.id, workspaceId, resolvedStepId)).pipe(

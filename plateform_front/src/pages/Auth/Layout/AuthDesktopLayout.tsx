@@ -2,7 +2,7 @@ import { Box, DarkMode, Flex, HStack, Icon, IconButton, Image } from "@chakra-ui
 import { ArrowLeft } from "lucide-react";
 import Spline from "@splinetool/react-spline";
 import type { Application } from "@splinetool/runtime";
-import logoGreen from "assets/logo/logoGreen.png";
+import logoGreen from "assets/logo/mainLogo.png";
 
 const fixSplineCanvas = (spline: Application) => {
     const canvas = spline.canvas as HTMLCanvasElement | undefined;

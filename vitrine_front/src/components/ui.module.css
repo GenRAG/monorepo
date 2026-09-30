@@ -1,0 +1,148 @@
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 640px;
+}
+
+.wide {
+  max-width: 980px;
+}
+
+.center {
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.eyebrowIndex {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrowRule {
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.display,
+.title {
+  font-weight: 600;
+  color: var(--text-strong);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.display {
+  font-size: var(--fs-display);
+}
+
+.title {
+  font-size: var(--fs-h2);
+  line-height: 1.05;
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  max-width: 520px;
+  text-wrap: pretty;
+}
+
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.975rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.25s var(--ease-out),
+    box-shadow 0.25s var(--ease-out),
+    background-color 0.25s,
+    border-color 0.25s;
+}
+
+.button svg {
+  transition: transform 0.25s var(--ease-out);
+}
+.button:hover svg {
+  transform: translateX(3px);
+}
+
+.primary {
+  background: var(--green-400);
+  color: var(--grey-975);
+  box-shadow: 0 0 0 1px rgba(110, 231, 199, 0.4) inset;
+}
+.primary:hover {
+  background: var(--green-300);
+  box-shadow:
+    0 0 0 1px rgba(168, 243, 223, 0.6) inset,
+    0 8px 32px rgba(52, 211, 169, 0.35);
+  transform: translateY(-1px);
+}
+
+.ghost {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+.ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.docIcon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--grey-300);
+}
+.k_pdf {
+  color: #f9a3a4;
+  background: rgba(249, 112, 113, 0.12);
+}
+.k_sheet {
+  color: var(--green-300);
+  background: rgba(52, 211, 169, 0.12);
+}
+.k_doc {
+  color: #99ccee;
+  background: rgba(74, 159, 216, 0.14);
+}
+.k_mail {
+  color: #efc27e;
+  background: rgba(232, 162, 79, 0.13);
+}
+.k_folder {
+  color: var(--grey-200);
+}

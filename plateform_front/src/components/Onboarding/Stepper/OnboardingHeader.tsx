@@ -5,7 +5,7 @@ import Button from "components/ui/Button";
 import { IconButton } from "@chakra-ui/react";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { Menu as MenuIcon } from "lucide-react";
-import logoGreen from "assets/logo/logoGreen.png";
+import logoGreen from "assets/logo/mainLogo.png";
 
 interface OnboardingHeaderProps {
     onOpenDrawer: () => void;

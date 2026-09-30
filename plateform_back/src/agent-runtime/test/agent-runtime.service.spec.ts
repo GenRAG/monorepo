@@ -4,14 +4,15 @@ import { AgentStatus, MessageSender } from 'generated/prisma';
 import { EventEmitter } from 'events';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import type { MessageEvent } from '@nestjs/common';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscriber } from 'rxjs';
 import * as Sentry from '@sentry/nestjs';
 import { AgentRuntimeService } from 'src/agent-runtime/agent-runtime.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
-import { UsageTrackerService } from 'src/credit/usage-tracker.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ConversationRepository } from 'src/conversation/conversation.repository';
-import { RagStreamForwarderService } from 'src/agent-runtime/rag-stream-forwarder.service';
+import { RagStreamForwarderService } from 'src/agent-runtime/streaming/rag-stream-forwarder.service';
+import { RuntimeSinkFactory } from 'src/agent-runtime/streaming/sinks/runtime-sink.factory';
+import { RuntimeUsageRecorder } from 'src/agent-runtime/usage/runtime-usage-recorder';
 
 jest.mock('@sentry/nestjs');
 
@@ -35,15 +36,24 @@ function createMockStream() {
     return stream;
 }
 
+/** A minimal stand-in for a real `RuntimeResultSink` — good enough to verify the service wires the
+ * right stream to the right sink, without re-testing the sinks' own behavior (see their own specs). */
+function createFakeSink(subscriber: Subscriber<MessageEvent>) {
+    return {
+        emit: jest.fn(),
+        onCompleted: jest.fn(() => subscriber.complete()),
+    };
+}
+
 const fakeAgent = { id: 'agent-1', workspaceId: 'ws-1', status: AgentStatus.PRODUCTION };
-const fakeConversation = { id: 'conv-1', agentId: 'agent-1', workspaceId: 'ws-1', title: 'Test' };
+const fakeConversation = { id: 'conv-1', agentId: 'agent-1', workspaceId: 'ws-1', title: 'Test', userId: 'user-1' };
 
 const mockOrchestrator = { streamQuery: jest.fn() as any };
-const mockUsageTracker = { recordQuery: (jest.fn() as any).mockResolvedValue(undefined) };
 const mockPrisma: any = {
     agent: { findUnique: jest.fn() as any },
 };
 const mockConversationRepo: any = {
+    hasAgentAccess: jest.fn() as any,
     findOne: jest.fn() as any,
     // Runs the callback with a dummy "tx" token — good enough to verify create()/
     // createMessage() are called through it, without needing a real Prisma transaction.
@@ -51,10 +61,12 @@ const mockConversationRepo: any = {
     create: jest.fn() as any,
     createMessage: jest.fn() as any,
 };
-const mockStreamForwarder: any = {
-    forward: jest.fn() as any,
-    forwardWithPersistence: jest.fn() as any,
+const mockStreamForwarder: any = { forward: jest.fn() as any };
+const mockSinkFactory: any = {
+    createTransient: jest.fn((subscriber: Subscriber<MessageEvent>) => createFakeSink(subscriber)),
+    createPersisting: jest.fn((subscriber: Subscriber<MessageEvent>) => createFakeSink(subscriber)),
 };
+const mockUsageRecorder: any = { recordSafely: jest.fn() };
 
 describe('AgentRuntimeService', () => {
     let service: AgentRuntimeService;
@@ -64,17 +76,24 @@ describe('AgentRuntimeService', () => {
             providers: [
                 AgentRuntimeService,
                 { provide: AgentRuntimeOrchestrator, useValue: mockOrchestrator },
-                { provide: UsageTrackerService, useValue: mockUsageTracker },
                 { provide: PrismaService, useValue: mockPrisma },
                 { provide: ConversationRepository, useValue: mockConversationRepo },
                 { provide: RagStreamForwarderService, useValue: mockStreamForwarder },
+                { provide: RuntimeSinkFactory, useValue: mockSinkFactory },
+                { provide: RuntimeUsageRecorder, useValue: mockUsageRecorder },
             ],
         }).compile();
 
         service = module.get<AgentRuntimeService>(AgentRuntimeService);
         jest.clearAllMocks();
-        mockUsageTracker.recordQuery.mockResolvedValue(undefined);
+        mockConversationRepo.hasAgentAccess.mockResolvedValue(true);
         mockConversationRepo.transaction.mockImplementation((cb: (tx: unknown) => unknown) => cb('tx'));
+        mockSinkFactory.createTransient.mockImplementation((subscriber: Subscriber<MessageEvent>) =>
+            createFakeSink(subscriber),
+        );
+        mockSinkFactory.createPersisting.mockImplementation((subscriber: Subscriber<MessageEvent>) =>
+            createFakeSink(subscriber),
+        );
     });
 
     describe('playgroundStream', () => {
@@ -90,17 +109,20 @@ describe('AgentRuntimeService', () => {
             );
         });
 
-        it('should hand the resolved RAG stream to the forwarder with a usage-tracking logCtx', async () => {
+        it('should build a transient sink with a usage-tracking logCtx and hand it the resolved stream', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
             service.playgroundStream('ws-1', 'agent-1', 'hello').subscribe();
             await flushPromises();
 
-            expect(mockStreamForwarder.forward).toHaveBeenCalledWith(
-                mockStream,
+            expect(mockSinkFactory.createTransient).toHaveBeenCalledWith(
                 expect.anything(),
                 expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', query: 'hello' }),
+            );
+            expect(mockStreamForwarder.forward).toHaveBeenCalledWith(
+                mockStream,
+                mockSinkFactory.createTransient.mock.results[0].value,
             );
         });
 
@@ -140,6 +162,17 @@ describe('AgentRuntimeService', () => {
                 expect.objectContaining({ message: expect.stringContaining('ECONNRESET') }),
             );
         });
+
+        it('should record a failed query log when the RAG stream fails to start', async () => {
+            mockOrchestrator.streamQuery.mockRejectedValue(new ForbiddenException('No credits'));
+
+            const { done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
+            await done;
+
+            expect(mockUsageRecorder.recordSafely).toHaveBeenCalledWith(
+                expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1' }),
+            );
+        });
     });
 
     describe('streamWithOrgOverride', () => {
@@ -155,14 +188,37 @@ describe('AgentRuntimeService', () => {
             );
         });
 
-        it('should forward with a defined logCtx so the query still gets billed', async () => {
+        it('should build a transient sink with a defined logCtx so the query still gets billed', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
             service.streamWithOrgOverride('ws-1', 'agent-1', 'test', 'org-x').subscribe();
             await flushPromises();
 
-            expect(mockStreamForwarder.forward).toHaveBeenCalledWith(mockStream, expect.anything(), expect.any(Object));
+            expect(mockSinkFactory.createTransient).toHaveBeenCalledWith(expect.anything(), expect.any(Object));
+            expect(mockStreamForwarder.forward).toHaveBeenCalledWith(mockStream, expect.anything());
+        });
+    });
+
+    describe('streamWithPersistence — access control', () => {
+        it('should deny access and never start a stream when no userId is provided', async () => {
+            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            await done;
+
+            expect(parseData(events[0])).toEqual({ error: 'Access denied' });
+            expect(mockOrchestrator.streamQuery).not.toHaveBeenCalled();
+        });
+
+        it('should deny access when the user has no access to the agent', async () => {
+            mockConversationRepo.hasAgentAccess.mockResolvedValue(false);
+
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1'),
+            );
+            await done;
+
+            expect(parseData(events[0])).toEqual({ error: 'Access denied' });
+            expect(mockOrchestrator.streamQuery).not.toHaveBeenCalled();
         });
     });
 
@@ -170,7 +226,9 @@ describe('AgentRuntimeService', () => {
         it('should send error and complete when agent is not found', async () => {
             mockPrisma.agent.findUnique.mockResolvedValue(null);
 
-            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1'),
+            );
             await done;
 
             expect(parseData(events[0])).toEqual({ error: 'Assistant not found' });
@@ -179,7 +237,9 @@ describe('AgentRuntimeService', () => {
         it('should send error and complete when agent is not in PRODUCTION', async () => {
             mockPrisma.agent.findUnique.mockResolvedValue({ ...fakeAgent, status: AgentStatus.DEVELOPMENT });
 
-            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1'),
+            );
             await done;
 
             expect(parseData(events[0])).toEqual({ error: 'Assistant not available' });
@@ -195,7 +255,9 @@ describe('AgentRuntimeService', () => {
         it('should send error when conversationId not found', async () => {
             mockConversationRepo.findOne.mockResolvedValue(null);
 
-            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello', 'unknown-conv'));
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', 'unknown-conv', 'user-1'),
+            );
             await flushPromises();
             await done;
 
@@ -205,7 +267,21 @@ describe('AgentRuntimeService', () => {
         it('should send error when conversation belongs to a different agent', async () => {
             mockConversationRepo.findOne.mockResolvedValue({ ...fakeConversation, agentId: 'other-agent' });
 
-            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello', 'conv-1'));
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', 'conv-1', 'user-1'),
+            );
+            await flushPromises();
+            await done;
+
+            expect(parseData(events[0])).toEqual({ error: 'Conversation not found' });
+        });
+
+        it('should send error when conversation belongs to a different user', async () => {
+            mockConversationRepo.findOne.mockResolvedValue({ ...fakeConversation, userId: 'someone-else' });
+
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', 'conv-1', 'user-1'),
+            );
             await flushPromises();
             await done;
 
@@ -216,11 +292,11 @@ describe('AgentRuntimeService', () => {
             mockConversationRepo.create.mockResolvedValue(fakeConversation);
             mockConversationRepo.createMessage.mockResolvedValue({});
 
-            service.streamWithPersistence('agent-1', 'hello').subscribe();
+            service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1').subscribe();
             await flushPromises();
 
             expect(mockConversationRepo.create).toHaveBeenCalledWith(
-                expect.objectContaining({ agentId: 'agent-1', workspaceId: 'ws-1' }),
+                expect.objectContaining({ agentId: 'agent-1', workspaceId: 'ws-1', userId: 'user-1' }),
                 'tx',
             );
         });
@@ -236,7 +312,7 @@ describe('AgentRuntimeService', () => {
             mockConversationRepo.create.mockResolvedValue(fakeConversation);
             mockConversationRepo.createMessage.mockResolvedValue({});
 
-            service.streamWithPersistence('agent-1', 'hello').subscribe();
+            service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1').subscribe();
             await flushPromises();
 
             expect(mockConversationRepo.transaction).toHaveBeenCalledTimes(1);
@@ -256,7 +332,9 @@ describe('AgentRuntimeService', () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1'),
+            );
             await flushPromises();
             await done;
 
@@ -273,7 +351,7 @@ describe('AgentRuntimeService', () => {
             mockConversationRepo.findOne.mockResolvedValue(fakeConversation);
             mockConversationRepo.createMessage.mockResolvedValue({});
 
-            service.streamWithPersistence('agent-1', 'hello', 'conv-1').subscribe();
+            service.streamWithPersistence('agent-1', 'hello', 'conv-1', 'user-1').subscribe();
             await flushPromises();
 
             expect(mockConversationRepo.create).not.toHaveBeenCalled();
@@ -289,7 +367,9 @@ describe('AgentRuntimeService', () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const { events, done } = collectEvents(service.streamWithPersistence('agent-1', 'hello'));
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1'),
+            );
             await flushPromises();
             await done;
 
@@ -308,19 +388,31 @@ describe('AgentRuntimeService', () => {
             mockConversationRepo.createMessage.mockResolvedValue({});
         });
 
-        it('should call forwardWithPersistence with the RAG stream, conversation id and logCtx', async () => {
+        it('should build a persisting sink with the conversation id and logCtx, and forward the RAG stream to it', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            service.streamWithPersistence('agent-1', 'hello').subscribe();
+            service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1').subscribe();
             await flushPromises();
 
-            expect(mockStreamForwarder.forwardWithPersistence).toHaveBeenCalledWith(
-                mockStream,
-                'conv-1',
+            expect(mockSinkFactory.createPersisting).toHaveBeenCalledWith(
                 expect.anything(),
+                'conv-1',
                 expect.objectContaining({ workspaceId: 'ws-1', agentId: 'agent-1', query: 'hello' }),
             );
+            expect(mockStreamForwarder.forward).toHaveBeenCalledWith(
+                mockStream,
+                mockSinkFactory.createPersisting.mock.results[0].value,
+            );
+        });
+
+        it('should not record a failed query log when the RAG stream fails to start (pre-existing quirk, preserved)', async () => {
+            mockOrchestrator.streamQuery.mockRejectedValue(new Error('boom'));
+
+            const { done } = collectEvents(service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1'));
+            await done;
+
+            expect(mockUsageRecorder.recordSafely).not.toHaveBeenCalled();
         });
     });
 
@@ -344,7 +436,7 @@ describe('AgentRuntimeService', () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
 
-            const subscription = service.streamWithPersistence('agent-1', 'hello').subscribe();
+            const subscription = service.streamWithPersistence('agent-1', 'hello', undefined, 'user-1').subscribe();
             await flushPromises();
 
             subscription.unsubscribe();
@@ -363,11 +455,13 @@ describe('AgentRuntimeService', () => {
         it('should not call destroy again on a stream that already reports itself destroyed after completion', async () => {
             const mockStream = createMockStream();
             mockOrchestrator.streamQuery.mockResolvedValue(mockStream);
-            // simulate the forwarder reaching the end of the stream and completing the subscriber
-            mockStreamForwarder.forward.mockImplementation((_s: unknown, subscriber: { complete: () => void }) => {
-                mockStream.destroyed = true;
-                subscriber.complete();
-            });
+            // simulate the forwarder reaching the end of the stream and completing the subscriber via the sink
+            mockStreamForwarder.forward.mockImplementation(
+                (stream: typeof mockStream, sink: { onCompleted: () => void }) => {
+                    stream.destroyed = true;
+                    sink.onCompleted();
+                },
+            );
 
             const { done } = collectEvents(service.playgroundStream('ws-1', 'agent-1', 'hello'));
             await done;

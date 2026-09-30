@@ -1,11 +1,15 @@
 import { Module, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { AgentRuntimeService } from './agent-runtime.service';
 import { AgentRuntimeController } from './agent-runtime.controller';
 import { AgentQueryLogRepository } from './agent-query-log.repository';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import { RagPipelineBuilder } from 'src/agent-runtime/agent-runtime.builder';
-import { RagStreamForwarderService } from 'src/agent-runtime/rag-stream-forwarder.service';
+import { RagStreamForwarderService } from 'src/agent-runtime/streaming/rag-stream-forwarder.service';
+import { RuntimeSinkFactory } from 'src/agent-runtime/streaming/sinks/runtime-sink.factory';
+import { RuntimeUsageRecorder, USAGE_RECORDING_QUEUE } from 'src/agent-runtime/usage/runtime-usage-recorder';
+import { UsageRecordingProcessor } from 'src/agent-runtime/usage/usage-recording.processor';
 import { RagEngineModule } from 'src/rag-engine/rag-engine.module';
 import { AgentModule } from 'src/agent/agent.module';
 import { WorkflowModule } from 'src/workflow/workflow.module';
@@ -23,11 +27,23 @@ import { ConversationRepository } from 'src/conversation/conversation.repository
         AgentRuntimeOrchestrator,
         RagPipelineBuilder,
         RagStreamForwarderService,
+        RuntimeSinkFactory,
+        RuntimeUsageRecorder,
+        UsageRecordingProcessor,
         AgentQueryLogRepository,
         ConversationRepository,
     ],
     exports: [AgentRuntimeOrchestrator, AgentRuntimeService],
-    imports: [PrismaModule, CreditModule, AgentModule, WorkflowModule, RagEngineModule, ConfigModule, WorkspaceModule],
+    imports: [
+        PrismaModule,
+        CreditModule,
+        AgentModule,
+        WorkflowModule,
+        RagEngineModule,
+        ConfigModule,
+        WorkspaceModule,
+        BullModule.registerQueue({ name: USAGE_RECORDING_QUEUE }),
+    ],
 })
 export class AgentRuntimeModule implements OnModuleInit, OnModuleDestroy {
     private unregisterListeners!: () => void;

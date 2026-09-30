@@ -1,7 +1,7 @@
 import { HStack, Image, useColorModeValue } from "@chakra-ui/react";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
-import logoGreen from "assets/logo/logoGreen.png";
+import logoGreen from "assets/logo/mainLogo.png";
 import Button from "components/ui/Button";
 
 interface SidebarHeaderProps {

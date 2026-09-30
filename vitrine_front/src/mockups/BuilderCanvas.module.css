@@ -1,0 +1,599 @@
+/* Canvas du builder — reprend NodeCard (packages/workflow) en mode sombre */
+.canvas {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border-radius: 14px;
+  background-color: #0d1115;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 26px 26px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(600px circle at 20% 110%, rgba(18, 185, 140, 0.12), transparent 70%);
+}
+
+.scroller {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  scrollbar-width: none;
+}
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.sizer {
+  position: relative;
+  flex: none;
+}
+
+.graph {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.edge {
+  fill: none;
+  stroke: var(--green-400);
+  stroke-width: 2;
+  stroke-dasharray: 1;
+  filter: drop-shadow(0 0 3px rgba(52, 211, 169, 0.45));
+}
+
+.edgeDot {
+  fill: var(--green-400);
+}
+
+/* Un lien apparaît en se traçant ; il disparaît en fondu (puis se « rembobine » hors écran). */
+.edgeOn .edge {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.75s var(--ease-out) 0.25s;
+}
+.edgeOn .edgeDot {
+  opacity: 1;
+  transition: opacity 0.3s 0.7s;
+}
+.edgeOff {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.edgeOff .edge {
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0s 0.3s;
+}
+.edgeOff .edgeDot {
+  opacity: 0;
+}
+
+.settingEdge {
+  fill: none;
+  stroke: var(--green-400);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 5;
+  opacity: 0.85;
+  animation: dash 1.2s linear infinite;
+  transition: opacity 0.4s 0.35s;
+}
+
+.settingOff {
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* ---------- Nodes principaux ---------- */
+.node {
+  position: absolute;
+  border-radius: 12px;
+  border: 1px solid var(--grey-700);
+  background: var(--grey-800);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  overflow: visible;
+  font-size: 11.5px;
+  transition:
+    opacity 0.45s var(--ease-out),
+    transform 0.55s var(--ease-out),
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+/* Blocs optionnels absents du schéma */
+.hidden {
+  opacity: 0;
+  transform: translateY(10px) scale(0.94);
+  pointer-events: none;
+}
+
+.selected {
+  border-color: var(--green-400);
+  box-shadow:
+    0 0 0 3px rgba(52, 211, 169, 0.18),
+    0 12px 32px -12px rgba(0, 0, 0, 0.6);
+}
+
+.fading {
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.scroller {
+  transition: opacity 0.6s var(--ease-out);
+}
+
+.nodeHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 11px 11px 0 0;
+  background: var(--grey-900);
+  border-bottom: 1px solid var(--grey-700);
+}
+
+.nodeIcon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--green-300);
+}
+
+.nodeTitle {
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--grey-100);
+}
+
+.tag {
+  margin-left: auto;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: rgba(52, 211, 169, 0.16);
+  border: 1px solid rgba(52, 211, 169, 0.35);
+  color: var(--green-300);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trash {
+  margin-left: auto;
+  color: var(--grey-400);
+}
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  color: var(--grey-300);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.row:first-of-type {
+  border-top: 0;
+}
+.row:last-child {
+  border-radius: 0 0 11px 11px;
+}
+
+.in::before,
+.out::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--green-400);
+}
+.in::before {
+  left: -1px;
+}
+.out,
+.setting {
+  justify-content: flex-end;
+}
+.out::after {
+  right: -1px;
+}
+
+.settingHandle {
+  position: absolute;
+  right: -5px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--grey-975);
+  border: 1.5px solid var(--green-400);
+}
+
+/* ---------- Nodes de réglages (modèle en vert) ---------- */
+.model {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 206px;
+  height: 66px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: var(--grey-800);
+  border: 1px solid rgba(52, 211, 169, 0.35);
+  border-top: 2px solid var(--green-400);
+  box-shadow: 0 10px 30px -12px rgba(18, 185, 140, 0.35);
+  transition:
+    opacity 0.45s var(--ease-out) 0.35s,
+    transform 0.55s var(--ease-out) 0.35s,
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.model.hidden {
+  transition-delay: 0s;
+}
+
+.model.selected {
+  border-color: var(--green-400);
+  box-shadow:
+    0 0 0 3px rgba(52, 211, 169, 0.22),
+    0 10px 30px -12px rgba(18, 185, 140, 0.45);
+}
+
+.model.hovered {
+  transform: translateY(-2px);
+}
+
+/* Modèle pas encore choisi (ModelNode « Add model » de l'app) */
+.placeholder {
+  border-style: dashed;
+  border-top-style: dashed;
+  background: rgba(46, 52, 60, 0.6);
+}
+.placeholder .modelName {
+  color: var(--grey-300);
+  font-weight: 600;
+}
+.placeholder .modelIcon {
+  background: transparent;
+  border: 1px dashed rgba(52, 211, 169, 0.5);
+}
+
+.modelText {
+  animation: modelIn 0.5s var(--ease-out);
+}
+
+@keyframes modelIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(3px);
+  }
+}
+
+.modelIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--green-300);
+}
+
+.modelText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.modelLabel {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-400);
+}
+
+.modelName {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--grey-50);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modelHint {
+  font-size: 9.5px;
+  color: var(--grey-400);
+}
+
+.chev {
+  margin-left: auto;
+  color: var(--green-300);
+}
+
+.handleIn {
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -4.5px;
+  border-radius: 50%;
+  background: var(--grey-975);
+  border: 1.5px solid var(--green-400);
+}
+
+.instruction {
+  position: absolute;
+  width: 196px;
+  border-radius: 12px;
+  background: var(--grey-800);
+  border: 1px solid var(--grey-700);
+}
+
+.instruction .handleIn {
+  top: 18px;
+}
+
+.instrHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--grey-700);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey-300);
+}
+
+.instrEdit {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+  color: var(--grey-100);
+}
+
+.instrText {
+  padding: 9px 10px 11px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--grey-100);
+}
+
+/* ---------- Chrome du canvas ---------- */
+.toolbar,
+.controls {
+  position: absolute;
+  display: flex;
+  gap: 14px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--grey-300);
+}
+
+.tool {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin: -4px;
+  border-radius: 6px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.toolHover {
+  background: var(--accent-soft);
+  color: var(--green-300);
+}
+
+.toolbar {
+  z-index: 2;
+  left: 12px;
+  top: 50%;
+  flex-direction: column;
+  transform: translateY(-50%);
+}
+
+.controls {
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+}
+
+.minimap {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  width: 110px;
+  height: 66px;
+  border-radius: 10px;
+  background: rgba(11, 14, 17, 0.7);
+  border: 1px solid var(--border-strong);
+}
+
+.minimap i {
+  position: absolute;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--green-400);
+  opacity: 0.85;
+}
+
+.minimap .miniAi {
+  background: var(--violet-500);
+}
+
+@media (max-width: 767px) {
+  .scroller {
+    place-items: center start;
+    padding: 0 16px;
+  }
+  .minimap {
+    display: none;
+  }
+  .toolbar {
+    left: 8px;
+    padding: 8px;
+  }
+}
+
+/* ---------- Disposition verticale (écrans étroits) : le canvas prend la hauteur du schéma ---------- */
+.canvas[data-layout="tall"] {
+  height: auto;
+  align-self: flex-start;
+}
+
+.canvas[data-layout="tall"] .scroller {
+  padding: 0;
+  place-items: center;
+}
+
+.canvas[data-layout="tall"] .toolbar {
+  top: auto;
+  bottom: 12px;
+  left: 12px;
+  flex-direction: row;
+  transform: none;
+}
+
+.canvas[data-layout="tall"] .controls,
+.canvas[data-layout="tall"] .minimap {
+  display: none;
+}
+
+/* Nodes compacts en disposition verticale : mêmes proportions que builderGraph `tall` */
+.canvas[data-layout="tall"] .node {
+  font-size: 10px;
+  border-radius: 10px;
+}
+.canvas[data-layout="tall"] .nodeHead {
+  height: 30px;
+  gap: 7px;
+  padding: 0 8px;
+  border-radius: 9px 9px 0 0;
+}
+.canvas[data-layout="tall"] .nodeIcon {
+  width: 19px;
+  height: 19px;
+  border-radius: 5px;
+}
+.canvas[data-layout="tall"] .nodeIcon svg {
+  width: 11px;
+  height: 11px;
+}
+.canvas[data-layout="tall"] .nodeTitle {
+  font-size: 10px;
+}
+.canvas[data-layout="tall"] .tag {
+  padding: 2px 4px;
+  font-size: 7.5px;
+}
+.canvas[data-layout="tall"] .trash {
+  width: 11px;
+}
+.canvas[data-layout="tall"] .row {
+  height: 22px;
+  padding: 0 9px;
+}
+.canvas[data-layout="tall"] .row:last-child {
+  border-radius: 0 0 9px 9px;
+}
+.canvas[data-layout="tall"] .model {
+  width: 150px;
+  height: 48px;
+  gap: 8px;
+  padding: 0 9px;
+  border-radius: 10px;
+}
+.canvas[data-layout="tall"] .modelIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+.canvas[data-layout="tall"] .modelIcon svg {
+  width: 12px;
+  height: 12px;
+}
+.canvas[data-layout="tall"] .modelLabel {
+  font-size: 7px;
+}
+.canvas[data-layout="tall"] .modelName {
+  font-size: 10.5px;
+}
+.canvas[data-layout="tall"] .modelHint,
+.canvas[data-layout="tall"] .chev,
+.canvas[data-layout="tall"] .instrEdit {
+  display: none;
+}
+.canvas[data-layout="tall"] .instruction {
+  width: 150px;
+  border-radius: 10px;
+}
+.canvas[data-layout="tall"] .instruction .handleIn {
+  top: 14px;
+}
+.canvas[data-layout="tall"] .instrHead {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 7.5px;
+}
+.canvas[data-layout="tall"] .instrText {
+  padding: 7px 8px 9px;
+  font-size: 9.5px;
+}

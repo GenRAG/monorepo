@@ -1,0 +1,177 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3.5vh, 40px);
+}
+
+/* Transition depuis « Assistants métier » : un trait descend du haut de la section jusqu'au mot de liaison */
+.bridge {
+  /* Remonte à travers le padding bas de la section précédente et le padding haut de celle-ci */
+  --pad: clamp(96px, 13vh, 160px);
+  --reach: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: calc(-2 * var(--pad) + var(--reach));
+}
+
+.bridge::before {
+  content: "";
+  width: 1px;
+  height: calc(var(--pad) + clamp(72px, 10vh, 128px) - var(--reach));
+  background: linear-gradient(180deg, rgba(52, 211, 169, 0), var(--green-400));
+}
+
+.bridge span {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 169, 0.4);
+  background: var(--accent-soft);
+  box-shadow: 0 0 24px -4px rgba(52, 211, 169, 0.45);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-300);
+}
+
+.head {
+  display: flex;
+  justify-content: center;
+}
+
+.head h2 {
+  font-size: clamp(2rem, 1rem + 2.6vw, 3.4rem);
+}
+
+.demo {
+  position: relative;
+}
+
+.pause {
+  position: absolute;
+  right: 4px;
+  bottom: -42px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--grey-300);
+}
+
+.pause:hover {
+  color: var(--grey-50);
+}
+
+/* Fenêtre de navigateur, même chrome que la section Partage */
+.browser {
+  border-radius: var(--r-xl);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--glass-shadow),
+    0 50px 100px -40px rgba(0, 0, 0, 0.9);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  overflow: hidden;
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 44px;
+  padding: 0 16px;
+}
+
+.lights {
+  display: flex;
+  gap: 7px;
+}
+
+.lights i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.url {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 400px;
+  height: 28px;
+  margin: 0 auto;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.8125rem;
+  color: var(--grey-100);
+}
+
+.url span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.url svg {
+  flex: none;
+  color: var(--green-400);
+}
+
+.reload {
+  flex: none;
+  color: var(--grey-500);
+}
+
+.window {
+  display: flex;
+  gap: 8px;
+  height: clamp(340px, calc(100vh - 440px), 560px);
+  margin: 0 8px 8px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--grey-975);
+}
+
+/* Le canvas en disposition verticale fixe lui-même sa hauteur */
+.window:has([data-layout="tall"]) {
+  height: auto;
+}
+
+@media (max-width: 1023px) {
+  .bridge {
+    --pad: clamp(72px, 12vw, 104px);
+  }
+  .window {
+    height: 420px;
+  }
+}
+
+@media (max-width: 560px) {
+  .browser {
+    margin: 0 calc(var(--gutter) * -0.5);
+  }
+  .chrome {
+    gap: 10px;
+    padding: 0 12px;
+  }
+  .lights {
+    display: none;
+  }
+  .window {
+    height: 340px;
+    padding: 6px;
+    margin: 0 6px 6px;
+  }
+}

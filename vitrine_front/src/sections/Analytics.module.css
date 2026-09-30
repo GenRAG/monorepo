@@ -1,0 +1,299 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  align-items: stretch;
+}
+
+/* Bande de l'intro : mêmes bordures haute et basse que le bento, prolongées jusqu'au bord gauche */
+.side {
+  display: flex;
+  align-items: center;
+  margin-left: calc(-1 * var(--gutter));
+  padding: 40px clamp(40px, 5vw, 80px) 40px var(--gutter);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Petite mention sous l'intro : les chiffres sont fictifs */
+.demo {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-label);
+}
+
+/* ---------- Bento à bordures partagées (même langage que « Comment ça marche ») ---------- */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "k1 e1 k2"
+    "ch ch k3"
+    "e2 tp tp";
+  /* Rejoint la ligne de structure verticale à droite de la section */
+  margin-right: calc(-1 * var(--gutter));
+  border-top: 1px solid var(--border);
+}
+
+.cell {
+  position: relative;
+  min-width: 0;
+  padding: 28px;
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+
+.cell:not(.empty):hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+[data-area="k1"] {
+  grid-area: k1;
+}
+[data-area="k2"] {
+  grid-area: k2;
+}
+[data-area="k3"] {
+  grid-area: k3;
+}
+[data-area="e1"] {
+  grid-area: e1;
+}
+[data-area="e2"] {
+  grid-area: e2;
+}
+[data-area="ch"] {
+  grid-area: ch;
+}
+[data-area="tp"] {
+  grid-area: tp;
+}
+
+/* Trait vert au survol, sur la bordure haute */
+.cell:not(.empty)::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--green-400);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.cell:not(.empty):hover::before {
+  transform: scaleX(1);
+}
+
+/* Case vide : juste une trame très discrète pour qu'elle reste une case, pas un trou */
+.empty {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.cellLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8125rem;
+  color: var(--text-label);
+}
+
+.cellLabel svg {
+  flex: none;
+  color: var(--green-400);
+}
+
+.kpiValue {
+  margin-top: 14px;
+  font-size: clamp(1.6rem, 1rem + 1.4vw, 2.3rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  margin-left: 6px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-label);
+}
+
+.cellHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.cellTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cellTitle svg {
+  color: var(--text-faint);
+}
+
+.periods {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-label);
+}
+
+.periods i {
+  font-style: normal;
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+.periods .periodOn {
+  background: var(--green-400);
+  color: var(--grey-975);
+}
+
+.chart {
+  width: 100%;
+  height: clamp(110px, 18vh, 170px);
+  overflow: visible;
+  /* Bords estompés : la courbe naît et s'éteint dans le fond au lieu d'être coupée net */
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+
+.gridLine {
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-dasharray: 3 4;
+}
+
+.line {
+  fill: none;
+  stroke: var(--green-400);
+  stroke-width: 2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.8s var(--ease-out) 0.2s;
+}
+
+.area {
+  opacity: 0;
+  transition: opacity 1s ease 0.9s;
+}
+
+.live .line {
+  stroke-dashoffset: 0;
+}
+.live .area {
+  opacity: 1;
+}
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.6875rem;
+  color: var(--text-faint);
+}
+
+.topics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.topics li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 5px;
+  font-size: 0.8125rem;
+}
+
+.topicLabel {
+  color: var(--text-primary);
+}
+
+.topicValue {
+  color: var(--text-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--green-600), var(--green-400));
+  width: calc(var(--w) * 100%);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 1s var(--ease-out);
+  transition-delay: calc(var(--d) + 400ms);
+}
+
+.live .bar {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line,
+  .area,
+  .bar {
+    transition: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .side {
+    margin-left: 0;
+    padding: 0;
+    border: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .bento {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "k1 k2"
+      "k3 k3"
+      "ch ch"
+      "tp tp";
+    margin-inline: calc(-1 * var(--gutter));
+  }
+  .empty {
+    display: none;
+  }
+  .cell {
+    padding: 22px var(--gutter);
+  }
+  .cell {
+    border-left: 0;
+  }
+  [data-area="k2"] {
+    border-left: 1px solid var(--border);
+  }
+}

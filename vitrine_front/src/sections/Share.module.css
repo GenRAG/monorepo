@@ -1,0 +1,130 @@
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: center;
+  gap: clamp(40px, 6vw, 96px);
+}
+
+.picker {
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.picker legend {
+  margin-bottom: 12px;
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.swatches {
+  display: flex;
+  gap: 10px;
+}
+
+.swatch {
+  cursor: pointer;
+}
+
+.swatchDot {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--c);
+  color: var(--grey-975);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    0 0 0 0 transparent;
+  transition:
+    transform 0.2s var(--ease-out),
+    box-shadow 0.2s;
+}
+
+.swatchDot svg {
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.2s,
+    transform 0.2s var(--ease-out);
+}
+
+.swatch:hover .swatchDot {
+  transform: scale(1.08);
+}
+
+.swatch input:checked + .swatchDot {
+  box-shadow:
+    0 0 0 2px var(--bg-page),
+    0 0 0 4px var(--c);
+}
+
+.swatch input:checked + .swatchDot svg {
+  opacity: 1;
+  transform: none;
+}
+
+.swatch input:focus-visible + .swatchDot {
+  outline: 2px solid var(--green-400);
+  outline-offset: 6px;
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.points li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.points svg {
+  flex: none;
+  padding: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--green-400);
+}
+
+.demo {
+  position: relative;
+}
+
+.pause {
+  position: absolute;
+  right: 4px;
+  bottom: -44px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--grey-300);
+}
+
+.pause:hover {
+  color: var(--grey-50);
+}
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,104 @@
+.sidebar {
+  flex: none;
+  width: 184px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  gap: 2px;
+  background:
+    radial-gradient(260px circle at 0% 0%, rgba(18, 185, 140, 0.16), transparent 70%),
+    radial-gradient(260px circle at 0% 100%, rgba(18, 185, 140, 0.1), transparent 70%);
+  font-size: 12px;
+  color: var(--grey-300);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 10px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: #86efac;
+  color: var(--grey-900);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.agent {
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--grey-50);
+  white-space: nowrap;
+}
+
+.collapse {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.group {
+  padding: 12px 6px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.item svg {
+  color: var(--grey-400);
+}
+
+.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--grey-50);
+  font-weight: 600;
+}
+
+.active svg {
+  color: var(--green-400);
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+/* Écrans peu hauts : sidebar compacte pour tenir dans la fenêtre */
+@media (max-height: 820px) {
+  .item {
+    height: 26px;
+  }
+  .group {
+    padding-top: 8px;
+  }
+  .compactHide {
+    display: none;
+  }
+}

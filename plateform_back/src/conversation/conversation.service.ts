@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MessageSender } from 'generated/prisma';
 import { ConversationRepository } from './conversation.repository';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
@@ -46,9 +46,6 @@ export class ConversationService {
     }
 
     async getConversations(userId: string, agentId: string) {
-        const hasAccess = await this.repo.hasAgentAccess(userId, agentId);
-        if (!hasAccess) throw new ForbiddenException('Access denied');
-
         const conversations = await this.repo.findAllByAgent(agentId, userId);
 
         return conversations.map((c) => ({
@@ -59,13 +56,7 @@ export class ConversationService {
         }));
     }
 
-    async getMessages(userId: string, conversationId: string): Promise<MessageSerialized[]> {
-        const conversation = await this.repo.findOne(conversationId);
-        if (!conversation) throw new NotFoundException('Conversation not found');
-
-        const hasAccess = await this.repo.hasAgentAccess(userId, conversation.agent.id);
-        if (!hasAccess) throw new ForbiddenException('Access denied');
-
+    async getMessages(conversationId: string): Promise<MessageSerialized[]> {
         const messages = await this.repo.findMessages(conversationId);
         const result: MessageSerialized[] = [];
 
@@ -92,10 +83,7 @@ export class ConversationService {
         return result;
     }
 
-    async getSourceUrl(userId: string, agentId: string, title: string): Promise<{ url: string }> {
-        const hasAccess = await this.repo.hasAgentAccess(userId, agentId);
-        if (!hasAccess) throw new ForbiddenException('Access denied');
-
+    async getSourceUrl(agentId: string, title: string): Promise<{ url: string }> {
         const document = await this.repo.findDocumentByAgentAndName(agentId, sanitizeFilename(title));
         if (!document) throw new NotFoundException('Document not found');
 
@@ -103,13 +91,7 @@ export class ConversationService {
         return { url };
     }
 
-    async deleteConversation(userId: string, conversationId: string) {
-        const conversation = await this.repo.findOne(conversationId);
-        if (!conversation) throw new NotFoundException('Conversation not found');
-
-        const hasAccess = await this.repo.hasAgentAccess(userId, conversation.agent.id);
-        if (!hasAccess) throw new ForbiddenException('Access denied');
-
+    async deleteConversation(conversationId: string) {
         return this.repo.delete(conversationId);
     }
 }

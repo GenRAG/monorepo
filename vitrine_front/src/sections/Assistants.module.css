@@ -1,0 +1,417 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(20px, 3.2vh, 36px);
+}
+
+/* ---------- Pastilles des modèles ---------- */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.pills {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pill {
+  flex: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px 0 5px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-label);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    color 0.25s,
+    border-color 0.25s,
+    background-color 0.25s;
+}
+
+.pill:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.pill[aria-selected="true"] {
+  color: var(--text-strong);
+  border-color: rgba(52, 211, 169, 0.45);
+  background: rgba(52, 211, 169, 0.08);
+}
+
+.pillIcon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  transition:
+    background-color 0.25s,
+    color 0.25s;
+}
+
+.pill[aria-selected="true"] .pillIcon {
+  background: var(--green-400);
+  color: var(--grey-975);
+}
+
+/* Remplissage qui indique le temps restant avant le modèle suivant */
+.progress {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(52, 211, 169, 0.12);
+  transform-origin: 0 50%;
+  animation: fill linear forwards;
+}
+
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.pause {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-label);
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.pause:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+/* ---------- Carrousel ---------- */
+.viewport {
+  width: 100%;
+  touch-action: pan-y;
+}
+
+.track {
+  display: grid;
+}
+
+.card {
+  --gap: 28px;
+  grid-area: 1 / 1;
+  justify-self: center;
+  width: min(100%, 1040px);
+  min-height: clamp(460px, 58vh, 560px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border-radius: var(--r-xl);
+  background: linear-gradient(180deg, var(--grey-900), var(--grey-950));
+  border: 1px solid var(--border-strong);
+  box-shadow:
+    0 40px 90px -40px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transform: translateX(calc(var(--off) * (100% + var(--gap)))) scale(0.93);
+  opacity: 0;
+  transition:
+    transform 0.8s var(--ease-out),
+    opacity 0.8s var(--ease-out),
+    border-color 0.3s;
+  user-select: none;
+}
+
+.card[data-position="center"] {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+  z-index: 2;
+  user-select: auto;
+}
+
+.card[data-position="side"] {
+  opacity: 0.32;
+  cursor: pointer;
+}
+
+.card[data-position="side"]:hover {
+  opacity: 0.5;
+}
+
+/* Une carte qui passe d'un bord à l'autre ne doit pas traverser l'écran */
+.card[data-position="hidden"] {
+  transition: opacity 0.4s;
+}
+
+/* ---------- Volet conversation ---------- */
+.chatPane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px;
+  background: radial-gradient(420px circle at 0% 0%, rgba(18, 185, 140, 0.1), transparent 70%), var(--grey-975);
+  border-right: 1px solid var(--border);
+}
+
+.userMsg {
+  align-self: flex-end;
+  max-width: 85%;
+  padding: 11px 15px;
+  border-radius: 16px 16px 4px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+}
+
+.botMsg {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+.botAvatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(52, 211, 169, 0.12);
+  border: 1px solid rgba(52, 211, 169, 0.3);
+  color: var(--green-300);
+}
+
+.answer {
+  min-height: 4.8em;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.cursor {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--green-400);
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.4s,
+    transform 0.4s var(--ease-out);
+}
+
+.sourcesIn {
+  opacity: 1;
+  transform: none;
+}
+
+.sourcesLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-right: 4px;
+}
+
+.source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(52, 211, 169, 0.3);
+  background: rgba(52, 211, 169, 0.06);
+  color: var(--green-200);
+  font-size: 0.75rem;
+}
+
+.input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 7px 0 15px;
+  border-radius: 12px;
+  background: var(--grey-900);
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+  font-size: 0.875rem;
+}
+
+.send {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--grey-800);
+  color: var(--grey-400);
+}
+
+/* ---------- Volet présentation ---------- */
+.infoPane {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 36px 36px 30px;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.portrait {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: radial-gradient(circle at 30% 20%, rgba(110, 231, 199, 0.35), transparent 60%), var(--green-800);
+  border: 1px solid rgba(110, 231, 199, 0.35);
+  color: var(--green-100);
+  box-shadow: 0 10px 30px -10px rgba(52, 211, 169, 0.5);
+}
+
+.discover {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-300);
+}
+
+.cardTitle {
+  font-size: clamp(1.5rem, 1.2rem + 0.7vw, 1.95rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.skills {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.skills li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(52, 211, 169, 0.14);
+  color: var(--green-300);
+}
+
+.more {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  font-size: 0.8125rem;
+  color: var(--text-label);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
+}
+
+@media (max-width: 767px) {
+  .controls {
+    align-self: stretch;
+    align-items: flex-start;
+  }
+  .pills {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 0 var(--gutter);
+  }
+  .pills::-webkit-scrollbar {
+    display: none;
+  }
+  .pause {
+    display: none;
+  }
+  .card {
+    --gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .infoPane {
+    order: -1;
+    padding: 20px;
+  }
+  .chatPane {
+    border-right: 0;
+    border-top: 1px solid var(--border);
+    padding: 20px;
+  }
+  .card[data-position="side"] {
+    opacity: 0;
+  }
+}

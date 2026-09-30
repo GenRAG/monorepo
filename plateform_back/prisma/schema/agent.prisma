@@ -59,6 +59,8 @@ model AgentQueryLog {
   costByType  Json?
   sources     Json?
   createdAt   DateTime       @default(now())
+
+  @@index([agentId, createdAt(sort: Desc)])
 }
 
 enum AgentStatus {

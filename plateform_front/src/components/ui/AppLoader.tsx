@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, VStack, Text, Image, Spinner } from "@chakra-ui/react";
-import logoGreen from "assets/logo/logoGreen.png";
+import logoGreen from "assets/logo/mainLogo.png";
 
 interface AppLoaderProps {
     message?: string;

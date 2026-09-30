@@ -55,7 +55,7 @@ Particularités :
 ## Config, sécurité, erreurs
 
 - `ConfigModule.forRoot({ isGlobal: true })` — **aucune validation de schéma des variables d'environnement**. Accès via `ConfigService.getOrThrow(...)`, jamais de `process.env` dans le code métier. Fichiers : `.env`, `.env.development`, `.env.production`, `.env.test`.
-- Variables principales : `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRATION`, `TOKEN_VALIDITY`, `TOKEN_RESEND_INTERVAL`, `FRONTEND_URL`, `PORT`, `SEND_EMAILS`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `AWS_*`, `S3_BUCKET`, `RAGENGINE_URL`, `RAGENGINE_API_KEY`, `RAG_MOCK`, `REDIS_URL` (ou `REDIS_HOST`/`REDIS_PORT`), `SENTRY_DSN`.
+- Variables principales : `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRATION`, `TOKEN_VALIDITY`, `TOKEN_RESEND_INTERVAL`, `FRONTEND_URL`, `PORT`, `SEND_EMAILS`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `AWS_*`, `S3_BUCKET`, `RAGENGINE_URL`, `RAGENGINE_API_KEY`, `RAG_MOCK`, `REDIS_URL` (ou `REDIS_HOST`/`REDIS_PORT`), `SENTRY_DSN`, `GOOGLE_CLIENT_ID` (client OAuth Google du front, même valeur que `REACT_APP_GOOGLE_CLIENT_ID` : audience exigée par `POST /auth/google`).
 - Auth : JWT en cookie HttpOnly `Authentication`, `JwtAuthGuard`, `LocalAuthGuard`, stratégies dans `auth/strategies/`, révocation au logout via `JwtBlacklistService` (vérifiée à chaque requête par la stratégie JWT ; s'assurer qu'elle survit à un redémarrage), anti brute-force via `LoginAttemptService`.
 - Autorisations par guards, jamais vérifiées à la main :
   - `WorkspaceRolesGuard` (`workspace/roles/guards/`) + décorateur `RolesInWorkspace(...)` ;

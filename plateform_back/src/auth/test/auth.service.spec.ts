@@ -13,6 +13,11 @@ import { jest, describe, beforeEach, it, expect } from '@jest/globals';
 jest.mock('bcryptjs', () => ({ compare: jest.fn(), hash: jest.fn() }));
 import bcryptjs from 'bcryptjs';
 
+const mockGetTokenInfo = jest.fn() as jest.MockedFunction<(accessToken: string) => Promise<Record<string, unknown>>>;
+jest.mock('google-auth-library', () => ({
+    OAuth2Client: jest.fn().mockImplementation(() => ({ getTokenInfo: mockGetTokenInfo })),
+}));
+
 const mockedBcryptCompare = bcryptjs.compare as jest.MockedFunction<typeof bcryptjs.compare>;
 const mockedBcryptHash = bcryptjs.hash as jest.MockedFunction<typeof bcryptjs.hash>;
 
@@ -37,6 +42,7 @@ const mockUsersService = {
     update: jest.fn() as jest.MockedFunction<
         (params: { where: Record<string, unknown>; data: Record<string, unknown> }) => Promise<unknown>
     >,
+    createGoogleUser: jest.fn() as jest.MockedFunction<(data: Record<string, unknown>) => Promise<unknown>>,
 };
 
 const mockConfigService = {
@@ -46,6 +52,7 @@ const mockConfigService = {
             JWT_SECRET: 'test-secret',
             JWT_EXPIRATION: '7d',
             TOKEN_VALIDITY: '15m',
+            GOOGLE_CLIENT_ID: 'genrag-client-id.apps.googleusercontent.com',
         };
         if (!(key in cfg)) throw new Error(`Missing config: ${key}`);
         return cfg[key];
@@ -300,6 +307,46 @@ describe('AuthService', () => {
                     data: expect.objectContaining({ password: 'new-hashed-password', passwordResetToken: null }),
                 }),
             );
+        });
+    });
+
+    describe('loginWithGoogle', () => {
+        const validTokenInfo = {
+            aud: 'genrag-client-id.apps.googleusercontent.com',
+            email: 'Alice@Example.com',
+            email_verified: 'true',
+        };
+
+        it('should log in an existing user when the token was issued to the GenRAG client', async () => {
+            mockGetTokenInfo.mockResolvedValue(validTokenInfo);
+            mockUsersService.findOneWithCredentials.mockResolvedValue(fakeUser);
+
+            const result = await service.loginWithGoogle('access-token', response);
+
+            expect(result).toEqual({ success: true });
+            expect(mockUsersService.findOneWithCredentials).toHaveBeenCalledWith({ email: 'alice@example.com' });
+            expect(cookieMock).toHaveBeenCalled();
+        });
+
+        it('should reject a token issued to another Google OAuth client (audience mismatch)', async () => {
+            mockGetTokenInfo.mockResolvedValue({ ...validTokenInfo, aud: 'attacker-app.apps.googleusercontent.com' });
+
+            await expect(service.loginWithGoogle('access-token', response)).rejects.toThrow(UnauthorizedException);
+            expect(mockUsersService.findOneWithCredentials).not.toHaveBeenCalled();
+            expect(cookieMock).not.toHaveBeenCalled();
+        });
+
+        it('should reject a Google account whose email is not verified', async () => {
+            mockGetTokenInfo.mockResolvedValue({ ...validTokenInfo, email_verified: 'false' });
+
+            await expect(service.loginWithGoogle('access-token', response)).rejects.toThrow(UnauthorizedException);
+            expect(mockUsersService.findOneWithCredentials).not.toHaveBeenCalled();
+        });
+
+        it('should reject an invalid token', async () => {
+            mockGetTokenInfo.mockRejectedValue(new Error('invalid_token'));
+
+            await expect(service.loginWithGoogle('access-token', response)).rejects.toThrow(UnauthorizedException);
         });
     });
 });

@@ -1,4 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
+import { Prisma } from 'generated/prisma';
 import { Test, TestingModule } from '@nestjs/testing';
 import { WorkflowRepository } from 'src/workflow/workflow.repository';
 import { WorkflowService } from 'src/workflow/workflow.service';
@@ -103,9 +104,21 @@ describe('WorkflowService', () => {
         });
 
         it('should throw NotFoundException when workflow not found', async () => {
-            mockWorkflowRepository.activate.mockRejectedValue(new Error('Not found'));
+            mockWorkflowRepository.activate.mockRejectedValue(
+                new Prisma.PrismaClientKnownRequestError('Record to update not found.', {
+                    code: 'P2025',
+                    clientVersion: '6.9.0',
+                }),
+            );
 
             await expect(service.activate('unknown-id', 'agent-1')).rejects.toThrow(NotFoundException);
+        });
+
+        it('should not disguise other database errors as a missing workflow', async () => {
+            const dbDown = new Error("Can't reach database server");
+            mockWorkflowRepository.activate.mockRejectedValue(dbDown);
+
+            await expect(service.activate('workflow-2', 'agent-1')).rejects.toBe(dbDown);
         });
 
         it('should throw NotFoundException when the workflow belongs to another agent', async () => {

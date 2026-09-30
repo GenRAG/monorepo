@@ -61,8 +61,12 @@ export class WorkflowService {
         let workflow: Workflow | null;
         try {
             workflow = await this.workflowRepository.activate(id, agentId);
-        } catch (_e: any) {
-            throw new NotFoundException('Workflow not found');
+        } catch (e) {
+            // Only "record not found" (row deleted concurrently) means 404; any other failure must surface as a 5xx.
+            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+                throw new NotFoundException('Workflow not found');
+            }
+            throw e;
         }
         if (!workflow) throw new NotFoundException('Workflow not found');
         return workflow;

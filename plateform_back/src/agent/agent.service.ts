@@ -4,6 +4,13 @@ import { UpdateAgentRequest } from './dto/update-agent.request';
 import { Agent, Prisma } from 'generated/prisma';
 import { AgentListItem, AgentRepository } from 'src/agent/agent.repository';
 
+// Only "record to update/delete not found" means 404: any other failure (DB down, constraint…) must surface as a
+// 5xx and reach Sentry instead of being disguised as a missing agent.
+const toNotFoundIfMissing = (e: unknown): unknown =>
+    e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025'
+        ? new NotFoundException('Agent not found')
+        : e;
+
 @Injectable()
 export class AgentService {
     constructor(private readonly agentRepository: AgentRepository) {}
@@ -52,16 +59,16 @@ export class AgentService {
     async update(id: string, updateAgentDto: UpdateAgentRequest, userId: string): Promise<Agent> {
         try {
             return await this.agentRepository.update(id, { ...updateAgentDto, updatedBy: userId });
-        } catch (_e: any) {
-            throw new NotFoundException('Agent not found');
+        } catch (e) {
+            throw toNotFoundIfMissing(e);
         }
     }
 
     async remove(id: string): Promise<void> {
         try {
             await this.agentRepository.delete(id);
-        } catch (_e: any) {
-            throw new NotFoundException('Agent not found');
+        } catch (e) {
+            throw toNotFoundIfMissing(e);
         }
     }
 

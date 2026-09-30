@@ -227,7 +227,7 @@ export const useWorkflowNodes = (
             );
             setEdges(allNewEdges);
         },
-        [setNodes, setEdges, readonlyMode, layout],
+        [setNodes, setEdges, readonlyMode, layout, registry],
     );
 
     const onDragOver = useCallback((event: React.DragEvent) => {

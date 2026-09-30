@@ -85,3 +85,4 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 - **Couleurs** : les tokens de `vitrine_front/src/styles/tokens.css` reprennent ceux de `plateform_front/src/themeNew` ; garder les deux alignés.
 
 <!-- claude-md: commit=a08731b69e6e4fe0f496cfddf9b51da54571de75 date=2026-09-30 -->
+

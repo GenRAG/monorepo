@@ -9,3 +9,4 @@ export * from "./utils/serialize";
 export * from "./utils/sanitize";
 export type { LayoutStrategy, NodePlacement, LinearLayoutConfig } from "./layout";
 export { LinearLayoutStrategy, VerticalLayoutStrategy, HorizontalLayoutStrategy, DEFAULT_LAYOUT } from "./layout";
+export * from "./utils/pipeline-to-workflow";

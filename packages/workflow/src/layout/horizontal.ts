@@ -1,6 +1,6 @@
 import { LinearLayoutStrategy } from './linear'
 
-/** Chain from left to right, settings below (previews). */
+/** Chain from left to right, settings stacked below each node (previews, viewer). */
 export class HorizontalLayoutStrategy extends LinearLayoutStrategy {
     constructor() {
         super({
@@ -9,7 +9,7 @@ export class HorizontalLayoutStrategy extends LinearLayoutStrategy {
             gap: 280,
             initialPosition: { x: 80, y: 200 },
             settingDistance: 150,
-            settingSpacing: 180,
+            settingSpacing: 120,
         })
     }
 }

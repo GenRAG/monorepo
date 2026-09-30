@@ -50,6 +50,8 @@ export type WorkflowNodeProps = NodeProps & {
     onInstructionSave?: (nodeId: string) => void;
     onMutation?: () => void;
     isVertical?: boolean;
+    /** Viewer mode: nodes must not offer any edition (remove, edit instruction…). */
+    readonly?: boolean;
 };
 
 export type NodeComponentType = ComponentType<WorkflowNodeProps>;

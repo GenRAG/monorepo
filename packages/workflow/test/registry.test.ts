@@ -65,6 +65,6 @@ describe("LinearLayoutStrategy", () => {
             x: 100,
             y: 0,
         });
-        assert.deepEqual(compact.getSettingOffset(0, 2), { x: -20, y: 50 });
+        assert.deepEqual(compact.getSettingOffset(1, 2), { x: 0, y: 90 });
     });
 });

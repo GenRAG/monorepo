@@ -43,12 +43,14 @@ describe("HorizontalLayoutStrategy", () => {
         assert.deepEqual(layout.computePlacements(nodes, [], "n")[0].position, { x: 80, y: 200 });
     });
 
-    it("spreads settings below their parent", () => {
+    it("stacks settings in a column below their parent", () => {
+        // Was a row (x: -180 / 0 / 180): it overlapped the settings of the next node (seen with WorkflowViewer).
+        // Only used by WorkflowViewer / pipelineToWorkflow and by node insertion, which previews do not allow.
         assert.equal(layout.isVertical, false);
         assert.deepEqual([0, 1, 2].map((i) => layout.getSettingOffset(i, 3)), [
-            { x: -180, y: 150 },
             { x: 0, y: 150 },
-            { x: 180, y: 150 },
+            { x: 0, y: 270 },
+            { x: 0, y: 390 },
         ]);
     });
 });

@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Prisma, User } from 'generated/prisma';
 import { CreateUserRequest, UserSafe } from 'src/users/dto/create-user.request';
+import { UpdateProfileRequest } from 'src/users/dto/update-profile.request';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from 'src/users/user.repository';
 
@@ -42,6 +43,21 @@ export class UsersService {
         const { where, data } = params;
 
         return this.userRepository.update(where, data);
+    }
+
+    async updateProfile(userId: string, profile: UpdateProfileRequest): Promise<UserSafe> {
+        // Emails are stored lowercased and trimmed everywhere else (register, login, reset), and looked up
+        // that way: storing "Alice@X.com" here would make the account impossible to log into.
+        const data = profile.email !== undefined ? { ...profile, email: profile.email.toLowerCase().trim() } : profile;
+
+        try {
+            return await this.userRepository.update({ id: userId }, data);
+        } catch (e) {
+            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+                throw new ConflictException('An account with this email already exists.');
+            }
+            throw e;
+        }
     }
 
     async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {

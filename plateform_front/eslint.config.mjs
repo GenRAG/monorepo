@@ -22,7 +22,7 @@ function downgradeRulesToWarn(config) {
 
 export default tseslint.config(
   {
-    ignores: ["eslint.config.mjs", "eslint.config.mts", "build", "node_modules", "public"],
+    ignores: ["eslint.config.mjs", "build", "node_modules", "public"],
   },
   downgradeRulesToWarn(eslint.configs.recommended),
   ...tseslint.configs.recommended.map(downgradeRulesToWarn),

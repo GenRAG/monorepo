@@ -1,6 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '../../src/app.module';
 import { AllExceptionsFilter } from '../../src/exeptions/interceptor.service';
@@ -12,6 +12,10 @@ export async function createTestApp(): Promise<INestApplication> {
     })
         .overrideModule(ThrottlerModule)
         .useModule(ThrottlerModule.forRoot([{ ttl: 60000, limit: 10000 }]))
+        // Routes set their own @Throttle limits (e.g. 10 logins/min), which the module-level override above
+        // does not relax: the suites share one IP, so rate limiting is disabled for e2e tests.
+        .overrideGuard(ThrottlerGuard)
+        .useValue({ canActivate: () => true })
         .compile();
 
     const app = moduleFixture.createNestApplication({ logger: false });

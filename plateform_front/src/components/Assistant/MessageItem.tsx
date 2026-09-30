@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Box, HStack, Text, useColorMode, VStack } from "@chakra-ui/react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { AiMarkdown } from "components/ui/chat/AiMarkdown";
 import { ChatMessage, RagSource } from "hooks/chat";
 import { getMarkdownStyles } from "components/ui/chat/markdownStyles";
 import ThinkingBubble from "components/ui/chat/ThinkingBubble";
@@ -84,7 +83,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, assistantId, agentVersio
                             </Text>
                         </HStack>
                         <Box fontSize="md" color="textSecondary" lineHeight="1.75" sx={getMarkdownStyles(colorMode)}>
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.response}</ReactMarkdown>
+                            <AiMarkdown>{msg.response}</AiMarkdown>
                         </Box>
                         <VStack align="flex-start" spacing={2} mt={0}>
                             <HStack>

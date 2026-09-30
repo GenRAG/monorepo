@@ -54,7 +54,19 @@ export const DocumentWorkspace: React.FC = () => {
     const handleDocumentDelete = async (id: string) => {
         if (!workspaceId || !agentId) return;
 
-        await deleteDocument({ workspaceId, agentId, id }).unwrap();
+        try {
+            await deleteDocument({ workspaceId, agentId, id }).unwrap();
+        } catch (error: unknown) {
+            toast({
+                title: "Erreur lors de la suppression",
+                description:
+                    getApiErrorMessage(error) || "Le document n'a pas pu être supprimé. Veuillez réessayer plus tard.",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
+            return;
+        }
 
         if (selectedDocument?.id === id) {
             setSelectedDocument(null);

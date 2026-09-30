@@ -99,7 +99,7 @@ export const LegalSidebar = () => {
                 _hover={{ bg: "surfaceHover" }}
                 onClick={() => {
                     const id = lastWorkspaceId ?? workspaces?.[0]?.id;
-                    void navigate(id ? `/workspaces/${id}/dashboard` : "/workspaces");
+                    void navigate(id ? `/workspaces/${id}/dashboard` : "/");
                 }}
             >
                 <Icon as={ArrowLeft} boxSize={3.5} />

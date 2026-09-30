@@ -12,7 +12,8 @@ const downloadBlob = (blob: Blob, filename: string) => {
     a.href = url;
     a.download = filename;
     a.click();
-    URL.revokeObjectURL(url);
+    // Revoking synchronously can cancel the download before the browser has read the blob (Firefox, Safari).
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
 export const UserRights = () => {

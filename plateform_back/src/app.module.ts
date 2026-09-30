@@ -61,7 +61,8 @@ import { SentryModule } from '@sentry/nestjs/setup';
                         ? { url: configService.get('REDIS_URL') }
                         : {
                               host: configService.get('REDIS_HOST') ?? 'localhost',
-                              port: Number(configService.get('REDIS_PORT')),
+                              // Same default as RedisModule: Number(undefined) would give NaN (ERR_SOCKET_BAD_PORT).
+                              port: Number(configService.get('REDIS_PORT') ?? 6379),
                           },
                     defaultJobOptions: {
                         removeOnComplete: 50,

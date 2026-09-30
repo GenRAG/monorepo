@@ -61,7 +61,7 @@ Voir le tableau détaillé dans `AUDIT_REPORT.md`. Suivi des statuts :
 
 ## Prochaine action
 
-Phase 2 : auditer `plateform_front` — lot 1 : `src/app/`, `src/services/`, `src/hooks/`, `src/store/`, `src/utils/`, `src/lib/`, config racine du front.
+Phase 2 : auditer `packages/workflow` (61 fichiers).
 
 ## Fichiers à auditer (Phase 2)
 
@@ -489,6 +489,14 @@ Hors `node_modules`, `build`, `dist`, `.venv`, `generated`, lockfiles, binaires 
 
 
 
+**plateform_back/src/rag-engine/**
+
+- [x] `plateform_back/src/rag-engine/ndjson-line-buffer.ts`
+- [x] `plateform_back/src/rag-engine/pipeline.schema.ts`
+- [x] `plateform_back/src/rag-engine/rag-engine.controller.ts`
+- [x] `plateform_back/src/rag-engine/rag-engine.module.ts`
+- [x] `plateform_back/src/rag-engine/rag-execution.service.ts`
+
 **plateform_back/src/redis/**
 
 - [x] `plateform_back/src/redis/redis.module.ts`
@@ -600,986 +608,986 @@ Hors `node_modules`, `build`, `dist`, `.venv`, `generated`, lockfiles, binaires 
 
 **plateform_front/**
 
-- [ ] `plateform_front/.gitignore`
+- [x] `plateform_front/.gitignore`
 
 **plateform_front/.vscode/**
 
-- [ ] `plateform_front/.vscode/settings.json`
+- [x] `plateform_front/.vscode/settings.json`
 
 **plateform_front/**
 
-- [ ] `plateform_front/CLAUDE.md`
-- [ ] `plateform_front/README.md`
-- [ ] `plateform_front/REFACTOR_PLAN.md`
-- [ ] `plateform_front/components.json`
-- [ ] `plateform_front/craco.config.js`
+- [x] `plateform_front/CLAUDE.md`
+- [x] `plateform_front/README.md`
+- [x] `plateform_front/REFACTOR_PLAN.md`
+- [x] `plateform_front/components.json`
+- [x] `plateform_front/craco.config.js`
 
 **plateform_front/docs/**
 
-- [ ] `plateform_front/docs/ARCHITECTURE.md`
+- [x] `plateform_front/docs/ARCHITECTURE.md`
 
 **plateform_front/**
 
-- [ ] `plateform_front/eslint.config.mjs`
-- [ ] `plateform_front/eslint.config.mts`
-- [ ] `plateform_front/package.json`
+- [x] `plateform_front/eslint.config.mjs`
+- [x] `plateform_front/eslint.config.mts`
+- [x] `plateform_front/package.json`
 
 **plateform_front/public/**
 
-- [ ] `plateform_front/public/index.html`
-- [ ] `plateform_front/public/manifest.json`
-- [ ] `plateform_front/public/robots.txt`
+- [x] `plateform_front/public/index.html`
+- [x] `plateform_front/public/manifest.json`
+- [x] `plateform_front/public/robots.txt`
 
 **plateform_front/scripts/**
 
-- [ ] `plateform_front/scripts/fix-tailwind-infinity.js`
+- [x] `plateform_front/scripts/fix-tailwind-infinity.js`
 
 **plateform_front/src/app/**
 
-- [ ] `plateform_front/src/app/App.tsx`
-- [ ] `plateform_front/src/app/AuthContext.tsx`
-- [ ] `plateform_front/src/app/DefaultRedirect.tsx`
+- [x] `plateform_front/src/app/App.tsx`
+- [x] `plateform_front/src/app/AuthContext.tsx`
+- [x] `plateform_front/src/app/DefaultRedirect.tsx`
 
 **plateform_front/src/app/Navigation/AgentSidebar/**
 
-- [ ] `plateform_front/src/app/Navigation/AgentSidebar/AgentSidebar.tsx`
-- [ ] `plateform_front/src/app/Navigation/AgentSidebar/AgentSidebarItems.tsx`
+- [x] `plateform_front/src/app/Navigation/AgentSidebar/AgentSidebar.tsx`
+- [x] `plateform_front/src/app/Navigation/AgentSidebar/AgentSidebarItems.tsx`
 
 **plateform_front/src/app/Navigation/LegalSidebar/**
 
-- [ ] `plateform_front/src/app/Navigation/LegalSidebar/LegalSidebar.tsx`
+- [x] `plateform_front/src/app/Navigation/LegalSidebar/LegalSidebar.tsx`
 
 **plateform_front/src/app/Navigation/MainSidebar/**
 
-- [ ] `plateform_front/src/app/Navigation/MainSidebar/WorkspaceDropdown.tsx`
+- [x] `plateform_front/src/app/Navigation/MainSidebar/WorkspaceDropdown.tsx`
 
 **plateform_front/src/app/Navigation/**
 
-- [ ] `plateform_front/src/app/Navigation/SidebarFooter.tsx`
-- [ ] `plateform_front/src/app/Navigation/SidebarFooterPanel.tsx`
-- [ ] `plateform_front/src/app/Navigation/SidebarHeader.tsx`
-- [ ] `plateform_front/src/app/Navigation/SidebarItem.tsx`
-- [ ] `plateform_front/src/app/Navigation/SidebarSection.tsx`
-- [ ] `plateform_front/src/app/Navigation/sidebarConfig.ts`
+- [x] `plateform_front/src/app/Navigation/SidebarFooter.tsx`
+- [x] `plateform_front/src/app/Navigation/SidebarFooterPanel.tsx`
+- [x] `plateform_front/src/app/Navigation/SidebarHeader.tsx`
+- [x] `plateform_front/src/app/Navigation/SidebarItem.tsx`
+- [x] `plateform_front/src/app/Navigation/SidebarSection.tsx`
+- [x] `plateform_front/src/app/Navigation/sidebarConfig.ts`
 
 **plateform_front/src/app/**
 
-- [ ] `plateform_front/src/app/PrivateAgentAppLayout.tsx`
-- [ ] `plateform_front/src/app/PrivateAppLayout.tsx`
-- [ ] `plateform_front/src/app/PrivateRoute.tsx`
-- [ ] `plateform_front/src/app/Router.tsx`
+- [x] `plateform_front/src/app/PrivateAgentAppLayout.tsx`
+- [x] `plateform_front/src/app/PrivateAppLayout.tsx`
+- [x] `plateform_front/src/app/PrivateRoute.tsx`
+- [x] `plateform_front/src/app/Router.tsx`
 
 **plateform_front/src/app/Routes/**
 
-- [ ] `plateform_front/src/app/Routes/AgentRoutes.tsx`
-- [ ] `plateform_front/src/app/Routes/AppRoutes.tsx`
-- [ ] `plateform_front/src/app/Routes/AuthRoutes.tsx`
-- [ ] `plateform_front/src/app/Routes/LegalRoutes.tsx`
+- [x] `plateform_front/src/app/Routes/AgentRoutes.tsx`
+- [x] `plateform_front/src/app/Routes/AppRoutes.tsx`
+- [x] `plateform_front/src/app/Routes/AuthRoutes.tsx`
+- [x] `plateform_front/src/app/Routes/LegalRoutes.tsx`
 
 **plateform_front/src/app/**
 
-- [ ] `plateform_front/src/app/WorkspaceGuard.tsx`
+- [x] `plateform_front/src/app/WorkspaceGuard.tsx`
 
 **plateform_front/src/components/Agents/**
 
-- [ ] `plateform_front/src/components/Agents/AgentFormPanel.tsx`
-- [ ] `plateform_front/src/components/Agents/AgentPreviewHeader.tsx`
-- [ ] `plateform_front/src/components/Agents/AgentPreviewPanel.tsx`
-- [ ] `plateform_front/src/components/Agents/AgentsTable.tsx`
+- [x] `plateform_front/src/components/Agents/AgentFormPanel.tsx`
+- [x] `plateform_front/src/components/Agents/AgentPreviewHeader.tsx`
+- [x] `plateform_front/src/components/Agents/AgentPreviewPanel.tsx`
+- [x] `plateform_front/src/components/Agents/AgentsTable.tsx`
 
 **plateform_front/src/components/Agents/Analytics/**
 
-- [ ] `plateform_front/src/components/Agents/Analytics/ActivityHeatmapCard.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/AnalyticsChartCard.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/AnalyticsTabs.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/ChartInfoTooltip.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/CostByModelCard.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/CostByTypeCard.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/CostChart.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/DocumentHealthCard.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/ErrorsChart.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/LatencyChart.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/PieLegendSwatch.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/RecentQueriesCard.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/VolumeChart.tsx`
-- [ ] `plateform_front/src/components/Agents/Analytics/types.ts`
+- [x] `plateform_front/src/components/Agents/Analytics/ActivityHeatmapCard.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/AnalyticsChartCard.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/AnalyticsTabs.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/ChartInfoTooltip.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/CostByModelCard.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/CostByTypeCard.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/CostChart.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/DocumentHealthCard.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/ErrorsChart.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/LatencyChart.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/PieLegendSwatch.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/RecentQueriesCard.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/VolumeChart.tsx`
+- [x] `plateform_front/src/components/Agents/Analytics/types.ts`
 
 **plateform_front/src/components/Agents/**
 
-- [ ] `plateform_front/src/components/Agents/CreateAgentModal.tsx`
-- [ ] `plateform_front/src/components/Agents/DeleteAgentModal.tsx`
-- [ ] `plateform_front/src/components/Agents/RightPreview.tsx`
-- [ ] `plateform_front/src/components/Agents/TemplateCard.tsx`
+- [x] `plateform_front/src/components/Agents/CreateAgentModal.tsx`
+- [x] `plateform_front/src/components/Agents/DeleteAgentModal.tsx`
+- [x] `plateform_front/src/components/Agents/RightPreview.tsx`
+- [x] `plateform_front/src/components/Agents/TemplateCard.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeInformation/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeInformation/BenefitItem.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeInformation/NodeInformationLayout.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeInformation/Reranker.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeInformation/Rewriter.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeInformation/BenefitItem.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeInformation/NodeInformationLayout.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeInformation/Reranker.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeInformation/Rewriter.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentAnimation.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentChunks.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentNodeContent.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentNodeOverviewTab.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentSearch.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentUpload.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentVectorSpace.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentAnimation.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentChunks.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentNodeContent.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentNodeOverviewTab.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentSearch.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentUpload.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Document/DocumentVectorSpace.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelDetailHelpers.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelDetailPanel.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelListItem.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelListPanel.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelSelectorContent.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelDetailHelpers.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelDetailPanel.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelListItem.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelListPanel.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ModelSelector/ModelSelectorContent.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/NodeOverviewLayout.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/NodeSettingsEditor.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/NodeOverviewLayout.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/NodeSettingsEditor.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryAnimation.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryNodeContent.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryNodeOverviewTab.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryPipeline.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryScene.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryAnimation.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryNodeContent.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryNodeOverviewTab.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryPipeline.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Query/QueryScene.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerAnimation.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerNodeContent.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerNodeOverviewTab.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerRow.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerScene.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerAnimation.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerNodeContent.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerNodeOverviewTab.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerRow.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerScene.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseAnimation.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseAnswer.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseNodeContent.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseNodeOverviewTab.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseNodeSettingsTab.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseScene.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseAnimation.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseAnswer.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseNodeContent.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseNodeOverviewTab.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseNodeSettingsTab.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Response/ResponseScene.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterAnimation.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeContent.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeOverviewTab.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterParts.tsx`
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterScene.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterAnimation.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeContent.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeOverviewTab.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterParts.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/Rewriter/RewriterScene.tsx`
 
 **plateform_front/src/components/Agents/Workflow/NodeModalContent/**
 
-- [ ] `plateform_front/src/components/Agents/Workflow/NodeModalContent/SettingPlaceholderContent.tsx`
+- [x] `plateform_front/src/components/Agents/Workflow/NodeModalContent/SettingPlaceholderContent.tsx`
 
 **plateform_front/src/components/Assistant/**
 
-- [ ] `plateform_front/src/components/Assistant/AssistantChatLayout.tsx`
-- [ ] `plateform_front/src/components/Assistant/AssistantInput.tsx`
-- [ ] `plateform_front/src/components/Assistant/AssistantsTable.tsx`
-- [ ] `plateform_front/src/components/Assistant/ConversationSidebar.tsx`
+- [x] `plateform_front/src/components/Assistant/AssistantChatLayout.tsx`
+- [x] `plateform_front/src/components/Assistant/AssistantInput.tsx`
+- [x] `plateform_front/src/components/Assistant/AssistantsTable.tsx`
+- [x] `plateform_front/src/components/Assistant/ConversationSidebar.tsx`
 
 **plateform_front/src/components/Assistant/Drawer/**
 
-- [ ] `plateform_front/src/components/Assistant/Drawer/QueryDetailsDrawer.tsx`
-- [ ] `plateform_front/src/components/Assistant/Drawer/QueryDetailsDrawerHeader.tsx`
-- [ ] `plateform_front/src/components/Assistant/Drawer/QueryDetailsTab.tsx`
-- [ ] `plateform_front/src/components/Assistant/Drawer/QuerySourcesTab.tsx`
+- [x] `plateform_front/src/components/Assistant/Drawer/QueryDetailsDrawer.tsx`
+- [x] `plateform_front/src/components/Assistant/Drawer/QueryDetailsDrawerHeader.tsx`
+- [x] `plateform_front/src/components/Assistant/Drawer/QueryDetailsTab.tsx`
+- [x] `plateform_front/src/components/Assistant/Drawer/QuerySourcesTab.tsx`
 
 **plateform_front/src/components/Assistant/**
 
-- [ ] `plateform_front/src/components/Assistant/HistoryLoadingSkeleton.tsx`
-- [ ] `plateform_front/src/components/Assistant/MessageItem.tsx`
+- [x] `plateform_front/src/components/Assistant/HistoryLoadingSkeleton.tsx`
+- [x] `plateform_front/src/components/Assistant/MessageItem.tsx`
 
 **plateform_front/src/components/Auth/**
 
-- [ ] `plateform_front/src/components/Auth/AuthHeader.tsx`
-- [ ] `plateform_front/src/components/Auth/GoogleLoginButton.tsx`
-- [ ] `plateform_front/src/components/Auth/WelcomeScreen.tsx`
+- [x] `plateform_front/src/components/Auth/AuthHeader.tsx`
+- [x] `plateform_front/src/components/Auth/GoogleLoginButton.tsx`
+- [x] `plateform_front/src/components/Auth/WelcomeScreen.tsx`
 
 **plateform_front/src/components/Auth/welcome/**
 
-- [ ] `plateform_front/src/components/Auth/welcome/WelcomeStepper.tsx`
+- [x] `plateform_front/src/components/Auth/welcome/WelcomeStepper.tsx`
 
 **plateform_front/src/components/Billing/**
 
-- [ ] `plateform_front/src/components/Billing/BuyCreditsSection.tsx`
-- [ ] `plateform_front/src/components/Billing/ChangePlanSection.tsx`
-- [ ] `plateform_front/src/components/Billing/ConsumptionCard.tsx`
-- [ ] `plateform_front/src/components/Billing/CreditsOrderSummary.tsx`
-- [ ] `plateform_front/src/components/Billing/PlanCard.tsx`
-- [ ] `plateform_front/src/components/Billing/PlanTierCard.tsx`
+- [x] `plateform_front/src/components/Billing/BuyCreditsSection.tsx`
+- [x] `plateform_front/src/components/Billing/ChangePlanSection.tsx`
+- [x] `plateform_front/src/components/Billing/ConsumptionCard.tsx`
+- [x] `plateform_front/src/components/Billing/CreditsOrderSummary.tsx`
+- [x] `plateform_front/src/components/Billing/PlanCard.tsx`
+- [x] `plateform_front/src/components/Billing/PlanTierCard.tsx`
 
 **plateform_front/src/components/Dashboard/**
 
-- [ ] `plateform_front/src/components/Dashboard/ActivityChart.tsx`
+- [x] `plateform_front/src/components/Dashboard/ActivityChart.tsx`
 
 **plateform_front/src/components/Dashboard/ActivityChart/**
 
-- [ ] `plateform_front/src/components/Dashboard/ActivityChart/ActivityHeader.tsx`
-- [ ] `plateform_front/src/components/Dashboard/ActivityChart/ActivityLegend.tsx`
+- [x] `plateform_front/src/components/Dashboard/ActivityChart/ActivityHeader.tsx`
+- [x] `plateform_front/src/components/Dashboard/ActivityChart/ActivityLegend.tsx`
 
 **plateform_front/src/components/Dashboard/**
 
-- [ ] `plateform_front/src/components/Dashboard/CardEmptyState.tsx`
-- [ ] `plateform_front/src/components/Dashboard/MetricBarChart.tsx`
-- [ ] `plateform_front/src/components/Dashboard/MetricCard.tsx`
-- [ ] `plateform_front/src/components/Dashboard/MetricCompositionPie.tsx`
-- [ ] `plateform_front/src/components/Dashboard/QuickActionCard.tsx`
-- [ ] `plateform_front/src/components/Dashboard/RecentActivityCard.tsx`
+- [x] `plateform_front/src/components/Dashboard/CardEmptyState.tsx`
+- [x] `plateform_front/src/components/Dashboard/MetricBarChart.tsx`
+- [x] `plateform_front/src/components/Dashboard/MetricCard.tsx`
+- [x] `plateform_front/src/components/Dashboard/MetricCompositionPie.tsx`
+- [x] `plateform_front/src/components/Dashboard/QuickActionCard.tsx`
+- [x] `plateform_front/src/components/Dashboard/RecentActivityCard.tsx`
 
 **plateform_front/src/components/Deployment/AccessControl/**
 
-- [ ] `plateform_front/src/components/Deployment/AccessControl/ApiKeysSection.tsx`
-- [ ] `plateform_front/src/components/Deployment/AccessControl/MembersSection.tsx`
-- [ ] `plateform_front/src/components/Deployment/AccessControl/VisibilitySection.tsx`
+- [x] `plateform_front/src/components/Deployment/AccessControl/ApiKeysSection.tsx`
+- [x] `plateform_front/src/components/Deployment/AccessControl/MembersSection.tsx`
+- [x] `plateform_front/src/components/Deployment/AccessControl/VisibilitySection.tsx`
 
 **plateform_front/src/components/Deployment/DashboardTab/**
 
-- [ ] `plateform_front/src/components/Deployment/DashboardTab/CreditSummaryCard.tsx`
-- [ ] `plateform_front/src/components/Deployment/DashboardTab/DeploymentBadge.tsx`
+- [x] `plateform_front/src/components/Deployment/DashboardTab/CreditSummaryCard.tsx`
+- [x] `plateform_front/src/components/Deployment/DashboardTab/DeploymentBadge.tsx`
 
 **plateform_front/src/components/Deployment/DashboardTab/HeaderCard/**
 
-- [ ] `plateform_front/src/components/Deployment/DashboardTab/HeaderCard/HeaderCard.tsx`
-- [ ] `plateform_front/src/components/Deployment/DashboardTab/HeaderCard/HeaderCardEmpty.tsx`
-- [ ] `plateform_front/src/components/Deployment/DashboardTab/HeaderCard/HeaderCardMain.tsx`
+- [x] `plateform_front/src/components/Deployment/DashboardTab/HeaderCard/HeaderCard.tsx`
+- [x] `plateform_front/src/components/Deployment/DashboardTab/HeaderCard/HeaderCardEmpty.tsx`
+- [x] `plateform_front/src/components/Deployment/DashboardTab/HeaderCard/HeaderCardMain.tsx`
 
 **plateform_front/src/components/Deployment/DashboardTab/**
 
-- [ ] `plateform_front/src/components/Deployment/DashboardTab/QuickLinksCard.tsx`
-- [ ] `plateform_front/src/components/Deployment/DashboardTab/RecentDeploymentsCard.tsx`
+- [x] `plateform_front/src/components/Deployment/DashboardTab/QuickLinksCard.tsx`
+- [x] `plateform_front/src/components/Deployment/DashboardTab/RecentDeploymentsCard.tsx`
 
 **plateform_front/src/components/Deployment/**
 
-- [ ] `plateform_front/src/components/Deployment/DeployModal.tsx`
-- [ ] `plateform_front/src/components/Deployment/DeploymentTabs.tsx`
-- [ ] `plateform_front/src/components/Deployment/ExportCard.tsx`
-- [ ] `plateform_front/src/components/Deployment/LiveDot.tsx`
-- [ ] `plateform_front/src/components/Deployment/PrivacyRow.tsx`
-- [ ] `plateform_front/src/components/Deployment/RegionCard.tsx`
-- [ ] `plateform_front/src/components/Deployment/SectionHeader.tsx`
+- [x] `plateform_front/src/components/Deployment/DeployModal.tsx`
+- [x] `plateform_front/src/components/Deployment/DeploymentTabs.tsx`
+- [x] `plateform_front/src/components/Deployment/ExportCard.tsx`
+- [x] `plateform_front/src/components/Deployment/LiveDot.tsx`
+- [x] `plateform_front/src/components/Deployment/PrivacyRow.tsx`
+- [x] `plateform_front/src/components/Deployment/RegionCard.tsx`
+- [x] `plateform_front/src/components/Deployment/SectionHeader.tsx`
 
 **plateform_front/src/components/Deployment/Settings/**
 
-- [ ] `plateform_front/src/components/Deployment/Settings/DataPrivacy.tsx`
-- [ ] `plateform_front/src/components/Deployment/Settings/HostingRegion.tsx`
-- [ ] `plateform_front/src/components/Deployment/Settings/QueryLogsTable.tsx`
-- [ ] `plateform_front/src/components/Deployment/Settings/RGPDBanner.tsx`
-- [ ] `plateform_front/src/components/Deployment/Settings/UserRights.tsx`
+- [x] `plateform_front/src/components/Deployment/Settings/DataPrivacy.tsx`
+- [x] `plateform_front/src/components/Deployment/Settings/HostingRegion.tsx`
+- [x] `plateform_front/src/components/Deployment/Settings/QueryLogsTable.tsx`
+- [x] `plateform_front/src/components/Deployment/Settings/RGPDBanner.tsx`
+- [x] `plateform_front/src/components/Deployment/Settings/UserRights.tsx`
 
 **plateform_front/src/components/Deployment/**
 
-- [ ] `plateform_front/src/components/Deployment/VersionListItem.tsx`
+- [x] `plateform_front/src/components/Deployment/VersionListItem.tsx`
 
 **plateform_front/src/components/Deployment/VersionsHistory/**
 
-- [ ] `plateform_front/src/components/Deployment/VersionsHistory/PipelineJsonPanel.tsx`
-- [ ] `plateform_front/src/components/Deployment/VersionsHistory/VersionDetailPanel.tsx`
-- [ ] `plateform_front/src/components/Deployment/VersionsHistory/VersionHeaderActions.tsx`
-- [ ] `plateform_front/src/components/Deployment/VersionsHistory/VersionsSidebar.tsx`
+- [x] `plateform_front/src/components/Deployment/VersionsHistory/PipelineJsonPanel.tsx`
+- [x] `plateform_front/src/components/Deployment/VersionsHistory/VersionDetailPanel.tsx`
+- [x] `plateform_front/src/components/Deployment/VersionsHistory/VersionHeaderActions.tsx`
+- [x] `plateform_front/src/components/Deployment/VersionsHistory/VersionsSidebar.tsx`
 
 **plateform_front/src/components/Document/**
 
-- [ ] `plateform_front/src/components/Document/DocumentEmptyState.tsx`
+- [x] `plateform_front/src/components/Document/DocumentEmptyState.tsx`
 
 **plateform_front/src/components/Document/Drawer/**
 
-- [ ] `plateform_front/src/components/Document/Drawer/DocumentInfoGrid.tsx`
-- [ ] `plateform_front/src/components/Document/Drawer/DocumentPreview.tsx`
-- [ ] `plateform_front/src/components/Document/Drawer/KnowledgeBaseStatus.tsx`
-- [ ] `plateform_front/src/components/Document/Drawer/PreviewDrawer.tsx`
-- [ ] `plateform_front/src/components/Document/Drawer/PreviewDrawerHeader.tsx`
+- [x] `plateform_front/src/components/Document/Drawer/DocumentInfoGrid.tsx`
+- [x] `plateform_front/src/components/Document/Drawer/DocumentPreview.tsx`
+- [x] `plateform_front/src/components/Document/Drawer/KnowledgeBaseStatus.tsx`
+- [x] `plateform_front/src/components/Document/Drawer/PreviewDrawer.tsx`
+- [x] `plateform_front/src/components/Document/Drawer/PreviewDrawerHeader.tsx`
 
 **plateform_front/src/components/Document/Header/**
 
-- [ ] `plateform_front/src/components/Document/Header/DocumentPageHeader.tsx`
-- [ ] `plateform_front/src/components/Document/Header/StorageOverviewPanel.tsx`
+- [x] `plateform_front/src/components/Document/Header/DocumentPageHeader.tsx`
+- [x] `plateform_front/src/components/Document/Header/StorageOverviewPanel.tsx`
 
 **plateform_front/src/components/Document/Modal/**
 
-- [ ] `plateform_front/src/components/Document/Modal/SelectedFilesList.tsx`
-- [ ] `plateform_front/src/components/Document/Modal/UploadModal.tsx`
-- [ ] `plateform_front/src/components/Document/Modal/UploadProgressList.tsx`
+- [x] `plateform_front/src/components/Document/Modal/SelectedFilesList.tsx`
+- [x] `plateform_front/src/components/Document/Modal/UploadModal.tsx`
+- [x] `plateform_front/src/components/Document/Modal/UploadProgressList.tsx`
 
 **plateform_front/src/components/Document/Table/**
 
-- [ ] `plateform_front/src/components/Document/Table/DocumentActionsMenu.tsx`
-- [ ] `plateform_front/src/components/Document/Table/DocumentCard.tsx`
-- [ ] `plateform_front/src/components/Document/Table/DocumentFilters.tsx`
-- [ ] `plateform_front/src/components/Document/Table/DocumentList.tsx`
-- [ ] `plateform_front/src/components/Document/Table/DocumentRow.tsx`
-- [ ] `plateform_front/src/components/Document/Table/DocumentSkeletonRow.tsx`
-- [ ] `plateform_front/src/components/Document/Table/DocumentTableHeader.tsx`
+- [x] `plateform_front/src/components/Document/Table/DocumentActionsMenu.tsx`
+- [x] `plateform_front/src/components/Document/Table/DocumentCard.tsx`
+- [x] `plateform_front/src/components/Document/Table/DocumentFilters.tsx`
+- [x] `plateform_front/src/components/Document/Table/DocumentList.tsx`
+- [x] `plateform_front/src/components/Document/Table/DocumentRow.tsx`
+- [x] `plateform_front/src/components/Document/Table/DocumentSkeletonRow.tsx`
+- [x] `plateform_front/src/components/Document/Table/DocumentTableHeader.tsx`
 
 **plateform_front/src/components/Legal/**
 
-- [ ] `plateform_front/src/components/Legal/ContactCard.tsx`
-- [ ] `plateform_front/src/components/Legal/ContactForm.tsx`
-- [ ] `plateform_front/src/components/Legal/DocBulletList.tsx`
-- [ ] `plateform_front/src/components/Legal/DocInfoBox.tsx`
-- [ ] `plateform_front/src/components/Legal/DocPageHeader.tsx`
-- [ ] `plateform_front/src/components/Legal/DocSection.tsx`
-- [ ] `plateform_front/src/components/Legal/DocSectionRenderer.tsx`
-- [ ] `plateform_front/src/components/Legal/DocTable.tsx`
-- [ ] `plateform_front/src/components/Legal/LegalDocPage.tsx`
+- [x] `plateform_front/src/components/Legal/ContactCard.tsx`
+- [x] `plateform_front/src/components/Legal/ContactForm.tsx`
+- [x] `plateform_front/src/components/Legal/DocBulletList.tsx`
+- [x] `plateform_front/src/components/Legal/DocInfoBox.tsx`
+- [x] `plateform_front/src/components/Legal/DocPageHeader.tsx`
+- [x] `plateform_front/src/components/Legal/DocSection.tsx`
+- [x] `plateform_front/src/components/Legal/DocSectionRenderer.tsx`
+- [x] `plateform_front/src/components/Legal/DocTable.tsx`
+- [x] `plateform_front/src/components/Legal/LegalDocPage.tsx`
 
 **plateform_front/src/components/Onboarding/CompareIntelligence/**
 
-- [ ] `plateform_front/src/components/Onboarding/CompareIntelligence/ResponseDetailPanel.tsx`
+- [x] `plateform_front/src/components/Onboarding/CompareIntelligence/ResponseDetailPanel.tsx`
 
 **plateform_front/src/components/Onboarding/ImproveAssistant/**
 
-- [ ] `plateform_front/src/components/Onboarding/ImproveAssistant/DocumentFileList.tsx`
-- [ ] `plateform_front/src/components/Onboarding/ImproveAssistant/UploadProgressStepper.tsx`
+- [x] `plateform_front/src/components/Onboarding/ImproveAssistant/DocumentFileList.tsx`
+- [x] `plateform_front/src/components/Onboarding/ImproveAssistant/UploadProgressStepper.tsx`
 
 **plateform_front/src/components/Onboarding/**
 
-- [ ] `plateform_front/src/components/Onboarding/StepFooter.tsx`
+- [x] `plateform_front/src/components/Onboarding/StepFooter.tsx`
 
 **plateform_front/src/components/Onboarding/Stepper/**
 
-- [ ] `plateform_front/src/components/Onboarding/Stepper/OnboardingHeader.tsx`
-- [ ] `plateform_front/src/components/Onboarding/Stepper/OnboardingSidebar.tsx`
-- [ ] `plateform_front/src/components/Onboarding/Stepper/OnboardingStepper.tsx`
+- [x] `plateform_front/src/components/Onboarding/Stepper/OnboardingHeader.tsx`
+- [x] `plateform_front/src/components/Onboarding/Stepper/OnboardingSidebar.tsx`
+- [x] `plateform_front/src/components/Onboarding/Stepper/OnboardingStepper.tsx`
 
 **plateform_front/src/components/charts/**
 
-- [ ] `plateform_front/src/components/charts/animation.ts`
-- [ ] `plateform_front/src/components/charts/area-chart-loading.tsx`
-- [ ] `plateform_front/src/components/charts/area-chart.tsx`
-- [ ] `plateform_front/src/components/charts/area-gradient-defs.tsx`
-- [ ] `plateform_front/src/components/charts/area.tsx`
-- [ ] `plateform_front/src/components/charts/background.tsx`
-- [ ] `plateform_front/src/components/charts/bar-chart-loading.tsx`
-- [ ] `plateform_front/src/components/charts/bar-chart.tsx`
-- [ ] `plateform_front/src/components/charts/bar-depth-geometry.ts`
-- [ ] `plateform_front/src/components/charts/bar-squares-layout.ts`
-- [ ] `plateform_front/src/components/charts/bar-squares.tsx`
-- [ ] `plateform_front/src/components/charts/bar-x-axis.tsx`
-- [ ] `plateform_front/src/components/charts/bar-y-axis.tsx`
-- [ ] `plateform_front/src/components/charts/bar.tsx`
-- [ ] `plateform_front/src/components/charts/chart-center-typography.ts`
-- [ ] `plateform_front/src/components/charts/chart-child-passthrough.ts`
-- [ ] `plateform_front/src/components/charts/chart-config-context.tsx`
-- [ ] `plateform_front/src/components/charts/chart-context.tsx`
-- [ ] `plateform_front/src/components/charts/chart-defs.ts`
-- [ ] `plateform_front/src/components/charts/chart-formatters.ts`
-- [ ] `plateform_front/src/components/charts/chart-legend-hover.tsx`
-- [ ] `plateform_front/src/components/charts/chart-loading-label.tsx`
-- [ ] `plateform_front/src/components/charts/chart-phase.ts`
-- [ ] `plateform_front/src/components/charts/chart-reveal-clip.tsx`
-- [ ] `plateform_front/src/components/charts/chart-scale.ts`
-- [ ] `plateform_front/src/components/charts/chart-stat-flow.tsx`
-- [ ] `plateform_front/src/components/charts/composed-chart.tsx`
-- [ ] `plateform_front/src/components/charts/dash-tail-stroke.tsx`
-- [ ] `plateform_front/src/components/charts/decimate-time-series.ts`
-- [ ] `plateform_front/src/components/charts/fade-edges.ts`
-- [ ] `plateform_front/src/components/charts/filter-data-by-x-domain.ts`
-- [ ] `plateform_front/src/components/charts/gauge-label-layout.tsx`
-- [ ] `plateform_front/src/components/charts/gauge.tsx`
-- [ ] `plateform_front/src/components/charts/generate-chart-skeleton-data.ts`
-- [ ] `plateform_front/src/components/charts/grid.tsx`
+- [x] `plateform_front/src/components/charts/animation.ts`
+- [x] `plateform_front/src/components/charts/area-chart-loading.tsx`
+- [x] `plateform_front/src/components/charts/area-chart.tsx`
+- [x] `plateform_front/src/components/charts/area-gradient-defs.tsx`
+- [x] `plateform_front/src/components/charts/area.tsx`
+- [x] `plateform_front/src/components/charts/background.tsx`
+- [x] `plateform_front/src/components/charts/bar-chart-loading.tsx`
+- [x] `plateform_front/src/components/charts/bar-chart.tsx`
+- [x] `plateform_front/src/components/charts/bar-depth-geometry.ts`
+- [x] `plateform_front/src/components/charts/bar-squares-layout.ts`
+- [x] `plateform_front/src/components/charts/bar-squares.tsx`
+- [x] `plateform_front/src/components/charts/bar-x-axis.tsx`
+- [x] `plateform_front/src/components/charts/bar-y-axis.tsx`
+- [x] `plateform_front/src/components/charts/bar.tsx`
+- [x] `plateform_front/src/components/charts/chart-center-typography.ts`
+- [x] `plateform_front/src/components/charts/chart-child-passthrough.ts`
+- [x] `plateform_front/src/components/charts/chart-config-context.tsx`
+- [x] `plateform_front/src/components/charts/chart-context.tsx`
+- [x] `plateform_front/src/components/charts/chart-defs.ts`
+- [x] `plateform_front/src/components/charts/chart-formatters.ts`
+- [x] `plateform_front/src/components/charts/chart-legend-hover.tsx`
+- [x] `plateform_front/src/components/charts/chart-loading-label.tsx`
+- [x] `plateform_front/src/components/charts/chart-phase.ts`
+- [x] `plateform_front/src/components/charts/chart-reveal-clip.tsx`
+- [x] `plateform_front/src/components/charts/chart-scale.ts`
+- [x] `plateform_front/src/components/charts/chart-stat-flow.tsx`
+- [x] `plateform_front/src/components/charts/composed-chart.tsx`
+- [x] `plateform_front/src/components/charts/dash-tail-stroke.tsx`
+- [x] `plateform_front/src/components/charts/decimate-time-series.ts`
+- [x] `plateform_front/src/components/charts/fade-edges.ts`
+- [x] `plateform_front/src/components/charts/filter-data-by-x-domain.ts`
+- [x] `plateform_front/src/components/charts/gauge-label-layout.tsx`
+- [x] `plateform_front/src/components/charts/gauge.tsx`
+- [x] `plateform_front/src/components/charts/generate-chart-skeleton-data.ts`
+- [x] `plateform_front/src/components/charts/grid.tsx`
 
 **plateform_front/src/components/charts/heatmap/**
 
-- [ ] `plateform_front/src/components/charts/heatmap/generate-heatmap-skeleton-data.ts`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-animation.ts`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-cells.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-chart-loading.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-chart.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-colors.ts`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-context.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-legend-gradient.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-legend-swatch.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-legend.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-pattern-defs.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-resolve-separator.ts`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-separator.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-tooltip.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-utils.ts`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-x-axis.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/heatmap-y-axis.tsx`
-- [ ] `plateform_front/src/components/charts/heatmap/index.ts`
-- [ ] `plateform_front/src/components/charts/heatmap/use-delayed-tooltip-data.ts`
+- [x] `plateform_front/src/components/charts/heatmap/generate-heatmap-skeleton-data.ts`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-animation.ts`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-cells.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-chart-loading.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-chart.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-colors.ts`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-context.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-legend-gradient.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-legend-swatch.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-legend.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-pattern-defs.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-resolve-separator.ts`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-separator.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-tooltip.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-utils.ts`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-x-axis.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/heatmap-y-axis.tsx`
+- [x] `plateform_front/src/components/charts/heatmap/index.ts`
+- [x] `plateform_front/src/components/charts/heatmap/use-delayed-tooltip-data.ts`
 
 **plateform_front/src/components/charts/**
 
-- [ ] `plateform_front/src/components/charts/highlight-segment-bounds.ts`
-- [ ] `plateform_front/src/components/charts/highlight-segment.tsx`
-- [ ] `plateform_front/src/components/charts/index.ts`
-- [ ] `plateform_front/src/components/charts/indicator-fade.ts`
-- [ ] `plateform_front/src/components/charts/line-chart-loading.tsx`
-- [ ] `plateform_front/src/components/charts/line-chart.tsx`
-- [ ] `plateform_front/src/components/charts/line-loading-pulse.tsx`
-- [ ] `plateform_front/src/components/charts/line-loading-timing.ts`
-- [ ] `plateform_front/src/components/charts/line-series-terminal-marker.tsx`
-- [ ] `plateform_front/src/components/charts/line.tsx`
-- [ ] `plateform_front/src/components/charts/loading-sweep.tsx`
-- [ ] `plateform_front/src/components/charts/motion-utils.ts`
-- [ ] `plateform_front/src/components/charts/notch-gauge-shared.ts`
-- [ ] `plateform_front/src/components/charts/path-stroke-utils.ts`
-- [ ] `plateform_front/src/components/charts/pattern-area.tsx`
-- [ ] `plateform_front/src/components/charts/pattern-preset.tsx`
-- [ ] `plateform_front/src/components/charts/pie-center-shell.tsx`
-- [ ] `plateform_front/src/components/charts/pie-center.tsx`
-- [ ] `plateform_front/src/components/charts/pie-chart.tsx`
-- [ ] `plateform_front/src/components/charts/pie-context.tsx`
-- [ ] `plateform_front/src/components/charts/pie-slice.tsx`
-- [ ] `plateform_front/src/components/charts/projection-config.ts`
-- [ ] `plateform_front/src/components/charts/projection-line-end-marker.tsx`
-- [ ] `plateform_front/src/components/charts/projection-line.tsx`
-- [ ] `plateform_front/src/components/charts/projection-utils.ts`
-- [ ] `plateform_front/src/components/charts/reference-area-config.ts`
-- [ ] `plateform_front/src/components/charts/reference-area-geometry.ts`
-- [ ] `plateform_front/src/components/charts/reference-area-registration-context.tsx`
-- [ ] `plateform_front/src/components/charts/series-bar-layout.ts`
-- [ ] `plateform_front/src/components/charts/series-bar.tsx`
-- [ ] `plateform_front/src/components/charts/series-dash-tail-overlay.tsx`
-- [ ] `plateform_front/src/components/charts/series-highlight-layer.tsx`
-- [ ] `plateform_front/src/components/charts/series-hover-dim.tsx`
-- [ ] `plateform_front/src/components/charts/series-markers.tsx`
-- [ ] `plateform_front/src/components/charts/series-path-utils.ts`
-- [ ] `plateform_front/src/components/charts/series-point-marker.tsx`
-- [ ] `plateform_front/src/components/charts/static-chart-preview-context.tsx`
-- [ ] `plateform_front/src/components/charts/time-series-chart-shell.tsx`
+- [x] `plateform_front/src/components/charts/highlight-segment-bounds.ts`
+- [x] `plateform_front/src/components/charts/highlight-segment.tsx`
+- [x] `plateform_front/src/components/charts/index.ts`
+- [x] `plateform_front/src/components/charts/indicator-fade.ts`
+- [x] `plateform_front/src/components/charts/line-chart-loading.tsx`
+- [x] `plateform_front/src/components/charts/line-chart.tsx`
+- [x] `plateform_front/src/components/charts/line-loading-pulse.tsx`
+- [x] `plateform_front/src/components/charts/line-loading-timing.ts`
+- [x] `plateform_front/src/components/charts/line-series-terminal-marker.tsx`
+- [x] `plateform_front/src/components/charts/line.tsx`
+- [x] `plateform_front/src/components/charts/loading-sweep.tsx`
+- [x] `plateform_front/src/components/charts/motion-utils.ts`
+- [x] `plateform_front/src/components/charts/notch-gauge-shared.ts`
+- [x] `plateform_front/src/components/charts/path-stroke-utils.ts`
+- [x] `plateform_front/src/components/charts/pattern-area.tsx`
+- [x] `plateform_front/src/components/charts/pattern-preset.tsx`
+- [x] `plateform_front/src/components/charts/pie-center-shell.tsx`
+- [x] `plateform_front/src/components/charts/pie-center.tsx`
+- [x] `plateform_front/src/components/charts/pie-chart.tsx`
+- [x] `plateform_front/src/components/charts/pie-context.tsx`
+- [x] `plateform_front/src/components/charts/pie-slice.tsx`
+- [x] `plateform_front/src/components/charts/projection-config.ts`
+- [x] `plateform_front/src/components/charts/projection-line-end-marker.tsx`
+- [x] `plateform_front/src/components/charts/projection-line.tsx`
+- [x] `plateform_front/src/components/charts/projection-utils.ts`
+- [x] `plateform_front/src/components/charts/reference-area-config.ts`
+- [x] `plateform_front/src/components/charts/reference-area-geometry.ts`
+- [x] `plateform_front/src/components/charts/reference-area-registration-context.tsx`
+- [x] `plateform_front/src/components/charts/series-bar-layout.ts`
+- [x] `plateform_front/src/components/charts/series-bar.tsx`
+- [x] `plateform_front/src/components/charts/series-dash-tail-overlay.tsx`
+- [x] `plateform_front/src/components/charts/series-highlight-layer.tsx`
+- [x] `plateform_front/src/components/charts/series-hover-dim.tsx`
+- [x] `plateform_front/src/components/charts/series-markers.tsx`
+- [x] `plateform_front/src/components/charts/series-path-utils.ts`
+- [x] `plateform_front/src/components/charts/series-point-marker.tsx`
+- [x] `plateform_front/src/components/charts/static-chart-preview-context.tsx`
+- [x] `plateform_front/src/components/charts/time-series-chart-shell.tsx`
 
 **plateform_front/src/components/charts/tooltip/**
 
-- [ ] `plateform_front/src/components/charts/tooltip/chart-tooltip.tsx`
-- [ ] `plateform_front/src/components/charts/tooltip/date-ticker.tsx`
-- [ ] `plateform_front/src/components/charts/tooltip/index.ts`
-- [ ] `plateform_front/src/components/charts/tooltip/tooltip-box.tsx`
-- [ ] `plateform_front/src/components/charts/tooltip/tooltip-content.tsx`
-- [ ] `plateform_front/src/components/charts/tooltip/tooltip-dot.tsx`
-- [ ] `plateform_front/src/components/charts/tooltip/tooltip-indicator.tsx`
+- [x] `plateform_front/src/components/charts/tooltip/chart-tooltip.tsx`
+- [x] `plateform_front/src/components/charts/tooltip/date-ticker.tsx`
+- [x] `plateform_front/src/components/charts/tooltip/index.ts`
+- [x] `plateform_front/src/components/charts/tooltip/tooltip-box.tsx`
+- [x] `plateform_front/src/components/charts/tooltip/tooltip-content.tsx`
+- [x] `plateform_front/src/components/charts/tooltip/tooltip-dot.tsx`
+- [x] `plateform_front/src/components/charts/tooltip/tooltip-indicator.tsx`
 
 **plateform_front/src/components/charts/**
 
-- [ ] `plateform_front/src/components/charts/use-animated-series-path.ts`
-- [ ] `plateform_front/src/components/charts/use-animated-y-domains.ts`
-- [ ] `plateform_front/src/components/charts/use-chart-interaction.ts`
-- [ ] `plateform_front/src/components/charts/use-chart-phase-orchestrator.ts`
-- [ ] `plateform_front/src/components/charts/use-enter-complete.ts`
-- [ ] `plateform_front/src/components/charts/use-grid-shimmer.ts`
-- [ ] `plateform_front/src/components/charts/use-highlight-segment.ts`
-- [ ] `plateform_front/src/components/charts/use-mount-progress.ts`
-- [ ] `plateform_front/src/components/charts/use-scheduled-tooltip.ts`
-- [ ] `plateform_front/src/components/charts/visx-pattern.tsx`
-- [ ] `plateform_front/src/components/charts/x-axis.tsx`
-- [ ] `plateform_front/src/components/charts/y-axis-scales.ts`
-- [ ] `plateform_front/src/components/charts/y-axis-ticks.ts`
-- [ ] `plateform_front/src/components/charts/y-axis.tsx`
-- [ ] `plateform_front/src/components/charts/y-domain-utils.ts`
+- [x] `plateform_front/src/components/charts/use-animated-series-path.ts`
+- [x] `plateform_front/src/components/charts/use-animated-y-domains.ts`
+- [x] `plateform_front/src/components/charts/use-chart-interaction.ts`
+- [x] `plateform_front/src/components/charts/use-chart-phase-orchestrator.ts`
+- [x] `plateform_front/src/components/charts/use-enter-complete.ts`
+- [x] `plateform_front/src/components/charts/use-grid-shimmer.ts`
+- [x] `plateform_front/src/components/charts/use-highlight-segment.ts`
+- [x] `plateform_front/src/components/charts/use-mount-progress.ts`
+- [x] `plateform_front/src/components/charts/use-scheduled-tooltip.ts`
+- [x] `plateform_front/src/components/charts/visx-pattern.tsx`
+- [x] `plateform_front/src/components/charts/x-axis.tsx`
+- [x] `plateform_front/src/components/charts/y-axis-scales.ts`
+- [x] `plateform_front/src/components/charts/y-axis-ticks.ts`
+- [x] `plateform_front/src/components/charts/y-axis.tsx`
+- [x] `plateform_front/src/components/charts/y-domain-utils.ts`
 
 **plateform_front/src/components/**
 
-- [ ] `plateform_front/src/components/shimmering-text.tsx`
+- [x] `plateform_front/src/components/shimmering-text.tsx`
 
 **plateform_front/src/components/ui/**
 
-- [ ] `plateform_front/src/components/ui/ActionMenu.tsx`
-- [ ] `plateform_front/src/components/ui/AppLoader.tsx`
-- [ ] `plateform_front/src/components/ui/Banner.tsx`
-- [ ] `plateform_front/src/components/ui/BoxIcon.tsx`
-- [ ] `plateform_front/src/components/ui/Button.tsx`
-- [ ] `plateform_front/src/components/ui/CardHeader.tsx`
-- [ ] `plateform_front/src/components/ui/ChartHoverBridge.tsx`
-- [ ] `plateform_front/src/components/ui/CustomTooltip.tsx`
-- [ ] `plateform_front/src/components/ui/DangerZone.tsx`
-- [ ] `plateform_front/src/components/ui/DocumentStatusBadge.tsx`
-- [ ] `plateform_front/src/components/ui/Drawer.tsx`
-- [ ] `plateform_front/src/components/ui/FooterButtonsResponsive.tsx`
+- [x] `plateform_front/src/components/ui/ActionMenu.tsx`
+- [x] `plateform_front/src/components/ui/AppLoader.tsx`
+- [x] `plateform_front/src/components/ui/Banner.tsx`
+- [x] `plateform_front/src/components/ui/BoxIcon.tsx`
+- [x] `plateform_front/src/components/ui/Button.tsx`
+- [x] `plateform_front/src/components/ui/CardHeader.tsx`
+- [x] `plateform_front/src/components/ui/ChartHoverBridge.tsx`
+- [x] `plateform_front/src/components/ui/CustomTooltip.tsx`
+- [x] `plateform_front/src/components/ui/DangerZone.tsx`
+- [x] `plateform_front/src/components/ui/DocumentStatusBadge.tsx`
+- [x] `plateform_front/src/components/ui/Drawer.tsx`
+- [x] `plateform_front/src/components/ui/FooterButtonsResponsive.tsx`
 
 **plateform_front/src/components/ui/GlassNav/**
 
-- [ ] `plateform_front/src/components/ui/GlassNav/GlassNav.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/GlassNavAppExample.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/GlassNavItemButton.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/GlassSurface.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/GlassNav.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/GlassNavAppExample.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/GlassNavItemButton.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/GlassSurface.tsx`
 
 **plateform_front/src/components/ui/GlassNav/icons/**
 
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/ChatIcon.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/CreditCardIcon.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/DashboardIcon.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/DocumentIcon.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/FolderIcon.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/SparklesIcon.tsx`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/iconScaleVariants.ts`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/index.ts`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/types.ts`
-- [ ] `plateform_front/src/components/ui/GlassNav/icons/useIconAnimationState.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/ChatIcon.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/CreditCardIcon.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/DashboardIcon.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/DocumentIcon.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/FolderIcon.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/SparklesIcon.tsx`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/iconScaleVariants.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/index.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/types.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/icons/useIconAnimationState.ts`
 
 **plateform_front/src/components/ui/GlassNav/**
 
-- [ ] `plateform_front/src/components/ui/GlassNav/index.ts`
-- [ ] `plateform_front/src/components/ui/GlassNav/navIconMap.ts`
-- [ ] `plateform_front/src/components/ui/GlassNav/useNavLayoutMode.ts`
-- [ ] `plateform_front/src/components/ui/GlassNav/utils.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/index.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/navIconMap.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/useNavLayoutMode.ts`
+- [x] `plateform_front/src/components/ui/GlassNav/utils.ts`
 
 **plateform_front/src/components/ui/**
 
-- [ ] `plateform_front/src/components/ui/GlassTabBar.tsx`
-- [ ] `plateform_front/src/components/ui/ImpactBar.tsx`
-- [ ] `plateform_front/src/components/ui/KdbStyles.tsx`
-- [ ] `plateform_front/src/components/ui/MainLayoutContainer.tsx`
-- [ ] `plateform_front/src/components/ui/MenuDropDown.tsx`
-- [ ] `plateform_front/src/components/ui/MobileSidebarDrawer.tsx`
-- [ ] `plateform_front/src/components/ui/Modal.tsx`
-- [ ] `plateform_front/src/components/ui/MultiOptionButtons.tsx`
-- [ ] `plateform_front/src/components/ui/OnboardingStepBanner.tsx`
-- [ ] `plateform_front/src/components/ui/RadioButton.tsx`
-- [ ] `plateform_front/src/components/ui/RowContainer.tsx`
-- [ ] `plateform_front/src/components/ui/ShowHidePasswordInput.tsx`
-- [ ] `plateform_front/src/components/ui/TabBar.tsx`
-- [ ] `plateform_front/src/components/ui/UploadDropzone.tsx`
-- [ ] `plateform_front/src/components/ui/WorkspaceHeader.tsx`
-- [ ] `plateform_front/src/components/ui/bannerVariants.ts`
+- [x] `plateform_front/src/components/ui/GlassTabBar.tsx`
+- [x] `plateform_front/src/components/ui/ImpactBar.tsx`
+- [x] `plateform_front/src/components/ui/KdbStyles.tsx`
+- [x] `plateform_front/src/components/ui/MainLayoutContainer.tsx`
+- [x] `plateform_front/src/components/ui/MenuDropDown.tsx`
+- [x] `plateform_front/src/components/ui/MobileSidebarDrawer.tsx`
+- [x] `plateform_front/src/components/ui/Modal.tsx`
+- [x] `plateform_front/src/components/ui/MultiOptionButtons.tsx`
+- [x] `plateform_front/src/components/ui/OnboardingStepBanner.tsx`
+- [x] `plateform_front/src/components/ui/RadioButton.tsx`
+- [x] `plateform_front/src/components/ui/RowContainer.tsx`
+- [x] `plateform_front/src/components/ui/ShowHidePasswordInput.tsx`
+- [x] `plateform_front/src/components/ui/TabBar.tsx`
+- [x] `plateform_front/src/components/ui/UploadDropzone.tsx`
+- [x] `plateform_front/src/components/ui/WorkspaceHeader.tsx`
+- [x] `plateform_front/src/components/ui/bannerVariants.ts`
 
 **plateform_front/src/components/ui/chat/**
 
-- [ ] `plateform_front/src/components/ui/chat/ChatHeader.tsx`
-- [ ] `plateform_front/src/components/ui/chat/ChatInput.tsx`
-- [ ] `plateform_front/src/components/ui/chat/ChatInterface.tsx`
-- [ ] `plateform_front/src/components/ui/chat/ChatMessageItem.tsx`
-- [ ] `plateform_front/src/components/ui/chat/ChatResponseBubble.tsx`
-- [ ] `plateform_front/src/components/ui/chat/SuggestedQuestions.tsx`
-- [ ] `plateform_front/src/components/ui/chat/ThinkingBubble.tsx`
-- [ ] `plateform_front/src/components/ui/chat/markdownStyles.ts`
+- [x] `plateform_front/src/components/ui/chat/ChatHeader.tsx`
+- [x] `plateform_front/src/components/ui/chat/ChatInput.tsx`
+- [x] `plateform_front/src/components/ui/chat/ChatInterface.tsx`
+- [x] `plateform_front/src/components/ui/chat/ChatMessageItem.tsx`
+- [x] `plateform_front/src/components/ui/chat/ChatResponseBubble.tsx`
+- [x] `plateform_front/src/components/ui/chat/SuggestedQuestions.tsx`
+- [x] `plateform_front/src/components/ui/chat/ThinkingBubble.tsx`
+- [x] `plateform_front/src/components/ui/chat/markdownStyles.ts`
 
 **plateform_front/src/components/ui/demo/**
 
-- [ ] `plateform_front/src/components/ui/demo/DemoChatInput.tsx`
-- [ ] `plateform_front/src/components/ui/demo/DemoCountUp.tsx`
-- [ ] `plateform_front/src/components/ui/demo/DemoCursor.tsx`
-- [ ] `plateform_front/src/components/ui/demo/DemoStage.tsx`
-- [ ] `plateform_front/src/components/ui/demo/DemoWords.tsx`
+- [x] `plateform_front/src/components/ui/demo/DemoChatInput.tsx`
+- [x] `plateform_front/src/components/ui/demo/DemoCountUp.tsx`
+- [x] `plateform_front/src/components/ui/demo/DemoCursor.tsx`
+- [x] `plateform_front/src/components/ui/demo/DemoStage.tsx`
+- [x] `plateform_front/src/components/ui/demo/DemoWords.tsx`
 
 **plateform_front/src/components/ui/workflow-preview/**
 
-- [ ] `plateform_front/src/components/ui/workflow-preview/WorkflowPreview.tsx`
-- [ ] `plateform_front/src/components/ui/workflow-preview/index.ts`
+- [x] `plateform_front/src/components/ui/workflow-preview/WorkflowPreview.tsx`
+- [x] `plateform_front/src/components/ui/workflow-preview/index.ts`
 
 **plateform_front/src/constants/**
 
-- [ ] `plateform_front/src/constants/localStorage.ts`
+- [x] `plateform_front/src/constants/localStorage.ts`
 
 **plateform_front/src/constants/models/**
 
-- [ ] `plateform_front/src/constants/models/modelBadges.ts`
+- [x] `plateform_front/src/constants/models/modelBadges.ts`
 
 **plateform_front/src/hooks/chat/**
 
-- [ ] `plateform_front/src/hooks/chat/index.ts`
-- [ ] `plateform_front/src/hooks/chat/types.ts`
-- [ ] `plateform_front/src/hooks/chat/useAgentQuery.ts`
-- [ ] `plateform_front/src/hooks/chat/useAssistantQuery.ts`
-- [ ] `plateform_front/src/hooks/chat/useChat.ts`
-- [ ] `plateform_front/src/hooks/chat/useSSEStream.ts`
-- [ ] `plateform_front/src/hooks/chat/useStreamQuery.ts`
+- [x] `plateform_front/src/hooks/chat/index.ts`
+- [x] `plateform_front/src/hooks/chat/types.ts`
+- [x] `plateform_front/src/hooks/chat/useAgentQuery.ts`
+- [x] `plateform_front/src/hooks/chat/useAssistantQuery.ts`
+- [x] `plateform_front/src/hooks/chat/useChat.ts`
+- [x] `plateform_front/src/hooks/chat/useSSEStream.ts`
+- [x] `plateform_front/src/hooks/chat/useStreamQuery.ts`
 
 **plateform_front/src/hooks/demo/**
 
-- [ ] `plateform_front/src/hooks/demo/useDemoScript.ts`
+- [x] `plateform_front/src/hooks/demo/useDemoScript.ts`
 
 **plateform_front/src/hooks/deployment/**
 
-- [ ] `plateform_front/src/hooks/deployment/useGetEnv.ts`
+- [x] `plateform_front/src/hooks/deployment/useGetEnv.ts`
 
 **plateform_front/src/hooks/onboarding/**
 
-- [ ] `plateform_front/src/hooks/onboarding/useOnboarding.ts`
+- [x] `plateform_front/src/hooks/onboarding/useOnboarding.ts`
 
 **plateform_front/src/hooks/sidebar/**
 
-- [ ] `plateform_front/src/hooks/sidebar/useActiveSidebarItem.ts`
+- [x] `plateform_front/src/hooks/sidebar/useActiveSidebarItem.ts`
 
 **plateform_front/src/hooks/**
 
-- [ ] `plateform_front/src/hooks/useActiveSection.ts`
-- [ ] `plateform_front/src/hooks/useAppResponsive.ts`
-- [ ] `plateform_front/src/hooks/useAuthStepConfig.ts`
-- [ ] `plateform_front/src/hooks/useAuthentification.ts`
-- [ ] `plateform_front/src/hooks/useCommandPaletteKeyboard.ts`
-- [ ] `plateform_front/src/hooks/useCopyToClipboard.ts`
-- [ ] `plateform_front/src/hooks/useDownloadFile.ts`
-- [ ] `plateform_front/src/hooks/useDragDrop.ts`
-- [ ] `plateform_front/src/hooks/useDynamicPlaceholder.ts`
-- [ ] `plateform_front/src/hooks/useGroupedConversations.ts`
-- [ ] `plateform_front/src/hooks/useIncompleteNodesGuard.tsx`
-- [ ] `plateform_front/src/hooks/useIsDark.ts`
-- [ ] `plateform_front/src/hooks/useThemedToast.tsx`
-- [ ] `plateform_front/src/hooks/useUnsavedChangesBlocker.ts`
-- [ ] `plateform_front/src/hooks/useUploadDocuments.ts`
-- [ ] `plateform_front/src/hooks/useUserInfo.ts`
+- [x] `plateform_front/src/hooks/useActiveSection.ts`
+- [x] `plateform_front/src/hooks/useAppResponsive.ts`
+- [x] `plateform_front/src/hooks/useAuthStepConfig.ts`
+- [x] `plateform_front/src/hooks/useAuthentification.ts`
+- [x] `plateform_front/src/hooks/useCommandPaletteKeyboard.ts`
+- [x] `plateform_front/src/hooks/useCopyToClipboard.ts`
+- [x] `plateform_front/src/hooks/useDownloadFile.ts`
+- [x] `plateform_front/src/hooks/useDragDrop.ts`
+- [x] `plateform_front/src/hooks/useDynamicPlaceholder.ts`
+- [x] `plateform_front/src/hooks/useGroupedConversations.ts`
+- [x] `plateform_front/src/hooks/useIncompleteNodesGuard.tsx`
+- [x] `plateform_front/src/hooks/useIsDark.ts`
+- [x] `plateform_front/src/hooks/useThemedToast.tsx`
+- [x] `plateform_front/src/hooks/useUnsavedChangesBlocker.ts`
+- [x] `plateform_front/src/hooks/useUploadDocuments.ts`
+- [x] `plateform_front/src/hooks/useUserInfo.ts`
 
 **plateform_front/src/**
 
-- [ ] `plateform_front/src/index.css`
-- [ ] `plateform_front/src/index.tsx`
+- [x] `plateform_front/src/index.css`
+- [x] `plateform_front/src/index.tsx`
 
 **plateform_front/src/lib/**
 
-- [ ] `plateform_front/src/lib/mixpanel.ts`
-- [ ] `plateform_front/src/lib/utils.ts`
+- [x] `plateform_front/src/lib/mixpanel.ts`
+- [x] `plateform_front/src/lib/utils.ts`
 
 **plateform_front/src/pages/Agents/AccessControl/**
 
-- [ ] `plateform_front/src/pages/Agents/AccessControl/index.tsx`
+- [x] `plateform_front/src/pages/Agents/AccessControl/index.tsx`
 
 **plateform_front/src/pages/Agents/Analytics/**
 
-- [ ] `plateform_front/src/pages/Agents/Analytics/index.tsx`
+- [x] `plateform_front/src/pages/Agents/Analytics/index.tsx`
 
 **plateform_front/src/pages/Agents/Chat/**
 
-- [ ] `plateform_front/src/pages/Agents/Chat/index.tsx`
+- [x] `plateform_front/src/pages/Agents/Chat/index.tsx`
 
 **plateform_front/src/pages/Agents/Deployment/**
 
-- [ ] `plateform_front/src/pages/Agents/Deployment/AccessControl.tsx`
-- [ ] `plateform_front/src/pages/Agents/Deployment/DashboardTab.tsx`
-- [ ] `plateform_front/src/pages/Agents/Deployment/Settings.tsx`
-- [ ] `plateform_front/src/pages/Agents/Deployment/VersionsHistory.tsx`
-- [ ] `plateform_front/src/pages/Agents/Deployment/data.ts`
-- [ ] `plateform_front/src/pages/Agents/Deployment/index.tsx`
+- [x] `plateform_front/src/pages/Agents/Deployment/AccessControl.tsx`
+- [x] `plateform_front/src/pages/Agents/Deployment/DashboardTab.tsx`
+- [x] `plateform_front/src/pages/Agents/Deployment/Settings.tsx`
+- [x] `plateform_front/src/pages/Agents/Deployment/VersionsHistory.tsx`
+- [x] `plateform_front/src/pages/Agents/Deployment/data.ts`
+- [x] `plateform_front/src/pages/Agents/Deployment/index.tsx`
 
 **plateform_front/src/pages/Agents/Documents/**
 
-- [ ] `plateform_front/src/pages/Agents/Documents/index.tsx`
+- [x] `plateform_front/src/pages/Agents/Documents/index.tsx`
 
 **plateform_front/src/pages/Agents/Settings/**
 
-- [ ] `plateform_front/src/pages/Agents/Settings/index.tsx`
+- [x] `plateform_front/src/pages/Agents/Settings/index.tsx`
 
 **plateform_front/src/pages/Agents/Workflow/**
 
-- [ ] `plateform_front/src/pages/Agents/Workflow/CustomControls.tsx`
-- [ ] `plateform_front/src/pages/Agents/Workflow/MenuNodeCard.tsx`
-- [ ] `plateform_front/src/pages/Agents/Workflow/MenuNodeModal.tsx`
-- [ ] `plateform_front/src/pages/Agents/Workflow/NodeModal.tsx`
-- [ ] `plateform_front/src/pages/Agents/Workflow/index.tsx`
+- [x] `plateform_front/src/pages/Agents/Workflow/CustomControls.tsx`
+- [x] `plateform_front/src/pages/Agents/Workflow/MenuNodeCard.tsx`
+- [x] `plateform_front/src/pages/Agents/Workflow/MenuNodeModal.tsx`
+- [x] `plateform_front/src/pages/Agents/Workflow/NodeModal.tsx`
+- [x] `plateform_front/src/pages/Agents/Workflow/index.tsx`
 
 **plateform_front/src/pages/Agents/**
 
-- [ ] `plateform_front/src/pages/Agents/index.tsx`
+- [x] `plateform_front/src/pages/Agents/index.tsx`
 
 **plateform_front/src/pages/Assistant/**
 
-- [ ] `plateform_front/src/pages/Assistant/Assistant.tsx`
-- [ ] `plateform_front/src/pages/Assistant/AssistantHome.tsx`
-- [ ] `plateform_front/src/pages/Assistant/AssistantList.tsx`
+- [x] `plateform_front/src/pages/Assistant/Assistant.tsx`
+- [x] `plateform_front/src/pages/Assistant/AssistantHome.tsx`
+- [x] `plateform_front/src/pages/Assistant/AssistantList.tsx`
 
 **plateform_front/src/pages/Auth/Layout/**
 
-- [ ] `plateform_front/src/pages/Auth/Layout/AuthDesktopLayout.tsx`
-- [ ] `plateform_front/src/pages/Auth/Layout/AuthLayout.tsx`
-- [ ] `plateform_front/src/pages/Auth/Layout/AuthLayoutContext.tsx`
-- [ ] `plateform_front/src/pages/Auth/Layout/AuthMobileLayout.tsx`
+- [x] `plateform_front/src/pages/Auth/Layout/AuthDesktopLayout.tsx`
+- [x] `plateform_front/src/pages/Auth/Layout/AuthLayout.tsx`
+- [x] `plateform_front/src/pages/Auth/Layout/AuthLayoutContext.tsx`
+- [x] `plateform_front/src/pages/Auth/Layout/AuthMobileLayout.tsx`
 
 **plateform_front/src/pages/Auth/Login/**
 
-- [ ] `plateform_front/src/pages/Auth/Login/EmailForm.tsx`
-- [ ] `plateform_front/src/pages/Auth/Login/LoginForm.tsx`
-- [ ] `plateform_front/src/pages/Auth/Login/PasswordForm.tsx`
-- [ ] `plateform_front/src/pages/Auth/Login/index.tsx`
+- [x] `plateform_front/src/pages/Auth/Login/EmailForm.tsx`
+- [x] `plateform_front/src/pages/Auth/Login/LoginForm.tsx`
+- [x] `plateform_front/src/pages/Auth/Login/PasswordForm.tsx`
+- [x] `plateform_front/src/pages/Auth/Login/index.tsx`
 
 **plateform_front/src/pages/Auth/Password/**
 
-- [ ] `plateform_front/src/pages/Auth/Password/ApplyResetPassword.tsx`
-- [ ] `plateform_front/src/pages/Auth/Password/ResetPassword.tsx`
-- [ ] `plateform_front/src/pages/Auth/Password/index.tsx`
+- [x] `plateform_front/src/pages/Auth/Password/ApplyResetPassword.tsx`
+- [x] `plateform_front/src/pages/Auth/Password/ResetPassword.tsx`
+- [x] `plateform_front/src/pages/Auth/Password/index.tsx`
 
 **plateform_front/src/pages/Auth/Register/**
 
-- [ ] `plateform_front/src/pages/Auth/Register/CreateAccountForm.tsx`
-- [ ] `plateform_front/src/pages/Auth/Register/Register.tsx`
-- [ ] `plateform_front/src/pages/Auth/Register/index.tsx`
+- [x] `plateform_front/src/pages/Auth/Register/CreateAccountForm.tsx`
+- [x] `plateform_front/src/pages/Auth/Register/Register.tsx`
+- [x] `plateform_front/src/pages/Auth/Register/index.tsx`
 
 **plateform_front/src/pages/Auth/Validate/**
 
-- [ ] `plateform_front/src/pages/Auth/Validate/ValidateAccountForm.tsx`
-- [ ] `plateform_front/src/pages/Auth/Validate/index.tsx`
+- [x] `plateform_front/src/pages/Auth/Validate/ValidateAccountForm.tsx`
+- [x] `plateform_front/src/pages/Auth/Validate/index.tsx`
 
 **plateform_front/src/pages/Billing/**
 
-- [ ] `plateform_front/src/pages/Billing/index.tsx`
+- [x] `plateform_front/src/pages/Billing/index.tsx`
 
 **plateform_front/src/pages/Dashboard/**
 
-- [ ] `plateform_front/src/pages/Dashboard/DashboardHeader.tsx`
-- [ ] `plateform_front/src/pages/Dashboard/data.ts`
-- [ ] `plateform_front/src/pages/Dashboard/index.tsx`
+- [x] `plateform_front/src/pages/Dashboard/DashboardHeader.tsx`
+- [x] `plateform_front/src/pages/Dashboard/data.ts`
+- [x] `plateform_front/src/pages/Dashboard/index.tsx`
 
 **plateform_front/src/pages/Legal/**
 
-- [ ] `plateform_front/src/pages/Legal/ContactPage.tsx`
-- [ ] `plateform_front/src/pages/Legal/NoticesPage.tsx`
-- [ ] `plateform_front/src/pages/Legal/PrivacyPage.tsx`
-- [ ] `plateform_front/src/pages/Legal/TermsPage.tsx`
+- [x] `plateform_front/src/pages/Legal/ContactPage.tsx`
+- [x] `plateform_front/src/pages/Legal/NoticesPage.tsx`
+- [x] `plateform_front/src/pages/Legal/PrivacyPage.tsx`
+- [x] `plateform_front/src/pages/Legal/TermsPage.tsx`
 
 **plateform_front/src/pages/Legal/data/**
 
-- [ ] `plateform_front/src/pages/Legal/data/legalNav.ts`
-- [ ] `plateform_front/src/pages/Legal/data/notices.ts`
-- [ ] `plateform_front/src/pages/Legal/data/privacy.ts`
-- [ ] `plateform_front/src/pages/Legal/data/terms.ts`
-- [ ] `plateform_front/src/pages/Legal/data/types.ts`
+- [x] `plateform_front/src/pages/Legal/data/legalNav.ts`
+- [x] `plateform_front/src/pages/Legal/data/notices.ts`
+- [x] `plateform_front/src/pages/Legal/data/privacy.ts`
+- [x] `plateform_front/src/pages/Legal/data/terms.ts`
+- [x] `plateform_front/src/pages/Legal/data/types.ts`
 
 **plateform_front/src/pages/Legal/**
 
-- [ ] `plateform_front/src/pages/Legal/index.tsx`
+- [x] `plateform_front/src/pages/Legal/index.tsx`
 
 **plateform_front/src/pages/NotFound/**
 
-- [ ] `plateform_front/src/pages/NotFound/index.tsx`
+- [x] `plateform_front/src/pages/NotFound/index.tsx`
 
 **plateform_front/src/pages/Onboarding/**
 
-- [ ] `plateform_front/src/pages/Onboarding/OnBoarding.tsx`
-- [ ] `plateform_front/src/pages/Onboarding/OnBoardingProvider.tsx`
-- [ ] `plateform_front/src/pages/Onboarding/OnboardingSessionError.tsx`
-- [ ] `plateform_front/src/pages/Onboarding/onboardingAnimations.css`
+- [x] `plateform_front/src/pages/Onboarding/OnBoarding.tsx`
+- [x] `plateform_front/src/pages/Onboarding/OnBoardingProvider.tsx`
+- [x] `plateform_front/src/pages/Onboarding/OnboardingSessionError.tsx`
+- [x] `plateform_front/src/pages/Onboarding/onboardingAnimations.css`
 
 **plateform_front/src/pages/Onboarding/steps/**
 
-- [ ] `plateform_front/src/pages/Onboarding/steps/CompareIntelligenceStep.tsx`
-- [ ] `plateform_front/src/pages/Onboarding/steps/ImproveAssistantStep.tsx`
-- [ ] `plateform_front/src/pages/Onboarding/steps/StepConfig.ts`
-- [ ] `plateform_front/src/pages/Onboarding/steps/TestAssistantStep.tsx`
-- [ ] `plateform_front/src/pages/Onboarding/steps/compareIntelligenceCards.ts`
+- [x] `plateform_front/src/pages/Onboarding/steps/CompareIntelligenceStep.tsx`
+- [x] `plateform_front/src/pages/Onboarding/steps/ImproveAssistantStep.tsx`
+- [x] `plateform_front/src/pages/Onboarding/steps/StepConfig.ts`
+- [x] `plateform_front/src/pages/Onboarding/steps/TestAssistantStep.tsx`
+- [x] `plateform_front/src/pages/Onboarding/steps/compareIntelligenceCards.ts`
 
 **plateform_front/src/pages/Onboarding/**
 
-- [ ] `plateform_front/src/pages/Onboarding/useOnboardingState.ts`
+- [x] `plateform_front/src/pages/Onboarding/useOnboardingState.ts`
 
 **plateform_front/src/pages/Profile/**
 
-- [ ] `plateform_front/src/pages/Profile/ProfileHero.tsx`
-- [ ] `plateform_front/src/pages/Profile/ProfileSidebar.tsx`
-- [ ] `plateform_front/src/pages/Profile/index.tsx`
+- [x] `plateform_front/src/pages/Profile/ProfileHero.tsx`
+- [x] `plateform_front/src/pages/Profile/ProfileSidebar.tsx`
+- [x] `plateform_front/src/pages/Profile/index.tsx`
 
 **plateform_front/src/pages/Profile/sections/**
 
-- [ ] `plateform_front/src/pages/Profile/sections/AppearanceSection.tsx`
-- [ ] `plateform_front/src/pages/Profile/sections/PersonalInfoSection.tsx`
-- [ ] `plateform_front/src/pages/Profile/sections/ProfileSelectField.tsx`
-- [ ] `plateform_front/src/pages/Profile/sections/SecuritySection.tsx`
+- [x] `plateform_front/src/pages/Profile/sections/AppearanceSection.tsx`
+- [x] `plateform_front/src/pages/Profile/sections/PersonalInfoSection.tsx`
+- [x] `plateform_front/src/pages/Profile/sections/ProfileSelectField.tsx`
+- [x] `plateform_front/src/pages/Profile/sections/SecuritySection.tsx`
 
 **plateform_front/src/**
 
-- [ ] `plateform_front/src/react-app-env.d.ts`
-- [ ] `plateform_front/src/reportWebVitals.ts`
+- [x] `plateform_front/src/react-app-env.d.ts`
+- [x] `plateform_front/src/reportWebVitals.ts`
 
 **plateform_front/src/services/agent/**
 
-- [ ] `plateform_front/src/services/agent/agent.ts`
-- [ ] `plateform_front/src/services/agent/agentMembers.ts`
+- [x] `plateform_front/src/services/agent/agent.ts`
+- [x] `plateform_front/src/services/agent/agentMembers.ts`
 
 **plateform_front/src/services/agentRuntime/**
 
-- [ ] `plateform_front/src/services/agentRuntime/agentRuntime.ts`
+- [x] `plateform_front/src/services/agentRuntime/agentRuntime.ts`
 
 **plateform_front/src/services/analytics/**
 
-- [ ] `plateform_front/src/services/analytics/analytics.ts`
+- [x] `plateform_front/src/services/analytics/analytics.ts`
 
 **plateform_front/src/services/**
 
-- [ ] `plateform_front/src/services/api.ts`
+- [x] `plateform_front/src/services/api.ts`
 
 **plateform_front/src/services/auth/**
 
-- [ ] `plateform_front/src/services/auth/auth.ts`
+- [x] `plateform_front/src/services/auth/auth.ts`
 
 **plateform_front/src/services/billing/**
 
-- [ ] `plateform_front/src/services/billing/billing.ts`
+- [x] `plateform_front/src/services/billing/billing.ts`
 
 **plateform_front/src/services/chat/**
 
-- [ ] `plateform_front/src/services/chat/chat.ts`
+- [x] `plateform_front/src/services/chat/chat.ts`
 
 **plateform_front/src/services/credit/**
 
-- [ ] `plateform_front/src/services/credit/credit.ts`
+- [x] `plateform_front/src/services/credit/credit.ts`
 
 **plateform_front/src/services/deployment/**
 
-- [ ] `plateform_front/src/services/deployment/deployment.ts`
+- [x] `plateform_front/src/services/deployment/deployment.ts`
 
 **plateform_front/src/services/document/**
 
-- [ ] `plateform_front/src/services/document/document.ts`
+- [x] `plateform_front/src/services/document/document.ts`
 
 **plateform_front/src/services/models/**
 
-- [ ] `plateform_front/src/services/models/models.ts`
+- [x] `plateform_front/src/services/models/models.ts`
 
 **plateform_front/src/services/onboarding/**
 
-- [ ] `plateform_front/src/services/onboarding/onboarding.ts`
+- [x] `plateform_front/src/services/onboarding/onboarding.ts`
 
 **plateform_front/src/services/tags/**
 
-- [ ] `plateform_front/src/services/tags/tag.ts`
+- [x] `plateform_front/src/services/tags/tag.ts`
 
 **plateform_front/src/services/workflow/**
 
-- [ ] `plateform_front/src/services/workflow/workflow.ts`
+- [x] `plateform_front/src/services/workflow/workflow.ts`
 
 **plateform_front/src/services/workspace/**
 
-- [ ] `plateform_front/src/services/workspace/workspace.ts`
+- [x] `plateform_front/src/services/workspace/workspace.ts`
 
 **plateform_front/src/**
 
-- [ ] `plateform_front/src/setupTests.ts`
+- [x] `plateform_front/src/setupTests.ts`
 
 **plateform_front/src/store/**
 
-- [ ] `plateform_front/src/store/index.ts`
-- [ ] `plateform_front/src/store/navigationSlice.ts`
-- [ ] `plateform_front/src/store/reduxProvider.tsx`
+- [x] `plateform_front/src/store/index.ts`
+- [x] `plateform_front/src/store/navigationSlice.ts`
+- [x] `plateform_front/src/store/reduxProvider.tsx`
 
 **plateform_front/src/**
 
-- [ ] `plateform_front/src/tailwind.src.css`
+- [x] `plateform_front/src/tailwind.src.css`
 
 **plateform_front/src/themeNew/components/**
 
-- [ ] `plateform_front/src/themeNew/components/accordion.ts`
-- [ ] `plateform_front/src/themeNew/components/badge.ts`
-- [ ] `plateform_front/src/themeNew/components/button.ts`
-- [ ] `plateform_front/src/themeNew/components/card.ts`
-- [ ] `plateform_front/src/themeNew/components/checkbox.ts`
-- [ ] `plateform_front/src/themeNew/components/divider.ts`
-- [ ] `plateform_front/src/themeNew/components/drawer.ts`
-- [ ] `plateform_front/src/themeNew/components/form-error-message.ts`
-- [ ] `plateform_front/src/themeNew/components/form-label.ts`
-- [ ] `plateform_front/src/themeNew/components/form.ts`
-- [ ] `plateform_front/src/themeNew/components/input.ts`
-- [ ] `plateform_front/src/themeNew/components/menu.ts`
-- [ ] `plateform_front/src/themeNew/components/modal.ts`
-- [ ] `plateform_front/src/themeNew/components/pin-input.ts`
-- [ ] `plateform_front/src/themeNew/components/popover.ts`
-- [ ] `plateform_front/src/themeNew/components/progress.ts`
-- [ ] `plateform_front/src/themeNew/components/radio.ts`
-- [ ] `plateform_front/src/themeNew/components/skeleton.ts`
-- [ ] `plateform_front/src/themeNew/components/slider.ts`
-- [ ] `plateform_front/src/themeNew/components/stepper.ts`
-- [ ] `plateform_front/src/themeNew/components/switch.ts`
-- [ ] `plateform_front/src/themeNew/components/table.ts`
-- [ ] `plateform_front/src/themeNew/components/tabs.ts`
-- [ ] `plateform_front/src/themeNew/components/textarea.ts`
+- [x] `plateform_front/src/themeNew/components/accordion.ts`
+- [x] `plateform_front/src/themeNew/components/badge.ts`
+- [x] `plateform_front/src/themeNew/components/button.ts`
+- [x] `plateform_front/src/themeNew/components/card.ts`
+- [x] `plateform_front/src/themeNew/components/checkbox.ts`
+- [x] `plateform_front/src/themeNew/components/divider.ts`
+- [x] `plateform_front/src/themeNew/components/drawer.ts`
+- [x] `plateform_front/src/themeNew/components/form-error-message.ts`
+- [x] `plateform_front/src/themeNew/components/form-label.ts`
+- [x] `plateform_front/src/themeNew/components/form.ts`
+- [x] `plateform_front/src/themeNew/components/input.ts`
+- [x] `plateform_front/src/themeNew/components/menu.ts`
+- [x] `plateform_front/src/themeNew/components/modal.ts`
+- [x] `plateform_front/src/themeNew/components/pin-input.ts`
+- [x] `plateform_front/src/themeNew/components/popover.ts`
+- [x] `plateform_front/src/themeNew/components/progress.ts`
+- [x] `plateform_front/src/themeNew/components/radio.ts`
+- [x] `plateform_front/src/themeNew/components/skeleton.ts`
+- [x] `plateform_front/src/themeNew/components/slider.ts`
+- [x] `plateform_front/src/themeNew/components/stepper.ts`
+- [x] `plateform_front/src/themeNew/components/switch.ts`
+- [x] `plateform_front/src/themeNew/components/table.ts`
+- [x] `plateform_front/src/themeNew/components/tabs.ts`
+- [x] `plateform_front/src/themeNew/components/textarea.ts`
 
 **plateform_front/src/themeNew/foundations/**
 
-- [ ] `plateform_front/src/themeNew/foundations/blur.ts`
-- [ ] `plateform_front/src/themeNew/foundations/borderRadius.ts`
-- [ ] `plateform_front/src/themeNew/foundations/borderWidth.ts`
-- [ ] `plateform_front/src/themeNew/foundations/colorTokens.ts`
-- [ ] `plateform_front/src/themeNew/foundations/colors.ts`
-- [ ] `plateform_front/src/themeNew/foundations/fonts.ts`
-- [ ] `plateform_front/src/themeNew/foundations/heading.ts`
-- [ ] `plateform_front/src/themeNew/foundations/shadow.ts`
-- [ ] `plateform_front/src/themeNew/foundations/spacing.ts`
-- [ ] `plateform_front/src/themeNew/foundations/text.ts`
-- [ ] `plateform_front/src/themeNew/foundations/themeConfig.ts`
-- [ ] `plateform_front/src/themeNew/foundations/typography.ts`
+- [x] `plateform_front/src/themeNew/foundations/blur.ts`
+- [x] `plateform_front/src/themeNew/foundations/borderRadius.ts`
+- [x] `plateform_front/src/themeNew/foundations/borderWidth.ts`
+- [x] `plateform_front/src/themeNew/foundations/colorTokens.ts`
+- [x] `plateform_front/src/themeNew/foundations/colors.ts`
+- [x] `plateform_front/src/themeNew/foundations/fonts.ts`
+- [x] `plateform_front/src/themeNew/foundations/heading.ts`
+- [x] `plateform_front/src/themeNew/foundations/shadow.ts`
+- [x] `plateform_front/src/themeNew/foundations/spacing.ts`
+- [x] `plateform_front/src/themeNew/foundations/text.ts`
+- [x] `plateform_front/src/themeNew/foundations/themeConfig.ts`
+- [x] `plateform_front/src/themeNew/foundations/typography.ts`
 
 **plateform_front/src/themeNew/**
 
-- [ ] `plateform_front/src/themeNew/index.scss`
-- [ ] `plateform_front/src/themeNew/index.ts`
-- [ ] `plateform_front/src/themeNew/scrollbar.ts`
+- [x] `plateform_front/src/themeNew/index.scss`
+- [x] `plateform_front/src/themeNew/index.ts`
+- [x] `plateform_front/src/themeNew/scrollbar.ts`
 
 **plateform_front/src/types/agent/**
 
-- [ ] `plateform_front/src/types/agent/agent.ts`
+- [x] `plateform_front/src/types/agent/agent.ts`
 
 **plateform_front/src/types/analytics/**
 
-- [ ] `plateform_front/src/types/analytics/analytics.ts`
+- [x] `plateform_front/src/types/analytics/analytics.ts`
 
 **plateform_front/src/types/assistant/**
 
-- [ ] `plateform_front/src/types/assistant/assistant.ts`
+- [x] `plateform_front/src/types/assistant/assistant.ts`
 
 **plateform_front/src/types/chat/**
 
-- [ ] `plateform_front/src/types/chat/chat.ts`
+- [x] `plateform_front/src/types/chat/chat.ts`
 
 **plateform_front/src/types/credit/**
 
-- [ ] `plateform_front/src/types/credit/credit.ts`
+- [x] `plateform_front/src/types/credit/credit.ts`
 
 **plateform_front/src/types/deployment/**
 
-- [ ] `plateform_front/src/types/deployment/deployment.ts`
+- [x] `plateform_front/src/types/deployment/deployment.ts`
 
 **plateform_front/src/types/document/**
 
-- [ ] `plateform_front/src/types/document/document.ts`
+- [x] `plateform_front/src/types/document/document.ts`
 
 **plateform_front/src/types/models/**
 
-- [ ] `plateform_front/src/types/models/models.ts`
+- [x] `plateform_front/src/types/models/models.ts`
 
 **plateform_front/src/types/onboarding/**
 
-- [ ] `plateform_front/src/types/onboarding/onboarding.ts`
+- [x] `plateform_front/src/types/onboarding/onboarding.ts`
 
 **plateform_front/src/types/**
 
-- [ ] `plateform_front/src/types/user.ts`
-- [ ] `plateform_front/src/types/utils.ts`
+- [x] `plateform_front/src/types/user.ts`
+- [x] `plateform_front/src/types/utils.ts`
 
 **plateform_front/src/types/workflow/**
 
-- [ ] `plateform_front/src/types/workflow/workflow.ts`
+- [x] `plateform_front/src/types/workflow/workflow.ts`
 
 **plateform_front/src/types/**
 
-- [ ] `plateform_front/src/types/workspace.ts`
+- [x] `plateform_front/src/types/workspace.ts`
 
 **plateform_front/src/utils/**
 
-- [ ] `plateform_front/src/utils/agentAvatar.ts`
+- [x] `plateform_front/src/utils/agentAvatar.ts`
 
 **plateform_front/src/utils/analytics/**
 
-- [ ] `plateform_front/src/utils/analytics/costUtils.ts`
-- [ ] `plateform_front/src/utils/analytics/dateUtils.ts`
-- [ ] `plateform_front/src/utils/analytics/heatmapUtils.ts`
+- [x] `plateform_front/src/utils/analytics/costUtils.ts`
+- [x] `plateform_front/src/utils/analytics/dateUtils.ts`
+- [x] `plateform_front/src/utils/analytics/heatmapUtils.ts`
 
 **plateform_front/src/utils/**
 
-- [ ] `plateform_front/src/utils/apiError.ts`
-- [ ] `plateform_front/src/utils/date.ts`
-- [ ] `plateform_front/src/utils/documentFormatters.ts`
-- [ ] `plateform_front/src/utils/isNotNone.ts`
+- [x] `plateform_front/src/utils/apiError.ts`
+- [x] `plateform_front/src/utils/date.ts`
+- [x] `plateform_front/src/utils/documentFormatters.ts`
+- [x] `plateform_front/src/utils/isNotNone.ts`
 
 **plateform_front/src/utils/models/**
 
-- [ ] `plateform_front/src/utils/models/modelFormatters.ts`
+- [x] `plateform_front/src/utils/models/modelFormatters.ts`
 
 **plateform_front/src/utils/**
 
-- [ ] `plateform_front/src/utils/standaloneToast.ts`
-- [ ] `plateform_front/src/utils/validateEmail.ts`
+- [x] `plateform_front/src/utils/standaloneToast.ts`
+- [x] `plateform_front/src/utils/validateEmail.ts`
 
 **plateform_front/**
 
-- [ ] `plateform_front/tsconfig.json`
-- [ ] `plateform_front/vercel.json`
+- [x] `plateform_front/tsconfig.json`
+- [x] `plateform_front/vercel.json`
 
 ### Périmètre `packages/workflow` (61 fichiers)
 

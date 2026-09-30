@@ -122,7 +122,7 @@ export class RagEngineService {
                 }
             };
 
-            stream.on('data', (chunk: Buffer) => handleEvents(lineBuffer.push(chunk.toString('utf-8'))));
+            stream.on('data', (chunk: Buffer) => handleEvents(lineBuffer.push(chunk)));
 
             stream.on('end', () => {
                 handleEvents(lineBuffer.flush());

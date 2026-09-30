@@ -6,6 +6,17 @@ function ndjson(events: Array<{ type: string; data: unknown }>): Buffer {
 }
 
 describe('RagStreamAccumulator', () => {
+    it('reassembles a multi-byte UTF-8 character split across two network chunks', () => {
+        const acc = new RagStreamAccumulator();
+        const payload = ndjson([{ type: 'token', data: 'Congés payés' }]);
+        const splitAt = payload.indexOf(Buffer.from('é', 'utf-8')) + 1; // between the two bytes of "é"
+
+        const events = [...acc.push(payload.subarray(0, splitAt)), ...acc.push(payload.subarray(splitAt))];
+
+        expect(events).toEqual([{ type: 'chunk', text: 'Congés payés' }]);
+        expect(acc.buildOutcome().fullText).toBe('Congés payés');
+    });
+
     it('accumulates token text and emits a chunk event for each token', () => {
         const acc = new RagStreamAccumulator();
 

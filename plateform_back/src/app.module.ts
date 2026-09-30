@@ -80,7 +80,6 @@ import { SentryModule } from '@sentry/nestjs/setup';
         AgentRuntimeModule,
         AgentAnalyticsModule,
         CreditModule,
-        DocumentModule,
         DeploymentModule,
         OnboardingModule,
         ConversationModule,

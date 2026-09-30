@@ -79,13 +79,6 @@ export class AgentAnalyticsRepository {
         return this._getCostBreakdown(agentId, since, 'costByType');
     }
 
-    /**
-     * Sums a JSON cost-breakdown column (e.g. { "gpt-4o": 0.02, "mistral": 0.01 } per row) across
-     * every matching query log. Done in JS rather than SQL's jsonb_each_text: the row set is
-     * already bounded by the agentId+createdAt index, so unnesting a small JSON object per row
-     * in JS is cheap, and it keeps this one query on the ORM like the rest of the codebase.
-     */
-
     async getDocumentStatusCounts(agentId: string): Promise<DocumentStatusCounts> {
         const rows = await this.prisma.document.groupBy({
             by: ['status'],
@@ -111,6 +104,12 @@ export class AgentAnalyticsRepository {
         return { data, total };
     }
 
+    /**
+     * Sums a JSON cost-breakdown column (e.g. { "gpt-4o": 0.02, "mistral": 0.01 } per row) across
+     * every matching query log. Done in JS rather than SQL's jsonb_each_text: the row set is
+     * already bounded by the agentId+createdAt index, so unnesting a small JSON object per row
+     * in JS is cheap, and it keeps this one query on the ORM like the rest of the codebase.
+     */
     private async _getCostBreakdown(
         agentId: string,
         since: Date,

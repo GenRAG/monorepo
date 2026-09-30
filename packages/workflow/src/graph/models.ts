@@ -1,5 +1,7 @@
-export type { ModelOption } from '../../types/model-option';
-import type { ModelOption } from '../../types/model-option';
+import type { ModelOption } from '../types/model-option';
+
+// Default model catalogs shown by the MODEL setting nodes. Static: plateform_front also loads the models
+// actually served by the RAG API (services/models); a consumer can override them with its own registry.
 
 export const LLMS: ModelOption[] = [
     {

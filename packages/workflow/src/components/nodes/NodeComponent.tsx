@@ -1,8 +1,8 @@
 import { Handle, Position } from "@xyflow/react";
 import { memo } from "react";
 import type { AppNodeData, WorkflowNodeProps } from "../../types/app-node";
-import { getTaskDef } from "../../graph/task-utils";
-import { Task, TaskParam } from "../../types/task";
+import { useTaskRegistry } from "../../graph/task/registry";
+import { TaskParam } from "../../types/task";
 import {
     Box,
     Text,
@@ -18,7 +18,7 @@ import { TrashIcon } from "lucide-react";
 
 const NodeComponent = memo((props: WorkflowNodeProps) => {
     const nodeData = props.data as AppNodeData;
-    const task = getTaskDef(nodeData.type) as Task | undefined;
+    const task = useTaskRegistry()[nodeData.type];
     const isMobile = useAppResponsive({ base: true, lg: false });
 
     const borderColor = useColorModeValue("green.200", "grey.700");

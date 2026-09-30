@@ -8,9 +8,11 @@ import {
 import {
     CreateFlowNode,
     createSettingPlaceholders,
+    linkNodes,
 } from "../graph/create-flow-node";
 import { TaskType, TaskParamType, type WorkflowRegistry, TaskChainOutput } from "../types/task";
-import { EdgeType } from "../types/edge";
+import { EdgeType, HandleId } from "../types/edge";
+import { TaskRegistry } from "../graph/task/registry";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 import { getConfigInputs } from "../graph/task-utils";
@@ -27,7 +29,7 @@ export const useWorkflowNodes = (
     options: UseWorkflowNodesOptions = {},
 ) => {
     const layout: LayoutStrategy = options.layout ?? DEFAULT_LAYOUT;
-    const registry = options.registry;
+    const registry = options.registry ?? TaskRegistry;
     const customInitialNodes = options.initialNodes;
     const customInitialEdges = options.initialEdges;
     const readonlyMode: boolean = options.readonly ?? false;
@@ -102,18 +104,7 @@ export const useWorkflowNodes = (
                     (e) => !idsToRemove.has(e.source) && !idsToRemove.has(e.target),
                 );
                 if (!incomingEdge || !outgoingEdge) return remaining;
-                return [
-                    ...remaining,
-                    {
-                        id: `${incomingEdge.source}-to-${outgoingEdge.target}`,
-                        source: incomingEdge.source,
-                        target: outgoingEdge.target,
-                        sourceHandle: "main-source",
-                        targetHandle: "main-target",
-                        animated: true,
-                        type: EdgeType.Main,
-                    },
-                ];
+                return [...remaining, linkNodes(incomingEdge.source, outgoingEdge.target)];
             });
         },
         [getEdges, setNodes, setEdges, readonlyMode],
@@ -121,7 +112,7 @@ export const useWorkflowNodes = (
 
     const handleAddChainNode = useCallback(
         (nodeType: TaskType) => {
-            if (readonlyMode || !registry) return;
+            if (readonlyMode) return;
 
             const nodes = nodesRef.current;
             const edges = edgesRef.current;
@@ -144,7 +135,7 @@ export const useWorkflowNodes = (
             const outgoingEdge = edges.find(
                 (e) =>
                     e.source === parentNode.id &&
-                    e.sourceHandle === "main-source",
+                    e.sourceHandle === HandleId.MainSource,
             );
 
             const nextNode = outgoingEdge
@@ -153,31 +144,12 @@ export const useWorkflowNodes = (
 
             const newNode = CreateFlowNode(nodeType, layout.getInitialPosition(), outputDef.optional);
 
-            const cfgInputs = getConfigInputs(newNode.data.type);
+            const cfgInputs = getConfigInputs(newNode.data.type, registry);
             const { nodes: settingNodes, edges: settingEdges } =
                 createSettingPlaceholders(newNode, cfgInputs, layout);
 
-            const incomingEdge = {
-                id: `${parentNode.id}-chain-to-${newNode.id}`,
-                source: parentNode.id,
-                target: newNode.id,
-                sourceHandle: "main-source",
-                targetHandle: "main-target",
-                animated: true,
-                type: EdgeType.Main,
-            };
-
-            const newOutgoingEdge = nextNode
-                ? {
-                    id: `${newNode.id}-chain-to-${nextNode.id}`,
-                    source: newNode.id,
-                    target: nextNode.id,
-                    sourceHandle: "main-source",
-                    targetHandle: "main-target",
-                    animated: true,
-                    type: EdgeType.Main,
-                }
-                : null;
+            const incomingEdge = linkNodes(parentNode.id, newNode.id);
+            const newOutgoingEdge = nextNode ? linkNodes(newNode.id, nextNode.id) : null;
 
             const allNewEdges: Edge[] = [
                 ...edges.filter(e => e.id !== outgoingEdge?.id),

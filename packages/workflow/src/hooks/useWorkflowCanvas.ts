@@ -4,6 +4,7 @@ import { useFlowTypes } from "./useFlowTypes";
 import { UseWorkflowNodesOptions } from "./useWorkflowNodes";
 import { type LayoutStrategy } from "../layout";
 import type { AppNode, NodeComponentType } from "../types/app-node";
+import type { WorkflowRegistry } from "../types/task";
 import { TaskRegistry } from "../graph/task/registry";
 
 export interface UseWorkflowCanvasOptions {
@@ -11,6 +12,8 @@ export interface UseWorkflowCanvasOptions {
     initialEdges?: Edge[];
     readonly?: boolean;
     layout?: LayoutStrategy;
+    /** Tasks available in the builder (default: TaskRegistry). */
+    registry?: WorkflowRegistry;
 
     nodeComponent?: NodeComponentType;
 
@@ -31,6 +34,7 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         initialEdges,
         readonly,
         layout,
+        registry = TaskRegistry,
     } = options;
 
     const workflowNodesOptions: UseWorkflowNodesOptions = {
@@ -38,7 +42,7 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         initialEdges,
         readonly,
         layout,
-        registry: TaskRegistry,
+        registry,
     };
 
     const { edgeTypes, nodeTypes, workflow } = useFlowTypes({ onEdgeClick, onNodeClick, onInstructionSave, onMutation, nodeComponent, workflowNodesOptions });

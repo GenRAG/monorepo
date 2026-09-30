@@ -9,6 +9,7 @@ import {
     useWorkflowCanvas,
     type UseWorkflowCanvasOptions,
 } from '../hooks/useWorkflowCanvas';
+import { TaskRegistry, TaskRegistryProvider } from '../graph/task/registry';
 
 export interface WorkflowCanvasProps extends UseWorkflowCanvasOptions {
     // ReactFlow visual config
@@ -85,6 +86,8 @@ const WorkflowCanvasInner = ({
  */
 export const WorkflowCanvas = (props: WorkflowCanvasProps) => (
     <ReactFlowProvider>
-        <WorkflowCanvasInner {...props} />
+        <TaskRegistryProvider value={props.registry ?? TaskRegistry}>
+            <WorkflowCanvasInner {...props} />
+        </TaskRegistryProvider>
     </ReactFlowProvider>
 );

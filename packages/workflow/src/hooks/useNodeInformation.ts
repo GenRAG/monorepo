@@ -1,13 +1,14 @@
 import { useReactFlow } from "@xyflow/react";
 import { AppNodeData } from "../types/app-node";
-import { TaskRegistry } from "../graph/task/registry";
+import { useTaskRegistry } from "../graph/task/registry";
 
 const useNodeInformation = (selectedNodeId: string | null) => {
     const { getNode } = useReactFlow();
+    const registry = useTaskRegistry();
 
     const selectedNode = selectedNodeId ? getNode(selectedNodeId) : null;
     const nodeData = selectedNode?.data as AppNodeData;
-    const task = nodeData ? TaskRegistry[nodeData.type] : null;
+    const task = nodeData ? registry[nodeData.type] : null;
 
     return {
         task,

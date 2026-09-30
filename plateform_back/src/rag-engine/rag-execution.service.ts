@@ -1,11 +1,22 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import type { Pipeline } from './pipeline.schema';
 import FormData from 'form-data';
 import type { IncomingMessage } from 'http';
 import { EventType, NdjsonLineBuffer, RagCostSummary, RagSources } from './ndjson-line-buffer';
+
+/**
+ * Model ids are provider slugs ("openai/gpt-4o", "meta-llama/llama-3.1-8b-instruct:free"). Express has already
+ * percent-decoded the route param, so anything that could change the target of the outgoing request (query,
+ * fragment, re-encoded chars, dot segments, empty segments) is rejected before it is interpolated in a URL.
+ */
+function isSafeModelId(modelId: string): boolean {
+    // Printable ASCII only (no spaces/control chars), minus the characters that alter a URL.
+    if (/[^!-~]|[?#%\\]/.test(modelId)) return false;
+    return modelId.split('/').every((segment) => segment !== '' && segment !== '.' && segment !== '..');
+}
 
 enum JobStatus {
     COMPLETED = 'completed',
@@ -210,6 +221,8 @@ export class RagEngineService {
     }
 
     async getModelInfo(modelId: string): Promise<unknown> {
+        if (!isSafeModelId(modelId)) throw new BadRequestException('Invalid model id');
+
         const response = await firstValueFrom(
             this.httpService.get(`${this.ragEngineUrl}/models/${modelId}/info`, {
                 headers: { 'X-API-Key': this.apiKey },

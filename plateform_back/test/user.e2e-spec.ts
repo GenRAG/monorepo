@@ -35,6 +35,33 @@ describe('Users (e2e)', () => {
         });
     });
 
+    describe('PATCH /users/me', () => {
+        it('should normalize a changed email so the user can still log in with it', async () => {
+            const user = { email: 'casechange@test.com', password: 'Password123!', name: 'Case' };
+            const userCookie = await registerAndLogin(app, user);
+
+            const res = await request(app.getHttpServer())
+                .patch('/users/me')
+                .set('Cookie', userCookie)
+                .send({ email: 'CaseChanged@Test.com' })
+                .expect(200);
+            expect(res.body.email).toBe('casechanged@test.com');
+
+            await request(app.getHttpServer())
+                .post('/auth/login')
+                .send({ email: 'CaseChanged@Test.com', password: user.password })
+                .expect(201);
+        });
+
+        it('should return 409 when the email is already used by another account', async () => {
+            await request(app.getHttpServer())
+                .patch('/users/me')
+                .set('Cookie', cookie)
+                .send({ email: 'casechanged@test.com' })
+                .expect(409);
+        });
+    });
+
     describe('DELETE /users/me', () => {
         it('should delete current user and return 204', async () => {
             const tempUser = {

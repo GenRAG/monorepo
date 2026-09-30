@@ -19,7 +19,7 @@ export class UsersController {
 
     @Patch('me')
     async updateMe(@CurrentUser(CurrentUserPipe) user: UserSafe, @Body() dto: UpdateProfileRequest): Promise<UserSafe> {
-        return this.usersService.update({ where: { id: user.id }, data: dto });
+        return this.usersService.updateProfile(user.id, dto);
     }
 
     @Patch('me/password')

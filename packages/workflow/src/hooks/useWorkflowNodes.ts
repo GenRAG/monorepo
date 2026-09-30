@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import {
     useNodesState,
     useEdgesState,
@@ -13,12 +13,9 @@ import { TaskType, TaskParamType, type WorkflowRegistry, TaskChainOutput } from 
 import { EdgeType } from "../types/edge";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
-import { getConfigInputs, getChainOutputs } from "../graph/task-utils";
-
-export { getConfigInputs, getChainOutputs };
+import { getConfigInputs } from "../graph/task-utils";
 
 export interface UseWorkflowNodesOptions {
-    initialVertical?: boolean;
     initialNodes?: AppNode[];
     initialEdges?: Edge[];
     readonly?: boolean;
@@ -31,12 +28,10 @@ export const useWorkflowNodes = (
 ) => {
     const layout: LayoutStrategy = options.layout ?? DEFAULT_LAYOUT;
     const registry = options.registry;
-    const initialVertical = options.initialVertical ?? layout.isVertical;
     const customInitialNodes = options.initialNodes;
     const customInitialEdges = options.initialEdges;
     const readonlyMode: boolean = options.readonly ?? false;
 
-    const [isVertical, setIsVertical] = useState(initialVertical);
     const initialStateRef = useRef({
         nodes: customInitialNodes ?? [] as AppNode[],
         edges: customInitialEdges ?? [] as Edge[],
@@ -156,12 +151,7 @@ export const useWorkflowNodes = (
                 ? nodes.find((n) => n.id === outgoingEdge.target)
                 : null;
 
-            const newNode = CreateFlowNode(
-                nodeType,
-                layout.getInitialPosition(),
-                undefined,
-                outputDef.optional,
-            ).node;
+            const newNode = CreateFlowNode(nodeType, layout.getInitialPosition(), outputDef.optional);
 
             const cfgInputs = getConfigInputs(newNode.data.type);
             const { nodes: settingNodes, edges: settingEdges } =
@@ -238,9 +228,8 @@ export const useWorkflowNodes = (
     return {
         nodes,
         edges,
-        isVertical,
+        isVertical: layout.isVertical,
         readonly: readonlyMode,
-        setIsVertical,
         onNodesChange,
         onEdgesChange,
         onDragOver,

@@ -1,4 +1,3 @@
-import { ShapeType } from "../components/nodes/NodeShape";
 import type { ModelOption } from "./model-option";
 import type { WorkflowNodeProps } from "./app-node";
 
@@ -22,7 +21,6 @@ export interface TaskSettingParam {
     required?: boolean;
     hideHandle?: boolean;
     items?: ModelOption[];
-    id?: string;
 }
 
 export interface TaskChainOutput {
@@ -34,13 +32,10 @@ export interface Task {
     type: TaskType;
     label: string;
     description: string;
-    shape: ShapeType;
     icon: React.ComponentType<React.ComponentProps<any>>;
     isEntryPoint: boolean;
     isEndPoint: boolean;
     isDeletable: boolean;
-    isDraggable: boolean;
-    id?: string;
 
     inputs: TaskSettingParam[];
     chainOutputs?: TaskChainOutput[];

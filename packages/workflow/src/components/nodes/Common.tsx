@@ -144,7 +144,3 @@ export const ReRanker: ModelOption[] = [
         badge: "fast",
     }
 ];
-
-export const LLMS_LABELS = LLMS.map((m) => m.label);
-export const ReRanker_LABELS = ReRanker.map((m) => m.label);
-export const LLMSRewriter_LABELS = LLMSRewriter.map((m) => m.label);

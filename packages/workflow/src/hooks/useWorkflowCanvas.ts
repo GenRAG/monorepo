@@ -9,7 +9,6 @@ import { TaskRegistry } from "../graph/task/registry";
 export interface UseWorkflowCanvasOptions {
     initialNodes?: AppNode[];
     initialEdges?: Edge[];
-    initialVertical?: boolean;
     readonly?: boolean;
     layout?: LayoutStrategy;
 
@@ -30,7 +29,6 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
         onMutation,
         initialNodes,
         initialEdges,
-        initialVertical,
         readonly,
         layout,
     } = options;
@@ -38,7 +36,6 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
     const workflowNodesOptions: UseWorkflowNodesOptions = {
         initialNodes,
         initialEdges,
-        initialVertical,
         readonly,
         layout,
         registry: TaskRegistry,

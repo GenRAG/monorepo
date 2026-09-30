@@ -72,14 +72,12 @@ const WorkflowCanvasInner = ({
 };
 
 /**
- * Composable ReactFlow canvas.
- *
- * Unlike WorkflowBuilder (fully opaque), WorkflowCanvas accepts children
- * so consumers can inject Background, MiniMap, Controls, modals, etc.
+ * Composable ReactFlow canvas: accepts children so consumers can inject
+ * Background, MiniMap, Controls, modals, etc.
  *
  * @example
  * ```tsx
- * <WorkflowCanvas nodeComponent={MyNodeComponent} isVertical readonly>
+ * <WorkflowCanvas nodeComponent={MyNodeComponent} layout={new HorizontalLayoutStrategy()} readonly>
  *   <Background variant={BackgroundVariant.Lines} />
  *   <MiniMap />
  * </WorkflowCanvas>

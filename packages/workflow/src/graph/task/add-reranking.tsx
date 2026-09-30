@@ -1,21 +1,17 @@
 import { ReRanker } from "../../components/nodes/Common";
 import { TaskParamType, TaskType } from "../../types/task";
 import { type LucideIcon, Sparkle } from "lucide-react";
-import { ShapeType } from "../../components/nodes";
 
 export const AddReranking = {
     type: TaskType.RERANKER,
-    shape: ShapeType.CIRCLE,
     label: "Classement",
     description: "Trie les résultats par ordre de pertinence pour améliorer la réponse",
     icon: (props: React.ComponentProps<LucideIcon>) => {
-        return <Sparkle {...props} className="stroke-blue-500" />;
+        return <Sparkle {...props} />;
     },
     isEntryPoint: false,
     isEndPoint: false,
     isDeletable: true,
-    isDraggable: true,
-    id: "tooltip-workflow-reranking",
     inputs: [
         {
             name: "Modèle de tri",
@@ -25,7 +21,6 @@ export const AddReranking = {
             required: true,
             hideHandle: false,
             items: ReRanker,
-            id: "tooltip-workflow-reranking-model",
         },
     ],
     chainOutputs: [],

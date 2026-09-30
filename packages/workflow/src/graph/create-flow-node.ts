@@ -11,10 +11,9 @@ declare const process: { env: { NODE_ENV?: string } };
 export function CreateFlowNode(
     nodeType: TaskType,
     position?: { x: number; y: number },
-    targetNodeId?: string,
     deletable?: boolean,
-): { node: AppNode; edge?: Edge } {
-    const newNode: AppNode = {
+): AppNode {
+    return {
         id: uuidv4(),
         type: "GenNode",
         dragHandle: ".drag-handle",
@@ -26,17 +25,6 @@ export function CreateFlowNode(
         deletable: deletable ?? true,
         position: position ?? { x: 0, y: 0 },
     };
-
-    const newEdge = targetNodeId
-        ? {
-              id: `${newNode.id}-to-${targetNodeId}`,
-              source: newNode.id,
-              target: targetNodeId,
-              animated: true,
-          }
-        : undefined;
-
-    return { node: newNode, edge: newEdge };
 }
 
 export function linkNodes(sourceNode: string, targetNode: string) {

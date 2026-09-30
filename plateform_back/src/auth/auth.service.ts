@@ -155,7 +155,15 @@ export class AuthService {
             throw new UnauthorizedException('Invalid Google token');
         });
 
+        // An access token issued to any other Google OAuth client must not open a GenRAG session.
+        const expectedAudience = this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID');
+        if (tokenInfo.aud !== expectedAudience) throw new UnauthorizedException('Invalid Google token');
+
         if (!tokenInfo.email) throw new UnauthorizedException('Google token has no email');
+        // The tokeninfo endpoint returns this flag as a string ("true"); the library types it as boolean.
+        if (String(tokenInfo.email_verified) !== 'true') {
+            throw new UnauthorizedException('Google email is not verified');
+        }
 
         const email = tokenInfo.email.toLowerCase();
 

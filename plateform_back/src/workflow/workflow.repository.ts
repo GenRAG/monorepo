@@ -35,8 +35,12 @@ export class WorkflowRepository {
         return this.prisma.workflow.update({ where: { id }, data });
     }
 
-    activate(id: string, agentId: string): Promise<Workflow> {
+    /** Returns null when `id` is not a workflow of `agentId` (nothing is modified in that case). */
+    activate(id: string, agentId: string): Promise<Workflow | null> {
         return this.prisma.$transaction(async (tx) => {
+            const target = await tx.workflow.findFirst({ where: { id, agentId }, select: { id: true } });
+            if (!target) return null;
+
             await tx.workflow.updateMany({
                 where: { agentId, isActive: true },
                 data: { isActive: false },

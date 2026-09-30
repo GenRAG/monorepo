@@ -6,6 +6,11 @@ import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+// Spreadsheet apps execute cells starting with these characters as formulas (CSV/formula injection):
+// the questions come from end users, the export is opened by workspace admins.
+const FORMULA_TRIGGER = /^[=+\-@\t\r]/;
+const neutralizeFormula = (value: string) => (FORMULA_TRIGGER.test(value) ? `'${value}` : value);
+
 @Controller('workspaces/:workspaceId/agents')
 @UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
 export class AgentExportController {
@@ -45,7 +50,7 @@ export class AgentExportController {
             orderBy: { createdAt: 'desc' },
         });
 
-        const escape = (s: string) => `"${s.replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+        const escape = (s: string) => `"${neutralizeFormula(s).replace(/"/g, '""').replace(/\n/g, ' ')}"`;
         const rows: string[] = ['conversation_id,conversation_title,timestamp,question,response'];
 
         for (const conv of conversations) {

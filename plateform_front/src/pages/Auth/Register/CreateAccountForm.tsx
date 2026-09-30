@@ -65,7 +65,7 @@ const CreateAccountForm: FC<CreateAccountFormProps> = ({ email }) => {
             .unwrap()
             .then(async () => {
                 mixpanel.track("user_signed_up", { method: "email" });
-                await navigate(`/validate?email=${data.email}`, { replace: true });
+                await navigate(`/validate?email=${encodeURIComponent(data.email)}`, { replace: true });
             })
             .catch((error: unknown) => {
                 if (typeof error === "object" && error !== null && "status" in error) {

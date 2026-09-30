@@ -1,4 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
+import { Prisma } from 'generated/prisma';
+
+const recordNotFound = () =>
+    new Prisma.PrismaClientKnownRequestError('Record to update not found.', { code: 'P2025', clientVersion: '6.9.0' });
 import { Test, TestingModule } from '@nestjs/testing';
 import { AgentStatus } from 'generated/prisma';
 import { AgentRepository } from 'src/agent/agent.repository';
@@ -152,9 +156,16 @@ describe('AgentService', () => {
         });
 
         it('should throw NotFoundException when agent not found', async () => {
-            mockAgentRepository.update.mockImplementation(() => Promise.reject(new Error('Not found')));
+            mockAgentRepository.update.mockImplementation(() => Promise.reject(recordNotFound()));
 
             await expect(service.update('unknown-id', { name: 'New' }, 'user-1')).rejects.toThrow(NotFoundException);
+        });
+
+        it('should not disguise other database errors as a missing agent', async () => {
+            const dbDown = new Error("Can't reach database server");
+            mockAgentRepository.update.mockImplementation(() => Promise.reject(dbDown));
+
+            await expect(service.update('agent-1', { name: 'New' }, 'user-1')).rejects.toBe(dbDown);
         });
     });
 
@@ -168,9 +179,16 @@ describe('AgentService', () => {
         });
 
         it('should throw NotFoundException when agent not found', async () => {
-            mockAgentRepository.delete.mockImplementation(() => Promise.reject(new Error('Not found')));
+            mockAgentRepository.delete.mockImplementation(() => Promise.reject(recordNotFound()));
 
             await expect(service.remove('unknown-id')).rejects.toThrow(NotFoundException);
+        });
+
+        it('should not disguise other database errors as a missing agent', async () => {
+            const dbDown = new Error("Can't reach database server");
+            mockAgentRepository.delete.mockImplementation(() => Promise.reject(dbDown));
+
+            await expect(service.remove('agent-1')).rejects.toBe(dbDown);
         });
     });
 });

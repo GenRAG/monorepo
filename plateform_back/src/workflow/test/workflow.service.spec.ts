@@ -107,6 +107,12 @@ describe('WorkflowService', () => {
 
             await expect(service.activate('unknown-id', 'agent-1')).rejects.toThrow(NotFoundException);
         });
+
+        it('should throw NotFoundException when the workflow belongs to another agent', async () => {
+            mockWorkflowRepository.activate.mockResolvedValue(null);
+
+            await expect(service.activate('workflow-of-another-agent', 'agent-1')).rejects.toThrow(NotFoundException);
+        });
     });
 
     describe('findAll', () => {

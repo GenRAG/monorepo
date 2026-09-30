@@ -214,6 +214,35 @@ describe('Workflow (e2e)', () => {
                 .send({ id: workflowV1Id })
                 .expect(403);
         });
+
+        it("should return 404 and leave both agents untouched when activating another tenant's workflow", async () => {
+            const otherWorkspaceId = await createWorkspace(app, cookieUser2, { name: 'Other WS', description: '' });
+            const otherAgentId = await createAgent(app, cookieUser2, otherWorkspaceId, {
+                name: 'Other tenant agent',
+                description: '',
+            });
+            const otherWorkflowUrl = `/workspaces/${otherWorkspaceId}/agents/${otherAgentId}/workflow`;
+            const otherWorkflowRes = await request(app.getHttpServer())
+                .post(otherWorkflowUrl)
+                .set('Cookie', cookieUser2)
+                .send({ definition: WORKFLOW_DEFINITION })
+                .expect(201);
+            const activeBefore = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie).expect(200);
+
+            await request(app.getHttpServer())
+                .patch(`${workflowUrl}/activate`)
+                .set('Cookie', cookie)
+                .send({ id: otherWorkflowRes.body.id })
+                .expect(404);
+
+            const activeAfter = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie).expect(200);
+            expect(activeAfter.body.id).toBe(activeBefore.body.id);
+            const otherHistory = await request(app.getHttpServer())
+                .get(`${otherWorkflowUrl}/history`)
+                .set('Cookie', cookieUser2)
+                .expect(200);
+            expect(otherHistory.body.filter((w: { isActive: boolean }) => w.isActive)).toHaveLength(1);
+        });
     });
 
     describe('GET /workflow/:id', () => {

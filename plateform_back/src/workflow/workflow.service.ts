@@ -58,11 +58,14 @@ export class WorkflowService {
     }
 
     async activate(id: string, agentId: string): Promise<Workflow> {
+        let workflow: Workflow | null;
         try {
-            return await this.workflowRepository.activate(id, agentId);
+            workflow = await this.workflowRepository.activate(id, agentId);
         } catch (_e: any) {
             throw new NotFoundException('Workflow not found');
         }
+        if (!workflow) throw new NotFoundException('Workflow not found');
+        return workflow;
     }
 
     async update(agentId: string, updateWorkflowRequest: UpdateWorkflowRequest): Promise<Workflow> {

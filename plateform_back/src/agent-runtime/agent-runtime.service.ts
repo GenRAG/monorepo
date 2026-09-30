@@ -129,6 +129,11 @@ export class AgentRuntimeService {
         const workspaceId = await this._resolveWorkspaceId(agentId, subscriber);
         if (!workspaceId) return;
 
+        // Checked before starting the RAG stream: a rejected request must not trigger a (paid) LLM call.
+        if (conversationId && !(await this._checkConversationOwnership(subscriber, conversationId, agentId, userId))) {
+            return;
+        }
+
         const stream = await this._startOrFail(subscriber, workspaceId, agentId, query, {}, startedAt, false);
         if (!stream) return;
         streamRef.current = stream;
@@ -218,6 +223,24 @@ export class AgentRuntimeService {
         }
     }
 
+    private async _checkConversationOwnership(
+        subscriber: Subscriber<MessageEvent>,
+        conversationId: string,
+        agentId: string,
+        userId: string,
+    ): Promise<boolean> {
+        try {
+            const existing = await this.conversationRepo.findOne(conversationId);
+            if (existing && existing.agentId === agentId && existing.userId === userId) return true;
+            subscriber.next(encodeSseEvent({ type: 'error', message: 'Conversation not found' }));
+        } catch (err: unknown) {
+            const message = toClientSafeErrorMessage(err, 'Failed to initialize conversation', this.logger);
+            subscriber.next(encodeSseEvent({ type: 'error', message }));
+        }
+        subscriber.complete();
+        return false;
+    }
+
     private async _initConversation(
         subscriber: Subscriber<MessageEvent>,
         workspaceId: string,
@@ -227,15 +250,6 @@ export class AgentRuntimeService {
         userId?: string,
     ): Promise<string | null> {
         try {
-            if (conversationId) {
-                const existing = await this.conversationRepo.findOne(conversationId);
-                if (!existing || existing.agentId !== agentId || existing.userId !== userId) {
-                    subscriber.next(encodeSseEvent({ type: 'error', message: 'Conversation not found' }));
-                    subscriber.complete();
-                    return null;
-                }
-            }
-
             return await this.conversationRepo.transaction(async (tx) => {
                 const convId = conversationId
                     ? conversationId

@@ -13,6 +13,7 @@ import { ConversationRepository } from 'src/conversation/conversation.repository
 import { RagStreamForwarderService } from 'src/agent-runtime/streaming/rag-stream-forwarder.service';
 import { RuntimeSinkFactory } from 'src/agent-runtime/streaming/sinks/runtime-sink.factory';
 import { RuntimeUsageRecorder } from 'src/agent-runtime/usage/runtime-usage-recorder';
+import { GENERIC_ERROR_MESSAGE } from 'src/agent-runtime/client-safe-error';
 
 jest.mock('@sentry/nestjs');
 
@@ -286,6 +287,32 @@ describe('AgentRuntimeService', () => {
             await done;
 
             expect(parseData(events[0])).toEqual({ error: 'Conversation not found' });
+        });
+
+        it('should never start the (paid) RAG stream for a conversation the user does not own', async () => {
+            mockConversationRepo.findOne.mockResolvedValue({ ...fakeConversation, userId: 'someone-else' });
+
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', 'conv-1', 'user-1'),
+            );
+            await flushPromises();
+            await done;
+
+            expect(parseData(events[0])).toEqual({ error: 'Conversation not found' });
+            expect(mockOrchestrator.streamQuery).not.toHaveBeenCalled();
+        });
+
+        it('should send a client-safe error and not start the RAG stream if the ownership lookup fails', async () => {
+            mockConversationRepo.findOne.mockRejectedValue(new Error('connection reset'));
+
+            const { events, done } = collectEvents(
+                service.streamWithPersistence('agent-1', 'hello', 'conv-1', 'user-1'),
+            );
+            await flushPromises();
+            await done;
+
+            expect(parseData(events[0])).toEqual({ error: GENERIC_ERROR_MESSAGE });
+            expect(mockOrchestrator.streamQuery).not.toHaveBeenCalled();
         });
 
         it('should create a new conversation when no conversationId is provided', async () => {

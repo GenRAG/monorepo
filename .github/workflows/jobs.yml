@@ -36,6 +36,8 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    # Without a limit, a hung step (e.g. Jest kept alive by an open connection) runs until GitHub's 6 h cap.
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -51,6 +53,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
 
     defaults:
       run:
@@ -61,7 +72,6 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
       FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
-      BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
       TOKEN_VALIDITY: ${{ secrets.TOKEN_VALIDITY }}
       TOKEN_RESEND_INTERVAL: ${{ secrets.TOKEN_RESEND_INTERVAL }}
       RAGENGINE_URL: ${{ secrets.RAGENGINE_URL }}
@@ -69,6 +79,16 @@ jobs:
       SEND_EMAILS: "false"
       NODE_ENV: test
       PORT: 8081
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+      # Read with getOrThrow at startup; dummy values are enough: no email is sent (SEND_EMAILS=false)
+      # and no e2e test calls S3.
+      RESEND_API_KEY: re_ci_dummy
+      RESEND_FROM_EMAIL: ci@example.com
+      AWS_REGION: eu-west-3
+      AWS_ACCESS_KEY_ID: ci-dummy
+      AWS_SECRET_ACCESS_KEY: ci-dummy
+      S3_BUCKET: ci-dummy
 
     steps:
       - uses: actions/checkout@v4

@@ -93,7 +93,8 @@ describe('Agent (e2e)', () => {
                 .expect(201);
 
             expect(res.body.name).toBe('Agent without desc');
-            expect(res.body.description).toBeNull();
+            // AgentService.insertOne stores a default description when none is provided
+            expect(res.body.description).toBe('Pas de description pour le moment');
         });
 
         it('should allow special characters in name', async () => {
@@ -336,11 +337,11 @@ describe('Agent (e2e)', () => {
                 .send({ definition: { blocks: [{ name: 'query', type: 'query' }] } })
                 .expect(201);
 
-            // Delete the agent
+            // Delete the agent (the controller answers 204 No Content)
             await request(app.getHttpServer())
                 .delete(`/workspaces/${workspaceId}/agents/${tempAgentId}`)
                 .set('Cookie', cookie)
-                .expect(200);
+                .expect(204);
 
             // Verify agent is gone
             await request(app.getHttpServer())
@@ -349,7 +350,7 @@ describe('Agent (e2e)', () => {
                 .expect(404);
         });
 
-        it('should return deleted agent data', async () => {
+        it('should answer 204 with an empty body and remove the agent from the list', async () => {
             const agentRes = await request(app.getHttpServer())
                 .post(`/workspaces/${workspaceId}/agents`)
                 .set('Cookie', cookie)
@@ -359,10 +360,14 @@ describe('Agent (e2e)', () => {
             const deleteRes = await request(app.getHttpServer())
                 .delete(`/workspaces/${workspaceId}/agents/${agentRes.body.id}`)
                 .set('Cookie', cookie)
-                .expect(200);
+                .expect(204);
 
-            expect(deleteRes.body.id).toBe(agentRes.body.id);
-            expect(deleteRes.body.name).toBe('Delete Response Test');
+            expect(deleteRes.body).toEqual({});
+            const listRes = await request(app.getHttpServer())
+                .get(`/workspaces/${workspaceId}/agents`)
+                .set('Cookie', cookie)
+                .expect(200);
+            expect(listRes.body.map((a: { id: string }) => a.id)).not.toContain(agentRes.body.id);
         });
 
         it('should return 404 for nonexistent agent', async () => {

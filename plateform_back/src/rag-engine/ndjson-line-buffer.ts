@@ -1,3 +1,5 @@
+import { StringDecoder } from 'string_decoder';
+
 export interface RagStreamEvent {
     type: EventType;
     data: unknown;
@@ -33,16 +35,19 @@ export enum EventType {
 
 export class NdjsonLineBuffer {
     private buffer = '';
+    // Network chunks can split a multi-byte UTF-8 character (é, emoji…): the decoder keeps the
+    // incomplete bytes until the next chunk instead of emitting U+FFFD replacement characters.
+    private readonly decoder = new StringDecoder('utf8');
 
-    push(chunk: string): RagStreamEvent[] {
-        this.buffer += chunk;
+    push(chunk: Buffer | string): RagStreamEvent[] {
+        this.buffer += typeof chunk === 'string' ? chunk : this.decoder.write(chunk);
         const lines = this.buffer.split('\n');
         this.buffer = lines.pop() ?? '';
         return this.parseLines(lines);
     }
 
     flush(): RagStreamEvent[] {
-        const remaining = this.buffer;
+        const remaining = this.buffer + this.decoder.end();
         this.buffer = '';
         return this.parseLines([remaining]);
     }

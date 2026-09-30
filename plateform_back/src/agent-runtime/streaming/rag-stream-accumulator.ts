@@ -52,7 +52,7 @@ export class RagStreamAccumulator {
 
     push(chunk: Buffer): RagLiveEvent[] {
         const events: RagLiveEvent[] = [];
-        for (const rawEvent of this.lineBuffer.push(chunk.toString('utf-8'))) {
+        for (const rawEvent of this.lineBuffer.push(chunk)) {
             const live = this.handlers[rawEvent.type]?.(rawEvent.data);
             if (live) events.push(live);
         }

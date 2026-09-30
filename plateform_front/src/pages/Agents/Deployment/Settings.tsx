@@ -8,15 +8,28 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDeleteAgentMutation, useGetAgentByIdQuery, useUpdateAgentMutation } from "services/agent/agent";
 import WorkspaceHeader from "components/ui/WorkspaceHeader";
+import useThemedToast from "hooks/useThemedToast";
+import { getApiErrorMessage } from "utils/apiError";
 
 const AgentDangerZone = () => {
     const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
     const navigate = useNavigate();
     const { data: agent } = useGetAgentByIdQuery({ workspaceId, id: agentId }, { skip: !agentId });
     const [deleteAgent, { isLoading }] = useDeleteAgentMutation();
+    const toast = useThemedToast();
 
     const handleDelete = async () => {
-        await deleteAgent({ workspaceId, id: agentId });
+        try {
+            await deleteAgent({ workspaceId, id: agentId }).unwrap();
+        } catch (err: unknown) {
+            toast({
+                title: "Erreur lors de la suppression",
+                description: getApiErrorMessage(err) || "L'agent n'a pas pu être supprimé. Veuillez réessayer.",
+                status: "error",
+                duration: 5000,
+            });
+            return;
+        }
         await navigate(`/workspaces/${workspaceId}/agents`);
     };
 

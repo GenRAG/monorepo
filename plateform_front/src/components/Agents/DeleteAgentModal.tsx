@@ -13,6 +13,8 @@ import { Trash2 } from "lucide-react";
 import { useDeleteAgentMutation } from "services/agent/agent";
 import BoxIcon from "components/ui/BoxIcon";
 import mixpanel from "lib/mixpanel";
+import useThemedToast from "hooks/useThemedToast";
+import { getApiErrorMessage } from "utils/apiError";
 
 interface DeleteAgentModalProps {
     agentId: string;
@@ -33,9 +35,20 @@ export const DeleteAgentModal: React.FC<DeleteAgentModalProps> = ({
 }: DeleteAgentModalProps) => {
     const cancelRef = useRef<HTMLButtonElement>(null);
     const [deleteAgent, { isLoading: isDeleting }] = useDeleteAgentMutation();
+    const toast = useThemedToast();
 
     const handleDelete = async () => {
-        await deleteAgent({ workspaceId, id: agentId });
+        try {
+            await deleteAgent({ workspaceId, id: agentId }).unwrap();
+        } catch (err: unknown) {
+            toast({
+                title: "Erreur lors de la suppression",
+                description: getApiErrorMessage(err) || "L'agent n'a pas pu être supprimé. Veuillez réessayer.",
+                status: "error",
+                duration: 5000,
+            });
+            return;
+        }
         mixpanel.track("agent_deleted", { agent_id: agentId });
         onClose();
         onSuccess?.();

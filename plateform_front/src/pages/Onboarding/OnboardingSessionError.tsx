@@ -53,7 +53,7 @@ export const OnboardingSessionError = ({ sessionError }: OnboardingSessionErrorP
                         {description}
                     </Text>
                 </VStack>
-                <Button colorScheme={currentDarkTheme.colorScheme} onClick={() => void navigate("/dashboard")}>
+                <Button colorScheme={currentDarkTheme.colorScheme} onClick={() => void navigate("/")}>
                     Retour au tableau de bord
                 </Button>
             </VStack>

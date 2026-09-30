@@ -58,19 +58,19 @@ Voir le tableau détaillé dans `AUDIT_REPORT.md`. Suivi des statuts :
 
 | ID | Sévérité | Titre | Statut |
 |---|---|---|---|
-| B-01 | Critique | `GET /workspaces/:workspaceId/onboarding/stream` prend `agentId` et `stepId` en query-string sans vérifier que | à traiter |
-| B-02 | Critique | Login Google : `OAuth2Client.getTokenInfo(accessToken)` sans vérifier l'audience (`aud`/`azp` = client id GenR | à traiter |
-| B-03 | Haute | `activate(id, agentId)` désactive les workflows de `agentId` puis `update({ where: { id } })` **sans filtrer s | à traiter |
+| B-01 | Critique | `GET /workspaces/:workspaceId/onboarding/stream` prend `agentId` et `stepId` en query-string sans vérifier que | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) |
+| B-02 | Critique | Login Google : `OAuth2Client.getTokenInfo(accessToken)` sans vérifier l'audience (`aud`/`azp` = client id GenR | PR ouverte ([#59](https://github.com/GenRAG/monorepo/pull/59)) |
+| B-03 | Haute | `activate(id, agentId)` désactive les workflows de `agentId` puis `update({ where: { id } })` **sans filtrer s | PR ouverte ([#60](https://github.com/GenRAG/monorepo/pull/60)) |
 | B-04 | Haute | Cookie d'auth `SameSite=None` en production, aucune protection CSRF, et Express accepte `application/x-www-for | décision humaine requise |
-| B-05 | Haute | Fichier de build incrémental TypeScript commité, contenant des chemins absolus d'un poste de dev (`/home/bollo | à traiter |
-| B-06 | Haute | `@getbrevo/brevo` et `sib-api-v3-sdk` ne sont plus utilisés (Resend les remplace) mais tirent `form-data` (cri | à traiter (partiel) + décision humaine requise |
-| B-07 | Moyenne | `getModelInfo(modelId)` interpole le paramètre de route (décodé par Express : `/`, `?`, `#`, `..` possibles) d | à traiter |
-| B-08 | Moyenne | Chaque chunk du flux NDJSON est décodé isolément (`chunk.toString('utf-8')`) | à traiter |
-| B-09 | Moyenne | Pour une exception non-HTTP, `error` = l'objet exception brut sérialisé : les erreurs Prisma exposent `code`,  | à traiter |
+| B-05 | Haute | Fichier de build incrémental TypeScript commité, contenant des chemins absolus d'un poste de dev (`/home/bollo | PR ouverte ([#61](https://github.com/GenRAG/monorepo/pull/61)) |
+| B-06 | Haute | `@getbrevo/brevo` et `sib-api-v3-sdk` ne sont plus utilisés (Resend les remplace) mais tirent `form-data` (cri | PR ouverte ([#62](https://github.com/GenRAG/monorepo/pull/62)) + décision humaine requise (reste) |
+| B-07 | Moyenne | `getModelInfo(modelId)` interpole le paramètre de route (décodé par Express : `/`, `?`, `#`, `..` possibles) d | PR ouverte ([#63](https://github.com/GenRAG/monorepo/pull/63)) |
+| B-08 | Moyenne | Chaque chunk du flux NDJSON est décodé isolément (`chunk.toString('utf-8')`) | PR ouverte ([#64](https://github.com/GenRAG/monorepo/pull/64)) |
+| B-09 | Moyenne | Pour une exception non-HTTP, `error` = l'objet exception brut sérialisé : les erreurs Prisma exposent `code`,  | PR ouverte ([#65](https://github.com/GenRAG/monorepo/pull/65)) |
 | B-10 | Moyenne | Export CSV des conversations : les champs (questions posées par les utilisateurs finaux) ne sont pas neutralis | à traiter |
 | B-11 | Moyenne | `PATCH /users/me` enregistre l'email tel quel (pas de `toLowerCase().trim()`), alors que login/register/reset  | à traiter (partiel) + décision humaine requise |
-| B-12 | Moyenne | `POST …/onboarding/steps-data` fusionne un objet `data` arbitraire dans `stepsData`, y compris la clé `queryCo | à traiter |
-| B-13 | Moyenne | `ThrottlerModule` est configuré mais `ThrottlerGuard` n'est pas global : seules les routes annotées sont limit | à traiter (partiel) + décision humaine requise |
+| B-12 | Moyenne | `POST …/onboarding/steps-data` fusionne un objet `data` arbitraire dans `stepsData`, y compris la clé `queryCo | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) |
+| B-13 | Moyenne | `ThrottlerModule` est configuré mais `ThrottlerGuard` n'est pas global : seules les routes annotées sont limit | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) + décision humaine requise (reste) |
 | B-15 | Moyenne | Le type MIME est celui déclaré par le client (`file.mimetype`), sans vérification du contenu (magic bytes) | décision humaine requise |
 | B-16 | Moyenne | Les documents sont identifiés auprès du moteur RAG par leur **nom** (`deleteDocument(doc.name, agentId)`, sour | décision humaine requise |
 | B-17 | Moyenne | Fichiers < 5 Mo copiés en base64 dans le payload du job BullMQ (Redis) ; `removeOnFail: false` conserve indéfi | décision humaine requise |
@@ -149,7 +149,7 @@ Voir le tableau détaillé dans `AUDIT_REPORT.md`. Suivi des statuts :
 
 ## Prochaine action
 
-Phase 3 : PR 1 — `audit/back-onboarding-tenant-isolation` (B-01, Critique).
+Phase 3 : PR suivante — `audit/back-csv-export-injection` (B-10), puis B-11 (normalisation email), F-01 (Markdown IA), F-02…F-06, B-29, puis les Basses et les refactors (Template Method sur les sinks, service d'export).
 
 ## Fichiers à auditer (Phase 2)
 

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreditTransactionType, OnboardingSession, Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
@@ -12,6 +12,13 @@ import { InstructionStyle } from './dto/complete-onboarding.request';
 import { DEMO_WORKFLOW_DEFINITION } from './demo-workflow.definition';
 
 const ONBOARDING_INITIAL_CREDITS = 20;
+
+// Steps whose chat goes through GET /onboarding/stream. `compare-intelligence` uses POST /compare.
+const STREAM_STEP_IDS = ['test-assistant', 'improve-assistant'];
+const DEFAULT_STREAM_STEP_ID = 'test-assistant';
+
+// Server-managed counter (see tryIncrementQueryCount): never writable through steps-data.
+const RESERVED_STEP_DATA_KEYS = ['queryCount'];
 
 const STYLE_TO_INSTRUCTION: Record<InstructionStyle, string> = {
     standard: 'Répondre de façon concise et directe en se basant exclusivement sur les documents fournis.',
@@ -115,11 +122,14 @@ export class OnboardingService {
         if (!session) throw new NotFoundException('Onboarding session not found');
 
         const current = (session.stepsData as Record<string, Record<string, unknown>>) ?? {};
+        const clientData = Object.fromEntries(
+            Object.entries(data).filter(([key]) => !RESERVED_STEP_DATA_KEYS.includes(key)),
+        );
 
         await this.onboardingRepository.update(session.id, {
             stepsData: {
                 ...current,
-                [stepId]: { ...(current[stepId] ?? {}), ...data },
+                [stepId]: { ...(current[stepId] ?? {}), ...clientData },
             } as Prisma.InputJsonValue,
         });
     }
@@ -199,14 +209,27 @@ export class OnboardingService {
     }
 
     resolveStreamParams(agentId: string, stepId?: string): { resolvedStepId: string; orgId: string } {
-        const resolvedStepId = stepId || 'test-assistant';
-        const orgId = resolvedStepId === 'test-assistant' ? 'onboarding' : agentId;
+        const resolvedStepId = stepId || DEFAULT_STREAM_STEP_ID;
+        if (!STREAM_STEP_IDS.includes(resolvedStepId)) {
+            throw new BadRequestException(`Unknown onboarding step: ${resolvedStepId}`);
+        }
+        const orgId = resolvedStepId === DEFAULT_STREAM_STEP_ID ? 'onboarding' : agentId;
         return { resolvedStepId, orgId };
     }
 
-    async checkAndIncrementQueryCount(userId: string, workspaceId: string, stepId: string): Promise<void> {
+    /**
+     * The stream only runs the demo agent of the caller's own onboarding session: `agentId` comes from
+     * the query string and is used as the RAG `org_id`, so it must never reference another agent.
+     */
+    async checkAndIncrementQueryCount(
+        userId: string,
+        workspaceId: string,
+        agentId: string,
+        stepId: string,
+    ): Promise<void> {
         const session = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
         if (!session) throw new NotFoundException('Onboarding session not found');
+        if (session.agentId !== agentId) throw new NotFoundException('Agent not found');
         await this._checkAndIncrementStepQueryCount(session, stepId);
     }
 

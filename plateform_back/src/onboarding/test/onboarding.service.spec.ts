@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
 import { describe, jest, beforeEach, afterEach, it, expect } from '@jest/globals';
 import { OnboardingService } from '../onboarding.service';
 import { OnboardingRepository } from '../onboarding.repository';
@@ -284,6 +284,31 @@ describe('OnboardingService', () => {
                 },
             });
         });
+
+        it('should never let the client overwrite the server-managed queryCount', async () => {
+            mockRepository.findByUserAndWorkspace.mockResolvedValue({
+                id: 'session-1',
+                userId: 'user-1',
+                workspaceId: 'workspace-1',
+                agentId: 'agent-1',
+                step: 1,
+                completed: false,
+                instruction: null,
+                stepsData: { 'test-assistant': { queryCount: 5 } },
+            });
+            mockRepository.update.mockResolvedValue({});
+
+            await service.updateStepsData('user-1', 'workspace-1', 'test-assistant', {
+                queryCount: 0,
+                messageCount: 1,
+            });
+
+            expect(mockRepository.update).toHaveBeenCalledWith('session-1', {
+                stepsData: {
+                    'test-assistant': { queryCount: 5, messageCount: 1 },
+                },
+            });
+        });
     });
 
     describe('compare', () => {
@@ -469,6 +494,14 @@ describe('OnboardingService', () => {
                 orgId: 'onboarding',
             });
         });
+
+        it('should reject unknown step ids (they would bypass the per-step query limits)', () => {
+            expect(() => service.resolveStreamParams('agent-1', 'anything-else')).toThrow(BadRequestException);
+        });
+
+        it('should reject compare-intelligence, which is served by POST /compare', () => {
+            expect(() => service.resolveStreamParams('agent-1', 'compare-intelligence')).toThrow(BadRequestException);
+        });
     });
 
     describe('checkAndIncrementQueryCount', () => {
@@ -487,7 +520,7 @@ describe('OnboardingService', () => {
             mockRepository.findByUserAndWorkspace.mockResolvedValue(mockSession);
             mockRepository.tryIncrementQueryCount.mockResolvedValue(true);
 
-            await service.checkAndIncrementQueryCount('user-1', 'workspace-1', 'test-assistant');
+            await service.checkAndIncrementQueryCount('user-1', 'workspace-1', 'agent-1', 'test-assistant');
 
             expect(mockRepository.tryIncrementQueryCount).toHaveBeenCalledWith('session-1', 'test-assistant', 5);
         });
@@ -496,8 +529,31 @@ describe('OnboardingService', () => {
             mockRepository.findByUserAndWorkspace.mockResolvedValue(null);
 
             await expect(
-                service.checkAndIncrementQueryCount('user-1', 'workspace-1', 'test-assistant'),
+                service.checkAndIncrementQueryCount('user-1', 'workspace-1', 'agent-1', 'test-assistant'),
             ).rejects.toThrow(NotFoundException);
+        });
+
+        it("should reject an agent that is not the session's demo agent", async () => {
+            mockRepository.findByUserAndWorkspace.mockResolvedValue({
+                id: 'session-1',
+                userId: 'user-1',
+                workspaceId: 'workspace-1',
+                agentId: 'agent-1',
+                step: 1,
+                completed: false,
+                instruction: null,
+                stepsData: null,
+            });
+
+            await expect(
+                service.checkAndIncrementQueryCount(
+                    'user-1',
+                    'workspace-1',
+                    'agent-of-another-tenant',
+                    'improve-assistant',
+                ),
+            ).rejects.toThrow(NotFoundException);
+            expect(mockRepository.tryIncrementQueryCount).not.toHaveBeenCalled();
         });
     });
 });

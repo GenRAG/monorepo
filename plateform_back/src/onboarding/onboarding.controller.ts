@@ -71,6 +71,8 @@ export class OnboardingController {
     }
 
     @Post('compare')
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 20, ttl: 60_000 } })
     compare(
         @Param('workspaceId') workspaceId: string,
         @CurrentUser(CurrentUserPipe) user: UserSafe,
@@ -110,7 +112,9 @@ export class OnboardingController {
             throw new BadRequestException(`Query must not exceed ${MAX_RUNTIME_QUERY_LENGTH} characters`);
         }
         const { resolvedStepId, orgId } = this.onboardingService.resolveStreamParams(agentId, stepId);
-        return from(this.onboardingService.checkAndIncrementQueryCount(user.id, workspaceId, resolvedStepId)).pipe(
+        return from(
+            this.onboardingService.checkAndIncrementQueryCount(user.id, workspaceId, agentId, resolvedStepId),
+        ).pipe(
             switchMap(() => this.agentRuntimeService.streamWithOrgOverride(workspaceId, agentId, query, orgId)),
             catchError((err: unknown) => {
                 if (err instanceof ForbiddenException) {

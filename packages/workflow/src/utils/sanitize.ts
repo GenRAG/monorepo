@@ -1,7 +1,9 @@
 import type { AppNode } from "../types/app-node";
 import type { Edge } from "@xyflow/react";
-import { EdgeType } from "../types/edge";
+import type { TaskSpecRegistry } from "../types/task";
+import { EdgeType, settingInputName, settingSourceHandle } from "../types/edge";
 import { getConfigInputs } from "../graph/task-utils";
+import { TASK_SPECS } from "../graph/task-specs";
 
 /**
  * Repairs a workflow loaded from storage whose settings-edge sourceHandles no
@@ -14,6 +16,7 @@ import { getConfigInputs } from "../graph/task-utils";
 export function sanitizeWorkflowEdges(
     nodes: AppNode[],
     edges: Edge[],
+    registry: TaskSpecRegistry = TASK_SPECS,
 ): { nodes: AppNode[]; edges: Edge[] } {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const orphanedNodeIds = new Set<string>();
@@ -27,8 +30,8 @@ export function sanitizeWorkflowEdges(
             return [];
         }
 
-        const configInputs = getConfigInputs(sourceNode.data.type);
-        const handleName = edge.sourceHandle.replace("setting-source-", "");
+        const configInputs = getConfigInputs(sourceNode.data.type, registry);
+        const handleName = settingInputName(edge.sourceHandle) ?? edge.sourceHandle;
 
         if (configInputs.some((i) => i.name === handleName)) return [edge];
 
@@ -58,7 +61,7 @@ export function sanitizeWorkflowEdges(
             {
                 ...edge,
                 id: `${edge.source}-setting-${correctInput.name}`,
-                sourceHandle: `setting-source-${correctInput.name}`,
+                sourceHandle: settingSourceHandle(correctInput.name),
                 data: { ...edge.data, label: correctInput.name },
             },
         ];

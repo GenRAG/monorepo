@@ -46,8 +46,17 @@ export const useFlowTypes = ({
         [workflow.handleRemoveChainNode],
     );
 
-    const nodeCallbacksRef = useRef({ onNodeClick, onRemoveNode: wrappedRemove, onInstructionSave, onMutation, isVertical: workflow.isVertical });
-    nodeCallbacksRef.current = { onNodeClick, onRemoveNode: wrappedRemove, onInstructionSave, onMutation, isVertical: workflow.isVertical };
+    // In readonly mode nodes get no remove callback: NodeComponent only shows the trash button when it has one.
+    const nodeCallbacks = {
+        onNodeClick,
+        onRemoveNode: workflow.readonly ? undefined : wrappedRemove,
+        onInstructionSave,
+        onMutation,
+        isVertical: workflow.isVertical,
+        readonly: workflow.readonly,
+    };
+    const nodeCallbacksRef = useRef(nodeCallbacks);
+    nodeCallbacksRef.current = nodeCallbacks;
     const Renderer = nodeComponent ?? NodeComponent;
 
     const nodeTypes = useMemo(
@@ -61,6 +70,7 @@ export const useFlowTypes = ({
                     onRemoveNode: nodeCallbacksRef.current.onRemoveNode,
                     onInstructionSave: nodeCallbacksRef.current.onInstructionSave,
                     onMutation: nodeCallbacksRef.current.onMutation,
+                    readonly: nodeCallbacksRef.current.readonly,
                 }),
             }),
 

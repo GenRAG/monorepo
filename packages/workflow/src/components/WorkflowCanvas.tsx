@@ -9,6 +9,7 @@ import {
     useWorkflowCanvas,
     type UseWorkflowCanvasOptions,
 } from '../hooks/useWorkflowCanvas';
+import { TaskRegistry, TaskRegistryProvider } from '../graph/task/registry';
 
 export interface WorkflowCanvasProps extends UseWorkflowCanvasOptions {
     // ReactFlow visual config
@@ -72,14 +73,12 @@ const WorkflowCanvasInner = ({
 };
 
 /**
- * Composable ReactFlow canvas.
- *
- * Unlike WorkflowBuilder (fully opaque), WorkflowCanvas accepts children
- * so consumers can inject Background, MiniMap, Controls, modals, etc.
+ * Composable ReactFlow canvas: accepts children so consumers can inject
+ * Background, MiniMap, Controls, modals, etc.
  *
  * @example
  * ```tsx
- * <WorkflowCanvas nodeComponent={MyNodeComponent} isVertical readonly>
+ * <WorkflowCanvas nodeComponent={MyNodeComponent} layout={new HorizontalLayoutStrategy()} readonly>
  *   <Background variant={BackgroundVariant.Lines} />
  *   <MiniMap />
  * </WorkflowCanvas>
@@ -87,6 +86,8 @@ const WorkflowCanvasInner = ({
  */
 export const WorkflowCanvas = (props: WorkflowCanvasProps) => (
     <ReactFlowProvider>
-        <WorkflowCanvasInner {...props} />
+        <TaskRegistryProvider value={props.registry ?? TaskRegistry}>
+            <WorkflowCanvasInner {...props} />
+        </TaskRegistryProvider>
     </ReactFlowProvider>
 );

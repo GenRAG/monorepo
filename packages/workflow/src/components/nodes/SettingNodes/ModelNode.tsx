@@ -17,11 +17,13 @@ const ModelCard = ({
     settingLabel,
     isSelected,
     onCardClick,
+    readonly,
 }: {
     label: string;
     settingLabel?: string;
     isSelected: boolean;
     onCardClick: () => void;
+    readonly?: boolean;
 }) => {
     const bg = useColorModeValue("white", "grey.800");
     const bgHover = useColorModeValue("green.50", "grey.700");
@@ -36,7 +38,7 @@ const ModelCard = ({
     return (
         <Box
             onClick={onCardClick}
-            cursor="pointer"
+            cursor={readonly ? "default" : "pointer"}
             bg={bg}
             border="1px solid"
             borderColor={isSelected ? borderActive : borderColor}
@@ -83,17 +85,21 @@ const ModelCard = ({
                     >
                         {label}
                     </Text>
-                    <Text fontSize="10px" color={subColor}>
-                        Cliquer pour modifier
-                    </Text>
+                    {!readonly && (
+                        <Text fontSize="10px" color={subColor}>
+                            Cliquer pour modifier
+                        </Text>
+                    )}
                 </VStack>
 
-                <Icon
-                    as={ChevronRight}
-                    boxSize={4}
-                    color={arrowColor}
-                    flexShrink={0}
-                />
+                {!readonly && (
+                    <Icon
+                        as={ChevronRight}
+                        boxSize={4}
+                        color={arrowColor}
+                        flexShrink={0}
+                    />
+                )}
             </Flex>
         </Box>
     );
@@ -152,7 +158,7 @@ const ModelPlaceholder = ({
     );
 };
 
-export const ModelNode = ({ id, data, selected, onNodeClick }: WorkflowNodeProps) => {
+export const ModelNode = ({ id, data, selected, onNodeClick, readonly }: WorkflowNodeProps) => {
     const nodeData = data as AppNodeData;
     const isPlaceholder = nodeData.isPlaceholder;
     const displayLabel = nodeData.modelName ?? "Model";
@@ -207,6 +213,7 @@ export const ModelNode = ({ id, data, selected, onNodeClick }: WorkflowNodeProps
                             settingLabel={nodeData.settingLabel}
                             isSelected={selected}
                             onCardClick={() => onNodeClick?.(id)}
+                            readonly={readonly}
                         />
                     </motion.div>
                 )}

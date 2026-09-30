@@ -21,7 +21,7 @@ const InstructionPlaceholder = ({
     onClick,
     isHighlighted,
 }: {
-    onClick: (e: React.MouseEvent) => void;
+    onClick?: (e: React.MouseEvent) => void;
     isHighlighted?: boolean;
 }) => {
     const borderColor = useColorModeValue(
@@ -56,9 +56,9 @@ const InstructionPlaceholder = ({
             borderColor={borderColor}
             bg={bg}
             borderRadius="10px"
-            cursor="pointer"
+            cursor={onClick ? "pointer" : "default"}
             transition="all 0.15s"
-            _hover={{ bg: bgHover, borderColor: iconColor }}
+            _hover={onClick ? { bg: bgHover, borderColor: iconColor } : undefined}
             onClick={onClick}
         >
             <Icon as={FileText} boxSize={4} color={iconColor} />
@@ -79,7 +79,7 @@ const InstructionCard = ({
     text: string;
     isSelected: boolean;
     onCardClick: () => void;
-    onEditClick: (e: React.MouseEvent) => void;
+    onEditClick?: (e: React.MouseEvent) => void;
     settingLabel?: string;
 }) => {
     const bg = useColorModeValue("white", "grey.800");
@@ -141,22 +141,24 @@ const InstructionCard = ({
                         {settingLabel ?? "Instruction"}
                     </Text>
                 </HStack>
-                <Button
-                    aria-label="Edit instruction"
-                    leftIcon={<Icon as={Pencil} boxSize={3} />}
-                    size="xs"
-                    variant="ghost"
-                    bg={editBg}
-                    color={editColor}
-                    h="20px"
-                    minW="20px"
-                    borderRadius="5px"
-                    _hover={{ bg: editHoverBg }}
-                    onClick={onEditClick}
-                    cursor="pointer"
-                >
-                    Modifier
-                </Button>
+                {onEditClick && (
+                    <Button
+                        aria-label="Edit instruction"
+                        leftIcon={<Icon as={Pencil} boxSize={3} />}
+                        size="xs"
+                        variant="ghost"
+                        bg={editBg}
+                        color={editColor}
+                        h="20px"
+                        minW="20px"
+                        borderRadius="5px"
+                        _hover={{ bg: editHoverBg }}
+                        onClick={onEditClick}
+                        cursor="pointer"
+                    >
+                        Modifier
+                    </Button>
+                )}
             </Flex>
             <Box px={3} py={2}>
                 <Text fontSize="xs" color={textColor} lineHeight={1.6} noOfLines={3}>
@@ -298,12 +300,16 @@ const InstructionPanel = ({
     );
 };
 
-export const InstructionNode = ({ id, data, selected, onNodeClick, onInstructionSave }: WorkflowNodeProps) => {
+export const InstructionNode = ({ id, data, selected, onNodeClick, onInstructionSave, readonly }: WorkflowNodeProps) => {
     const { updateNodeData } = useReactFlow();
     const nodeData = data as AppNodeData;
 
     const stringValue = nodeData.stringValue ?? "";
-    const isValidated = stringValue.trim().length > 0 && !nodeData.isEditing;
+    const hasText = stringValue.trim().length > 0;
+    // A viewer shows what is saved, whatever the editing state stored with the node.
+    const isValidated = hasText && (readonly || !nodeData.isEditing);
+    const showPlaceholder = readonly ? !hasText : nodeData.isPlaceholder && !nodeData.isEditing && !stringValue;
+    const showPanel = !readonly && (nodeData.isEditing || (!isValidated && !nodeData.isPlaceholder));
     const [draft, setDraft] = useState(stringValue);
 
     const handleValidate = (e: React.MouseEvent) => {
@@ -354,7 +360,7 @@ export const InstructionNode = ({ id, data, selected, onNodeClick, onInstruction
             />
 
             <AnimatePresence mode="wait">
-                {nodeData.isPlaceholder && !nodeData.isEditing && !stringValue && (
+                {showPlaceholder && (
                     <motion.div
                         key="placeholder"
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -364,15 +370,19 @@ export const InstructionNode = ({ id, data, selected, onNodeClick, onInstruction
                     >
                         <InstructionPlaceholder
                             isHighlighted={nodeData.isHighlighted as boolean | undefined}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                updateNodeData(id, { isEditing: true, isPlaceholder: false });
-                            }}
+                            onClick={
+                                readonly
+                                    ? undefined
+                                    : (e) => {
+                                          e.stopPropagation();
+                                          updateNodeData(id, { isEditing: true, isPlaceholder: false });
+                                      }
+                            }
                         />
                     </motion.div>
                 )}
 
-                {(nodeData.isEditing || (!isValidated && !nodeData.isPlaceholder)) && (
+                {showPanel && (
                     <motion.div
                         key="panel"
                         initial={{ opacity: 0, scale: 0.95, y: -4 }}
@@ -403,7 +413,7 @@ export const InstructionNode = ({ id, data, selected, onNodeClick, onInstruction
                             text={stringValue}
                             isSelected={!!selected}
                             onCardClick={() => onNodeClick?.(id)}
-                            onEditClick={handleEditClick}
+                            onEditClick={readonly ? undefined : handleEditClick}
                             settingLabel={nodeData.settingLabel}
                         />
                     </motion.div>

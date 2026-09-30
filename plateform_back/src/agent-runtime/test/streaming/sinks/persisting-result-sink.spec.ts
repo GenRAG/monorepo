@@ -115,6 +115,29 @@ describe('PersistingResultSink', () => {
         });
     });
 
+    it('reports an error event of the RAG engine: generic message, partial text persisted, cost billed', async () => {
+        await build().onCompleted({
+            kind: 'end',
+            fullText: 'Partial answer',
+            streamError: 'upstream model timeout',
+            costSummary: { total_cost_usd: 0.0004 },
+        });
+
+        expect(parseData(subscriber.next.mock.calls[0][0])).toEqual({
+            error: 'Une erreur est survenue. Veuillez réessayer.',
+        });
+        expect(conversationRepo.createMessage).toHaveBeenLastCalledWith({
+            conversationId: 'conv-1',
+            sender: MessageSender.AGENT,
+            content: 'Partial answer',
+            metadata: { durationMs: expect.any(Number) },
+        });
+        expect(conversationRepo.updateTimestamp).not.toHaveBeenCalled();
+        expect(usageRecorder.recordSafely).toHaveBeenCalledWith(
+            expect.objectContaining({ status: QueryLogStatus.ERROR, creditsUsed: 3 }),
+        );
+    });
+
     it('includes citedSources in the persisted metadata when present', async () => {
         const citedSources = [{ index: 0, title: 'doc.pdf', score: 0.9 }];
 

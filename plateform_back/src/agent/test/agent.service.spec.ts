@@ -82,6 +82,16 @@ describe('AgentService', () => {
             });
         });
 
+        it('should trim the name', async () => {
+            mockTx.agent.create.mockImplementation(() => Promise.resolve(fakeAgent));
+
+            await service.insertOne({ name: '  Support Agent  ' }, 'user-1', 'workspace-1');
+
+            expect(mockTx.agent.create).toHaveBeenCalledWith({
+                data: expect.objectContaining({ name: 'Support Agent' }),
+            });
+        });
+
         it('should use default description when none provided', async () => {
             mockTx.agent.create.mockImplementation(() =>
                 Promise.resolve({ ...fakeAgent, description: 'Pas de description pour le moment' }),
@@ -153,6 +163,28 @@ describe('AgentService', () => {
                 'agent-1',
                 expect.objectContaining({ name: 'Updated Agent', updatedBy: 'user-1' }),
             );
+        });
+
+        it('should trim the name', async () => {
+            mockAgentRepository.update.mockImplementation(() => Promise.resolve(fakeAgent));
+
+            await service.update('agent-1', { name: '  Updated Agent ' }, 'user-1');
+
+            expect(mockAgentRepository.update).toHaveBeenCalledWith(
+                'agent-1',
+                expect.objectContaining({ name: 'Updated Agent' }),
+            );
+        });
+
+        it('should leave the name out when it is not updated', async () => {
+            mockAgentRepository.update.mockImplementation(() => Promise.resolve(fakeAgent));
+
+            await service.update('agent-1', { description: 'New' }, 'user-1');
+
+            expect(mockAgentRepository.update).toHaveBeenCalledWith('agent-1', {
+                description: 'New',
+                updatedBy: 'user-1',
+            });
         });
 
         it('should throw NotFoundException when agent not found', async () => {

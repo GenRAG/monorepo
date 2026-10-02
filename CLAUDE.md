@@ -59,7 +59,7 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 |---|---|---|---|---|
 | Authentification | Inscription, connexion, reset, JWT en cookie | `pages/Auth`, `app/AuthContext.tsx` | `auth/` | `services/auth/auth.ts` |
 | Onboarding | Setup guidé en 3 étapes | `pages/Onboarding` | `onboarding/` | `services/onboarding/onboarding.ts` |
-| Workspaces | Multi-tenant, rôles ADMIN / EDITOR / VIEWER | `app/WorkspaceGuard.tsx`, `app/Navigation/` | `workspace/` | `services/workspace/workspace.ts` |
+| Workspaces | Multi-tenant, un seul par utilisateur (présenté comme « l'entreprise »), rôles ADMIN / EDITOR / VIEWER | `app/WorkspaceGuard.tsx`, `app/Navigation/` | `workspace/` | `services/workspace/workspace.ts` |
 | Agents | CRUD, export et partage d'agents | `pages/Agents`, `components/Agents` | `agent/` | `services/agent/agent.ts`, `agentMembers.ts` |
 | Workflow builder | Pipeline RAG drag-and-drop, aperçus animés des blocs | `pages/Agents/Workflow`, `components/Agents/Workflow` | `workflow/` | `services/workflow/workflow.ts`, `services/models/models.ts` |
 | Documents | Import, indexation asynchrone, statuts | `components/Document` | `document/`, `storage/` | `services/document/document.ts` |

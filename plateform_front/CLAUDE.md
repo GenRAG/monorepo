@@ -34,7 +34,8 @@ Convention : **`hooks/`, `utils/`, `types/`, `constants/`, `services/` vivent à
 ## Routes
 
 - Auth (publiques) : `/login`, `/register`, `/validate`, `/reset-password`, `/new-password` (+ `/test`, écran de bienvenue de dev).
-- Hors workspace : `/profile`, `/assistants` (interface utilisateur final), `/billing`, `/onboarding/:workspaceId`.
+- Hors workspace : `/profile` (dont la section « Entreprise », qui renomme le workspace), `/assistants` (interface utilisateur final), `/billing`, `/onboarding/:workspaceId`.
+- Un utilisateur n'a qu'un workspace : pas de sélecteur. Il est créé sur l'écran de bienvenue (`components/Auth/WelcomeScreen.tsx`, champ « Nom de votre entreprise ») et les textes de l'interface parlent d'« entreprise », pas de workspace.
 - Workspace : `/workspaces/:workspaceId/{dashboard,assistants[/:assistantId],billing,agents}`.
 - Agent : `/workspaces/:workspaceId/agents/:agentId/{playground,workflow,documents,deploy,access-control,analytics,settings}` (la racine redirige vers `playground`).
 - Légal : `/legal/{privacy,terms,notices,contact}`. Il n'y a plus de `/dashboard` ni de liste `/workspaces` hors contexte.

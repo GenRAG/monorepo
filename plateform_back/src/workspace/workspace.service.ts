@@ -1,5 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Workspace } from 'generated/prisma';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
+import { UpdateWorkspaceRequest } from 'src/workspace/dto/update-workspace.request';
 import { WorkspaceStatsService } from 'src/workspace/workspace-stats.service';
 import { WorkspaceRepository, WorkspaceWithUsers, WorkspacePayload } from 'src/workspace/workspace.repository';
 
@@ -11,8 +13,30 @@ export class WorkspaceService {
     ) {}
 
     async create(workspaceData: CreateWorkspaceRequest, userId: string): Promise<WorkspaceWithUsers> {
-        const { name, description } = workspaceData;
+        const { description } = workspaceData;
+        const name = this._normalizeName(workspaceData.name);
+
+        // One workspace per user: each creation grants the plan's initial credits.
+        if ((await this.workspaceRepository.countByUser(userId)) > 0) {
+            throw new ConflictException('User already has a workspace');
+        }
+
         return this.workspaceRepository.create({ name, description, userId });
+    }
+
+    async rename(workspaceId: string, { name }: UpdateWorkspaceRequest): Promise<Workspace> {
+        try {
+            return await this.workspaceRepository.updateName(workspaceId, this._normalizeName(name));
+        } catch (e: any) {
+            if (e?.code === 'P2025') throw new NotFoundException('Workspace not found');
+            throw e;
+        }
+    }
+
+    private _normalizeName(name: string): string {
+        const trimmed = name.trim();
+        if (!trimmed) throw new BadRequestException('Workspace name must not be empty');
+        return trimmed;
     }
 
     async findAll(userId: string): Promise<WorkspaceWithUsers[]> {
@@ -23,15 +47,6 @@ export class WorkspaceService {
         const workspace = await this.workspaceRepository.findOne(workspaceId);
         if (!workspace) throw new NotFoundException('Workspace not found');
         return workspace;
-    }
-
-    async delete(workspaceId: string): Promise<void> {
-        try {
-            await this.workspaceRepository.delete(workspaceId);
-        } catch (e: any) {
-            if (e?.code === 'P2025') throw new NotFoundException('Workspace not found');
-            throw e;
-        }
     }
 
     async getStats(workspaceId: string) {

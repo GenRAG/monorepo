@@ -39,7 +39,7 @@ const TIERS: PlanTier[] = [
         popular: false,
         features: [
             "Assistants illimités",
-            "SSO & workspace équipe",
+            "SSO & espace équipe",
             "Publication interne",
             "Intégrations personnalisées",
             "Garantie SLA",

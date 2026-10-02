@@ -18,7 +18,7 @@ export const CreditSummaryCard = ({ workspaceId }: CreditSummaryCardProps) => {
             <Card variant="attachedTop" size="sm">
                 <HStack align="flex-start" justify="space-between">
                     <VStack align="flex-start" spacing={0}>
-                        <Text variant="body-md-semibold">Crédits du workspace</Text>
+                        <Text variant="body-md-semibold">Crédits de l&apos;entreprise</Text>
                         <Text variant="body-xs-muted">Solde disponible pour l&apos;ensemble de vos agents</Text>
                     </VStack>
                 </HStack>

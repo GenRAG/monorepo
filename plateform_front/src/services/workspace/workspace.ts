@@ -1,6 +1,12 @@
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
-import { Workspace, WorkspaceCreateRequest, WorkspaceDetail, WorkspaceStats } from "types/workspace";
+import {
+    Workspace,
+    WorkspaceCreateRequest,
+    WorkspaceDetail,
+    WorkspaceRenameRequest,
+    WorkspaceStats,
+} from "types/workspace";
 
 export const workspaceStatsTag = (workspaceId: string) => ({
     type: Tag.Workspaces as const,
@@ -43,12 +49,13 @@ export const workspaceApi = backendApi.injectEndpoints({
             invalidatesTags: [{ type: Tag.Workspaces, id: "LIST" }],
         }),
 
-        deleteWorkspace: builder.mutation<void, string>({
-            query: (workspaceId) => ({
+        renameWorkspace: builder.mutation<Workspace, WorkspaceRenameRequest>({
+            query: ({ workspaceId, name }) => ({
                 url: `/workspaces/${workspaceId}`,
-                method: "DELETE",
+                method: "PATCH",
+                body: { name },
             }),
-            invalidatesTags: (_result, _error, workspaceId) => [
+            invalidatesTags: (_result, _error, { workspaceId }) => [
                 { type: Tag.Workspaces, id: "LIST" },
                 { type: Tag.Workspaces, id: workspaceId },
             ],
@@ -68,6 +75,6 @@ export const {
     useGetUserWorkspacesQuery,
     useGetWorkspaceByIdQuery,
     useCreateWorkspaceMutation,
-    useDeleteWorkspaceMutation,
+    useRenameWorkspaceMutation,
     useGetWorkspaceStatsQuery,
 } = workspaceApi;

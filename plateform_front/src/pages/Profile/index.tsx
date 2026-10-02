@@ -8,6 +8,7 @@ import { getApiErrorMessage } from "utils/apiError";
 import ProfileHero from "./ProfileHero";
 import ProfileSidebar, { ProfileSection } from "./ProfileSidebar";
 import PersonalInfoSection from "./sections/PersonalInfoSection";
+import OrganizationSection from "./sections/OrganizationSection";
 import SecuritySection from "./sections/SecuritySection";
 import AppearanceSection from "./sections/AppearanceSection";
 import DangerZone from "components/ui/DangerZone";
@@ -73,6 +74,7 @@ export const ProfilePage = () => {
                             {section === "info" && (
                                 <PersonalInfoSection user={user} onSave={handleSaveName} isLoading={isUpdating} />
                             )}
+                            {section === "organization" && <OrganizationSection />}
                             {section === "security" && (
                                 <SecuritySection onChangePassword={handleChangePassword} isLoading={isChangingPw} />
                             )}
@@ -84,7 +86,7 @@ export const ProfilePage = () => {
                     title="Supprimer le compte"
                     description="Supprime définitivement le compte, ses documents, conversations et workflows."
                     modalTitle="Supprimer le compte"
-                    modalDescription="Cette action supprimera définitivement votre compte, tous vos workspaces, agents et documents."
+                    modalDescription="Cette action supprimera définitivement votre compte, votre entreprise, vos agents et vos documents."
                     confirmText={user.email}
                     onConfirm={handleDeleteAccount}
                     isLoading={isDeleting}

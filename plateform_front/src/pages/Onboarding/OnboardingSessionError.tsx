@@ -6,12 +6,12 @@ import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
 const SESSION_ERROR_MESSAGES: Record<SessionError, { title: string; description: string }> = {
     not_found: {
-        title: "Workspace introuvable",
-        description: "Ce workspace n'existe pas ou a été supprimé. Vérifiez l'URL ou retournez au tableau de bord.",
+        title: "Espace introuvable",
+        description: "Cet espace n'existe pas ou a été supprimé. Vérifiez l'URL ou retournez au tableau de bord.",
     },
     unauthorized: {
         title: "Accès non autorisé",
-        description: "Vous n'avez pas accès à ce workspace. Contactez un administrateur.",
+        description: "Vous n'avez pas accès à cet espace. Contactez un administrateur.",
     },
     unknown: {
         title: "Une erreur est survenue",

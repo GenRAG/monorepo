@@ -39,7 +39,7 @@ Particularités :
 - Toujours `prisma.$transaction()` pour les opérations atomiques (crédits + `CreditTransaction`, déploiement + `AgentVersion`).
 - Workflow actif vs snapshot : l'exécution charge toujours `isActive: true`. Les snapshots (`isActive: false`) sont créés au déploiement et servent au rollback (`POST .../deployments/rollback` recopie la définition). Ne jamais activer un snapshot à la main.
 - Le statut d'un agent est dérivé du dernier `AgentVersion.toStatus` (aucune version = `DEVELOPMENT`) : le modifier via `deployment/`, jamais directement.
-- Un workspace démarre à 0 crédit (`POST /workspaces/:id/credit-balance` pour en ajouter).
+- **Un seul workspace par utilisateur** : `POST /workspaces` renvoie 409 si l'utilisateur en a déjà un (chaque création crédite les crédits initiaux du plan, `plans/plans.config.ts`). `PATCH /workspaces/:id` (ADMIN) le renomme. Il n'y a pas de suppression de workspace : il disparaît avec le compte (`users/user.repository.ts`), sinon supprimer puis recréer rendrait les crédits initiaux. Côté interface il est présenté comme « l'entreprise », jamais comme un workspace.
 
 ## Événements
 

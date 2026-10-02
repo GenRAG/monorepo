@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createTestApp } from './helpers/app.helper';
-import { cleanDatabase } from './helpers/db.helper';
+import { cleanDatabase, seedExtraWorkspace } from './helpers/db.helper';
 import { TEST_USER, TEST_USER_2, registerAndLogin, createWorkspace } from './helpers/auth.helper';
 
 describe('Agent (e2e)', () => {
@@ -158,10 +158,7 @@ describe('Agent (e2e)', () => {
         });
 
         it('should return empty array if no agents', async () => {
-            const emptyWorkspaceId = await createWorkspace(app, cookie, {
-                name: 'Empty Workspace',
-                description: '',
-            });
+            const emptyWorkspaceId = await seedExtraWorkspace(app, TEST_USER.email, 'Empty Workspace');
 
             const res = await request(app.getHttpServer())
                 .get(`/workspaces/${emptyWorkspaceId}/agents`)
@@ -218,10 +215,7 @@ describe('Agent (e2e)', () => {
         });
 
         it('should return 404 when agent belongs to different workspace', async () => {
-            const otherWorkspaceId = await createWorkspace(app, cookie, {
-                name: 'Other Workspace',
-                description: '',
-            });
+            const otherWorkspaceId = await seedExtraWorkspace(app, TEST_USER.email, 'Other Workspace');
 
             await request(app.getHttpServer())
                 .get(`/workspaces/${otherWorkspaceId}/agents/${agentId}`)
@@ -409,10 +403,7 @@ describe('Agent (e2e)', () => {
         });
 
         it('should prevent deletion of agent in another workspace', async () => {
-            const otherWorkspaceId = await createWorkspace(app, cookie, {
-                name: 'Other workspace for delete test',
-                description: '',
-            });
+            const otherWorkspaceId = await seedExtraWorkspace(app, TEST_USER.email, 'Other workspace for delete test');
 
             // Try to delete using wrong workspace ID
             await request(app.getHttpServer())

@@ -65,7 +65,7 @@ const PersonalInfoSection = ({ user, onSave, isLoading }: Props) => {
                         Informations personnelles
                     </Text>
                     <Text fontSize="sm" color="textLabel" mt={0.5}>
-                        Visibles par les membres de votre workspace.
+                        Visibles par les membres de votre entreprise.
                     </Text>
                 </Box>
 

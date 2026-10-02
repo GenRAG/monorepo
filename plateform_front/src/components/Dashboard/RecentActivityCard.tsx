@@ -139,7 +139,7 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                 <CardEmptyState
                     icon={Clock}
                     title="Aucune activité récente"
-                    description="Les événements de votre workspace apparaîtront ici."
+                    description="Les événements de votre entreprise apparaîtront ici."
                 />
             ) : (
                 <>

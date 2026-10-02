@@ -42,6 +42,14 @@ export interface WorkspaceCreateRequest {
     description?: string;
 }
 
+export interface WorkspaceRenameRequest {
+    workspaceId: string;
+    name: string;
+}
+
+export const WORKSPACE_NAME_MAX_LENGTH = 60;
+export const DEFAULT_WORKSPACE_NAME = "Mon entreprise";
+
 export interface WorkspaceStatsAgentItem {
     id: string;
     name: string;

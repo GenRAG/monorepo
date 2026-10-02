@@ -19,7 +19,7 @@ export class AgentService {
         return this.agentRepository.transaction(async (tx) => {
             const agent = await tx.agent.create({
                 data: {
-                    name: createAgentRequest.name,
+                    name: createAgentRequest.name.trim(),
                     description: createAgentRequest.description ?? 'Pas de description pour le moment',
                     createdBy: userId,
                     updatedBy: userId,
@@ -58,7 +58,12 @@ export class AgentService {
 
     async update(id: string, updateAgentDto: UpdateAgentRequest, userId: string): Promise<Agent> {
         try {
-            return await this.agentRepository.update(id, { ...updateAgentDto, updatedBy: userId });
+            const name = updateAgentDto.name?.trim();
+            return await this.agentRepository.update(id, {
+                ...updateAgentDto,
+                ...(name !== undefined && { name }),
+                updatedBy: userId,
+            });
         } catch (e) {
             throw toNotFoundIfMissing(e);
         }

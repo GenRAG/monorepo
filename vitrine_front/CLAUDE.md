@@ -26,7 +26,7 @@ CHROME_PATH=/usr/bin/google-chrome node scripts/shots.mjs http://localhost:3001/
 |---|---|
 | `content.ts` | **Tous les textes du site**, une constante par section (`hero`, `steps`, `builder`, `share`, `analytics`…), plus `nav` (ordre des sections). |
 | `App.tsx` | Assemble les sections dans l'ordre de `nav`. |
-| `sections/` | Une section = `Xxx.tsx` + `Xxx.module.css`. Les sections complexes ont un sous-dossier : `hero/` (animation d'ingestion), `builder/` (démo de l'éditeur), `share/` (démo de déploiement), `connectors/` (démo des connecteurs). |
+| `sections/` | Une section = `Xxx.tsx` + `Xxx.module.css`. Les sections complexes ont un sous-dossier : `hero/` (animation d'ingestion), `builder/` (démo de l'éditeur), `share/` (démo de déploiement), `connectors/` (démo des connecteurs), `reasoning/` (démo de comparaison de sources). |
 | `mockups/` | Maquettes réutilisables de l'app : `AppSidebar`, `BuilderCanvas` + `builderGraph.ts` (géométrie du schéma, dispositions `wide` et `tall`). |
 | `components/` | Transverse : `Panel` (section), `ui.tsx` (`SectionIntro`, `ButtonLink`, `DocIcon`), `Chrome` (header, nav latérale, barre de progression), `Logo`, `icoFaces.ts`, `DemoCursor`, `reveal.ts`. |
 | `motion/` | `stage.ts` (révélations au scroll, section active), `store.ts` (`useActivePanel`, `useHasEntered`), `scrubs.ts` (timeline `data-scrub="steps"`), `reduced.ts`, `MotionContext.tsx` (`useAnchor`, `sectionIndex`). |
@@ -39,7 +39,7 @@ CHROME_PATH=/usr/bin/google-chrome node scripts/shots.mjs http://localhost:3001/
 - **Sections** : `<Panel id tone label>`. `tone="open"` (fond continu, par défaut), `"slab"` (dalle sombre, avec `glow`), `"light"` (une seule dalle claire sur le parcours). L'`id` doit exister dans `nav` de `content.ts`, et `SectionIntro index` suit l'ordre de `nav`.
 - **Grilles « quadrillées »** (Étapes, Pourquoi, Suivi) : cellules jointives à bordures partagées (`var(--border)`), fond transparent, débordement d'une gouttière (`margin-inline: calc(-1 * var(--gutter))`) pour rejoindre les lignes de structure verticales des sections ouvertes.
 - **Révélations** : `{...reveal(i)}` sur un élément (fondu décalé de `i × 80 ms`).
-- **Démos animées** (`useConnectorDemo`, `useBuilderDemo`, `useShareDemo`) : même patron à réutiliser pour toute nouvelle démo :
+- **Démos animées** (`useConnectorDemo`, `useBuilderDemo`, `useShareDemo`, `useReasoningDemo`) : même patron à réutiliser pour toute nouvelle démo :
   - scénario async en boucle, annulé par un symbole `ABORT` dans le nettoyage de l'effet ;
   - ne tourne que si la section est active (`useActivePanel() === sectionIndex(id)`), avec un bouton pause ;
   - le curseur est `components/DemoCursor.tsx`, qui vise les éléments marqués `data-demo="…"` ;

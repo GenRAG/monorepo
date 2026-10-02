@@ -9,6 +9,7 @@ import { Problem } from "./sections/Problem";
 import { Steps } from "./sections/Steps";
 import { Assistants } from "./sections/Assistants";
 import { Connectors } from "./sections/Connectors";
+import { Reasoning } from "./sections/Reasoning";
 import { Builder } from "./sections/Builder";
 import { Share } from "./sections/Share";
 import { Analytics } from "./sections/Analytics";
@@ -53,6 +54,7 @@ export default function App() {
         <Assistants />
         <Builder />
         <Connectors />
+        <Reasoning />
         <Share />
         <Analytics />
         <Why />

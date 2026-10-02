@@ -42,7 +42,7 @@ export function Share() {
 
   return (
     <Panel id="partage" label="Déploiement" tone="open" className={styles.grid}>
-      <SectionIntro index={7} eyebrow={share.eyebrow} title={share.title} text={share.text}>
+      <SectionIntro index={8} eyebrow={share.eyebrow} title={share.title} text={share.text}>
         <ul className={styles.points} {...reveal(3)}>
           {share.points.map((p) => (
             <li key={p}>

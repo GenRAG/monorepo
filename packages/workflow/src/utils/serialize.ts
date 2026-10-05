@@ -1,22 +1,11 @@
 import type { Edge } from "@xyflow/react";
 import type { AppNode } from "../types/app-node";
 import { TaskType } from "../types/task";
-import { EdgeType } from "../types/edge";
+import { EdgeType, HandleId } from "../types/edge";
+import type { PipelineBlock, WorkflowDefinition } from "../types/pipeline";
+import { isSettingsTaskType } from "../graph/task-utils";
 
-export type QueryBlock    = { name: string; type: 'query' };
-export type RewriteBlock  = { name: string; type: 'query_rewrite'; model: string };
-export type RetrieveBlock = { name: string; type: 'retrieve'; collection_name: string; top_k: number };
-export type RerankBlock   = { name: string; type: 'rerank'; model: string };
-export type AnswerBlock   = { name: string; type: 'answer'; model: string; system_prompt?: string };
-
-export type PipelineBlock = QueryBlock | RewriteBlock | RetrieveBlock | RerankBlock | AnswerBlock;
-
-export interface WorkflowDefinition {
-    nodes: AppNode[];
-    edges: Edge[];
-    blocks: PipelineBlock[];
-}
-
+// Placeholder MODEL settings fall back to these models (the builder warns before saving an incomplete workflow).
 const DEFAULT_MODELS = { rewrite: 'gpt-4o', rerank: 'bge', answer: 'gpt-4o' } as const;
 const COLLECTION_NAME = 'genrag_knowledge_base';
 const DEFAULT_TOP_K = 5;
@@ -56,7 +45,7 @@ function collectMainChainNodes(nodes: AppNode[], edges: Edge[]): AppNode[] {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const nextNodeMap = new Map(
         edges
-            .filter((e) => e.type !== EdgeType.Settings && e.sourceHandle === 'main-source')
+            .filter((e) => e.type !== EdgeType.Settings && e.sourceHandle === HandleId.MainSource)
             .map((e) => [e.source, e.target]),
     );
 
@@ -66,7 +55,7 @@ function collectMainChainNodes(nodes: AppNode[], edges: Edge[]): AppNode[] {
 
     while (current && !visited.has(current.id)) {
         visited.add(current.id);
-        if (current.data.type !== TaskType.MODEL && current.data.type !== TaskType.INSTRUCTION) {
+        if (!isSettingsTaskType(current.data.type)) {
             orderedNodes.push(current);
         }
         const nextId = nextNodeMap.get(current.id);

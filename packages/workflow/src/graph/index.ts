@@ -1,2 +1,11 @@
-export { linkNodes, makeFlowNode, withAutoSettings } from './create-flow-node';
-export { getTaskDef, getNonSettingsTaskTypes, getAddableTaskTypes, getConfigInputs, getChainOutputs } from './task-utils';
+export { linkNodes, makeFlowNode, withAutoSettings, WORKFLOW_NODE_TYPE } from './create-flow-node';
+export {
+    getTaskSpec,
+    getNonSettingsTaskTypes,
+    getAddableTaskTypes,
+    getConfigInputs,
+    getChainOutputs,
+    isSettingsTaskType,
+} from './task-utils';
+export { TASK_SPECS } from './task-specs';
+export { LLMS, LLMSRewriter, ReRanker } from './models';

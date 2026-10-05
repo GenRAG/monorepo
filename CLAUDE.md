@@ -29,7 +29,7 @@ Fichiers racine : `docker-compose.yml` (services de dev), `package.json` (worksp
 
 - Workspaces yarn racine : **`packages/*` et `plateform_front` uniquement** (`nohoist` pour `plateform_front`). `yarn install` à la racine installe ces deux-là.
 - `plateform_back/` : `yarn install` dans le dossier. `vitrine_front/` : `npm install` dans le dossier. `rag-engine/` : `uv`.
-- `plateform_front` consomme `packages/workflow/dist` : rebuild le package après l'avoir modifié.
+- `plateform_front` compile `packages/workflow/src` directement (alias craco + `paths` tsconfig) : pas de rebuild nécessaire en dev. `dist/` (`yarn build`) sert aux consommateurs externes et au build Vercel.
 
 ## Commandes utiles
 

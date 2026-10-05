@@ -1,8 +1,9 @@
-import { Box, Button, Stack, Text, VStack } from "@chakra-ui/react";
+import { Flex, Icon, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SessionError } from "hooks/onboarding/useOnboarding";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import { AmbientGlow } from "components/ui/AmbientGlow";
+import Button from "components/ui/Button";
 
 const SESSION_ERROR_MESSAGES: Record<SessionError, { title: string; description: string }> = {
     not_found: {
@@ -25,38 +26,37 @@ interface OnboardingSessionErrorProps {
 
 export const OnboardingSessionError = ({ sessionError }: OnboardingSessionErrorProps) => {
     const navigate = useNavigate();
+    const ambientBg = useColorModeValue("grey.100", "grey.975");
     const { title, description } = SESSION_ERROR_MESSAGES[sessionError];
 
     return (
-        <Stack h="100vh" align="center" justify="center" p={8}>
+        <Flex h="100vh" align="center" justify="center" p={6} position="relative" zIndex={0} bg={ambientBg}>
+            <AmbientGlow />
             <VStack
-                spacing={6}
-                maxW="480px"
-                h="100%"
+                spacing={5}
+                maxW="440px"
                 w="100%"
                 p={8}
-                bg="surfaceModal"
-                border="1px solid"
-                borderColor="borderDivider"
-                borderRadius="16px"
-                align="center"
+                bg="agentBackgroundDefault"
+                borderWidth="1px"
+                borderStyle="solid"
+                borderColor="borderSubtle"
+                borderRadius="20px"
                 textAlign="center"
             >
-                <Box p={4} bg="borderDefault" borderRadius="12px">
-                    <AlertTriangle size={32} color="var(--chakra-colors-errorIconAccent)" />
-                </Box>
-                <VStack spacing={2}>
-                    <Text fontSize="xl" fontWeight="semibold" color="textStrong">
+                <Flex w="52px" h="52px" align="center" justify="center" bg="surfaceHover" borderRadius="12px">
+                    <Icon as={AlertTriangle} boxSize={6} color="errorIconAccent" />
+                </Flex>
+                <VStack spacing={1.5}>
+                    <Text variant="body-lg-semibold" color="textStrong">
                         {title}
                     </Text>
-                    <Text fontSize="sm" color="textDescription">
+                    <Text variant="body-sm" color="textLabel">
                         {description}
                     </Text>
                 </VStack>
-                <Button colorScheme={currentDarkTheme.colorScheme} onClick={() => void navigate("/")}>
-                    Retour au tableau de bord
-                </Button>
+                <Button onClick={() => void navigate("/")}>Retour au tableau de bord</Button>
             </VStack>
-        </Stack>
+        </Flex>
     );
 };

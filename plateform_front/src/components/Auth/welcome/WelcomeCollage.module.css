@@ -1,0 +1,72 @@
+/* Composition des démos reprises du site vitrine : un plan net, un arrière-plan flou. */
+.frame {
+  position: relative;
+  flex: none;
+}
+
+.canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 980px;
+  height: 860px;
+  transform-origin: 0 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.layer {
+  position: absolute;
+}
+
+.builder {
+  left: 40px;
+  top: 0;
+  width: 940px;
+  z-index: 1;
+}
+
+.share {
+  left: 550px;
+  top: 400px;
+  width: 510px;
+  z-index: 2;
+  filter: drop-shadow(0 40px 60px rgba(0, 0, 0, 0.7));
+}
+
+/* Fond plein : les fenêtres sont en verre, ce qui est derrière ne doit pas transparaître */
+.builder,
+.share {
+  background: var(--grey-975);
+  border-radius: var(--r-xl);
+}
+
+.reasoning {
+  left: 0;
+  top: 455px;
+  width: 450px;
+}
+
+/* Arrière-plan : flou et atténué, pour donner de la profondeur sans disputer l'attention */
+.blurred {
+  filter: blur(4px);
+  opacity: 0.55;
+}
+
+.enter {
+  animation: enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i) * 140ms);
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter {
+    animation: none;
+  }
+}

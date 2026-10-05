@@ -42,11 +42,17 @@ export const useOnboardingState = (steps: StepConfig[]) => {
             .then((session) => {
                 setAgentId(session.agentId);
                 setSessionId(session.sessionId);
-                setState((prev) => ({
-                    ...prev,
-                    currentStep: Math.min(Math.max(prev.currentStep, session.step - 1), steps.length - 1),
-                    stepsData: session.stepsData ?? prev.stepsData,
-                }));
+                setState((prev) => {
+                    const currentStep = Math.min(Math.max(prev.currentStep, session.step - 1), steps.length - 1);
+                    // Une session reprise est déjà passée par les étapes précédentes : elles restent accessibles.
+                    const reached = Array.from({ length: currentStep }, (_, i) => i);
+                    return {
+                        ...prev,
+                        currentStep,
+                        completedSteps: Array.from(new Set([...prev.completedSteps, ...reached])),
+                        stepsData: session.stepsData ?? prev.stepsData,
+                    };
+                });
             })
             .catch((err) => {
                 const status = err?.status ?? err?.originalStatus;

@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useCallback } from "react";
 import "pages/Onboarding/onboardingAnimations.css";
-import { Box, HStack, Spinner, Stack, Text, VStack, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, useColorModeValue } from "@chakra-ui/react";
 import { OnboardingProvider } from "pages/Onboarding/OnBoardingProvider";
 import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import { stepsConfig } from "pages/Onboarding/steps/StepConfig";
 import StepFooter from "components/Onboarding/StepFooter";
-import OnboardingHeader from "components/Onboarding/Stepper/OnboardingHeader";
-import OnboardingSidebar from "components/Onboarding/Stepper/OnboardingSidebar";
+import OnboardingRail from "components/Onboarding/Stepper/OnboardingRail";
+import OnboardingTopBar from "components/Onboarding/Stepper/OnboardingTopBar";
 import { OnboardingSessionError } from "pages/Onboarding/OnboardingSessionError";
+import { AmbientGlow } from "components/ui/AmbientGlow";
+import { AppLoader } from "components/ui/AppLoader";
+import WorkspaceHeader from "components/ui/WorkspaceHeader";
 
 const OnboardingContent: React.FC = () => {
     const {
         currentStep,
+        totalSteps,
         goNext,
         goPrevious,
-        skip,
         updateStepData,
         getStepData,
         isStepValid,
@@ -22,12 +25,8 @@ const OnboardingContent: React.FC = () => {
         sessionError,
     } = useOnboarding();
 
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
-    const containerStyles = {
-        borderColor: "borderDivider",
-    };
-    const responsivePadding = { base: 4, md: 6, lg: 10 };
+    // Même fond ambiant que la section agent (voir PrivateAgentAppLayout).
+    const ambientBg = useColorModeValue("grey.100", "grey.975");
 
     const currentStepConfig = stepsConfig[currentStep];
     const CurrentStepComponent = currentStepConfig.component;
@@ -37,35 +36,8 @@ const OnboardingContent: React.FC = () => {
         [updateStepData, currentStepConfig.id],
     );
 
-    const [justCompletedStep, setJustCompletedStep] = useState<number | null>(null);
-    const prevStepRef = useRef(currentStep);
-
-    useEffect(() => {
-        const prevStep = prevStepRef.current;
-        if (prevStep === currentStep) return;
-
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        setTimeout(() => {
-            const container = document.querySelector("[data-onboarding-container]") as HTMLElement;
-            container?.scrollTo({ top: 0, behavior: "smooth" });
-        }, 50);
-
-        if (currentStep > prevStep) setJustCompletedStep(prevStep);
-
-        const timer = setTimeout(() => setJustCompletedStep(null), 1000);
-        prevStepRef.current = currentStep;
-        return () => clearTimeout(timer);
-    }, [currentStep]);
-
     if (isSessionLoading) {
-        return (
-            <Stack h="100vh" align="center" justify="center" spacing={4}>
-                <Spinner size="lg" color="iconAccent" />
-                <Text color="textDescription" fontSize="sm">
-                    Chargement de votre session...
-                </Text>
-            </Stack>
-        );
+        return <AppLoader />;
     }
 
     if (sessionError) {
@@ -73,73 +45,39 @@ const OnboardingContent: React.FC = () => {
     }
 
     return (
-        <Stack h="100vh" bg="secondBackgroundDefault" spacing={0} overflow="hidden">
-            <OnboardingHeader onOpenDrawer={onOpen} />
+        <Flex h="100vh" overflow="hidden" position="relative" zIndex={0} bg={ambientBg}>
+            <AmbientGlow />
+            <OnboardingRail />
 
-            <HStack w="100%" flex={1} minH={0} p={0} spacing={0} align="stretch">
-                <Stack p={4}>
-                    <OnboardingSidebar
-                        justCompletedStep={justCompletedStep}
-                        isDrawerOpen={isOpen}
-                        onDrawerClose={onClose}
-                    />
-                </Stack>
-
-                <VStack
-                    flex={{ base: 1, md: 4 }}
-                    align="start"
-                    px={responsivePadding}
-                    pt={responsivePadding}
-                    borderRadius={0}
-                    borderStyle="solid"
-                    justify="space-between"
+            <Flex flex={1} minW={0} direction="column" p={3} overflow="hidden">
+                <OnboardingTopBar />
+                <Flex
+                    flex={1}
+                    minH={0}
+                    direction="column"
                     overflow="hidden"
-                    h="100%"
-                    data-onboarding-container
-                    {...containerStyles}
+                    bg="agentBackgroundDefault"
+                    borderRadius="20px"
                 >
-                    <VStack h="100%" align="start" spacing={0} w="100%" justify="space-between" minH={0}>
-                        <Stack w="100%" spacing={4} flex={1} minH={0} overflow="hidden">
-                            <Text
-                                fontSize="2xl"
-                                color="iconAccent"
-                                fontWeight="semibold"
-                                key={`step-text-${currentStep}`}
-                                className="step-text-animation"
-                            >
-                                {`ETAPE ${currentStep + 1} / ${stepsConfig.length}`} <br />{" "}
-                                {`${currentStepConfig.title}`}
-                            </Text>
-                            <Box
-                                key={`step-content-${currentStep}`}
-                                className="step-content-animation"
-                                w="100%"
-                                h="100%"
-                                flex={1}
-                                minH={0}
-                                pr={4}
-                                mb={4}
-                            >
-                                <CurrentStepComponent
-                                    data={getStepData(currentStepConfig.id)}
-                                    updateData={handleUpdateData}
-                                    goNext={goNext}
-                                    goPrevious={goPrevious}
-                                    isValid={isStepValid(currentStep)}
-                                />
-                            </Box>
-                        </Stack>
-                        <StepFooter
-                            currentStep={currentStep}
+                    <WorkspaceHeader title={currentStepConfig.title} description={currentStepConfig.description} />
+                    <Box key={currentStep} className="step-content-animation" flex={1} minH={0} p={4} overflow="hidden">
+                        <CurrentStepComponent
+                            data={getStepData(currentStepConfig.id)}
+                            updateData={handleUpdateData}
                             goNext={goNext}
                             goPrevious={goPrevious}
-                            onValidateAndGoNext={async () => goNext()}
-                            onSkip={skip}
+                            isValid={isStepValid(currentStep)}
                         />
-                    </VStack>
-                </VStack>
-            </HStack>
-        </Stack>
+                    </Box>
+                    <StepFooter
+                        currentStep={currentStep}
+                        totalSteps={totalSteps}
+                        goNext={goNext}
+                        goPrevious={goPrevious}
+                    />
+                </Flex>
+            </Flex>
+        </Flex>
     );
 };
 

@@ -1,0 +1,119 @@
+/*
+ * Portée des démos reprises du site vitrine : mêmes noms de tokens que vitrine_front/src/styles/tokens.css,
+ * limités à ce conteneur (l'app définit déjà --border ailleurs) et branchés sur le thème Chakra.
+ */
+.scope {
+  /* Échelle grey (app) */
+  --grey-50: var(--chakra-colors-grey-50);
+  --grey-100: var(--chakra-colors-grey-100);
+  --grey-200: var(--chakra-colors-grey-200);
+  --grey-300: var(--chakra-colors-grey-300);
+  --grey-400: var(--chakra-colors-grey-400);
+  --grey-500: var(--chakra-colors-grey-500);
+  --grey-600: var(--chakra-colors-grey-600);
+  --grey-700: var(--chakra-colors-grey-700);
+  --grey-800: var(--chakra-colors-grey-800);
+  --grey-850: var(--chakra-colors-grey-850);
+  --grey-900: var(--chakra-colors-grey-900);
+  --grey-950: var(--chakra-colors-grey-950);
+  --grey-975: var(--chakra-colors-grey-975);
+
+  /* Échelle green (app) */
+  --green-50: var(--chakra-colors-green-50);
+  --green-100: var(--chakra-colors-green-100);
+  --green-200: var(--chakra-colors-green-200);
+  --green-300: var(--chakra-colors-green-300);
+  --green-400: var(--chakra-colors-green-400);
+  --green-500: var(--chakra-colors-green-500);
+  --green-600: var(--chakra-colors-green-600);
+  --green-700: var(--chakra-colors-green-700);
+  --green-800: var(--chakra-colors-green-800);
+  --green-900: var(--chakra-colors-green-900);
+
+  /* Violet : réservé au « modèle IA » (minimap / handles de l'app) */
+  --violet-300: #c4b5fd;
+  --violet-400: #a78bfa;
+  --violet-500: #8b5cf6;
+  --violet-900: #2e1f5e;
+
+  --olive-50: #f4f6ef;
+  --orange-400: #ffa980;
+  --red-400: #f97071;
+
+  /* Sémantique — sombre */
+  --bg-shell: var(--grey-975);
+  --bg-page: var(--grey-950);
+  --surface-1: var(--grey-900);
+  --surface-2: var(--grey-850);
+  --surface-3: var(--grey-800);
+  --text-strong: #ffffff;
+  --text-primary: var(--grey-100);
+  --text-secondary: var(--grey-300);
+  --text-label: var(--grey-400);
+  --text-faint: var(--grey-500);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --accent: var(--green-400);
+  --accent-strong: var(--green-500);
+  --accent-soft: rgba(52, 211, 169, 0.12);
+  --accent-glow: rgba(18, 185, 140, 0.2);
+  --ai: var(--violet-400);
+  --ai-soft: rgba(139, 92, 246, 0.14);
+
+  /* Section claire */
+  --light-bg: var(--olive-50);
+  --light-surface: #ffffff;
+  --light-text: var(--grey-900);
+  --light-text-muted: var(--grey-600);
+  --light-border: rgba(15, 23, 42, 0.1);
+
+  /* Verre (GlassSurface, variante dark) */
+  --glass-bg: rgba(11, 14, 17, 0.52);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-blur: blur(16px) saturate(200%);
+  --glass-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --glass-sheen: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.04) 32%,
+    rgba(255, 255, 255, 0) 55%
+  );
+
+  /* Typo */
+  --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-display: clamp(2.6rem, 1.2rem + 4.4vw, 5.25rem);
+  --fs-h2: clamp(2.1rem, 1.1rem + 3.1vw, 4rem);
+  --fs-h3: clamp(1.15rem, 1rem + 0.4vw, 1.35rem);
+  --fs-lead: clamp(1.05rem, 0.98rem + 0.3vw, 1.25rem);
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-micro: 0.6875rem;
+
+  /* Rayons (app : nodes 12px, cartes 16px) */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+
+  /* Layout */
+  --maxw: 1200px;
+  --gutter: clamp(20px, 4vw, 48px);
+  --header-h: 68px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  color-scheme: dark;
+}
+
+.scope svg {
+  display: block;
+}
+
+.scope p {
+  margin: 0;
+}

@@ -29,12 +29,13 @@ Convention : **`hooks/`, `utils/`, `types/`, `constants/`, `services/` vivent à
 - ✅ `src/utils/analytics/dateUtils.ts` — un élément transverse (`src/utils/validateEmail.ts`, `src/utils/agentAvatar.ts`) reste à la racine du dossier.
 - `src/lib/` est distinct de `src/utils/` : réservé aux petits wrappers de librairie (`lib/utils.ts` → `cn()` clsx+tailwind-merge pour les composants Tailwind, `lib/mixpanel.ts` → client Mixpanel). Ne pas y mettre de logique métier.
 - `src/store/` : `navigationSlice.ts` (état client pur — sidebar/nav), `index.ts` (configureStore), `reduxProvider.tsx`. N'y ajouter que de l'état UI/client, jamais des données serveur (RTK Query cache s'en charge).
-- Routing : `src/app/Router.tsx` délègue à `src/app/Routes/{AppRoutes,AgentRoutes,AuthRoutes,LegalRoutes}.tsx`. Layouts : `PrivateAppLayout` (sidebar principale), `PrivateAgentAppLayout` (sidebar agent). Guards : `PrivateRoute`, `WorkspaceGuard` (vérifie l'accès au `workspaceId` de l'URL).
+- Routing : `src/app/Router.tsx` délègue à `src/app/Routes/{AppRoutes,AgentRoutes,AuthRoutes,LegalRoutes}.tsx`. Layouts : `PrivateAppLayout` (sidebar principale), `PrivateAgentAppLayout` (sidebar agent). L'onboarding (`pages/Onboarding/OnBoarding.tsx`) reprend le fond et le panneau arrondi de la section agent : la lueur est partagée dans `components/ui/AmbientGlow.tsx`. Guards : `PrivateRoute`, `WorkspaceGuard` (vérifie l'accès au `workspaceId` de l'URL).
 
 ## Routes
 
 - Auth (publiques) : `/login`, `/register`, `/validate`, `/reset-password`, `/new-password` (+ `/test`, écran de bienvenue de dev).
 - Hors workspace : `/profile` (dont la section « Entreprise », qui renomme le workspace), `/assistants` (interface utilisateur final), `/billing`, `/onboarding/:workspaceId`.
+- Écran de bienvenue : son visuel (`components/Auth/welcome/`) reprend trois démos animées du site vitrine (éditeur, déploiement, comparaison de sources). `welcome/vitrine/` est une **copie** de fichiers de `vitrine_front/src` (CSS Modules, pas de Chakra), avec ses tokens limités à `scope.module.css` ; elle n'est pas synchronisée avec la vitrine.
 - Un utilisateur n'a qu'un workspace : pas de sélecteur. Il est créé sur l'écran de bienvenue (`components/Auth/WelcomeScreen.tsx`, champ « Nom de votre entreprise ») et les textes de l'interface parlent d'« entreprise », pas de workspace.
 - Workspace : `/workspaces/:workspaceId/{dashboard,assistants[/:assistantId],billing,agents}`.
 - Agent : `/workspaces/:workspaceId/agents/:agentId/{playground,workflow,documents,deploy,access-control,analytics,settings}` (la racine redirige vers `playground`).

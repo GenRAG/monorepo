@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Box, Skeleton, Stack, Text, VStack, chakra } from "@chakra-ui/react";
 import { RotateCcw } from "lucide-react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
-import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
 import ChatInput from "components/ui/chat/ChatInput";
 import Button from "components/ui/Button";
 import ResponseCard from "components/Onboarding/CompareIntelligence/ResponseDetailPanel";
+import CompareEmptyState from "components/Onboarding/CompareIntelligence/CompareEmptyState";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import {
@@ -13,7 +13,7 @@ import {
     useCompareOnboardingMutation,
     useUpdateOnboardingStepsDataMutation,
 } from "services/onboarding/onboarding";
-import Banner from "components/ui/Banner";
+import StepHint from "components/Onboarding/StepHint";
 import { CARD_META } from "pages/Onboarding/steps/compareIntelligenceCards";
 
 const MAX_COMPARES = 2;
@@ -40,7 +40,11 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
             const defaultLLM = "precise";
             setSelectedLLM(defaultLLM);
             updateData({ selectedLLM: defaultLLM });
-            void updateStepsData({ workspaceId, stepId: STEP_ID, data: { selectedLLM: defaultLLM } });
+            void updateStepsData({
+                workspaceId,
+                stepId: STEP_ID,
+                data: { selectedLLM: defaultLLM },
+            });
         }
     }, [isAtLimit, selectedLLM, workspaceId, updateData, updateStepsData]);
 
@@ -54,7 +58,11 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
         const newCount = compareCount + 1;
         setCompareCount(newCount);
         updateData({ compareCount: newCount });
-        void updateStepsData({ workspaceId, stepId: STEP_ID, data: { compareCount: newCount } });
+        void updateStepsData({
+            workspaceId,
+            stepId: STEP_ID,
+            data: { compareCount: newCount },
+        });
 
         try {
             const result = await compareOnboarding({
@@ -63,19 +71,31 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
             }).unwrap();
             setResponses(result);
             updateData({ messageSent: true });
-            void updateStepsData({ workspaceId, stepId: STEP_ID, data: { messageSent: true } });
+            void updateStepsData({
+                workspaceId,
+                stepId: STEP_ID,
+                data: { messageSent: true },
+            });
         } catch {
             setQuestion(null);
             setCompareCount(compareCount);
             updateData({ compareCount });
-            void updateStepsData({ workspaceId, stepId: STEP_ID, data: { compareCount } });
+            void updateStepsData({
+                workspaceId,
+                stepId: STEP_ID,
+                data: { compareCount },
+            });
         }
     };
 
     const handleResponseSelect = (llmId: string) => {
         setSelectedLLM(llmId);
         updateData({ selectedLLM: llmId });
-        void updateStepsData({ workspaceId, stepId: STEP_ID, data: { selectedLLM: llmId } });
+        void updateStepsData({
+            workspaceId,
+            stepId: STEP_ID,
+            data: { selectedLLM: llmId },
+        });
     };
 
     const handleReset = () => {
@@ -88,35 +108,40 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
     return (
         <chakra.form w="100%" h="100%">
             <Stack w="100%" h="100%" spacing={4} flexDirection="column">
-                <VStack align="start" spacing={4} w="100%">
-                    <Banner title="Information concernant cette étape" variant="green">
-                        <Text fontSize="xs">
-                            Pose une question pour comparer les différentes manières dont l&apos;assistant peut
-                            répondre. Ensuite choisis la réponse que tu préfères pour personnaliser ton assistant.
-                        </Text>
-                    </Banner>
-                </VStack>
+                <StepHint
+                    quota={{
+                        current: compareCount,
+                        max: MAX_COMPARES,
+                        label: "comparaisons",
+                    }}
+                >
+                    Pose une question pour comparer trois styles de réponse, puis choisis celui que tu préfères : ton
+                    assistant l&apos;adoptera.
+                </StepHint>
 
                 <Box
                     flex={1}
                     minH={0}
                     overflowY="auto"
-                    pr={2}
-                    border="1px solid"
-                    borderColor="borderPanel"
+                    borderWidth="1px"
+                    borderStyle="solid"
+                    borderColor="borderSubtle"
                     borderRadius="12px"
-                    p={4}
+                    p={question ? 4 : 0}
                 >
                     {!question ? (
-                        <ChatInput
-                            placeholder={
-                                isAtLimit
-                                    ? `Limite atteinte (${compareCount}/${MAX_COMPARES})`
-                                    : "Pose une question pour voir les différences..."
-                            }
-                            onSend={handleQuestionSend}
-                            disabled={isAtLimit}
-                        />
+                        <VStack h="100%" align="stretch" spacing={0}>
+                            <CompareEmptyState />
+                            <ChatInput
+                                placeholder={
+                                    isAtLimit
+                                        ? `Limite atteinte (${compareCount}/${MAX_COMPARES})`
+                                        : "Pose une question pour voir les différences..."
+                                }
+                                onSend={handleQuestionSend}
+                                disabled={isAtLimit}
+                            />
+                        </VStack>
                     ) : (
                         <VStack spacing={4} align="stretch">
                             <VStack align="flex-end" spacing={1} alignSelf="flex-end" maxW="80%">
@@ -133,19 +158,12 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                             {isLoading ? (
                                 <Stack direction={isMobile ? "column" : "row"} spacing={4} align="stretch">
                                     {CARD_META.map((card) => (
-                                        <Skeleton
-                                            key={card.key}
-                                            flex={1}
-                                            height="200px"
-                                            borderRadius="12px"
-                                            startColor="skeletonStart"
-                                            endColor="skeletonEnd"
-                                        />
+                                        <Skeleton key={card.key} flex={1} height="200px" borderRadius="12px" />
                                     ))}
                                 </Stack>
                             ) : responses ? (
                                 <>
-                                    <Text fontSize="sm" color="textDescription">
+                                    <Text variant="body-sm" color="textLabel">
                                         Sélectionne la réponse que tu préfères :
                                     </Text>
 
@@ -181,7 +199,6 @@ export const CompareIntelligenceStepComponent: React.FC<StepComponentProps> = ({
                         </VStack>
                     )}
                 </Box>
-                <OnboardingStepBanner current={compareCount} max={MAX_COMPARES} />
             </Stack>
         </chakra.form>
     );

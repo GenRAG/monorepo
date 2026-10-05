@@ -1,12 +1,11 @@
 import React, { useCallback } from "react";
-import { Box, Stack, Text, chakra } from "@chakra-ui/react";
+import { Box, Stack, chakra } from "@chakra-ui/react";
 import { StepComponentProps } from "pages/Onboarding/OnBoardingProvider";
 import { ChatMessage, RagSource, ChatResponseMeta, ThinkingEvent, useAgentQuery } from "hooks/chat";
 import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 import { ChatInterface } from "components/ui/chat/ChatInterface";
-import OnboardingStepBanner from "components/ui/OnboardingStepBanner";
-import Banner from "components/ui/Banner";
+import StepHint from "components/Onboarding/StepHint";
 
 const STEP_ID = "test-assistant";
 const MAX_EXCHANGES = 5;
@@ -62,15 +61,18 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
     return (
         <chakra.form w="100%" h="100%">
             <Stack spacing={4} h="100%">
-                <Banner title="Information concernant cette étape" variant="green">
-                    <Text fontSize="xs">
-                        L&apos;assistant actuel utilise des documents RH publics et des informations générales. Il
-                        n&apos;a pas encore accès à vos documents. Pose lui une question pour tester ses réponses. Tu
-                        peux poser jusqu&apos;à {MAX_EXCHANGES} questions.
-                    </Text>
-                </Banner>
+                <StepHint
+                    quota={{
+                        current: messageCount,
+                        max: MAX_EXCHANGES,
+                        label: "questions",
+                    }}
+                >
+                    L&apos;assistant utilise pour l&apos;instant des documents RH publics, pas encore les tiens.
+                    Pose-lui une question pour tester ses réponses.
+                </StepHint>
 
-                <Box flex={1} minH={0} display="flex" flexDirection="column" gap={2}>
+                <Box flex={1} minH={0} display="flex" flexDirection="column">
                     <ChatInterface
                         fullHeight
                         compact
@@ -91,7 +93,6 @@ export const TestAssistantStepComponent: React.FC<StepComponentProps> = ({ data,
                         welcomeMessage="Pose-lui une question ou essaie l'une des suggestions ci-dessous."
                     />
                 </Box>
-                <OnboardingStepBanner current={messageCount} max={MAX_EXCHANGES} mb={0} />
             </Stack>
         </chakra.form>
     );

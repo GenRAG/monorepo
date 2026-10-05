@@ -30,32 +30,37 @@ const ResponseCard: React.FC<ResponseCardProps> = ({
     return (
         <Box
             flex={1}
-            border="1px solid"
-            borderColor={isSelected ? "borderAccentCardActive" : "borderDivider"}
+            as="button"
+            type="button"
+            aria-pressed={isSelected}
+            textAlign="left"
+            borderWidth="1px"
+            borderStyle="solid"
+            borderColor={isSelected ? "borderAccentCardActive" : "borderSubtle"}
             borderRadius="12px"
             p={4}
             cursor="pointer"
             onClick={onClick}
-            bg="surfaceAction"
+            bg={isSelected ? "accentCardBg" : "surfaceCard"}
             _hover={{
                 borderColor: "borderAccentCardActive",
             }}
-            transition="border-color 0.15s"
+            transition="border-color 0.15s, background 0.15s"
         >
             <VStack align="stretch" spacing={3}>
                 <HStack justify="space-between" align="center">
                     <HStack spacing={2}>
                         <Icon as={icon} boxSize={4} color="iconAccent" />
-                        <Text fontWeight="bold" fontSize="xs" letterSpacing="wider" color="textStrong">
+                        <Text variant="body-sm-semibold" color="textStrong">
                             {title}
                         </Text>
                     </HStack>
                     <Badge
-                        fontSize="xs"
                         colorScheme={isRecommended ? "green" : "gray"}
                         variant="subtle"
                         borderRadius="full"
                         px={2}
+                        textTransform="none"
                     >
                         {badge}
                     </Badge>

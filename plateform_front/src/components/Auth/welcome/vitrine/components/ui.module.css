@@ -1,0 +1,29 @@
+.docIcon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--grey-300);
+}
+.k_pdf {
+  color: #f9a3a4;
+  background: rgba(249, 112, 113, 0.12);
+}
+.k_sheet {
+  color: var(--green-300);
+  background: rgba(52, 211, 169, 0.12);
+}
+.k_doc {
+  color: #99ccee;
+  background: rgba(74, 159, 216, 0.14);
+}
+.k_mail {
+  color: #efc27e;
+  background: rgba(232, 162, 79, 0.13);
+}
+.k_folder {
+  color: var(--grey-200);
+}

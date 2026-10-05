@@ -81,7 +81,7 @@ export const PipelineJsonPanel = ({
             </HStack>
             <Box p={5} bg="secondBackgroundDefault" flex="1" maxW="100%" overflowY="scroll" overflowX="hidden">
                 {isLoading ? (
-                    <Skeleton h="200px" borderRadius="6px" />
+                    <Skeleton h="200px" borderRadius="8px" />
                 ) : isError ? (
                     <Text fontSize="sm" color="textError">
                         Impossible de charger le workflow de ce déploiement.

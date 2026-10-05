@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, Card, HStack, Stack, Text } from "@chakra-ui/react";
+import { Box, Card, HStack, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { DocumentStats } from "types/document/document";
 import { formatFileSize } from "utils/documentFormatters";
 
@@ -48,21 +48,28 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
         <Card size="none" variant="attachedBottom" p={5} pt={3} display="flex" flexDirection="column" gap={3} minW={0}>
             <Stack spacing="2px">
                 <Text variant="caption-xl">Stockage</Text>
-                <HStack align="flex-start">
-                    <Box>
-                        <HStack align="baseline" spacing={2}>
-                            <Text fontSize="28px" fontWeight="700" color="textPrimary" lineHeight="1">
-                                {formatFileSize(totalUsed)}
+                {!stats ? (
+                    <Stack spacing={2}>
+                        <Skeleton h="28px" w="140px" borderRadius="4px" />
+                        <Skeleton h="10px" w="180px" borderRadius="4px" />
+                    </Stack>
+                ) : (
+                    <HStack align="flex-start">
+                        <Box>
+                            <HStack align="baseline" spacing={2}>
+                                <Text fontSize="28px" fontWeight="700" color="textPrimary" lineHeight="1">
+                                    {formatFileSize(totalUsed)}
+                                </Text>
+                                <Text fontSize="13px" fontWeight="600" color={pctColor}>
+                                    {usedPct.toFixed(1)}%
+                                </Text>
+                            </HStack>
+                            <Text variant="body-2xs-muted" mt={0.5}>
+                                / {formatFileSize(DEFAULT_QUOTA_BYTES)} - {formatFileSize(freeBytes)} libre
                             </Text>
-                            <Text fontSize="13px" fontWeight="600" color={pctColor}>
-                                {usedPct.toFixed(1)}%
-                            </Text>
-                        </HStack>
-                        <Text variant="body-2xs-muted" mt={0.5}>
-                            / {formatFileSize(DEFAULT_QUOTA_BYTES)} - {formatFileSize(freeBytes)} libre
-                        </Text>
-                    </Box>
-                </HStack>
+                        </Box>
+                    </HStack>
+                )}
             </Stack>
 
             <Box position="relative" h="8px" borderRadius="full" bg="borderDefault" overflow="hidden">
@@ -75,26 +82,28 @@ export const StorageOverviewPanel: React.FC<StorageOverviewPanelProps> = ({ stat
                 </HStack>
             </Box>
 
-            <HStack spacing={3} flexWrap="wrap">
-                {SEGMENTS.filter((s) => byType[s.key] > 0).map((seg) => (
-                    <HStack key={seg.key} spacing={1.5}>
-                        <Box w="8px" h="8px" borderRadius="2px" bg={seg.fill} flexShrink={0} />
-                        <Text variant="body-2xs-muted">{seg.label}</Text>
-                        <Text fontSize="11px" color="textPrimary" fontWeight="500">
-                            {formatFileSize(byType[seg.key])}
-                        </Text>
-                    </HStack>
-                ))}
-                {freeBytes > 0 && (
-                    <HStack spacing={1.5}>
-                        <Box w="8px" h="8px" borderRadius="2px" bg="borderDefault" flexShrink={0} />
-                        <Text variant="body-2xs-muted">Libre</Text>
-                        <Text fontSize="11px" color="textPrimary" fontWeight="500">
-                            {formatFileSize(freeBytes)}
-                        </Text>
-                    </HStack>
-                )}
-            </HStack>
+            {stats && (
+                <HStack spacing={3} flexWrap="wrap">
+                    {SEGMENTS.filter((s) => byType[s.key] > 0).map((seg) => (
+                        <HStack key={seg.key} spacing={1.5}>
+                            <Box w="8px" h="8px" borderRadius="2px" bg={seg.fill} flexShrink={0} />
+                            <Text variant="body-2xs-muted">{seg.label}</Text>
+                            <Text fontSize="11px" color="textPrimary" fontWeight="500">
+                                {formatFileSize(byType[seg.key])}
+                            </Text>
+                        </HStack>
+                    ))}
+                    {freeBytes > 0 && (
+                        <HStack spacing={1.5}>
+                            <Box w="8px" h="8px" borderRadius="2px" bg="borderDefault" flexShrink={0} />
+                            <Text variant="body-2xs-muted">Libre</Text>
+                            <Text fontSize="11px" color="textPrimary" fontWeight="500">
+                                {formatFileSize(freeBytes)}
+                            </Text>
+                        </HStack>
+                    )}
+                </HStack>
+            )}
         </Card>
     );
 };

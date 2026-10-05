@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from "react";
-import { useColorMode, VStack, Box, useDisclosure, useToken, Spinner, Center, Text } from "@chakra-ui/react";
+import { useColorMode, VStack, Box, useDisclosure, useToken, Center, Text } from "@chakra-ui/react";
 import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider } from "@xyflow/react";
 import {
     useNodeSelection,
@@ -15,6 +15,7 @@ import { NodeModal } from "pages/Agents/Workflow/NodeModal";
 import MenuNodeModal from "pages/Agents/Workflow/MenuNodeModal";
 import CustomControls from "pages/Agents/Workflow/CustomControls";
 import { applyAlphaToColor } from "components/ui/workflow-preview/WorkflowPreview";
+import { GenragLoader } from "components/ui/GenragLoader";
 import { useParams } from "react-router-dom";
 import {
     useGetActiveWorkflowQuery,
@@ -65,7 +66,11 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         onEdgeClick: isMenuOpen ? onMenuClose : onMenuOpen,
         onInstructionSave: () => {
             markDirty();
-            toast({ title: "Instruction modifiée", status: "success", duration: 2000 });
+            toast({
+                title: "Instruction modifiée",
+                status: "success",
+                duration: 2000,
+            });
         },
         onMutation: markDirty,
         initialNodes,
@@ -234,7 +239,7 @@ const WorkflowWorkspace = () => {
         <VStack w="100%" h="100%" align="stretch" spacing={0} overflow="hidden">
             {isLoading ? (
                 <Center flex={1}>
-                    <Spinner size="lg" color="green.500" />
+                    <GenragLoader size={64} />
                 </Center>
             ) : isError && !is404 ? (
                 <Center flex={1}>

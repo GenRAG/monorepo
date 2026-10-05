@@ -148,11 +148,7 @@ const ConsumptionCard: React.FC = () => {
 
                         <Box flex={1} minH={0} display="flex" alignItems="center" justifyContent="center">
                             {isLoading ? (
-                                <SkeletonCircle
-                                    startColor="skeletonStart"
-                                    endColor="skeletonEnd"
-                                    boxSize={`${PIE_SIZE}px`}
-                                />
+                                <SkeletonCircle boxSize={`${PIE_SIZE}px`} />
                             ) : (
                                 <Box boxSize={`${PIE_SIZE}px`} flexShrink={0}>
                                     {agentTotal > 0 ? (

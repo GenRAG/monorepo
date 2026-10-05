@@ -11,6 +11,7 @@ interface AssistantChatLayoutProps {
     assistantId: string;
     agentVersion?: string;
     title: string;
+    isTitleLoading?: boolean;
     sharedBy?: string;
     messages: ChatMessage[];
     conversations: ConversationPreview[];
@@ -28,6 +29,7 @@ const AssistantChatLayout: React.FC<AssistantChatLayoutProps> = ({
     assistantId,
     agentVersion,
     title,
+    isTitleLoading,
     sharedBy,
     messages,
     conversations,
@@ -55,6 +57,7 @@ const AssistantChatLayout: React.FC<AssistantChatLayoutProps> = ({
         <HStack h="100vh" w="100%" spacing={0} align="stretch" overflow="hidden" bg={mainBg}>
             <ConversationSidebar
                 title={title}
+                isTitleLoading={isTitleLoading}
                 sharedBy={sharedBy}
                 conversations={conversations}
                 currentConversationId={currentConversationId}

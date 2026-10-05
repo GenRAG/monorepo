@@ -18,15 +18,14 @@ interface MetricCompositionPieProps {
 }
 
 export const MetricCompositionPie = ({ segments, isLoading, defaultLabel }: MetricCompositionPieProps) => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
     const patternIdBase = `metric-pie-pattern-${useId()}`;
     const total = segments.reduce((sum, segment) => sum + segment.value, 0);
 
     if (isLoading) {
         return (
             <VStack spacing={2} flexShrink={0}>
-                <SkeletonCircle {...skeletonProps} boxSize={`${COMPOSITION_PIE_SIZE}px`} />
-                <Skeleton {...skeletonProps} h="8px" w="70px" borderRadius="4px" />
+                <SkeletonCircle boxSize={`${COMPOSITION_PIE_SIZE}px`} />
+                <Skeleton h="8px" w="70px" borderRadius="4px" />
             </VStack>
         );
     }

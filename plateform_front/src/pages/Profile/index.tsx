@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Grid, Stack } from "@chakra-ui/react";
+import { Box, Grid, HStack, Skeleton, Stack, VStack } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useChangePasswordMutation, useDeleteMeMutation, useGetMeQuery, useUpdateMeMutation } from "services/auth/auth";
 import { useAuth } from "app/AuthContext";
@@ -13,6 +13,21 @@ import SecuritySection from "./sections/SecuritySection";
 import AppearanceSection from "./sections/AppearanceSection";
 import DangerZone from "components/ui/DangerZone";
 
+const ProfileSkeleton = () => (
+    <Stack p={{ base: 4, lg: 16 }} align="center" gap={8} minH="100vh" bg="surfacePrimary" overflow="auto">
+        <Stack w="60%" gap={0}>
+            <HStack spacing={4} px={6} pt={6} pb={5}>
+                <Skeleton boxSize="52px" borderRadius="8px" />
+                <VStack align="start" spacing={2}>
+                    <Skeleton h="16px" w="160px" borderRadius="4px" />
+                    <Skeleton h="12px" w="200px" borderRadius="4px" />
+                </VStack>
+            </HStack>
+            <Skeleton h="420px" borderBottomRadius="14px" />
+        </Stack>
+    </Stack>
+);
+
 export const ProfilePage = () => {
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -24,7 +39,7 @@ export const ProfilePage = () => {
     const [changePassword, { isLoading: isChangingPw }] = useChangePasswordMutation();
     const [deleteMe, { isLoading: isDeleting }] = useDeleteMeMutation();
 
-    if (!user) return null;
+    if (!user) return <ProfileSkeleton />;
 
     const handleSaveName = async (name: string) => {
         try {
@@ -37,7 +52,10 @@ export const ProfilePage = () => {
 
     const handleChangePassword = async (current: string, next: string) => {
         try {
-            await changePassword({ currentPassword: current, newPassword: next }).unwrap();
+            await changePassword({
+                currentPassword: current,
+                newPassword: next,
+            }).unwrap();
             toast({ title: "Mot de passe modifié", status: "success" });
         } catch (err: unknown) {
             toast({ title: getApiErrorMessage(err) ?? "Erreur", status: "error" });

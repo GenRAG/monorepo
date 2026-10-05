@@ -7,8 +7,6 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader = ({ name, stats }: DashboardHeaderProps) => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
-
     return (
         <Stack
             direction={{ base: "column", md: "row" }}
@@ -38,7 +36,7 @@ export const DashboardHeader = ({ name, stats }: DashboardHeaderProps) => {
                         {`${stats.agents.total} agent${stats.agents.total > 1 ? "s" : ""} / ${stats.agents.production} en production / ${stats.documents.indexed} document${stats.documents.indexed > 1 ? "s" : ""} indexé${stats.documents.indexed > 1 ? "s" : ""}`}
                     </Text>
                 ) : (
-                    <Skeleton height="17px" width="320px" maxW="80vw" borderRadius="4px" {...skeletonProps} />
+                    <Skeleton height="17px" width="320px" maxW="80vw" borderRadius="4px" />
                 )}
             </VStack>
         </Stack>

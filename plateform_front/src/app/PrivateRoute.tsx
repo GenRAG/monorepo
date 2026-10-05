@@ -15,7 +15,7 @@ const PrivateRoute: React.FC = () => {
     }
 
     if (isLoading || !hasChecked.current) {
-        return <AppLoader message="Vérification de l'authentification..." />;
+        return <AppLoader />;
     }
 
     if (!isLoggedIn) {

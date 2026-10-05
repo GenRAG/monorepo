@@ -40,9 +40,9 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
     if (isLoading)
         return (
             <VStack align="stretch" spacing={2}>
-                <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="14px" w="90%" borderRadius="4px" />
-                <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="14px" w="75%" borderRadius="4px" />
-                <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="14px" w="80%" borderRadius="4px" />
+                <Skeleton h="14px" w="90%" borderRadius="4px" />
+                <Skeleton h="14px" w="75%" borderRadius="4px" />
+                <Skeleton h="14px" w="80%" borderRadius="4px" />
             </VStack>
         );
     if (isError || !content)
@@ -58,15 +58,36 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
             lineHeight="1.7"
             color="textPrimary"
             sx={{
-                "h1,h2,h3,h4": { fontWeight: 700, marginTop: "0.8em", marginBottom: "0.3em" },
+                "h1,h2,h3,h4": {
+                    fontWeight: 700,
+                    marginTop: "0.8em",
+                    marginBottom: "0.3em",
+                },
                 h1: { fontSize: "18px" },
                 h2: { fontSize: "15px" },
                 h3: { fontSize: "13px" },
                 p: { marginBottom: "0.5em" },
                 "ul,ol": { paddingLeft: "1.2em", marginBottom: "0.5em" },
-                code: { bg: codeBg, color: "textBody", px: "3px", borderRadius: "3px", fontSize: "12px" },
-                pre: { bg: codeBg, p: 2, borderRadius: "6px", overflowX: "auto", marginBottom: "0.5em" },
-                blockquote: { borderLeft: "3px solid", borderColor: "green.300", pl: 3, color: "textMuted" },
+                code: {
+                    bg: codeBg,
+                    color: "textBody",
+                    px: "3px",
+                    borderRadius: "3px",
+                    fontSize: "12px",
+                },
+                pre: {
+                    bg: codeBg,
+                    p: 2,
+                    borderRadius: "6px",
+                    overflowX: "auto",
+                    marginBottom: "0.5em",
+                },
+                blockquote: {
+                    borderLeft: "3px solid",
+                    borderColor: "green.300",
+                    pl: 3,
+                    color: "textMuted",
+                },
                 a: { color: "green.500", textDecoration: "underline" },
             }}
         >
@@ -85,7 +106,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({ document, prev
             <Card size="none" h={{ base: "250px", md: "400px" }} bg="surfacePrimary" overflow="auto" p={3}>
                 {isLoading && (
                     <VStack h="100%" align="stretch" justify="center" spacing={2}>
-                        <Skeleton startColor="skeletonStart" endColor="skeletonEnd" h="100%" borderRadius="8px" />
+                        <Skeleton h="100%" borderRadius="8px" />
                     </VStack>
                 )}
 

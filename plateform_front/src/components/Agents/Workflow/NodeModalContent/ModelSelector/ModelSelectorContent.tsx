@@ -1,9 +1,10 @@
 import React, { memo, useEffect, useState } from "react";
-import { HStack, Spinner, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { HStack, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { useGetModelsGenerationQuery, useGetModelsRerankQuery } from "services/models/models";
 import { RagModel } from "types/models/models";
 import { ModelListPanel } from "./ModelListPanel";
 import { ModelDetailPanel } from "./ModelDetailPanel";
+import { ModelDetailPanelSkeleton } from "./ModelDetailHelpers";
 
 interface Props {
     onSelect: (modelId: string) => void;
@@ -24,12 +25,24 @@ export const ModelSelectorContent: React.FC<Props> = memo(({ onSelect, fetchMode
 
     if (isLoading) {
         return (
-            <VStack flex={1} align="center" justify="center" spacing={2}>
-                <Spinner size="sm" color="green.500" />
-                <Text fontSize="12px" color={subColor}>
-                    Chargement des modèles...
-                </Text>
-            </VStack>
+            <HStack flex={1} align="stretch" spacing={0} overflow="hidden">
+                <VStack
+                    align="stretch"
+                    spacing={2}
+                    w="200px"
+                    flexShrink={0}
+                    p={2}
+                    bg="surfacePrimary"
+                    borderRightWidth="1px"
+                    borderRightStyle="solid"
+                    borderRightColor="borderSubtle"
+                >
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <Skeleton key={i} h="48px" borderRadius="8px" />
+                    ))}
+                </VStack>
+                <ModelDetailPanelSkeleton />
+            </HStack>
         );
     }
 

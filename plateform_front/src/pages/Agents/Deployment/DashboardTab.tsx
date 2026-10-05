@@ -21,7 +21,15 @@ export const DashboardTab = () => {
     });
 
     if (isLoading) {
-        return <Skeleton m={6} height="200px" width="100%" borderRadius="12px" mb={6} />;
+        return (
+            <VStack flex={1} p={6} spacing={5} align="stretch">
+                <Skeleton h="200px" borderRadius="12px" />
+                <Grid templateColumns={{ base: "1fr", xl: "3fr 2fr" }} gap={5}>
+                    <Skeleton h="180px" borderRadius="12px" />
+                    <Skeleton h="180px" borderRadius="12px" />
+                </Grid>
+            </VStack>
+        );
     }
 
     if (isError || !data) {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, HStack, Icon, Stack, Text, VStack, useColorMode } from "@chakra-ui/react";
+import { Box, HStack, Icon, Skeleton, Stack, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { ChevronRight, LayoutGrid, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ConversationPreview } from "services/chat/chat";
@@ -19,6 +19,7 @@ const formatConversationDate = (iso: string) => {
 
 interface AssistantHomeProps {
     title: string;
+    isTitleLoading?: boolean;
     sharedBy?: string;
     conversations: ConversationPreview[];
     isLoading?: boolean;
@@ -30,6 +31,7 @@ interface AssistantHomeProps {
 
 const AssistantHome: React.FC<AssistantHomeProps> = ({
     title,
+    isTitleLoading,
     sharedBy,
     conversations,
     isLoading,
@@ -47,6 +49,7 @@ const AssistantHome: React.FC<AssistantHomeProps> = ({
             <HStack h="100%" align="stretch" spacing={0}>
                 <ConversationSidebar
                     title={title}
+                    isTitleLoading={isTitleLoading}
                     sharedBy={sharedBy}
                     conversations={conversations}
                     currentConversationId={null}
@@ -65,18 +68,26 @@ const AssistantHome: React.FC<AssistantHomeProps> = ({
                             Tout les assistants
                         </Button>
                         <Icon as={ChevronRight} boxSize={3.5} color="textFaint" />
-                        <Text fontSize="sm" fontWeight="medium" color="textBody">
-                            {title}
-                        </Text>
+                        {isTitleLoading ? (
+                            <Skeleton h="12px" w="100px" borderRadius="4px" />
+                        ) : (
+                            <Text fontSize="sm" fontWeight="medium" color="textBody">
+                                {title}
+                            </Text>
+                        )}
                     </HStack>
 
                     <Box flex={1} minH={0} display="flex" flexDirection="column" position="relative" zIndex={1}>
                         <Box flex={1} display="flex" alignItems="center" justifyContent="center">
                             <VStack spacing={5} textAlign="center" px={4}>
                                 <VStack spacing={1}>
-                                    <Text fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold">
-                                        {title}
-                                    </Text>
+                                    {isTitleLoading ? (
+                                        <Skeleton h="32px" w="240px" borderRadius="8px" />
+                                    ) : (
+                                        <Text fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+                                            {title}
+                                        </Text>
+                                    )}
                                     {sharedBy && (
                                         <Text fontSize="sm" color={isDark ? "grey.500" : "grey.400"}>
                                             Partagé par {sharedBy}
@@ -117,7 +128,10 @@ const AssistantHome: React.FC<AssistantHomeProps> = ({
                                                     border="1px solid"
                                                     borderColor="borderDefault"
                                                     bg="surfaceCard"
-                                                    _hover={{ borderColor: "borderStrong", bg: "surfaceHover" }}
+                                                    _hover={{
+                                                        borderColor: "borderStrong",
+                                                        bg: "surfaceHover",
+                                                    }}
                                                     transition="all 0.12s"
                                                     onClick={() => onSelectConversation(conv.id)}
                                                 >

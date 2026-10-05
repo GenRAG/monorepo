@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Circle, HStack, Text, VStack, Stack, useDisclosure, Divider } from "@chakra-ui/react";
+import { Box, Circle, HStack, Skeleton, Text, VStack, Stack, useDisclosure, Divider } from "@chakra-ui/react";
 import { Bot, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { ConversationPreview } from "services/chat/chat";
 import { useGroupedConversations } from "hooks/useGroupedConversations";
@@ -16,6 +16,7 @@ const formatDateShort = (iso: string) => {
 
 interface ConversationSidebarProps {
     title: string;
+    isTitleLoading?: boolean;
     sharedBy?: string;
     conversations: ConversationPreview[];
     currentConversationId: string | null;
@@ -25,6 +26,7 @@ interface ConversationSidebarProps {
 
 const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
     title,
+    isTitleLoading,
     sharedBy,
     conversations,
     currentConversationId,
@@ -68,9 +70,13 @@ const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                     <HStack spacing={2.5} minW={0}>
                         <BoxIcon icon={Bot} />
                         <VStack align="start" spacing={0} minW={0}>
-                            <Text fontSize="sm" fontWeight="600" color="textStrong" noOfLines={1}>
-                                {title}
-                            </Text>
+                            {isTitleLoading ? (
+                                <Skeleton h="12px" w="110px" borderRadius="4px" my="4px" />
+                            ) : (
+                                <Text fontSize="sm" fontWeight="600" color="textStrong" noOfLines={1}>
+                                    {title}
+                                </Text>
+                            )}
                             {sharedBy && (
                                 <Text fontSize="10px" color="textLabel" noOfLines={1}>
                                     partagé par {sharedBy}

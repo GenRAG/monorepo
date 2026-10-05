@@ -71,12 +71,10 @@ export const MetricCard = ({
     const trendPercent = trendSourceValues ? computeTrendPercent(trendSourceValues) : null;
     const trendPercentPositive = (trendPercent ?? 0) >= 0;
 
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
-
     const headerRow = (
         <HStack justify="space-between" align="start" w="100%">
             {isLoading ? (
-                <Skeleton {...skeletonProps} h="10px" w="110px" borderRadius="4px" />
+                <Skeleton h="10px" w="110px" borderRadius="4px" />
             ) : (
                 <HStack justify="space-between" w="100%">
                     <HStack spacing={1.5}>
@@ -107,7 +105,7 @@ export const MetricCard = ({
     const valueBlock = (
         <Box>
             {isLoading ? (
-                <Skeleton {...skeletonProps} h="28px" w="80px" borderRadius="6px" mb={2} />
+                <Skeleton h="28px" w="80px" borderRadius="8px" mb={2} />
             ) : (
                 <ChartStatFlow
                     value={displayValue}
@@ -117,7 +115,7 @@ export const MetricCard = ({
                 />
             )}
             {isLoading ? (
-                <Skeleton {...skeletonProps} h="10px" w="60px" borderRadius="4px" />
+                <Skeleton h="10px" w="60px" borderRadius="4px" />
             ) : (
                 <HStack spacing={1}>
                     <Icon

@@ -37,7 +37,7 @@ export default function DefaultRedirect() {
     }
 
     if (isLoading || !workspaces?.length) {
-        return <AppLoader message="Chargement de votre espace..." />;
+        return <AppLoader />;
     }
 
     return <Navigate to={`/workspaces/${workspaces[0].id}/agents`} replace />;

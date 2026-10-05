@@ -5,7 +5,7 @@ export const DocumentSkeletonRow: React.FC = () => (
     <Tr>
         <Td>
             <HStack spacing={3}>
-                <Skeleton w="32px" h="32px" borderRadius="6px" />
+                <Skeleton w="32px" h="32px" borderRadius="8px" />
                 <Skeleton h="14px" w="140px" borderRadius="4px" />
             </HStack>
         </Td>

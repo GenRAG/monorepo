@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Card, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, Card, HStack, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { ParentSize } from "@visx/responsive";
 import { Gauge } from "components/charts";
 import { useParams } from "react-router-dom";
@@ -23,7 +23,7 @@ interface PlanCardProps {
 
 const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
     const { workspaceId } = useParams();
-    const { data: creditBalance } = useGetCreditBalanceQuery(workspaceId ?? "", {
+    const { data: creditBalance, isLoading } = useGetCreditBalanceQuery(workspaceId ?? "", {
         skip: !workspaceId,
     });
 
@@ -67,28 +67,37 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
                             <Text variant="caption-sm-muted" mb={1}>
                                 Crédits du cycle
                             </Text>
-                            <HStack align="baseline" spacing={1} mb={1.5} flexWrap="wrap">
-                                <Text fontSize="xl" fontWeight="bold" color="textPrimary">
-                                    {consumed.toLocaleString("fr-FR")}{" "}
-                                </Text>
-                                <Text variant="body-md-muted">/ {total.toLocaleString("fr-FR")} consommés</Text>
-                            </HStack>
-                            <ParentSize debounceTime={10}>
-                                {({ width }) =>
-                                    width > 0 ? (
-                                        <Gauge
-                                            orientation="linear"
-                                            value={progress}
-                                            width={width}
-                                            linearHeight={10}
-                                            notchCornerRadius={3}
-                                            notchWidthPercent={60}
-                                            totalNotches={Math.max(20, Math.round(width / NOTCH_PITCH_PX))}
-                                            inactiveFill="var(--border)"
-                                        />
-                                    ) : null
-                                }
-                            </ParentSize>
+                            {isLoading ? (
+                                <>
+                                    <Skeleton h="28px" w="180px" borderRadius="4px" mb={1.5} />
+                                    <Skeleton h="10px" borderRadius="4px" />
+                                </>
+                            ) : (
+                                <>
+                                    <HStack align="baseline" spacing={1} mb={1.5} flexWrap="wrap">
+                                        <Text fontSize="xl" fontWeight="bold" color="textPrimary">
+                                            {consumed.toLocaleString("fr-FR")}{" "}
+                                        </Text>
+                                        <Text variant="body-md-muted">/ {total.toLocaleString("fr-FR")} consommés</Text>
+                                    </HStack>
+                                    <ParentSize debounceTime={10}>
+                                        {({ width }) =>
+                                            width > 0 ? (
+                                                <Gauge
+                                                    orientation="linear"
+                                                    value={progress}
+                                                    width={width}
+                                                    linearHeight={10}
+                                                    notchCornerRadius={3}
+                                                    notchWidthPercent={60}
+                                                    totalNotches={Math.max(20, Math.round(width / NOTCH_PITCH_PX))}
+                                                    inactiveFill="var(--border)"
+                                                />
+                                            ) : null
+                                        }
+                                    </ParentSize>
+                                </>
+                            )}
                             <HStack justify="space-between" mt={1} flexWrap="wrap" gap={1}>
                                 <Text variant="body-sm-muted">Cycle commencé le {fmt(lastMonday)}</Text>
                             </HStack>

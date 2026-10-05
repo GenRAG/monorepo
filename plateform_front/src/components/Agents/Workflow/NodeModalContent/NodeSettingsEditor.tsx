@@ -1,5 +1,5 @@
 import { useReactFlow, useStore, type ReactFlowState } from "@xyflow/react";
-import { Box, HStack, Icon, Spinner, Text, Textarea, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, HStack, Icon, Skeleton, Text, Textarea, VStack, useColorModeValue } from "@chakra-ui/react";
 import { Check } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 import { List, type RowComponentProps } from "react-window";
@@ -181,7 +181,10 @@ const InstructionEditor = ({ stringValue, onChange }: { stringValue?: string; on
             resize="vertical"
             borderRadius="10px"
             borderColor="borderDivider"
-            _focus={{ borderColor: "inputActiveBorder", boxShadow: "0 0 0 1px var(--chakra-colors-green-400)" }}
+            _focus={{
+                borderColor: "inputActiveBorder",
+                boxShadow: "0 0 0 1px var(--chakra-colors-green-400)",
+            }}
         />
     );
 };
@@ -205,7 +208,16 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
     const handleInstructionChange = (nodeId: string, value: string) => {
         setNodes((prev) =>
             prev.map((n) =>
-                n.id === nodeId ? { ...n, data: { ...n.data, stringValue: value, isPlaceholder: !value.trim() } } : n,
+                n.id === nodeId
+                    ? {
+                          ...n,
+                          data: {
+                              ...n.data,
+                              stringValue: value,
+                              isPlaceholder: !value.trim(),
+                          },
+                      }
+                    : n,
             ),
         );
     };
@@ -235,9 +247,11 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
                             {node.settingLabel ?? "Modèle"}
                         </Text>
                         {isLoadingModels ? (
-                            <HStack justify="center" py={4}>
-                                <Spinner size="sm" color="iconAccent" />
-                            </HStack>
+                            <VStack align="stretch" spacing={2}>
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <Skeleton key={i} h={`${CARD_HEIGHT}px`} borderRadius="10px" />
+                                ))}
+                            </VStack>
                         ) : (
                             <Box flex={1} minH={0}>
                                 <List

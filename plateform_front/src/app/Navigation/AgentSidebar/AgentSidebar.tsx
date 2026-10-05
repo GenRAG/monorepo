@@ -92,13 +92,7 @@ const AgentSidebar = () => {
             <HStack justify="space-between" align="center" mb={6} px={isOpen ? 1 : 0}>
                 <HStack spacing={2} minW={0} flex={1} justify={isOpen ? "flex-start" : "center"}>
                     {isAgentLoading ? (
-                        <Skeleton
-                            startColor="skeletonStart"
-                            endColor="skeletonEnd"
-                            boxSize="28px"
-                            borderRadius="8px"
-                            flexShrink={0}
-                        />
+                        <Skeleton boxSize="28px" borderRadius="8px" flexShrink={0} />
                     ) : (
                         <BoxIcon
                             size="sm"
@@ -109,13 +103,7 @@ const AgentSidebar = () => {
                     )}
                     {isOpen &&
                         (isAgentLoading ? (
-                            <Skeleton
-                                startColor="skeletonStart"
-                                endColor="skeletonEnd"
-                                h="12px"
-                                w="90px"
-                                borderRadius="4px"
-                            />
+                            <Skeleton h="12px" w="90px" borderRadius="4px" />
                         ) : (
                             <Text fontSize="xs" fontWeight="700" letterSpacing="0.5px" color={ink.text} noOfLines={1}>
                                 {agent?.name?.toUpperCase() ?? ""}

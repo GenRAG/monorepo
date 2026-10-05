@@ -1,22 +1,9 @@
 import { Box, useColorModeValue } from "@chakra-ui/react";
 import Router from "app/Router";
-import React, { useState, useEffect } from "react";
-import { AppLoader } from "components/ui/AppLoader";
+import React from "react";
 
 const App: React.FC = () => {
-    const [isInitializing, setIsInitializing] = useState(true);
     const backgroundColor = useColorModeValue("grey.25", "grey.975");
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsInitializing(false);
-        }, 800);
-        return () => clearTimeout(timer);
-    }, []);
-
-    if (isInitializing) {
-        return <AppLoader message="Initialisation de l'application..." />;
-    }
 
     return (
         <Box bg={backgroundColor} minH="100vh" display="flex">

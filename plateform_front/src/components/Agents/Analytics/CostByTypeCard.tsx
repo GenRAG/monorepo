@@ -84,12 +84,7 @@ export const CostByTypeCard = ({ workspaceId, agentId }: CostByTypeCardProps) =>
                                 flexShrink={0}
                             >
                                 {isLoading ? (
-                                    <SkeletonCircle
-                                        startColor="skeletonStart"
-                                        endColor="skeletonEnd"
-                                        w="100%"
-                                        h="100%"
-                                    />
+                                    <SkeletonCircle w="100%" h="100%" />
                                 ) : (
                                     <PieChart data={pieData} innerRadius={55}>
                                         {pieData.map((_, index) =>
@@ -134,29 +129,10 @@ export const CostByTypeCard = ({ workspaceId, agentId }: CostByTypeCardProps) =>
                                     ? [1, 2, 3].map((i) => (
                                           <HStack h="100%" key={i} justify="space-between" p={2} minW={0}>
                                               <HStack spacing={2} minW={0}>
-                                                  <Skeleton
-                                                      startColor="skeletonStart"
-                                                      endColor="skeletonEnd"
-                                                      w={4}
-                                                      h={4}
-                                                      borderRadius="4px"
-                                                      flexShrink={0}
-                                                  />
-                                                  <Skeleton
-                                                      startColor="skeletonStart"
-                                                      endColor="skeletonEnd"
-                                                      h="14px"
-                                                      w="90px"
-                                                      borderRadius="4px"
-                                                  />
+                                                  <Skeleton w={4} h={4} borderRadius="4px" flexShrink={0} />
+                                                  <Skeleton h="14px" w="90px" borderRadius="4px" />
                                               </HStack>
-                                              <Skeleton
-                                                  startColor="skeletonStart"
-                                                  endColor="skeletonEnd"
-                                                  h="14px"
-                                                  w="36px"
-                                                  borderRadius="4px"
-                                              />
+                                              <Skeleton h="14px" w="36px" borderRadius="4px" />
                                           </HStack>
                                       ))
                                     : pieData.map((item, index) => (

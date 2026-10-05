@@ -21,6 +21,7 @@ export const nav = [
   { id: "assistants", label: "Assistants métier", short: "Assistants" },
   { id: "editeur", label: "Éditeur", short: "Éditeur" },
   { id: "connecteurs", label: "Vos documents", short: "Documents" },
+  { id: "raisonnement", label: "Recherche et raisonnement", short: "Analyse" },
   { id: "partage", label: "Partage", short: "Partage" },
   { id: "suivi", label: "Suivi", short: "Suivi" },
   { id: "pourquoi", label: "Pourquoi GenRAG", short: "Pourquoi" },
@@ -213,12 +214,41 @@ export const connectors = {
   },
 };
 
+export const reasoning = {
+  eyebrow: "Recherche et raisonnement",
+  title: "Il ne retrouve pas seulement. Il compare.",
+  text: "Posez une question qui croise plusieurs documents. L'assistant récupère les bons passages, les confronte et rédige la synthèse : le travail de comparaison est fait pour vous.",
+  points: ["Plusieurs sources par question", "Comparaison point par point", "Synthèse sourcée"],
+  alt: "Démonstration : l'assistant retrouve la clause de non-concurrence dans deux documents, compare la durée, la zone géographique et la contrepartie financière, puis résume les écarts",
+  question: "Quelle différence entre la clause de non-concurrence du contrat Dupont et celle de notre modèle actuel ?",
+  /** Étapes de réflexion affichées avant la réponse : `label` pendant, `done` une fois terminée. */
+  trace: [
+    { label: "Recherche dans vos documents", done: "2 passages trouvés" },
+    { label: "Comparaison des deux clauses", done: "3 écarts relevés" },
+  ],
+  sources: [
+    { label: "Contrat Dupont", name: "Contrat_Dupont.pdf", ref: "Art. 9", kind: "pdf" },
+    { label: "Modèle actuel", name: "Modele_contrat_2026.docx", ref: "Art. 11", kind: "doc" },
+  ],
+  criterion: "Critère",
+  /** `values` suit l'ordre de `sources`. */
+  rows: [
+    { label: "Durée", values: ["24 mois", "12 mois"] },
+    { label: "Zone géographique", values: ["France entière", "Île-de-France"] },
+    { label: "Contrepartie financière", values: ["30 % du salaire", "50 % du salaire"] },
+  ],
+  answer:
+    "La clause du contrat Dupont est plus contraignante que celle de votre modèle : durée doublée, zone étendue à toute la France et contrepartie plus faible.",
+  pause: "Mettre en pause l'animation",
+  play: "Reprendre l'animation",
+};
+
 export const builder = {
   eyebrow: "Éditeur sans code",
   title: "Construisez votre assistant comme un schéma.",
   /** Mot de liaison avec la section précédente (« Un assistant prêt pour chaque service »). */
   bridge: "ou",
-  text: "Reliez des blocs entre eux. Chaque étape est visible, chaque réglage à portée de clic.",
+  text: "Vous voulez plus de contrôle ? Reliez des blocs entre eux. Chaque étape est visible, chaque réglage à portée de clic.",
   sidebar: {
     agent: "Assistant RH",
     groups: [

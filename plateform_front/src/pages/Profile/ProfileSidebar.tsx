@@ -1,17 +1,18 @@
 import { HStack, Icon, Text, VStack } from "@chakra-ui/react";
-import { Monitor, Shield, User, type LucideIcon } from "lucide-react";
+import { Building2, Monitor, Shield, User, type LucideIcon } from "lucide-react";
 
 export type ProfileSection =
     | "info"
     | "security"
     | "appearance"
     | "sessions"
-    | "workspaces"
+    | "organization"
     | "linked"
     | "notifications";
 
 const NAV_ITEMS: { id: ProfileSection; label: string; icon: LucideIcon }[] = [
     { id: "info", label: "Informations", icon: User },
+    { id: "organization", label: "Entreprise", icon: Building2 },
     { id: "security", label: "Sécurité", icon: Shield },
     { id: "appearance", label: "Apparence", icon: Monitor },
 ];

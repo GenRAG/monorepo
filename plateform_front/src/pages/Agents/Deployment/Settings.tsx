@@ -1,4 +1,4 @@
-import { Box, VStack, Stack } from "@chakra-ui/react";
+import { Box, Skeleton, VStack, Stack } from "@chakra-ui/react";
 import DataPrivacy from "components/Deployment/Settings/DataPrivacy";
 import RGPDBanner from "components/Deployment/Settings/RGPDBanner";
 import { UserRights } from "components/Deployment/Settings/UserRights";
@@ -12,7 +12,10 @@ import useThemedToast from "hooks/useThemedToast";
 import { getApiErrorMessage } from "utils/apiError";
 
 const AgentDangerZone = () => {
-    const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
+    const { workspaceId = "", agentId = "" } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
     const navigate = useNavigate();
     const { data: agent } = useGetAgentByIdQuery({ workspaceId, id: agentId }, { skip: !agentId });
     const [deleteAgent, { isLoading }] = useDeleteAgentMutation();
@@ -52,13 +55,14 @@ const AgentDangerZone = () => {
 };
 
 export const Settings = () => {
-    const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
+    const { workspaceId = "", agentId = "" } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
     const [apiLogs, setApiLogs] = useState(true);
 
     const { data: agent } = useGetAgentByIdQuery({ workspaceId, id: agentId }, { skip: !agentId });
     const [updateAgent] = useUpdateAgentMutation();
-
-    const retentionDays = agent?.retentionDays ?? 30;
 
     const handleRetentionDaysChange = (v: number | null) => {
         void updateAgent({ workspaceId, id: agentId, retentionDays: v });
@@ -70,12 +74,16 @@ export const Settings = () => {
             <Box flex={1} minH={0} overflowY="auto" p={6}>
                 <VStack spacing={5} align="stretch" mx="auto">
                     <RGPDBanner />
-                    <DataPrivacy
-                        apiLogs={apiLogs}
-                        onApiLogsChange={setApiLogs}
-                        retentionDays={retentionDays}
-                        onRetentionDaysChange={handleRetentionDaysChange}
-                    />
+                    {agent ? (
+                        <DataPrivacy
+                            apiLogs={apiLogs}
+                            onApiLogsChange={setApiLogs}
+                            retentionDays={agent.retentionDays ?? null}
+                            onRetentionDaysChange={handleRetentionDaysChange}
+                        />
+                    ) : (
+                        <Skeleton h="220px" borderRadius="12px" />
+                    )}
                     {apiLogs && <QueryLogsTable />}
                     <UserRights />
                     <AgentDangerZone />

@@ -1,44 +1,33 @@
-import { HStack, VStack } from "@chakra-ui/react";
-import Button from "components/ui/Button";
+import { HStack } from "@chakra-ui/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import Button from "components/ui/Button";
 
 interface StepFooterProps {
     currentStep: number;
+    totalSteps: number;
     goNext: () => void;
     goPrevious: () => void;
-    onValidateAndGoNext?: () => Promise<void>;
-    onSkip?: () => void;
 }
 
-const StepFooter = ({ currentStep, goNext, goPrevious, onValidateAndGoNext, onSkip }: StepFooterProps) => {
-    const handleNext = async () => {
-        if (onValidateAndGoNext) {
-            await onValidateAndGoNext();
-        } else {
-            goNext();
-        }
-    };
-
-    return (
-        <VStack w="100%" spacing={3} align="stretch" pb="24px" p={{ base: "8px", md: "12px" }}>
-            <HStack w="100%" justify="space-between">
-                <Button variant="ghost" isDisabled={currentStep === 0} onClick={goPrevious}>
-                    <ArrowLeft size={18} style={{ marginRight: 8 }} />
-                    Retour
-                </Button>
-                <HStack spacing={4}>
-                    {onSkip && (
-                        <Button variant="outline" size="lg" _hover={{ color: "textBody" }} onClick={onSkip}>
-                            Passer le tutoriel
-                        </Button>
-                    )}
-                    <Button rightIcon={ArrowRight} size="lg" px={8} onClick={handleNext}>
-                        Sauvegarder et continuer
-                    </Button>
-                </HStack>
-            </HStack>
-        </VStack>
-    );
-};
+const StepFooter = ({ currentStep, totalSteps, goNext, goPrevious }: StepFooterProps) => (
+    <HStack
+        w="100%"
+        px={4}
+        py={3}
+        flexShrink={0}
+        justify="space-between"
+        bg="surfaceCard"
+        borderTopWidth="1px"
+        borderTopStyle="solid"
+        borderColor="borderSubtle"
+    >
+        <Button variant="ghost" size="sm" leftIcon={ArrowLeft} isDisabled={currentStep === 0} onClick={goPrevious}>
+            Retour
+        </Button>
+        <Button rightIcon={ArrowRight} px={6} onClick={goNext}>
+            {currentStep === totalSteps - 1 ? "Terminer" : "Continuer"}
+        </Button>
+    </HStack>
+);
 
 export default StepFooter;

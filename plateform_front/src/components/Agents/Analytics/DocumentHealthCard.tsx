@@ -23,17 +23,32 @@ interface DocumentHealthCardProps {
 }
 
 export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardProps) => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
     const { data: health, isLoading } = useGetDocumentHealthQuery(
         { workspaceId, agentId },
         { skip: !workspaceId || !agentId },
     );
 
     const pieData: PieData[] = [
-        { label: "Indexés", value: health?.indexed ?? 0, color: DOCUMENT_HEALTH_COLORS[0] },
-        { label: "En cours", value: health?.processing ?? 0, color: DOCUMENT_HEALTH_COLORS[1] },
-        { label: "Uploadés", value: health?.uploaded ?? 0, color: DOCUMENT_HEALTH_COLORS[2] },
-        { label: "Échoués", value: health?.failed ?? 0, color: DOCUMENT_HEALTH_COLORS[3] },
+        {
+            label: "Indexés",
+            value: health?.indexed ?? 0,
+            color: DOCUMENT_HEALTH_COLORS[0],
+        },
+        {
+            label: "En cours",
+            value: health?.processing ?? 0,
+            color: DOCUMENT_HEALTH_COLORS[1],
+        },
+        {
+            label: "Uploadés",
+            value: health?.uploaded ?? 0,
+            color: DOCUMENT_HEALTH_COLORS[2],
+        },
+        {
+            label: "Échoués",
+            value: health?.failed ?? 0,
+            color: DOCUMENT_HEALTH_COLORS[3],
+        },
     ];
     const totalDocuments = health?.total ?? 0;
 
@@ -79,7 +94,7 @@ export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardP
                                     ml={2}
                                 >
                                     {isLoading ? (
-                                        <SkeletonCircle {...skeletonProps} w="100%" h="100%" />
+                                        <SkeletonCircle w="100%" h="100%" />
                                     ) : (
                                         <PieChart data={pieData} innerRadius={55}>
                                             <PatternLines
@@ -137,13 +152,7 @@ export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardP
                                         <HStack h="100%" key={index} justify="space-between" p={2}>
                                             <HStack spacing={2} minW={0}>
                                                 {isLoading ? (
-                                                    <Skeleton
-                                                        {...skeletonProps}
-                                                        w={5}
-                                                        h={5}
-                                                        borderRadius="4px"
-                                                        flexShrink={0}
-                                                    />
+                                                    <Skeleton w={5} h={5} borderRadius="4px" flexShrink={0} />
                                                 ) : (
                                                     <PieLegendSwatch
                                                         color={DOCUMENT_HEALTH_COLORS[index]}
@@ -151,7 +160,7 @@ export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardP
                                                     />
                                                 )}
                                                 {isLoading ? (
-                                                    <Skeleton {...skeletonProps} h="14px" w="90px" borderRadius="4px" />
+                                                    <Skeleton h="14px" w="90px" borderRadius="4px" />
                                                 ) : (
                                                     <Text variant="body-sm" noOfLines={1}>
                                                         {status.label}
@@ -159,7 +168,7 @@ export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardP
                                                 )}
                                             </HStack>
                                             {isLoading ? (
-                                                <Skeleton {...skeletonProps} h="14px" w="36px" borderRadius="4px" />
+                                                <Skeleton h="14px" w="36px" borderRadius="4px" />
                                             ) : (
                                                 <Text variant="body-sm-semibold" color="textStrong">
                                                     {totalDocuments > 0

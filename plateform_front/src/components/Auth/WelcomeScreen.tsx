@@ -1,98 +1,143 @@
-import { Box, DarkMode, HStack, Image, Text, VStack } from "@chakra-ui/react";
-import { motion, type Variants } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { WelcomeStepper } from "./welcome/WelcomeStepper";
+import { useState, type FormEvent } from "react";
+import {
+    Box,
+    DarkMode,
+    Divider,
+    Flex,
+    FormControl,
+    FormLabel,
+    Heading,
+    HStack,
+    Icon,
+    Image,
+    Input,
+    Text,
+    VStack,
+} from "@chakra-ui/react";
+import { motion, MotionConfig } from "framer-motion";
+import { Check } from "lucide-react";
 import logoGreen from "assets/logo/mainLogo.png";
 import Button from "components/ui/Button";
+import { DEFAULT_WORKSPACE_NAME, WORKSPACE_NAME_MAX_LENGTH } from "types/workspace";
+import { WelcomeStage } from "./welcome/WelcomeStage";
+import { WELCOME_EASE, WELCOME_NEXT_STEPS } from "./welcome/welcomeContent";
 
 const MotionVStack = motion(VStack);
-const MotionHStack = motion(HStack);
-const MotionBox = motion(Box);
-
-const containerVariants: Variants = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
-};
-
-const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 14 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0, 0, 1] } },
-};
-
-const GenRAGLogo = () => <Image src={logoGreen} alt="GenRAG" position="absolute" top={5} left={6} h="28px" w="28px" />;
-
-const SuccessBadge = () => (
-    <HStack spacing={3} align="center">
-        <Box flex={1} h="1px" bg="borderDivider" w="60px" />
-        <Text fontSize="10px" fontWeight="600" letterSpacing="0.15em" color="textLabel" textTransform="uppercase">
-            Compte créé avec succès
-        </Text>
-        <Box flex={1} h="1px" bg="borderDivider" w="60px" />
-    </HStack>
-);
 
 interface WelcomeScreenProps {
-    onDone?: () => void;
+    onDone?: (organizationName: string) => void;
+    isSubmitting?: boolean;
 }
 
-export const WelcomeScreen = ({ onDone }: WelcomeScreenProps) => (
-    <DarkMode>
-        <Box
-            position="fixed"
-            inset={0}
-            zIndex={9999}
-            bg="surfaceAppShell"
-            sx={{
-                backgroundImage: `
-                repeating-linear-gradient(45deg, transparent, transparent 22px, rgba(255,255,255,0.015) 22px, rgba(255,255,255,0.015) 23px),
-                repeating-linear-gradient(-45deg, transparent, transparent 22px, rgba(255,255,255,0.015) 22px, rgba(255,255,255,0.015) 23px)
-            `,
-            }}
-        >
-            <GenRAGLogo />
+export const WelcomeScreen = ({ onDone, isSubmitting }: WelcomeScreenProps) => {
+    const [organizationName, setOrganizationName] = useState("");
 
-            <MotionVStack
-                h="100%"
-                align="center"
-                justify="center"
-                spacing={7}
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-            >
-                <MotionBox variants={itemVariants}>
-                    <Image src={logoGreen} alt="GenRAG" h="64px" w="64px" />
-                </MotionBox>
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        onDone?.(organizationName);
+    };
 
-                <MotionBox variants={itemVariants}>
-                    <SuccessBadge />
-                </MotionBox>
+    return (
+        <DarkMode>
+            <MotionConfig reducedMotion="user">
+                <Flex position="fixed" inset={0} zIndex={9999} bg="grey.975" overflow="auto">
+                    <Image src={logoGreen} alt="GenRAG" position="absolute" top="24px" left="24px" h="36px" />
 
-                <MotionBox variants={itemVariants} textAlign="center">
-                    <Text fontSize="4xl" fontWeight="700" color="textStrong" letterSpacing="-0.03em" lineHeight={1.15}>
-                        Bienvenue sur{" "}
-                        <Box as="span" color="iconAccent">
-                            GenRAG
-                        </Box>
-                    </Text>
-                </MotionBox>
+                    <WelcomeStage />
 
-                <MotionBox variants={itemVariants}>
-                    <Text fontSize="sm" color="textLabel" textAlign="center" maxW="360px" lineHeight={1.7}>
-                        Votre espace est prêt. Il ne reste plus qu&apos;à le configurer selon vos besoins.
-                    </Text>
-                </MotionBox>
+                    <Flex
+                        as="main"
+                        flexShrink={0}
+                        w={{ base: "100%", lg: "clamp(400px, 34vw, 520px)" }}
+                        direction="column"
+                        justify="center"
+                        px={{ base: 6, lg: 12 }}
+                        py={24}
+                        borderLeftWidth={{ base: 0, lg: "1px" }}
+                        borderLeftStyle="solid"
+                        borderColor="borderDefault"
+                    >
+                        <MotionVStack
+                            align="stretch"
+                            spacing={8}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: WELCOME_EASE }}
+                        >
+                            <VStack align="start" spacing={4}>
+                                <HStack spacing={2} color="iconAccent">
+                                    <Icon as={Check} boxSize={4} strokeWidth={3} />
+                                    <Text variant="body-sm-semibold">Compte créé</Text>
+                                </HStack>
+                                <Heading
+                                    as="h1"
+                                    fontSize={{ base: "32px", lg: "40px" }}
+                                    fontWeight={600}
+                                    lineHeight={1.05}
+                                    letterSpacing="-0.03em"
+                                    color="textStrong"
+                                >
+                                    Bienvenue sur GenRAG
+                                </Heading>
+                                <Text variant="body-md" color="textLabel" lineHeight={1.6}>
+                                    Indiquez le nom de votre entreprise : il s&apos;affiche sur les assistants que vous
+                                    partagez.
+                                </Text>
+                            </VStack>
 
-                <MotionBox variants={itemVariants}>
-                    <WelcomeStepper />
-                </MotionBox>
+                            <VStack as="form" onSubmit={handleSubmit} align="stretch" spacing={4}>
+                                <FormControl>
+                                    <FormLabel fontSize="xs" color="textLabel">
+                                        Nom de votre entreprise
+                                    </FormLabel>
+                                    <Input
+                                        value={organizationName}
+                                        onChange={(e) => setOrganizationName(e.target.value)}
+                                        placeholder={DEFAULT_WORKSPACE_NAME}
+                                        maxLength={WORKSPACE_NAME_MAX_LENGTH}
+                                        autoFocus
+                                    />
+                                </FormControl>
+                                <Button w="100%" type="submit" isLoading={isSubmitting}>
+                                    Commencer
+                                </Button>
+                            </VStack>
 
-                <MotionHStack gap={8} variants={itemVariants} spacing={3} align="center">
-                    <Button w="100%" onClick={onDone} rightIcon={ArrowRight}>
-                        Commencer
-                    </Button>
-                </MotionHStack>
-            </MotionVStack>
-        </Box>
-    </DarkMode>
-);
+                            <Divider borderColor="borderDefault" />
+
+                            <Box>
+                                <Text variant="body-sm" color="textLabel" mb={3}>
+                                    Ensuite, trois étapes pour créer votre premier assistant :
+                                </Text>
+                                <VStack as="ol" align="stretch" spacing={2.5} listStyleType="none">
+                                    {WELCOME_NEXT_STEPS.map((step, i) => (
+                                        <HStack as="li" key={step} spacing={3}>
+                                            <Flex
+                                                w="22px"
+                                                h="22px"
+                                                align="center"
+                                                justify="center"
+                                                flexShrink={0}
+                                                borderRadius="full"
+                                                borderWidth="1px"
+                                                borderStyle="solid"
+                                                borderColor="borderStrong"
+                                            >
+                                                <Text variant="body-xs" color="textLabel">
+                                                    {i + 1}
+                                                </Text>
+                                            </Flex>
+                                            <Text variant="body-sm" color="textPrimary">
+                                                {step}
+                                            </Text>
+                                        </HStack>
+                                    ))}
+                                </VStack>
+                            </Box>
+                        </MotionVStack>
+                    </Flex>
+                </Flex>
+            </MotionConfig>
+        </DarkMode>
+    );
+};

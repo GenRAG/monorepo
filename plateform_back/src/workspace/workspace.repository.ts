@@ -116,8 +116,12 @@ export class WorkspaceRepository {
         });
     }
 
-    async delete(id: string): Promise<Workspace> {
-        return this.prisma.workspace.delete({ where: { id } });
+    async countByUser(userId: string): Promise<number> {
+        return this.prisma.userWorkspace.count({ where: { userId } });
+    }
+
+    async updateName(id: string, name: string): Promise<Workspace> {
+        return this.prisma.workspace.update({ where: { id }, data: { name } });
     }
 
     async exists(id: string): Promise<boolean> {

@@ -4,7 +4,6 @@ import { PanelBottom, PanelLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { mainMenu, supportMenu } from "app/Navigation/sidebarConfig";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
-import WorkspaceDropdown from "app/Navigation/MainSidebar/WorkspaceDropdown";
 import BoxIcon from "components/ui/BoxIcon";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
 import { useAppResponsive } from "hooks/useAppResponsive";
@@ -41,12 +40,12 @@ const items: GlassNavItem[] = mainMenu.map((entry) => ({
  * choix explicite posé via le petit bouton de bascule ci-dessous ou Profil > Apparence — les deux
  * lisent/écrivent le même état, donc restent toujours synchronisés.
  *
- * Le sélecteur de workspace et le menu profil de l'ancienne sidebar (`WorkspaceDropdown`,
- * `SidebarFooter`) ne sont pas réécrits : réutilisés tels quels via leur prop `compactTrigger`,
- * pour garder une seule source de vérité sur la logique (liste des workspaces, déconnexion,
- * thème...). Seul le déclencheur change — un avatar dans une bulle de verre plutôt que la ligne
- * pleine largeur de la sidebar dépliable. Les trois contrôles utilitaires (workspace, profil,
- * bascule sidebar/bottom bar) sont regroupés en haut à droite : une position fixe, quelle que
+ * Le menu profil de l'ancienne sidebar (`SidebarFooter`) n'est pas réécrit : réutilisé tel quel
+ * via sa prop `compactTrigger`, pour garder une seule source de vérité sur la logique
+ * (déconnexion, thème...). Seul le déclencheur change — un avatar dans une bulle de verre plutôt
+ * que la ligne pleine largeur de la sidebar dépliable. Il n'y a pas de sélecteur de workspace :
+ * un utilisateur n'en a qu'un. Les deux contrôles utilitaires (profil, bascule sidebar/bottom
+ * bar) sont regroupés en haut à droite : une position fixe, quelle que
  * soit l'orientation du nav principal, plutôt que "collée" à un nav dont la hauteur varie selon
  * le nombre d'items.
  *
@@ -89,10 +88,6 @@ export const GlassNavAppExample = () => {
         await navigate(`/workspaces/${workspaceId}/${id}`);
     };
 
-    const handleWorkspaceChange = async (id: string) => {
-        await navigate(`/workspaces/${id}/dashboard`);
-    };
-
     const toggleLayoutMode = () => {
         dispatch(setSidebarLayoutMode(isVertical ? "bottombar" : "sidebar"));
     };
@@ -108,7 +103,7 @@ export const GlassNavAppExample = () => {
                 variant={variant}
             />
 
-            {/* Contrôles utilitaires : workspace, profil, bascule sidebar/bottom bar — voir la
+            {/* Contrôles utilitaires : profil, bascule sidebar/bottom bar — voir la
                 note de fonction ci-dessus pour le choix de position (coin haut-droit fixe). */}
             <Flex
                 direction="column"
@@ -118,21 +113,6 @@ export const GlassNavAppExample = () => {
                 right={`calc(${offsetPx} + env(safe-area-inset-right, 0px))`}
                 zIndex={30}
             >
-                <WorkspaceDropdown
-                    workspaces={workspaces}
-                    selectedId={workspaceId ?? ""}
-                    onSelect={handleWorkspaceChange}
-                    compactTrigger={
-                        <GlassSurface variant={variant} borderRadius="12px" p="6px" display="flex">
-                            <BoxIcon
-                                size="sm"
-                                clickable
-                                letters={workspaces.find((w) => w.id === workspaceId)?.name.slice(0, 2)}
-                            />
-                        </GlassSurface>
-                    }
-                />
-
                 <SidebarFooter
                     isOpen={false}
                     activeItem={null}

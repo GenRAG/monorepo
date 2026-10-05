@@ -1,4 +1,4 @@
-import { Badge, Box, HStack, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr, VStack } from "@chakra-ui/react";
+import { Badge, Box, HStack, Skeleton, Table, Tbody, Td, Text, Th, Thead, Tr, VStack } from "@chakra-ui/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -32,7 +32,10 @@ const formatLogDateTime = (iso: string) =>
 const LIMIT = 8;
 
 export const QueryLogsTable = () => {
-    const { workspaceId = "", agentId = "" } = useParams<{ workspaceId: string; agentId: string }>();
+    const { workspaceId = "", agentId = "" } = useParams<{
+        workspaceId: string;
+        agentId: string;
+    }>();
     const [page, setPage] = useState(1);
 
     const { data, isLoading, isError } = useGetQueryLogsQuery(
@@ -49,8 +52,15 @@ export const QueryLogsTable = () => {
                 subtitle="Historique des requêtes envoyées à cet agent par les utilisateurs finaux"
             />
             {isLoading ? (
-                <VStack py={8}>
-                    <Spinner size="sm" />
+                <VStack align="stretch" spacing={3} px={4} py={4}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <HStack key={i} spacing={4}>
+                            <Skeleton h="12px" flex={1} borderRadius="4px" />
+                            <Skeleton h="12px" w="40px" borderRadius="4px" />
+                            <Skeleton h="16px" w="60px" borderRadius="full" />
+                            <Skeleton h="12px" w="90px" borderRadius="4px" />
+                        </HStack>
+                    ))}
                 </VStack>
             ) : isError ? (
                 <VStack py={8}>

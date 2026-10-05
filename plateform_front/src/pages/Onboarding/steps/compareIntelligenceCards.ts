@@ -3,7 +3,7 @@ import { MessageCircle, Search, Zap } from "lucide-react";
 export const CARD_META = [
     {
         key: "standard" as const,
-        title: "STANDARD",
+        title: "Standard",
         badge: "Rapide",
         isRecommended: false,
         icon: Zap,
@@ -11,7 +11,7 @@ export const CARD_META = [
     },
     {
         key: "precise" as const,
-        title: "PRÉCIS",
+        title: "Précis",
         badge: "Recommandé",
         isRecommended: true,
         icon: Search,
@@ -19,7 +19,7 @@ export const CARD_META = [
     },
     {
         key: "creative" as const,
-        title: "CRÉATIF",
+        title: "Créatif",
         badge: "Convivial",
         isRecommended: false,
         icon: MessageCircle,

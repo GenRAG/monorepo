@@ -1,17 +1,16 @@
 import {
     Body,
     Controller,
-    Delete,
     Get,
-    HttpCode,
     Param,
+    Patch,
     Post,
     Query,
     DefaultValuePipe,
     ParseIntPipe,
     UseGuards,
 } from '@nestjs/common';
-import { UserRole } from 'generated/prisma';
+import { UserRole, Workspace } from 'generated/prisma';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
@@ -19,6 +18,7 @@ import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator'
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
+import { UpdateWorkspaceRequest } from 'src/workspace/dto/update-workspace.request';
 import { WorkspaceService } from 'src/workspace/workspace.service';
 import { WorkspaceWithUsers, WorkspacePayload } from 'src/workspace/workspace.repository';
 
@@ -61,11 +61,10 @@ export class WorkspaceController {
         return this.workspaceService.getConsumption(workspaceId, Math.min(Math.max(days, 7), 90));
     }
 
-    @Delete(':id')
+    @Patch(':id')
     @UseGuards(WorkspaceRolesGuard)
     @RolesInWorkspace(UserRole.ADMIN)
-    @HttpCode(204)
-    deleteWorkspace(@Param('id') workspaceId: string): Promise<void> {
-        return this.workspaceService.delete(workspaceId);
+    renameWorkspace(@Param('id') workspaceId: string, @Body() dto: UpdateWorkspaceRequest): Promise<Workspace> {
+        return this.workspaceService.rename(workspaceId, dto);
     }
 }

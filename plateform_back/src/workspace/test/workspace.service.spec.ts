@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserRole } from 'generated/prisma';
 import { WorkspaceRepository, WorkspaceWithUsers } from 'src/workspace/workspace.repository';
@@ -19,8 +19,9 @@ const mockWorkspaceRepository = {
     findOne: jest.fn() as any,
     findAll: jest.fn() as any,
     create: jest.fn() as any,
-    delete: jest.fn() as any,
     exists: jest.fn() as any,
+    countByUser: jest.fn() as any,
+    updateName: jest.fn() as any,
 };
 
 const mockWorkspaceStatsService = {
@@ -41,6 +42,7 @@ describe('WorkspaceService', () => {
 
         service = module.get<WorkspaceService>(WorkspaceService);
         jest.clearAllMocks();
+        mockWorkspaceRepository.countByUser.mockImplementation(() => Promise.resolve(0));
     });
 
     describe('create', () => {
@@ -79,6 +81,54 @@ describe('WorkspaceService', () => {
         });
     });
 
+    describe('create (one workspace per user)', () => {
+        it('should throw ConflictException when the user already has a workspace', async () => {
+            mockWorkspaceRepository.countByUser.mockImplementation(() => Promise.resolve(1));
+
+            await expect(service.create({ name: 'Second' }, 'user-1')).rejects.toThrow(ConflictException);
+            expect(mockWorkspaceRepository.create).not.toHaveBeenCalled();
+        });
+
+        it('should trim the name', async () => {
+            mockWorkspaceRepository.create.mockImplementation(() => Promise.resolve(fakeWorkspace));
+
+            await service.create({ name: '  Acme  ' }, 'user-1');
+
+            expect(mockWorkspaceRepository.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Acme' }));
+        });
+
+        it('should reject a blank name', async () => {
+            await expect(service.create({ name: '   ' }, 'user-1')).rejects.toThrow(BadRequestException);
+            expect(mockWorkspaceRepository.create).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('rename', () => {
+        it('should rename the workspace with a trimmed name', async () => {
+            mockWorkspaceRepository.updateName.mockImplementation(() =>
+                Promise.resolve({ ...fakeWorkspace, name: 'Acme' }),
+            );
+
+            const result = await service.rename('workspace-1', { name: ' Acme ' });
+
+            expect(result.name).toBe('Acme');
+            expect(mockWorkspaceRepository.updateName).toHaveBeenCalledWith('workspace-1', 'Acme');
+        });
+
+        it('should reject a blank name', async () => {
+            await expect(service.rename('workspace-1', { name: '  ' })).rejects.toThrow(BadRequestException);
+            expect(mockWorkspaceRepository.updateName).not.toHaveBeenCalled();
+        });
+
+        it('should throw NotFoundException on P2025', async () => {
+            const prismaError = new Error('Record not found') as Error & { code: string };
+            prismaError.code = 'P2025';
+            mockWorkspaceRepository.updateName.mockImplementation(() => Promise.reject(prismaError));
+
+            await expect(service.rename('unknown-id', { name: 'Acme' })).rejects.toThrow(NotFoundException);
+        });
+    });
+
     describe('findAll', () => {
         it('should return all workspaces for a user', async () => {
             mockWorkspaceRepository.findAll.mockImplementation(() => Promise.resolve([fakeWorkspace]));
@@ -110,31 +160,6 @@ describe('WorkspaceService', () => {
             mockWorkspaceRepository.findOne.mockImplementation(() => Promise.resolve(null));
 
             await expect(service.findOne('unknown-id')).rejects.toThrow(NotFoundException);
-        });
-    });
-
-    describe('delete', () => {
-        it('should delete workspace', async () => {
-            mockWorkspaceRepository.delete.mockImplementation(() => Promise.resolve(fakeWorkspace));
-
-            await service.delete('workspace-1');
-
-            expect(mockWorkspaceRepository.delete).toHaveBeenCalledWith('workspace-1');
-        });
-
-        it('should throw NotFoundException on P2025', async () => {
-            const prismaError = new Error('Record not found') as Error & { code: string };
-            prismaError.code = 'P2025';
-            mockWorkspaceRepository.delete.mockImplementation(() => Promise.reject(prismaError));
-
-            await expect(service.delete('unknown-id')).rejects.toThrow(NotFoundException);
-        });
-
-        it('should rethrow unknown errors', async () => {
-            const err = new Error('DB connection lost');
-            mockWorkspaceRepository.delete.mockImplementation(() => Promise.reject(err));
-
-            await expect(service.delete('workspace-1')).rejects.toThrow('DB connection lost');
         });
     });
 

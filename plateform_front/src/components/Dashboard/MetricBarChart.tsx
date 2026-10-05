@@ -42,16 +42,7 @@ interface MetricBarChartProps {
 
 export const MetricBarChart = ({ data, color, isLoading, onHoverChange }: MetricBarChartProps) => {
     if (isLoading) {
-        return (
-            <Skeleton
-                startColor="skeletonStart"
-                endColor="skeletonEnd"
-                w={`${BAR_AREA_WIDTH}px`}
-                h="90px"
-                borderRadius="8px"
-                flexShrink={0}
-            />
-        );
+        return <Skeleton w={`${BAR_AREA_WIDTH}px`} h="90px" borderRadius="8px" flexShrink={0} />;
     }
 
     return (

@@ -25,13 +25,20 @@ export const Assistant = () => {
 
     const { sendQuery, isOutOfCredits } = useAssistantQuery(assistantId ?? "");
 
-    const { data: metadata } = useGetAssistantMetadataQuery(assistantId ?? "", { skip: !assistantId });
+    const { data: metadata, isLoading: isMetadataLoading } = useGetAssistantMetadataQuery(assistantId ?? "", {
+        skip: !assistantId,
+    });
     const { data: conversationsData = [], refetch: refetchConversations } = useGetConversationsForAssistantQuery(
         assistantId ?? "",
-        { skip: !assistantId },
+        {
+            skip: !assistantId,
+        },
     );
     const { data: historyData, isFetching: isHistoryFetching } = useGetChatHistoryQuery(
-        { assistantId: assistantId ?? "", conversationId: currentConversationId ?? "" },
+        {
+            assistantId: assistantId ?? "",
+            conversationId: currentConversationId ?? "",
+        },
         { skip: !assistantId || !currentConversationId },
     );
 
@@ -66,7 +73,9 @@ export const Assistant = () => {
         [assistantId, sendQuery, refetchConversations],
     );
 
-    const { messages, setMessages, sendMessage, isLoading } = useChat({ getResponse });
+    const { messages, setMessages, sendMessage, isLoading } = useChat({
+        getResponse,
+    });
 
     useEffect(() => {
         if (!isHistoryFetching && historyData) {
@@ -102,6 +111,7 @@ export const Assistant = () => {
                 assistantId={assistantId}
                 agentVersion={agentVersion}
                 title={title}
+                isTitleLoading={isMetadataLoading}
                 sharedBy={sharedBy}
                 messages={messages}
                 conversations={conversationsData}
@@ -120,6 +130,7 @@ export const Assistant = () => {
     return (
         <AssistantHome
             title={title}
+            isTitleLoading={isMetadataLoading}
             sharedBy={sharedBy}
             conversations={conversationsData}
             isLoading={isLoading}

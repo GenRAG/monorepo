@@ -15,7 +15,7 @@ async function desktop(w, h) {
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   await page.goto(url, { waitUntil: "networkidle" });
   await wait(1500);
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 11; i++) {
     if (only && !only.split(",").includes(String(i))) continue;
     await page.evaluate((i) => window.__motion.scrollToPanel(i), i);
     await wait(2200);

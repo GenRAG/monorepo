@@ -1,43 +1,43 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useGetUserWorkspacesQuery, useCreateWorkspaceMutation } from "services/workspace/workspace";
 import { WelcomeScreen } from "components/Auth/WelcomeScreen";
 import { AppLoader } from "components/ui/AppLoader";
+import useThemedToast from "hooks/useThemedToast";
+import { DEFAULT_WORKSPACE_NAME } from "types/workspace";
 
 export default function DefaultRedirect() {
     const navigate = useNavigate();
+    const toast = useThemedToast();
     const { data: workspaces, isLoading } = useGetUserWorkspacesQuery();
-    const [createWorkspace] = useCreateWorkspaceMutation();
-    const [isCreating, setIsCreating] = useState(false);
+    const [createWorkspace, { isLoading: isCreating }] = useCreateWorkspaceMutation();
     const [showWelcome, setShowWelcome] = useState(false);
-    const [pendingWorkspaceId, setPendingWorkspaceId] = useState<string | null>(null);
-
-    const isNewUser = !isLoading && workspaces !== undefined && workspaces.length === 0;
 
     useEffect(() => {
-        if (isLoading || workspaces === undefined || isCreating) return;
-        if (workspaces.length === 0) {
-            setIsCreating(true);
-            setShowWelcome(true);
-            void createWorkspace({ name: "Mon workspace" })
-                .unwrap()
-                .then((ws) => setPendingWorkspaceId(ws.id))
-                .catch(() => {});
-        }
-    }, [isLoading, workspaces, createWorkspace, isCreating]);
+        if (!isLoading && workspaces?.length === 0) setShowWelcome(true);
+    }, [isLoading, workspaces]);
 
-    const handleWelcomeDone = useCallback(() => {
-        if (pendingWorkspaceId) {
-            void navigate(`/onboarding/${pendingWorkspaceId}`, { replace: true });
+    const handleStart = async (organizationName: string) => {
+        try {
+            const workspace = await createWorkspace({
+                name: organizationName.trim() || DEFAULT_WORKSPACE_NAME,
+            }).unwrap();
+            void navigate(`/onboarding/${workspace.id}`, { replace: true });
+        } catch {
+            toast({
+                title: "Impossible de créer votre espace",
+                description: "Réessayez dans un instant.",
+                status: "error",
+            });
         }
-    }, [pendingWorkspaceId, navigate]);
+    };
 
     if (showWelcome) {
-        return <WelcomeScreen onDone={handleWelcomeDone} />;
+        return <WelcomeScreen onDone={handleStart} isSubmitting={isCreating} />;
     }
 
-    if (isLoading || isCreating || !workspaces?.length) {
-        return <AppLoader message="Chargement de votre espace..." />;
+    if (isLoading || !workspaces?.length) {
+        return <AppLoader />;
     }
 
     return <Navigate to={`/workspaces/${workspaces[0].id}/agents`} replace />;

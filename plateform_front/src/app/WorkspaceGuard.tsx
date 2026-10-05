@@ -16,7 +16,7 @@ export default function WorkspaceGuard() {
     });
 
     if (isLoading || isOnboardingLoading) {
-        return <AppLoader message="Chargement de votre espace..." />;
+        return <AppLoader />;
     }
 
     if (isError) {

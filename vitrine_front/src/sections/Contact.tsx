@@ -57,7 +57,7 @@ export function Contact() {
 
   return (
     <Panel id="contact" label="Contact" tone="slab" glow className={styles.grid}>
-      <SectionIntro index={10} eyebrow={contact.eyebrow} title={contact.title} text={contact.text} />
+      <SectionIntro index={11} eyebrow={contact.eyebrow} title={contact.title} text={contact.text} />
 
       <form className={styles.form} onSubmit={onSubmit} noValidate {...reveal(3)}>
         {state === "success" ? (

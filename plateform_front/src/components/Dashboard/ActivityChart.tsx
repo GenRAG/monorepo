@@ -1,5 +1,5 @@
 import { Box, Card, Skeleton, Text } from "@chakra-ui/react";
-import { BarChart2 } from "lucide-react";
+import { BarChart2, CalendarX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { type Period } from "pages/Dashboard/data";
 import { STATUS_COLORS } from "themeNew/foundations/themeConfig";
@@ -16,6 +16,12 @@ const BAR_MAX_HEIGHT_RATIO = 0.55;
 
 /** ComposedChart is time-scaled — the x-axis is hidden here, so evenly-spaced
  * placeholder dates only drive point spacing, never displayed to the user. */
+const PERIOD_LABELS: Record<Period, string> = {
+    "24h": "ces dernières 24 heures",
+    "7j": "ces 7 derniers jours",
+    "30j": "ces 30 derniers jours",
+};
+
 const toChartRows = (labels: string[], values: number[]) =>
     labels.map((label, i) => ({
         date: new Date(2020, 0, 1 + i),
@@ -47,6 +53,7 @@ export const ActivityChart = ({
     const defaultValue = period === "24h" ? todayConversations : totalConversations;
     const defaultLabel = period === "24h" ? "Aujourd'hui" : "Total";
 
+    const isPeriodEmpty = values.every((v) => !v);
     const chartRows = useMemo(() => toChartRows(labels, values), [labels, values]);
 
     return (
@@ -59,17 +66,17 @@ export const ActivityChart = ({
                     title="Aucune conversation"
                     description="Les métriques d'activité apparaîtront une fois vos agents en production."
                 />
+            ) : isPeriodEmpty && !isLoading ? (
+                <CardEmptyState
+                    icon={CalendarX}
+                    title="Aucune conversation sur la période"
+                    description={`Aucune conversation n'a eu lieu ${PERIOD_LABELS[period]}.`}
+                />
             ) : (
                 <>
                     <Box px={4} mt={3} pb={2}>
                         {isLoading ? (
-                            <Skeleton
-                                startColor="skeletonStart"
-                                endColor="skeletonEnd"
-                                h="28px"
-                                w="80px"
-                                borderRadius="6px"
-                            />
+                            <Skeleton h="28px" w="80px" borderRadius="6px" />
                         ) : (
                             <ChartStatFlow
                                 value={hover.value ?? defaultValue}

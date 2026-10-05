@@ -32,7 +32,7 @@ const proofs = [
 export function Why() {
   return (
     <Panel id="pourquoi" label="Pourquoi GenRAG" tone="open">
-      <SectionIntro index={9} eyebrow={why.eyebrow} title={why.title} wide />
+      <SectionIntro index={10} eyebrow={why.eyebrow} title={why.title} wide />
       {/* TODO: pas d'affirmation sécurité / conformité / RGPD tant qu'elle n'est pas validée (voir content.ts). */}
       <ul className={styles.list}>
         {why.items.map((item, i) => {

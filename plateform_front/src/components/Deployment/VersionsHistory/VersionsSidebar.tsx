@@ -41,7 +41,7 @@ export const VersionsSidebar = ({ selectedId, onSelect, workspaceId, agentId }: 
 
             <VStack spacing={0} align="stretch" overflowY="auto" flex={1} minH={0}>
                 {isLoading ? (
-                    Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} h="72px" m={4} borderRadius="6px" />)
+                    Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} h="72px" m={4} borderRadius="8px" />)
                 ) : isError ? (
                     <Text fontSize="sm" color="textError" p={4}>
                         Impossible de charger les versions.

@@ -1,0 +1,429 @@
+/* Onglet « Aperçu » d'un bloc — reprend NodeOverviewLayout (docs/screenshot/node-modal-animation.png) */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  flex: 1;
+}
+
+.heading {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--grey-50);
+}
+
+.stage {
+  position: relative;
+  flex: none;
+  padding: 40px 14px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--grey-700);
+  background: var(--grey-900);
+  overflow: hidden;
+}
+
+.chip {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 169, 0.35);
+  background: rgba(52, 211, 169, 0.08);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--grey-100);
+  animation: chipIn 0.45s var(--ease-out);
+}
+
+.chip svg {
+  color: var(--green-400);
+}
+
+@keyframes chipIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(3px);
+  }
+}
+
+.progress {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+.progress i {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--grey-700);
+  transition: background 0.5s;
+}
+
+.progress .done {
+  background: var(--green-400);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--grey-400);
+  transition:
+    background 0.4s,
+    color 0.4s;
+}
+
+.steps .current {
+  background: rgba(52, 211, 169, 0.08);
+  color: var(--grey-50);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--grey-600);
+  transition:
+    background 0.4s,
+    box-shadow 0.4s;
+}
+
+.current .dot {
+  background: var(--green-400);
+  box-shadow: 0 0 0 4px rgba(52, 211, 169, 0.18);
+}
+
+/* ---------- Reformulation ---------- */
+.scene {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--grey-700);
+  background: var(--grey-800);
+  transition:
+    border-color 0.4s,
+    box-shadow 0.4s;
+}
+
+.cardActive {
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px rgba(52, 211, 169, 0.12);
+}
+
+.cardLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+}
+
+.cardLabel svg {
+  color: var(--green-400);
+}
+
+.text {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--grey-100);
+}
+
+.vague {
+  border-radius: 3px;
+  text-decoration: underline wavy var(--green-400);
+  text-underline-offset: 3px;
+  animation: flag 0.5s var(--ease-out) 0.7s both;
+}
+
+@keyframes flag {
+  from {
+    color: inherit;
+    text-decoration-color: transparent;
+  }
+  to {
+    color: var(--green-300);
+    background: rgba(52, 211, 169, 0.12);
+  }
+}
+
+.word {
+  display: inline-block;
+  white-space: pre;
+  font-weight: 600;
+  animation: wordIn 0.45s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 55ms);
+}
+
+@keyframes wordIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(5px);
+  }
+}
+
+.tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+.tags span {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--grey-300);
+  transition:
+    background 0.4s,
+    color 0.4s;
+}
+
+.tags .tagStrong {
+  background: var(--green-500);
+  color: var(--grey-975);
+}
+
+.scores {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.4s,
+    transform 0.5s var(--ease-out);
+}
+
+.scoresOn {
+  opacity: 1;
+  transform: none;
+}
+
+.scores p {
+  display: grid;
+  grid-template-columns: 38px 1fr 30px;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--grey-400);
+}
+
+.scores p > span:last-child {
+  text-align: right;
+}
+
+.scores .scoreStrong {
+  color: var(--green-300);
+}
+
+.bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--grey-700);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--grey-500);
+  transition: width 0.9s var(--ease-out) 0.2s;
+}
+
+.scoresOn .bar i {
+  width: var(--w);
+}
+
+.scoreStrong .bar i {
+  background: var(--green-400);
+  transition-delay: 0.45s;
+}
+
+/* ---------- Classement ---------- */
+.results {
+  position: relative;
+  height: calc(4 * 28px - 4px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.results li {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 7px;
+  border: 1px solid var(--grey-700);
+  background: var(--grey-800);
+  font-size: 10.5px;
+  transform: translateY(calc(var(--row) * 28px));
+  transition:
+    transform 0.7s cubic-bezier(0.34, 1.3, 0.5, 1),
+    opacity 0.4s,
+    border-color 0.4s,
+    box-shadow 0.4s;
+  transition-delay: calc(var(--i) * 40ms);
+}
+
+.rank {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 15px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--grey-300);
+}
+
+.fileIcon {
+  flex: none;
+  color: var(--green-400);
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--grey-100);
+}
+
+.results .bar {
+  flex: none;
+  width: 38px;
+  height: 4px;
+}
+
+.results .bar i {
+  width: var(--score);
+  background: var(--green-400);
+  transition: none;
+}
+
+.value {
+  position: relative;
+  width: 26px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--green-300);
+}
+
+.sim {
+  display: none;
+}
+
+/* Étape 1 : les scores de similarité deviennent des scores de pertinence, ligne par ligne */
+.scoring .bar i {
+  animation: rescore 0.8s var(--ease-out) both;
+  animation-delay: calc(0.5s + var(--i) * 0.3s);
+}
+
+@keyframes rescore {
+  from {
+    width: var(--sim);
+    background: var(--grey-500);
+  }
+}
+
+.scoring .sim {
+  display: inline;
+  position: absolute;
+  right: 0;
+  color: var(--grey-400);
+  animation: out 0.3s both;
+  animation-delay: calc(0.6s + var(--i) * 0.3s);
+}
+
+.scoring .score {
+  animation: in 0.3s both;
+  animation-delay: calc(0.6s + var(--i) * 0.3s);
+}
+
+@keyframes out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes in {
+  from {
+    opacity: 0;
+  }
+}
+
+.results .top {
+  border-color: var(--green-500);
+  box-shadow: 0 0 0 3px rgba(52, 211, 169, 0.14);
+}
+
+.top .rank {
+  background: var(--green-500);
+  color: var(--grey-975);
+}
+
+.dropped {
+  opacity: 0.4;
+}
+
+.dropped .name {
+  text-decoration: line-through;
+}
+
+.droppedTag {
+  font-size: 9.5px;
+  color: var(--grey-400);
+}
+
+/* Fenêtres basses : on garde la scène, la liste d'étapes est déjà résumée par la pastille */
+@media (max-height: 850px) and (min-width: 768px) {
+  .steps {
+    display: none;
+  }
+}

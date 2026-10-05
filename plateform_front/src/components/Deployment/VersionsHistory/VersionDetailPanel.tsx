@@ -19,7 +19,7 @@ export const VersionDetailPanel = ({ selectedId, workspaceId, agentId }: Version
     if (isLoading) {
         return (
             <Box flex="1 1 0" p={6} bg="surfacePrimary">
-                <Skeleton h="full" borderRadius="12px" startColor="skeletonStart" endColor="skeletonEnd" />
+                <Skeleton h="full" borderRadius="12px" />
             </Box>
         );
     }

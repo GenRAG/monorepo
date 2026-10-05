@@ -1,0 +1,237 @@
+/* Palette de blocs — reprend MenuNodeModal (docs/screenshot/node-selector.png) */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(11, 14, 17, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.open {
+  opacity: 1;
+}
+
+.palette {
+  width: min(440px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: rgba(26, 31, 38, 0.92);
+  border: 1px solid var(--border-strong);
+  box-shadow:
+    0 30px 60px -20px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  transform: translateY(10px) scale(0.96);
+  transition: transform 0.4s var(--ease-out);
+  overflow: hidden;
+}
+
+.open .palette {
+  transform: none;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.searchIcon,
+.close {
+  flex: none;
+  color: var(--grey-400);
+}
+
+.search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--grey-700);
+  font-size: 12.5px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.focused {
+  border-color: var(--green-400);
+  box-shadow: 0 0 0 3px rgba(52, 211, 169, 0.14);
+}
+
+.placeholder {
+  color: var(--grey-500);
+}
+
+.query {
+  color: var(--grey-50);
+}
+
+.caret {
+  width: 1.5px;
+  height: 15px;
+  margin-left: 1px;
+  background: var(--green-400);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 8px 8px;
+  overflow: hidden;
+  /* La liste est plus longue que la palette : elle s'estompe en bas, comme une liste qu'on ferait défiler */
+  mask-image: linear-gradient(180deg, #000 82%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 82%, transparent);
+}
+
+.group {
+  padding: 10px 8px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+}
+
+.divider {
+  height: 1px;
+  margin: 6px -8px 0;
+  background: var(--border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-height: 52px;
+  padding: 8px;
+  margin-bottom: 4px;
+  border-radius: 9px;
+  overflow: hidden;
+  transition:
+    background 0.2s,
+    opacity 0.3s,
+    max-height 0.35s var(--ease-out),
+    padding 0.35s var(--ease-out),
+    margin 0.35s var(--ease-out);
+}
+
+.rowHidden {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  opacity: 0;
+}
+
+.active {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.rowIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--green-300);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.rowTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--grey-50);
+}
+
+.rowDesc {
+  font-size: 10.5px;
+  color: var(--grey-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.info {
+  flex: none;
+  margin-left: auto;
+  color: var(--grey-500);
+}
+
+.used {
+  opacity: 0.45;
+}
+
+.usedTag {
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-strong);
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey-400);
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--grey-400);
+}
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hint kbd {
+  min-width: 16px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid var(--grey-600);
+  font-family: inherit;
+  font-size: 9px;
+  text-align: center;
+  color: var(--grey-200);
+}
+
+@media (max-width: 560px) {
+  .hints {
+    display: none;
+  }
+}

@@ -18,9 +18,27 @@ interface ActivityAccent {
 }
 
 const ACTIVITY_ACCENTS: Record<string, ActivityAccent> = {
-    conversation: { icon: MessageSquare, label: "Conversation", badgeScheme: "blue", bar: "blue.400", hex: "#4A9FD8" },
-    document_upload: { icon: FileUp, label: "Document", badgeScheme: "orange", bar: "orange.400", hex: "#FF9460" },
-    deployment: { icon: ArrowUpRight, label: "Déploiement", badgeScheme: "green", bar: "green.400", hex: "#12B98C" },
+    conversation: {
+        icon: MessageSquare,
+        label: "Conversation",
+        badgeScheme: "blue",
+        bar: "blue.400",
+        hex: "#4A9FD8",
+    },
+    document_upload: {
+        icon: FileUp,
+        label: "Document",
+        badgeScheme: "orange",
+        bar: "orange.400",
+        hex: "#FF9460",
+    },
+    deployment: {
+        icon: ArrowUpRight,
+        label: "Déploiement",
+        badgeScheme: "green",
+        bar: "green.400",
+        hex: "#12B98C",
+    },
 };
 
 const DEFAULT_ACCENT: ActivityAccent = {
@@ -100,7 +118,6 @@ interface RecentActivityCardProps {
 }
 
 export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = false }: RecentActivityCardProps) => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
     const page = Math.min(currentPage, totalPages);
@@ -112,12 +129,12 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                 <VStack spacing={2} align="stretch" h="100%" p={3}>
                     {[...Array(3)].map((_, i) => (
                         <HStack key={i} spacing={3} p={2} borderRadius="10px" bg="surfaceHover">
-                            <Skeleton {...skeletonProps} w="28px" h="28px" borderRadius="8px" flexShrink={0} />
+                            <Skeleton w="28px" h="28px" borderRadius="8px" flexShrink={0} />
                             <VStack align="start" spacing={1} flex={1} minW={0}>
-                                <Skeleton {...skeletonProps} h="14px" w="160px" borderRadius="4px" />
-                                <Skeleton {...skeletonProps} h="12px" w="100px" borderRadius="4px" />
+                                <Skeleton h="14px" w="160px" borderRadius="4px" />
+                                <Skeleton h="12px" w="100px" borderRadius="4px" />
                             </VStack>
-                            <Skeleton {...skeletonProps} h="12px" w="40px" borderRadius="4px" flexShrink={0} />
+                            <Skeleton h="12px" w="40px" borderRadius="4px" flexShrink={0} />
                         </HStack>
                     ))}
                 </VStack>
@@ -139,7 +156,7 @@ export const RecentActivityCard = ({ items = [], isEmpty = false, isLoading = fa
                 <CardEmptyState
                     icon={Clock}
                     title="Aucune activité récente"
-                    description="Les événements de votre workspace apparaîtront ici."
+                    description="Les événements de votre entreprise apparaîtront ici."
                 />
             ) : (
                 <>

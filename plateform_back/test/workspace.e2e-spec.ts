@@ -45,7 +45,50 @@ describe('Workspace (e2e)', () => {
         });
 
         it('should fail with missing fields', async () => {
-            await request(app.getHttpServer()).post('/workspaces').set('Cookie', cookie).send({}).expect(400);
+            await request(app.getHttpServer()).post('/workspaces').set('Cookie', cookieUser2).send({}).expect(400);
+        });
+
+        it('should refuse a second workspace for the same user', async () => {
+            await request(app.getHttpServer())
+                .post('/workspaces')
+                .set('Cookie', cookie)
+                .send({ name: 'Second' })
+                .expect(409);
+        });
+    });
+
+    describe('DELETE /workspaces/:id', () => {
+        it('should not be exposed: deleting then recreating would grant the initial credits again', async () => {
+            await request(app.getHttpServer()).delete(`/workspaces/${workspaceId}`).set('Cookie', cookie).expect(404);
+            await request(app.getHttpServer()).get(`/workspaces/${workspaceId}`).set('Cookie', cookie).expect(200);
+        });
+    });
+
+    describe('PATCH /workspaces/:id', () => {
+        it('should rename the workspace as ADMIN', async () => {
+            const res = await request(app.getHttpServer())
+                .patch(`/workspaces/${workspaceId}`)
+                .set('Cookie', cookie)
+                .send({ name: 'Acme' })
+                .expect(200);
+
+            expect(res.body.name).toBe('Acme');
+        });
+
+        it('should fail with an empty name', async () => {
+            await request(app.getHttpServer())
+                .patch(`/workspaces/${workspaceId}`)
+                .set('Cookie', cookie)
+                .send({ name: '' })
+                .expect(400);
+        });
+
+        it('should return 403 for non-member', async () => {
+            await request(app.getHttpServer())
+                .patch(`/workspaces/${workspaceId}`)
+                .set('Cookie', cookieUser2)
+                .send({ name: 'Hack' })
+                .expect(403);
         });
     });
 
@@ -112,30 +155,6 @@ describe('Workspace (e2e)', () => {
 
         it('should return 404 for unknown workspace', async () => {
             await request(app.getHttpServer()).get('/workspaces/unknown-id/stats').set('Cookie', cookie).expect(404);
-        });
-    });
-
-    describe('DELETE /workspaces/:id', () => {
-        it('should return 403 for non-member', async () => {
-            await request(app.getHttpServer())
-                .delete(`/workspaces/${workspaceId}`)
-                .set('Cookie', cookieUser2)
-                .expect(403);
-        });
-
-        it('should return 404 for unknown workspace', async () => {
-            await request(app.getHttpServer()).delete('/workspaces/unknown-id').set('Cookie', cookie).expect(404);
-        });
-
-        it('should delete workspace as ADMIN', async () => {
-            const res = await request(app.getHttpServer())
-                .post('/workspaces')
-                .set('Cookie', cookie)
-                .send({ name: 'To Delete', description: 'Will be deleted' });
-
-            const idToDelete = res.body.id;
-
-            await request(app.getHttpServer()).delete(`/workspaces/${idToDelete}`).set('Cookie', cookie).expect(204);
         });
     });
 });

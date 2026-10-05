@@ -92,7 +92,7 @@ export function Analytics() {
   return (
     <Panel id="suivi" label="Suivi" tone="open" className={styles.layout}>
       <div className={styles.side}>
-        <SectionIntro index={8} eyebrow={analytics.eyebrow} title={analytics.title} text={analytics.text}>
+        <SectionIntro index={9} eyebrow={analytics.eyebrow} title={analytics.title} text={analytics.text}>
           <p className={styles.demo} {...reveal(3)}>
             {site.demoLabel}
           </p>

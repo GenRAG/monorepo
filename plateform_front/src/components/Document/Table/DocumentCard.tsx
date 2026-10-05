@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Card, HStack, Text } from "@chakra-ui/react";
+import { Box, Card, HStack, Skeleton, Text } from "@chakra-ui/react";
 import { DocumentStatusBadge } from "components/ui/DocumentStatusBadge";
 import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { formatFileSize, getFileTypeBadgeConfig } from "utils/documentFormatters";
@@ -17,19 +17,21 @@ interface DocumentCardProps {
     onDownload: () => void;
 }
 
-const DocumentThumbnail: React.FC<{ document: DocumentEntity; workspaceId: string; agentId: string }> = ({
-    document,
-    workspaceId,
-    agentId,
-}) => {
+const DocumentThumbnail: React.FC<{
+    document: DocumentEntity;
+    workspaceId: string;
+    agentId: string;
+}> = ({ document, workspaceId, agentId }) => {
     const badge = getFileTypeBadgeConfig(document.mimeType);
     const isPdf = document.mimeType === "application/pdf";
     const isIndexed = document.status === DocumentStatus.INDEXED;
 
-    const { data: urlData } = useGetDocumentUrlQuery(
+    const { data: urlData, isLoading } = useGetDocumentUrlQuery(
         { workspaceId, agentId, id: document.id },
         { skip: !isPdf || !isIndexed },
     );
+
+    if (isLoading) return <Skeleton w="100%" h="100%" borderRadius="8px" />;
 
     if (isPdf && urlData?.url) {
         return (

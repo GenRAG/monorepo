@@ -44,7 +44,7 @@ const DocumentFileList: React.FC<DocumentFileListProps> = ({ sources }) => {
 
     return (
         <VStack align="start" w="100%" spacing={2} mt="4px" overflow="auto">
-            <Text fontWeight="semibold" color="textStrong">
+            <Text variant="body-sm-semibold" color="textStrong">
                 Fichiers ajoutés
             </Text>
             {sources.map((source, index) => {
@@ -54,10 +54,11 @@ const DocumentFileList: React.FC<DocumentFileListProps> = ({ sources }) => {
                         key={index}
                         w="100%"
                         p={3}
-                        border="1px solid"
-                        borderColor="borderDefault"
-                        borderRadius="8px"
-                        bg="surfaceAction"
+                        borderWidth="1px"
+                        borderStyle="solid"
+                        borderColor="borderSubtle"
+                        borderRadius="12px"
+                        bg="surfaceCard"
                     >
                         <HStack spacing={3}>
                             <BoxIcon

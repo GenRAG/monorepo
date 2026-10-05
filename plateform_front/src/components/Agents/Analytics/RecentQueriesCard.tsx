@@ -9,17 +9,16 @@ import { useMemo, useState } from "react";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 
 const RecentQueryItemSkeleton = () => {
-    const skeletonProps = { startColor: "skeletonStart", endColor: "skeletonEnd" };
     return (
         <Box p={3} bg="surfaceCard" borderBottomWidth="1px" borderStyle="solid" borderColor="borderDefault">
             <HStack justify="space-between" align="start" mb={2}>
-                <Skeleton {...skeletonProps} h="14px" w="60%" borderRadius="4px" />
-                <Skeleton {...skeletonProps} h="16px" w="60px" borderRadius="full" flexShrink={0} />
+                <Skeleton h="14px" w="60%" borderRadius="4px" />
+                <Skeleton h="16px" w="60px" borderRadius="full" flexShrink={0} />
             </HStack>
             <HStack spacing={4}>
-                <Skeleton {...skeletonProps} h="12px" w="90px" borderRadius="4px" />
-                <Skeleton {...skeletonProps} h="12px" w="70px" borderRadius="4px" />
-                <Skeleton {...skeletonProps} h="12px" w="70px" borderRadius="4px" />
+                <Skeleton h="12px" w="90px" borderRadius="4px" />
+                <Skeleton h="12px" w="70px" borderRadius="4px" />
+                <Skeleton h="12px" w="70px" borderRadius="4px" />
             </HStack>
         </Box>
     );

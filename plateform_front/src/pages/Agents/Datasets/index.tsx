@@ -1,8 +1,10 @@
 import { useMemo } from "react";
-import { Center, HStack, Icon, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
-import { Info } from "lucide-react";
+import { Center, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import { AgentDatasetRow } from "components/Agents/Datasets/AgentDatasetRow";
+import { AgentDatasetsEmptyState } from "components/Agents/Datasets/AgentDatasetsEmptyState";
+import { AgentDatasetsSection } from "components/Agents/Datasets/AgentDatasetsSection";
+import { AgentDatasetsSummary } from "components/Agents/Datasets/AgentDatasetsSummary";
 import Button from "components/ui/Button";
 import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import useThemedToast from "hooks/useThemedToast";
@@ -15,16 +17,6 @@ import { useGetActiveWorkflowQuery } from "services/workflow/workflow";
 import { getApiErrorMessage } from "utils/apiError";
 import { getAgentDatasetUsage } from "utils/dataset/agentDatasetUsage";
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <VStack align="stretch" spacing={2}>
-        <Text variant="caption-xs-semibold" color="textLabel" textTransform="uppercase" letterSpacing="0.06em">
-            {title}
-        </Text>
-        {children}
-    </VStack>
-);
-
-/** Which knowledge bases the agent may search. Documents themselves are managed from the Bases page. */
 export const AgentDatasets = () => {
     const { workspaceId = "", agentId = "" } = useParams<{
         workspaceId: string;
@@ -68,7 +60,7 @@ export const AgentDatasets = () => {
             return (
                 <Stack spacing={2}>
                     {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} h="60px" borderRadius="12px" />
+                        <Skeleton key={i} h="68px" borderRadius="14px" />
                     ))}
                 </Stack>
             );
@@ -83,13 +75,14 @@ export const AgentDatasets = () => {
                 </Center>
             );
         }
+        if (datasets.length === 0) return <AgentDatasetsEmptyState kind="no-dataset" workspaceId={workspaceId} />;
         return (
             <VStack align="stretch" spacing={8}>
-                <Section title={`Utilisées par cet agent (${attached.length})`}>
+                <AgentDatasetsSummary attached={attached} total={datasets.length} />
+
+                <AgentDatasetsSection title="Utilisées par cet agent" count={attached.length}>
                     {attached.length === 0 ? (
-                        <Text variant="body-sm-muted">
-                            Aucune base : l&apos;agent répond sans consulter de documents. Ajoutez-en une ci-dessous.
-                        </Text>
+                        <AgentDatasetsEmptyState kind="none-attached" workspaceId={workspaceId} />
                     ) : (
                         attached.map((dataset) => (
                             <AgentDatasetRow
@@ -108,14 +101,11 @@ export const AgentDatasets = () => {
                             />
                         ))
                     )}
-                </Section>
+                </AgentDatasetsSection>
 
-                <Section title="Autres bases de l'entreprise">
+                <AgentDatasetsSection title="Autres bases de l'entreprise" count={available.length}>
                     {available.length === 0 ? (
-                        <Text variant="body-sm-muted">
-                            Toutes vos bases sont déjà utilisées par cet agent. Créez-en d&apos;autres depuis la page
-                            Bases.
-                        </Text>
+                        <AgentDatasetsEmptyState kind="all-attached" workspaceId={workspaceId} />
                     ) : (
                         available.map((dataset) => (
                             <AgentDatasetRow
@@ -131,7 +121,7 @@ export const AgentDatasets = () => {
                             />
                         ))
                     )}
-                </Section>
+                </AgentDatasetsSection>
             </VStack>
         );
     };
@@ -145,19 +135,11 @@ export const AgentDatasets = () => {
             <VStack
                 align="stretch"
                 spacing={6}
-                px={{ base: 6, md: 16 }}
+                px={{ base: 4, md: 16 }}
                 py={{ base: 4, md: 8 }}
                 overflow="auto"
                 flex={1}
             >
-                <HStack spacing={2} p={3} borderRadius="10px" bg="surfaceSubtle" align="start">
-                    <Icon as={Info} boxSize={4} color="textLabel" mt={0.5} />
-                    <Text variant="body-xs-muted">
-                        Par défaut, l&apos;agent cherche dans toutes les bases ajoutées ici. Pour n&apos;en utiliser que
-                        certaines, ajoutez des blocs « Base de connaissances » à la Recherche dans l&apos;onglet
-                        Architecture.
-                    </Text>
-                </HStack>
                 {renderBody()}
             </VStack>
         </VStack>

@@ -2,9 +2,7 @@ import React from "react";
 import { Box, HStack, Icon, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { Search } from "lucide-react";
 import Button from "components/ui/Button";
-import MultiOptionButtons from "components/ui/MultiOptionButtons";
 import { MultiSelectDropdown } from "components/ui/MultiSelectDropdown";
-import { ViewMode } from "hooks/dataset/useViewModePreference";
 
 const TYPE_FILTERS = [
     { value: "PDF", label: "PDF" },
@@ -20,9 +18,6 @@ interface DocumentFiltersProps {
     onSearchChange: (value: string) => void;
     activeTypes: TypeFilter[];
     onTypesChange: (types: TypeFilter[]) => void;
-    viewMode: ViewMode;
-    onViewModeChange: (mode: ViewMode) => void;
-    isMobile?: boolean;
     total: number;
     onOpenUpload?: () => void;
     /** Rendered right after the type filter (e.g. the source filter). */
@@ -34,9 +29,6 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
     onSearchChange,
     activeTypes,
     onTypesChange,
-    viewMode,
-    onViewModeChange,
-    isMobile = false,
     total,
     onOpenUpload,
     extraFilters,
@@ -48,6 +40,7 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
                     <Icon as={Search} boxSize={3.5} />
                 </InputLeftElement>
                 <Input
+                    variant="glass"
                     value={search}
                     onChange={(e) => onSearchChange(e.target.value)}
                     placeholder={`Rechercher dans ${total} document${total > 1 ? "s" : ""}`}
@@ -70,18 +63,6 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
             <Button size="sm" variant="superPrimary" onClick={() => onOpenUpload?.()}>
                 Téléverser un document
             </Button>
-
-            {!isMobile && (
-                <MultiOptionButtons
-                    options={[
-                        { value: "grid", label: "Grille" },
-                        { value: "table", label: "Tableau" },
-                    ]}
-                    value={viewMode}
-                    onChange={onViewModeChange}
-                    size="xs"
-                />
-            )}
         </HStack>
     );
 };

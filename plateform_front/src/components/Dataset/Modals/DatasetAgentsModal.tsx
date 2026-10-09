@@ -10,6 +10,7 @@ import {
     Skeleton,
     Stack,
     Text,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import Button from "components/ui/Button";
 import useThemedToast from "hooks/useThemedToast";
@@ -31,6 +32,7 @@ export const DatasetAgentsModal = ({ dataset, workspaceId, onClose }: DatasetAge
     const { data: agents = [], isLoading } = useGetWorkspaceAgentsQuery(workspaceId, { skip: !dataset });
     const [setDatasetAgents, { isLoading: isSaving }] = useSetDatasetAgentsMutation();
     const [selected, setSelected] = useState<Set<string>>(new Set());
+    const overlayBg = useColorModeValue("whiteAlpha.600", "blackAlpha.400");
 
     useEffect(() => {
         setSelected(new Set(dataset?.agents.map((agent) => agent.id) ?? []));
@@ -68,8 +70,8 @@ export const DatasetAgentsModal = ({ dataset, workspaceId, onClose }: DatasetAge
 
     return (
         <Modal isOpen={!!dataset} onClose={onClose} isCentered size="md" scrollBehavior="inside">
-            <ModalOverlay backdropFilter="blur(2px)" />
-            <ModalContent bg="surfaceModal" borderRadius="16px">
+            <ModalOverlay bg={overlayBg} />
+            <ModalContent bg="transparent" backdropFilter="blur(20px)" borderRadius="16px">
                 <ModalHeader pb={1}>Utiliser dans des agents</ModalHeader>
                 <Text variant="body-xs-muted" px={6} pb={3}>
                     Les agents cochés pourront répondre à partir de « {dataset?.name} ».

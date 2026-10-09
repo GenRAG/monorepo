@@ -156,7 +156,6 @@ const AgentSidebar = () => {
                     </Box>
                 ))}
             </VStack>
-
             <Box mt={2} flexShrink={0}>
                 <SidebarFooter
                     isOpen={isOpen}
@@ -166,6 +165,7 @@ const AgentSidebar = () => {
                     supportMenu={[]}
                     compactTrigger={footerTrigger}
                     compactPlacement="right-start"
+                    compactFullWidth
                 />
             </Box>
         </Box>

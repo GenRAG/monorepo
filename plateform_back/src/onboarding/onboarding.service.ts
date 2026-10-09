@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreditTransactionType, OnboardingSession, Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
+import { DatasetService } from 'src/dataset/dataset.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import type { PipelineBlock } from 'src/rag-engine/pipeline.schema';
@@ -12,6 +13,7 @@ import { InstructionStyle } from './dto/complete-onboarding.request';
 import { DEMO_WORKFLOW_DEFINITION } from './demo-workflow.definition';
 
 const ONBOARDING_INITIAL_CREDITS = 20;
+const DEMO_DATASET_NAME = 'Documents de démonstration';
 
 // Steps whose chat goes through GET /onboarding/stream. `compare-intelligence` uses POST /compare.
 const STREAM_STEP_IDS = ['test-assistant', 'improve-assistant'];
@@ -44,6 +46,7 @@ export class OnboardingService {
         private readonly workflowService: WorkflowService,
         private readonly orchestrator: AgentRuntimeOrchestrator,
         private readonly creditBalanceService: CreditBalanceService,
+        private readonly datasetService: DatasetService,
     ) {}
 
     async start(userId: string, workspaceId: string): Promise<OnboardingSessionResponse> {
@@ -77,6 +80,13 @@ export class OnboardingService {
                 return this.toResponse(winner!);
             }
             throw err;
+        }
+
+        try {
+            const dataset = await this.datasetService.create(workspaceId, { name: DEMO_DATASET_NAME });
+            await this.datasetService.attachToAgent(dataset.id, agent.id, workspaceId);
+        } catch (err) {
+            this.logger.error(`Failed to create the demo dataset for agent ${agent.id}`, err);
         }
 
         try {
@@ -208,18 +218,22 @@ export class OnboardingService {
         await this.onboardingRepository.update(session.id, { instruction, completed: true });
     }
 
-    resolveStreamParams(agentId: string, stepId?: string): { resolvedStepId: string; orgId: string } {
+    /**
+     * The first step queries the shared demo base (`org_id` "onboarding"); the next one queries the datasets
+     * attached to the demo agent (no override).
+     */
+    resolveStreamParams(stepId?: string): { resolvedStepId: string; orgId?: string } {
         const resolvedStepId = stepId || DEFAULT_STREAM_STEP_ID;
         if (!STREAM_STEP_IDS.includes(resolvedStepId)) {
             throw new BadRequestException(`Unknown onboarding step: ${resolvedStepId}`);
         }
-        const orgId = resolvedStepId === DEFAULT_STREAM_STEP_ID ? 'onboarding' : agentId;
+        const orgId = resolvedStepId === DEFAULT_STREAM_STEP_ID ? 'onboarding' : undefined;
         return { resolvedStepId, orgId };
     }
 
     /**
      * The stream only runs the demo agent of the caller's own onboarding session: `agentId` comes from
-     * the query string and is used as the RAG `org_id`, so it must never reference another agent.
+     * the query string and selects the datasets searched by the RAG engine, so it must never reference another agent.
      */
     async checkAndIncrementQueryCount(
         userId: string,

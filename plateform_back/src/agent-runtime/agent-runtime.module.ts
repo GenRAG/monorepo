@@ -13,6 +13,7 @@ import { UsageRecordingProcessor } from 'src/agent-runtime/usage/usage-recording
 import { RagEngineModule } from 'src/rag-engine/rag-engine.module';
 import { AgentModule } from 'src/agent/agent.module';
 import { WorkflowModule } from 'src/workflow/workflow.module';
+import { DatasetModule } from 'src/dataset/dataset.module';
 import { ConfigModule } from '@nestjs/config';
 import { CreditModule } from 'src/credit/credit.module';
 import { registerAgentListeners } from 'src/events/agent/agent-event.listener';
@@ -39,6 +40,7 @@ import { ConversationRepository } from 'src/conversation/conversation.repository
         CreditModule,
         AgentModule,
         WorkflowModule,
+        DatasetModule,
         RagEngineModule,
         ConfigModule,
         WorkspaceModule,

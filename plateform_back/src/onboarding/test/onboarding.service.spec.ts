@@ -1,3 +1,4 @@
+import { DatasetService } from 'src/dataset/dataset.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
 import { describe, jest, beforeEach, afterEach, it, expect } from '@jest/globals';
@@ -37,6 +38,11 @@ describe('OnboardingService', () => {
         grantInitial: jest.fn(),
     } as any;
 
+    const mockDatasetService = {
+        create: jest.fn(() => Promise.resolve({ id: 'dataset-1' })),
+        attachToAgent: jest.fn(),
+    } as any;
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -46,6 +52,7 @@ describe('OnboardingService', () => {
                 { provide: WorkflowService, useValue: mockWorkflowService },
                 { provide: AgentRuntimeOrchestrator, useValue: mockOrchestrator },
                 { provide: CreditBalanceService, useValue: mockCreditBalanceService },
+                { provide: DatasetService, useValue: mockDatasetService },
             ],
         }).compile();
 
@@ -118,6 +125,8 @@ describe('OnboardingService', () => {
                 workspaceId,
             );
             expect(mockRepository.create).toHaveBeenCalled();
+            expect(mockDatasetService.create).toHaveBeenCalledWith(workspaceId, { name: 'Documents de démonstration' });
+            expect(mockDatasetService.attachToAgent).toHaveBeenCalledWith('dataset-1', 'agent-1', workspaceId);
             expect(mockCreditBalanceService.grantInitial).toHaveBeenCalledWith(
                 { workspaceId, amount: 20 },
                 'SUBSCRIPTION',
@@ -469,7 +478,7 @@ describe('OnboardingService', () => {
 
     describe('resolveStreamParams', () => {
         it('should return onboarding org for test-assistant', () => {
-            const result = service.resolveStreamParams('agent-1', 'test-assistant');
+            const result = service.resolveStreamParams('test-assistant');
 
             expect(result).toEqual({
                 resolvedStepId: 'test-assistant',
@@ -477,17 +486,17 @@ describe('OnboardingService', () => {
             });
         });
 
-        it('should return agentId org for other steps', () => {
-            const result = service.resolveStreamParams('agent-1', 'improve-assistant');
+        it('should not override the org for other steps (agent datasets are used)', () => {
+            const result = service.resolveStreamParams('improve-assistant');
 
             expect(result).toEqual({
                 resolvedStepId: 'improve-assistant',
-                orgId: 'agent-1',
+                orgId: undefined,
             });
         });
 
         it('should default to test-assistant when stepId not provided', () => {
-            const result = service.resolveStreamParams('agent-1');
+            const result = service.resolveStreamParams();
 
             expect(result).toEqual({
                 resolvedStepId: 'test-assistant',
@@ -496,11 +505,11 @@ describe('OnboardingService', () => {
         });
 
         it('should reject unknown step ids (they would bypass the per-step query limits)', () => {
-            expect(() => service.resolveStreamParams('agent-1', 'anything-else')).toThrow(BadRequestException);
+            expect(() => service.resolveStreamParams('anything-else')).toThrow(BadRequestException);
         });
 
         it('should reject compare-intelligence, which is served by POST /compare', () => {
-            expect(() => service.resolveStreamParams('agent-1', 'compare-intelligence')).toThrow(BadRequestException);
+            expect(() => service.resolveStreamParams('compare-intelligence')).toThrow(BadRequestException);
         });
     });
 

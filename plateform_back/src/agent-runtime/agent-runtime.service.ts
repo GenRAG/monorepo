@@ -47,7 +47,7 @@ export class AgentRuntimeService {
         workspaceId: string,
         agentId: string,
         query: string,
-        orgIdOverride: string,
+        orgIdOverride?: string,
     ): Observable<MessageEvent> {
         return this._observe((subscriber, streamRef) =>
             this._runTransientStream(subscriber, streamRef, workspaceId, agentId, query, { orgIdOverride }),

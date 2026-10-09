@@ -111,7 +111,7 @@ export class OnboardingController {
         if (query.length > MAX_RUNTIME_QUERY_LENGTH) {
             throw new BadRequestException(`Query must not exceed ${MAX_RUNTIME_QUERY_LENGTH} characters`);
         }
-        const { resolvedStepId, orgId } = this.onboardingService.resolveStreamParams(agentId, stepId);
+        const { resolvedStepId, orgId } = this.onboardingService.resolveStreamParams(stepId);
         return from(
             this.onboardingService.checkAndIncrementQueryCount(user.id, workspaceId, agentId, resolvedStepId),
         ).pipe(

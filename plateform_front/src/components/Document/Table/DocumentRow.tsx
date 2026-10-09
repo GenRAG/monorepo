@@ -1,54 +1,78 @@
 import React from "react";
-import { HStack, Td, Text, Tr } from "@chakra-ui/react";
+import { Box, HStack, Icon, Td, Text, Tr, VStack } from "@chakra-ui/react";
+import { Clock } from "lucide-react";
 import { DocumentStatusBadge } from "components/ui/DocumentStatusBadge";
-import { DocumentEntity } from "types/document/document";
-import { formatFileSize, getFileTypeLabel, getFileTypeBadgeConfig } from "utils/documentFormatters";
-import { formatRelativeDate } from "utils/date";
-import { DocumentActionsMenu } from "./DocumentActionsMenu";
 import BoxIcon from "components/ui/BoxIcon";
+import { DocumentEntity } from "types/document/document";
+import { formatFileSize, getFileTypeBadgeConfig, getFileTypeLabel } from "utils/documentFormatters";
+import { formatRelativeDate } from "utils/date";
+import { getDocumentSourceLabel } from "utils/dataset/documentSource";
+import { DocumentActionsMenu } from "./DocumentActionsMenu";
 
 interface DocumentRowProps {
     document: DocumentEntity;
+    hoverBg: string;
     onPreview: () => void;
     onDelete: () => void;
     onRetry?: () => void;
     onDownload: () => void;
 }
 
-export const DocumentRow: React.FC<DocumentRowProps> = ({ document, onPreview, onDelete, onRetry, onDownload }) => {
+export const DocumentRow: React.FC<DocumentRowProps> = ({
+    document,
+    hoverBg,
+    onPreview,
+    onDelete,
+    onRetry,
+    onDownload,
+}) => {
     const badge = getFileTypeBadgeConfig(document.mimeType);
 
     return (
-        <Tr _hover={{ bg: "surfaceSubtle" }} onClick={onPreview} cursor="pointer">
-            <Td>
+        <Tr cursor="pointer" _hover={{ bg: hoverBg }} onClick={onPreview}>
+            <Td maxW="360px">
                 <HStack spacing={3}>
-                    <BoxIcon size="sm" letters={badge.label} />
-                    <Text fontWeight="500" fontSize="xs" color="textPrimary" noOfLines={1}>
-                        {document.name}
-                    </Text>
+                    <BoxIcon size="md" letters={badge.label} bg={badge.bg} color={badge.color} />
+                    <VStack align="start" spacing={0} minW={0}>
+                        <Text fontSize="sm" fontWeight="600" color="textStrong" noOfLines={1} wordBreak="break-all">
+                            {document.name}
+                        </Text>
+                        <Text fontSize="xs" color="textLabel" noOfLines={1}>
+                            {getFileTypeLabel(document.mimeType)}
+                        </Text>
+                    </VStack>
                 </HStack>
             </Td>
             <Td>
-                <Text variant="body-xs-muted">{getFileTypeLabel(document.mimeType)}</Text>
+                <Text fontSize="sm" color="textBody" whiteSpace="nowrap">
+                    {getDocumentSourceLabel(document.source)}
+                </Text>
             </Td>
             <Td>
-                <Text variant="body-xs-muted">{formatFileSize(document.size)}</Text>
+                <Text fontSize="sm" color="textMuted" whiteSpace="nowrap">
+                    {formatFileSize(document.size)}
+                </Text>
             </Td>
             <Td>
                 <DocumentStatusBadge status={document.status} retryCount={document.retryCount} />
             </Td>
             <Td>
-                <Text variant="body-xs-muted">{formatRelativeDate(document.createdAt)}</Text>
+                <HStack spacing={1.5}>
+                    <Icon as={Clock} boxSize={3} color="textLabel" />
+                    <Text fontSize="sm" color="textMuted" whiteSpace="nowrap">
+                        {formatRelativeDate(document.createdAt)}
+                    </Text>
+                </HStack>
             </Td>
             <Td onClick={(e) => e.stopPropagation()}>
-                <HStack spacing={1} justify="flex-end">
+                <Box display="flex" justifyContent="flex-end">
                     <DocumentActionsMenu
                         status={document.status}
                         onDelete={onDelete}
                         onRetry={onRetry}
                         onDownload={onDownload}
                     />
-                </HStack>
+                </Box>
             </Td>
         </Tr>
     );

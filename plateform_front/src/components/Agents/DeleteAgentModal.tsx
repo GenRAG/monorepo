@@ -89,7 +89,8 @@ export const DeleteAgentModal: React.FC<DeleteAgentModalProps> = ({
                         <Text as="span" fontWeight="600" color="textStrong">
                             {agentName}
                         </Text>{" "}
-                        ? Toutes les conversations, documents et workflows associés seront supprimés définitivement.
+                        ? Toutes les conversations et workflows associés seront supprimés définitivement. Ses bases de
+                        connaissances sont conservées.
                     </AlertDialogBody>
 
                     <AlertDialogFooter gap={2} px={6} pb={5} pt={4}>

@@ -1,9 +1,11 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 import { useColorMode, VStack, Box, useDisclosure, useToken, Center, Text } from "@chakra-ui/react";
 import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider } from "@xyflow/react";
 import {
     useNodeSelection,
     useWorkflowCanvas,
+    DatasetCatalogProvider,
+    type DatasetCatalogEntry,
     sanitizeWorkflowEdges,
     serializeWorkflow,
     TaskType,
@@ -23,6 +25,7 @@ import {
     useCreateWorkflowMutation,
 } from "services/workflow/workflow";
 import { useGetModelsGenerationQuery } from "services/models/models";
+import { useAgentDatasets } from "hooks/dataset/useAgentDatasets";
 import useThemedToast from "hooks/useThemedToast";
 import { useIncompleteNodesGuard } from "hooks/useIncompleteNodesGuard";
 import { useUnsavedChangesBlocker } from "hooks/useUnsavedChangesBlocker";
@@ -60,6 +63,8 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         onEdgesChange,
         onDragOver,
         handleSettingSelect,
+        handleAddSettingNode,
+        handleRemoveSettingNode,
         handleAddChainNode,
     } = useWorkflowCanvas({
         onNodeClick: handleNodeClick,
@@ -120,6 +125,22 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
             markDirty();
         },
         [handleSettingSelect, markDirty],
+    );
+
+    const handleAddSettingNodeWithDirty = useCallback(
+        (parentId: string, inputName: string, value: string) => {
+            handleAddSettingNode(parentId, inputName, value);
+            markDirty();
+        },
+        [handleAddSettingNode, markDirty],
+    );
+
+    const handleRemoveSettingNodeWithDirty = useCallback(
+        (nodeId: string) => {
+            handleRemoveSettingNode(nodeId);
+            markDirty();
+        },
+        [handleRemoveSettingNode, markDirty],
     );
 
     const handleAddChainNodeWithDirty = useCallback(
@@ -209,6 +230,10 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                 onClose={handleModalClose}
                 selectedNodeId={selectedNodeId}
                 onSettingSelect={handleSettingSelectWithDirty}
+                onAddSettingNode={handleAddSettingNodeWithDirty}
+                onRemoveSettingNode={handleRemoveSettingNodeWithDirty}
+                workspaceId={workspaceId}
+                agentId={agentId}
             />
         </Box>
     );
@@ -227,6 +252,16 @@ const WorkflowWorkspace = () => {
         error,
     } = useGetActiveWorkflowQuery({ workspaceId: workspaceId!, agentId: agentId! }, { skip: !workspaceId || !agentId });
     const is404 = typeof error === "object" && error !== null && "status" in error && error.status === 404;
+
+    // DATASET nodes show the name of their dataset; one missing from the agent is displayed as an error.
+    const { attached, isLoading: isDatasetsLoading } = useAgentDatasets(workspaceId!, agentId!);
+    const datasetCatalog = useMemo<Record<string, DatasetCatalogEntry> | null>(
+        () =>
+            isDatasetsLoading
+                ? null
+                : Object.fromEntries(attached.map((d) => [d.id, { name: d.name, documentsCount: d.documentsCount }])),
+        [attached, isDatasetsLoading],
+    );
 
     // Legacy workflows may have a `definition` that doesn't (yet) match the current WorkflowDefinition shape.
     const canvas = workflow?.definition as Partial<WorkflowDefinition> | undefined;
@@ -247,13 +282,15 @@ const WorkflowWorkspace = () => {
                 </Center>
             ) : (
                 <ReactFlowProvider>
-                    <WorkflowInner
-                        initialNodes={initialNodes}
-                        initialEdges={initialEdges}
-                        workflowExists={!!workflow}
-                        workspaceId={workspaceId!}
-                        agentId={agentId!}
-                    />
+                    <DatasetCatalogProvider value={datasetCatalog}>
+                        <WorkflowInner
+                            initialNodes={initialNodes}
+                            initialEdges={initialEdges}
+                            workflowExists={!!workflow}
+                            workspaceId={workspaceId!}
+                            agentId={agentId!}
+                        />
+                    </DatasetCatalogProvider>
                 </ReactFlowProvider>
             )}
         </VStack>

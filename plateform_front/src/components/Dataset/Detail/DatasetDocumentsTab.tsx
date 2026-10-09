@@ -3,34 +3,52 @@ import { HStack, IconButton, Text, VStack, useDisclosure } from "@chakra-ui/reac
 import { DocumentList } from "components/Document/Table/DocumentList";
 import { PreviewDrawer } from "components/Document/Drawer/PreviewDrawer";
 import { UploadModal } from "components/Document/Modal/UploadModal";
-import { DocumentPageHeader } from "components/Document/Header/DocumentPageHeader";
 import { MoveLeft, MoveRight } from "lucide-react";
 import {
     useDeleteDocumentMutation,
-    useGetAgentDocumentsQuery,
+    useGetDatasetDocumentsQuery,
+    useGetDatasetDocumentStatsQuery,
     useLazyGetDocumentUrlQuery,
     useRetryDocumentMutation,
 } from "services/document/document";
-import { useParams } from "react-router-dom";
 import { DocumentEntity, DocumentStatus } from "types/document/document";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import useThemedToast from "hooks/useThemedToast";
-import WorkspaceHeader from "components/ui/WorkspaceHeader";
 import { getApiErrorMessage } from "utils/apiError";
+import { DocumentSource } from "types/dataset/dataset";
 
 const PAGE_SIZE = 8;
 
-export const DocumentWorkspace: React.FC = () => {
-    const { workspaceId, agentId } = useParams();
+interface DatasetDocumentsTabProps {
+    workspaceId: string;
+    datasetId: string;
+    /** Owned by the page so the Sources tab can open the upload too. */
+    uploadModal: { isOpen: boolean; onOpen: () => void; onClose: () => void };
+}
+
+export const DatasetDocumentsTab: React.FC<DatasetDocumentsTabProps> = ({ workspaceId, datasetId, uploadModal }) => {
     const toast = useThemedToast();
 
     const [currentPage, setCurrentPage] = useState(1);
     const [pollingInterval, setPollingInterval] = useState(0);
+    const [sourceFilter, setSourceFilter] = useState<DocumentSource[]>([]);
 
-    const { data: fetchedDocuments, isLoading } = useGetAgentDocumentsQuery(
-        { workspaceId: workspaceId!, agentId: agentId!, page: currentPage, limit: PAGE_SIZE },
+    const { data: fetchedDocuments, isLoading } = useGetDatasetDocumentsQuery(
+        {
+            workspaceId,
+            datasetId,
+            page: currentPage,
+            limit: PAGE_SIZE,
+            sources: sourceFilter,
+        },
         { pollingInterval },
     );
+    const { data: stats } = useGetDatasetDocumentStatsQuery({ workspaceId, datasetId });
+
+    const handleSourceFilterChange = (value: DocumentSource[]) => {
+        setSourceFilter(value);
+        setCurrentPage(1);
+    };
     const [deleteDocument] = useDeleteDocumentMutation();
     const [retryDocument] = useRetryDocumentMutation();
     const [getDocumentUrl] = useLazyGetDocumentUrlQuery();
@@ -48,14 +66,13 @@ export const DocumentWorkspace: React.FC = () => {
 
     const [selectedDocument, setSelectedDocument] = useState<DocumentEntity | null>(null);
 
-    const uploadModal = useDisclosure();
     const previewDrawer = useDisclosure();
 
     const handleDocumentDelete = async (id: string) => {
-        if (!workspaceId || !agentId) return;
+        if (!workspaceId || !datasetId) return;
 
         try {
-            await deleteDocument({ workspaceId, agentId, id }).unwrap();
+            await deleteDocument({ workspaceId, datasetId, id }).unwrap();
         } catch (error: unknown) {
             toast({
                 title: "Erreur lors de la suppression",
@@ -84,8 +101,8 @@ export const DocumentWorkspace: React.FC = () => {
     };
 
     const handleDocumentRetry = async (id: string) => {
-        if (!workspaceId || !agentId) return;
-        await retryDocument({ workspaceId, agentId, id })
+        if (!workspaceId || !datasetId) return;
+        await retryDocument({ workspaceId, datasetId, id })
             .unwrap()
             .catch((error: unknown) => {
                 toast({
@@ -101,8 +118,8 @@ export const DocumentWorkspace: React.FC = () => {
     };
 
     const handleDocumentDownload = async (id: string) => {
-        if (!workspaceId || !agentId) return;
-        const { data } = await getDocumentUrl({ workspaceId, agentId, id });
+        if (!workspaceId || !datasetId) return;
+        const { data } = await getDocumentUrl({ workspaceId, datasetId, id });
         if (!data?.url) return;
         const a = document.createElement("a");
         a.href = data.url;
@@ -119,23 +136,13 @@ export const DocumentWorkspace: React.FC = () => {
 
     return (
         <VStack w="100%" h="100%" align="stretch" spacing={0} overflow="hidden" position="relative">
-            <WorkspaceHeader title="Documents" description="Gérez vos documents et consultez leur statut." />
-            <VStack
-                align="stretch"
-                spacing={0}
-                px={{ base: 12, md: 16 }}
-                py={{ base: 3, md: 8 }}
-                overflow="auto"
-                flex={1}
-                zIndex={1}
-                position="relative"
-            >
+            <VStack align="stretch" spacing={0} pt={4} overflow="auto" flex={1} zIndex={1} position="relative">
                 <DocumentList
                     documents={documents}
                     total={total}
                     selectedFolderId={null}
-                    workspaceId={workspaceId!}
-                    agentId={agentId!}
+                    workspaceId={workspaceId}
+                    datasetId={datasetId}
                     onUploadClick={uploadModal.onOpen}
                     onDocumentPreview={handleDocumentPreview}
                     onDocumentDelete={handleDocumentDelete}
@@ -144,6 +151,10 @@ export const DocumentWorkspace: React.FC = () => {
                     onUploadOpen={uploadModal.onOpen}
                     isMobile={isMobile}
                     isLoading={isLoading}
+                    hasAnyDocument={(stats?.total ?? total) > 0}
+                    sourceFilter={sourceFilter}
+                    onSourceFilterChange={handleSourceFilterChange}
+                    sourceCounts={stats?.countBySource}
                     footer={
                         totalPages > 1 && documents.length > 0 ? (
                             <HStack p={3} justify="space-between" bg="tableBg">
@@ -172,14 +183,13 @@ export const DocumentWorkspace: React.FC = () => {
                         ) : undefined
                     }
                 />
-                {documents.length !== 0 && <DocumentPageHeader workspaceId={workspaceId!} agentId={agentId!} />}
             </VStack>
 
             <UploadModal
                 isOpen={uploadModal.isOpen}
                 onClose={uploadModal.onClose}
-                workspaceId={workspaceId!}
-                agentId={agentId!}
+                workspaceId={workspaceId}
+                datasetId={datasetId}
                 targetFolderId={null}
                 onUploadComplete={handleUploadComplete}
             />

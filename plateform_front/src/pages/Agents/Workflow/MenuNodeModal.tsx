@@ -72,6 +72,7 @@ const MenuNodeModal = ({ usedNodes, isOpen, onClose, onToggle, addNode }: MenuNo
             [TaskType.QUERY]: null,
             [TaskType.MODEL]: null,
             [TaskType.INSTRUCTION]: null,
+            [TaskType.DATASET]: null,
             [TaskType.REWRITER]: <RewriterInformation />,
         }),
         [],

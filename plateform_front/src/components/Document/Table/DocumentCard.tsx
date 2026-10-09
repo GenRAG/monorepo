@@ -6,11 +6,12 @@ import { formatFileSize, getFileTypeBadgeConfig } from "utils/documentFormatters
 import { DocumentActionsMenu } from "./DocumentActionsMenu";
 import BoxIcon from "components/ui/BoxIcon";
 import { useGetDocumentUrlQuery } from "services/document/document";
+import { getDocumentSourceLabel } from "utils/dataset/documentSource";
 
 interface DocumentCardProps {
     document: DocumentEntity;
     workspaceId: string;
-    agentId: string;
+    datasetId: string;
     onPreview: () => void;
     onDelete: () => void;
     onRetry?: () => void;
@@ -20,14 +21,14 @@ interface DocumentCardProps {
 const DocumentThumbnail: React.FC<{
     document: DocumentEntity;
     workspaceId: string;
-    agentId: string;
-}> = ({ document, workspaceId, agentId }) => {
+    datasetId: string;
+}> = ({ document, workspaceId, datasetId }) => {
     const badge = getFileTypeBadgeConfig(document.mimeType);
     const isPdf = document.mimeType === "application/pdf";
     const isIndexed = document.status === DocumentStatus.INDEXED;
 
     const { data: urlData, isLoading } = useGetDocumentUrlQuery(
-        { workspaceId, agentId, id: document.id },
+        { workspaceId, datasetId, id: document.id },
         { skip: !isPdf || !isIndexed },
     );
 
@@ -62,7 +63,7 @@ const DocumentThumbnail: React.FC<{
 export const DocumentCard: React.FC<DocumentCardProps> = ({
     document,
     workspaceId,
-    agentId,
+    datasetId,
     onPreview,
     onDelete,
     onRetry,
@@ -87,12 +88,15 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                 position="relative"
                 overflow="hidden"
             >
-                <DocumentThumbnail document={document} workspaceId={workspaceId} agentId={agentId} />
+                <DocumentThumbnail document={document} workspaceId={workspaceId} datasetId={datasetId} />
             </Box>
 
             <Box px={3} pt={2} pb={3}>
-                <Text fontSize="13px" fontWeight="500" color="textPrimary" noOfLines={2} lineHeight="1.4" mb={2}>
+                <Text fontSize="13px" fontWeight="500" color="textPrimary" noOfLines={2} lineHeight="1.4">
                     {document.name}
+                </Text>
+                <Text fontSize="11px" color="textMuted" mb={2}>
+                    {getDocumentSourceLabel(document.source)}
                 </Text>
 
                 <HStack justify="space-between" align="center">

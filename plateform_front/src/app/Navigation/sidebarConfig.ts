@@ -1,12 +1,12 @@
 import {
     LayoutDashboard,
     Folder,
-    FileText,
     MessageCircle,
     GitGraph,
     Settings,
     CreditCard,
     Cloud,
+    Library,
     BarChart3,
     type LucideIcon,
 } from "lucide-react";
@@ -25,6 +25,7 @@ export interface NavSection {
 export const mainMenu = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { id: "agents", icon: Folder, label: "Agents" },
+    { id: "datasets", icon: Library, label: "Bases" },
     { id: "assistants", icon: MessageCircle, label: "Chats" },
     { id: "billing", icon: CreditCard, label: "Crédits" },
 ];
@@ -40,7 +41,7 @@ export const agentNavSections: NavSection[] = [
         label: "Développement",
         items: [
             { id: "playground", icon: MessageCircle, label: "Test & chat" },
-            { id: "documents", icon: FileText, label: "Documents" },
+            { id: "datasets", icon: Library, label: "Bases" },
             { id: "workflow", icon: GitGraph, label: "Architecture" },
         ],
     },

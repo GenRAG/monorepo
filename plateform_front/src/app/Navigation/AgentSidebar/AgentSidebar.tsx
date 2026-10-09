@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { agentNavItems, agentNavSections } from "app/Navigation/sidebarConfig";
 import { SidebarFooter } from "app/Navigation/SidebarFooter";
 import { AgentSidebarItem, CollapseToggle } from "app/Navigation/AgentSidebar/AgentSidebarItems";
+import { AGENT_NAV_ICON_MAP } from "components/ui/GlassNav/navIconMap";
 import BoxIcon from "components/ui/BoxIcon";
 import { getGlassInk } from "components/ui/GlassNav";
 import { useActiveSidebarItem } from "hooks/sidebar/useActiveSidebarItem";
@@ -141,6 +142,7 @@ const AgentSidebar = () => {
                                 <AgentSidebarItem
                                     key={id}
                                     icon={icon}
+                                    animatedIcon={AGENT_NAV_ICON_MAP[id]}
                                     label={label}
                                     active={activePath === id}
                                     isOpen={isOpen}

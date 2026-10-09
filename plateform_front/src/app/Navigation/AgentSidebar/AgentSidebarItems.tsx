@@ -1,10 +1,13 @@
 import { Box, Icon, Text, Tooltip, useToken } from "@chakra-ui/react";
 import { ChevronsLeft, ChevronsRight, LucideIcon } from "lucide-react";
-import React from "react";
+import React, { type ComponentType, useState } from "react";
 import { getGlassInk } from "components/ui/GlassNav";
+import type { AnimatedIconProps } from "components/ui/GlassNav/icons";
 
 interface AgentSidebarItemProps {
     icon: LucideIcon;
+    /** Animated version of the icon, preferred when the item has one. */
+    animatedIcon?: ComponentType<AnimatedIconProps>;
     label: string;
     active: boolean;
     isOpen: boolean;
@@ -18,6 +21,7 @@ interface AgentSidebarItemProps {
 // dupliquer la logique de bascule déjà faite dans AgentSidebar (source unique de vérité).
 export const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({
     icon: ItemIcon,
+    animatedIcon: AnimatedIcon,
     label,
     active,
     isOpen,
@@ -25,6 +29,8 @@ export const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({
     onClick,
 }) => {
     const [activeColor] = useToken("colors", ["green.400"]);
+    // Hover is tracked on the whole row so the icon animates when the pointer is anywhere on it.
+    const [isHovered, setIsHovered] = useState(false);
 
     const row = (
         <Box
@@ -33,6 +39,8 @@ export const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({
             aria-label={label}
             aria-current={active ? "page" : undefined}
             onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             display="flex"
             alignItems="center"
             justifyContent={isOpen ? "flex-start" : "center"}
@@ -48,7 +56,13 @@ export const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({
             transition="background 0.15s"
             _hover={{ bg: ink.pillBg }}
         >
-            <Icon as={ItemIcon} boxSize="18px" color={active ? activeColor : ink.muted} flexShrink={0} />
+            {AnimatedIcon ? (
+                <Box color={active ? activeColor : ink.muted} display="flex" flexShrink={0}>
+                    <AnimatedIcon size={18} isActive={active} isHovered={isHovered} />
+                </Box>
+            ) : (
+                <Icon as={ItemIcon} boxSize="18px" color={active ? activeColor : ink.muted} flexShrink={0} />
+            )}
             {isOpen && (
                 <Text fontSize="sm" fontWeight={active ? 600 : 500} color={active ? ink.text : ink.muted} noOfLines={1}>
                     {label}

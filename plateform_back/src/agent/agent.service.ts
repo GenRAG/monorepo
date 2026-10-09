@@ -46,7 +46,7 @@ export class AgentService {
         const agents = await this.agentRepository.findAll(workspaceId);
         return agents.map(({ deployments: _deployments, _count, ...agent }) => ({
             ...agent,
-            documentsCount: _count.documents,
+            datasetsCount: _count.datasets,
         }));
     }
 

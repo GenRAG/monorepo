@@ -11,7 +11,7 @@ model Agent {
   workspaceId   String
   workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workflows          Workflow[]
-  documents          Document[]
+  datasets           AgentDataset[]
   deployments        AgentVersion[]
   onboardingSession  OnboardingSession?
   conversations      Conversation[]

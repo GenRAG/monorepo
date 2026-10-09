@@ -5,21 +5,33 @@ enum DocumentStatus {
     FAILED
 }
 
-model Document {
-    id         String         @id @default(cuid())
-    name       String
-    agentId    String
-    size       Float
-    storageKey String
-    mimeType   String
-    status     DocumentStatus @default(UPLOADED)
-    indexedAt  DateTime?
-    failedAt   DateTime?
-    indexError  String?
-    retryCount  Int            @default(0)
-    createdAt   DateTime       @default(now())
-    updatedAt  DateTime       @updatedAt
-    agent      Agent          @relation(fields: [agentId], references: [id], onDelete: Cascade)
+enum DocumentSource {
+    UPLOAD
+    GOOGLE_DRIVE
+    SHAREPOINT
+    NOTION
+}
 
-    @@index([agentId])
+model Document {
+    id                 String         @id @default(cuid())
+    name               String
+    datasetId          String
+    size               Float
+    storageKey         String
+    mimeType           String
+    status             DocumentStatus @default(UPLOADED)
+    indexedAt          DateTime?
+    failedAt           DateTime?
+    indexError         String?
+    retryCount         Int            @default(0)
+    source             DocumentSource @default(UPLOAD)
+    externalId         String?
+    externalUrl        String?
+    externalModifiedAt DateTime?
+    createdAt          DateTime       @default(now())
+    updatedAt          DateTime       @updatedAt
+    dataset            Dataset        @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+    @@unique([datasetId, source, externalId])
+    @@index([datasetId, createdAt])
 }

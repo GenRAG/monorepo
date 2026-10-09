@@ -29,9 +29,9 @@ export type WorkspacePayload = Prisma.WorkspaceGetPayload<{
                         isActive: true;
                     };
                 };
-                documents: {
+                datasets: {
                     select: {
-                        id: true;
+                        datasetId: true;
                     };
                 };
             };
@@ -66,7 +66,7 @@ export class WorkspaceRepository {
                         description: true,
                         createdAt: true,
                         workflows: { select: { id: true, isActive: true } },
-                        documents: { select: { id: true } },
+                        datasets: { select: { datasetId: true } },
                     },
                 },
             },

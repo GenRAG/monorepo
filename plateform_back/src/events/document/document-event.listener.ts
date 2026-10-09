@@ -5,7 +5,7 @@ import { Logger } from 'nestjs-pino';
 
 export function registerDocumentListeners(logger: Logger): () => void {
     const onIndexed = (event: DocumentIndexedEvent) => {
-        logger.log(`[DocumentListener] document=${event.documentId} indexed for agent=${event.agentId}`);
+        logger.log(`[DocumentListener] document=${event.documentId} indexed in dataset=${event.datasetId}`);
     };
 
     const onFailed = (event: DocumentFailedEvent) => {

@@ -10,6 +10,7 @@ export enum TaskType {
     RESPONSE = "RESPONSE",
     MODEL = "MODEL",
     INSTRUCTION = "INSTRUCTION",
+    DATASET = "DATASET",
 }
 
 export enum TaskParamType {
@@ -20,7 +21,7 @@ export enum TaskParamType {
     SETTINGS = "SETTINGS", // setting placeholder (Model, Instruction…)
 }
 
-/** A setting of a chain task, rendered as a separate MODEL / INSTRUCTION node linked by a settings edge. */
+/** A setting of a chain task, rendered as a separate MODEL / INSTRUCTION / DATASET node linked by a settings edge. */
 export interface TaskSettingParam {
     name: string;
     type: TaskParamType;
@@ -29,6 +30,11 @@ export interface TaskSettingParam {
     required?: boolean;
     hideHandle?: boolean;
     items?: ModelOption[];
+    /**
+     * Several setting nodes may hang off this input (DATASET). None is created automatically: having no node is a
+     * valid state, its meaning is up to the task (RETRIEVER: every dataset of the agent).
+     */
+    multiple?: boolean;
 }
 
 export type TaskParam = TaskSettingParam;

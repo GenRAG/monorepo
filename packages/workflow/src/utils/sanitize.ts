@@ -3,6 +3,7 @@ import type { Edge } from "@xyflow/react";
 import type { TaskSpecRegistry } from "../types/task";
 import { EdgeType, settingInputName, settingSourceHandle } from "../types/edge";
 import { getConfigInputs } from "../graph/task-utils";
+import { settingEdgeId } from "../graph/create-flow-node";
 import { TASK_SPECS } from "../graph/task-specs";
 
 /**
@@ -60,7 +61,7 @@ export function sanitizeWorkflowEdges(
         return [
             {
                 ...edge,
-                id: `${edge.source}-setting-${correctInput.name}`,
+                id: settingEdgeId(edge.source, correctInput, edge.target),
                 sourceHandle: settingSourceHandle(correctInput.name),
                 data: { ...edge.data, label: correctInput.name },
             },

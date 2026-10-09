@@ -14,6 +14,7 @@ import type { ModelOption } from "./model-option";
  *   configItems, inputType, firstTime
  * - Fields for MODEL nodes only: modelName
  * - Fields for INSTRUCTION nodes only: stringValue, isEditing
+ * - DATASET nodes keep their dataset id in inputs.datasetId (never a vector-store org_id)
  *
  * When adding a new settings node type, add its fields here with a comment
  * indicating which node type owns them. Do NOT add fields to the top-level

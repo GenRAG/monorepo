@@ -15,6 +15,7 @@ import {
 import BoxIcon from "../BoxIcon";
 import { useAppResponsive } from "../../hooks/useAppResponsive";
 import { TrashIcon } from "lucide-react";
+import { MultipleSettingHint } from "./MultipleSettingHint";
 
 const NodeComponent = memo((props: WorkflowNodeProps) => {
     const nodeData = props.data as AppNodeData;
@@ -204,15 +205,18 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                                 _hover={{ bg: rowHoverBg }}
                                 transition="background 0.1s"
                             >
-                                <Text
-                                    fontSize={isMobile ? "9px" : "11px"}
-                                    fontWeight={500}
-                                    color={labelColor}
-                                    letterSpacing="0.02em"
-                                    noOfLines={1}
-                                >
-                                    {input.name}
-                                </Text>
+                                <Box textAlign="right" minW={0}>
+                                    <Text
+                                        fontSize={isMobile ? "9px" : "11px"}
+                                        fontWeight={500}
+                                        color={labelColor}
+                                        letterSpacing="0.02em"
+                                        noOfLines={1}
+                                    >
+                                        {input.name}
+                                    </Text>
+                                    {input.multiple && <MultipleSettingHint inputName={input.name} isMobile={isMobile} />}
+                                </Box>
                                 <Box
                                     position="relative"
                                     w="8px"

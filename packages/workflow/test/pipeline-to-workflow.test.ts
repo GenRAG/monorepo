@@ -13,21 +13,28 @@ const json = (v: unknown) => JSON.parse(JSON.stringify(v));
 const FULL: PipelineBlock[] = [
     { name: "query", type: "query" },
     { name: "rewrite", type: "query_rewrite", model: "mistral" },
-    { name: "retrieve", type: "retrieve", collection_name: "genrag_knowledge_base", top_k: 5 },
+    { name: "retrieve", type: "retrieve", collection_name: "genrag_knowledge_base", top_k: 5, datasetIds: [] },
     { name: "rerank", type: "rerank", model: "colbert" },
     { name: "answer", type: "answer", model: "google/gemini-2.5-flash", system_prompt: "Réponds en français." },
 ];
 
 const MINIMAL: PipelineBlock[] = [
     { name: "query", type: "query" },
-    { name: "retrieve", type: "retrieve", collection_name: "genrag_knowledge_base", top_k: 5 },
+    { name: "retrieve", type: "retrieve", collection_name: "genrag_knowledge_base", top_k: 5, datasetIds: [] },
     { name: "answer", type: "answer", model: "gpt-4o" },
 ];
 
 describe("pipelineToWorkflow", () => {
+    const WITH_DATASETS: PipelineBlock[] = [
+        { name: "query", type: "query" },
+        { name: "retrieve", type: "retrieve", collection_name: "genrag_knowledge_base", top_k: 5, datasetIds: ["d1", "d2"] },
+        { name: "answer", type: "answer", model: "gpt-4o" },
+    ];
+
     for (const [label, blocks] of [
         ["full pipeline", FULL],
         ["minimal pipeline without system prompt", MINIMAL],
+        ["retriever restricted to datasets", WITH_DATASETS],
     ] as const) {
         it(`round-trips with serializeWorkflow (${label})`, () => {
             const { nodes, edges } = pipelineToWorkflow(blocks);

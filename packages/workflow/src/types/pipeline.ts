@@ -5,7 +5,17 @@ import type { AppNode } from "./app-node";
 // and rag-engine/BLOCKS_FORMAT.md. Any change here must be made there too.
 export type QueryBlock = { name: string; type: "query" };
 export type RewriteBlock = { name: string; type: "query_rewrite"; model: string };
-export type RetrieveBlock = { name: string; type: "retrieve"; collection_name: string; top_k: number };
+/**
+ * `datasetIds` are the datasets chosen in the builder (empty = every dataset of the agent). The backend validates
+ * them and replaces them by the engine `org_ids` before calling the engine: they are never sent as is.
+ */
+export type RetrieveBlock = {
+    name: string;
+    type: "retrieve";
+    collection_name: string;
+    top_k: number;
+    datasetIds?: string[];
+};
 export type RerankBlock = { name: string; type: "rerank"; model: string };
 export type AnswerBlock = { name: string; type: "answer"; model: string; system_prompt?: string };
 

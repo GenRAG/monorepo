@@ -26,7 +26,7 @@ export class IndexDocumentHandler {
             ? Buffer.from(command.buffer, 'base64')
             : await this.storage.get(command.storageKey);
 
-        await this.ragEngineService.indexDocument(command.name, command.agentId, fileBuffer, command.mimeType);
+        await this.ragEngineService.indexDocument(command.name, command.datasetId, fileBuffer, command.mimeType);
 
         await this.documentRepository.updateStatus(command.documentId, DocumentStatus.INDEXED, {
             indexedAt: new Date(),
@@ -34,7 +34,7 @@ export class IndexDocumentHandler {
 
         EventBus.emit(
             DocumentEventType.DOCUMENT_INDEXED,
-            new DocumentIndexedEvent(command.documentId, command.agentId),
+            new DocumentIndexedEvent(command.documentId, command.datasetId),
         );
 
         this.logger.log(`Document indexed successfully: ${command.documentId}`);
@@ -52,7 +52,10 @@ export class IndexDocumentHandler {
             indexError: errorMessage,
         });
 
-        EventBus.emit(DocumentEventType.DOCUMENT_FAILED, new DocumentFailedEvent(command.documentId, command.agentId));
+        EventBus.emit(
+            DocumentEventType.DOCUMENT_FAILED,
+            new DocumentFailedEvent(command.documentId, command.datasetId),
+        );
 
         this.logger.warn(`Document marked as FAILED: ${command.documentId}`);
     }

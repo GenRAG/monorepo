@@ -31,8 +31,8 @@ export interface WorkspaceDetail extends Workspace {
             definition: unknown;
             isActive: boolean;
         }[];
-        documents: {
-            id: string;
+        datasets: {
+            datasetId: string;
         }[];
     }[];
 }
@@ -55,7 +55,7 @@ export interface WorkspaceStatsAgentItem {
     name: string;
     status: string;
     conversationCount: number;
-    documentCount: number;
+    datasetCount: number;
     latestVersion: number | null;
 }
 

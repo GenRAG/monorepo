@@ -5,6 +5,7 @@ const BACKEND_TAG_TYPES = [
     Tag.Workspaces,
     Tag.Users,
     Tag.Documents,
+    Tag.Datasets,
     Tag.Agents,
     Tag.Chat,
     Tag.Workflow,

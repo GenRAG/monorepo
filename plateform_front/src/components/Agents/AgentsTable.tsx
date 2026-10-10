@@ -23,11 +23,24 @@ import { DeleteAgentModal } from "components/Agents/DeleteAgentModal";
 import { getAgentAvatar } from "utils/agentAvatar";
 import { formatRelativeDate } from "utils/date";
 
-const thProps = { fontSize: "12px", fontWeight: "700", color: "textMuted", py: 3 };
+const thProps = {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "textMuted",
+    py: 3,
+};
 
-const STATUS_SECTIONS: Array<{ status: AgentStatus; label: string; accent: string }> = [
+const STATUS_SECTIONS: Array<{
+    status: AgentStatus;
+    label: string;
+    accent: string;
+}> = [
     { status: AgentStatus.PRODUCTION, label: "Production", accent: "green.500" },
-    { status: AgentStatus.DEVELOPMENT, label: "Développement", accent: "orange.500" },
+    {
+        status: AgentStatus.DEVELOPMENT,
+        label: "Développement",
+        accent: "orange.500",
+    },
 ];
 
 interface AgentsTableProps {
@@ -59,7 +72,7 @@ export const AgentsTable = ({
 
     const renderRow = (agent: AgentPreview) => {
         const avatarStyle = getAgentAvatar(agent.name);
-        const documentsCount = agent.documentsCount ?? 0;
+        const datasetsCount = agent.datasetsCount ?? 0;
 
         return (
             <Tr
@@ -88,7 +101,7 @@ export const AgentsTable = ({
                 </Td>
                 <Td>
                     <Text fontSize="sm" color="textBody">
-                        {documentsCount} document{documentsCount !== 1 ? "s" : ""}
+                        {datasetsCount} base{datasetsCount !== 1 ? "s" : ""}
                     </Text>
                 </Td>
                 <Td>

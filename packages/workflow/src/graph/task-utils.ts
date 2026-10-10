@@ -11,7 +11,8 @@ export function getTaskSpec<R extends TaskSpecRegistry = TaskSpecRegistry>(
     return registry[type as TaskType];
 }
 
-export const isSettingsTaskType = (type: TaskType) => type === TaskType.MODEL || type === TaskType.INSTRUCTION;
+export const isSettingsTaskType = (type: TaskType) =>
+    type === TaskType.MODEL || type === TaskType.INSTRUCTION || type === TaskType.DATASET;
 
 export function getNonSettingsTaskTypes(registry: TaskSpecRegistry = TASK_SPECS): TaskType[] {
     return (Object.keys(registry) as TaskType[]).filter((t) => !isSettingsTaskType(t));
@@ -31,6 +32,11 @@ export function getAddableTaskTypes(presentTypes: TaskType[], registry: TaskSpec
 
 export function getConfigInputs(taskType: TaskType, registry: TaskSpecRegistry = TASK_SPECS): TaskParam[] {
     return (registry[taskType]?.inputs ?? []).filter((i) => !i.hideHandle);
+}
+
+/** Settings created with their chain node (placeholders): every single-valued input with a handle. */
+export function getAutoSettingInputs(taskType: TaskType, registry: TaskSpecRegistry = TASK_SPECS): TaskParam[] {
+    return getConfigInputs(taskType, registry).filter((i) => !i.multiple);
 }
 
 export function getChainOutputs(taskType: TaskType, registry: TaskSpecRegistry = TASK_SPECS): NonNullable<TaskSpec["chainOutputs"]> {

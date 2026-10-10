@@ -47,7 +47,7 @@ export class AgentRuntimeService {
         workspaceId: string,
         agentId: string,
         query: string,
-        orgIdOverride: string,
+        orgIdOverride?: string,
     ): Observable<MessageEvent> {
         return this._observe((subscriber, streamRef) =>
             this._runTransientStream(subscriber, streamRef, workspaceId, agentId, query, { orgIdOverride }),
@@ -70,9 +70,21 @@ export class AgentRuntimeService {
     ): Observable<MessageEvent> {
         return new Observable((subscriber) => {
             const streamRef: StreamRef = { current: null };
-            void run(subscriber, streamRef);
+            run(subscriber, streamRef).catch((err: unknown) => {
+                const message = toClientSafeErrorMessage(err, 'RAG stream error', this.logger);
+                subscriber.next(encodeSseEvent({ type: 'error', message }));
+                subscriber.complete();
+            });
             return () => this._teardownStream(streamRef);
         });
+    }
+
+    /** Registers the stream for teardown; a client that unsubscribed while it was starting must not leave it running. */
+    private _adoptStream(subscriber: Subscriber<MessageEvent>, ref: StreamRef, stream: RagStream): boolean {
+        ref.current = stream;
+        if (!subscriber.closed) return true;
+        stream.destroy();
+        return false;
     }
 
     private _teardownStream(ref: StreamRef): void {
@@ -100,9 +112,8 @@ export class AgentRuntimeService {
             startedAt,
             !streamOptions.skipUsageTracking,
         );
-        if (!stream) return;
+        if (!stream || !this._adoptStream(subscriber, streamRef, stream)) return;
 
-        streamRef.current = stream;
         const logCtx: LogCtx | undefined = streamOptions.skipUsageTracking
             ? undefined
             : { workspaceId, agentId, query, startedAt };
@@ -135,8 +146,7 @@ export class AgentRuntimeService {
         }
 
         const stream = await this._startOrFail(subscriber, workspaceId, agentId, query, {}, startedAt, false);
-        if (!stream) return;
-        streamRef.current = stream;
+        if (!stream || !this._adoptStream(subscriber, streamRef, stream)) return;
 
         const convId = await this._initConversation(subscriber, workspaceId, agentId, query, conversationId, userId);
         if (!convId) {

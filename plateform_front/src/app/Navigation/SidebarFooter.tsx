@@ -27,6 +27,12 @@ interface SidebarFooterProps {
      * (ex: AgentSidebar) où ouvrir vers la gauche sortirait de l'écran.
      */
     compactPlacement?: ComponentProps<typeof ActionMenu>["placement"];
+    /**
+     * Étire le wrapper du `compactTrigger` sur toute la largeur du parent — nécessaire quand le
+     * déclencheur se centre lui-même (ex: AgentSidebar replié), sinon le wrapper `inline-flex`
+     * du menu se réduit au contenu et le déclencheur reste collé à gauche.
+     */
+    compactFullWidth?: boolean;
 }
 
 export const SidebarFooter = ({
@@ -36,6 +42,7 @@ export const SidebarFooter = ({
     supportMenu,
     compactTrigger,
     compactPlacement = "left-end",
+    compactFullWidth = false,
 }: SidebarFooterProps) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
@@ -120,6 +127,7 @@ export const SidebarFooter = ({
                 footer={footer}
                 placement={compactPlacement}
                 width="250px"
+                fullWidth={compactFullWidth}
             />
         );
     }

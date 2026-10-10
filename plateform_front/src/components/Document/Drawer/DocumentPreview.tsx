@@ -22,7 +22,7 @@ const isMarkdown = (mimeType: string, name: string) => {
 };
 
 const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
-    const { workspaceId, agentId } = useParams();
+    const { workspaceId, datasetId } = useParams();
     const {
         data: content,
         isLoading,
@@ -30,10 +30,10 @@ const MarkdownPreview: React.FC<{ documentId: string }> = ({ documentId }) => {
     } = useGetDocumentContentQuery(
         {
             workspaceId: workspaceId ?? "",
-            agentId: agentId ?? "",
+            datasetId: datasetId ?? "",
             id: documentId,
         },
-        { skip: !workspaceId || !agentId },
+        { skip: !workspaceId || !datasetId },
     );
     const codeBg = useColorModeValue("grey.100", "grey.800");
 

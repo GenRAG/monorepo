@@ -20,30 +20,35 @@ export class OnboardingRepository {
         return this.prisma.onboardingSession.update({ where: { id }, data });
     }
 
+    /**
+     * Atomic: the limit check and the increment are one UPDATE, so parallel requests cannot all pass it.
+     * Returns false when the limit was already reached.
+     */
     async tryIncrementQueryCount(id: string, stepId: string, max: number): Promise<boolean> {
-        let limitReached = false;
+        const updated = await this.prisma.$executeRaw`
+            UPDATE "OnboardingSession"
+            SET "stepsData" = jsonb_set(
+                COALESCE("stepsData", '{}'::jsonb),
+                ARRAY[${stepId}::text],
+                COALESCE("stepsData" -> ${stepId}, '{}'::jsonb)
+                    || jsonb_build_object('queryCount', COALESCE(("stepsData" -> ${stepId} ->> 'queryCount')::int, 0) + 1)
+            )
+            WHERE "id" = ${id}
+              AND COALESCE(("stepsData" -> ${stepId} ->> 'queryCount')::int, 0) < ${max}
+        `;
+        return updated > 0;
+    }
 
-        await this.prisma.$transaction(async (tx) => {
-            const session = await tx.onboardingSession.findUnique({ where: { id } });
-            const stepsData = (session?.stepsData as Record<string, Record<string, unknown>>) ?? {};
-            const count = (stepsData[stepId]?.queryCount as number) ?? 0;
-
-            if (count >= max) {
-                limitReached = true;
-                return;
-            }
-
-            await tx.onboardingSession.update({
-                where: { id },
-                data: {
-                    stepsData: {
-                        ...stepsData,
-                        [stepId]: { ...(stepsData[stepId] ?? {}), queryCount: count + 1 },
-                    } as Prisma.InputJsonValue,
-                },
-            });
-        });
-
-        return !limitReached;
+    /** Atomic merge into one step: concurrent writes cannot overwrite each other's keys (e.g. `queryCount`). */
+    async mergeStepData(id: string, stepId: string, data: Record<string, unknown>): Promise<void> {
+        await this.prisma.$executeRaw`
+            UPDATE "OnboardingSession"
+            SET "stepsData" = jsonb_set(
+                COALESCE("stepsData", '{}'::jsonb),
+                ARRAY[${stepId}::text],
+                COALESCE("stepsData" -> ${stepId}, '{}'::jsonb) || ${JSON.stringify(data)}::jsonb
+            )
+            WHERE "id" = ${id}
+        `;
     }
 }

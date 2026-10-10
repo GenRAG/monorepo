@@ -11,7 +11,7 @@ import { RagEngineModule } from 'src/rag-engine/rag-engine.module';
 import { Logger } from 'nestjs-pino';
 import { IndexDocumentHandler } from './handlers/index-document.handler';
 import { WorkspaceModule } from 'src/workspace/workspace.module';
-import { AgentModule } from 'src/agent/agent.module';
+import { DatasetModule } from 'src/dataset/dataset.module';
 
 @Module({
     imports: [
@@ -20,10 +20,11 @@ import { AgentModule } from 'src/agent/agent.module';
         PrismaModule,
         RagEngineModule,
         WorkspaceModule,
-        AgentModule,
+        DatasetModule,
     ],
     controllers: [DocumentController],
     providers: [DocumentService, DocumentProcessor, IndexDocumentHandler, DocumentRepository],
+    exports: [DocumentService],
 })
 export class DocumentModule implements OnModuleInit, OnModuleDestroy {
     private unregisterListeners!: () => void;

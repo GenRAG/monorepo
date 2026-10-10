@@ -47,7 +47,7 @@ export class WorkspaceStatsService {
                     id: true,
                     name: true,
                     status: true,
-                    _count: { select: { conversations: true, documents: true } },
+                    _count: { select: { conversations: true, datasets: true } },
                     deployments: { orderBy: { version: 'desc' }, take: 1, select: { version: true } },
                 },
                 orderBy: { updatedAt: 'desc' },
@@ -61,7 +61,7 @@ export class WorkspaceStatsService {
     private async getDocumentStats(workspaceId: string) {
         const grouped = await this.prisma.document.groupBy({
             by: ['status'],
-            where: { agent: { workspaceId } },
+            where: { dataset: { workspaceId } },
             _count: { _all: true },
         });
 
@@ -100,10 +100,10 @@ export class WorkspaceStatsService {
     private async getRecentActivity(workspaceId: string) {
         const [docs, deployments, conversations] = await this.prisma.$transaction([
             this.prisma.document.findMany({
-                where: { agent: { workspaceId } },
+                where: { dataset: { workspaceId } },
                 orderBy: { createdAt: 'desc' },
                 take: 5,
-                select: { name: true, status: true, createdAt: true, agent: { select: { name: true } } },
+                select: { name: true, status: true, createdAt: true, dataset: { select: { name: true } } },
             }),
             this.prisma.agentVersion.findMany({
                 where: { agent: { workspaceId }, toStatus: AgentStatus.PRODUCTION },
@@ -123,7 +123,7 @@ export class WorkspaceStatsService {
             ...docs.map((d) => ({
                 type: 'document_upload' as const,
                 title: d.name,
-                subtitle: `${d.agent.name} - ${this.formatDocStatus(d.status)}`,
+                subtitle: `${d.dataset.name} - ${this.formatDocStatus(d.status)}`,
                 createdAt: d.createdAt.toISOString(),
             })),
             ...deployments.map((d) => ({
@@ -153,7 +153,7 @@ export class WorkspaceStatsService {
                 name: a.name,
                 status: a.status as string,
                 conversationCount: a._count.conversations,
-                documentCount: a._count.documents,
+                datasetCount: a._count.datasets,
                 latestVersion: a.deployments[0]?.version ?? null,
             })),
         };

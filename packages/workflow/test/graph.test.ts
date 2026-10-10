@@ -45,6 +45,12 @@ describe("withAutoSettings", () => {
         edges: [linkNodes("r", "s")],
     });
 
+    it("creates no placeholder for a multiple input (DATASET of the retriever)", () => {
+        const { nodes } = withAutoSettings(chain().nodes, chain().edges);
+
+        assert.equal(settingNodesOf(nodes, "r").length, 0);
+    });
+
     it("adds one placeholder per setting input, next to its parent", () => {
         const { nodes, edges } = withAutoSettings(chain().nodes, chain().edges);
         const settings = settingNodesOf(nodes, "s");

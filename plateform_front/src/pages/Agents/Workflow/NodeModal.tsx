@@ -8,6 +8,8 @@ import RerankerNodeModal from "components/Agents/Workflow/NodeModalContent/ReRan
 import RewriterNodeModal from "components/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeContent";
 import QueryNodeModal from "components/Agents/Workflow/NodeModalContent/Query/QueryNodeContent";
 import { ModelSelectorContent } from "components/Agents/Workflow/NodeModalContent/ModelSelector/ModelSelectorContent";
+import { DatasetSettingContent } from "components/Agents/Workflow/NodeModalContent/Datasets/DatasetSettingContent";
+import { RETRIEVER_DATASET_INPUT } from "components/Agents/Workflow/NodeModalContent/Datasets/retrieverDatasetInput";
 import { Task, TaskType, type AppNodeData } from "@genrag/workflow";
 import ResponseNodeModal from "components/Agents/Workflow/NodeModalContent/Response/ResponseNodeContent";
 import useThemedToast from "hooks/useThemedToast";
@@ -20,9 +22,24 @@ interface NodeModalProps {
     nodeData?: AppNodeData;
     selectedNodeId?: string | null;
     onSettingSelect?: (nodeId: string, item: string) => void;
+    onAddSettingNode: (parentId: string, inputName: string, value: string) => void;
+    onRemoveSettingNode: (nodeId: string) => void;
+    workspaceId: string;
+    agentId: string;
 }
 
-export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onSettingSelect }: NodeModalProps) => {
+export const NodeModal = ({
+    task,
+    isOpen,
+    onClose,
+    nodeData,
+    selectedNodeId,
+    onSettingSelect,
+    onAddSettingNode,
+    onRemoveSettingNode,
+    workspaceId,
+    agentId,
+}: NodeModalProps) => {
     const { fitView, getNode } = useReactFlow();
     const [contentReady, setContentReady] = useState(false);
     const toast = useThemedToast();
@@ -102,7 +119,30 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                                     />
                                 </HStack>
                             </Flex>
-                            {task.type === TaskType.RETRIEVER && <DatabaseNodeModal />}
+                            {task.type === TaskType.RETRIEVER && (
+                                <DatabaseNodeModal
+                                    retrieverId={selectedNodeId ?? ""}
+                                    workspaceId={workspaceId}
+                                    agentId={agentId}
+                                    onAddDataset={(datasetId) =>
+                                        onAddSettingNode(selectedNodeId ?? "", RETRIEVER_DATASET_INPUT.name, datasetId)
+                                    }
+                                    onRemoveSettingNode={onRemoveSettingNode}
+                                />
+                            )}
+                            {task.type === TaskType.DATASET && nodeData && (
+                                <DatasetSettingContent
+                                    nodeId={selectedNodeId ?? ""}
+                                    nodeData={nodeData}
+                                    workspaceId={workspaceId}
+                                    agentId={agentId}
+                                    onSelect={(nodeId, datasetId) => onSettingSelect?.(nodeId, datasetId)}
+                                    onRemove={(nodeId) => {
+                                        onRemoveSettingNode(nodeId);
+                                        onClose();
+                                    }}
+                                />
+                            )}
                             {task.type === TaskType.RERANKER && (
                                 <RerankerNodeModal
                                     task={task}

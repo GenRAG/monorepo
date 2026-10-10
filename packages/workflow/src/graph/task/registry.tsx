@@ -1,9 +1,10 @@
 import { createContext, useContext } from "react";
-import { Brain, Database, FileText, PencilIcon, Search, Sparkle, Speech } from "lucide-react";
+import { Brain, Database, FileText, Library, PencilIcon, Search, Sparkle, Speech } from "lucide-react";
 import { TaskType, type Task, type TaskSpecRegistry, type WorkflowRegistry } from "../../types/task";
 import { TASK_SPECS } from "../task-specs";
 import { InstructionNode } from "../../components/nodes/SettingNodes/InstructionNode";
 import { ModelNode } from "../../components/nodes/SettingNodes/ModelNode";
+import { DatasetNode } from "../../components/nodes/SettingNodes/DatasetNode";
 
 type TaskVisual = Pick<Task, "icon" | "component">;
 
@@ -15,6 +16,7 @@ const TASK_VISUALS: Record<TaskType, TaskVisual> = {
     [TaskType.RESPONSE]: { icon: Speech },
     [TaskType.MODEL]: { icon: Brain, component: ModelNode },
     [TaskType.INSTRUCTION]: { icon: FileText, component: InstructionNode },
+    [TaskType.DATASET]: { icon: Library, component: DatasetNode },
 };
 
 /** Merges task specs with how they are drawn. Pass overrides to change icons or node components. */

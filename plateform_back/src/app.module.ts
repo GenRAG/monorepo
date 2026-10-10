@@ -13,6 +13,7 @@ import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
 import { AgentAnalyticsModule } from './agent-analytics/agent-analytics.module';
 import { CreditModule } from 'src/credit/credit.module';
 import { DocumentModule } from './document/document.module';
+import { DatasetModule } from './dataset/dataset.module';
 import { DeploymentModule } from './deployment/deployment.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { ConversationModule } from './conversation/conversation.module';
@@ -35,6 +36,15 @@ import { SentryModule } from '@sentry/nestjs/setup';
                 return {
                     pinoHttp: {
                         autoLogging: !isTest,
+                        // Neither headers (JWT cookie) nor query strings (user questions on the SSE routes) are logged.
+                        serializers: {
+                            req: (req: { id: unknown; method: string; url: string }) => ({
+                                id: req.id,
+                                method: req.method,
+                                url: req.url.split('?')[0],
+                            }),
+                            res: (res: { statusCode: number }) => ({ statusCode: res.statusCode }),
+                        },
                         transport: isProduction
                             ? undefined
                             : {
@@ -75,6 +85,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
         UsersModule,
         AuthModule,
         WorkspaceModule,
+        DatasetModule,
         DocumentModule,
         AgentModule,
         WorkflowModule,

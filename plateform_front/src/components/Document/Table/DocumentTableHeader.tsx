@@ -1,24 +1,20 @@
 import React from "react";
 import { Th, Thead, Tr } from "@chakra-ui/react";
+import { DOCUMENT_TH_PROPS } from "./documentTableStyles";
 
-const COLUMNS = ["NOM", "TYPE", "TAILLE", "STATUT", "TÉLÉVERSÉ", "ACTIONS"];
+const COLUMNS = ["Document", "Provenance", "Taille", "Statut", "Ajouté"];
 
-export const DocumentTableHeader: React.FC = () => {
-    return (
-        <Thead position="sticky" top={0} bg="surfacePrimary" zIndex={1}>
-            <Tr>
-                {COLUMNS.map((col) => (
-                    <Th
-                        key={col}
-                        textAlign={col === "ACTIONS" ? "right" : "left"}
-                        width={col === "ACTIONS" ? "90px" : undefined}
-                    >
-                        {col}
-                    </Th>
-                ))}
-            </Tr>
-        </Thead>
-    );
-};
+export const DocumentTableHeader: React.FC = () => (
+    <Thead bg="secondBackgroundDefault">
+        <Tr>
+            {COLUMNS.map((label) => (
+                <Th key={label} {...DOCUMENT_TH_PROPS}>
+                    {label}
+                </Th>
+            ))}
+            <Th {...DOCUMENT_TH_PROPS} w="1px" />
+        </Tr>
+    </Thead>
+);
 
 export default DocumentTableHeader;

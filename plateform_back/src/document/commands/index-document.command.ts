@@ -1,6 +1,6 @@
 export interface IndexDocumentCommandProps {
     documentId: string;
-    agentId: string;
+    datasetId: string;
     storageKey: string;
     mimeType: string;
     buffer: string | null;

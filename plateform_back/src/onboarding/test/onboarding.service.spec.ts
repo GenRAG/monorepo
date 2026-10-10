@@ -1,3 +1,4 @@
+import { DatasetService } from 'src/dataset/dataset.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
 import { describe, jest, beforeEach, afterEach, it, expect } from '@jest/globals';
@@ -17,6 +18,7 @@ describe('OnboardingService', () => {
         create: jest.fn(),
         update: jest.fn(),
         tryIncrementQueryCount: jest.fn(),
+        mergeStepData: jest.fn(),
     } as any;
 
     const mockAgentService = {
@@ -37,6 +39,11 @@ describe('OnboardingService', () => {
         grantInitial: jest.fn(),
     } as any;
 
+    const mockDatasetService = {
+        create: jest.fn(() => Promise.resolve({ id: 'dataset-1' })),
+        attachToAgent: jest.fn(),
+    } as any;
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -46,6 +53,7 @@ describe('OnboardingService', () => {
                 { provide: WorkflowService, useValue: mockWorkflowService },
                 { provide: AgentRuntimeOrchestrator, useValue: mockOrchestrator },
                 { provide: CreditBalanceService, useValue: mockCreditBalanceService },
+                { provide: DatasetService, useValue: mockDatasetService },
             ],
         }).compile();
 
@@ -118,6 +126,8 @@ describe('OnboardingService', () => {
                 workspaceId,
             );
             expect(mockRepository.create).toHaveBeenCalled();
+            expect(mockDatasetService.create).toHaveBeenCalledWith(workspaceId, { name: 'Documents de démonstration' });
+            expect(mockDatasetService.attachToAgent).toHaveBeenCalledWith('dataset-1', 'agent-1', workspaceId);
             expect(mockCreditBalanceService.grantInitial).toHaveBeenCalledWith(
                 { workspaceId, amount: 20 },
                 'SUBSCRIPTION',
@@ -237,76 +247,35 @@ describe('OnboardingService', () => {
     });
 
     describe('updateStepsData', () => {
-        it('should update step data', async () => {
-            const mockSession = {
-                id: 'session-1',
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: { step1: { existing: 'data' } },
-            };
+        const session = {
+            id: 'session-1',
+            userId: 'user-1',
+            workspaceId: 'workspace-1',
+            agentId: 'agent-1',
+            step: 1,
+            completed: false,
+            instruction: null,
+            stepsData: null,
+        };
 
-            mockRepository.findByUserAndWorkspace.mockResolvedValue(mockSession);
-            mockRepository.update.mockResolvedValue(mockSession);
+        it('should merge the data into the step', async () => {
+            mockRepository.findByUserAndWorkspace.mockResolvedValue(session);
 
             await service.updateStepsData('user-1', 'workspace-1', 'step1', { new: 'value' });
 
-            expect(mockRepository.update).toHaveBeenCalledWith('session-1', {
-                stepsData: {
-                    step1: { existing: 'data', new: 'value' },
-                },
-            });
-        });
-
-        it('should initialize stepsData if not present', async () => {
-            const mockSession = {
-                id: 'session-1',
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: null,
-            };
-
-            mockRepository.findByUserAndWorkspace.mockResolvedValue(mockSession);
-            mockRepository.update.mockResolvedValue(mockSession);
-
-            await service.updateStepsData('user-1', 'workspace-1', 'step1', { data: 'value' });
-
-            expect(mockRepository.update).toHaveBeenCalledWith('session-1', {
-                stepsData: {
-                    step1: { data: 'value' },
-                },
-            });
+            expect(mockRepository.mergeStepData).toHaveBeenCalledWith('session-1', 'step1', { new: 'value' });
         });
 
         it('should never let the client overwrite the server-managed queryCount', async () => {
-            mockRepository.findByUserAndWorkspace.mockResolvedValue({
-                id: 'session-1',
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: { 'test-assistant': { queryCount: 5 } },
-            });
-            mockRepository.update.mockResolvedValue({});
+            mockRepository.findByUserAndWorkspace.mockResolvedValue(session);
 
             await service.updateStepsData('user-1', 'workspace-1', 'test-assistant', {
                 queryCount: 0,
                 messageCount: 1,
             });
 
-            expect(mockRepository.update).toHaveBeenCalledWith('session-1', {
-                stepsData: {
-                    'test-assistant': { queryCount: 5, messageCount: 1 },
-                },
+            expect(mockRepository.mergeStepData).toHaveBeenCalledWith('session-1', 'test-assistant', {
+                messageCount: 1,
             });
         });
     });
@@ -469,7 +438,7 @@ describe('OnboardingService', () => {
 
     describe('resolveStreamParams', () => {
         it('should return onboarding org for test-assistant', () => {
-            const result = service.resolveStreamParams('agent-1', 'test-assistant');
+            const result = service.resolveStreamParams('test-assistant');
 
             expect(result).toEqual({
                 resolvedStepId: 'test-assistant',
@@ -477,17 +446,17 @@ describe('OnboardingService', () => {
             });
         });
 
-        it('should return agentId org for other steps', () => {
-            const result = service.resolveStreamParams('agent-1', 'improve-assistant');
+        it('should not override the org for other steps (agent datasets are used)', () => {
+            const result = service.resolveStreamParams('improve-assistant');
 
             expect(result).toEqual({
                 resolvedStepId: 'improve-assistant',
-                orgId: 'agent-1',
+                orgId: undefined,
             });
         });
 
         it('should default to test-assistant when stepId not provided', () => {
-            const result = service.resolveStreamParams('agent-1');
+            const result = service.resolveStreamParams();
 
             expect(result).toEqual({
                 resolvedStepId: 'test-assistant',
@@ -496,11 +465,11 @@ describe('OnboardingService', () => {
         });
 
         it('should reject unknown step ids (they would bypass the per-step query limits)', () => {
-            expect(() => service.resolveStreamParams('agent-1', 'anything-else')).toThrow(BadRequestException);
+            expect(() => service.resolveStreamParams('anything-else')).toThrow(BadRequestException);
         });
 
         it('should reject compare-intelligence, which is served by POST /compare', () => {
-            expect(() => service.resolveStreamParams('agent-1', 'compare-intelligence')).toThrow(BadRequestException);
+            expect(() => service.resolveStreamParams('compare-intelligence')).toThrow(BadRequestException);
         });
     });
 

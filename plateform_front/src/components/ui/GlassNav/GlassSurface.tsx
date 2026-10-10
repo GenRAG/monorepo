@@ -27,6 +27,8 @@ export interface GlassSurfaceProps extends BoxProps {
     withBorder?: boolean;
     /** Affiche l'ombre portée + le bevel inset du panneau (défaut: true). */
     withBoxShadow?: boolean;
+    /** Affiche le reflet diagonal (défaut: true). À couper sur les panneaux de page où il se lit comme une zone blanche. */
+    withSheen?: boolean;
 }
 
 /**
@@ -62,6 +64,7 @@ export const GlassSurface = forwardRef<HTMLDivElement, GlassSurfaceProps>(
             tint,
             withBorder = true,
             withBoxShadow = true,
+            withSheen = true,
             children,
             ...rest
         },
@@ -100,14 +103,16 @@ export const GlassSurface = forwardRef<HTMLDivElement, GlassSurfaceProps>(
                     // Le reflet diagonal : généré en `::before` (peint avant les vrais enfants, donc
                     // dessous) plutôt que via un enfant Box, pour ne jamais intercepter les clics —
                     // `pointerEvents: none` en double sécurité.
-                    "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        inset: 0,
-                        borderRadius: "inherit",
-                        pointerEvents: "none",
-                        background: sheen,
-                    },
+                    "&::before": withSheen
+                        ? {
+                              content: '""',
+                              position: "absolute",
+                              inset: 0,
+                              borderRadius: "inherit",
+                              pointerEvents: "none",
+                              background: sheen,
+                          }
+                        : undefined,
                 }}
                 {...rest}
             >

@@ -9,13 +9,13 @@ export type FindAllAgentResult = Prisma.AgentGetPayload<{
             select: { toStatus: true };
         };
         _count: {
-            select: { documents: true };
+            select: { datasets: true };
         };
     };
 }>;
 
 export type AgentListItem = Omit<FindAllAgentResult, 'deployments' | '_count'> & {
-    documentsCount: number;
+    datasetsCount: number;
 };
 
 type AgentWithWorkflows = Prisma.AgentGetPayload<{
@@ -75,7 +75,7 @@ export class AgentRepository {
                     select: { toStatus: true },
                 },
                 _count: {
-                    select: { documents: true },
+                    select: { datasets: true },
                 },
             },
         });

@@ -24,7 +24,7 @@ interface UploadModalProps {
     isOpen: boolean;
     onClose: () => void;
     workspaceId: string;
-    agentId: string;
+    datasetId: string;
     targetFolderId: string | null;
     onUploadComplete: () => void;
 }
@@ -33,7 +33,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     isOpen,
     onClose,
     workspaceId,
-    agentId,
+    datasetId,
     onUploadComplete,
 }) => {
     const [isDragging, setIsDragging] = useState(false);
@@ -41,7 +41,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     const overlayBg = useColorModeValue("whiteAlpha.600", "blackAlpha.400");
 
     const { selectedFiles, sources, isUploading, isDone, allDone, addFiles, removeSelectedFile, handleUpload, reset } =
-        useUploadDocuments(workspaceId, agentId);
+        useUploadDocuments(workspaceId, datasetId);
 
     const acceptedTypesString = useMemo(
         () => [...(ACCEPTED_TYPES as readonly string[]), ...ACCEPTED_EXTENSIONS].join(","),

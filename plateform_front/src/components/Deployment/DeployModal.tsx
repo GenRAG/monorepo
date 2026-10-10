@@ -12,6 +12,7 @@ import {
     Input,
     Textarea,
     Text,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import Button from "components/ui/Button";
 import useThemedToast from "hooks/useThemedToast";
@@ -36,6 +37,7 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
     const [changelog, setChangelog] = useState("");
     const [deploy, { isLoading: isDeploying }] = useCreateDeploymentMutation();
     const toast = useThemedToast();
+    const overlayBg = useColorModeValue("whiteAlpha.600", "blackAlpha.400");
 
     const handleSubmit = async () => {
         try {
@@ -67,14 +69,8 @@ export const DeployModal = ({ isOpen, onClose, title = "Déployer en Production"
 
     return (
         <Modal isOpen={isOpen} onClose={handleClose} size="md" isCentered>
-            <ModalOverlay backdropFilter="blur(4px)" />
-            <ModalContent
-                bg="surfaceCard"
-                borderWidth="1px"
-                borderStyle="solid"
-                borderColor="borderDivider"
-                borderRadius="14px"
-            >
+            <ModalOverlay bg={overlayBg} />
+            <ModalContent bg="transparent" backdropFilter="blur(20px)" borderRadius="16px">
                 <ModalHeader fontSize="2xl" fontWeight={600} color="textStrong" pb={1}>
                     {title}
                 </ModalHeader>

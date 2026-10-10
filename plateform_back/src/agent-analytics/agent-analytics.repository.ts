@@ -82,7 +82,7 @@ export class AgentAnalyticsRepository {
     async getDocumentStatusCounts(agentId: string): Promise<DocumentStatusCounts> {
         const rows = await this.prisma.document.groupBy({
             by: ['status'],
-            where: { agentId },
+            where: { dataset: { agents: { some: { agentId } } } },
             _count: true,
         });
 

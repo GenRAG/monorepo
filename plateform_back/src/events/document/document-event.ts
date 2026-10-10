@@ -3,7 +3,7 @@ import { DocumentEventType } from 'src/events/document/document-event.type';
 export class DocumentIndexedEvent {
     constructor(
         readonly documentId: string,
-        readonly agentId: string,
+        readonly datasetId: string,
     ) {}
 
     readonly eventType = DocumentEventType.DOCUMENT_INDEXED;
@@ -13,7 +13,7 @@ export class DocumentIndexedEvent {
 export class DocumentFailedEvent {
     constructor(
         readonly documentId: string,
-        readonly agentId: string,
+        readonly datasetId: string,
     ) {}
 
     readonly eventType = DocumentEventType.DOCUMENT_FAILED;

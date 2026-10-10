@@ -2,7 +2,7 @@ import type { Edge } from "@xyflow/react";
 import type { AppNode } from "../types/app-node";
 import type { PipelineBlock } from "../types/pipeline";
 import { TaskType, type TaskSpecRegistry } from "../types/task";
-import { linkNodes, makeFlowNode, withAutoSettings } from "../graph/create-flow-node";
+import { createMultipleSettingNode, linkNodes, makeFlowNode, withAutoSettings } from "../graph/create-flow-node";
 import { TASK_SPECS } from "../graph/task-specs";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 
@@ -50,7 +50,7 @@ function settingValuesOf(block: PipelineBlock, type: TaskType, registry: TaskSpe
  * (placeholders when missing). Node ids are the block names (suffixed when repeated).
  *
  * Inverse of `serializeWorkflow` for the settings the builder exposes: `collection_name` and `top_k` of a
- * retrieve block have no node and are not kept.
+ * retrieve block have no node and are not kept; its `datasetIds` become DATASET nodes.
  *
  * @throws UnsupportedPipelineBlockError on a block type the builder does not know.
  */
@@ -64,6 +64,7 @@ export function pipelineToWorkflow(
     const edges: Edge[] = [];
     const settingValues: Record<string, Record<string, string>> = {};
     const usedIds = new Set<string>();
+    const datasetIdsByNode: Record<string, string[]> = {};
 
     blocks.forEach((block, index) => {
         const type = TASK_TYPE_BY_BLOCK[block?.type];
@@ -81,7 +82,22 @@ export function pipelineToWorkflow(
         node.position = layout.computePlacements(nodes, edges, id)[0]?.position ?? layout.getInitialPosition();
 
         settingValues[id] = settingValuesOf(block, type, registry);
+        if (block.type === "retrieve" && block.datasetIds?.length) datasetIdsByNode[id] = [...new Set(block.datasetIds)];
     });
 
-    return withAutoSettings(nodes, edges, settingValues, layout, registry);
+    const graph = withAutoSettings(nodes, edges, settingValues, layout, registry);
+
+    // One DATASET node per dataset of a retrieve block, after the single-valued settings.
+    for (const [nodeId, datasetIds] of Object.entries(datasetIdsByNode)) {
+        const parent = graph.nodes.find((n) => n.id === nodeId)!;
+        const input = registry[parent.data.type]?.inputs.find((i) => i.nodeType === TaskType.DATASET);
+        if (!input) continue;
+        datasetIds.forEach((datasetId, index) => {
+            const { node, edge } = createMultipleSettingNode(parent, input, datasetId, index, layout);
+            graph.nodes.push(node);
+            graph.edges.push(edge);
+        });
+    }
+
+    return graph;
 }

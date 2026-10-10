@@ -4,7 +4,7 @@ import { workspaceStatsTag } from "services/workspace/workspace";
 import { Agent, AgentByIdParams, CreateAgentParams, UpdateAgentParams } from "types/agent/agent";
 import { AgentPreview } from "types/agent/agent";
 
-const getWorkspaceAgentsTagId = (workspaceId: string) => `workspace-${workspaceId}`;
+export const getWorkspaceAgentsTagId = (workspaceId: string) => `workspace-${workspaceId}`;
 
 export const extendedAgentApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({

@@ -2,8 +2,7 @@ import React from "react";
 import { Box, HStack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { RagModel } from "types/models/models";
 import { formatContextLength, getProviderName } from "utils/models/modelFormatters";
-import { getAgentAvatar } from "utils/agentAvatar";
-import BoxIcon from "components/ui/BoxIcon";
+import { ModelAvatar } from "./ModelAvatar";
 
 interface Props {
     model: RagModel;
@@ -18,7 +17,6 @@ const ModelListItemBase: React.FC<Props> = ({ model, isSelected, onSelect }) => 
 
     const provider = getProviderName(model.id, model.provider);
     const ctx = model.context_length ? formatContextLength(model.context_length) : null;
-    const avatarStyle = getAgentAvatar(model.name);
 
     return (
         <Box
@@ -37,7 +35,7 @@ const ModelListItemBase: React.FC<Props> = ({ model, isSelected, onSelect }) => 
             onClick={() => onSelect(model)}
         >
             <HStack spacing={2} align="center" w="100%">
-                <BoxIcon letters={model.name.charAt(0).toUpperCase()} bg={avatarStyle.bg} color={avatarStyle.color} />
+                <ModelAvatar model={model} />
                 <VStack align="stretch" spacing={0} flex={1} minW={0}>
                     <Text fontSize="11px" fontWeight={600} color="textOnBubble" noOfLines={1}>
                         {model.name}

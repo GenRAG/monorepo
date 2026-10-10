@@ -60,6 +60,43 @@ const Input = defineMultiStyleConfig({
         default: {
             ...baseStyle,
         },
+        // Verre dépoli, aligné sur GlassSurface (components/ui/GlassNav) : fond translucide, flou,
+        // bordure fine, sans ombre. Le rayon reste celui du thème par défaut. Le verre suit le colorMode (le ton de base vient de grey.975 / grey.100).
+        glass: {
+            field: {
+                borderWidth: "1px",
+                bg: "rgba(231, 231, 231, 0.62)",
+                borderColor: "rgba(15, 23, 42, 0.16)",
+                color: "rgba(15, 23, 42, 0.95)",
+                backdropFilter: "blur(12px) saturate(200%)",
+                WebkitBackdropFilter: "blur(12px) saturate(200%)",
+                _placeholder: {
+                    color: "rgba(15, 23, 42, 0.5)",
+                },
+                _hover: {
+                    borderColor: "rgba(15, 23, 42, 0.28)",
+                },
+                _dark: {
+                    bg: "rgba(11, 14, 17, 0.52)",
+                    borderColor: "rgba(255, 255, 255, 0.14)",
+                    color: "rgba(255, 255, 255, 0.95)",
+                    _placeholder: {
+                        color: "rgba(255, 255, 255, 0.55)",
+                    },
+                    _hover: {
+                        borderColor: "rgba(255, 255, 255, 0.28)",
+                    },
+                },
+                _focus: {
+                    borderColor: "inputActiveBorder",
+                    boxShadow: "none",
+                },
+                _focusVisible: {
+                    borderColor: "inputActiveBorder",
+                    boxShadow: "none",
+                },
+            },
+        },
     },
     sizes: {
         lg: {

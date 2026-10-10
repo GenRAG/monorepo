@@ -131,17 +131,11 @@ export class OnboardingService {
 
         if (!session) throw new NotFoundException('Onboarding session not found');
 
-        const current = (session.stepsData as Record<string, Record<string, unknown>>) ?? {};
         const clientData = Object.fromEntries(
             Object.entries(data).filter(([key]) => !RESERVED_STEP_DATA_KEYS.includes(key)),
         );
 
-        await this.onboardingRepository.update(session.id, {
-            stepsData: {
-                ...current,
-                [stepId]: { ...(current[stepId] ?? {}), ...clientData },
-            } as Prisma.InputJsonValue,
-        });
+        await this.onboardingRepository.mergeStepData(session.id, stepId, clientData);
     }
 
     async compare(userId: string, workspaceId: string, query: string): Promise<CompareOnboardingResponse> {

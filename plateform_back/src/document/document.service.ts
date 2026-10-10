@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, NotFoundExc
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { AxiosError } from 'axios';
-import { DocumentSource } from 'generated/prisma';
+import { DocumentSource, Prisma } from 'generated/prisma';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from './document.repository';
 import { IndexDocumentCommandProps } from './commands/index-document.command';
@@ -90,14 +90,24 @@ export class DocumentService {
         const storageKey = `datasets/${datasetId}/${Date.now()}-${safeFilename}`;
         await this.storage.put(storageKey, file.buffer, file.mimeType);
 
-        const document = await this.documentRepository.create({
-            datasetId,
-            storageKey,
-            mimeType: file.mimeType,
-            name: safeFilename,
-            size: file.size,
-            ...origin,
-        });
+        let document;
+        try {
+            document = await this.documentRepository.create({
+                datasetId,
+                storageKey,
+                mimeType: file.mimeType,
+                name: safeFilename,
+                size: file.size,
+                ...origin,
+            });
+        } catch (error) {
+            // Never leave the uploaded file behind; a concurrent upload of the same name hits the unique index.
+            await this.storage.delete(storageKey);
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw new ConflictException(`Un document nommé « ${safeFilename} » existe déjà dans cette base`);
+            }
+            throw error;
+        }
         await this.documentRepository.touchDataset(datasetId);
 
         await this.documentQueue.add(

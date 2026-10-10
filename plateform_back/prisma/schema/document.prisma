@@ -33,5 +33,6 @@ model Document {
     dataset            Dataset        @relation(fields: [datasetId], references: [id], onDelete: Cascade)
 
     @@unique([datasetId, source, externalId])
+  @@unique([datasetId, name])
     @@index([datasetId, createdAt])
 }

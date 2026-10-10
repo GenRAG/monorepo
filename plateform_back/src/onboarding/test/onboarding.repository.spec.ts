@@ -14,6 +14,7 @@ describe('OnboardingRepository', () => {
             update: jest.fn(),
         },
         $transaction: jest.fn(),
+        $executeRaw: jest.fn(),
     } as any;
 
     beforeEach(async () => {
@@ -117,114 +118,26 @@ describe('OnboardingRepository', () => {
     });
 
     describe('tryIncrementQueryCount', () => {
-        it('should increment query count when under limit', async () => {
-            const sessionId = 'session-1';
-            const stepId = 'test-assistant';
-            const max = 5;
-            const mockTx = {
-                onboardingSession: {
-                    findUnique: jest.fn(),
-                    update: jest.fn(),
-                },
-            } as any;
+        it('should return true when the atomic UPDATE touched the session', async () => {
+            mockPrismaService.$executeRaw.mockResolvedValue(1);
 
-            const sessionData = {
-                id: sessionId,
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: { 'test-assistant': { queryCount: 3 } },
-            };
-
-            mockTx.onboardingSession.findUnique.mockResolvedValue(sessionData);
-            mockTx.onboardingSession.update.mockResolvedValue({
-                ...sessionData,
-                stepsData: { 'test-assistant': { queryCount: 4 } },
-            });
-
-            mockPrismaService.$transaction.mockImplementation((cb: any) => Promise.resolve(cb(mockTx)));
-
-            const result = await repository.tryIncrementQueryCount(sessionId, stepId, max);
-
-            expect(result).toBe(true);
-            expect(mockTx.onboardingSession.update).toHaveBeenCalledWith({
-                where: { id: sessionId },
-                data: {
-                    stepsData: {
-                        'test-assistant': { queryCount: 4 },
-                    },
-                },
-            });
+            await expect(repository.tryIncrementQueryCount('session-1', 'test-assistant', 5)).resolves.toBe(true);
         });
 
-        it('should not increment when limit reached', async () => {
-            const sessionId = 'session-1';
-            const stepId = 'test-assistant';
-            const max = 5;
-            const mockTx = {
-                onboardingSession: {
-                    findUnique: jest.fn(),
-                    update: jest.fn(),
-                },
-            } as any;
+        it('should return false when the limit was already reached (no row updated)', async () => {
+            mockPrismaService.$executeRaw.mockResolvedValue(0);
 
-            const sessionData = {
-                id: sessionId,
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: { 'test-assistant': { queryCount: 5 } },
-            };
-
-            mockTx.onboardingSession.findUnique.mockResolvedValue(sessionData);
-            mockPrismaService.$transaction.mockImplementation((cb: any) => Promise.resolve(cb(mockTx)));
-
-            const result = await repository.tryIncrementQueryCount(sessionId, stepId, max);
-
-            expect(result).toBe(false);
-            expect(mockTx.onboardingSession.update).not.toHaveBeenCalled();
+            await expect(repository.tryIncrementQueryCount('session-1', 'test-assistant', 5)).resolves.toBe(false);
         });
+    });
 
-        it('should initialize query count if not present', async () => {
-            const sessionId = 'session-1';
-            const stepId = 'improve-assistant';
-            const max = 5;
-            const mockTx = {
-                onboardingSession: {
-                    findUnique: jest.fn(),
-                    update: jest.fn(),
-                },
-            } as any;
+    describe('mergeStepData', () => {
+        it('should merge the data with a single UPDATE', async () => {
+            mockPrismaService.$executeRaw.mockResolvedValue(1);
 
-            const sessionData = {
-                id: sessionId,
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: {},
-            };
+            await repository.mergeStepData('session-1', 'step1', { a: 1 });
 
-            mockTx.onboardingSession.findUnique.mockResolvedValue(sessionData);
-            mockTx.onboardingSession.update.mockResolvedValue({
-                ...sessionData,
-                stepsData: { 'improve-assistant': { queryCount: 1 } },
-            });
-
-            mockPrismaService.$transaction.mockImplementation((cb: any) => Promise.resolve(cb(mockTx)));
-
-            const result = await repository.tryIncrementQueryCount(sessionId, stepId, max);
-
-            expect(result).toBe(true);
-            expect(mockTx.onboardingSession.update).toHaveBeenCalled();
+            expect(mockPrismaService.$executeRaw).toHaveBeenCalledTimes(1);
         });
     });
 });

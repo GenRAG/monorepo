@@ -36,6 +36,15 @@ import { SentryModule } from '@sentry/nestjs/setup';
                 return {
                     pinoHttp: {
                         autoLogging: !isTest,
+                        // Neither headers (JWT cookie) nor query strings (user questions on the SSE routes) are logged.
+                        serializers: {
+                            req: (req: { id: unknown; method: string; url: string }) => ({
+                                id: req.id,
+                                method: req.method,
+                                url: req.url.split('?')[0],
+                            }),
+                            res: (res: { statusCode: number }) => ({ statusCode: res.statusCode }),
+                        },
                         transport: isProduction
                             ? undefined
                             : {

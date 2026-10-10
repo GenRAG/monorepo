@@ -18,6 +18,7 @@ describe('OnboardingService', () => {
         create: jest.fn(),
         update: jest.fn(),
         tryIncrementQueryCount: jest.fn(),
+        mergeStepData: jest.fn(),
     } as any;
 
     const mockAgentService = {
@@ -246,76 +247,35 @@ describe('OnboardingService', () => {
     });
 
     describe('updateStepsData', () => {
-        it('should update step data', async () => {
-            const mockSession = {
-                id: 'session-1',
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: { step1: { existing: 'data' } },
-            };
+        const session = {
+            id: 'session-1',
+            userId: 'user-1',
+            workspaceId: 'workspace-1',
+            agentId: 'agent-1',
+            step: 1,
+            completed: false,
+            instruction: null,
+            stepsData: null,
+        };
 
-            mockRepository.findByUserAndWorkspace.mockResolvedValue(mockSession);
-            mockRepository.update.mockResolvedValue(mockSession);
+        it('should merge the data into the step', async () => {
+            mockRepository.findByUserAndWorkspace.mockResolvedValue(session);
 
             await service.updateStepsData('user-1', 'workspace-1', 'step1', { new: 'value' });
 
-            expect(mockRepository.update).toHaveBeenCalledWith('session-1', {
-                stepsData: {
-                    step1: { existing: 'data', new: 'value' },
-                },
-            });
-        });
-
-        it('should initialize stepsData if not present', async () => {
-            const mockSession = {
-                id: 'session-1',
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: null,
-            };
-
-            mockRepository.findByUserAndWorkspace.mockResolvedValue(mockSession);
-            mockRepository.update.mockResolvedValue(mockSession);
-
-            await service.updateStepsData('user-1', 'workspace-1', 'step1', { data: 'value' });
-
-            expect(mockRepository.update).toHaveBeenCalledWith('session-1', {
-                stepsData: {
-                    step1: { data: 'value' },
-                },
-            });
+            expect(mockRepository.mergeStepData).toHaveBeenCalledWith('session-1', 'step1', { new: 'value' });
         });
 
         it('should never let the client overwrite the server-managed queryCount', async () => {
-            mockRepository.findByUserAndWorkspace.mockResolvedValue({
-                id: 'session-1',
-                userId: 'user-1',
-                workspaceId: 'workspace-1',
-                agentId: 'agent-1',
-                step: 1,
-                completed: false,
-                instruction: null,
-                stepsData: { 'test-assistant': { queryCount: 5 } },
-            });
-            mockRepository.update.mockResolvedValue({});
+            mockRepository.findByUserAndWorkspace.mockResolvedValue(session);
 
             await service.updateStepsData('user-1', 'workspace-1', 'test-assistant', {
                 queryCount: 0,
                 messageCount: 1,
             });
 
-            expect(mockRepository.update).toHaveBeenCalledWith('session-1', {
-                stepsData: {
-                    'test-assistant': { queryCount: 5, messageCount: 1 },
-                },
+            expect(mockRepository.mergeStepData).toHaveBeenCalledWith('session-1', 'test-assistant', {
+                messageCount: 1,
             });
         });
     });

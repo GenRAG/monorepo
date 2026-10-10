@@ -99,7 +99,7 @@ describe('DatasetService', () => {
 
         it("should put each day's additions in the right dataset and slot", async () => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            today.setUTCHours(0, 0, 0, 0);
             const todayKey = today.toISOString().slice(0, 10);
             mockDatasetRepository.findAll.mockResolvedValue([fakeDataset, { ...fakeDataset, id: 'dataset-2' }]);
             mockDatasetRepository.getWorkspaceDailyAdditions.mockResolvedValue([
@@ -266,7 +266,7 @@ describe('DatasetService', () => {
 
         it('should return one point per day of the period, with the totals and quota', async () => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            today.setUTCHours(0, 0, 0, 0);
             const todayKey = today.toISOString().slice(0, 10);
             mockDatasetRepository.getDailyAdditions.mockResolvedValue([
                 { day: new Date(todayKey), count: 3, size: 400 },

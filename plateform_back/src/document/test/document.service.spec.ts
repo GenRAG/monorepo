@@ -4,7 +4,7 @@ import { getQueueToken } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { DocumentSource } from 'generated/prisma';
+import { DocumentSource, Prisma } from 'generated/prisma';
 import { DocumentService } from 'src/document/document.service';
 import { DocumentRepository } from 'src/document/document.repository';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
@@ -121,6 +121,19 @@ describe('DocumentService', () => {
 
             await expect(service.ingestFile('dataset-1', file)).rejects.toThrow(ConflictException);
             expect(mockStorage.put).not.toHaveBeenCalled();
+        });
+
+        it('should turn a concurrent duplicate (unique index) into a conflict and remove the stored file', async () => {
+            mockDocumentRepository.create.mockRejectedValue(
+                new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+                    code: 'P2002',
+                    clientVersion: 'test',
+                }),
+            );
+
+            await expect(service.ingestFile('dataset-1', file)).rejects.toThrow(ConflictException);
+            expect(mockStorage.delete).toHaveBeenCalledTimes(1);
+            expect(mockQueue.add).not.toHaveBeenCalled();
         });
     });
 

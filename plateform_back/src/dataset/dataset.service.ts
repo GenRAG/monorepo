@@ -16,14 +16,14 @@ export const DATASET_ACTIVITY_DAYS = 30;
 /** Same day keys as agent analytics: Postgres `::date` values come back as UTC midnights. */
 const toIsoDate = (date: Date) => date.toISOString().slice(0, 10);
 
-/** Midnight `days - 1` days ago and the key of every day up to today. */
+/** UTC midnight `days - 1` days ago and the key of every day up to today (UTC, like `toIsoDate`). */
 const dayRange = (days: number) => {
     const since = new Date();
-    since.setHours(0, 0, 0, 0);
-    since.setDate(since.getDate() - (days - 1));
+    since.setUTCHours(0, 0, 0, 0);
+    since.setUTCDate(since.getUTCDate() - (days - 1));
     const keys = Array.from({ length: days }, (_, i) => {
         const day = new Date(since);
-        day.setDate(since.getDate() + i);
+        day.setUTCDate(since.getUTCDate() + i);
         return toIsoDate(day);
     });
     return { since, keys };

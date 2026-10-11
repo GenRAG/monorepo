@@ -1,3 +1,5 @@
+import { GLASS_INK, type GlassTone } from "themeNew/foundations/glass";
+
 /** Convertit un hex "#RRGGBB" (issu du thème) en rgba() pour pouvoir lui donner de la transparence. */
 export const hexToRgba = (hex: string, alpha: number): string => {
     const clean = hex.replace("#", "");
@@ -26,30 +28,11 @@ export const lightenHex = (hex: string, amount: number): string => {
     return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 };
 
-export interface GlassInk {
-    /** Texte/icône au premier plan (labels actifs). */
-    text: string;
-    /** Texte/icône secondaire (labels inactifs). */
-    muted: string;
-    /** Icônes des boutons utilitaires détachés (workspace, profil, bascule layout). */
-    icon: string;
-    /** Fond du pill actif derrière l'item sélectionné. */
-    pillBg: string;
-}
+export type GlassInk = (typeof GLASS_INK)[GlassTone];
 
 /**
  * Couleurs de premier plan à poser sur une `GlassSurface`, dérivées de son `variant` plutôt que du
  * colorMode de l'app (une GlassSurface "dark" reste lisible en blanc même si l'app est en light
- * mode, et inversement) — voir la note de `GlassSurfaceProps.variant`. Centralisé ici pour éviter
- * que `GlassNav` et `GlassNavAppExample` ne redéfinissent chacun leur propre ternaire `isDark`.
+ * mode, et inversement) — voir la note de `GlassSurfaceProps.variant`.
  */
-export const getGlassInk = (variant: "dark" | "light"): GlassInk => {
-    const isDark = variant === "dark";
-
-    return {
-        text: isDark ? "rgba(255, 255, 255, 0.95)" : "rgba(15, 23, 42, 0.95)",
-        muted: isDark ? "rgba(255, 255, 255, 0.55)" : "rgba(15, 23, 42, 0.5)",
-        icon: isDark ? "rgba(255, 255, 255, 0.85)" : "rgba(15, 23, 42, 0.85)",
-        pillBg: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.05)",
-    };
-};
+export const getGlassInk = (variant: GlassTone): GlassInk => GLASS_INK[variant];

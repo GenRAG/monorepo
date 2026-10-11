@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box, Text, Tooltip, chakra } from "@chakra-ui/react";
 import { motion, Variants } from "framer-motion";
+import { GLASS_FOCUS_RING } from "themeNew/foundations/glass";
 import { GlassNavItem } from "./GlassNav";
 
 const MotionBox = motion(Box);
@@ -86,7 +87,7 @@ export const NavItemButton = ({
             border="none"
             bg="transparent"
             outline="none"
-            _focusVisible={{ boxShadow: "0 0 0 2px rgba(52, 211, 169, 0.85)" }}
+            _focusVisible={{ boxShadow: GLASS_FOCUS_RING }}
         >
             {isActive && (
                 <MotionBox

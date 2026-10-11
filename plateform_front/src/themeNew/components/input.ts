@@ -2,6 +2,7 @@ import { inputAnatomy } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/styled-system";
 
 import borderRadius from "themeNew/foundations/borderRadius";
+import { GLASS_BG, GLASS_BORDER, GLASS_BORDER_HOVER, GLASS_INK } from "themeNew/foundations/glass";
 import { textStyles } from "themeNew/foundations/typography";
 
 const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(inputAnatomy.keys);
@@ -65,26 +66,26 @@ const Input = defineMultiStyleConfig({
         glass: {
             field: {
                 borderWidth: "1px",
-                bg: "rgba(231, 231, 231, 0.62)",
-                borderColor: "rgba(15, 23, 42, 0.16)",
-                color: "rgba(15, 23, 42, 0.95)",
+                bg: GLASS_BG.light,
+                borderColor: GLASS_BORDER.light,
+                color: GLASS_INK.light.text,
                 backdropFilter: "blur(12px) saturate(200%)",
                 WebkitBackdropFilter: "blur(12px) saturate(200%)",
                 _placeholder: {
-                    color: "rgba(15, 23, 42, 0.5)",
+                    color: GLASS_INK.light.muted,
                 },
                 _hover: {
-                    borderColor: "rgba(15, 23, 42, 0.28)",
+                    borderColor: GLASS_BORDER_HOVER.light,
                 },
                 _dark: {
-                    bg: "rgba(11, 14, 17, 0.52)",
-                    borderColor: "rgba(255, 255, 255, 0.14)",
-                    color: "rgba(255, 255, 255, 0.95)",
+                    bg: GLASS_BG.dark,
+                    borderColor: GLASS_BORDER.dark,
+                    color: GLASS_INK.dark.text,
                     _placeholder: {
-                        color: "rgba(255, 255, 255, 0.55)",
+                        color: GLASS_INK.dark.muted,
                     },
                     _hover: {
-                        borderColor: "rgba(255, 255, 255, 0.28)",
+                        borderColor: GLASS_BORDER_HOVER.dark,
                     },
                 },
                 _focus: {

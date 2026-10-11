@@ -3,6 +3,7 @@ import { LucideIcon } from "lucide-react";
 import Button from "components/ui/Button";
 import { getGlassInk } from "components/ui/GlassNav";
 import { GlassSurface } from "components/ui/GlassNav/GlassSurface";
+import { GLASS_ACTIVE_PILL } from "themeNew/foundations/glass";
 
 type Option<T extends string> = {
     value: T;
@@ -25,10 +26,9 @@ type MultiOptionButtonsProps<T extends string> = {
  */
 function MultiOptionButtons<T extends string>({ options, value, onChange, size = "xs" }: MultiOptionButtonsProps<T>) {
     const { colorMode } = useColorMode();
-    const isDark = colorMode === "dark";
     const ink = getGlassInk(colorMode);
 
-    const activeBg = isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(255, 255, 255, 0.95)";
+    const activeBg = GLASS_ACTIVE_PILL[colorMode];
 
     return (
         <GlassSurface

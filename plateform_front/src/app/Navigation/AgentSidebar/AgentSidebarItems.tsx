@@ -3,6 +3,7 @@ import { ChevronsLeft, ChevronsRight, LucideIcon } from "lucide-react";
 import React, { type ComponentType, useState } from "react";
 import { getGlassInk } from "components/ui/GlassNav";
 import type { AnimatedIconProps } from "components/ui/GlassNav/icons";
+import { GLASS_FOCUS_RING } from "themeNew/foundations/glass";
 
 interface AgentSidebarItemProps {
     icon: LucideIcon;
@@ -55,7 +56,7 @@ export const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({
             outline="none"
             transition="background 0.15s"
             _hover={{ bg: ink.pillBg }}
-            _focusVisible={{ boxShadow: "0 0 0 2px var(--chakra-colors-green-400)" }}
+            _focusVisible={{ boxShadow: GLASS_FOCUS_RING }}
         >
             {AnimatedIcon ? (
                 <Box color={active ? activeColor : ink.muted} display="flex" flexShrink={0}>
@@ -114,7 +115,7 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({ isOpen, ink, onC
             cursor="pointer"
             transition="color 0.15s"
             _hover={{ color: ink.text }}
-            _focusVisible={{ boxShadow: "0 0 0 2px var(--chakra-colors-green-400)" }}
+            _focusVisible={{ boxShadow: GLASS_FOCUS_RING }}
         >
             {isOpen ? <ChevronsLeft size={14} /> : <ChevronsRight size={14} />}
         </Box>

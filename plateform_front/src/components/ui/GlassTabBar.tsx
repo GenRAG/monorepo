@@ -2,6 +2,7 @@ import { type ComponentType, useId } from "react";
 import { Box, chakra, Text, Tooltip, useColorModeValue, useToken } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { GlassSurface, getGlassInk } from "components/ui/GlassNav";
+import { GLASS_FOCUS_RING } from "themeNew/foundations/glass";
 
 const MotionBox = motion(Box);
 const MotionButton = chakra(motion.button);
@@ -92,7 +93,7 @@ export const GlassTabBar = <T extends string = string>({
                                 bg="transparent"
                                 outline="none"
                                 transition="padding 0.15s ease"
-                                _focusVisible={{ boxShadow: "0 0 0 2px rgba(52, 211, 169, 0.85)" }}
+                                _focusVisible={{ boxShadow: GLASS_FOCUS_RING }}
                             >
                                 {isActive && (
                                     <MotionBox

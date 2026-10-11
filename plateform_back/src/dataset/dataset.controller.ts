@@ -15,10 +15,9 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { Dataset, UserRole } from 'generated/prisma';
+import { Dataset } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
-import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { DatasetService } from './dataset.service';
 import { DatasetBelongsToWorkspaceGuard } from './guard/dataset-workspace.guard';
 import { CreateDatasetRequest } from './dto/create-dataset.request';
@@ -28,12 +27,11 @@ import { DatasetAnalytics, DatasetListItem } from './dataset.types';
 import { ANALYTICS_PERIOD_DAYS } from 'src/agent-analytics/dto/analytics-period.query';
 
 @Controller('workspaces/:workspaceId/datasets')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, DatasetBelongsToWorkspaceGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard, DatasetBelongsToWorkspaceGuard)
 export class DatasetController {
     constructor(private readonly datasetService: DatasetService) {}
 
     @Post()
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     create(@Param('workspaceId') workspaceId: string, @Body() dto: CreateDatasetRequest): Promise<Dataset> {
         return this.datasetService.create(workspaceId, dto);
     }
@@ -62,7 +60,6 @@ export class DatasetController {
     }
 
     @Patch(':id')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     update(
         @Param('workspaceId') workspaceId: string,
         @Param('id') id: string,
@@ -72,14 +69,12 @@ export class DatasetController {
     }
 
     @Delete(':id')
-    @RolesInWorkspace(UserRole.ADMIN)
     @HttpCode(204)
     async delete(@Param('workspaceId') workspaceId: string, @Param('id') id: string): Promise<void> {
         await this.datasetService.delete(id, workspaceId);
     }
 
     @Post(':id/agents/:agentId')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     @HttpCode(204)
     @ApiOperation({ summary: 'Attach the dataset to an agent' })
     async attach(
@@ -91,7 +86,6 @@ export class DatasetController {
     }
 
     @Delete(':id/agents/:agentId')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     @HttpCode(204)
     @ApiOperation({ summary: 'Detach the dataset from an agent' })
     async detach(
@@ -103,7 +97,6 @@ export class DatasetController {
     }
 
     @Put(':id/agents')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     @HttpCode(204)
     @ApiOperation({ summary: 'Replace the set of agents using the dataset' })
     async setAgents(

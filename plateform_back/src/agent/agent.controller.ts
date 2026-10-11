@@ -3,22 +3,20 @@ import { AgentService } from './agent.service';
 import { CreateAgentRequest } from './dto/create-agent.request';
 import { UpdateAgentRequest } from './dto/update-agent.request';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
-import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
-import { Agent, UserRole } from 'generated/prisma';
+import { Agent } from 'generated/prisma';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 import { AgentListItem } from 'src/agent/agent.repository';
 
 @Controller('workspaces/:workspaceId/agents')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard, AgentBelongsToWorkspaceGuard)
 export class AgentController {
     constructor(private readonly agentService: AgentService) {}
 
     @Post()
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     create(
         @Param('workspaceId') workspaceId: string,
         @CurrentUser(CurrentUserPipe) user: UserSafe,
@@ -38,7 +36,6 @@ export class AgentController {
     }
 
     @Patch(':id')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     update(
         @Param('id') id: string,
         @Body() updateAgentRequest: UpdateAgentRequest,
@@ -48,7 +45,6 @@ export class AgentController {
     }
 
     @Delete(':id')
-    @RolesInWorkspace(UserRole.ADMIN)
     @HttpCode(204)
     async remove(@Param('id') id: string): Promise<void> {
         await this.agentService.remove(id);

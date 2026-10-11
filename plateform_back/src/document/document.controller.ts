@@ -13,11 +13,10 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { DatasetBelongsToWorkspaceGuard } from 'src/dataset/guard/dataset-workspace.guard';
-import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator';
-import { UserRole } from 'generated/prisma';
 import { DocumentService } from './document.service';
+import { matchesDeclaredType } from 'src/lib/file-signature.util';
 import { DocumentPaginationQuery } from './dto/document-pagination.query';
 import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 
@@ -36,12 +35,11 @@ const toArray = <T>(value?: T | T[]): T[] | undefined =>
     value === undefined ? undefined : Array.isArray(value) ? value : [value];
 
 @Controller('workspaces/:workspaceId/datasets/:datasetId/documents')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, DatasetBelongsToWorkspaceGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard, DatasetBelongsToWorkspaceGuard)
 export class DocumentController {
     constructor(private readonly documentService: DocumentService) {}
 
     @Post()
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE } }))
     @ApiOperation({ summary: 'Upload a document' })
     @ApiConsumes('multipart/form-data')
@@ -56,6 +54,9 @@ export class DocumentController {
         if (!file) throw new BadRequestException('Aucun fichier fourni');
         if (!file.buffer || file.buffer.length === 0) throw new BadRequestException('Le fichier est vide');
         if (!ALLOWED_MIME_TYPES.has(file.mimetype)) throw new BadRequestException('Type de fichier non supporté');
+        if (!matchesDeclaredType(file.buffer, file.mimetype)) {
+            throw new BadRequestException('Le contenu du fichier ne correspond pas à son type');
+        }
         return this.documentService.upload(file, datasetId);
     }
 
@@ -93,14 +94,12 @@ export class DocumentController {
     }
 
     @Post(':id/retry')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     @ApiOperation({ summary: 'Retry indexing a failed document' })
     retry(@Param('id') id: string, @Param('datasetId') datasetId: string) {
         return this.documentService.retry(id, datasetId);
     }
 
     @Delete(':id')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     @HttpCode(204)
     async delete(@Param('id') id: string, @Param('datasetId') datasetId: string): Promise<void> {
         await this.documentService.delete(id, datasetId);

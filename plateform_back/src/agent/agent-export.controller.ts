@@ -2,7 +2,7 @@ import { Controller, Get, Param, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { MessageSender } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -12,7 +12,7 @@ const FORMULA_TRIGGER = /^[=+\-@\t\r]/;
 const neutralizeFormula = (value: string) => (FORMULA_TRIGGER.test(value) ? `'${value}` : value);
 
 @Controller('workspaces/:workspaceId/agents')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard, AgentBelongsToWorkspaceGuard)
 export class AgentExportController {
     constructor(private readonly prisma: PrismaService) {}
 

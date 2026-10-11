@@ -1,10 +1,10 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreditBalanceService } from 'src/credit/credit-balance.service';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 
 @Controller('workspaces/:workspaceId/credit-balance')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard)
 export class CreditBalanceController {
     constructor(private readonly creditBalanceService: CreditBalanceService) {}
 

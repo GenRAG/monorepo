@@ -34,7 +34,7 @@ describe('Workspace (e2e)', () => {
 
             expect(res.body).toHaveProperty('id');
             expect(res.body.name).toBe('Mon Workspace');
-            expect(res.body.users[0].role).toBe('ADMIN');
+            expect(res.body.users[0].userId).toBeDefined();
         });
 
         it('should fail without auth', async () => {

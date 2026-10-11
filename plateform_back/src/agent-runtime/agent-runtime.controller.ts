@@ -15,12 +15,12 @@ import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AgentRuntimeService } from './agent-runtime.service';
 import { AgentQueryLogRepository } from './agent-query-log.repository';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 import { MAX_RUNTIME_QUERY_LENGTH } from 'src/agent-runtime/agent-runtime.types';
 
 @Controller('workspaces/:workspaceId/agents/:agentId/runtime')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard, AgentBelongsToWorkspaceGuard)
 export class AgentRuntimeController {
     constructor(
         private readonly agentRuntimeService: AgentRuntimeService,

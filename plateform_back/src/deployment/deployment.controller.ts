@@ -1,18 +1,16 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
-import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
-import { UserRole } from 'generated/prisma';
 import { DeploymentService } from './deployment.service';
 import { CreateDeploymentRequest } from './dto/create-deployment.request';
 import { RollbackDeploymentRequest } from './dto/rollback-deployment.request';
 
 @Controller('workspaces/:workspaceId/agents/:agentId/deployments')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard, AgentBelongsToWorkspaceGuard)
 export class DeploymentController {
     constructor(private readonly deploymentService: DeploymentService) {}
 
@@ -32,7 +30,6 @@ export class DeploymentController {
     }
 
     @Post()
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     deploy(
         @Param('agentId') agentId: string,
         @Param('workspaceId') workspaceId: string,
@@ -43,7 +40,6 @@ export class DeploymentController {
     }
 
     @Post('stop')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     stop(
         @Param('agentId') agentId: string,
         @Param('workspaceId') workspaceId: string,
@@ -53,7 +49,6 @@ export class DeploymentController {
     }
 
     @Post('rollback')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     rollback(
         @Param('agentId') agentId: string,
         @Param('workspaceId') workspaceId: string,

@@ -1,16 +1,14 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { CreateWorkflowRequest } from 'src/workflow/dto/create-workflow.request';
 import { UpdateWorkflowRequest } from 'src/workflow/dto/update-workflow.request';
 import { ActivateWorkflowRequest } from 'src/workflow/dto/activate-workflow.request';
 import { WorkflowService } from 'src/workflow/workflow.service';
-import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator';
-import { UserRole } from 'generated/prisma';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
 @Controller('workspaces/:workspaceId/agents/:agentId/workflow')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard, AgentBelongsToWorkspaceGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard, AgentBelongsToWorkspaceGuard)
 export class WorkflowController {
     constructor(private readonly workflowService: WorkflowService) {}
 
@@ -35,19 +33,16 @@ export class WorkflowController {
     }
 
     @Patch()
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     update(@Param('agentId') agentId: string, @Body() updateWorkflowRequest: UpdateWorkflowRequest) {
         return this.workflowService.update(agentId, updateWorkflowRequest);
     }
 
     @Patch('activate')
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     activate(@Param('agentId') agentId: string, @Body() body: ActivateWorkflowRequest) {
         return this.workflowService.activate(body.id, agentId);
     }
 
     @Post()
-    @RolesInWorkspace(UserRole.ADMIN, UserRole.EDITOR)
     deploy(@Param('agentId') agentId: string, @Body() createWorkflowRequest: CreateWorkflowRequest) {
         return this.workflowService.create(agentId, createWorkflowRequest);
     }

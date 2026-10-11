@@ -1,9 +1,3 @@
-export enum UserRole {
-    ADMIN = "ADMIN",
-    EDITOR = "EDITOR",
-    VIEWER = "VIEWER",
-}
-
 export interface Workspace {
     id: string;
     name: string;
@@ -13,7 +7,6 @@ export interface Workspace {
     users: {
         userId: string;
         workspaceId: string;
-        role: UserRole;
     }[];
 }
 

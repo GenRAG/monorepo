@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { linkNodes, makeFlowNode, withAutoSettings } from "../src/graph/create-flow-node";
-import { getAddableTaskTypes, getConfigInputs, getNonSettingsTaskTypes } from "../src/graph/task-utils";
+import { getAddableTaskTypes, getConfigInputs, getNonSettingsTaskTypes, isSettingsTaskType } from "../src/graph/task-utils";
+import { SETTING_KINDS } from "../src/graph/setting-kinds";
+import type { AppNodeData } from "../src/types/app-node";
 import { TaskParamType, TaskType } from "../src/types/task";
 import { settingNodesOf } from "./fixtures";
 
@@ -90,5 +92,20 @@ describe("withAutoSettings", () => {
 
         assert.equal(second.nodes.length, first.nodes.length);
         assert.equal(second.edges.length, first.edges.length);
+    });
+});
+
+describe("setting kinds", () => {
+    it("reads back what it writes, for each setting type", () => {
+        for (const type of [TaskType.MODEL, TaskType.INSTRUCTION, TaskType.DATASET]) {
+            const kind = SETTING_KINDS[type]!;
+            const data = { type, inputs: {}, outputs: [] } as AppNodeData;
+            assert.equal(kind.read({ ...data, ...kind.write(data, "value") }), "value");
+        }
+    });
+
+    it("recognizes setting task types from the table", () => {
+        assert.equal(isSettingsTaskType(TaskType.DATASET), true);
+        assert.equal(isSettingsTaskType(TaskType.RETRIEVER), false);
     });
 });

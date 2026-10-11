@@ -9,15 +9,15 @@ import {
     CreateFlowNode,
     createMultipleSettingNode,
     createSettingPlaceholders,
-    DATASET_ID_INPUT,
     linkNodes,
 } from "../graph/create-flow-node";
-import { TaskType, TaskParamType, type WorkflowRegistry, TaskChainOutput } from "../types/task";
+import { TaskType, type WorkflowRegistry, TaskChainOutput } from "../types/task";
 import { EdgeType, HandleId } from "../types/edge";
 import { TaskRegistry } from "../graph/task/registry";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 import { getConfigInputs } from "../graph/task-utils";
+import { SETTING_KINDS } from "../graph/setting-kinds";
 
 export interface UseWorkflowNodesOptions {
     initialNodes?: AppNode[];
@@ -63,12 +63,7 @@ export const useWorkflowNodes = (
             setNodes((prev: AppNode[]) =>
                 prev.map((n) => {
                     if (n.id !== nodeId) return n;
-                    const fieldUpdate =
-                        n.data.type === TaskType.DATASET
-                            ? { inputs: { ...n.data.inputs, [DATASET_ID_INPUT]: item } }
-                            : n.data.inputType === TaskParamType.STRING
-                              ? { stringValue: item, isEditing: false }
-                              : { modelName: item };
+                    const fieldUpdate = SETTING_KINDS[n.data.type]?.write(n.data, item);
                     return {
                         ...n,
                         data: {

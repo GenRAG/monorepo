@@ -4,7 +4,7 @@ import { TaskType } from "../types/task";
 import { EdgeType, HandleId } from "../types/edge";
 import type { PipelineBlock, WorkflowDefinition } from "../types/pipeline";
 import { isSettingsTaskType } from "../graph/task-utils";
-import { DATASET_ID_INPUT } from "../graph/create-flow-node";
+import { SETTING_KINDS } from "../graph/setting-kinds";
 
 // Placeholder MODEL settings fall back to these models (the builder warns before saving an incomplete workflow).
 const DEFAULT_MODELS = { rewrite: 'gpt-4o', rerank: 'bge', answer: 'gpt-4o' } as const;
@@ -32,12 +32,13 @@ function buildSettingsMap(nodes: AppNode[], edges: Edge[]): Map<string, NodeSett
             const settingsNode = nodeMap.get(e.target);
             if (!settingsNode) return;
             const current = settingsMap.get(e.source) ?? {};
+            const value = SETTING_KINDS[settingsNode.data.type]?.read(settingsNode.data);
             if (settingsNode.data.type === TaskType.MODEL) {
-                settingsMap.set(e.source, { ...current, model: settingsNode.data.modelName as string | undefined });
+                settingsMap.set(e.source, { ...current, model: value });
             } else if (settingsNode.data.type === TaskType.INSTRUCTION) {
-                settingsMap.set(e.source, { ...current, instruction: settingsNode.data.stringValue as string | undefined });
+                settingsMap.set(e.source, { ...current, instruction: value });
             } else if (settingsNode.data.type === TaskType.DATASET) {
-                const datasetId = settingsNode.data.inputs?.[DATASET_ID_INPUT];
+                const datasetId = value;
                 if (!datasetId || current.datasetIds?.includes(datasetId)) return;
                 settingsMap.set(e.source, { ...current, datasetIds: [...(current.datasetIds ?? []), datasetId] });
             }

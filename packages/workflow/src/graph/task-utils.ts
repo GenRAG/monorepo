@@ -1,4 +1,5 @@
 import { TaskType, type TaskParam, type TaskSpec, type TaskSpecRegistry } from "../types/task";
+import { SETTING_KINDS } from "./setting-kinds";
 import { TASK_SPECS } from "./task-specs";
 
 // Every helper takes the registry to read (default: TASK_SPECS). A UI registry (`TaskRegistry` or a custom one)
@@ -11,8 +12,7 @@ export function getTaskSpec<R extends TaskSpecRegistry = TaskSpecRegistry>(
     return registry[type as TaskType];
 }
 
-export const isSettingsTaskType = (type: TaskType) =>
-    type === TaskType.MODEL || type === TaskType.INSTRUCTION || type === TaskType.DATASET;
+export const isSettingsTaskType = (type: TaskType) => type in SETTING_KINDS;
 
 export function getNonSettingsTaskTypes(registry: TaskSpecRegistry = TASK_SPECS): TaskType[] {
     return (Object.keys(registry) as TaskType[]).filter((t) => !isSettingsTaskType(t));

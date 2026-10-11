@@ -4,6 +4,7 @@ import type { AppNode } from "../types/app-node";
 import { TaskType, type TaskParam, type TaskSpecRegistry } from "../types/task";
 import { EdgeType, HandleId, settingSourceHandle } from "../types/edge";
 import { getAutoSettingInputs, getConfigInputs } from "./task-utils";
+import { SETTING_KINDS } from "./setting-kinds";
 import { TASK_SPECS } from "./task-specs";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 
@@ -44,8 +45,7 @@ export function linkNodes(sourceNode: string, targetNode: string) {
     };
 }
 
-/** Input key holding the dataset id of a DATASET setting node. */
-export const DATASET_ID_INPUT = "datasetId";
+export { DATASET_ID_INPUT } from "./setting-kinds";
 
 /** The setting node of `input`, next to its parent; `value` fills it, otherwise it is a placeholder. */
 function makeSettingNode(parent: AppNode, input: TaskParam, position: Position, value?: string): AppNode {
@@ -59,10 +59,8 @@ function makeSettingNode(parent: AppNode, input: TaskParam, position: Position, 
         inputType: input.type,
         parentNodeId: parent.id,
     };
-    if (value !== undefined && input.nodeType === TaskType.DATASET) {
-        data.inputs = { [DATASET_ID_INPUT]: value };
-    } else if (value !== undefined) {
-        Object.assign(data, { firstTime: false, isEditing: false, modelName: value, stringValue: value });
+    if (value !== undefined) {
+        Object.assign(data, { firstTime: false }, SETTING_KINDS[input.nodeType]?.write(data, value));
     }
     return { id: uuidv4(), type: WORKFLOW_NODE_TYPE, dragHandle: ".drag-handle", data, deletable: true, position };
 }

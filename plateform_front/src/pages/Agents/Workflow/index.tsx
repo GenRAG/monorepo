@@ -1,14 +1,11 @@
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useColorMode, VStack, Box, useDisclosure, useToken, Center, Text } from "@chakra-ui/react";
-import { ReactFlow, Background, BackgroundVariant, MiniMap, ReactFlowProvider } from "@xyflow/react";
+import { ReactFlow, Background, BackgroundVariant, ReactFlowProvider } from "@xyflow/react";
 import {
     useNodeSelection,
     useWorkflowCanvas,
     DatasetCatalogProvider,
-    type DatasetCatalogEntry,
     sanitizeWorkflowEdges,
-    serializeWorkflow,
-    TaskType,
     type AppNode,
     type WorkflowDefinition,
 } from "@genrag/workflow";
@@ -19,19 +16,13 @@ import CustomControls from "pages/Agents/Workflow/CustomControls";
 import { applyAlphaToColor } from "components/ui/workflow-preview/WorkflowPreview";
 import { GenragLoader } from "components/ui/GenragLoader";
 import { useParams } from "react-router-dom";
-import {
-    useGetActiveWorkflowQuery,
-    useUpdateWorkflowMutation,
-    useCreateWorkflowMutation,
-} from "services/workflow/workflow";
+import { useGetActiveWorkflowQuery } from "services/workflow/workflow";
 import { useGetModelsGenerationQuery } from "services/models/models";
-import { useAgentDatasets } from "hooks/dataset/useAgentDatasets";
+import { useAgentDatasetCatalog } from "hooks/dataset/useAgentDatasetCatalog";
 import useThemedToast from "hooks/useThemedToast";
-import { useIncompleteNodesGuard } from "hooks/useIncompleteNodesGuard";
 import { useUnsavedChangesBlocker } from "hooks/useUnsavedChangesBlocker";
-import { WorkflowDirtyProvider } from "components/Agents/Workflow/WorkflowDirtyContext";
-import mixpanel from "lib/mixpanel";
-import { currentDarkTheme } from "themeNew/foundations/themeConfig";
+import { useSaveWorkflow } from "hooks/workflow/useSaveWorkflow";
+import { WorkflowMiniMap } from "pages/Agents/Workflow/WorkflowMiniMap";
 
 interface WorkflowInnerProps {
     initialNodes?: AppNode[];
@@ -41,9 +32,11 @@ interface WorkflowInnerProps {
     agentId: string;
 }
 
+const SNAP_GRID: [number, number] = [50, 50];
+const FIT_VIEW_OPTIONS = { padding: 0.1, minZoom: 0.5, maxZoom: 1 };
+
 const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId, agentId }: WorkflowInnerProps) => {
     const { colorMode } = useColorMode();
-    const reactFlowContainerRef = useRef<HTMLDivElement>(null);
     const toast = useThemedToast();
 
     useGetModelsGenerationQuery();
@@ -83,161 +76,71 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
         initialEdges,
     });
 
-    const { checkIncompleteNodes } = useIncompleteNodesGuard();
-    const [updateWorkflow, { isLoading: isUpdating }] = useUpdateWorkflowMutation();
-    const [createWorkflow, { isLoading: isCreating }] = useCreateWorkflowMutation();
-    const isSaving = isUpdating || isCreating;
+    const { save, isSaving } = useSaveWorkflow({
+        workspaceId,
+        agentId,
+        workflowExists,
+        onSaved: () => setIsDirty(false),
+    });
 
-    const handleSave = async () => {
-        if (!checkIncompleteNodes(nodes)) return;
-
-        const definition: WorkflowDefinition = serializeWorkflow(nodes, edges);
-        const params = { workspaceId, agentId, definition };
-
-        try {
-            if (workflowExists) {
-                await updateWorkflow(params).unwrap();
-            } else {
-                await createWorkflow(params).unwrap();
-            }
-            mixpanel.track("workflow_saved", { agent_id: agentId });
-            setIsDirty(false);
-            toast({
-                title: "Workflow enregistré",
-                description: "Votre workflow d'execution a été enregistré avec succès.",
-                status: "success",
-                duration: 2000,
-                isClosable: true,
-            });
-        } catch {
-            toast({
-                title: "Erreur lors de l'enregistrement",
-                description: "Une erreur est survenue lors de l'enregistrement de votre workflow.",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-            });
-        }
-    };
-
-    const handleSettingSelectWithDirty = useCallback(
-        (nodeId: string, item: string) => {
-            handleSettingSelect(nodeId, item);
+    const withDirty =
+        <A extends unknown[]>(fn: (...args: A) => void) =>
+        (...args: A) => {
+            fn(...args);
             markDirty();
-        },
-        [handleSettingSelect, markDirty],
-    );
-
-    const handleAddSettingNodeWithDirty = useCallback(
-        (parentId: string, inputName: string, value: string) => {
-            handleAddSettingNode(parentId, inputName, value);
-            markDirty();
-        },
-        [handleAddSettingNode, markDirty],
-    );
-
-    const handleRemoveSettingNodeWithDirty = useCallback(
-        (nodeId: string) => {
-            handleRemoveSettingNode(nodeId);
-            markDirty();
-        },
-        [handleRemoveSettingNode, markDirty],
-    );
-
-    const handleAddChainNodeWithDirty = useCallback(
-        (nodeType: Parameters<typeof handleAddChainNode>[0]) => {
-            handleAddChainNode(nodeType);
-            markDirty();
-        },
-        [handleAddChainNode, markDirty],
-    );
+        };
 
     useUnsavedChangesBlocker(isDirty);
 
     const [gridLineLight, gridLineDark] = useToken("colors", ["grey.200", "grey.800"]);
     const lineColor = applyAlphaToColor(colorMode === "dark" ? gridLineDark : gridLineLight, 0.8);
 
-    const snapGrid: [number, number] = [50, 50];
-    const fitViewOptions = { padding: 0.1, minZoom: 0.5, maxZoom: 1 };
-
     return (
-        <Box ref={reactFlowContainerRef} flex={1} position="relative" overflow="hidden" display="flex">
+        <Box flex={1} position="relative" overflow="hidden" display="flex">
             <MenuNodeModal
                 usedNodes={nodes}
                 isOpen={isMenuOpen}
-                addNode={handleAddChainNodeWithDirty}
+                addNode={withDirty(handleAddChainNode)}
                 onClose={onMenuClose}
                 onToggle={isMenuOpen ? onMenuClose : onMenuOpen}
             />
 
             <Box flex={1} position="relative">
                 <ReactFlow
-                    colorMode={colorMode === "dark" ? "light" : "light"}
+                    colorMode="light"
                     nodes={nodes}
                     edges={edges}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
-                    snapGrid={snapGrid}
-                    fitViewOptions={fitViewOptions}
+                    snapGrid={SNAP_GRID}
+                    fitViewOptions={FIT_VIEW_OPTIONS}
                     fitView
                     onDragOver={onDragOver}
                 >
-                    <MiniMap<AppNode>
-                        position="bottom-left"
-                        nodeBorderRadius={12}
-                        nodeStrokeWidth={6}
-                        nodeColor={(node) => {
-                            if (node.data.isPlaceholder) return "transparent";
-                            switch (node.data.type) {
-                                case TaskType.QUERY:
-                                    return currentDarkTheme.hex.primary;
-                                case TaskType.RESPONSE:
-                                    return currentDarkTheme.hex.primary;
-                                case TaskType.INSTRUCTION:
-                                    return "#8b5cf6";
-                                case TaskType.MODEL:
-                                    return "#8b5cf6";
-                                default:
-                                    return currentDarkTheme.hex.primary;
-                            }
-                        }}
-                        nodeStrokeColor={(node) => {
-                            if (node.data.isPlaceholder) return "transparent";
-                            return node.data.type === TaskType.MODEL ? "#8b5cf6" : currentDarkTheme.hex.primary;
-                        }}
-                        maskColor={colorMode === "dark" ? "rgba(74, 74, 75, 0)" : "rgba(240, 253, 250, 0)"}
-                        style={{
-                            background: colorMode === "dark" ? "rgba(74, 74, 75, 0)" : "#f0fdf450",
-                            border: `1px solid ${colorMode === "dark" ? "#353535" : currentDarkTheme.hex.primary}`,
-                            borderRadius: "12px",
-                            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-                        }}
-                    />
+                    <WorkflowMiniMap isDark={colorMode === "dark"} />
                     <Background variant={BackgroundVariant.Lines} color={lineColor} gap={36} />
                     <CustomControls
                         onMenuToggle={isMenuOpen ? onMenuClose : onMenuOpen}
-                        onSave={handleSave}
+                        onSave={() => save(nodes, edges)}
                         isSaving={isSaving}
                     />
                 </ReactFlow>
             </Box>
 
-            <WorkflowDirtyProvider value={markDirty}>
-                <NodeModal
-                    task={task}
-                    nodeData={nodeData}
-                    isOpen={isModalOpen}
-                    onClose={handleModalClose}
-                    selectedNodeId={selectedNodeId}
-                    onSettingSelect={handleSettingSelectWithDirty}
-                    onAddSettingNode={handleAddSettingNodeWithDirty}
-                    onRemoveSettingNode={handleRemoveSettingNodeWithDirty}
-                    workspaceId={workspaceId}
-                    agentId={agentId}
-                />
-            </WorkflowDirtyProvider>
+            <NodeModal
+                task={task}
+                nodeData={nodeData}
+                isOpen={isModalOpen}
+                onClose={handleModalClose}
+                selectedNodeId={selectedNodeId}
+                onSettingSelect={withDirty(handleSettingSelect)}
+                onAddSettingNode={withDirty(handleAddSettingNode)}
+                onRemoveSettingNode={withDirty(handleRemoveSettingNode)}
+                workspaceId={workspaceId}
+                agentId={agentId}
+            />
         </Box>
     );
 };
@@ -257,14 +160,7 @@ const WorkflowWorkspace = () => {
     const is404 = typeof error === "object" && error !== null && "status" in error && error.status === 404;
 
     // DATASET nodes show the name of their dataset; one missing from the agent is displayed as an error.
-    const { attached, isLoading: isDatasetsLoading } = useAgentDatasets(workspaceId!, agentId!);
-    const datasetCatalog = useMemo<Record<string, DatasetCatalogEntry> | null>(
-        () =>
-            isDatasetsLoading
-                ? null
-                : Object.fromEntries(attached.map((d) => [d.id, { name: d.name, documentsCount: d.documentsCount }])),
-        [attached, isDatasetsLoading],
-    );
+    const datasetCatalog = useAgentDatasetCatalog(workspaceId!, agentId!);
 
     // Legacy workflows may have a `definition` that doesn't (yet) match the current WorkflowDefinition shape.
     const canvas = workflow?.definition as Partial<WorkflowDefinition> | undefined;

@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from "react";
 import { HStack, Skeleton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
-import { useGetModelsGenerationQuery, useGetModelsRerankQuery } from "services/models/models";
+import type { TaskType } from "@genrag/workflow";
+import { useModelsFor } from "hooks/models/useModelsFor";
 import { RagModel } from "types/models/models";
 import { ModelListPanel } from "./ModelListPanel";
 import { ModelDetailPanel } from "./ModelDetailPanel";
@@ -8,12 +9,12 @@ import { ModelDetailPanelSkeleton } from "./ModelDetailHelpers";
 
 interface Props {
     onSelect: (modelId: string) => void;
-    fetchModels: () => ReturnType<typeof useGetModelsGenerationQuery | typeof useGetModelsRerankQuery>;
+    ownerType?: TaskType;
     currentModelId?: string;
 }
 
-export const ModelSelectorContent: React.FC<Props> = memo(({ onSelect, fetchModels, currentModelId }: Props) => {
-    const { data: models = [], isLoading, isError } = fetchModels();
+export const ModelSelectorContent: React.FC<Props> = memo(({ onSelect, ownerType, currentModelId }: Props) => {
+    const { data: models = [], isLoading, isError } = useModelsFor(ownerType);
     const [selectedModel, setSelectedModel] = useState<RagModel | null>(null);
     const subColor = useColorModeValue("grey.500", "grey.400");
 

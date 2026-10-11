@@ -7,15 +7,17 @@ import {
 } from "@xyflow/react";
 import {
     CreateFlowNode,
+    createMultipleSettingNode,
     createSettingPlaceholders,
     linkNodes,
 } from "../graph/create-flow-node";
-import { TaskType, TaskParamType, type WorkflowRegistry, TaskChainOutput } from "../types/task";
+import { TaskType, type WorkflowRegistry, TaskChainOutput } from "../types/task";
 import { EdgeType, HandleId } from "../types/edge";
 import { TaskRegistry } from "../graph/task/registry";
 import { AppNode } from "../types/app-node";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
 import { getConfigInputs } from "../graph/task-utils";
+import { SETTING_KINDS } from "../graph/setting-kinds";
 
 export interface UseWorkflowNodesOptions {
     initialNodes?: AppNode[];
@@ -61,10 +63,7 @@ export const useWorkflowNodes = (
             setNodes((prev: AppNode[]) =>
                 prev.map((n) => {
                     if (n.id !== nodeId) return n;
-                    const fieldUpdate =
-                        n.data.inputType === TaskParamType.STRING
-                            ? { stringValue: item, isEditing: false }
-                            : { modelName: item };
+                    const fieldUpdate = SETTING_KINDS[n.data.type]?.write(n.data, item);
                     return {
                         ...n,
                         data: {
@@ -78,6 +77,35 @@ export const useWorkflowNodes = (
             );
         },
         [setNodes, readonlyMode],
+    );
+
+    /** Adds a setting node with `value` on a `multiple` input of `parentId` (e.g. a DATASET of the RETRIEVER). */
+    const handleAddSettingNode = useCallback(
+        (parentId: string, inputName: string, value: string) => {
+            if (readonlyMode) return;
+            const parent = nodesRef.current.find((n) => n.id === parentId);
+            const input = parent && getConfigInputs(parent.data.type, registry).find((i) => i.name === inputName);
+            if (!parent || !input?.multiple) return;
+
+            const existingCount = edgesRef.current.filter(
+                (e) => e.source === parentId && e.type === EdgeType.Settings,
+            ).length;
+            const { node, edge } = createMultipleSettingNode(parent, input, value, existingCount, layout);
+
+            setNodes((prev) => [...prev, node]);
+            setEdges((prev) => [...prev, edge]);
+        },
+        [setNodes, setEdges, readonlyMode, layout, registry],
+    );
+
+    /** Removes a setting node and its settings edge (only meaningful for `multiple` inputs). */
+    const handleRemoveSettingNode = useCallback(
+        (nodeId: string) => {
+            if (readonlyMode) return;
+            setNodes((prev) => prev.filter((n) => n.id !== nodeId));
+            setEdges((prev) => prev.filter((e) => e.target !== nodeId));
+        },
+        [setNodes, setEdges, readonlyMode],
     );
 
     const handleRemoveChainNode = useCallback(
@@ -206,6 +234,8 @@ export const useWorkflowNodes = (
         onEdgesChange,
         onDragOver,
         handleSettingSelect,
+        handleAddSettingNode,
+        handleRemoveSettingNode,
         handleAddChainNode,
         handleRemoveChainNode,
     };

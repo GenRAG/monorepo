@@ -22,7 +22,7 @@ export async function seedExtraWorkspace(app: INestApplication, userEmail: strin
     const user = await prisma.user.findUniqueOrThrow({ where: { email: userEmail } });
 
     const workspace = await prisma.workspace.create({
-        data: { name, users: { create: { userId: user.id, role: 'ADMIN' } } },
+        data: { name, users: { create: { userId: user.id } } },
     });
 
     return workspace.id;

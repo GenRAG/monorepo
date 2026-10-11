@@ -18,8 +18,8 @@ interface PreviewDrawerProps {
 }
 
 export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, document }) => {
-    const { workspaceId, agentId } = useParams();
-    const shouldFetchUrl = Boolean(document && workspaceId && agentId && isOpen);
+    const { workspaceId, datasetId } = useParams();
+    const shouldFetchUrl = Boolean(document && workspaceId && datasetId && isOpen);
 
     const {
         data: documentUrl,
@@ -28,7 +28,7 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, d
     } = useGetDocumentUrlQuery(
         {
             workspaceId: workspaceId ?? "",
-            agentId: agentId ?? "",
+            datasetId: datasetId ?? "",
             id: document?.id ?? "",
         },
         { skip: !shouldFetchUrl },
@@ -58,7 +58,11 @@ export const PreviewDrawer: React.FC<PreviewDrawerProps> = ({ isOpen, onClose, d
                         <DocumentInfoGrid document={document} />
                         <KnowledgeBaseStatus document={document} />
                         <DocumentPreview
-                            document={{ id: document.id, name: document.name, mimeType: document.mimeType }}
+                            document={{
+                                id: document.id,
+                                name: document.name,
+                                mimeType: document.mimeType,
+                            }}
                             previewUrl={previewUrl}
                             isLoading={isDocumentUrlLoading}
                             isError={isDocumentUrlError}

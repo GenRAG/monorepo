@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { Box, BoxProps, useToken } from "@chakra-ui/react";
+import { GLASS_BG, GLASS_BORDER } from "themeNew/foundations/glass";
 import { hexToRgba } from "./utils";
 
 export type GlassVariant = "dark" | "light";
@@ -27,6 +28,8 @@ export interface GlassSurfaceProps extends BoxProps {
     withBorder?: boolean;
     /** Affiche l'ombre portée + le bevel inset du panneau (défaut: true). */
     withBoxShadow?: boolean;
+    /** Affiche le reflet diagonal (défaut: true). À couper sur les panneaux de page où il se lit comme une zone blanche. */
+    withSheen?: boolean;
 }
 
 /**
@@ -62,16 +65,17 @@ export const GlassSurface = forwardRef<HTMLDivElement, GlassSurfaceProps>(
             tint,
             withBorder = true,
             withBoxShadow = true,
+            withSheen = true,
             children,
             ...rest
         },
         ref,
     ) => {
-        const [darkBase, lightBase, tintBase] = useToken("colors", ["grey.975", "grey.100", tint ?? "grey.975"]);
+        const [tintBase] = useToken("colors", [tint ?? "grey.975"]);
 
         const isDark = tint ? true : variant === "dark";
-        const bg = tint ? hexToRgba(tintBase, 0.4) : isDark ? hexToRgba(darkBase, 0.52) : hexToRgba(lightBase, 0.62);
-        const borderColor = isDark ? "rgba(255, 255, 255, 0.14)" : "rgba(15, 23, 42, 0.16)";
+        const bg = tint ? hexToRgba(tintBase, 0.4) : GLASS_BG[isDark ? "dark" : "light"];
+        const borderColor = GLASS_BORDER[isDark ? "dark" : "light"];
         // Highlight en haut (la lumière "accroche" le bord supérieur du verre) + ombre discrète en
         // bas (épaisseur) + ombre portée douce vers l'extérieur (le panneau flotte au-dessus du fond).
         const boxShadow = isDark
@@ -100,14 +104,16 @@ export const GlassSurface = forwardRef<HTMLDivElement, GlassSurfaceProps>(
                     // Le reflet diagonal : généré en `::before` (peint avant les vrais enfants, donc
                     // dessous) plutôt que via un enfant Box, pour ne jamais intercepter les clics —
                     // `pointerEvents: none` en double sécurité.
-                    "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        inset: 0,
-                        borderRadius: "inherit",
-                        pointerEvents: "none",
-                        background: sheen,
-                    },
+                    "&::before": withSheen
+                        ? {
+                              content: '""',
+                              position: "absolute",
+                              inset: 0,
+                              borderRadius: "inherit",
+                              pointerEvents: "none",
+                              background: sheen,
+                          }
+                        : undefined,
                 }}
                 {...rest}
             >

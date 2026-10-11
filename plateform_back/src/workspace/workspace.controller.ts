@@ -10,11 +10,10 @@ import {
     ParseIntPipe,
     UseGuards,
 } from '@nestjs/common';
-import { UserRole, Workspace } from 'generated/prisma';
+import { Workspace } from 'generated/prisma';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
-import { RolesInWorkspace } from 'src/workspace/roles/roles-workspace.decorator';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { UserSafe } from 'src/users/dto/create-user.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { CreateWorkspaceRequest } from 'src/workspace/dto/create-workspace.request';
@@ -41,19 +40,19 @@ export class WorkspaceController {
     }
 
     @Get(':id')
-    @UseGuards(WorkspaceRolesGuard)
+    @UseGuards(WorkspaceMemberGuard)
     getWorkspaceById(@Param('id') workspaceId: string): Promise<WorkspacePayload> {
         return this.workspaceService.findOne(workspaceId);
     }
 
     @Get(':id/stats')
-    @UseGuards(WorkspaceRolesGuard)
+    @UseGuards(WorkspaceMemberGuard)
     getWorkspaceStats(@Param('id') workspaceId: string) {
         return this.workspaceService.getStats(workspaceId);
     }
 
     @Get(':id/consumption')
-    @UseGuards(WorkspaceRolesGuard)
+    @UseGuards(WorkspaceMemberGuard)
     getWorkspaceConsumption(
         @Param('id') workspaceId: string,
         @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
@@ -62,8 +61,7 @@ export class WorkspaceController {
     }
 
     @Patch(':id')
-    @UseGuards(WorkspaceRolesGuard)
-    @RolesInWorkspace(UserRole.ADMIN)
+    @UseGuards(WorkspaceMemberGuard)
     renameWorkspace(@Param('id') workspaceId: string, @Body() dto: UpdateWorkspaceRequest): Promise<Workspace> {
         return this.workspaceService.rename(workspaceId, dto);
     }

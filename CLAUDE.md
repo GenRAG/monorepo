@@ -15,7 +15,7 @@ Ce fichier décrit l'organisation du monorepo. **Les conventions détaillées so
 | `plateform_front/` | App web de la plateforme : dashboard, agents, builder de workflow, documents, déploiement, billing, et interface de l'assistant pour l'utilisateur final. | React 19, CRA + craco, Chakra UI 2, RTK Query | `plateform_front/CLAUDE.md` |
 | `plateform_back/` | API de la plateforme : auth, workspaces, agents, workflows, documents (S3 + queue d'indexation), runtime RAG en SSE, crédits, analytics. Appelle l'API RAG externe. | NestJS 11, Prisma 6 / PostgreSQL, BullMQ / Redis | `plateform_back/CLAUDE.md` (modèle de données, flux, env) |
 | `packages/workflow/` | Package `@genrag/workflow` : builder de workflow ReactFlow (nodes, edges, registre des tâches, layouts, sérialisation vers le format `blocks`). Consommé par `plateform_front`. | React, `@xyflow/react`, Chakra UI | `packages/workflow/CLAUDE.md` |
-| `vitrine_front/` | Site vitrine (landing page) statique, avec des démos animées de l'app. Aucune dépendance au back ni au package. `_archive/` = ancien site Next.js. | Vite, React 19, CSS Modules, GSAP | `vitrine_front/CLAUDE.md` |
+| `vitrine_front/` | Site vitrine (landing page) statique, avec des démos animées de l'app. Aucune dépendance au back ni au package (c'est `plateform_front` qui importe ses démos animées via l'alias `@vitrine`). `_archive/` = ancien site Next.js. | Vite, React 19, CSS Modules, GSAP | `vitrine_front/CLAUDE.md` |
 | `rag-engine/` | Copie versionnée du moteur RAG externe (API Python) pour le dev local. Hors périmètre de la plateforme. | Python (uv) | `rag-engine/CLAUDE.md` |
 | `RAG-GenRag/` | Clone local **non versionné** du dépôt `GenRAG/RAG-GenRag` (version plus récente du moteur, avec `worker/`). Ne pas le committer ; à ignorer ou passer en sous-module. | Python | `RAG-GenRag/CLAUDE.md` |
 | `architecture/` | Diagrammes Mermaid : `backend.mmd`, `document-flow.mmd`, `agent-runtime-flow.mmd`, `agent-runtime-architecture-proposal.mmd`. | Mermaid | — |
@@ -59,7 +59,7 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 |---|---|---|---|---|
 | Authentification | Inscription, connexion, reset, JWT en cookie | `pages/Auth`, `app/AuthContext.tsx` | `auth/` | `services/auth/auth.ts` |
 | Onboarding | Setup guidé en 3 étapes | `pages/Onboarding` | `onboarding/` | `services/onboarding/onboarding.ts` |
-| Workspaces | Multi-tenant, un seul par utilisateur (présenté comme « l'entreprise »), rôles ADMIN / EDITOR / VIEWER | `app/WorkspaceGuard.tsx`, `app/Navigation/` | `workspace/` | `services/workspace/workspace.ts` |
+| Workspaces | Multi-tenant, un seul par utilisateur (présenté comme « l'entreprise »), pas de rôles ni de collaboration | `app/WorkspaceGuard.tsx`, `app/Navigation/` | `workspace/` | `services/workspace/workspace.ts` |
 | Agents | CRUD, export et partage d'agents | `pages/Agents`, `components/Agents` | `agent/` | `services/agent/agent.ts`, `agentMembers.ts` |
 | Workflow builder | Pipeline RAG drag-and-drop, aperçus animés des blocs | `pages/Agents/Workflow`, `components/Agents/Workflow` | `workflow/` | `services/workflow/workflow.ts`, `services/models/models.ts` |
 | Documents | Import, indexation asynchrone, statuts | `components/Document` | `document/`, `storage/` | `services/document/document.ts` |

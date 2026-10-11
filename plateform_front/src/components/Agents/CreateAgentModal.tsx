@@ -7,6 +7,7 @@ import { useCreateAgentMutation } from "services/agent/agent";
 import useThemedToast from "hooks/useThemedToast";
 import { makeFlowNode, linkNodes, withAutoSettings, serializeWorkflow, TaskType } from "@genrag/workflow";
 import mixpanel from "lib/mixpanel";
+import { BLANK_WORKFLOW } from "constants/agent/blankWorkflow";
 
 const { nodes: _faqNodes, edges: _faqEdges } = withAutoSettings(
     [
@@ -17,15 +18,6 @@ const { nodes: _faqNodes, edges: _faqEdges } = withAutoSettings(
         makeFlowNode("s", TaskType.RESPONSE, 360, 550),
     ],
     [linkNodes("q", "w"), linkNodes("w", "r"), linkNodes("r", "k"), linkNodes("k", "s")],
-);
-
-const { nodes: BLANK_NODES, edges: BLANK_EDGES } = withAutoSettings(
-    [
-        makeFlowNode("q", TaskType.QUERY, 0, -50),
-        makeFlowNode("r", TaskType.RETRIEVER, 50, 180),
-        makeFlowNode("s", TaskType.RESPONSE, 520, 240),
-    ],
-    [linkNodes("q", "r"), linkNodes("r", "s")],
 );
 
 const TEMPLATES: Template[] = [
@@ -56,8 +48,8 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
     const handleCreate = useCallback(
         async (name: string, description: string) => {
             try {
-                const nodes = selectedTemplate?.nodes ?? BLANK_NODES;
-                const edges = selectedTemplate?.edges ?? BLANK_EDGES;
+                const nodes = selectedTemplate?.nodes ?? BLANK_WORKFLOW.nodes;
+                const edges = selectedTemplate?.edges ?? BLANK_WORKFLOW.edges;
 
                 const agent = await createAgent({
                     workspaceId,

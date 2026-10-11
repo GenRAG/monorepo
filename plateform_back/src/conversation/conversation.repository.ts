@@ -92,7 +92,7 @@ export class ConversationRepository {
     }
 
     findDocumentByAgentAndName(agentId: string, name: string) {
-        return this.prisma.document.findFirst({ where: { agentId, name } });
+        return this.prisma.document.findFirst({ where: { name, dataset: { agents: { some: { agentId } } } } });
     }
 
     updateTimestamp(id: string) {

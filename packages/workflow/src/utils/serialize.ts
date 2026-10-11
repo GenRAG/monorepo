@@ -4,19 +4,20 @@ import { TaskType } from "../types/task";
 import { EdgeType, HandleId } from "../types/edge";
 import type { PipelineBlock, WorkflowDefinition } from "../types/pipeline";
 import { isSettingsTaskType } from "../graph/task-utils";
+import { SETTING_KINDS } from "../graph/setting-kinds";
 
 // Placeholder MODEL settings fall back to these models (the builder warns before saving an incomplete workflow).
 const DEFAULT_MODELS = { rewrite: 'gpt-4o', rerank: 'bge', answer: 'gpt-4o' } as const;
 const COLLECTION_NAME = 'genrag_knowledge_base';
 const DEFAULT_TOP_K = 5;
 
-type NodeSettings = { model?: string; instruction?: string };
+type NodeSettings = { model?: string; instruction?: string; datasetIds?: string[] };
 type BlockFactory = (s: NodeSettings) => PipelineBlock;
 
 const BLOCK_FACTORIES: Partial<Record<TaskType, BlockFactory>> = {
     [TaskType.QUERY]:     ()  => ({ name: 'query',    type: 'query' }),
     [TaskType.REWRITER]:  (s) => ({ name: 'rewrite',  type: 'query_rewrite', model: s.model ?? DEFAULT_MODELS.rewrite }),
-    [TaskType.RETRIEVER]: ()  => ({ name: 'retrieve', type: 'retrieve', collection_name: COLLECTION_NAME, top_k: DEFAULT_TOP_K }),
+    [TaskType.RETRIEVER]: (s) => ({ name: 'retrieve', type: 'retrieve', collection_name: COLLECTION_NAME, top_k: DEFAULT_TOP_K, datasetIds: s.datasetIds ?? [] }),
     [TaskType.RERANKER]:  (s) => ({ name: 'rerank',   type: 'rerank',   model: s.model ?? DEFAULT_MODELS.rerank }),
     [TaskType.RESPONSE]:  (s) => ({ name: 'answer',   type: 'answer',   model: s.model ?? DEFAULT_MODELS.answer, system_prompt: s.instruction }),
 };
@@ -31,10 +32,15 @@ function buildSettingsMap(nodes: AppNode[], edges: Edge[]): Map<string, NodeSett
             const settingsNode = nodeMap.get(e.target);
             if (!settingsNode) return;
             const current = settingsMap.get(e.source) ?? {};
+            const value = SETTING_KINDS[settingsNode.data.type]?.read(settingsNode.data);
             if (settingsNode.data.type === TaskType.MODEL) {
-                settingsMap.set(e.source, { ...current, model: settingsNode.data.modelName as string | undefined });
+                settingsMap.set(e.source, { ...current, model: value });
             } else if (settingsNode.data.type === TaskType.INSTRUCTION) {
-                settingsMap.set(e.source, { ...current, instruction: settingsNode.data.stringValue as string | undefined });
+                settingsMap.set(e.source, { ...current, instruction: value });
+            } else if (settingsNode.data.type === TaskType.DATASET) {
+                const datasetId = value;
+                if (!datasetId || current.datasetIds?.includes(datasetId)) return;
+                settingsMap.set(e.source, { ...current, datasetIds: [...(current.datasetIds ?? []), datasetId] });
             }
         });
 

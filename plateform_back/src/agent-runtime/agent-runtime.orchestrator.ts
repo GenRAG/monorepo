@@ -134,7 +134,12 @@ export class AgentRuntimeOrchestrator {
             await this.usageTracker.checkOrThrow(workspaceId);
         }
 
-        const pipeline = await this.pipelineBuilder.buildPipeline({ agentId, instructionOverride, forceActive });
+        const pipeline = await this.pipelineBuilder.buildPipeline({
+            agentId,
+            instructionOverride,
+            orgIdOverride,
+            forceActive,
+        });
 
         return { pipeline, orgId: orgIdOverride ?? agentId };
     }

@@ -53,6 +53,7 @@ export const AssistantsList = () => {
                                 <Icon as={Search} boxSize={4} color="textLabel" />
                             </InputLeftElement>
                             <Input
+                                variant="glass"
                                 placeholder="Rechercher un assistant..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}

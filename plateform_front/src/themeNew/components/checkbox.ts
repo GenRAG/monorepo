@@ -54,7 +54,7 @@ const goldWithContainer = definePartsStyle({
         background: colors.whites.white,
 
         _dark: {
-            background: colors.grey[700],
+            background: colors.grey[900],
             borderColor: colors.grey[700],
             _hover: {
                 borderColor: colors.grey[800],
@@ -84,7 +84,7 @@ const goldWithContainer = definePartsStyle({
             bg: darkThemeColors.green.primary,
             color: colors.whites.white,
             _dark: {
-                bg: darkThemeColors.green.primary,
+                bg: colors.green[900],
             },
         },
     },

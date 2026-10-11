@@ -30,7 +30,7 @@ Implémenter un système de **Knowledge Datasets** (similare a dify.ai avec leur
 1. Un `Dataset` appartient à un `Workspace` (pas à un Agent)
 2. Un `Dataset` contient des `Document`s
 3. Un `Agent` peut utiliser plusieurs `Dataset`s via une table de liaison `AgentDataset`
-4. Dans le workflow builder, le node RETRIEVER permet de sélectionner quel(s) dataset(s) utiliser
+4. Dans le workflow builder, le node RETRIEVER permet de sélectionner quel(s) dataset(s) utiliser grace a un node setting Dataset
 5. Chaque dataset a son propre `collectionName` dans le vector store (format: `dataset_{id}`)
 6. La mécanique S3 + BullMQ reste identique, seule la relation change
 

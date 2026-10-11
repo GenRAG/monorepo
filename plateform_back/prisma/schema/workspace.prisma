@@ -18,4 +18,5 @@ model Workspace {
   creditTransactions CreditTransaction[]
   onboardingSessions OnboardingSession[]
   conversations      Conversation[]
+  datasets           Dataset[]
 }

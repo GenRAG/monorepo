@@ -17,16 +17,9 @@ model User {
   conversations               Conversation[]
 }
 
-enum UserRole {
-  ADMIN
-  EDITOR
-  VIEWER
-}
-
 model UserWorkspace {
   userId      String
   workspaceId String
-  role        UserRole
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 

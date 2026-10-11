@@ -10,7 +10,8 @@ import { useOnboarding } from "hooks/onboarding/useOnboarding";
 import { useAppResponsive } from "hooks/useAppResponsive";
 import UploadDropzone from "components/ui/UploadDropzone";
 import DocumentFileList from "components/Onboarding/ImproveAssistant/DocumentFileList";
-import { useGetAgentDocumentStatsQuery } from "services/document/document";
+import { useGetDatasetDocumentStatsQuery } from "services/document/document";
+import { useGetWorkspaceDatasetsQuery } from "services/dataset/dataset";
 import { useUpdateOnboardingStepsDataMutation } from "services/onboarding/onboarding";
 import StepHint from "components/Onboarding/StepHint";
 
@@ -29,9 +30,15 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
     const messageCount: number = (data.messageCount as number) ?? 0;
     const isAtLimit = messageCount >= MAX_EXCHANGES;
 
-    const { data: documentStats } = useGetAgentDocumentStatsQuery(
-        { workspaceId: workspaceId!, agentId: agentId! },
-        { skip: !workspaceId || !agentId },
+    // The backend attaches a demo dataset to the onboarding agent when the session starts.
+    const { data: datasets } = useGetWorkspaceDatasetsQuery(workspaceId!, {
+        skip: !workspaceId,
+    });
+    const datasetId = datasets?.find((dataset) => dataset.agents.some((agent) => agent.id === agentId))?.id;
+
+    const { data: documentStats } = useGetDatasetDocumentStatsQuery(
+        { workspaceId: workspaceId!, datasetId: datasetId! },
+        { skip: !workspaceId || !datasetId },
     );
     const [persistedIndexedCount, setPersistedIndexedCount] = useState(0);
     const hasInitialized = useRef(false);
@@ -44,7 +51,7 @@ export const ImproveAssistantStepComponent: React.FC<StepComponentProps> = ({ da
 
     const { uploadDocuments, sources, isAtMaxFiles } = useUploadDocuments(
         workspaceId,
-        agentId,
+        datasetId,
         MAX_FILES,
         persistedIndexedCount,
     );

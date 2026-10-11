@@ -233,14 +233,14 @@ export class RagEngineService {
         return response.data;
     }
 
-    async indexDocument(name: string, agentId: string, buffer: Buffer, mimeType: string): Promise<void> {
+    async indexDocument(name: string, orgId: string, buffer: Buffer, mimeType: string): Promise<void> {
         const form = new FormData();
 
         form.append('file', buffer, {
             filename: name,
             contentType: mimeType,
         });
-        form.append('org_id', agentId);
+        form.append('org_id', orgId);
 
         const response = await firstValueFrom(
             this.httpService.post(`${this.ragEngineUrl}/ingest`, form, {
@@ -256,18 +256,18 @@ export class RagEngineService {
         await this.waitForJob(job_id);
     }
 
-    async deleteDocument(filename: string, agentId: string): Promise<void> {
+    async deleteDocument(filename: string, orgId: string): Promise<void> {
         const response = await firstValueFrom(
             this.httpService.delete(`${this.ragEngineUrl}/documents`, {
                 headers: { 'X-API-Key': this.apiKey, 'Content-Type': 'application/json' },
-                data: { filename, org_id: agentId },
+                data: { filename, org_id: orgId },
                 timeout: 30_000,
             }),
         );
 
         const { status, file_deleted } = response.data as { status: string; file_deleted: boolean };
         if (status !== 'deleted' || !file_deleted) {
-            throw new Error(`RAG engine failed to delete document '${filename}' for org '${agentId}'`);
+            throw new Error(`RAG engine failed to delete document '${filename}' for org '${orgId}'`);
         }
     }
 

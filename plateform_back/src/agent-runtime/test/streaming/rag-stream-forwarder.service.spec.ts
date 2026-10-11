@@ -68,4 +68,29 @@ describe('RagStreamForwarderService', () => {
             citedSources: undefined,
         });
     });
+
+    it('settles with the partial outcome when the stream is destroyed before ending (client disconnect)', () => {
+        const stream = createMockStream();
+        const { sink, asSink } = createSpySink();
+
+        service.forward(stream, asSink);
+        stream.emit('data', ndjson([{ type: 'token', data: 'Partial' }]));
+        stream.emit('close');
+
+        expect(sink.onCompleted).toHaveBeenCalledWith(
+            expect.objectContaining({ kind: 'error', fullText: 'Partial', error: expect.any(Error) }),
+        );
+    });
+
+    it('settles only once when close follows end', () => {
+        const stream = createMockStream();
+        const { sink, asSink } = createSpySink();
+
+        service.forward(stream, asSink);
+        stream.emit('end');
+        stream.emit('close');
+
+        expect(sink.onCompleted).toHaveBeenCalledTimes(1);
+        expect(sink.onCompleted).toHaveBeenCalledWith(expect.objectContaining({ kind: 'end' }));
+    });
 });

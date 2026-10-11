@@ -19,8 +19,7 @@ import {
     ScoreBar,
     StatBadge,
 } from "./ModelDetailHelpers";
-import BoxIcon from "components/ui/BoxIcon";
-import { getAgentAvatar } from "utils/agentAvatar";
+import { ModelAvatar } from "./ModelAvatar";
 import Button from "components/ui/Button";
 import { ChartInfoTooltip } from "components/Agents/Analytics/ChartInfoTooltip";
 
@@ -147,18 +146,13 @@ export const ModelDetailPanel: React.FC<Props> = ({ model, onConfirm }) => {
             : []),
     ];
 
-    const avatarStyle = getAgentAvatar(model.name);
 
     return (
         <VStack flex={1} align="stretch" overflowY="auto" bg="surfacePrimary">
             <Stack px={4} py={4} pb={2}>
                 <HStack spacing={3} align="flex-start" justify="space-between">
                     <HStack spacing={3} align="flex-start" flex={1} minW={0}>
-                        <BoxIcon
-                            letters={model.name.charAt(0).toUpperCase()}
-                            bg={avatarStyle.bg}
-                            color={avatarStyle.color}
-                        />
+                        <ModelAvatar model={model} />
                         <VStack align="stretch" spacing={0.5} flex={1} minW={0}>
                             <Text fontSize="15px" fontWeight={700} color="textStrong" noOfLines={2} lineHeight="1.3">
                                 {model.name}

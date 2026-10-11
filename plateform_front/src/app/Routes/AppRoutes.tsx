@@ -5,6 +5,8 @@ import { Assistant } from "pages/Assistant/Assistant";
 import { AssistantsList } from "pages/Assistant/AssistantList";
 import { BillingWorkspace } from "pages/Billing";
 import Dashboard from "pages/Dashboard";
+import { DatasetLibrary } from "pages/Datasets";
+import { DatasetDetail } from "pages/Datasets/DatasetDetail";
 import { ProfilePage } from "pages/Profile";
 import { Route, useParams } from "react-router-dom";
 
@@ -25,6 +27,8 @@ export const AppRoutes = () => (
             <Route path="/workspaces/:workspaceId/assistants/:assistantId" element={<ChatRoute />} />
             <Route path="/workspaces/:workspaceId/billing" element={<BillingWorkspace />} />
             <Route path="/workspaces/:workspaceId/agents" element={<AgentsList />} />
+            <Route path="/workspaces/:workspaceId/datasets" element={<DatasetLibrary />} />
+            <Route path="/workspaces/:workspaceId/datasets/:datasetId" element={<DatasetDetail />} />
         </Route>
     </Route>
 );

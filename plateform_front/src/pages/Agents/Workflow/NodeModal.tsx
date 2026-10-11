@@ -2,16 +2,9 @@ import { Flex, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCallback, useState } from "react";
-import DatabaseNodeModal from "components/Agents/Workflow/NodeModalContent/Document/DocumentNodeContent";
-import RerankerNodeModal from "components/Agents/Workflow/NodeModalContent/ReRanker/ReRankerNodeContent";
-import RewriterNodeModal from "components/Agents/Workflow/NodeModalContent/Rewriter/RewriterNodeContent";
-import QueryNodeModal from "components/Agents/Workflow/NodeModalContent/Query/QueryNodeContent";
-import { ModelSelectorContent } from "components/Agents/Workflow/NodeModalContent/ModelSelector/ModelSelectorContent";
+import { useState } from "react";
+import { PANELS } from "components/Agents/Workflow/NodeModalContent/panels";
 import { Task, TaskType, type AppNodeData } from "@genrag/workflow";
-import ResponseNodeModal from "components/Agents/Workflow/NodeModalContent/Response/ResponseNodeContent";
-import useThemedToast from "hooks/useThemedToast";
-import { useGetModelsGenerationQuery, useGetModelsRerankQuery } from "services/models/models";
 
 interface NodeModalProps {
     task: Task | null;
@@ -19,17 +12,30 @@ interface NodeModalProps {
     onClose: () => void;
     nodeData?: AppNodeData;
     selectedNodeId?: string | null;
-    onSettingSelect?: (nodeId: string, item: string) => void;
+    onSettingSelect: (nodeId: string, item: string) => void;
+    onAddSettingNode: (parentId: string, inputName: string, value: string) => void;
+    onRemoveSettingNode: (nodeId: string) => void;
+    workspaceId: string;
+    agentId: string;
 }
 
-export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onSettingSelect }: NodeModalProps) => {
+export const NodeModal = ({
+    task,
+    isOpen,
+    onClose,
+    nodeData,
+    selectedNodeId,
+    onSettingSelect,
+    onAddSettingNode,
+    onRemoveSettingNode,
+    workspaceId,
+    agentId,
+}: NodeModalProps) => {
     const { fitView, getNode } = useReactFlow();
     const [contentReady, setContentReady] = useState(false);
-    const toast = useThemedToast();
 
     const parentNode = nodeData?.parentNodeId ? getNode(nodeData.parentNodeId) : undefined;
-    const callbackFetchModels =
-        parentNode?.data?.type === TaskType.RERANKER ? useGetModelsRerankQuery : useGetModelsGenerationQuery;
+    const Panel = task ? PANELS[task.type] : null;
 
     const modalWidth = task?.type === TaskType.MODEL ? "550px" : "420px";
 
@@ -40,15 +46,6 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
             await fitView({ duration: 500, minZoom: 1, maxZoom: 1 });
         }, 500);
     };
-
-    const handleModelSelect = useCallback(
-        (item: string) => {
-            onSettingSelect?.(selectedNodeId ?? "", item);
-            toast({ title: `Modèle sélectionné: ${item}`, status: "success" });
-            onClose();
-        },
-        [onSettingSelect, selectedNodeId, toast, onClose],
-    );
 
     return (
         <motion.div
@@ -102,37 +99,17 @@ export const NodeModal = ({ task, isOpen, onClose, nodeData, selectedNodeId, onS
                                     />
                                 </HStack>
                             </Flex>
-                            {task.type === TaskType.RETRIEVER && <DatabaseNodeModal />}
-                            {task.type === TaskType.RERANKER && (
-                                <RerankerNodeModal
-                                    task={task}
-                                    nodeData={nodeData!}
-                                    mainNodeId={selectedNodeId ?? ""}
-                                    onSettingSelect={onSettingSelect ?? (() => {})}
-                                />
-                            )}
-                            {task.type === TaskType.REWRITER && (
-                                <RewriterNodeModal
-                                    task={task}
-                                    nodeData={nodeData!}
-                                    mainNodeId={selectedNodeId ?? ""}
-                                    onSettingSelect={onSettingSelect ?? (() => {})}
-                                />
-                            )}
-                            {task.type === TaskType.QUERY && <QueryNodeModal />}
-                            {task.type === TaskType.RESPONSE && (
-                                <ResponseNodeModal
-                                    task={task}
-                                    nodeData={nodeData!}
-                                    mainNodeId={selectedNodeId ?? ""}
-                                    onSettingSelect={onSettingSelect ?? (() => {})}
-                                />
-                            )}
-                            {task.type === TaskType.MODEL && contentReady && (
-                                <ModelSelectorContent
-                                    onSelect={handleModelSelect}
-                                    fetchModels={() => callbackFetchModels()}
-                                    currentModelId={nodeData?.modelName}
+                            {Panel && selectedNodeId && nodeData && (task.type !== TaskType.MODEL || contentReady) && (
+                                <Panel
+                                    nodeId={selectedNodeId}
+                                    nodeData={nodeData}
+                                    workspaceId={workspaceId}
+                                    agentId={agentId}
+                                    ownerType={parentNode?.data?.type as TaskType | undefined}
+                                    onSettingSelect={onSettingSelect}
+                                    onAddSettingNode={onAddSettingNode}
+                                    onRemoveSettingNode={onRemoveSettingNode}
+                                    onClose={onClose}
                                 />
                             )}
                         </Flex>

@@ -71,6 +71,7 @@ export const AgentsList = () => {
                                     <Icon as={Search} boxSize={4} color="textLabel" />
                                 </InputLeftElement>
                                 <Input
+                                    variant="glass"
                                     placeholder="Rechercher un agent..."
                                     value={searchValue}
                                     onChange={(e) => setSearchValue(e.target.value)}

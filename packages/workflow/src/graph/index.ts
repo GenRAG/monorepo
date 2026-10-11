@@ -1,9 +1,18 @@
-export { linkNodes, makeFlowNode, withAutoSettings, WORKFLOW_NODE_TYPE } from './create-flow-node';
+export {
+    linkNodes,
+    makeFlowNode,
+    withAutoSettings,
+    createMultipleSettingNode,
+    settingEdgeId,
+    DATASET_ID_INPUT,
+    WORKFLOW_NODE_TYPE,
+} from './create-flow-node';
 export {
     getTaskSpec,
     getNonSettingsTaskTypes,
     getAddableTaskTypes,
     getConfigInputs,
+    getAutoSettingInputs,
     getChainOutputs,
     isSettingsTaskType,
 } from './task-utils';

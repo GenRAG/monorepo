@@ -12,7 +12,7 @@ export interface AgentPreview {
     id: string;
     name: string;
     workspaceId: string;
-    documentsCount?: number;
+    datasetsCount?: number;
     updatedAt?: string;
     description?: string;
     status: AgentStatus;

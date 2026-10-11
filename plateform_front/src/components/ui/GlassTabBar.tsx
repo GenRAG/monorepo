@@ -2,6 +2,7 @@ import { type ComponentType, useId } from "react";
 import { Box, chakra, Text, Tooltip, useColorModeValue, useToken } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { GlassSurface, getGlassInk } from "components/ui/GlassNav";
+import { GLASS_FOCUS_RING } from "themeNew/foundations/glass";
 
 const MotionBox = motion(Box);
 const MotionButton = chakra(motion.button);
@@ -16,6 +17,8 @@ interface GlassTabBarProps<T extends string> {
     tabs: GlassTab<T>[];
     activeTab: T;
     onChange: (tab: T) => void;
+    /** In the page flow (where a classic tab bar would sit) instead of floating at the bottom; every label shows. */
+    inline?: boolean;
 }
 
 /**
@@ -37,7 +40,12 @@ interface GlassTabBarProps<T extends string> {
  * (mode bottom bar mobile), et deux éléments animés avec le même `layoutId` se feraient concurrence
  * dans la transition de layout de framer-motion.
  */
-export const GlassTabBar = <T extends string = string>({ tabs, activeTab, onChange }: GlassTabBarProps<T>) => {
+export const GlassTabBar = <T extends string = string>({
+    tabs,
+    activeTab,
+    onChange,
+    inline = false,
+}: GlassTabBarProps<T>) => {
     const instanceId = useId();
     const variant = useColorModeValue("light", "dark");
     const { text: textColor, muted: mutedColor, pillBg } = getGlassInk(variant);
@@ -46,17 +54,22 @@ export const GlassTabBar = <T extends string = string>({ tabs, activeTab, onChan
 
     return (
         <Box
-            position="absolute"
-            bottom={{ base: 4, md: 6 }}
-            left="50%"
-            transform="translateX(-50%)"
-            zIndex={2}
-            pointerEvents="none"
+            {...(inline
+                ? { alignSelf: "flex-start" }
+                : {
+                      position: "absolute",
+                      bottom: { base: 4, md: 6 },
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      zIndex: 2,
+                      pointerEvents: "none",
+                  })}
         >
             <GlassSurface variant={variant} borderRadius="full" p="3px" pointerEvents="auto">
                 <Box display="flex" alignItems="center" gap="2px">
                     {tabs.map(({ value, label, icon: Icon }) => {
                         const isActive = activeTab === value;
+                        const showLabel = isActive || inline;
                         const button = (
                             <MotionButton
                                 key={value}
@@ -70,8 +83,8 @@ export const GlassTabBar = <T extends string = string>({ tabs, activeTab, onChan
                                 flexDirection="row"
                                 alignItems="center"
                                 justifyContent="center"
-                                gap={isActive ? "6px" : 0}
-                                px={isActive ? "12px" : "9px"}
+                                gap={showLabel ? "6px" : 0}
+                                px={showLabel ? "12px" : "9px"}
                                 h="32px"
                                 flexShrink={0}
                                 borderRadius="full"
@@ -80,7 +93,7 @@ export const GlassTabBar = <T extends string = string>({ tabs, activeTab, onChan
                                 bg="transparent"
                                 outline="none"
                                 transition="padding 0.15s ease"
-                                _focusVisible={{ boxShadow: "0 0 0 2px rgba(52, 211, 169, 0.85)" }}
+                                _focusVisible={{ boxShadow: GLASS_FOCUS_RING }}
                             >
                                 {isActive && (
                                     <MotionBox
@@ -98,13 +111,13 @@ export const GlassTabBar = <T extends string = string>({ tabs, activeTab, onChan
                                         <Icon size={16} />
                                     </Box>
                                 )}
-                                {isActive && (
+                                {showLabel && (
                                     <Text
                                         as="span"
                                         fontSize="12px"
                                         fontWeight={600}
                                         lineHeight={1}
-                                        color={textColor}
+                                        color={isActive ? textColor : mutedColor}
                                         userSelect="none"
                                         whiteSpace="nowrap"
                                     >
@@ -114,7 +127,7 @@ export const GlassTabBar = <T extends string = string>({ tabs, activeTab, onChan
                             </MotionButton>
                         );
 
-                        return isActive ? (
+                        return showLabel ? (
                             button
                         ) : (
                             <Tooltip

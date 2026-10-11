@@ -1,7 +1,8 @@
-import { IsObject, IsString } from 'class-validator';
+import { IsIn, IsObject } from 'class-validator';
+import { ONBOARDING_STEP_IDS } from '../onboarding.constants';
 
 export class UpdateStepsDataRequest {
-    @IsString()
+    @IsIn(ONBOARDING_STEP_IDS)
     stepId: string;
 
     @IsObject()

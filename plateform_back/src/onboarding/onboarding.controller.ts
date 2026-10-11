@@ -15,7 +15,7 @@ import { Observable, from } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { WorkspaceRolesGuard } from 'src/workspace/roles/guards/workspace-roles.guard';
+import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
@@ -29,7 +29,7 @@ import { CompareOnboardingRequest, CompareOnboardingResponse } from './dto/compa
 import { UpdateStepsDataRequest } from './dto/update-steps-data.request';
 
 @Controller('workspaces/:workspaceId/onboarding')
-@UseGuards(JwtAuthGuard, WorkspaceRolesGuard)
+@UseGuards(JwtAuthGuard, WorkspaceMemberGuard)
 export class OnboardingController {
     constructor(
         private readonly onboardingService: OnboardingService,
@@ -111,7 +111,7 @@ export class OnboardingController {
         if (query.length > MAX_RUNTIME_QUERY_LENGTH) {
             throw new BadRequestException(`Query must not exceed ${MAX_RUNTIME_QUERY_LENGTH} characters`);
         }
-        const { resolvedStepId, orgId } = this.onboardingService.resolveStreamParams(agentId, stepId);
+        const { resolvedStepId, orgId } = this.onboardingService.resolveStreamParams(stepId);
         return from(
             this.onboardingService.checkAndIncrementQueryCount(user.id, workspaceId, agentId, resolvedStepId),
         ).pipe(

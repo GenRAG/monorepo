@@ -2,10 +2,9 @@ import React from "react";
 import { Box, HStack, Icon, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { Search } from "lucide-react";
 import Button from "components/ui/Button";
-import MultiOptionButtons from "components/ui/MultiOptionButtons";
+import { MultiSelectDropdown } from "components/ui/MultiSelectDropdown";
 
 const TYPE_FILTERS = [
-    { value: "all", label: "Tous" },
     { value: "PDF", label: "PDF" },
     { value: "Markdown", label: "Markdown" },
     { value: "Texte", label: "Texte" },
@@ -13,30 +12,26 @@ const TYPE_FILTERS = [
 ] as const;
 
 export type TypeFilter = (typeof TYPE_FILTERS)[number]["value"];
-type ViewMode = "list" | "grid";
 
 interface DocumentFiltersProps {
     search: string;
     onSearchChange: (value: string) => void;
-    activeType: TypeFilter;
-    onTypeChange: (type: TypeFilter) => void;
-    viewMode: ViewMode;
-    onViewModeChange: (mode: ViewMode) => void;
-    isMobile?: boolean;
+    activeTypes: TypeFilter[];
+    onTypesChange: (types: TypeFilter[]) => void;
     total: number;
     onOpenUpload?: () => void;
+    /** Rendered right after the type filter (e.g. the source filter). */
+    extraFilters?: React.ReactNode;
 }
 
 export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
     search,
     onSearchChange,
-    activeType,
-    onTypeChange,
-    viewMode,
-    onViewModeChange,
-    isMobile = false,
+    activeTypes,
+    onTypesChange,
     total,
     onOpenUpload,
+    extraFilters,
 }) => {
     return (
         <HStack flexWrap={{ base: "wrap", md: "nowrap" }} align="center" mb={4}>
@@ -45,6 +40,7 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
                     <Icon as={Search} boxSize={3.5} />
                 </InputLeftElement>
                 <Input
+                    variant="glass"
                     value={search}
                     onChange={(e) => onSearchChange(e.target.value)}
                     placeholder={`Rechercher dans ${total} document${total > 1 ? "s" : ""}`}
@@ -53,25 +49,20 @@ export const DocumentFilters: React.FC<DocumentFiltersProps> = ({
                 />
             </InputGroup>
 
-            <MultiOptionButtons options={[...TYPE_FILTERS]} value={activeType} onChange={onTypeChange} size="sm" />
+            <MultiSelectDropdown
+                label="Type"
+                options={[...TYPE_FILTERS]}
+                value={activeTypes}
+                onChange={onTypesChange}
+            />
+
+            {extraFilters}
 
             <Box flex={1} />
 
             <Button size="sm" variant="superPrimary" onClick={() => onOpenUpload?.()}>
                 Téléverser un document
             </Button>
-
-            {!isMobile && (
-                <MultiOptionButtons
-                    options={[
-                        { value: "list", label: "Liste" },
-                        { value: "grid", label: "Grille" },
-                    ]}
-                    value={viewMode}
-                    onChange={onViewModeChange}
-                    size="xs"
-                />
-            )}
         </HStack>
     );
 };

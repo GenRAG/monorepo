@@ -34,12 +34,12 @@ Particularités :
 ## Données (Prisma)
 
 - Schéma splitté dans `prisma/schema/*.prisma` : `user`, `workspace`, `agent`, `workflow`, `document`, `conversation`, `credit`, `onboarding`, assemblé via `prisma.config.ts` (qui charge le `.env` lui-même).
-- Modèles : `User`, `UserWorkspace` (rôles `ADMIN`/`EDITOR`/`VIEWER`), `Workspace`, `Agent` (`DEVELOPMENT` | `PRODUCTION`, plus de `STAGING`), `AgentVersion` (journal de déploiement immuable), `AgentMember`, `AgentQueryLog`, `Workflow` (`definition` JSONB `{ nodes, edges, blocks }`, `version`, `isActive`), `Document` (`UPLOADED` → `PROCESSING` → `INDEXED` | `FAILED`), `Conversation`, `Message`, `CreditBalance`, `CreditTransaction`, `OnboardingSession`.
+- Modèles : `User`, `UserWorkspace` (lien utilisateur ↔ workspace, sans rôle : pas de collaboration), `Workspace`, `Agent` (`DEVELOPMENT` | `PRODUCTION`, plus de `STAGING`), `AgentVersion` (journal de déploiement immuable), `AgentMember`, `AgentQueryLog`, `Workflow` (`definition` JSONB `{ nodes, edges, blocks }`, `version`, `isActive`), `Document` (`UPLOADED` → `PROCESSING` → `INDEXED` | `FAILED`), `Conversation`, `Message`, `CreditBalance`, `CreditTransaction`, `OnboardingSession`.
 - **Un seul dossier de migrations** : `prisma/schema/migrations/` (ne pas recréer `prisma/migrations/`). Toute modification passe par une migration : `../scripts/migrate.sh <nom>` (dans le container `server`), `-reset` pour repartir de zéro.
 - Toujours `prisma.$transaction()` pour les opérations atomiques (crédits + `CreditTransaction`, déploiement + `AgentVersion`).
 - Workflow actif vs snapshot : l'exécution charge toujours `isActive: true`. Les snapshots (`isActive: false`) sont créés au déploiement et servent au rollback (`POST .../deployments/rollback` recopie la définition). Ne jamais activer un snapshot à la main.
 - Le statut d'un agent est dérivé du dernier `AgentVersion.toStatus` (aucune version = `DEVELOPMENT`) : le modifier via `deployment/`, jamais directement.
-- **Un seul workspace par utilisateur** : `POST /workspaces` renvoie 409 si l'utilisateur en a déjà un (chaque création crédite les crédits initiaux du plan, `plans/plans.config.ts`). `PATCH /workspaces/:id` (ADMIN) le renomme. Il n'y a pas de suppression de workspace : il disparaît avec le compte (`users/user.repository.ts`), sinon supprimer puis recréer rendrait les crédits initiaux. Côté interface il est présenté comme « l'entreprise », jamais comme un workspace.
+- **Un seul workspace par utilisateur** : `POST /workspaces` renvoie 409 si l'utilisateur en a déjà un (chaque création crédite les crédits initiaux du plan, `plans/plans.config.ts`). `PATCH /workspaces/:id` le renomme. Il n'y a pas de suppression de workspace : il disparaît avec le compte (`users/user.repository.ts`), sinon supprimer puis recréer rendrait les crédits initiaux. Côté interface il est présenté comme « l'entreprise », jamais comme un workspace.
 
 ## Événements
 
@@ -58,7 +58,7 @@ Particularités :
 - Variables principales : `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRATION`, `TOKEN_VALIDITY`, `TOKEN_RESEND_INTERVAL`, `FRONTEND_URL`, `PORT`, `SEND_EMAILS`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `AWS_*`, `S3_BUCKET`, `RAGENGINE_URL`, `RAGENGINE_API_KEY`, `RAG_MOCK`, `REDIS_URL` (ou `REDIS_HOST`/`REDIS_PORT`), `SENTRY_DSN`, `GOOGLE_CLIENT_ID` (client OAuth Google du front, même valeur que `REACT_APP_GOOGLE_CLIENT_ID` : audience exigée par `POST /auth/google`).
 - Auth : JWT en cookie HttpOnly `Authentication`, `JwtAuthGuard`, `LocalAuthGuard`, stratégies dans `auth/strategies/`, révocation au logout via `JwtBlacklistService` (vérifiée à chaque requête par la stratégie JWT ; s'assurer qu'elle survit à un redémarrage), anti brute-force via `LoginAttemptService`.
 - Autorisations par guards, jamais vérifiées à la main :
-  - `WorkspaceRolesGuard` (`workspace/roles/guards/`) + décorateur `RolesInWorkspace(...)` ;
+  - `WorkspaceMemberGuard` (`workspace/guards/`) : l'utilisateur doit être membre du workspace du chemin ; il n'y a pas de rôles ;
   - `AgentBelongsToWorkspaceGuard` (`agent/guard/agent-workspace.guard.ts`) ;
   - `AgentAccessGuard` et `ConversationAccessGuard` (`conversation/guard/`) pour l'assistant final.
 - Filtre global : `exeptions/interceptor.service.ts` (`AllExceptionsFilter`) — log pino, Sentry si `status >= 500`, réponse `{ statusCode, timestamp, path, error }`. **Le front dépend de ce format** (`plateform_front/src/services/api.ts`).

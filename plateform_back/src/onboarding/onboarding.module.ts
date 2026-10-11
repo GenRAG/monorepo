@@ -1,3 +1,4 @@
+import { DatasetModule } from 'src/dataset/dataset.module';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { AgentModule } from 'src/agent/agent.module';
@@ -12,6 +13,14 @@ import { WorkspaceModule } from 'src/workspace/workspace.module';
 @Module({
     controllers: [OnboardingController],
     providers: [OnboardingService, OnboardingRepository],
-    imports: [PrismaModule, AgentModule, WorkflowModule, AgentRuntimeModule, CreditModule, WorkspaceModule],
+    imports: [
+        PrismaModule,
+        AgentModule,
+        WorkflowModule,
+        AgentRuntimeModule,
+        CreditModule,
+        WorkspaceModule,
+        DatasetModule,
+    ],
 })
 export class OnboardingModule {}

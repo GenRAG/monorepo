@@ -1,37 +1,58 @@
 import { Injectable } from '@nestjs/common';
-import { DocumentStatus } from 'generated/prisma';
+import { DocumentSource, DocumentStatus, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
+
+/** Grouped by source (enum declaration order: manual import first), newest first inside a source. */
+const LIST_ORDER: Prisma.DocumentOrderByWithRelationInput[] = [{ source: 'asc' }, { createdAt: 'desc' }];
 
 @Injectable()
 export class DocumentRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    create(data: { agentId: string; storageKey: string; mimeType: string; name: string; size: number }) {
+    create(data: {
+        datasetId: string;
+        storageKey: string;
+        mimeType: string;
+        name: string;
+        size: number;
+        source: DocumentSource;
+        externalId?: string;
+        externalUrl?: string;
+        externalModifiedAt?: Date;
+    }) {
         return this.prisma.document.create({
             data: { ...data, status: DocumentStatus.UPLOADED },
         });
     }
 
-    findById(id: string, agentId: string) {
-        return this.prisma.document.findFirst({ where: { id, agentId } });
+    findById(id: string, datasetId: string) {
+        return this.prisma.document.findFirst({ where: { id, datasetId } });
     }
 
-    findByAgent(agentId: string) {
-        return this.prisma.document.findMany({
-            where: { agentId },
-            orderBy: { createdAt: 'desc' },
+    findByName(datasetId: string, name: string) {
+        return this.prisma.document.findFirst({
+            where: { datasetId, name },
+            select: { id: true },
         });
     }
 
-    async findByAgentPaginated(agentId: string, page: number, limit: number) {
+    findByDataset(datasetId: string, sources?: DocumentSource[]) {
+        return this.prisma.document.findMany({
+            where: { datasetId, source: sources?.length ? { in: sources } : undefined },
+            orderBy: LIST_ORDER,
+        });
+    }
+
+    async findByDatasetPaginated(datasetId: string, page: number, limit: number, sources?: DocumentSource[]) {
+        const where = { datasetId, source: sources?.length ? { in: sources } : undefined };
         const [data, total] = await this.prisma.$transaction([
             this.prisma.document.findMany({
-                where: { agentId },
-                orderBy: { createdAt: 'desc' },
+                where,
+                orderBy: LIST_ORDER,
                 skip: (page - 1) * limit,
                 take: limit,
             }),
-            this.prisma.document.count({ where: { agentId } }),
+            this.prisma.document.count({ where }),
         ]);
         return { data, total };
     }
@@ -52,17 +73,23 @@ export class DocumentRepository {
         });
     }
 
-    async getStats(agentId: string) {
-        const [documents, statusCounts] = await this.prisma.$transaction([
+    async getStats(datasetId: string) {
+        const [documents, statusCounts, sourceCounts] = await this.prisma.$transaction([
             this.prisma.document.findMany({
-                where: { agentId },
+                where: { datasetId },
                 select: { status: true, mimeType: true, size: true },
             }),
             this.prisma.document.groupBy({
                 by: ['status'],
-                where: { agentId },
+                where: { datasetId },
                 _count: true,
                 orderBy: { status: 'asc' },
+            }),
+            this.prisma.document.groupBy({
+                by: ['source'],
+                where: { datasetId },
+                _count: true,
+                orderBy: { source: 'asc' },
             }),
         ]);
 
@@ -78,12 +105,13 @@ export class DocumentRepository {
             indexed: countByStatus[DocumentStatus.INDEXED] ?? 0,
             processing: countByStatus[DocumentStatus.PROCESSING] ?? 0,
             sizeByMimeType,
+            countBySource: Object.fromEntries(sourceCounts.map((r) => [r.source, r._count as number])),
         };
     }
 
-    async getTotalSize(agentId: string): Promise<number> {
+    async getTotalSize(datasetId: string): Promise<number> {
         const result = await this.prisma.document.aggregate({
-            where: { agentId },
+            where: { datasetId },
             _sum: { size: true },
         });
         return result._sum.size ?? 0;
@@ -92,7 +120,18 @@ export class DocumentRepository {
     resetForRetry(id: string) {
         return this.prisma.document.update({
             where: { id },
-            data: { status: DocumentStatus.UPLOADED, failedAt: null, indexError: null },
+            data: {
+                status: DocumentStatus.UPLOADED,
+                failedAt: null,
+                indexError: null,
+            },
+        });
+    }
+
+    async touchDataset(datasetId: string): Promise<void> {
+        await this.prisma.dataset.update({
+            where: { id: datasetId },
+            data: { updatedAt: new Date() },
         });
     }
 

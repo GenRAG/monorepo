@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useUploadDocumentMutation } from "services/document/document";
+import { useLazyGetDocumentByIdQuery, useUploadDocumentMutation } from "services/document/document";
 import { DocumentStatus } from "types/document/document";
 import mixpanel from "lib/mixpanel";
 
@@ -38,11 +38,12 @@ export interface UploadedSource {
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLLS = 40;
 
-const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null, maxFiles = 3, initialCount = 0) => {
+const useUploadDocuments = (workspaceId?: string | null, datasetId?: string | null, maxFiles = 3, initialCount = 0) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [sources, setSources] = useState<UploadedSource[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadDocument] = useUploadDocumentMutation();
+    const [fetchDocument] = useLazyGetDocumentByIdQuery();
     const cancelledPolls = useRef<Set<string>>(new Set());
 
     const sessionValidCount = sources.filter((s) => s.status !== Status.ERROR).length;
@@ -52,7 +53,6 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
         sources.length > 0 && sources.every((s) => s.status === Status.COMPLETED || s.status === Status.ERROR);
 
     const pollDocumentStatus = (documentId: string, sourceId: string): void => {
-        const backendUrl = (process.env.REACT_APP_BACKEND_URL ?? "").replace(/\/$/, "");
         let polls = 0;
 
         const check = async (): Promise<void> => {
@@ -64,12 +64,8 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
             polls++;
 
             try {
-                const response = await fetch(
-                    `${backendUrl}/workspaces/${workspaceId}/agents/${agentId}/documents/${documentId}`,
-                    { credentials: "include" },
-                );
-                if (!response.ok) throw new Error("Fetch failed");
-                const doc = await response.json();
+                if (!workspaceId || !datasetId) throw new Error("Missing dataset");
+                const doc = await fetchDocument({ workspaceId, datasetId, id: documentId }, false).unwrap();
 
                 if (cancelledPolls.current.has(sourceId)) return;
 
@@ -108,10 +104,14 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
             filesToUpload.map(async (file, index) => {
                 const sourceId = newSources[index].id;
                 try {
-                    if (workspaceId && agentId) {
-                        const doc = await uploadDocument({ workspaceId, agentId, file }).unwrap();
+                    if (workspaceId && datasetId) {
+                        const doc = await uploadDocument({
+                            workspaceId,
+                            datasetId,
+                            file,
+                        }).unwrap();
                         mixpanel.track("document_uploaded", {
-                            agent_id: agentId,
+                            dataset_id: datasetId,
                             document_id: doc.id,
                             file_size_bytes: file.size,
                             mime_type: file.type,
@@ -119,7 +119,12 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
                         setSources((prev) =>
                             prev.map((s) =>
                                 s.id === sourceId
-                                    ? { ...s, status: Status.PROCESSING, progress: 50, documentId: doc.id }
+                                    ? {
+                                          ...s,
+                                          status: Status.PROCESSING,
+                                          progress: 50,
+                                          documentId: doc.id,
+                                      }
                                     : s,
                             ),
                         );
@@ -168,13 +173,15 @@ const useUploadDocuments = (workspaceId?: string | null, agentId?: string | null
     // Upload all pending selectedFiles, then clear the selection.
     // isUploading is true while initial mutations are in flight; polling continues after.
     const handleUpload = async (): Promise<{ erroredFiles: string[] }> => {
-        if (selectedFiles.length === 0 || !workspaceId || !agentId) return { erroredFiles: [] };
+        if (selectedFiles.length === 0 || !workspaceId || !datasetId) return { erroredFiles: [] };
         setIsUploading(true);
         const filesToUpload = selectedFiles;
         setSelectedFiles([]);
         const results = await uploadFilesInternal(filesToUpload);
         setIsUploading(false);
-        return { erroredFiles: results.filter((s) => s.status === Status.ERROR).map((s) => s.name) };
+        return {
+            erroredFiles: results.filter((s) => s.status === Status.ERROR).map((s) => s.name),
+        };
     };
 
     const removeSource = (id: string): void => {

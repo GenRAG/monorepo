@@ -29,7 +29,7 @@ CHROME_PATH=/usr/bin/google-chrome node scripts/shots.mjs http://localhost:3001/
 | `sections/` | Une section = `Xxx.tsx` + `Xxx.module.css`. Les sections complexes ont un sous-dossier : `hero/` (animation d'ingestion), `builder/` (démo de l'éditeur), `share/` (démo de déploiement), `connectors/` (démo des connecteurs), `reasoning/` (démo de comparaison de sources). |
 | `mockups/` | Maquettes réutilisables de l'app : `AppSidebar`, `BuilderCanvas` + `builderGraph.ts` (géométrie du schéma, dispositions `wide` et `tall`). |
 | `components/` | Transverse : `Panel` (section), `ui.tsx` (`SectionIntro`, `ButtonLink`, `DocIcon`), `Chrome` (header, nav latérale, barre de progression), `Logo`, `icoFaces.ts`, `DemoCursor`, `reveal.ts`. |
-| `motion/` | `stage.ts` (révélations au scroll, section active), `store.ts` (`useActivePanel`, `useHasEntered`), `scrubs.ts` (timeline `data-scrub="steps"`), `reduced.ts`, `MotionContext.tsx` (`useAnchor`, `sectionIndex`). |
+| `motion/` | `stage.ts` (révélations au scroll, section active), `store.ts` (`useActivePanel`, `useHasEntered`), `scrubs.ts` (timeline `data-scrub="steps"`), `reduced.ts`, `scenario.ts` (`useScenario`, moteur des démos animées), `MotionContext.tsx` (`useAnchor`, `sectionIndex`). |
 | `styles/tokens.css` | Tokens repris de `plateform_front/src/themeNew` (`--grey-*`, `--green-*`, `--violet-*`, sémantiques `--text-*`, `--border*`, `--accent*`, `--glass-*`, `--r-*`, `--gutter`, `--ease-out`). |
 
 ## Conventions
@@ -39,8 +39,8 @@ CHROME_PATH=/usr/bin/google-chrome node scripts/shots.mjs http://localhost:3001/
 - **Sections** : `<Panel id tone label>`. `tone="open"` (fond continu, par défaut), `"slab"` (dalle sombre, avec `glow`), `"light"` (une seule dalle claire sur le parcours). L'`id` doit exister dans `nav` de `content.ts`, et `SectionIntro index` suit l'ordre de `nav`.
 - **Grilles « quadrillées »** (Étapes, Pourquoi, Suivi) : cellules jointives à bordures partagées (`var(--border)`), fond transparent, débordement d'une gouttière (`margin-inline: calc(-1 * var(--gutter))`) pour rejoindre les lignes de structure verticales des sections ouvertes.
 - **Révélations** : `{...reveal(i)}` sur un élément (fondu décalé de `i × 80 ms`).
-- **Démos animées** (`useConnectorDemo`, `useBuilderDemo`, `useShareDemo`, `useReasoningDemo`) : même patron à réutiliser pour toute nouvelle démo :
-  - scénario async en boucle, annulé par un symbole `ABORT` dans le nettoyage de l'effet ;
+- **Démos animées** (`useConnectorDemo`, `useBuilderDemo`, `useShareDemo`, `useReasoningDemo`) : toutes reposent sur `motion/scenario.ts` (`useScenario`), à réutiliser pour toute nouvelle démo : le hook ne décrit que `idle`, `staticState` et une fonction `play(api)` (`update`, `wait`, `click`, `moveCursor`, `env`) ; le moteur gère la boucle, l'arrêt (minuteurs annulés) et l'état figé :
+  - scénario async en boucle, interrompu au nettoyage de l'effet ;
   - ne tourne que si la section est active (`useActivePanel() === sectionIndex(id)`), avec un bouton pause ;
   - le curseur est `components/DemoCursor.tsx`, qui vise les éléments marqués `data-demo="…"` ;
   - un `staticState` figé est affiché si `prefersReducedMotion()`.
@@ -56,4 +56,5 @@ Aucun test automatisé. La vérification se fait visuellement avec `scripts/shot
 ## Points d'attention
 
 - Contenu marketing : pas d'affirmation sécurité / conformité / RGPD non validée (TODO dans `sections/Why.tsx`).
+- Les démos animées (`mockups/`, `sections/builder|share|reasoning`, `content.ts`, `components/DemoCursor|Logo|ui`) sont aussi importées par `plateform_front` (alias `@vitrine`, écran de bienvenue) : ne pas y introduire de dépendance à GSAP ni au contexte de scroll (`motion/stage|store|scrubs`).
 - Le déploiement Vercel du dossier est séparé de celui de l'app (le `vercel.json` racine build `plateform_front`) : Root Directory `vitrine_front`, output `dist`.

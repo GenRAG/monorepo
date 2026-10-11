@@ -11,10 +11,9 @@ import {
 } from "@chakra-ui/react";
 import { Trash2 } from "lucide-react";
 import BoxIcon from "components/ui/BoxIcon";
-import useThemedToast from "hooks/useThemedToast";
+import useApiErrorToast from "hooks/useApiErrorToast";
 import { useDeleteDatasetMutation } from "services/dataset/dataset";
 import { DatasetEntity } from "types/dataset/dataset";
-import { getApiErrorMessage } from "utils/apiError";
 import { pluralize } from "utils/dataset/datasetStatus";
 
 interface DeleteDatasetModalProps {
@@ -26,7 +25,7 @@ interface DeleteDatasetModalProps {
 
 export const DeleteDatasetModal = ({ dataset, workspaceId, onClose, onDeleted }: DeleteDatasetModalProps) => {
     const cancelRef = useRef<HTMLButtonElement>(null);
-    const toast = useThemedToast();
+    const notifyError = useApiErrorToast();
     const [deleteDataset, { isLoading }] = useDeleteDatasetMutation();
 
     const handleDelete = async () => {
@@ -34,12 +33,7 @@ export const DeleteDatasetModal = ({ dataset, workspaceId, onClose, onDeleted }:
         try {
             await deleteDataset({ workspaceId, id: dataset.id }).unwrap();
         } catch (error) {
-            toast({
-                title: "Suppression impossible",
-                description: getApiErrorMessage(error) || "La base n'a pas pu être supprimée. Veuillez réessayer.",
-                status: "error",
-                duration: 5000,
-            });
+            notifyError("Suppression impossible", error, "La base n'a pas pu être supprimée. Veuillez réessayer.");
             return;
         }
         onClose();

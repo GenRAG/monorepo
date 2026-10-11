@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { Center, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import { AgentDatasetRow } from "components/Agents/Datasets/AgentDatasetRow";
@@ -7,14 +6,10 @@ import { AgentDatasetsSection } from "components/Agents/Datasets/AgentDatasetsSe
 import { AgentDatasetsSummary } from "components/Agents/Datasets/AgentDatasetsSummary";
 import Button from "components/ui/Button";
 import WorkspaceHeader from "components/ui/WorkspaceHeader";
-import useThemedToast from "hooks/useThemedToast";
-import {
-    useAttachDatasetToAgentMutation,
-    useDetachDatasetFromAgentMutation,
-    useGetWorkspaceDatasetsQuery,
-} from "services/dataset/dataset";
+import { useAgentDatasets } from "hooks/dataset/useAgentDatasets";
+import useApiErrorToast from "hooks/useApiErrorToast";
+import { useAttachDatasetToAgentMutation, useDetachDatasetFromAgentMutation } from "services/dataset/dataset";
 import { useGetActiveWorkflowQuery } from "services/workflow/workflow";
-import { getApiErrorMessage } from "utils/apiError";
 import { getAgentDatasetUsage } from "utils/dataset/agentDatasetUsage";
 
 export const AgentDatasets = () => {
@@ -22,8 +17,15 @@ export const AgentDatasets = () => {
         workspaceId: string;
         agentId: string;
     }>();
-    const toast = useThemedToast();
-    const { data: datasets = [], isLoading, isError, refetch } = useGetWorkspaceDatasetsQuery(workspaceId);
+    const notifyError = useApiErrorToast();
+    const {
+        datasets,
+        attached,
+        others: available,
+        isLoading,
+        isError,
+        refetch,
+    } = useAgentDatasets(workspaceId, agentId);
     const { data: workflow } = useGetActiveWorkflowQuery({
         workspaceId,
         agentId,
@@ -31,24 +33,11 @@ export const AgentDatasets = () => {
     const [attach, attachState] = useAttachDatasetToAgentMutation();
     const [detach, detachState] = useDetachDatasetFromAgentMutation();
 
-    const { attached, available } = useMemo(() => {
-        const isAttached = (agents: { id: string }[]) => agents.some((agent) => agent.id === agentId);
-        return {
-            attached: datasets.filter((d) => isAttached(d.agents)),
-            available: datasets.filter((d) => !isAttached(d.agents)),
-        };
-    }, [datasets, agentId]);
-
     const run = async (mutation: typeof attach | typeof detach, datasetId: string) => {
         try {
             await mutation({ workspaceId, id: datasetId, agentId }).unwrap();
         } catch (error) {
-            toast({
-                title: "Modification impossible",
-                description: getApiErrorMessage(error) || "Veuillez réessayer.",
-                status: "error",
-                duration: 5000,
-            });
+            notifyError("Modification impossible", error);
         }
     };
 

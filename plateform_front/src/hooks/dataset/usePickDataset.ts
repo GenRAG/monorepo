@@ -1,12 +1,11 @@
 import { useCallback } from "react";
-import useThemedToast from "hooks/useThemedToast";
+import useApiErrorToast from "hooks/useApiErrorToast";
 import { useAttachDatasetToAgentMutation } from "services/dataset/dataset";
 import { DatasetEntity } from "types/dataset/dataset";
-import { getApiErrorMessage } from "utils/apiError";
 
 /** Attaches the dataset to the agent first when needed, then runs `onPicked`. */
 export const usePickDataset = (workspaceId: string, agentId: string, onPicked: (datasetId: string) => void) => {
-    const toast = useThemedToast();
+    const notifyError = useApiErrorToast();
     const [attach, { isLoading }] = useAttachDatasetToAgentMutation();
 
     const pick = useCallback(
@@ -15,18 +14,13 @@ export const usePickDataset = (workspaceId: string, agentId: string, onPicked: (
                 try {
                     await attach({ workspaceId, id: dataset.id, agentId }).unwrap();
                 } catch (error) {
-                    toast({
-                        title: "Impossible d'ajouter la base à l'agent",
-                        description: getApiErrorMessage(error) || "Veuillez réessayer.",
-                        status: "error",
-                        duration: 5000,
-                    });
+                    notifyError("Impossible d'ajouter la base à l'agent", error);
                     return;
                 }
             }
             onPicked(dataset.id);
         },
-        [attach, workspaceId, agentId, onPicked, toast],
+        [attach, workspaceId, agentId, onPicked, notifyError],
     );
 
     return { pick, isAttaching: isLoading };

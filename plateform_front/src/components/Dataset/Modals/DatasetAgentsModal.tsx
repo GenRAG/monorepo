@@ -13,11 +13,11 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import Button from "components/ui/Button";
+import useApiErrorToast from "hooks/useApiErrorToast";
 import useThemedToast from "hooks/useThemedToast";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useSetDatasetAgentsMutation } from "services/dataset/dataset";
 import { DatasetEntity } from "types/dataset/dataset";
-import { getApiErrorMessage } from "utils/apiError";
 import { AgentUsageRow } from "./AgentUsageRow";
 
 interface DatasetAgentsModalProps {
@@ -29,6 +29,7 @@ interface DatasetAgentsModalProps {
 /** Picks every agent allowed to search a dataset, saved in one request. */
 export const DatasetAgentsModal = ({ dataset, workspaceId, onClose }: DatasetAgentsModalProps) => {
     const toast = useThemedToast();
+    const notifyError = useApiErrorToast();
     const { data: agents = [], isLoading } = useGetWorkspaceAgentsQuery(workspaceId, { skip: !dataset });
     const [setDatasetAgents, { isLoading: isSaving }] = useSetDatasetAgentsMutation();
     const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -59,12 +60,7 @@ export const DatasetAgentsModal = ({ dataset, workspaceId, onClose }: DatasetAge
             toast({ title: "Agents mis à jour", status: "success", duration: 2000 });
             onClose();
         } catch (error) {
-            toast({
-                title: "Enregistrement impossible",
-                description: getApiErrorMessage(error) || "Veuillez réessayer.",
-                status: "error",
-                duration: 5000,
-            });
+            notifyError("Enregistrement impossible", error);
         }
     };
 

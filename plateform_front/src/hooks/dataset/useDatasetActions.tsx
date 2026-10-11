@@ -4,17 +4,16 @@ import { DatasetAction } from "components/Dataset/DatasetActionsMenu";
 import { DatasetAgentsModal } from "components/Dataset/Modals/DatasetAgentsModal";
 import { DatasetFormModal, DatasetFormValues } from "components/Dataset/Modals/DatasetFormModal";
 import { DeleteDatasetModal } from "components/Dataset/Modals/DeleteDatasetModal";
-import useThemedToast from "hooks/useThemedToast";
+import useApiErrorToast from "hooks/useApiErrorToast";
 import { useUpdateDatasetMutation } from "services/dataset/dataset";
 import { DatasetEntity } from "types/dataset/dataset";
-import { getApiErrorMessage } from "utils/apiError";
 
 type ModalAction = Exclude<DatasetAction, "open">;
 
 /** Menu actions of a dataset (library card / row, detail header) and the modals they open. */
 export const useDatasetActions = (workspaceId: string, { onDeleted }: { onDeleted?: () => void } = {}) => {
     const navigate = useNavigate();
-    const toast = useThemedToast();
+    const notifyError = useApiErrorToast();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateDatasetMutation();
     const [target, setTarget] = useState<{
         action: ModalAction;
@@ -42,12 +41,7 @@ export const useDatasetActions = (workspaceId: string, { onDeleted }: { onDelete
             }).unwrap();
             close();
         } catch (error) {
-            toast({
-                title: "Modification impossible",
-                description: getApiErrorMessage(error) || "Veuillez réessayer.",
-                status: "error",
-                duration: 5000,
-            });
+            notifyError("Modification impossible", error);
         }
     };
 

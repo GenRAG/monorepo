@@ -9,13 +9,12 @@ import { DatasetFormModal, DatasetFormValues } from "components/Dataset/Modals/D
 import Button from "components/ui/Button";
 import { MainLayoutContainer } from "components/ui/MainLayoutContainer";
 import { useDatasetActions } from "hooks/dataset/useDatasetActions";
-import useThemedToast from "hooks/useThemedToast";
+import useApiErrorToast from "hooks/useApiErrorToast";
 import { useCreateDatasetMutation, useGetWorkspaceDatasetsQuery } from "services/dataset/dataset";
-import { getApiErrorMessage } from "utils/apiError";
 
 export const DatasetLibrary = () => {
     const { workspaceId = "" } = useParams<{ workspaceId: string }>();
-    const toast = useThemedToast();
+    const notifyError = useApiErrorToast();
     const { data: datasets = [], isLoading, isError, refetch } = useGetWorkspaceDatasetsQuery(workspaceId);
     const [createDataset, { isLoading: isCreating }] = useCreateDatasetMutation();
     const [search, setSearch] = useState("");
@@ -32,12 +31,7 @@ export const DatasetLibrary = () => {
             await createDataset({ workspaceId, ...values }).unwrap();
             setIsCreateOpen(false);
         } catch (error) {
-            toast({
-                title: "Création impossible",
-                description: getApiErrorMessage(error) || "Veuillez réessayer.",
-                status: "error",
-                duration: 5000,
-            });
+            notifyError("Création impossible", error);
         }
     };
 

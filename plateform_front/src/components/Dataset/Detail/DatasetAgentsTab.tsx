@@ -3,11 +3,10 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BoxIcon from "components/ui/BoxIcon";
 import Button from "components/ui/Button";
-import useThemedToast from "hooks/useThemedToast";
+import useApiErrorToast from "hooks/useApiErrorToast";
 import { useDetachDatasetFromAgentMutation } from "services/dataset/dataset";
 import { DatasetEntity } from "types/dataset/dataset";
 import { getAgentAvatar } from "utils/agentAvatar";
-import { getApiErrorMessage } from "utils/apiError";
 
 interface DatasetAgentsTabProps {
     dataset: DatasetEntity;
@@ -17,19 +16,14 @@ interface DatasetAgentsTabProps {
 
 export const DatasetAgentsTab = ({ dataset, workspaceId, onAddAgents }: DatasetAgentsTabProps) => {
     const navigate = useNavigate();
-    const toast = useThemedToast();
+    const notifyError = useApiErrorToast();
     const [detach, { isLoading, originalArgs }] = useDetachDatasetFromAgentMutation();
 
     const handleDetach = async (agentId: string) => {
         try {
             await detach({ workspaceId, id: dataset.id, agentId }).unwrap();
         } catch (error) {
-            toast({
-                title: "Impossible de retirer l'agent",
-                description: getApiErrorMessage(error) || "Veuillez réessayer.",
-                status: "error",
-                duration: 5000,
-            });
+            notifyError("Impossible de retirer l'agent", error);
         }
     };
 

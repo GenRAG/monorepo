@@ -17,5 +17,11 @@ export const useAgentDatasets = (workspaceId: string, agentId: string) => {
         return { attached, others };
     }, [query.data, agentId]);
 
-    return { ...split, isLoading: query.isLoading, isError: query.isError };
+    return {
+        ...split,
+        datasets: query.data ?? [],
+        isLoading: query.isLoading,
+        isError: query.isError,
+        refetch: query.refetch,
+    };
 };

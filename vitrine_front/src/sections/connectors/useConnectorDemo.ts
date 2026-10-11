@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { connectors } from "../../content";
+import { useScenario, type Point, type ScenarioApi } from "../../motion/scenario";
 
 /**
  * Scénario en boucle de la section « Vos documents » : un curseur ouvre le connecteur de démo,
@@ -13,7 +13,7 @@ export const DEMO = Math.max(
   connectors.sources.findIndex((s) => s.id === connectors.demo),
 );
 
-export type Point = { x: number; y: number };
+export type { Point };
 export type Target =
   { kind: "tile"; index: number } | { kind: "file"; index: number } | { kind: "button" } | { kind: "rest" };
 
@@ -37,8 +37,6 @@ interface DemoEnv {
   remeasure: () => void;
 }
 
-const ABORT = Symbol("abort");
-
 const idle: DemoState = {
   cursor: { x: 0, y: 0, press: false, visible: false, duration: 0 },
   popup: null,
@@ -56,107 +54,65 @@ export const staticState: DemoState = {
   linked: true,
 };
 
-export function useConnectorDemo(running: boolean, reduced: boolean, env: DemoEnv) {
-  const [state, setState] = useState<DemoState>(reduced ? staticState : idle);
-  const envRef = useRef(env);
+const play = async ({ update, wait, click, moveCursor, env }: ScenarioApi<DemoState, DemoEnv>) => {
+  const move = (target: Target, ms = 650) => moveCursor(env().locate(target), ms);
 
-  useEffect(() => {
-    envRef.current = env;
-  });
-
-  useEffect(() => {
-    if (!running || reduced) return;
-    let cancelled = false;
-
-    const update = (patch: Partial<DemoState> | ((s: DemoState) => Partial<DemoState>)) =>
-      setState((s) => ({ ...s, ...(typeof patch === "function" ? patch(s) : patch) }));
-
-    const wait = async (ms: number) => {
-      await new Promise((r) => setTimeout(r, ms));
-      if (cancelled) throw ABORT;
-    };
-
-    const move = async (target: Target, ms = 650) => {
-      const p = envRef.current.locate(target);
-      if (p) update((s) => ({ cursor: { ...s.cursor, ...p, visible: true, press: false, duration: ms } }));
-      await wait(ms + 80);
-    };
-
-    const click = async () => {
-      update((s) => ({ cursor: { ...s.cursor, press: true } }));
-      await wait(170);
-      update((s) => ({ cursor: { ...s.cursor, press: false } }));
-      await wait(140);
-    };
-
-    const toggleFiles = async (files: number[], on: boolean) => {
-      for (const j of files) {
-        await move({ kind: "file", index: j }, 520);
-        await click();
-        update((s) => ({ checked: on ? [...s.checked, j] : s.checked.filter((c) => c !== j) }));
-        await wait(220);
-      }
-    };
-
-    const cycle = async (source: number) => {
-      const { files, picked } = connectors.sources[source];
-
-      // 1. Ajout
-      await move({ kind: "tile", index: source }, 900);
+  const toggleFiles = async (files: number[], on: boolean) => {
+    for (const j of files) {
+      await move({ kind: "file", index: j }, 520);
       await click();
-      update({ popup: "add", popupAt: envRef.current.placePopup(source), checked: [] });
-      await wait(420);
-      await toggleFiles(picked, true);
-      await move({ kind: "button" }, 520);
-      await click();
-      update({ popup: null });
-      await wait(260);
-      update({ added: picked.map((j) => ({ name: files[j], indexed: false })) });
-      await wait(80);
-      envRef.current.remeasure();
-      await wait(80);
-      update({ linked: true });
-      await move({ kind: "rest" }, 900);
-      await wait(700);
-      update((s) => ({ added: s.added.map((a) => ({ ...a, indexed: true })) }));
-      await wait(2200);
+      update((s) => ({ checked: on ? [...s.checked, j] : s.checked.filter((c) => c !== j) }));
+      await wait(220);
+    }
+  };
 
-      // 2. Retrait
-      await move({ kind: "tile", index: source }, 800);
-      await click();
-      update({ popup: "remove", popupAt: envRef.current.placePopup(source), checked: [...picked] });
-      await wait(420);
-      await toggleFiles(picked, false);
-      await move({ kind: "button" }, 520);
-      await click();
-      update({ popup: null });
-      await wait(200);
-      update({ linked: false, leaving: true });
-      await wait(750);
-      update({ added: [], leaving: false });
-      await wait(60);
-      envRef.current.remeasure();
-      await move({ kind: "rest" }, 800);
-      await wait(500);
-    };
+  const cycle = async (source: number) => {
+    const { files, picked } = connectors.sources[source];
 
-    const run = async () => {
-      const start = envRef.current.locate({ kind: "rest" });
-      if (start) update({ cursor: { ...start, press: false, visible: true, duration: 0 } });
-      await wait(500);
-      for (;;) await cycle(DEMO);
-    };
+    // 1. Ajout
+    await move({ kind: "tile", index: source }, 900);
+    await click();
+    update({ popup: "add", popupAt: env().placePopup(source), checked: [] });
+    await wait(420);
+    await toggleFiles(picked, true);
+    await move({ kind: "button" }, 520);
+    await click();
+    update({ popup: null });
+    await wait(260);
+    update({ added: picked.map((j) => ({ name: files[j], indexed: false })) });
+    await wait(80);
+    env().remeasure();
+    await wait(80);
+    update({ linked: true });
+    await move({ kind: "rest" }, 900);
+    await wait(700);
+    update((s) => ({ added: s.added.map((a) => ({ ...a, indexed: true })) }));
+    await wait(2200);
 
-    run().catch((e) => {
-      if (e !== ABORT) throw e;
-    });
+    // 2. Retrait
+    await move({ kind: "tile", index: source }, 800);
+    await click();
+    update({ popup: "remove", popupAt: env().placePopup(source), checked: [...picked] });
+    await wait(420);
+    await toggleFiles(picked, false);
+    await move({ kind: "button" }, 520);
+    await click();
+    update({ popup: null });
+    await wait(200);
+    update({ linked: false, leaving: true });
+    await wait(750);
+    update({ added: [], leaving: false });
+    await wait(60);
+    env().remeasure();
+    await move({ kind: "rest" }, 800);
+    await wait(500);
+  };
 
-    return () => {
-      cancelled = true;
-      setState(idle);
-      envRef.current.remeasure();
-    };
-  }, [running, reduced]);
+  const start = env().locate({ kind: "rest" });
+  if (start) update({ cursor: { ...start, press: false, visible: true, duration: 0 } });
+  await wait(500);
+  for (;;) await cycle(DEMO);
+};
 
-  return state;
-}
+export const useConnectorDemo = (running: boolean, reduced: boolean, env: DemoEnv) =>
+  useScenario({ running, reduced, idle, staticState, env, play, onStop: (e) => e.remeasure() });

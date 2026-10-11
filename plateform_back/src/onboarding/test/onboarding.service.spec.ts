@@ -17,6 +17,7 @@ describe('OnboardingService', () => {
         findByUserAndWorkspace: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        countByWorkspace: jest.fn(),
         tryIncrementQueryCount: jest.fn(),
         mergeStepData: jest.fn(),
     } as any;
@@ -42,6 +43,7 @@ describe('OnboardingService', () => {
     const mockDatasetService = {
         create: jest.fn(() => Promise.resolve({ id: 'dataset-1' })),
         attachToAgent: jest.fn(),
+        delete: jest.fn(),
     } as any;
 
     beforeEach(async () => {
@@ -113,6 +115,7 @@ describe('OnboardingService', () => {
                 stepsData: null,
             });
             mockCreditBalanceService.grantInitial.mockResolvedValue(undefined);
+            mockRepository.countByWorkspace.mockResolvedValue(0);
 
             const result = await service.start(userId, workspaceId);
 
@@ -134,6 +137,30 @@ describe('OnboardingService', () => {
                 { source: 'onboarding_bonus' },
             );
             expect(result.sessionId).toBe('session-1');
+        });
+
+        it('should not grant the bonus again when another member already started the onboarding', async () => {
+            mockRepository.findByUserAndWorkspace.mockResolvedValue(null);
+            mockRepository.countByWorkspace.mockResolvedValue(1);
+            mockAgentService.insertOne.mockResolvedValue({ id: 'agent-1' });
+            mockRepository.create.mockResolvedValue({ id: 'session-2', agentId: 'agent-1', stepsData: null });
+
+            await service.start('user-2', 'workspace-1');
+
+            expect(mockCreditBalanceService.grantInitial).not.toHaveBeenCalled();
+        });
+
+        it('should roll back the agent and dataset when a later step fails, then rethrow', async () => {
+            mockRepository.findByUserAndWorkspace.mockResolvedValue(null);
+            mockRepository.countByWorkspace.mockResolvedValue(0);
+            mockAgentService.insertOne.mockResolvedValue({ id: 'agent-1' });
+            mockRepository.create.mockResolvedValue({ id: 'session-1', agentId: 'agent-1', stepsData: null });
+            mockCreditBalanceService.grantInitial.mockRejectedValue(new Error('Credit failure'));
+
+            await expect(service.start('user-1', 'workspace-1')).rejects.toThrow('Credit failure');
+
+            expect(mockAgentService.remove).toHaveBeenCalledWith('agent-1');
+            expect(mockDatasetService.delete).toHaveBeenCalledWith('dataset-1', 'workspace-1');
         });
 
         it('should remove agent on constraint violation', async () => {

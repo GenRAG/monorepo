@@ -16,12 +16,9 @@ export class WorkspaceService {
         const { description } = workspaceData;
         const name = this._normalizeName(workspaceData.name);
 
-        // One workspace per user: each creation grants the plan's initial credits.
-        if ((await this.workspaceRepository.countByUser(userId)) > 0) {
-            throw new ConflictException('User already has a workspace');
-        }
-
-        return this.workspaceRepository.create({ name, description, userId });
+        const workspace = await this.workspaceRepository.create({ name, description, userId });
+        if (!workspace) throw new ConflictException('User already has a workspace');
+        return workspace;
     }
 
     async rename(workspaceId: string, { name }: UpdateWorkspaceRequest): Promise<Workspace> {

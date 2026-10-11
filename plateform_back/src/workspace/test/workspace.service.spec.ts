@@ -1,6 +1,5 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserRole } from 'generated/prisma';
 import { WorkspaceRepository, WorkspaceWithUsers } from 'src/workspace/workspace.repository';
 import { WorkspaceStatsService } from 'src/workspace/workspace-stats.service';
 import { WorkspaceService } from 'src/workspace/workspace.service';
@@ -12,7 +11,7 @@ const fakeWorkspace = {
     description: 'Test description',
     createdAt: new Date(),
     updatedAt: new Date(),
-    users: [{ userId: 'user-1', workspaceId: 'workspace-1', role: UserRole.ADMIN }],
+    users: [{ userId: 'user-1', workspaceId: 'workspace-1' }],
 } as WorkspaceWithUsers;
 
 const mockWorkspaceRepository = {
@@ -20,7 +19,6 @@ const mockWorkspaceRepository = {
     findAll: jest.fn() as any,
     create: jest.fn() as any,
     exists: jest.fn() as any,
-    countByUser: jest.fn() as any,
     updateName: jest.fn() as any,
 };
 
@@ -42,7 +40,6 @@ describe('WorkspaceService', () => {
 
         service = module.get<WorkspaceService>(WorkspaceService);
         jest.clearAllMocks();
-        mockWorkspaceRepository.countByUser.mockImplementation(() => Promise.resolve(0));
     });
 
     describe('create', () => {
@@ -52,7 +49,7 @@ describe('WorkspaceService', () => {
             const result = await service.create({ name: 'Mon Workspace', description: 'Test description' }, 'user-1');
 
             expect(result.name).toBe('Mon Workspace');
-            expect(result.users[0].role).toBe(UserRole.ADMIN);
+            expect(result.users[0].userId).toBe('user-1');
             expect(mockWorkspaceRepository.create).toHaveBeenCalledWith({
                 name: 'Mon Workspace',
                 description: 'Test description',
@@ -83,10 +80,9 @@ describe('WorkspaceService', () => {
 
     describe('create (one workspace per user)', () => {
         it('should throw ConflictException when the user already has a workspace', async () => {
-            mockWorkspaceRepository.countByUser.mockImplementation(() => Promise.resolve(1));
+            mockWorkspaceRepository.create.mockImplementation(() => Promise.resolve(null));
 
             await expect(service.create({ name: 'Second' }, 'user-1')).rejects.toThrow(ConflictException);
-            expect(mockWorkspaceRepository.create).not.toHaveBeenCalled();
         });
 
         it('should trim the name', async () => {

@@ -143,6 +143,7 @@ describe('DatasetService', () => {
         it('should delete the dataset and enqueue the cleanup of its files and vectors', async () => {
             const documents = [{ name: 'a.pdf', storageKey: 'datasets/dataset-1/1-a.pdf' }];
             mockDatasetRepository.findDocumentsForCleanup.mockResolvedValue(documents);
+            mockQueue.add.mockResolvedValue({ remove: jest.fn() });
 
             await service.delete('dataset-1', 'workspace-1');
 
@@ -152,6 +153,16 @@ describe('DatasetService', () => {
                 { datasetId: 'dataset-1', documents },
                 expect.any(Object),
             );
+        });
+
+        it('should drop the queued cleanup when the delete fails, so files of a surviving dataset are kept', async () => {
+            const remove = jest.fn() as any;
+            mockDatasetRepository.findDocumentsForCleanup.mockResolvedValue([{ name: 'a.pdf', storageKey: 'k' }]);
+            mockQueue.add.mockResolvedValue({ remove });
+            mockDatasetRepository.delete.mockRejectedValueOnce(new Error('db down'));
+
+            await expect(service.delete('dataset-1', 'workspace-1')).rejects.toThrow('db down');
+            expect(remove).toHaveBeenCalledTimes(1);
         });
 
         it('should not enqueue a cleanup for an empty dataset', async () => {

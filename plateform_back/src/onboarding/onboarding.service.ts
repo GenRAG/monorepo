@@ -56,6 +56,9 @@ export class OnboardingService {
             return this.toResponse(existing);
         }
 
+        // The bonus belongs to the workspace: only the first member to start the onboarding gets it.
+        const grantsBonus = (await this.onboardingRepository.countByWorkspace(workspaceId)) === 0;
+
         const agent = await this.agentService.insertOne(
             {
                 name: 'Demo Assistant',
@@ -82,24 +85,36 @@ export class OnboardingService {
             throw err;
         }
 
+        // Everything below must succeed together: on failure the half-built onboarding is removed so that a
+        // retry starts clean instead of returning a session that lacks its dataset or credits.
+        let datasetId: string | undefined;
         try {
             const dataset = await this.datasetService.create(workspaceId, { name: DEMO_DATASET_NAME });
+            datasetId = dataset.id;
             await this.datasetService.attachToAgent(dataset.id, agent.id, workspaceId);
+            if (grantsBonus) {
+                await this.creditBalanceService.grantInitial(
+                    { workspaceId, amount: ONBOARDING_INITIAL_CREDITS },
+                    CreditTransactionType.SUBSCRIPTION,
+                    { source: 'onboarding_bonus' },
+                );
+            }
         } catch (err) {
-            this.logger.error(`Failed to create the demo dataset for agent ${agent.id}`, err);
-        }
-
-        try {
-            await this.creditBalanceService.grantInitial(
-                { workspaceId, amount: ONBOARDING_INITIAL_CREDITS },
-                CreditTransactionType.SUBSCRIPTION,
-                { source: 'onboarding_bonus' },
-            );
-        } catch (err) {
-            this.logger.error(`Failed to grant initial credits for workspace ${workspaceId}`, err);
+            await this.rollbackStart(agent.id, datasetId, workspaceId);
+            throw err;
         }
 
         return this.toResponse(session);
+    }
+
+    private async rollbackStart(agentId: string, datasetId: string | undefined, workspaceId: string): Promise<void> {
+        try {
+            // The onboarding session and the agent/dataset link cascade with the agent.
+            await this.agentService.remove(agentId);
+            if (datasetId) await this.datasetService.delete(datasetId, workspaceId);
+        } catch (err) {
+            this.logger.error(`Failed to roll back the onboarding of agent ${agentId}`, err);
+        }
     }
 
     async getSession(userId: string, workspaceId: string): Promise<OnboardingSessionResponse | null> {

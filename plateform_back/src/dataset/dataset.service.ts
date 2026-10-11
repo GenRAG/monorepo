@@ -31,6 +31,9 @@ const dayRange = (days: number) => {
 
 export const DATASET_CLEANUP_JOB = 'cleanup-dataset';
 
+/** Leaves the dataset delete time to commit before the cleanup of its files starts. */
+const CLEANUP_DELAY_MS = 30_000;
+
 @Injectable()
 export class DatasetService {
     private readonly logger = new Logger(DatasetService.name);
@@ -82,20 +85,31 @@ export class DatasetService {
         await this._assertDatasetInWorkspace(id, workspaceId);
 
         const documents = await this.datasetRepository.findDocumentsForCleanup(id);
-        await this.datasetRepository.delete(id);
+        if (documents.length === 0) {
+            await this.datasetRepository.delete(id);
+            return;
+        }
 
-        if (documents.length === 0) return;
-
-        await this.cleanupQueue.add(
+        // Queued first (delayed) so a Redis outage cannot leave the files and vectors orphaned; if the delete
+        // fails the job is removed, and otherwise it runs after the delete has committed.
+        const job = await this.cleanupQueue.add(
             DATASET_CLEANUP_JOB,
             { datasetId: id, documents },
             {
+                delay: CLEANUP_DELAY_MS,
                 attempts: 5,
                 backoff: { type: 'exponential', delay: 5000 },
                 removeOnComplete: true,
                 removeOnFail: false,
             },
         );
+
+        try {
+            await this.datasetRepository.delete(id);
+        } catch (error) {
+            await job.remove();
+            throw error;
+        }
     }
 
     async attachToAgent(datasetId: string, agentId: string, workspaceId: string): Promise<void> {

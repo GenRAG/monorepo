@@ -12,6 +12,7 @@ import { sanitizeFilename } from 'src/lib/filename.util';
 import ms from 'ms';
 import { MAX_DATASET_STORAGE_BYTES } from 'src/dataset/dataset.constants';
 
+const MAX_TEXT_CONTENT_BYTES = 2 * 1024 * 1024;
 const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024;
 const INDEX_DOCUMENT_JOB = 'index-document';
 const INDEX_JOB_OPTIONS = {
@@ -159,6 +160,10 @@ export class DocumentService {
     async getContent(id: string, datasetId: string): Promise<string> {
         const doc = await this.documentRepository.findById(id, datasetId);
         if (!doc) throw new NotFoundException('Document not found');
+        // Only text files have a readable content: a PDF or DOCX would come back as binary garbage.
+        if (!doc.mimeType.startsWith('text/') || doc.size > MAX_TEXT_CONTENT_BYTES) {
+            throw new BadRequestException("L'aperçu texte n'est pas disponible pour ce document");
+        }
         const buffer = await this.storage.get(doc.storageKey);
         return buffer.toString('utf-8');
     }

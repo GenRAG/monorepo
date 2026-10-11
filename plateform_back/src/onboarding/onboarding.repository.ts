@@ -12,6 +12,10 @@ export class OnboardingRepository {
         });
     }
 
+    countByWorkspace(workspaceId: string): Promise<number> {
+        return this.prisma.onboardingSession.count({ where: { workspaceId } });
+    }
+
     create(data: Prisma.OnboardingSessionCreateInput): Promise<OnboardingSession> {
         return this.prisma.onboardingSession.create({ data });
     }

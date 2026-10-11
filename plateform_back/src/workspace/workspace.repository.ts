@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserRole, Prisma, Workspace, PlanTier, CreditTransactionType, UserWorkspace } from 'generated/prisma';
+import { Prisma, Workspace, PlanTier, CreditTransactionType, UserWorkspace } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { getPlanConfig } from 'src/plans/plans.config';
 
@@ -80,22 +80,30 @@ export class WorkspaceRepository {
         });
     }
 
+    /**
+     * One workspace per user, enforced here: the per-user advisory lock serializes concurrent creations, so
+     * the check and the insert cannot interleave (each creation grants the plan's initial credits).
+     * Returns null when the user already has a workspace.
+     */
     async create(data: {
         name: string;
         description?: string;
         userId: string;
         plan?: PlanTier;
-    }): Promise<WorkspaceWithUsers> {
+    }): Promise<WorkspaceWithUsers | null> {
         const { name, description, userId, plan = PlanTier.FREE } = data;
         const { initialCredits } = getPlanConfig(plan);
 
         return this.prisma.$transaction(async (tx) => {
+            await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
+            if ((await tx.userWorkspace.count({ where: { userId } })) > 0) return null;
+
             const workspace = await tx.workspace.create({
                 data: {
                     name,
                     description,
                     plan,
-                    users: { create: { userId, role: UserRole.ADMIN } },
+                    users: { create: { userId } },
                     creditBalance: { create: { balance: initialCredits } },
                 },
                 include: { users: true },
@@ -114,10 +122,6 @@ export class WorkspaceRepository {
 
             return workspace;
         });
-    }
-
-    async countByUser(userId: string): Promise<number> {
-        return this.prisma.userWorkspace.count({ where: { userId } });
     }
 
     async updateName(id: string, name: string): Promise<Workspace> {

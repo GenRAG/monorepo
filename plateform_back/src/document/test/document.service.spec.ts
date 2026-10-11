@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getQueueToken } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
@@ -134,6 +134,32 @@ describe('DocumentService', () => {
             await expect(service.ingestFile('dataset-1', file)).rejects.toThrow(ConflictException);
             expect(mockStorage.delete).toHaveBeenCalledTimes(1);
             expect(mockQueue.add).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('getContent', () => {
+        it('should refuse a binary document (PDF/DOCX would come back as garbage)', async () => {
+            mockDocumentRepository.findById.mockResolvedValueOnce({
+                id: 'doc-1',
+                mimeType: 'application/pdf',
+                size: 10,
+                storageKey: 'k',
+            });
+
+            await expect(service.getContent('doc-1', 'dataset-1')).rejects.toThrow(BadRequestException);
+            expect(mockStorage.get).not.toHaveBeenCalled();
+        });
+
+        it('should return the text of a text document', async () => {
+            mockDocumentRepository.findById.mockResolvedValueOnce({
+                id: 'doc-1',
+                mimeType: 'text/markdown',
+                size: 10,
+                storageKey: 'k',
+            });
+            mockStorage.get.mockResolvedValue(Buffer.from('# Hello'));
+
+            await expect(service.getContent('doc-1', 'dataset-1')).resolves.toBe('# Hello');
         });
     });
 

@@ -1,8 +1,8 @@
 import { useRef, useState, type CSSProperties } from "react";
-import { share } from "./content";
-import { prefersReducedMotion } from "./motion/reduced";
-import { useShareDemo } from "./sections/share/useShareDemo";
-import { ShareBrowser } from "./sections/share/ShareBrowser";
+import { share } from "@vitrine/content";
+import { prefersReducedMotion } from "@vitrine/motion/reduced";
+import { useShareDemo } from "@vitrine/sections/share/useShareDemo";
+import { ShareBrowser } from "@vitrine/sections/share/ShareBrowser";
 
 /** Démo de déploiement reprise du site vitrine : adresse, couleur, mise en ligne, première question. */
 export const ShareDemo = () => {

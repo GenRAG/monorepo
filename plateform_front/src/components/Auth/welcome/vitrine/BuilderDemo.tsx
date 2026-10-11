@@ -1,13 +1,13 @@
 import { useRef } from "react";
 import { Lock, RotateCw } from "lucide-react";
-import { builder } from "./content";
-import { DemoCursor } from "./components/DemoCursor";
-import { AppSidebar } from "./mockups/AppSidebar";
-import { BuilderCanvas } from "./mockups/BuilderCanvas";
-import { prefersReducedMotion } from "./motion/reduced";
-import { useBuilderDemo } from "./sections/builder/useBuilderDemo";
-import { NodePalette } from "./sections/builder/NodePalette";
-import { NodePanel } from "./sections/builder/NodePanel";
+import { builder } from "@vitrine/content";
+import { DemoCursor } from "@vitrine/components/DemoCursor";
+import { AppSidebar } from "@vitrine/mockups/AppSidebar";
+import { BuilderCanvas } from "@vitrine/mockups/BuilderCanvas";
+import { prefersReducedMotion } from "@vitrine/motion/reduced";
+import { useBuilderDemo } from "@vitrine/sections/builder/useBuilderDemo";
+import { NodePalette } from "@vitrine/sections/builder/NodePalette";
+import { NodePanel } from "@vitrine/sections/builder/NodePanel";
 import styles from "./sections/Builder.module.css";
 
 /** Démo de l'éditeur reprise du site vitrine : le curseur ajoute des blocs et leur choisit un modèle. */

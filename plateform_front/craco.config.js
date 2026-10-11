@@ -4,11 +4,15 @@ import { fileURLToPath } from "url";
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
 const workflowSrc = resolve(currentDir, "../packages/workflow/src");
+// Les démos animées du site vitrine sont importées telles quelles (une seule source), voir @vitrine.
+const vitrineSrc = resolve(currentDir, "../vitrine_front/src");
 
 export const webpack = {
   alias: {
     "@": resolve(currentDir, "src"),
     "@genrag/workflow": resolve(currentDir, "../packages/workflow/src/index.ts"),
+    "@vitrine": vitrineSrc,
+    "lucide-react": resolve(currentDir, "node_modules/lucide-react"),
     react: resolve(currentDir, "node_modules/react"),
     "react-dom": resolve(currentDir, "node_modules/react-dom"),
     "@xyflow/react": resolve(currentDir, "node_modules/@xyflow/react"),
@@ -45,14 +49,11 @@ export const webpack = {
         ? babelRule.include
         : [babelRule.include].filter(Boolean);
 
-      if (
-        !include.some(
-          (p) =>
-            p === workflowSrc ||
-            (p && p.toString && p.toString().includes("packages/workflow")),
-        )
-      ) {
-        babelRule.include = [...include, workflowSrc];
+      const missing = [workflowSrc, vitrineSrc].filter(
+        (src) => !include.some((p) => p === src),
+      );
+      if (missing.length > 0) {
+        babelRule.include = [...include, ...missing];
       }
     });
 

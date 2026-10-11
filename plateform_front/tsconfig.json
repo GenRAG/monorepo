@@ -28,6 +28,9 @@
       "@genrag/workflow": [
         "../../packages/workflow/src/index.ts"
       ],
+      "@vitrine/*": [
+        "../../vitrine_front/src/*"
+      ],
       "themeNew/*": [
         "themeNew/*"
       ],

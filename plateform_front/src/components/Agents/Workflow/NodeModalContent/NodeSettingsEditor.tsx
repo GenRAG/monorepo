@@ -7,6 +7,7 @@ import { TaskType } from "@genrag/workflow";
 import type { AppNodeData } from "@genrag/workflow";
 import { useGetModelsGenerationQuery, useGetModelsRerankQuery } from "services/models/models";
 import { RagModel } from "types/models/models";
+import { useMarkWorkflowDirty } from "../WorkflowDirtyContext";
 
 interface NodeSettingsEditorProps {
     mainNodeId: string;
@@ -191,6 +192,7 @@ const InstructionEditor = ({ stringValue, onChange }: { stringValue?: string; on
 
 export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSettingsEditorProps) => {
     const { setNodes, getNode } = useReactFlow();
+    const markDirty = useMarkWorkflowDirty();
     const { data: generationModels = [], isLoading: isLoadingGeneration } = useGetModelsGenerationQuery();
     const { data: rerankModels = [], isLoading: isLoadingRerank } = useGetModelsRerankQuery();
 
@@ -220,6 +222,7 @@ export const NodeSettingsEditor = memo(({ mainNodeId, onSettingSelect }: NodeSet
                     : n,
             ),
         );
+        markDirty();
     };
 
     if (modelNodes.length === 0 && instructionNodes.length === 0) {

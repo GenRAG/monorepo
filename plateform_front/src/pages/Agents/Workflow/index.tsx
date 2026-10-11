@@ -29,6 +29,7 @@ import { useAgentDatasets } from "hooks/dataset/useAgentDatasets";
 import useThemedToast from "hooks/useThemedToast";
 import { useIncompleteNodesGuard } from "hooks/useIncompleteNodesGuard";
 import { useUnsavedChangesBlocker } from "hooks/useUnsavedChangesBlocker";
+import { WorkflowDirtyProvider } from "components/Agents/Workflow/WorkflowDirtyContext";
 import mixpanel from "lib/mixpanel";
 import { currentDarkTheme } from "themeNew/foundations/themeConfig";
 
@@ -223,18 +224,20 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                 </ReactFlow>
             </Box>
 
-            <NodeModal
-                task={task}
-                nodeData={nodeData}
-                isOpen={isModalOpen}
-                onClose={handleModalClose}
-                selectedNodeId={selectedNodeId}
-                onSettingSelect={handleSettingSelectWithDirty}
-                onAddSettingNode={handleAddSettingNodeWithDirty}
-                onRemoveSettingNode={handleRemoveSettingNodeWithDirty}
-                workspaceId={workspaceId}
-                agentId={agentId}
-            />
+            <WorkflowDirtyProvider value={markDirty}>
+                <NodeModal
+                    task={task}
+                    nodeData={nodeData}
+                    isOpen={isModalOpen}
+                    onClose={handleModalClose}
+                    selectedNodeId={selectedNodeId}
+                    onSettingSelect={handleSettingSelectWithDirty}
+                    onAddSettingNode={handleAddSettingNodeWithDirty}
+                    onRemoveSettingNode={handleRemoveSettingNodeWithDirty}
+                    workspaceId={workspaceId}
+                    agentId={agentId}
+                />
+            </WorkflowDirtyProvider>
         </Box>
     );
 };

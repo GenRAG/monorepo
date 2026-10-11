@@ -55,6 +55,7 @@ export const AgentSidebarItem: React.FC<AgentSidebarItemProps> = ({
             outline="none"
             transition="background 0.15s"
             _hover={{ bg: ink.pillBg }}
+            _focusVisible={{ boxShadow: "0 0 0 2px var(--chakra-colors-green-400)" }}
         >
             {AnimatedIcon ? (
                 <Box color={active ? activeColor : ink.muted} display="flex" flexShrink={0}>
@@ -113,6 +114,7 @@ export const CollapseToggle: React.FC<CollapseToggleProps> = ({ isOpen, ink, onC
             cursor="pointer"
             transition="color 0.15s"
             _hover={{ color: ink.text }}
+            _focusVisible={{ boxShadow: "0 0 0 2px var(--chakra-colors-green-400)" }}
         >
             {isOpen ? <ChevronsLeft size={14} /> : <ChevronsRight size={14} />}
         </Box>

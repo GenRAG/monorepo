@@ -52,6 +52,7 @@ Handles : `HandleId.MainSource` / `MainTarget` (chaîne), `settingSourceHandle(i
 ## Utilitaires clés
 
 - `useWorkflowNodes({ initialNodes, initialEdges, registry, readonly, layout })` → `nodes`, `edges`, `onNodesChange`, `onEdgesChange`, `handleSettingSelect`, `handleAddChainNode`, `handleRemoveChainNode`, `isVertical` (celui du layout), `readonly`.
+- `handleAddChainNode(type)` délègue à `insertChainNode` (core, testé) : insère le node optionnel après son parent avec ses placeholders, ou renvoie `null` s'il est déjà présent (un double clic n'ajoute rien).
 - `handleRemoveChainNode(id)` supprime le node, ses réglages et reconnecte le précédent au suivant. **Ne jamais supprimer un node chaîné autrement** (les nodes de chaîne sont `deletable: false` pour que ReactFlow ne les supprime pas au clavier).
 - `serializeWorkflow(nodes, edges)` → `{ nodes, edges, blocks }` : parcourt la chaîne depuis QUERY et lit MODEL / INSTRUCTION via les edges `settings`. C'est ce que l'API RAG reçoit.
 - `pipelineToWorkflow(blocks, { layout, registry })` : inverse de `serializeWorkflow` (aller-retour testé) ; lève `UnsupportedPipelineBlockError` sur un type inconnu.

@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { linkNodes, makeFlowNode, withAutoSettings } from "../src/graph/create-flow-node";
+import { insertChainNode, linkNodes, makeFlowNode, withAutoSettings } from "../src/graph/create-flow-node";
 import { getAddableTaskTypes, getConfigInputs, getNonSettingsTaskTypes, isSettingsTaskType } from "../src/graph/task-utils";
 import { SETTING_KINDS } from "../src/graph/setting-kinds";
+import { DEFAULT_LAYOUT } from "../src/layout";
 import type { AppNodeData } from "../src/types/app-node";
 import { TaskParamType, TaskType } from "../src/types/task";
-import { settingNodesOf } from "./fixtures";
+import { fullWorkflow, minimalWorkflow, settingNodesOf } from "./fixtures";
 
 describe("task utils", () => {
     it("lists the setting inputs of a task", () => {
@@ -92,6 +93,43 @@ describe("withAutoSettings", () => {
 
         assert.equal(second.nodes.length, first.nodes.length);
         assert.equal(second.edges.length, first.edges.length);
+    });
+});
+
+describe("insertChainNode", () => {
+    const mainEdges = (edges: { source: string; target: string; type?: string }[]) =>
+        edges.filter((e) => e.type !== "settings").map((e) => [e.source, e.target]);
+
+    it("inserts the node between its parent and the next node, with its setting placeholders", () => {
+        const { nodes, edges } = insertChainNode(minimalWorkflow().nodes, minimalWorkflow().edges, TaskType.RERANKER)!;
+        const reranker = nodes.find((n) => n.data.type === TaskType.RERANKER)!;
+
+        assert.deepEqual(mainEdges(edges), [
+            ["q", "r"],
+            ["r", reranker.id],
+            [reranker.id, "s"],
+        ]);
+        assert.equal(reranker.deletable, true);
+        const settings = settingNodesOf(nodes, reranker.id);
+        assert.equal(settings.length, 1);
+        assert.equal(settings[0].data.isPlaceholder, true);
+    });
+
+    it("places the node between its neighbours, its settings following it", () => {
+        const { nodes } = insertChainNode(minimalWorkflow().nodes, minimalWorkflow().edges, TaskType.REWRITER)!;
+        const rewriter = nodes.find((n) => n.data.type === TaskType.REWRITER)!;
+        const [setting] = settingNodesOf(nodes, rewriter.id);
+        const offset = DEFAULT_LAYOUT.getSettingOffset(0, 1);
+
+        assert.deepEqual(rewriter.position, { x: 0, y: 70 });
+        assert.deepEqual(setting.position, { x: rewriter.position.x + offset.x, y: rewriter.position.y + offset.y });
+    });
+
+    it("does nothing when the node is already present or nothing can chain it", () => {
+        const { nodes, edges } = fullWorkflow();
+
+        assert.equal(insertChainNode(nodes, edges, TaskType.REWRITER), null);
+        assert.equal(insertChainNode(nodes, edges, TaskType.RESPONSE), null);
     });
 });
 

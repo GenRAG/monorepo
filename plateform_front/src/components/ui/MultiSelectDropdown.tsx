@@ -1,5 +1,4 @@
 import {
-    Badge,
     Box,
     HStack,
     Menu,
@@ -13,12 +12,13 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { ChevronDown } from "lucide-react";
-import Button from "components/ui/Button";
 
 export interface MultiSelectOption<T extends string> {
     value: T;
     label: string;
     count?: number;
+    /** Shown before the label (logo, file type tile…). */
+    icon?: React.ReactNode;
 }
 
 interface MultiSelectDropdownProps<T extends string> {
@@ -28,7 +28,6 @@ interface MultiSelectDropdownProps<T extends string> {
     /** Selected values; empty means no filter (everything shows). */
     value: T[];
     onChange: (value: T[]) => void;
-    size?: "xs" | "sm" | "md";
 }
 
 /** Dropdown with checkboxes: stays open while options are toggled, the button shows how many are selected. */
@@ -37,54 +36,55 @@ export const MultiSelectDropdown = <T extends string>({
     options,
     value,
     onChange,
-    size = "sm",
 }: MultiSelectDropdownProps<T>) => (
-    <Menu closeOnSelect={false} placement="bottom-start">
+    <Menu variant="glass" closeOnSelect={false} placement="bottom-start" gutter={6}>
         {({ isOpen }) => (
             <>
-                <MenuButton as={Button} variant="secondary" size={size} flexShrink={0}>
+                <MenuButton flexShrink={0}>
                     <HStack spacing={2}>
                         <Text as="span">{label}</Text>
                         {value.length > 0 && (
-                            <Badge colorScheme="green" borderRadius="full" px={1.5}>
+                            <Box
+                                as="span"
+                                minW="18px"
+                                h="18px"
+                                px={1.5}
+                                borderRadius="full"
+                                bg="green.400"
+                                color="grey.975"
+                                fontSize="11px"
+                                fontWeight="bold"
+                                lineHeight="18px"
+                                textAlign="center"
+                            >
                                 {value.length}
-                            </Badge>
+                            </Box>
                         )}
                         <Box
                             as={ChevronDown}
                             size={14}
-                            color="textLabel"
+                            opacity={0.6}
                             transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
                             transition="transform 0.2s ease-in-out"
                         />
                     </HStack>
                 </MenuButton>
                 <Portal>
-                    <MenuList
-                        p="0.5"
-                        zIndex="popover"
-                        minW="220px"
-                        bg="surfaceModal"
-                        borderColor="surfaceModal"
-                        boxShadow="lg"
-                    >
+                    <MenuList zIndex="popover">
                         <MenuOptionGroup
                             type="checkbox"
                             value={value}
                             onChange={(next) => onChange((Array.isArray(next) ? next : [next]) as T[])}
                         >
                             {options.map((option) => (
-                                <MenuItemOption
-                                    key={option.value}
-                                    value={option.value}
-                                    fontSize="sm"
-                                    bg="transparent"
-                                    _hover={{ bg: "surfaceHover" }}
-                                >
-                                    <HStack justify="space-between" spacing={4}>
-                                        <Text as="span">{option.label}</Text>
+                                <MenuItemOption key={option.value} value={option.value}>
+                                    <HStack spacing={2.5}>
+                                        {option.icon}
+                                        <Text as="span" flex={1}>
+                                            {option.label}
+                                        </Text>
                                         {option.count !== undefined && (
-                                            <Text as="span" variant="body-xs-muted">
+                                            <Text as="span" fontSize="xs" opacity={0.55}>
                                                 {option.count}
                                             </Text>
                                         )}
@@ -94,14 +94,8 @@ export const MultiSelectDropdown = <T extends string>({
                         </MenuOptionGroup>
                         {value.length > 0 && (
                             <>
-                                <MenuDivider borderColor="borderDefault" />
-                                <MenuItem
-                                    fontSize="sm"
-                                    color="textLabel"
-                                    bg="transparent"
-                                    _hover={{ bg: "surfaceHover" }}
-                                    onClick={() => onChange([])}
-                                >
+                                <MenuDivider />
+                                <MenuItem opacity={0.7} onClick={() => onChange([])}>
                                     Tout afficher
                                 </MenuItem>
                             </>

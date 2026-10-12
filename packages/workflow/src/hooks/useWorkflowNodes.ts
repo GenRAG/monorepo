@@ -2,7 +2,6 @@ import { useCallback, useRef } from "react";
 import {
     useNodesState,
     useEdgesState,
-    useReactFlow,
     type Edge,
 } from "@xyflow/react";
 import { createMultipleSettingNode, insertChainNode, linkNodes } from "../graph/create-flow-node";
@@ -42,7 +41,6 @@ export const useWorkflowNodes = (
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(
         initialStateRef.current.edges,
     );
-    const { getEdges } = useReactFlow();
 
     // Refs so handleAddChainNode can read the latest nodes/edges without
     // capturing them as useCallback deps (which would recreate the function
@@ -106,7 +104,7 @@ export const useWorkflowNodes = (
     const handleRemoveChainNode = useCallback(
         (nodeId: string) => {
             if (readonlyMode) return;
-            const allEdges = getEdges();
+            const allEdges = edgesRef.current;
 
             const settingNodeIds = allEdges
                 .filter((e) => e.source === nodeId && e.type === EdgeType.Settings)
@@ -130,7 +128,7 @@ export const useWorkflowNodes = (
                 return [...remaining, linkNodes(incomingEdge.source, outgoingEdge.target)];
             });
         },
-        [getEdges, setNodes, setEdges, readonlyMode],
+        [setNodes, setEdges, readonlyMode],
     );
 
     const handleAddChainNode = useCallback(

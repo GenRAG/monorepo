@@ -31,7 +31,7 @@ yarn test        # tsc -p tsconfig.test.json + node --test (test/*.test.ts)
 | `graph/` | `task-specs.ts` (`TASK_SPECS` : les 7 tâches), `models.ts` (catalogues `LLMS`, `LLMSRewriter`, `ReRanker`), `task-utils.ts`, `setting-kinds.ts` (`SETTING_KINDS` : où chaque réglage MODEL / INSTRUCTION / DATASET stocke sa valeur, lecture et écriture), `create-flow-node.ts` (`makeFlowNode`, `linkNodes`, `withAutoSettings`…), `task/registry.tsx` (UI : icônes, `TaskRegistry`, `createTaskRegistry`, `getTaskDef`, contexte `TaskRegistryProvider` / `useTaskRegistry`) |
 | `layout/` | `LayoutStrategy` ; `LinearLayoutStrategy` configurable, `VerticalLayoutStrategy` (défaut du builder, réglages à droite) et `HorizontalLayoutStrategy` (réglages empilés sous chaque node) |
 | `utils/` | `serialize.ts` (graphe → blocks), `pipeline-to-workflow.ts` (blocks → graphe), `sanitize.ts` |
-| `components/` | `WorkflowCanvas` (canvas composable), `WorkflowViewer` (lecture seule depuis `pipeline` ou `definition`), `nodes/` (`NodeComponent`, `SettingNodes/ModelNode`, `SettingNodes/InstructionNode`), `edges/` (`GenEdge`, `SettingsEdge` + `edge-animations.css`), `BoxIcon` (interne) |
+| `components/` | `WorkflowCanvas` (canvas composable), `WorkflowViewer` (lecture seule depuis `pipeline` ou `definition`), `nodes/` (`NodeComponent`, `SettingNodes/ModelNode`, `InstructionNode`, `DatasetNode`, `AllDatasetsNode`), `edges/` (`GenEdge`, `SettingsEdge` + `edge-animations.css`), `BoxIcon` (interne) |
 | `hooks/` | `useWorkflowNodes` (état central), `useWorkflowCanvas` (composition pour `<ReactFlow>`), `useFlowTypes`, `useNodeSelection`, `useNodeInformation`, `useFixNodePosition`, `useAppResponsive` (interne) |
 
 ## Modèle
@@ -52,6 +52,7 @@ Handles : `HandleId.MainSource` / `MainTarget` (chaîne), `settingSourceHandle(i
 ## Utilitaires clés
 
 - `useWorkflowNodes({ initialNodes, initialEdges, registry, readonly, layout })` → `nodes`, `edges`, `onNodesChange`, `onEdgesChange`, `handleSettingSelect`, `handleAddChainNode`, `handleRemoveChainNode`, `isVertical` (celui du layout), `readonly`.
+- `useWorkflowCanvas` renvoie aussi `canvasNodes` / `canvasEdges` : le graphe plus les nodes d'affichage de `withEmptySettingNodes` (un RETRIEVER sans DATASET montre un node « Toutes les bases », `EMPTY_SETTING_NODE_TYPE`, rendu par `AllDatasetsNode`). **Les passer à `<ReactFlow>`, mais sauvegarder `nodes` / `edges`** : ces nodes ne sont jamais dans l'état ni dans le workflow en base.
 - `handleAddChainNode(type)` délègue à `insertChainNode` (core, testé) : insère le node optionnel après son parent avec ses placeholders, ou renvoie `null` s'il est déjà présent (un double clic n'ajoute rien).
 - `handleRemoveChainNode(id)` supprime le node, ses réglages et reconnecte le précédent au suivant. **Ne jamais supprimer un node chaîné autrement** (les nodes de chaîne sont `deletable: false` pour que ReactFlow ne les supprime pas au clavier).
 - `serializeWorkflow(nodes, edges)` → `{ nodes, edges, blocks }` : parcourt la chaîne depuis QUERY et lit MODEL / INSTRUCTION via les edges `settings`. C'est ce que l'API RAG reçoit.

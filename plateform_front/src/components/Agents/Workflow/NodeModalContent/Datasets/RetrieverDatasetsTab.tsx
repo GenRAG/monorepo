@@ -1,6 +1,6 @@
 import { HStack, IconButton, Stack, Text, VStack } from "@chakra-ui/react";
 import { useNodeConnections, useNodesData } from "@xyflow/react";
-import { DATASET_ID_INPUT, type AppNode } from "@genrag/workflow";
+import { DATASET_ID_INPUT, EMPTY_SETTING_NODE_TYPE, type AppNode } from "@genrag/workflow";
 import { Library, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BoxIcon from "components/ui/BoxIcon";
@@ -37,10 +37,13 @@ export const RetrieverDatasetsTab = ({
         handleId: RETRIEVER_DATASET_HANDLE,
     });
     const settingNodes = useNodesData<AppNode>(connections.map((c) => c.target));
-    const selected = settingNodes.map((node) => ({
-        nodeId: node.id,
-        datasetId: node.data.inputs?.[DATASET_ID_INPUT] ?? "",
-    }));
+    // The canvas also links the display-only "all bases" node to this handle: it is not a selected base.
+    const selected = settingNodes
+        .filter((node) => node.type !== EMPTY_SETTING_NODE_TYPE)
+        .map((node) => ({
+            nodeId: node.id,
+            datasetId: node.data.inputs?.[DATASET_ID_INPUT] ?? "",
+        }));
     const datasetById = new Map(attached.map((d) => [d.id, d]));
 
     return (

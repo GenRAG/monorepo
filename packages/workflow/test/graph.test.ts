@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { insertChainNode, linkNodes, makeFlowNode, withAutoSettings } from "../src/graph/create-flow-node";
+import {
+    createMultipleSettingNode,
+    EMPTY_SETTING_NODE_TYPE,
+    insertChainNode,
+    linkNodes,
+    makeFlowNode,
+    withAutoSettings,
+    withEmptySettingNodes,
+} from "../src/graph/create-flow-node";
 import { getAddableTaskTypes, getConfigInputs, getNonSettingsTaskTypes, isSettingsTaskType } from "../src/graph/task-utils";
 import { SETTING_KINDS } from "../src/graph/setting-kinds";
 import { DEFAULT_LAYOUT } from "../src/layout";
@@ -130,6 +138,35 @@ describe("insertChainNode", () => {
 
         assert.equal(insertChainNode(nodes, edges, TaskType.REWRITER), null);
         assert.equal(insertChainNode(nodes, edges, TaskType.RESPONSE), null);
+    });
+});
+
+describe("withEmptySettingNodes", () => {
+    it("shows an 'all bases' node on a retriever without dataset, linked to its dataset handle", () => {
+        const { nodes, edges } = minimalWorkflow();
+        const canvas = withEmptySettingNodes(nodes, edges);
+        const [empty] = canvas.nodes.filter((n) => n.type === EMPTY_SETTING_NODE_TYPE);
+
+        assert.equal(canvas.nodes.length, nodes.length + 1);
+        assert.equal(empty.data.type, TaskType.DATASET);
+        assert.equal(empty.data.parentNodeId, "r");
+        assert.equal(empty.selectable, false);
+        const edge = canvas.edges.find((e) => e.target === empty.id)!;
+        assert.deepEqual([edge.source, edge.sourceHandle, edge.type], ["r", "setting-source-Bases", "settings"]);
+    });
+
+    it("shows nothing once a dataset is chosen, and never touches the saved graph", () => {
+        const { nodes, edges } = minimalWorkflow();
+        const retriever = nodes.find((n) => n.id === "r")!;
+        const input = getConfigInputs(TaskType.RETRIEVER).find((i) => i.multiple)!;
+        const dataset = createMultipleSettingNode(retriever, input, "ds-1", 0);
+        const withDataset = { nodes: [...nodes, dataset.node], edges: [...edges, dataset.edge] };
+
+        const canvas = withEmptySettingNodes(withDataset.nodes, withDataset.edges);
+
+        assert.equal(canvas.nodes, withDataset.nodes);
+        assert.equal(canvas.edges, withDataset.edges);
+        assert.equal(nodes.length, minimalWorkflow().nodes.length);
     });
 });
 

@@ -51,6 +51,8 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
     const {
         nodes,
         edges,
+        canvasNodes,
+        canvasEdges,
         nodeTypes,
         edgeTypes,
         onNodesChange,
@@ -108,8 +110,8 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
             <Box flex={1} position="relative">
                 <ReactFlow
                     colorMode="light"
-                    nodes={nodes}
-                    edges={edges}
+                    nodes={canvasNodes}
+                    edges={canvasEdges}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     nodeTypes={nodeTypes}

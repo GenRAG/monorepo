@@ -60,9 +60,9 @@ import { ReactFlow } from "@xyflow/react";
 import { useWorkflowCanvas, sanitizeWorkflowEdges, serializeWorkflow } from "@genrag/workflow";
 
 const { nodes: initialNodes, edges: initialEdges } = sanitizeWorkflowEdges(saved.nodes, saved.edges);
-const { nodes, edges, nodeTypes, edgeTypes, onNodesChange, onEdgesChange, handleAddChainNode } =
+const { nodes, edges, canvasNodes, canvasEdges, nodeTypes, edgeTypes, onNodesChange, onEdgesChange, handleAddChainNode } =
     useWorkflowCanvas({ initialNodes, initialEdges, onNodeClick });
-// <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} … />
+// <ReactFlow nodes={canvasNodes} edges={canvasEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} … />
 // Sauvegarde : serializeWorkflow(nodes, edges) → { nodes, edges, blocks }
 ```
 

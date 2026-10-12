@@ -152,6 +152,46 @@ export function withAutoSettings(
     };
 }
 
+/** ReactFlow node type of the display-only node shown for a `multiple` input left empty (never in the saved graph). */
+export const EMPTY_SETTING_NODE_TYPE = "EmptySetting";
+
+/**
+ * Adds, for display only, a node on every `multiple` input that has no setting yet (a RETRIEVER without DATASET
+ * searches every base of the agent), so that "nothing selected" reads as a choice. Pass the result to `<ReactFlow>`,
+ * never to `serializeWorkflow`.
+ */
+export function withEmptySettingNodes(
+    nodes: AppNode[],
+    edges: Edge[],
+    layout: LayoutStrategy = DEFAULT_LAYOUT,
+    registry: TaskSpecRegistry = TASK_SPECS,
+): { nodes: AppNode[]; edges: Edge[] } {
+    const extraNodes: AppNode[] = [];
+    const extraEdges: Edge[] = [];
+
+    for (const parent of nodes) {
+        const settingCount = edges.filter((e) => e.source === parent.id && e.type === EdgeType.Settings).length;
+        for (const input of getConfigInputs(parent.data.type, registry)) {
+            const handle = settingSourceHandle(input.name);
+            if (!input.multiple || edges.some((e) => e.source === parent.id && e.sourceHandle === handle)) continue;
+            const node: AppNode = {
+                id: `${parent.id}-empty-${input.name}`,
+                type: EMPTY_SETTING_NODE_TYPE,
+                position: offsetFrom(parent, layout.getSettingOffset(settingCount, settingCount + 1)),
+                data: { type: input.nodeType, inputs: {}, outputs: [], parentNodeId: parent.id, settingLabel: input.name },
+                dragHandle: ".drag-handle",
+                selectable: false,
+                deletable: false,
+                connectable: false,
+            };
+            extraNodes.push(node);
+            extraEdges.push({ ...makeSettingEdge(parent, input, node.id), selectable: false });
+        }
+    }
+
+    return extraNodes.length ? { nodes: [...nodes, ...extraNodes], edges: [...edges, ...extraEdges] } : { nodes, edges };
+}
+
 /**
  * Inserts the optional chain node `nodeType` (e.g. REWRITER) right after the node that declares it in its
  * `chainOutputs`, with its setting placeholders, and re-lays the chain out. `null` when it is already present or

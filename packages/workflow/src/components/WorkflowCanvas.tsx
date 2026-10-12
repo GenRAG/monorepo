@@ -39,8 +39,8 @@ const WorkflowCanvasInner = ({
     ...canvasOptions
 }: WorkflowCanvasProps) => {
     const {
-        nodes,
-        edges,
+        canvasNodes,
+        canvasEdges,
         nodeTypes,
         edgeTypes,
         onNodesChange,
@@ -51,8 +51,8 @@ const WorkflowCanvasInner = ({
 
     return (
         <ReactFlow
-            nodes={nodes}
-            edges={edges}
+            nodes={canvasNodes}
+            edges={canvasEdges}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             onNodesChange={readonly ? undefined : onNodesChange}

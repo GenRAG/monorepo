@@ -89,6 +89,12 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 - **Toute feature ou modification de plus d'un fichier, même demandée comme une petite retouche** (« ça peut être sympa des icônes », « change le style des boutons ») : invoquer `pstack:poteto-mode` avant la première modification, et dire en une ligne quel skill est utilisé.
 - **Avant de dire « terminé »** : vérifier le rendu réel dans le navigateur (dev server `plateform_front` sur le port 3000). Si ce n'est pas possible, le dire en premier, avec la liste précise de ce qui n'a pas été vérifié, pas en fin de message.
 - **Puis une passe de revue** sur le diff (règles des `CLAUDE.md` concernés, tokens de couleur, tests) avant de rendre la main, sans attendre qu'un audit soit demandé.
+- **Choix du skill d'audit** (Claude choisit seul, sans demander) :
+  - branche ou diff courant : `ponytail:ponytail-review` ;
+  - code risqué (auth, crédits / Stripe, format `blocks` envoyé au moteur RAG, migrations Prisma) : `pstack:interrogate`, en plus ou à la place ;
+  - doute sur ce qu'un changement casse ailleurs : `pstack:blast-radius` ;
+  - tout le repo : `ponytail:ponytail-audit`.
+- Un audit ne modifie rien : il ne passe pas par `pstack:poteto-mode`. Corriger ses constats, si : c'est une modification comme une autre.
 
 <!-- claude-md: commit=a08731b69e6e4fe0f496cfddf9b51da54571de75 date=2026-09-30 -->
 

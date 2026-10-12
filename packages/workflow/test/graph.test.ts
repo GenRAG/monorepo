@@ -137,7 +137,7 @@ describe("insertChainNode", () => {
         const { nodes, edges } = fullWorkflow();
 
         assert.equal(insertChainNode(nodes, edges, TaskType.REWRITER), null);
-        assert.equal(insertChainNode(nodes, edges, TaskType.RESPONSE), null);
+        assert.equal(insertChainNode([], [], TaskType.REWRITER), null);
     });
 });
 

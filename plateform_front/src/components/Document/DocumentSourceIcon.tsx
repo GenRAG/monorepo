@@ -20,7 +20,7 @@ export const DocumentSourceIcon = ({ source = "UPLOAD", size = 20 }: { source?: 
             <Image src={logo} alt="" w="100%" h="100%" objectFit="contain" />
         </Box>
     ) : (
-        <Center w={`${size}px`} h={`${size}px`} borderRadius="5px" bg="accentIconBg" color="green.500" flexShrink={0}>
+        <Center w={`${size}px`} h={`${size}px`} borderRadius="5px" bg="accentIconBg" color="iconAccent" flexShrink={0}>
             <Icon as={Upload} boxSize={`${Math.round(size * 0.6)}px`} />
         </Center>
     );

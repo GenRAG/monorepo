@@ -120,7 +120,7 @@ const glass = definePartsStyle({
         },
     },
     icon: {
-        color: "green.400",
+        color: "iconAccent",
     },
     groupTitle: {
         ...textStyles["body-xs-semibold"],

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EMPTY_SETTING_NODE_TYPE, withEmptySettingNodes } from "../graph/create-flow-node";
 import { type Edge, type NodeChange } from "@xyflow/react";
 import { useFlowTypes } from "./useFlowTypes";
@@ -67,6 +67,14 @@ export function useWorkflowCanvas(options: UseWorkflowCanvasOptions = {}) {
 
     const emptyIdsRef = useRef(new Set<string>());
     emptyIdsRef.current = new Set(canvas.nodes.filter((n) => n.type === EMPTY_SETTING_NODE_TYPE).map((n) => n.id));
+
+    // A node that comes back (dataset added then removed) starts again next to its parent, not where it was dragged.
+    useEffect(() => {
+        setEmptyNodeOverrides((prev) => {
+            const kept = Object.entries(prev).filter(([id]) => emptyIdsRef.current.has(id));
+            return kept.length === Object.keys(prev).length ? prev : Object.fromEntries(kept);
+        });
+    }, [canvas.nodes]);
 
     const { onNodesChange: onGraphNodesChange } = workflow;
     const onNodesChange = useCallback(

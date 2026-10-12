@@ -1,5 +1,5 @@
 import { Handle, Position } from "@xyflow/react";
-import { Box, Flex, Icon, Text, VStack, useColorModeValue } from "@chakra-ui/react";
+import { Box, Flex, Icon, Text, VStack } from "@chakra-ui/react";
 import { AlertTriangle, ChevronRight, Library } from "lucide-react";
 import type { AppNodeData, WorkflowNodeProps } from "../../../types/app-node";
 import { HandleId } from "../../../types/edge";
@@ -15,16 +15,6 @@ export const AllDatasetsNode = ({ data, onNodeClick, readonly }: WorkflowNodePro
     const entries = catalog ? Object.values(catalog) : null;
     const isEmpty = entries?.length === 0;
 
-    const bg = useColorModeValue("whiteAlpha.700", "blackAlpha.300");
-    const bgHover = useColorModeValue("green.50", "grey.800");
-    const borderColor = useColorModeValue("green.300", "grey.600");
-    const accentBg = useColorModeValue("green.50", "green.900");
-    const accentColor = useColorModeValue("green.500", "green.300");
-    const warnColor = useColorModeValue("orange.500", "orange.300");
-    const warnBg = useColorModeValue("orange.50", "orange.900");
-    const labelColor = useColorModeValue("grey.800", "grey.100");
-    const subColor = useColorModeValue("grey.500", "grey.400");
-
     const title = isEmpty ? "Aucune base" : "Toutes les bases";
     const subtitle = !entries
         ? "Toutes les bases de l'agent"
@@ -34,7 +24,7 @@ export const AllDatasetsNode = ({ data, onNodeClick, readonly }: WorkflowNodePro
                 entries.reduce((sum, e) => sum + e.documentsCount, 0),
                 "document",
             )}`;
-    const color = isEmpty ? warnColor : accentColor;
+    const color = isEmpty ? "warningAccent" : "iconAccent";
     const isClickable = !readonly && !!onNodeClick && !!parentNodeId;
 
     return (
@@ -58,15 +48,15 @@ export const AllDatasetsNode = ({ data, onNodeClick, readonly }: WorkflowNodePro
                 minW="160px"
                 maxW="220px"
                 cursor={isClickable ? "pointer" : "default"}
-                bg={bg}
+                bg="surfaceAction"
                 borderWidth="1.5px"
                 borderStyle="dashed"
-                borderColor={isEmpty ? warnColor : borderColor}
+                borderColor={isEmpty ? "warningAccent" : "borderAccentCard"}
                 borderRadius="12px"
                 transition="all 0.15s"
-                _hover={isClickable ? { bg: bgHover, borderColor: color } : undefined}
+                _hover={isClickable ? { bg: "accentCardBg", borderColor: isEmpty ? "warningAccent" : "borderAccentCardActive" } : undefined}
             >
-                <BoxIcon icon={isEmpty ? AlertTriangle : Library} color={color} bg={isEmpty ? warnBg : accentBg} size="sm" />
+                <BoxIcon icon={isEmpty ? AlertTriangle : Library} color={color} bg={isEmpty ? "warningIconBg" : "accentIconBg"} size="sm" />
                 <VStack align="start" spacing={0} flex={1} minW={0}>
                     <Text
                         fontSize="9px"
@@ -79,14 +69,14 @@ export const AllDatasetsNode = ({ data, onNodeClick, readonly }: WorkflowNodePro
                     >
                         Base de connaissances
                     </Text>
-                    <Text fontSize="sm" fontWeight={600} color={labelColor} noOfLines={1}>
+                    <Text fontSize="sm" fontWeight={600} color="textPrimary" noOfLines={1}>
                         {title}
                     </Text>
-                    <Text fontSize="10px" color={isEmpty ? warnColor : subColor} noOfLines={1}>
+                    <Text fontSize="10px" color={isEmpty ? "warningAccent" : "textLabel"} noOfLines={1}>
                         {subtitle}
                     </Text>
                 </VStack>
-                {isClickable && <Icon as={ChevronRight} boxSize={4} color={subColor} flexShrink={0} />}
+                {isClickable && <Icon as={ChevronRight} boxSize={4} color="textLabel" flexShrink={0} />}
             </Flex>
         </Box>
     );

@@ -68,6 +68,10 @@ const colorTokens = {
     trendNeutral: { default: "orange.500", _dark: "orange.300" },
     trendNegative: { default: "red.500", _dark: "red.400" },
 
+    // === WARNING (alerte non bloquante) ===
+    warningAccent: { default: "orange.500", _dark: "orange.300" }, // Texte, icône et bordure d'alerte
+    warningIconBg: { default: "orange.50", _dark: "orange.900" }, // Fond d'icône d'alerte
+
     accentCardBg: { default: "green.50", _dark: "grey.850" }, // Carte sélectionnée/active
     accentIconBg: { default: "green.100", _dark: "grey.800" }, // Fond icône accent
     iconAccent: { default: "green.500", _dark: "green.400" }, // Icône accentuée (vert marque)

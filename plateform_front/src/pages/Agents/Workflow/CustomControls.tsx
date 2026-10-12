@@ -1,6 +1,10 @@
-import { Box, IconButton, Divider, Tooltip, Spinner } from "@chakra-ui/react";
+import { Fragment } from "react";
+import { Box, IconButton, Spinner, Tooltip, useColorMode, type PlacementWithLogical } from "@chakra-ui/react";
 import { useReactFlow } from "@xyflow/react";
-import { Plus, Minus, Expand, Save } from "lucide-react";
+import { Expand, Minus, Plus, Save } from "lucide-react";
+import { getGlassInk } from "components/ui/GlassNav";
+import { GlassSurface } from "components/ui/GlassNav/GlassSurface";
+import { GLASS_BORDER, GLASS_FOCUS_RING } from "themeNew/foundations/glass";
 
 interface CustomControlsProps {
     onMenuToggle?: () => void;
@@ -8,52 +12,80 @@ interface CustomControlsProps {
     isSaving?: boolean;
 }
 
+interface ControlButton {
+    label: string;
+    icon: React.ReactElement;
+    action?: () => void;
+    isDisabled?: boolean;
+}
+
+/** Builder controls in the frosted glass of MultiOptionButtons: block / save on the left, zoom at the bottom. */
 const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps) => {
     const { zoomIn, zoomOut, fitView } = useReactFlow();
+    const { colorMode } = useColorMode();
+    const ink = getGlassInk(colorMode);
 
-    const toolButtons = [
+    const toolButtons: ControlButton[] = [
+        { label: "Ajouter un bloc", icon: <Plus size={18} />, action: onMenuToggle },
         {
-            label: "Ajouter un bloc",
-            icon: <Plus size={18} />,
-            action: () => onMenuToggle?.(),
-            tool: null,
+            label: "Enregistrer l'architecture",
+            icon: isSaving ? <Spinner size="xs" /> : <Save size={18} />,
+            action: onSave,
+            isDisabled: isSaving,
         },
     ];
 
-    const zoomButtons = [
-        { label: "Agrandir", icon: <Plus size={18} />, action: () => zoomIn() },
-        {
-            label: "Réduire",
-            icon: <Minus size={18} />,
-            action: () => zoomOut(),
-        },
+    const zoomButtons: ControlButton[] = [
+        { label: "Agrandir", icon: <Plus size={18} />, action: () => void zoomIn() },
+        { label: "Réduire", icon: <Minus size={18} />, action: () => void zoomOut() },
         {
             label: "Centrer la vue",
             icon: <Expand size={18} />,
-            action: () => fitView({ duration: 500, minZoom: 1, maxZoom: 1 }),
+            action: () => void fitView({ duration: 500, minZoom: 1, maxZoom: 1 }),
         },
     ];
 
-    const renderButton = (label: string, icon: React.ReactElement, action: () => void, isActive = false) => (
-        <Tooltip bg="tooltipBg" key={label} label={label} placement="right" color="white" borderRadius="8px" hasArrow>
-            <IconButton
-                aria-label={label}
-                icon={icon}
-                onClick={action}
-                size="sm"
-                variant="ghost"
-                borderRadius="8px"
-                color="textPrimary"
-                bg={isActive ? "bubbleAccentBg" : "transparent"}
-                _hover={{ bg: "bubbleAccentBg" }}
-                _active={{ bg: "bubbleAccentBg" }}
-            />
-        </Tooltip>
+    const separator = (vertical: boolean) => (
+        <Box
+            w={vertical ? "16px" : "1px"}
+            h={vertical ? "1px" : "16px"}
+            bg={GLASS_BORDER[colorMode]}
+            my={vertical ? "2px" : 0}
+            mx={vertical ? 0 : "2px"}
+        />
     );
+
+    const renderButtons = (buttons: ControlButton[], placement: PlacementWithLogical) =>
+        buttons.map(({ label, icon, action, isDisabled }, i) => (
+            <Fragment key={label}>
+                {i > 0 && separator(placement === "right")}
+                <Tooltip bg="tooltipBg" label={label} placement={placement} color="white" borderRadius="8px" hasArrow>
+                    <IconButton
+                        aria-label={label}
+                        icon={icon}
+                        onClick={action}
+                        isDisabled={isDisabled}
+                        size="sm"
+                        variant="ghost"
+                        borderRadius="full"
+                        color={ink.muted}
+                        bg="transparent"
+                        transition="background 0.15s, color 0.15s"
+                        _hover={{ bg: ink.pillBg, color: ink.text }}
+                        _active={{ bg: ink.pillBg }}
+                        _focusVisible={{ boxShadow: GLASS_FOCUS_RING }}
+                    />
+                </Tooltip>
+            </Fragment>
+        ));
 
     return (
         <>
-            <Box
+            <GlassSurface
+                variant={colorMode}
+                blur={12}
+                withBoxShadow={false}
+                borderRadius="full"
                 position="absolute"
                 left="10px"
                 top="50%"
@@ -61,89 +93,30 @@ const CustomControls = ({ onMenuToggle, onSave, isSaving }: CustomControlsProps)
                 display="flex"
                 flexDirection="column"
                 alignItems="center"
-                bg="surfaceAction"
-                borderRadius="12px"
-                border="1px solid"
-                borderColor="borderDivider"
-                p="6px"
-                gap="2px"
+                gap={1}
+                p={1}
                 zIndex={5}
-                boxShadow="lg"
             >
-                {toolButtons.map(({ label, icon, action, tool }) => renderButton(label, icon, action, tool !== null))}
+                {renderButtons(toolButtons, "right")}
+            </GlassSurface>
 
-                <Divider borderColor="borderDivider" width="20px" my="2px" />
-
-                <Tooltip
-                    bg="tooltipBg"
-                    label="Enregistrer l'architecture"
-                    placement="right"
-                    color="white"
-                    borderRadius="8px"
-                    hasArrow
-                >
-                    <IconButton
-                        aria-label="Enregistrer l'architecture"
-                        icon={isSaving ? <Spinner size="xs" /> : <Save size={18} />}
-                        onClick={onSave}
-                        size="sm"
-                        variant="ghost"
-                        borderRadius="8px"
-                        color="textPrimary"
-                        bg="transparent"
-                        _hover={{ bg: "bubbleAccentBg" }}
-                        _active={{ bg: "bubbleAccentBg" }}
-                        isDisabled={isSaving}
-                    />
-                </Tooltip>
-            </Box>
-
-            <Box
+            <GlassSurface
+                variant={colorMode}
+                blur={12}
+                withBoxShadow={false}
+                borderRadius="full"
                 position="absolute"
                 bottom="10px"
-                right="50%"
-                transform="translateX(50%)"
+                left="50%"
+                transform="translateX(-50%)"
                 display="flex"
-                flexDirection="row"
                 alignItems="center"
-                bg="surfaceAction"
-                borderRadius="8px"
-                border="1px solid"
-                borderColor="borderDivider"
-                px="4px"
-                py="4px"
-                gap="2px"
+                gap={1}
+                p={1}
                 zIndex={5}
-                boxShadow="lg"
             >
-                {zoomButtons.map(({ label, icon, action }, i) => (
-                    <>
-                        {i > 0 && <Box key={`div-${i}`} w="0.5px" h="20px" bg="borderDivider" mx="2px" />}
-                        <Tooltip
-                            bg="tooltipBg"
-                            key={label}
-                            label={label}
-                            placement="top"
-                            color="white"
-                            borderRadius="8px"
-                            hasArrow
-                        >
-                            <IconButton
-                                aria-label={label}
-                                icon={icon}
-                                onClick={action}
-                                size="sm"
-                                variant="ghost"
-                                borderRadius="8px"
-                                color="textPrimary"
-                                bg="transparent"
-                                _hover={{ bg: "bubbleAccentBg" }}
-                                _active={{ bg: "bubbleAccentBg" }}
-                            />
-                        </Tooltip>
-                    </>
-                ))}
-            </Box>
+                {renderButtons(zoomButtons, "top")}
+            </GlassSurface>
         </>
     );
 };

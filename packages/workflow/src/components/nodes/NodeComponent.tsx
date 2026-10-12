@@ -15,7 +15,6 @@ import {
 import BoxIcon from "../BoxIcon";
 import { useAppResponsive } from "../../hooks/useAppResponsive";
 import { TrashIcon } from "lucide-react";
-import { MultipleSettingHint } from "./MultipleSettingHint";
 
 const NodeComponent = memo((props: WorkflowNodeProps) => {
     const nodeData = props.data as AppNodeData;
@@ -215,7 +214,6 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                                     >
                                         {input.name}
                                     </Text>
-                                    {input.multiple && <MultipleSettingHint inputName={input.name} isMobile={isMobile} />}
                                 </Box>
                                 <Box
                                     position="relative"

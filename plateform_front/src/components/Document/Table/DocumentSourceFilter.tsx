@@ -1,5 +1,6 @@
 import React from "react";
 import { MultiSelectDropdown } from "components/ui/MultiSelectDropdown";
+import { DocumentSourceIcon } from "components/Document/DocumentSourceIcon";
 import { DocumentSource } from "types/dataset/dataset";
 import { DOCUMENT_SOURCE_LABELS, DOCUMENT_SOURCES } from "utils/dataset/documentSource";
 
@@ -17,6 +18,7 @@ export const DocumentSourceFilter: React.FC<DocumentSourceFilterProps> = ({ valu
             value: source,
             label: DOCUMENT_SOURCE_LABELS[source],
             count: counts[source] ?? 0,
+            icon: <DocumentSourceIcon source={source} />,
         }))}
         value={value}
         onChange={onChange}

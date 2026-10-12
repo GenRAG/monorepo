@@ -3,7 +3,7 @@ import type { Edge } from "@xyflow/react";
 import type { AppNode } from "../types/app-node";
 import { TaskType, type TaskParam, type TaskSpecRegistry } from "../types/task";
 import { EdgeType, HandleId, settingSourceHandle } from "../types/edge";
-import { getAutoSettingInputs, getConfigInputs } from "./task-utils";
+import { getAutoSettingInputs, getChainOutputs, getConfigInputs } from "./task-utils";
 import { SETTING_KINDS } from "./setting-kinds";
 import { TASK_SPECS } from "./task-specs";
 import { type LayoutStrategy, DEFAULT_LAYOUT } from "../layout";
@@ -149,6 +149,97 @@ export function withAutoSettings(
     return {
         nodes: [...nodes, ...extraNodes],
         edges: [...edges, ...extraEdges],
+    };
+}
+
+/** ReactFlow node type of the display-only node shown for a `multiple` input left empty (never in the saved graph). */
+export const EMPTY_SETTING_NODE_TYPE = "EmptySetting";
+
+/**
+ * Adds, for display only, a node on every `multiple` input that has no setting yet (a RETRIEVER without DATASET
+ * searches every base of the agent), so that "nothing selected" reads as a choice. Pass the result to `<ReactFlow>`,
+ * never to `serializeWorkflow`.
+ */
+export function withEmptySettingNodes(
+    nodes: AppNode[],
+    edges: Edge[],
+    layout: LayoutStrategy = DEFAULT_LAYOUT,
+    registry: TaskSpecRegistry = TASK_SPECS,
+): { nodes: AppNode[]; edges: Edge[] } {
+    const extraNodes: AppNode[] = [];
+    const extraEdges: Edge[] = [];
+
+    for (const parent of nodes) {
+        const settingCount = edges.filter((e) => e.source === parent.id && e.type === EdgeType.Settings).length;
+        for (const input of getConfigInputs(parent.data.type, registry)) {
+            const handle = settingSourceHandle(input.name);
+            if (!input.multiple || edges.some((e) => e.source === parent.id && e.sourceHandle === handle)) continue;
+            const node: AppNode = {
+                id: `${parent.id}-empty-${input.name}`,
+                type: EMPTY_SETTING_NODE_TYPE,
+                position: offsetFrom(parent, layout.getSettingOffset(settingCount, settingCount + 1)),
+                data: { type: input.nodeType, inputs: {}, outputs: [], parentNodeId: parent.id, settingLabel: input.name },
+                dragHandle: ".drag-handle",
+                selectable: false,
+                deletable: false,
+                connectable: false,
+            };
+            extraNodes.push(node);
+            extraEdges.push({ ...makeSettingEdge(parent, input, node.id), selectable: false });
+        }
+    }
+
+    return extraNodes.length ? { nodes: [...nodes, ...extraNodes], edges: [...edges, ...extraEdges] } : { nodes, edges };
+}
+
+/**
+ * Inserts the optional chain node `nodeType` (e.g. REWRITER) right after the node that declares it in its
+ * `chainOutputs`, with its setting placeholders, and re-lays the chain out. `null` when it is already present or
+ * no node can chain it.
+ */
+export function insertChainNode(
+    nodes: AppNode[],
+    edges: Edge[],
+    nodeType: TaskType,
+    layout: LayoutStrategy = DEFAULT_LAYOUT,
+    registry: TaskSpecRegistry = TASK_SPECS,
+): { nodes: AppNode[]; edges: Edge[] } | null {
+    if (nodes.some((n) => n.data.type === nodeType)) return null;
+    const outputOf = (n: AppNode) => getChainOutputs(n.data.type, registry).find((o) => o.nodeType === nodeType);
+    const parent = nodes.find(outputOf);
+    if (!parent) return null;
+
+    const node = CreateFlowNode(nodeType, layout.getInitialPosition(), outputOf(parent)!.optional);
+    const settings = createSettingPlaceholders(node, getConfigInputs(nodeType, registry), layout);
+    const outgoing = edges.find((e) => e.source === parent.id && e.sourceHandle === HandleId.MainSource);
+
+    const nextEdges = [
+        ...edges.filter((e) => e !== outgoing),
+        linkNodes(parent.id, node.id),
+        ...(outgoing ? [linkNodes(node.id, outgoing.target)] : []),
+        ...settings.edges,
+    ];
+    const nextNodes = [...nodes, node, ...settings.nodes];
+
+    const placed = new Map(layout.computePlacements(nextNodes, nextEdges, node.id).map((p) => [p.id, p.position]));
+    const byId = new Map(nextNodes.map((n) => [n.id, n]));
+    const settingParent = new Map(nextEdges.filter((e) => e.type === EdgeType.Settings).map((e) => [e.target, e.source]));
+
+    return {
+        nodes: nextNodes.map((n) => {
+            const position = placed.get(n.id);
+            if (position) return { ...n, position };
+            // A setting node keeps its offset from a parent the layout moved.
+            const parentId = settingParent.get(n.id);
+            const parentPosition = parentId && placed.get(parentId);
+            if (!parentPosition) return n;
+            const before = byId.get(parentId)!.position;
+            return {
+                ...n,
+                position: { x: parentPosition.x + n.position.x - before.x, y: parentPosition.y + n.position.y - before.y },
+            };
+        }),
+        edges: nextEdges,
     };
 }
 

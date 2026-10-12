@@ -1,6 +1,16 @@
-import { Menu, MenuButton, MenuDivider, MenuGroup, MenuItem, MenuList, Text } from "@chakra-ui/react";
+import {
+    Box,
+    HStack,
+    Menu,
+    MenuButton,
+    MenuDivider,
+    MenuGroup,
+    MenuItem,
+    MenuList,
+    Spinner,
+    Text,
+} from "@chakra-ui/react";
 import { ChevronDown } from "lucide-react";
-import Button from "components/ui/Button";
 import { DatasetEntity } from "types/dataset/dataset";
 import { pluralize } from "utils/dataset/datasetStatus";
 
@@ -20,30 +30,31 @@ export const DatasetPicker = ({ label, attached, others, excludedIds, onPick, is
     const isEmpty = agentChoices.length === 0 && otherChoices.length === 0;
 
     const renderItem = (dataset: DatasetEntity, needsAttach: boolean) => (
-        <MenuItem key={dataset.id} onClick={() => onPick(dataset, needsAttach)} fontSize="sm">
-            <Text noOfLines={1} flex={1}>
+        <MenuItem key={dataset.id} onClick={() => onPick(dataset, needsAttach)}>
+            <Text as="span" noOfLines={1} flex={1}>
                 {dataset.name}
             </Text>
-            <Text variant="caption-xs-muted" ml={3}>
+            <Text as="span" fontSize="xs" opacity={0.55} ml={3}>
                 {pluralize(dataset.documentsCount, "doc")}
             </Text>
         </MenuItem>
     );
 
     return (
-        <Menu placement="bottom-start" matchWidth>
-            <MenuButton
-                as={Button}
-                size="sm"
-                variant="secondary"
-                rightIcon={ChevronDown}
-                w="100%"
-                isLoading={isLoading}
-                isDisabled={isEmpty}
-            >
-                {isEmpty ? "Aucune autre base disponible" : label}
+        <Menu variant="glass" placement="bottom-start" matchWidth gutter={6}>
+            <MenuButton w="100%" textAlign="left" disabled={isLoading || isEmpty}>
+                <HStack justify="space-between">
+                    <Text as="span" noOfLines={1}>
+                        {isLoading ? "Chargement…" : isEmpty ? "Aucune autre base disponible" : label}
+                    </Text>
+                    {isLoading ? (
+                        <Spinner size="xs" />
+                    ) : (
+                        <Box as={ChevronDown} size={14} opacity={0.6} flexShrink={0} />
+                    )}
+                </HStack>
             </MenuButton>
-            <MenuList bg="surfaceCard" maxH="320px" overflowY="auto" zIndex={20}>
+            <MenuList maxH="320px" overflowY="auto" zIndex={20}>
                 {agentChoices.length > 0 && (
                     <MenuGroup title="Bases de l'agent">{agentChoices.map((d) => renderItem(d, false))}</MenuGroup>
                 )}

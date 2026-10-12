@@ -1,11 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { linkNodes, makeFlowNode, withAutoSettings } from "../src/graph/create-flow-node";
+import {
+    createMultipleSettingNode,
+    EMPTY_SETTING_NODE_TYPE,
+    insertChainNode,
+    linkNodes,
+    makeFlowNode,
+    withAutoSettings,
+    withEmptySettingNodes,
+} from "../src/graph/create-flow-node";
 import { getAddableTaskTypes, getConfigInputs, getNonSettingsTaskTypes, isSettingsTaskType } from "../src/graph/task-utils";
 import { SETTING_KINDS } from "../src/graph/setting-kinds";
+import { DEFAULT_LAYOUT } from "../src/layout";
 import type { AppNodeData } from "../src/types/app-node";
 import { TaskParamType, TaskType } from "../src/types/task";
-import { settingNodesOf } from "./fixtures";
+import { fullWorkflow, minimalWorkflow, settingNodesOf } from "./fixtures";
 
 describe("task utils", () => {
     it("lists the setting inputs of a task", () => {
@@ -92,6 +101,72 @@ describe("withAutoSettings", () => {
 
         assert.equal(second.nodes.length, first.nodes.length);
         assert.equal(second.edges.length, first.edges.length);
+    });
+});
+
+describe("insertChainNode", () => {
+    const mainEdges = (edges: { source: string; target: string; type?: string }[]) =>
+        edges.filter((e) => e.type !== "settings").map((e) => [e.source, e.target]);
+
+    it("inserts the node between its parent and the next node, with its setting placeholders", () => {
+        const { nodes, edges } = insertChainNode(minimalWorkflow().nodes, minimalWorkflow().edges, TaskType.RERANKER)!;
+        const reranker = nodes.find((n) => n.data.type === TaskType.RERANKER)!;
+
+        assert.deepEqual(mainEdges(edges), [
+            ["q", "r"],
+            ["r", reranker.id],
+            [reranker.id, "s"],
+        ]);
+        assert.equal(reranker.deletable, true);
+        const settings = settingNodesOf(nodes, reranker.id);
+        assert.equal(settings.length, 1);
+        assert.equal(settings[0].data.isPlaceholder, true);
+    });
+
+    it("places the node between its neighbours, its settings following it", () => {
+        const { nodes } = insertChainNode(minimalWorkflow().nodes, minimalWorkflow().edges, TaskType.REWRITER)!;
+        const rewriter = nodes.find((n) => n.data.type === TaskType.REWRITER)!;
+        const [setting] = settingNodesOf(nodes, rewriter.id);
+        const offset = DEFAULT_LAYOUT.getSettingOffset(0, 1);
+
+        assert.deepEqual(rewriter.position, { x: 0, y: 70 });
+        assert.deepEqual(setting.position, { x: rewriter.position.x + offset.x, y: rewriter.position.y + offset.y });
+    });
+
+    it("does nothing when the node is already present or nothing can chain it", () => {
+        const { nodes, edges } = fullWorkflow();
+
+        assert.equal(insertChainNode(nodes, edges, TaskType.REWRITER), null);
+        assert.equal(insertChainNode([], [], TaskType.REWRITER), null);
+    });
+});
+
+describe("withEmptySettingNodes", () => {
+    it("shows an 'all bases' node on a retriever without dataset, linked to its dataset handle", () => {
+        const { nodes, edges } = minimalWorkflow();
+        const canvas = withEmptySettingNodes(nodes, edges);
+        const [empty] = canvas.nodes.filter((n) => n.type === EMPTY_SETTING_NODE_TYPE);
+
+        assert.equal(canvas.nodes.length, nodes.length + 1);
+        assert.equal(empty.data.type, TaskType.DATASET);
+        assert.equal(empty.data.parentNodeId, "r");
+        assert.equal(empty.selectable, false);
+        const edge = canvas.edges.find((e) => e.target === empty.id)!;
+        assert.deepEqual([edge.source, edge.sourceHandle, edge.type], ["r", "setting-source-Bases", "settings"]);
+    });
+
+    it("shows nothing once a dataset is chosen, and never touches the saved graph", () => {
+        const { nodes, edges } = minimalWorkflow();
+        const retriever = nodes.find((n) => n.id === "r")!;
+        const input = getConfigInputs(TaskType.RETRIEVER).find((i) => i.multiple)!;
+        const dataset = createMultipleSettingNode(retriever, input, "ds-1", 0);
+        const withDataset = { nodes: [...nodes, dataset.node], edges: [...edges, dataset.edge] };
+
+        const canvas = withEmptySettingNodes(withDataset.nodes, withDataset.edges);
+
+        assert.equal(canvas.nodes, withDataset.nodes);
+        assert.equal(canvas.edges, withDataset.edges);
+        assert.equal(nodes.length, minimalWorkflow().nodes.length);
     });
 });
 

@@ -51,7 +51,7 @@ Seules limites de l'aller-retour : `collection_name` et `top_k` d'un block `retr
 
 ## Thème
 
-Les nodes utilisent Chakra UI. Il faut un `ChakraProvider` avec le thème GenRAG (`plateform_front/src/themeNew`) : palettes `grey` (dont `grey.750`, `grey.850`, `grey.950`) et `green`, token sémantique `accentIconBg`, et variante de bouton `superPrimary` (bouton « Valider » des instructions, en édition seulement). Sans ce thème, le rendu retombe sur les couleurs Chakra par défaut.
+Les nodes utilisent Chakra UI. Il faut un `ChakraProvider` avec le thème GenRAG (`plateform_front/src/themeNew`) : palettes `grey` (dont `grey.750`, `grey.850`, `grey.950`) et `green`, tokens sémantiques de `colorTokens.ts` (`accentIconBg`, `iconAccent`, `accentCardBg`, `borderAccentCard`, `borderAccentCardActive`, `surfaceAction`, `textPrimary`, `textLabel`, `warningAccent`, `warningIconBg`), et variante de bouton `superPrimary` (bouton « Valider » des instructions, en édition seulement). Sans ce thème, le rendu retombe sur les couleurs Chakra par défaut.
 
 ## Éditer un workflow
 
@@ -60,9 +60,9 @@ import { ReactFlow } from "@xyflow/react";
 import { useWorkflowCanvas, sanitizeWorkflowEdges, serializeWorkflow } from "@genrag/workflow";
 
 const { nodes: initialNodes, edges: initialEdges } = sanitizeWorkflowEdges(saved.nodes, saved.edges);
-const { nodes, edges, nodeTypes, edgeTypes, onNodesChange, onEdgesChange, handleAddChainNode } =
+const { nodes, edges, canvasNodes, canvasEdges, nodeTypes, edgeTypes, onNodesChange, onEdgesChange, handleAddChainNode } =
     useWorkflowCanvas({ initialNodes, initialEdges, onNodeClick });
-// <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} … />
+// <ReactFlow nodes={canvasNodes} edges={canvasEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} … />
 // Sauvegarde : serializeWorkflow(nodes, edges) → { nodes, edges, blocks }
 ```
 

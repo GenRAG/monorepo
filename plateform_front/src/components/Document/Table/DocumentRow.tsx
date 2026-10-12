@@ -7,6 +7,7 @@ import { DocumentEntity } from "types/document/document";
 import { formatFileSize, getFileTypeBadgeConfig, getFileTypeLabel } from "utils/documentFormatters";
 import { formatRelativeDate } from "utils/date";
 import { getDocumentSourceLabel } from "utils/dataset/documentSource";
+import { DocumentSourceIcon } from "components/Document/DocumentSourceIcon";
 import { DocumentActionsMenu } from "./DocumentActionsMenu";
 
 interface DocumentRowProps {
@@ -44,9 +45,12 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
                 </HStack>
             </Td>
             <Td>
-                <Text fontSize="sm" color="textBody" whiteSpace="nowrap">
-                    {getDocumentSourceLabel(document.source)}
-                </Text>
+                <HStack spacing={2}>
+                    <DocumentSourceIcon source={document.source} size={18} />
+                    <Text fontSize="sm" color="textBody" whiteSpace="nowrap">
+                        {getDocumentSourceLabel(document.source)}
+                    </Text>
+                </HStack>
             </Td>
             <Td>
                 <Text fontSize="sm" color="textMuted" whiteSpace="nowrap">

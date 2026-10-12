@@ -68,9 +68,15 @@ const colorTokens = {
     trendNeutral: { default: "orange.500", _dark: "orange.300" },
     trendNegative: { default: "red.500", _dark: "red.400" },
 
+    // === WARNING (alerte non bloquante) ===
+    warningAccent: { default: "orange.500", _dark: "orange.300" }, // Texte, icône et bordure d'alerte
+    warningIconBg: { default: "orange.50", _dark: "orange.900" }, // Fond d'icône d'alerte
+
     accentCardBg: { default: "green.50", _dark: "grey.850" }, // Carte sélectionnée/active
     accentIconBg: { default: "green.100", _dark: "grey.800" }, // Fond icône accent
     iconAccent: { default: "green.500", _dark: "green.400" }, // Icône accentuée (vert marque)
+    accentBadgeBg: { default: "green.400", _dark: "green.400" }, // Pastille de compteur (filtres actifs)
+    accentBadgeText: { default: "grey.975", _dark: "grey.975" }, // Texte de la pastille de compteur
     iconStepInactive: { default: "grey.500", _dark: "grey.900" }, // Icône d'étape inactive sur fond accentué
     thinkingDotColor: { default: "#38A169", _dark: "#68D391" }, // Puce d'indicateur "en train de réfléchir"
     errorIconAccent: { default: "#ef4444", _dark: "#f87171" }, // Icône d'alerte/erreur

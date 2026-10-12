@@ -2,6 +2,8 @@ export {
     linkNodes,
     makeFlowNode,
     withAutoSettings,
+    withEmptySettingNodes,
+    EMPTY_SETTING_NODE_TYPE,
     createMultipleSettingNode,
     settingEdgeId,
     DATASET_ID_INPUT,

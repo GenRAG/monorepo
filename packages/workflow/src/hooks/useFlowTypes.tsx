@@ -4,6 +4,8 @@ import SettingsEdge from "../components/edges/SettingsEdge";
 import { EdgeType } from "../types/edge";
 import type { NodeComponentType } from "../types/app-node";
 import NodeComponent from "../components/nodes/NodeComponent";
+import AllDatasetsNode from "../components/nodes/SettingNodes/AllDatasetsNode";
+import { EMPTY_SETTING_NODE_TYPE } from "../graph/create-flow-node";
 import { useWorkflowNodes, UseWorkflowNodesOptions } from "./useWorkflowNodes";
 
 interface UseFlowTypesParams {
@@ -70,6 +72,12 @@ export const useFlowTypes = ({
                     onRemoveNode: nodeCallbacksRef.current.onRemoveNode,
                     onInstructionSave: nodeCallbacksRef.current.onInstructionSave,
                     onMutation: nodeCallbacksRef.current.onMutation,
+                    readonly: nodeCallbacksRef.current.readonly,
+                }),
+            [EMPTY_SETTING_NODE_TYPE]: (props: any) =>
+                createElement(AllDatasetsNode, {
+                    ...props,
+                    onNodeClick: nodeCallbacksRef.current.onNodeClick,
                     readonly: nodeCallbacksRef.current.readonly,
                 }),
             }),

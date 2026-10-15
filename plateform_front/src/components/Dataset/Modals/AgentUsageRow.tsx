@@ -6,6 +6,8 @@ import { AgentPreview } from "types/agent/agent";
 import { getAgentAvatar } from "utils/agentAvatar";
 import { getAgentDatasetUsage } from "utils/dataset/agentDatasetUsage";
 
+const SELECTION_GRADIENT = "linear(to-r, selectionGradientStart, selectionGradientEnd)";
+
 interface AgentUsageRowProps {
     agent: AgentPreview;
     workspaceId: string;
@@ -26,15 +28,31 @@ export const AgentUsageRow = ({ agent, workspaceId, datasetId, isChecked, onTogg
             onChange={onToggle}
             colorScheme="green"
             spacing={3}
-            alignItems="flex-start"
+            alignItems="center"
             px={3}
             py={2.5}
+            // Le thème Checkbox fixe 48px : l'avertissement sur deux lignes déborderait.
+            h="auto"
             borderRadius="10px"
+            // Bordure via _light, pas _dark : un prop _dark remplacerait tout le _dark du thème (fond, survol).
+            borderWidth={0}
+            _light={{ borderWidth: "1px", borderColor: "borderStrong" }}
             cursor="pointer"
-            _hover={{ bg: "surfaceHover" }}
+            // Répété dans _checked et _checked._dark : le thème Checkbox y pose un `bg` qui écraserait le dégradé.
+            _checked={{ bgGradient: SELECTION_GRADIENT, _dark: { bgGradient: SELECTION_GRADIENT } }}
+            // bgColor, pas bg : le raccourci `background` effacerait le dégradé de la ligne cochée au survol.
+            _hover={{ bgColor: "surfaceHover" }}
             sx={{
-                "& .chakra-checkbox__control": { mt: 1.5 },
                 "& .chakra-checkbox__label": { flex: 1, minW: 0, ml: 0 },
+                // Le thème Checkbox n'a pas de variante sombre pour la case : blanche sur fond sombre sinon.
+                "& .chakra-checkbox__control": {
+                    borderColor: "borderStrong",
+                    _dark: {
+                        bg: "inputBg",
+                        borderColor: "inputBorder",
+                        _checked: { bg: "accentBadgeBg", borderColor: "accentBadgeBg", color: "accentBadgeText" },
+                    },
+                },
             }}
         >
             <HStack spacing={3} align="start" minW={0}>

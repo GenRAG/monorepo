@@ -1,28 +1,19 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
-    Badge,
-    Box,
     Button,
-    Divider,
     FormControl,
+    FormHelperText,
     FormLabel,
     Grid,
-    HStack,
     Icon,
     Input,
-    Stack,
-    Text,
-    useColorModeValue,
-    VStack,
+    InputGroup,
+    InputLeftElement,
 } from "@chakra-ui/react";
-import { Info, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { User } from "types/user";
-import { ProfileSelectField } from "pages/Profile/sections/ProfileSelectField";
-
-const LANG_OPTIONS = [{ value: "fr", label: "Français" }];
-
-const TZ_OPTIONS = [{ value: "Europe/Paris", label: "Europe/Paris (UTC+1)" }];
+import { ProfileBlock } from "../ProfileBlock";
 
 const splitName = (name: string): [string, string] => {
     const idx = name.indexOf(" ");
@@ -32,8 +23,6 @@ const splitName = (name: string): [string, string] => {
 interface FormValues {
     firstName: string;
     lastName: string;
-    lang: string;
-    tz: string;
 }
 
 interface Props {
@@ -44,109 +33,76 @@ interface Props {
 
 const PersonalInfoSection = ({ user, onSave, isLoading }: Props) => {
     const [firstName, lastName] = splitName(user.name ?? "");
-    const inputBg = useColorModeValue("white", "grey.900");
-
-    const { register, handleSubmit, reset, control } = useForm<FormValues>({
-        defaultValues: { firstName, lastName, lang: "fr", tz: "Europe/Paris" },
+    const { register, handleSubmit, reset, formState } = useForm<FormValues>({
+        defaultValues: { firstName, lastName },
     });
 
     useEffect(() => {
         const [fn, ln] = splitName(user.name ?? "");
-        reset({ firstName: fn, lastName: ln, lang: "fr", tz: "Europe/Paris" });
+        reset({ firstName: fn, lastName: ln });
     }, [user.name, reset]);
 
     const onSubmit = (values: FormValues) => onSave([values.firstName, values.lastName].filter(Boolean).join(" "));
 
     return (
-        <VStack align="stretch" as="form" onSubmit={handleSubmit(onSubmit)} w="100%">
-            <Stack p={6}>
-                <Box>
-                    <Text fontSize="md" fontWeight="600" color="textPrimary">
-                        Informations personnelles
-                    </Text>
-                    <Text fontSize="sm" color="textLabel" mt={0.5}>
-                        Visibles par les membres de votre entreprise.
-                    </Text>
-                </Box>
-
-                <Grid templateColumns="1fr 1fr" gap={4} w="100%">
-                    <FormControl>
-                        <FormLabel fontSize="xs" color="textLabel">
-                            Prénom
-                        </FormLabel>
-                        <Input bg={inputBg} {...register("firstName")} />
-                    </FormControl>
-
-                    <FormControl>
-                        <FormLabel fontSize="xs" color="textLabel">
-                            Nom
-                        </FormLabel>
-                        <Input bg={inputBg} {...register("lastName")} />
-                    </FormControl>
-
-                    <FormControl gridColumn="1 / -1">
-                        <HStack mb={1} spacing={2}>
-                            <FormLabel fontSize="xs" color="textLabel" mb={0}>
-                                Adresse email
-                            </FormLabel>
-                            {user.isEmailVerified && (
-                                <Badge colorScheme="green" variant="subtle" fontSize="10px" px={2} borderRadius="full">
-                                    ✓ Vérifiée
-                                </Badge>
-                            )}
-                        </HStack>
-                        <HStack
-                            bg="inputDisabledBg"
-                            border="1px solid"
-                            borderColor="inputBorder"
-                            borderRadius="6px"
-                            px={3}
-                            h="40px"
-                        >
-                            <Icon as={Mail} boxSize={3.5} color="textLabel" flexShrink={0} />
-                            <Text fontSize="sm" color="textSecondary">
-                                {user.email}
-                            </Text>
-                        </HStack>
-                        <Text fontSize="xs" color="textMuted" mt={1}>
-                            Contactez un administrateur pour changer l&apos;adresse email.
-                        </Text>
-                    </FormControl>
-
-                    <ProfileSelectField
-                        name="lang"
-                        control={control}
-                        label="Langue de l'interface"
-                        options={LANG_OPTIONS}
-                        inputBg={inputBg}
-                    />
-                    <ProfileSelectField
-                        name="tz"
-                        control={control}
-                        label="Fuseau horaire"
-                        options={TZ_OPTIONS}
-                        inputBg={inputBg}
-                    />
-                </Grid>
-            </Stack>
-
-            <Divider borderColor="borderDefault" />
-
-            <HStack justify="space-between" p={6}>
-                <HStack spacing={1.5} color="textMuted">
-                    <Icon as={Info} boxSize={3} />
-                    <Text fontSize="xs">Les modifications ne seront visibles qu&apos;après enregistrement.</Text>
-                </HStack>
-                <HStack spacing={3}>
-                    <Button size="sm" variant="ghost" type="button" onClick={() => reset()}>
+        <ProfileBlock
+            title="Informations personnelles"
+            subtitle="Votre nom tel qu'il s'affiche dans l'application."
+            onSubmit={handleSubmit(onSubmit)}
+            footer={
+                <>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        type="button"
+                        onClick={() => reset()}
+                        isDisabled={!formState.isDirty}
+                    >
                         Annuler
                     </Button>
-                    <Button size="sm" variant="superPrimary" type="submit" isLoading={isLoading}>
+                    <Button
+                        size="sm"
+                        variant="superPrimary"
+                        type="submit"
+                        isLoading={isLoading}
+                        isDisabled={!formState.isDirty}
+                    >
                         Enregistrer
                     </Button>
-                </HStack>
-            </HStack>
-        </VStack>
+                </>
+            }
+        >
+            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
+                <FormControl>
+                    <FormLabel fontSize="xs" color="textLabel">
+                        Prénom
+                    </FormLabel>
+                    <Input variant="glass" size="sm" {...register("firstName")} />
+                </FormControl>
+
+                <FormControl>
+                    <FormLabel fontSize="xs" color="textLabel">
+                        Nom
+                    </FormLabel>
+                    <Input variant="glass" size="sm" {...register("lastName")} />
+                </FormControl>
+
+                <FormControl gridColumn="1 / -1">
+                    <FormLabel fontSize="xs" color="textLabel">
+                        Adresse email
+                    </FormLabel>
+                    <InputGroup size="sm">
+                        <InputLeftElement pointerEvents="none">
+                            <Icon as={Mail} boxSize={3.5} color="textLabel" />
+                        </InputLeftElement>
+                        <Input variant="glass" value={user.email} isReadOnly color="textLabel" />
+                    </InputGroup>
+                    <FormHelperText fontSize="xs" color="textMuted">
+                        Contactez le support pour changer d&apos;adresse email.
+                    </FormHelperText>
+                </FormControl>
+            </Grid>
+        </ProfileBlock>
     );
 };
 

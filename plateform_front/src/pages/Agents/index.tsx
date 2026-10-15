@@ -1,12 +1,11 @@
 import { HStack, Icon, Input, InputGroup, InputLeftElement, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AgentsTable } from "components/Agents/AgentsTable";
 import { CreateAgentModal } from "components/Agents/CreateAgentModal";
 import { useGetWorkspaceAgentsQuery } from "services/agent/agent";
 import { useParams } from "react-router-dom";
 import { AgentStatus } from "types/deployment/deployment";
-import Button from "components/ui/Button";
 import { MainLayoutContainer } from "components/ui/MainLayoutContainer";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
 
@@ -78,14 +77,6 @@ export const AgentsList = () => {
                                     size="sm"
                                 />
                             </InputGroup>
-                            <Button
-                                size="sm"
-                                variant="superPrimary"
-                                leftIcon={Plus}
-                                onClick={() => setIsCreateModalOpen(true)}
-                            >
-                                Nouvel agent
-                            </Button>
                         </HStack>
                     </HStack>
 

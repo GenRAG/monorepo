@@ -73,6 +73,8 @@ const colorTokens = {
     warningIconBg: { default: "orange.50", _dark: "orange.900" }, // Fond d'icône d'alerte
 
     accentCardBg: { default: "green.50", _dark: "grey.850" }, // Carte sélectionnée/active
+    selectionGradientStart: { default: "green.100", _dark: "green.950" }, // Ligne cochée : départ du dégradé (gauche)
+    selectionGradientEnd: { default: "white", _dark: "grey.900" }, // Ligne cochée : fin du dégradé (droite)
     accentIconBg: { default: "green.100", _dark: "grey.800" }, // Fond icône accent
     iconAccent: { default: "green.500", _dark: "green.400" }, // Icône accentuée (vert marque)
     accentBadgeBg: { default: "green.400", _dark: "green.400" }, // Pastille de compteur (filtres actifs)

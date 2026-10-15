@@ -1,14 +1,12 @@
-import { Box, Divider, HStack, Icon, Text, VStack, useColorMode, useColorModeValue } from "@chakra-ui/react";
+import { Box, Divider, HStack, Icon, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { LogOut, Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "store";
 import { useAuth } from "app/AuthContext";
 import { useLogoutUserMutation } from "services/auth/auth";
 import { backendApi } from "services/api";
 import mixpanel from "lib/mixpanel";
-
-type ThemeMode = "light" | "dark" | "system";
+import { useThemeMode, type ThemeMode } from "hooks/useThemeMode";
 
 interface SidebarFooterPanelProps {
     onClose: () => void;
@@ -20,25 +18,10 @@ export const SidebarFooterPanel = ({ onClose }: SidebarFooterPanelProps) => {
     const dispatch = useAppDispatch();
     const { logout } = useAuth();
     const [logoutUser] = useLogoutUserMutation();
-    const { colorMode, setColorMode } = useColorMode();
-
-    const [themeMode, setThemeMode] = useState<ThemeMode>(
-        () => (localStorage.getItem("themeMode") as ThemeMode) ?? colorMode,
-    );
+    const { themeMode, setThemeMode } = useThemeMode();
 
     const cardActiveText = useColorModeValue("green.700", "green.400");
     const dangerHoverBg = useColorModeValue("red.50", "grey.900");
-
-    const handleTheme = (mode: ThemeMode) => {
-        setThemeMode(mode);
-        localStorage.setItem("themeMode", mode);
-        if (mode === "system") {
-            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            setColorMode(prefersDark ? "dark" : "light");
-        } else {
-            setColorMode(mode);
-        }
-    };
 
     const themeOptions: { id: ThemeMode; label: string; icon: LucideIcon }[] = [
         { id: "light", label: "Clair", icon: Sun },
@@ -76,7 +59,7 @@ export const SidebarFooterPanel = ({ onClose }: SidebarFooterPanelProps) => {
                                 borderStyle="solid"
                                 borderColor={active ? "borderAccentCardActive" : "borderDivider"}
                                 bg={active ? "accentCardBg" : "surfaceHover"}
-                                onClick={() => handleTheme(id)}
+                                onClick={() => setThemeMode(id)}
                                 transition="all 0.15s"
                                 _hover={{ borderColor: active ? "borderAccentCardActive" : "grey.500" }}
                             >

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from 'src/users/users.service';
 import { UserRepository } from 'src/users/user.repository';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'generated/prisma';
 
 const fakeUserSafe = {
@@ -26,6 +26,7 @@ const fakeUserWithCredentials = {
 const mockUserRepository = {
     findOne: jest.fn() as any,
     findOneWithCredentials: jest.fn() as any,
+    findAccountFlags: jest.fn() as any,
     create: jest.fn() as any,
     update: jest.fn() as any,
     delete: jest.fn() as any,
@@ -163,6 +164,35 @@ describe('UsersService', () => {
             await expect(service.updateProfile('user-1', { email: 'taken@example.com' })).rejects.toThrow(
                 ConflictException,
             );
+        });
+    });
+
+    describe('getMe', () => {
+        it('should add the account flags to the current user', async () => {
+            mockUserRepository.findAccountFlags.mockResolvedValue({ hasPassword: false, isEmailVerified: true });
+
+            await expect(service.getMe(fakeUserSafe)).resolves.toEqual({
+                ...fakeUserSafe,
+                hasPassword: false,
+                isEmailVerified: true,
+            });
+        });
+
+        it('should answer 404 when the user disappeared since the token check', async () => {
+            mockUserRepository.findAccountFlags.mockResolvedValue(null);
+
+            await expect(service.getMe(fakeUserSafe)).rejects.toBeInstanceOf(NotFoundException);
+        });
+    });
+
+    describe('changePassword', () => {
+        it('should answer 400 pointing to the reset flow for an account without password', async () => {
+            mockUserRepository.findOneWithCredentials.mockResolvedValue({ ...fakeUserWithCredentials, password: null });
+
+            const result = service.changePassword('user-1', 'anything', 'Password123!');
+            await expect(result).rejects.toBeInstanceOf(BadRequestException);
+            await expect(result).rejects.toThrow('Mot de passe oublié');
+            expect(mockUserRepository.update).not.toHaveBeenCalled();
         });
     });
 

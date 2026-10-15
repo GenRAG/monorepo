@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createTestApp } from './helpers/app.helper';
 import { cleanDatabase } from './helpers/db.helper';
+import { PrismaService } from '../src/prisma/prisma.service';
 import { TEST_USER, registerAndLogin } from './helpers/auth.helper';
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
@@ -28,10 +29,45 @@ describe('Users (e2e)', () => {
             expect(res.body).not.toHaveProperty('password');
             expect(res.body).not.toHaveProperty('emailVerificationToken');
             expect(res.body).not.toHaveProperty('passwordResetToken');
+            expect(res.body).toHaveProperty('hasPassword', true);
+            expect(res.body).toHaveProperty('isEmailVerified');
         });
 
         it('should return 401 without auth', async () => {
             await request(app.getHttpServer()).get('/users/me').expect(401);
+        });
+    });
+
+    describe('account without password (created with Google)', () => {
+        let googleCookie: string;
+
+        beforeAll(async () => {
+            googleCookie = await registerAndLogin(app, {
+                email: 'google@test.com',
+                password: 'Password123!',
+                name: 'Google',
+            });
+            // Same state as createGoogleUser, without going through Google.
+            await app.get(PrismaService).user.update({
+                where: { email: 'google@test.com' },
+                data: { password: null, isEmailVerified: true },
+            });
+        });
+
+        it('should tell GET /users/me it has no password', async () => {
+            const res = await request(app.getHttpServer()).get('/users/me').set('Cookie', googleCookie).expect(200);
+
+            expect(res.body).toMatchObject({ hasPassword: false, isEmailVerified: true });
+        });
+
+        it('should answer 400 on PATCH /users/me/password instead of a wrong-password 401', async () => {
+            const res = await request(app.getHttpServer())
+                .patch('/users/me/password')
+                .set('Cookie', googleCookie)
+                .send({ currentPassword: 'anything', newPassword: 'NewPassword123!' })
+                .expect(400);
+
+            expect(JSON.stringify(res.body)).toContain('Mot de passe oublié');
         });
     });
 

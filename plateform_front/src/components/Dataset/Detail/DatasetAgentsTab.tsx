@@ -1,6 +1,7 @@
 import { HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Banner from "components/ui/Banner";
 import BoxIcon from "components/ui/BoxIcon";
 import Button from "components/ui/Button";
 import useApiErrorToast from "hooks/useApiErrorToast";
@@ -29,12 +30,15 @@ export const DatasetAgentsTab = ({ dataset, workspaceId, onAddAgents }: DatasetA
 
     return (
         <VStack align="stretch" spacing={4} pt={4}>
-            <HStack justify="space-between">
-                <Text variant="body-sm-muted">Ces agents peuvent répondre à partir des documents de cette base.</Text>
+            <HStack spacing={3}>
                 <Button size="sm" variant="superPrimary" leftIcon={Plus} onClick={onAddAgents}>
                     Ajouter à un agent
                 </Button>
             </HStack>
+
+            <Banner variant="grey" size="sm" flex={1}>
+                Ces agents peuvent répondre à partir des documents de cette base.
+            </Banner>
 
             {dataset.agents.length === 0 ? (
                 <Text

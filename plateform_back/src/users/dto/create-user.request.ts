@@ -28,3 +28,6 @@ export type UserSafe = Prisma.UserGetPayload<{
         updatedAt: true;
     };
 }>;
+
+/** Response of GET /users/me: the safe user plus what the profile needs to know about the account. */
+export type UserMe = UserSafe & { hasPassword: boolean; isEmailVerified: boolean };

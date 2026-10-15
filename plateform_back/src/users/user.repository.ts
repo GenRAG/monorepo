@@ -28,6 +28,15 @@ export class UserRepository {
         return this.prisma.user.findUnique({ where: filter });
     }
 
+    /** Flags exposed by GET /users/me: the hash is read here only to become a boolean, it never leaves the repository. */
+    async findAccountFlags(id: string): Promise<{ hasPassword: boolean; isEmailVerified: boolean } | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+            select: { password: true, isEmailVerified: true },
+        });
+        return user && { hasPassword: user.password !== null, isEmailVerified: user.isEmailVerified };
+    }
+
     findAll(): Promise<UserSafe[]> {
         return this.prisma.user.findMany({ select: this.safeSelect });
     }

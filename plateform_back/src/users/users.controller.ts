@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Patch, UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserSafe } from 'src/users/dto/create-user.request';
+import { UserMe, UserSafe } from 'src/users/dto/create-user.request';
 import { UpdateProfileRequest } from 'src/users/dto/update-profile.request';
 import { ChangePasswordRequest } from 'src/users/dto/change-password.request';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
@@ -13,8 +13,8 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
     @Get('me')
-    getMe(@CurrentUser(CurrentUserPipe) user: UserSafe): UserSafe {
-        return user;
+    getMe(@CurrentUser(CurrentUserPipe) user: UserSafe): Promise<UserMe> {
+        return this.usersService.getMe(user);
     }
 
     @Patch('me')

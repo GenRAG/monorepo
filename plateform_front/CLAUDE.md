@@ -34,7 +34,8 @@ Convention : **`hooks/`, `utils/`, `types/`, `constants/`, `services/` vivent à
 ## Routes
 
 - Auth (publiques) : `/login`, `/register`, `/validate`, `/reset-password`, `/new-password` (+ `/test`, écran de bienvenue de dev).
-- Hors workspace : `/profile` (dont la section « Entreprise », qui renomme le workspace), `/assistants` (interface utilisateur final), `/billing`, `/onboarding/:workspaceId`.
+- Profil : pas de route, c'est une modal (`pages/Profile/ProfileModal.tsx`) ouverte par « Mon profil » dans le menu du compte (`app/Navigation/SidebarFooter.tsx`). Sa section « Entreprise » renomme le workspace.
+- Hors workspace : `/assistants` (interface utilisateur final), `/billing`, `/onboarding/:workspaceId`.
 - Écran de bienvenue : son visuel (`components/Auth/welcome/`) reprend trois démos animées du site vitrine (éditeur, déploiement, comparaison de sources). `welcome/vitrine/` ne contient que les trois enveloppes (`BuilderDemo`, `ShareDemo`, `ReasoningDemo`), `scope.module.css` (tokens de la vitrine limités à ce conteneur, branchés sur le thème Chakra) et le cadre du navigateur de l'éditeur : le reste (hooks, maquettes, CSS Modules) est importé de `vitrine_front/src` via l'alias `@vitrine` (`craco.config.js` + `tsconfig.json`, avec `react`, `react-dom` et `lucide-react` forcés sur ceux de l'app). Ne pas recopier de fichier de la vitrine : modifier la source.
 - Un utilisateur n'a qu'un workspace : pas de sélecteur. Il est créé sur l'écran de bienvenue (`components/Auth/WelcomeScreen.tsx`, champ « Nom de votre entreprise ») et les textes de l'interface parlent d'« entreprise », pas de workspace.
 - Workspace : `/workspaces/:workspaceId/{dashboard,assistants[/:assistantId],billing,agents}`.

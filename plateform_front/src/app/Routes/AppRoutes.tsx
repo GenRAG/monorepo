@@ -7,7 +7,6 @@ import { BillingWorkspace } from "pages/Billing";
 import Dashboard from "pages/Dashboard";
 import { DatasetLibrary } from "pages/Datasets";
 import { DatasetDetail } from "pages/Datasets/DatasetDetail";
-import { ProfilePage } from "pages/Profile";
 import { Route, useParams } from "react-router-dom";
 
 export const ChatRoute = () => {
@@ -17,7 +16,6 @@ export const ChatRoute = () => {
 
 export const AppRoutes = () => (
     <Route element={<PrivateAppLayout />}>
-        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/assistants" element={<AssistantsList />} />
         <Route path="/billing" element={<BillingWorkspace />} />
 

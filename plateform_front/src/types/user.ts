@@ -5,6 +5,8 @@ export interface User {
     createdAt: string;
     updatedAt: string;
     isEmailVerified: boolean;
+    /** Faux pour un compte créé avec Google : il n'a pas de mot de passe à changer. */
+    hasPassword: boolean;
 }
 
 export interface LoginParams {

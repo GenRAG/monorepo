@@ -8,13 +8,9 @@ const PrivateAppLayout: React.FC = () => {
     return (
         <Box h="100vh" overflow="hidden">
             <GlassNavAppExample />
-            <Box
-                h="100%"
-                minW={0}
-                overflow="hidden"
-                pl={isVertical ? "128px" : 4}
-                pb={isVertical ? 0 : "calc(84px + env(safe-area-inset-bottom, 0px))"}
-            >
+            {/* Pas de padding-bottom en bottom bar : le contenu défile sous la barre en verre,
+            MainLayoutContainer réserve sa hauteur en fin de scroll. */}
+            <Box h="100%" minW={0} overflow="hidden" pl={isVertical ? "128px" : 4}>
                 <Outlet />
             </Box>
         </Box>

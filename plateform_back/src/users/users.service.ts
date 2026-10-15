@@ -1,6 +1,12 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { Prisma, User } from 'generated/prisma';
-import { CreateUserRequest, UserSafe } from 'src/users/dto/create-user.request';
+import { CreateUserRequest, UserMe, UserSafe } from 'src/users/dto/create-user.request';
 import { UpdateProfileRequest } from 'src/users/dto/update-profile.request';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from 'src/users/user.repository';
@@ -60,11 +66,21 @@ export class UsersService {
         }
     }
 
+    /** Accounts created through Google have no password until they set one with the reset flow. */
+    async getMe(user: UserSafe): Promise<UserMe> {
+        const flags = await this.userRepository.findAccountFlags(user.id);
+        if (!flags) throw new NotFoundException('User not found');
+        return { ...user, ...flags };
+    }
+
     async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
         const user = await this.userRepository.findOneWithCredentials({ id: userId });
         if (!user) throw new NotFoundException('User not found');
 
-        if (!user.password) throw new UnauthorizedException('Mot de passe actuel incorrect');
+        if (!user.password)
+            throw new BadRequestException(
+                "Ce compte n'a pas encore de mot de passe : créez-en un avec « Mot de passe oublié » sur la page de connexion.",
+            );
 
         const isValid = await bcrypt.compare(currentPassword, user.password);
         if (!isValid) throw new UnauthorizedException('Mot de passe actuel incorrect');

@@ -1,4 +1,4 @@
-import { Divider, HStack, Icon, Stack, Text, VStack } from "@chakra-ui/react";
+import { Divider, HStack, Icon, Stack, Text, VStack, useDisclosure } from "@chakra-ui/react";
 import { MessageSquare, Scale, User, type LucideIcon } from "lucide-react";
 import { ComponentProps, ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,6 +7,7 @@ import { setLastWorkspaceId } from "store/navigationSlice";
 import BoxIcon from "components/ui/BoxIcon";
 import { ActionMenu } from "components/ui/ActionMenu";
 import { SidebarFooterPanel } from "app/Navigation/SidebarFooterPanel";
+import { ProfileModal } from "pages/Profile/ProfileModal";
 
 interface SidebarFooterProps {
     isOpen: boolean;
@@ -47,6 +48,7 @@ export const SidebarFooter = ({
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const { workspaceId } = useParams<{ workspaceId: string }>();
+    const profileModal = useDisclosure();
 
     if (!name && !email) return null;
 
@@ -85,7 +87,7 @@ export const SidebarFooter = ({
                 {
                     label: "Mon profil",
                     icon: <User size={14} />,
-                    onClick: () => void navigate("/profile"),
+                    onClick: profileModal.onOpen,
                     shortcut: "⌘ P",
                 },
             ],
@@ -119,16 +121,21 @@ export const SidebarFooter = ({
         },
     ];
 
+    const modal = <ProfileModal isOpen={profileModal.isOpen} onClose={profileModal.onClose} />;
+
     if (compactTrigger) {
         return (
-            <ActionMenu
-                trigger={compactTrigger}
-                sections={sections}
-                footer={footer}
-                placement={compactPlacement}
-                width="250px"
-                fullWidth={compactFullWidth}
-            />
+            <>
+                <ActionMenu
+                    trigger={compactTrigger}
+                    sections={sections}
+                    footer={footer}
+                    placement={compactPlacement}
+                    width="250px"
+                    fullWidth={compactFullWidth}
+                />
+                {modal}
+            </>
         );
     }
 
@@ -144,6 +151,7 @@ export const SidebarFooter = ({
                     width="250px"
                 />
             </Stack>
+            {modal}
         </VStack>
     );
 };

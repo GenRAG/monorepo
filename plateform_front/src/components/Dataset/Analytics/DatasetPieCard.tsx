@@ -17,6 +17,8 @@ interface DatasetPieCardProps {
 /** Donut + legend (label, count, share): the legend carries identity, the color only repeats it. */
 export const DatasetPieCard = ({ title, tooltip, subtitle, centerLabel, items, isLoading }: DatasetPieCardProps) => {
     const total = items.reduce((sum, item) => sum + item.value, 0);
+    // d3 pie gives every item a padAngle, even empty ones: they would leave gaps in the ring.
+    const slices = items.filter((item) => item.value > 0);
 
     return (
         <Stack spacing={0} h="100%">
@@ -43,8 +45,13 @@ export const DatasetPieCard = ({ title, tooltip, subtitle, centerLabel, items, i
                             {isLoading ? (
                                 <SkeletonCircle w="100%" h="100%" />
                             ) : (
-                                <PieChart data={items} innerRadius={52} padAngle={0.03} cornerRadius={4}>
-                                    {items.map((item, index) => (
+                                <PieChart
+                                    data={slices}
+                                    innerRadius={52}
+                                    padAngle={slices.length > 1 ? 0.03 : 0}
+                                    cornerRadius={4}
+                                >
+                                    {slices.map((item, index) => (
                                         <PieSlice key={item.label} index={index} fill={item.color} />
                                     ))}
                                     <PieCenter defaultLabel={centerLabel} />

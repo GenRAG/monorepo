@@ -1,32 +1,51 @@
-import { Box, HStack, Text, useColorModeValue, VStack } from "@chakra-ui/react";
+import { HStack, Icon, Text, VStack } from "@chakra-ui/react";
+import { BadgeCheck } from "lucide-react";
 import BoxIcon from "components/ui/BoxIcon";
+import { useGetUserWorkspacesQuery } from "services/workspace/workspace";
 import { User } from "types/user";
 
+const Stat = ({ label, value }: { label: string; value: string }) => (
+    <VStack align="start" spacing={0}>
+        <Text variant="caption-xs-muted">{label}</Text>
+        <Text variant="body-sm-semibold">{value}</Text>
+    </VStack>
+);
+
+/** En-tête du profil, sur le modèle de celui d'une base de connaissances. */
 const ProfileHero = ({ user }: { user: User }) => {
+    const { data: workspaces } = useGetUserWorkspacesQuery();
     const initials = (user.name || user.email).slice(0, 2).toUpperCase();
-    const textColor = useColorModeValue("grey.700", "grey.50");
-    const borderColor = useColorModeValue("grey.100", "grey.700");
 
     return (
-        <Box borderTopRadius="14px" overflow="hidden" border="1px solid" borderBottom="none" borderColor={borderColor}>
-            <HStack px={6} pt={6} pb={5} justify="space-between" align="flex-start">
-                <HStack spacing={4} align="center">
-                    <BoxIcon letters={initials} size="xl" />
-                    <VStack align="start" spacing={1}>
-                        <HStack spacing={2} flexWrap="wrap">
-                            <Text fontSize="lg" fontWeight="700" color={textColor}>
-                                {user.name || user.email}
-                            </Text>
-                        </HStack>
-                        {user.name && (
-                            <Text fontSize="sm" color={textColor}>
-                                {user.email}
-                            </Text>
+        <VStack align="stretch" spacing={4}>
+            <HStack align="center" spacing={4}>
+                <BoxIcon letters={initials} size="lg" />
+                <VStack align="start" spacing={0.5} minW={0}>
+                    <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="textStrong" noOfLines={1}>
+                        {user.name || user.email}
+                    </Text>
+                    <HStack spacing={1.5}>
+                        <Text fontSize="sm" color="textLabel" noOfLines={1}>
+                            {user.email}
+                        </Text>
+                        {user.isEmailVerified && (
+                            <Icon as={BadgeCheck} boxSize={3.5} color="iconAccent" aria-label="Email vérifié" />
                         )}
-                    </VStack>
-                </HStack>
+                    </HStack>
+                </VStack>
             </HStack>
-        </Box>
+
+            <HStack spacing={8}>
+                <Stat label="Entreprise" value={workspaces?.[0]?.name ?? "—"} />
+                <Stat
+                    label="Membre depuis"
+                    value={new Date(user.createdAt).toLocaleDateString("fr-FR", {
+                        month: "long",
+                        year: "numeric",
+                    })}
+                />
+            </HStack>
+        </VStack>
     );
 };
 

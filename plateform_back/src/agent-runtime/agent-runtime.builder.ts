@@ -9,6 +9,9 @@ type RawBlock = Record<string, unknown>;
 const isRetrieveBlock = (block: unknown): block is RawBlock =>
     typeof block === 'object' && block !== null && (block as RawBlock).type === 'retrieve';
 
+const datasetIdsOf = (retrieve: RawBlock): string[] =>
+    Array.isArray(retrieve.datasetIds) ? retrieve.datasetIds.filter((id): id is string => typeof id === 'string') : [];
+
 @Injectable()
 export class RagPipelineBuilder {
     private readonly logger = new Logger(RagPipelineBuilder.name);
@@ -31,19 +34,11 @@ export class RagPipelineBuilder {
         orgIdOverride?: string;
         forceActive?: boolean;
     }): Promise<Pipeline> {
-        const prodVersion = forceActive ? null : await this.agentService.findProductionWorkflowVersion(agentId);
-
-        const workflow = prodVersion
-            ? await this.workflowService.findByVersion(agentId, prodVersion)
-            : await this.workflowService.findActive(agentId);
-
-        if (!workflow) {
+        const rawBlocks = await this.loadRawBlocks(agentId, forceActive);
+        if (rawBlocks === null) {
             throw new NotFoundException('No active workflow found for this agent');
         }
 
-        // Legacy workflows stored the blocks array directly as the definition.
-        const def = workflow.definition as Record<string, unknown> | unknown[];
-        const rawBlocks = Array.isArray(def) ? def : (def.blocks ?? []);
         const blocks = Array.isArray(rawBlocks)
             ? await this.resolveRetrieveBlocks(agentId, rawBlocks, orgIdOverride)
             : rawBlocks;
@@ -55,6 +50,28 @@ export class RagPipelineBuilder {
         }
 
         return this.applyInstructionOverride(result.data, instructionOverride);
+    }
+
+    /** Datasets the deployed agent actually searches: the same ones its pipeline sends to the RAG engine. */
+    async resolveDatasetIds(agentId: string): Promise<string[]> {
+        const rawBlocks = await this.loadRawBlocks(agentId, false);
+        const retrieve = Array.isArray(rawBlocks) ? rawBlocks.find(isRetrieveBlock) : undefined;
+        if (!retrieve) return [];
+        return this.datasetService.resolveOrgIdsForAgent(agentId, datasetIdsOf(retrieve));
+    }
+
+    /** Blocks of the production workflow (the active one if never deployed, or with forceActive); null without workflow. */
+    private async loadRawBlocks(agentId: string, forceActive: boolean): Promise<unknown> {
+        const prodVersion = forceActive ? null : await this.agentService.findProductionWorkflowVersion(agentId);
+
+        const workflow = prodVersion
+            ? await this.workflowService.findByVersion(agentId, prodVersion)
+            : await this.workflowService.findActive(agentId);
+        if (!workflow) return null;
+
+        // Legacy workflows stored the blocks array directly as the definition.
+        const def = workflow.definition as Record<string, unknown> | unknown[];
+        return Array.isArray(def) ? def : (def.blocks ?? []);
     }
 
     /**
@@ -69,13 +86,9 @@ export class RagPipelineBuilder {
         const retrieve = blocks.find(isRetrieveBlock);
         if (!retrieve) return blocks;
 
-        const datasetIds = Array.isArray(retrieve.datasetIds)
-            ? retrieve.datasetIds.filter((id): id is string => typeof id === 'string')
-            : [];
-
         const orgIds = orgIdOverride
             ? [orgIdOverride]
-            : await this.datasetService.resolveOrgIdsForAgent(agentId, datasetIds);
+            : await this.datasetService.resolveOrgIdsForAgent(agentId, datasetIdsOf(retrieve));
 
         if (orgIds.length === 0) {
             this.logger.log(`Agent ${agentId}: no dataset available, retrieve block skipped`);

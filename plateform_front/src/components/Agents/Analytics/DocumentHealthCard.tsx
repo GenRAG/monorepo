@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Box, Card, HStack, Stack, Text, VStack, Divider, Skeleton, SkeletonCircle } from "@chakra-ui/react";
 import { CHART_GREEN_SHADES, STATUS_COLORS } from "themeNew/foundations/themeConfig";
 import { PieChart, PieSlice, type PieData, PieCenter } from "components/charts";
@@ -23,10 +24,16 @@ interface DocumentHealthCardProps {
 }
 
 export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardProps) => {
+    const [pollingInterval, setPollingInterval] = useState(0);
     const { data: health, isLoading } = useGetDocumentHealthQuery(
         { workspaceId, agentId },
-        { skip: !workspaceId || !agentId },
+        // Datasets, deployments and documents change on other pages: never show the cached breakdown on return.
+        { skip: !workspaceId || !agentId, refetchOnMountOrArgChange: true, pollingInterval },
     );
+    const isIndexing = (health?.uploaded ?? 0) + (health?.processing ?? 0) > 0;
+
+    // Follow the documents being indexed until they settle.
+    useEffect(() => setPollingInterval(isIndexing ? 5000 : 0), [isIndexing]);
 
     const pieData: PieData[] = [
         {
@@ -59,7 +66,7 @@ export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardP
                     <VStack align="flex-start" spacing={0} flex={1}>
                         <HStack spacing={1.5}>
                             <Text variant="body-md-semibold">Santé des documents</Text>
-                            <ChartInfoTooltip label="Répartition des documents de l'agent par statut d'indexation." />
+                            <ChartInfoTooltip label="Répartition par statut d'indexation des documents des bases que l'agent interroge, d'après son workflow déployé." />
                         </HStack>
                         <Text variant="body-xs-muted">
                             Vous permet de suivre l&apos;évolution de la santé de vos documents
@@ -73,7 +80,7 @@ export const DocumentHealthCard = ({ workspaceId, agentId }: DocumentHealthCardP
                     <CardEmptyState
                         icon={PieChartIcon}
                         title="Aucun document"
-                        description="Aucun document n'a été trouvé pour cet agent."
+                        description="Les bases interrogées par le workflow de cet agent ne contiennent aucun document."
                     />
                 ) : (
                     <Box position="relative" flex={1} minH="260px" minW={0} w="100%">

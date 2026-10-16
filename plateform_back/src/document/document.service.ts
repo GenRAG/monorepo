@@ -95,7 +95,7 @@ export class DocumentService {
 
         const safeFilename = sanitizeFilename(file.filename);
 
-        // The RAG engine identifies a document by (org_id, filename): two files with the same name would collide.
+        // The RAG engine identifies a document by (org_id, dataset_id, filename): two files with the same name would collide.
         if (await this.documentRepository.findByName(datasetId, safeFilename)) {
             throw new ConflictException(`Un document nommé « ${safeFilename} » existe déjà dans cette base`);
         }
@@ -225,7 +225,10 @@ export class DocumentService {
         if (!doc) throw new NotFoundException('Document not found');
 
         try {
-            await this.ragEngineService.deleteDocument(doc.name, datasetId);
+            await this.ragEngineService.deleteDocument(
+                await this.documentRepository.findEngineScope(datasetId),
+                doc.name,
+            );
         } catch (error) {
             // 404: the document never reached the vector store (failed or still pending indexing).
             if (!(error instanceof AxiosError && error.response?.status === 404)) throw error;

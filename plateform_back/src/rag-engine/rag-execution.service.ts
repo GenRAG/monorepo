@@ -43,6 +43,12 @@ interface RagModel {
     provider?: string;
 }
 
+/** Where a document lives in the RAG engine: the workspace (`org_id`, one collection each) and its dataset. */
+export interface RagDocumentScope {
+    orgId: string;
+    datasetId: string;
+}
+
 @Injectable()
 export class RagEngineService {
     private readonly logger = new Logger(RagEngineService.name);
@@ -233,7 +239,12 @@ export class RagEngineService {
         return response.data;
     }
 
-    async indexDocument(name: string, orgId: string, buffer: Buffer, mimeType: string): Promise<void> {
+    async indexDocument(
+        { orgId, datasetId }: RagDocumentScope,
+        name: string,
+        buffer: Buffer,
+        mimeType: string,
+    ): Promise<void> {
         const form = new FormData();
 
         form.append('file', buffer, {
@@ -241,6 +252,7 @@ export class RagEngineService {
             contentType: mimeType,
         });
         form.append('org_id', orgId);
+        form.append('dataset_id', datasetId);
 
         const response = await firstValueFrom(
             this.httpService.post(`${this.ragEngineUrl}/ingest`, form, {
@@ -256,18 +268,19 @@ export class RagEngineService {
         await this.waitForJob(job_id);
     }
 
-    async deleteDocument(filename: string, orgId: string): Promise<void> {
+    async deleteDocument({ orgId, datasetId }: RagDocumentScope, filename: string): Promise<void> {
         const response = await firstValueFrom(
             this.httpService.delete(`${this.ragEngineUrl}/documents`, {
                 headers: { 'X-API-Key': this.apiKey, 'Content-Type': 'application/json' },
-                data: { filename, org_id: orgId },
+                data: { filename, org_id: orgId, dataset_id: datasetId },
                 timeout: 30_000,
             }),
         );
 
-        const { status, file_deleted } = response.data as { status: string; file_deleted: boolean };
-        if (status !== 'deleted' || !file_deleted) {
-            throw new Error(`RAG engine failed to delete document '${filename}' for org '${orgId}'`);
+        // 200 with `file_deleted: false` means the vectors were removed but the stored copy was already gone.
+        const { status } = response.data as { status: string };
+        if (status !== 'deleted') {
+            throw new Error(`RAG engine failed to delete document '${filename}' of dataset '${datasetId}'`);
         }
     }
 

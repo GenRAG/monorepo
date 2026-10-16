@@ -1,10 +1,11 @@
 # Audit de `dev` — 16 octobre 2026
 
-Commit audité : `904c1d3` (`origin/dev`, merge de #92). Rien n'a été modifié dans le code : c'est un rapport.
+Commit audité : `904c1d3` (`origin/dev`, merge de #92), complété par le **connecteur Google Drive** (PR #93, `fcba1e8`), voir [`05_connecteur_google_drive.md`](05_connecteur_google_drive.md). Rien n'a été modifié dans le code : c'est un rapport.
 
 ## Méthode
 
 - **`ponytail:ponytail-audit`** sur tout le repo, en 4 périmètres : back, front, package `workflow`, vitrine + racine (CI, Docker, scripts). Rapports détaillés : [`01_back.md`](01_back.md), [`02_front.md`](02_front.md), [`03_workflow.md`](03_workflow.md), [`04_vitrine_racine.md`](04_vitrine_racine.md).
+- **Connecteur Google Drive (PR #93)** : `ponytail:ponytail-review` sur le diff `904c1d3..fcba1e8`, puis `pstack:interrogate` avec 4 relecteurs. Rapport : [`05_connecteur_google_drive.md`](05_connecteur_google_drive.md).
 - **`pstack:interrogate`** sur le code risqué (auth, crédits, isolation entre clients, format `blocks`, migrations Prisma), avec 4 relecteurs indépendants. Le relecteur B devait tourner sur le modèle fable, qui n'avait plus de crédits d'usage. Il a donc tourné sur le modèle par défaut du relecteur A, ce que prévoit la règle de repli du skill. Synthèse et tri : [`interrogate.md`](interrogate.md), rapports bruts dans [`interrogate/`](interrogate/).
 - Chaque constat retenu ci-dessous a été relu dans le code avant d'être gardé. Le marqueur « 4/4 », par exemple, donne le nombre de relecteurs qui l'ont trouvé indépendamment.
 - Hors périmètre : `rag-engine/` (demandé) et `RAG-GenRag/` (absent du checkout). La copie `rag-engine/` n'a servi qu'à lire le contrat.
@@ -14,7 +15,7 @@ Commit audité : `904c1d3` (`origin/dev`, merge de #92). Rien n'a été modifié
 
 | Périmètre | Lint | Typecheck | Tests | Build |
 |---|---|---|---|---|
-| `plateform_back` | OK | OK | 450/450 unitaires OK ; e2e vert en CI (run 421) | OK |
+| `plateform_back` | OK | OK | 450/450 unitaires OK (467/467 sur `fcba1e8`, avec le connecteur) ; e2e vert en CI (run 421) | OK |
 | `packages/workflow` | — | OK | 46/46 OK | OK |
 | `plateform_front` | **42 erreurs** (`react/prop-types`, `components/charts/`), ignorées par la CI | OK | **aucun test** (`craco test` : « No tests found ») | vert en CI |
 | `vitrine_front` | OK | OK | — | OK |
@@ -178,14 +179,26 @@ Constats laissés hors de cette liste, environ 70, détaillés dans les rapports
 - La CSRF n'est pas protégée (B-04).
 - Les JWT ne sont pas révoqués au changement de mot de passe (B-19).
 
+## Connecteur Google Drive (PR #93)
+
+Détail et preuves dans [`05_connecteur_google_drive.md`](05_connecteur_google_drive.md). Le connecteur est bien isolé : pas de SSRF, pas d'accès entre clients, jeton jamais enregistré, validation commune avec l'upload. Quatre points comptent :
+
+- **C1 (Must fix) La resynchro supprime avant de vérifier.** L'ancien document est supprimé avant que `ingestFile` vérifie la nouvelle version (nom, quota, signature). Un renommage en conflit fait disparaître le document de l'agent. Trouvé par 4/4.
+- **C2 (Must fix) Corbeille non détectée.** `trashed` n'est pas demandé à Drive, donc un fichier à la corbeille reste indexé et compté « à jour ». Trouvé par 3/4.
+- **C3 (Should fix) Titres coupés.** `sanitizeFilename` applique `basename`, donc « CR 12/03/2026 » devient `2026.pdf`, et les imports suivants sont refusés comme doublons.
+- **C4 (Should fix) Jeton dans Sentry.** Le corps des requêtes, donc le jeton Google, est envoyé à Sentry sur toute erreur 500, d'après le SDK 10.62 (`patchRequestToCaptureBody`). C'est une ligne dans `Sentry.init`, et elle couvre aussi les mots de passe de `/auth`.
+
+Il reste cinq autres constats à corriger (jeton expiré, absence de timeout, mauvais messages 403, analytics couplées au runtime, tests) et quatre plus légers.
+
 ## Ordre de correction proposé
 
 1. **Avant tout déploiement de `dev` en prod :** 4 (migration), puis 6 (vérifier le contrat contre `RAG-GenRag`).
 2. **Argent et comptes :** 1, 2, puis 15, 5, 8, puis 13. Trancher 3 (playground).
-3. **Intégrité des données :** 7, 9, 10, 14.
-4. **Front :** 11, 16.
-5. **Outils :** 12, 17, 18 (décisions CI et infra).
-6. **Nettoyage :** voir Lean.
+3. **Connecteur :** C1 et C2 avant d'ouvrir la fonction aux clients, puis C3 et C4.
+4. **Intégrité des données :** 7, 9, 10, 14.
+5. **Front :** 11, 16.
+6. **Outils :** 12, 17, 18 (décisions CI et infra).
+7. **Nettoyage :** voir Lean.
 
 ## Verdict
 

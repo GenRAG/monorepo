@@ -79,10 +79,10 @@ export class AgentAnalyticsRepository {
         return this._getCostBreakdown(agentId, since, 'costByType');
     }
 
-    async getDocumentStatusCounts(agentId: string): Promise<DocumentStatusCounts> {
+    async getDocumentStatusCounts(datasetIds: string[]): Promise<DocumentStatusCounts> {
         const rows = await this.prisma.document.groupBy({
             by: ['status'],
-            where: { dataset: { agents: { some: { agentId } } } },
+            where: { datasetId: { in: datasetIds } },
             _count: true,
         });
 

@@ -13,7 +13,7 @@ import {
     UploadDocumentParams,
 } from "types/document/document";
 
-const getDatasetDocumentsTagId = (workspaceId: string, datasetId: string) => `${workspaceId}-${datasetId}`;
+export const getDatasetDocumentsTagId = (workspaceId: string, datasetId: string) => `${workspaceId}-${datasetId}`;
 
 export const extendedDocumentApi = backendApi.injectEndpoints({
     endpoints: (builder) => ({

@@ -34,7 +34,7 @@ import { ConversationRepository } from 'src/conversation/conversation.repository
         AgentQueryLogRepository,
         ConversationRepository,
     ],
-    exports: [AgentRuntimeOrchestrator, AgentRuntimeService],
+    exports: [AgentRuntimeOrchestrator, AgentRuntimeService, RagPipelineBuilder],
     imports: [
         PrismaModule,
         CreditModule,

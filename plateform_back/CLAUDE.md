@@ -8,14 +8,15 @@ NestJS 11, Prisma 6 (PostgreSQL), BullMQ + Redis, AWS S3, `class-validator`/`cla
 
 ## Modules (`src/`)
 
-Un dossier par module métier : `agent/`, `agent-analytics/`, `agent-runtime/`, `auth/`, `conversation/`, `credit/`, `deployment/`, `document/`, `events/`, `onboarding/`, `plans/`, `rag-engine/`, `redis/`, `retention/`, `sentry/`, `storage/`, `users/`, `workflow/`, `workspace/`, `lib/` (`event-bus.ts`), `prisma/`, `exeptions/` (typo assumée, ne pas renommer sans vérifier tous les imports). `generated/` = client Prisma généré.
+Un dossier par module métier : `agent/`, `agent-analytics/`, `agent-runtime/`, `auth/`, `connector/`, `conversation/`, `credit/`, `deployment/`, `document/`, `events/`, `onboarding/`, `plans/`, `rag-engine/`, `redis/`, `retention/`, `sentry/`, `storage/`, `users/`, `workflow/`, `workspace/`, `lib/` (`event-bus.ts`), `prisma/`, `exeptions/` (typo assumée, ne pas renommer sans vérifier tous les imports). `generated/` = client Prisma généré.
 
 Structure de module : `xxx.module.ts`, `xxx.controller.ts`, `xxx.service.ts`, `xxx.repository.ts`, `dto/`, `guard/`, `test/`. Couches Controller → Service → Repository → Prisma ; aucune logique métier dans un controller.
 
 Particularités :
 - `agent/` : aussi `agent-export.controller.ts` (export JSON/config) et `agent-member.*` (partage d'agent).
 - `agent-analytics/` (stats par agent) est distinct de `workspace/workspace-stats.service.ts` (stats workspace, `GET /workspaces/:id/stats`).
-- `document/` : CQRS léger (`commands/index-document.command.ts` + `handlers/index-document.handler.ts`), queue BullMQ `documents`.
+- `document/` : CQRS léger (`commands/index-document.command.ts` + `handlers/index-document.handler.ts`), queue BullMQ `documents`. `DocumentService.ingestFile` est le seul point d'entrée d'un fichier (upload et connecteurs) et porte la validation (type, signature, taille, `document.constants.ts`) : ne pas la remettre dans un controller.
+- `connector/` : connecteurs externes (Google Drive). `POST .../datasets/:datasetId/connectors/google-drive/{import,sync}` reçoit un jeton OAuth `drive.file` de courte durée obtenu dans le navigateur, utilisé pour la requête puis oublié. `google-drive.client.ts` appelle l'API Drive (Docs et Slides exportés en PDF), `connector.service.ts` passe par `ingestFile`. Jeton expiré = 400 (`DriveAccessExpiredException`), jamais 401 (réservé à la session). Le traitement tourne dans la requête (20 fichiers max) : voir les `shortcut:`.
 - `plans/plans.config.ts` : limites par tier (`FREE` / `PRO` / `BUSINESS` / `ENTERPRISE`).
 - `retention/retention-cleanup.service.ts` : purge planifiée des `AgentQueryLog` selon `Agent.retentionDays` (`null` = conservation illimitée).
 

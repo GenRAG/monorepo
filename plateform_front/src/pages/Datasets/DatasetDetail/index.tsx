@@ -92,7 +92,9 @@ export const DatasetDetail = () => {
                             uploadModal={uploadModal}
                         />
                     )}
-                    {activeTab === "sources" && <DatasetSourcesTab onImport={handleImport} />}
+                    {activeTab === "sources" && (
+                        <DatasetSourcesTab workspaceId={workspaceId} datasetId={datasetId} onImport={handleImport} />
+                    )}
                     {activeTab === "agents" && (
                         <DatasetAgentsTab
                             dataset={dataset}

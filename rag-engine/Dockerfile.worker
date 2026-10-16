@@ -1,0 +1,24 @@
+FROM python:3.12-slim
+WORKDIR /app
+
+# Install system dependencies required by markitdown[all] native extensions
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for dependency management
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Copy worker dependency file and install all deps
+COPY pyproject.worker.toml ./pyproject.toml
+RUN uv sync --no-dev
+
+# Copy the worker package
+COPY worker/ ./worker/
+
+# Ensure the installed environment is on PATH
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Worker entry point — runs the Redis-listening event loop
+CMD ["python", "-m", "worker.main"]

@@ -7,7 +7,7 @@ from .sqlite_store import SQLiteStore
 from app.services.vector_db import ensure_collection, client as qdrant_client
 from qdrant_client.models import PointStruct
 from app.services.embedding import EmbeddingService
-from app.services.ingestion import chunk_text
+from worker.chunking import chunk_text
 from tqdm.auto import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
@@ -33,7 +33,7 @@ def run_indexing():
             logger.info(f"Generating chunks for {doc['url']}")
 
             # Basic Chunking strategy using main repo tools
-            chunks = chunk_text(doc['content_md'], chunk_size=1000, overlap=100)
+            chunks = chunk_text(doc['content_md'], chunk_size=1000)
             
             # Use Qwen Embedding Service
             embeddings = embedding_service.process_chunks_in_batches(chunks)

@@ -1,24 +1,49 @@
-import io
-from pypdf import PdfReader
+"""
+ingestion.py
+
+Lightweight file-type detection helpers for the API.
+Actual document parsing has been moved to the ingestion_worker service.
+
+Supported formats: PDF, TXT, MD, HTML, DOCX
+"""
+
+import os
+
+# Mapping of extensions to their human-readable type name
+EXTENSION_MAP = {
+    ".pdf": "pdf",
+    ".txt": "txt",
+    ".md": "md",
+    ".markdown": "md",
+    ".html": "html",
+    ".htm": "html",
+    ".docx": "docx",
+}
+
+SUPPORTED_EXTENSIONS = set(EXTENSION_MAP.keys())
+SUPPORTED_TYPES = set(EXTENSION_MAP.values())
+
+# Human-friendly description for error messages
+SUPPORTED_DESCRIPTION = "PDF, TXT, MD, HTML, DOCX"
 
 
-def parse_pdf(file_bytes: bytes) -> str:
-    """Extracts raw text from PDF bytes."""
-    try:
-        reader = PdfReader(io.BytesIO(file_bytes))
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
-        return text
-    except Exception as e:
-        print(f"Error parsing PDF: {e}")
-        return ""
+def detect_file_type(filename: str) -> str:
+    """Detect file type from extension.
+
+    Returns one of: 'pdf', 'txt', 'md', 'html', 'docx'
+    Raises ValueError if the extension is unsupported.
+    """
+    ext = os.path.splitext(filename)[1].lower()
+    file_type = EXTENSION_MAP.get(ext)
+    if file_type is None:
+        raise ValueError(
+            f"Unsupported file type '{ext}' for '{filename}'. "
+            f"Supported types: {SUPPORTED_DESCRIPTION}"
+        )
+    return file_type
 
 
-import semchunk
-
-def chunk_text(text: str, chunk_size=1024):
-    """Split text into semantic chunks using semchunk."""
-    # semchunk.chunk requires a token counter function or expects a model.
-    # For a simple local setup, providing a basic length-based counter is best.
-    return semchunk.chunk(text, chunk_size=chunk_size, token_counter=len)
+def is_supported(filename: str) -> bool:
+    """Return True if the filename has a supported extension."""
+    ext = os.path.splitext(filename)[1].lower()
+    return ext in EXTENSION_MAP

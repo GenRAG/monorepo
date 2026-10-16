@@ -3,53 +3,57 @@ from typing import Union, Dict, Any, AsyncGenerator, Optional
 from pydantic import Field
 from langfuse import get_client, observe
 
+langfuse = get_client()
+
 from app.blocks.base_block import BaseBlock
 from app.simple_openrouter_client import OpenRouterClient
 
 class VerifiedAnswerBlock(BaseBlock):
     model_name: str
-    judge_model_name: str = Field(default="google/gemini-2.5-flash")
+    judge_model_name: str = Field(default="qwen/qwen3.7-flash")
     temperature: Optional[float] = Field(default=0.3)
-    max_tokens: Optional[int] = Field(default=512)
+    max_tokens: Optional[int] = Field(default=None)  # None lets the model/OpenRouter decide, avoiding truncation with thinking models
     
     system_prompt: str = Field(
         default=(
-            "You are an expert, friendly, and highly capable AI assistant for a Retrieval-Augmented Generation (RAG) system. "
-            "Your goal is to help the user explore documents, extract insights, and answer questions. "
-            "Follow these guidelines strictly:\n\n"
+            "Vous êtes un assistant IA expert. "
+            "Votre mission est d'accompagner les utilisateurs dans leurs recherches et questions "
+            "en vous appuyant sur la base de connaissances documentaire de l'entreprise. "
+            "Suivez strictement ces consignes :\n\n"
 
-            "## Answering & Formatting\n"
-            "- Use ONLY information from the provided context documents to answer the question.\n"
-            "- Do not fabricate information or use outside knowledge.\n"
-            "- Format your response using markdown blockquotes, bold text, and proper bullet points for readability.\n"
-            "- CRITICAL: Do NOT repeat long document titles inline after every sentence. Always use numerical footnotes (e.g., [1], [2]) inline.\n"
-            "- Provide the filenames of the referenced sources in a numbered list at the very bottom under a '### Sources' heading.\n"
-            "- Use conversation history only to maintain context.\n\n"
+            "## Réponse & Formatage\n"
+            "- Utilisez UNIQUEMENT les informations fournies dans les documents contextuels pour répondre à la question.\n"
+            "- N'inventez pas d'informations et n'utilisez pas de connaissances externes.\n"
+            "- Formatez votre réponse en markdown : blockquotes, gras, et listes à puces pour une meilleure lisibilité.\n"
+            "- CRITIQUE : Ne répétez PAS les longs titres de documents en ligne après chaque phrase. Utilisez toujours des notes de bas de page numériques (ex : [1], [2]) en ligne.\n"
+            "- N'ajoutez PAS de liste de sources ou de section '### Sources' à la fin de votre réponse : l'interface affiche déjà les sources séparément.\n"
+            "- Utilisez l'historique de la conversation uniquement pour maintenir le contexte.\n\n"
 
-            "## Uncertainty\n"
-            "- If the provided context does not contain enough information to answer the question confidently, "
-            "say so clearly. Do not guess or speculate.\n"
-            "- If the context contains contradictory information, acknowledge the discrepancy and present both perspectives.\n\n"
+            "## Incertitude\n"
+            "- Si le contexte fourni ne contient pas assez d'informations pour répondre à la question avec confiance, "
+            "dites-le clairement. Ne devinez pas et ne spéculez pas.\n"
+            "- Si le contexte contient des informations contradictoires, reconnaissez la divergence et présentez les deux perspectives.\n\n"
 
-            "## Tone & Audience\n"
-            "- Write in clear language by default.\n"
-            "- Keep answers focused and concise. Use short paragraphs rather than long walls of text.\n"
-            "- When the user initiates a greeting or conversational remark, respond warmly and naturally. "
-            "NEVER use robotic disclaimers like 'As an AI...'. "
+            "## Ton & Audience\n"
+            "- Rédigez dans un langage professionnel mais clair.\n"
+            "- Adaptez votre réponse au niveau de l'utilisateur.\n"
+            "- Gardez les réponses ciblées et concises. Utilisez des paragraphes courts plutôt que de longs murs de texte.\n"
+            "- Quand l'utilisateur initie une salutation ou une remarque conversationnelle, répondez chaleureusement et naturellement. "
+            "N'utilisez JAMAIS de désclamations robotiques comme 'En tant qu'IA...'. "
         )
     )
-    
+
     judge_system_prompt: str = Field(
         default=(
-            "You are a strict context verification judge for a medical RAG pipeline.\n"
-            "Evaluate if the provided 'Context' documents contain sufficient, relevant, and non-contradictory "
-            "information to fully and safely answer the user's 'Query' without hallucination.\n\n"
-            "Return ONLY a valid JSON object matching exactly this schema:\n"
-            '{"is_safe": true|false, "refusal_message": "<friendly explanation>"}\n\n'
-            "Rules:\n"
-            "- If the context has no relevant information for the query, set is_safe to false.\n"
-            "- If the context only partially answers the query with high risk of hallucination for the rest, set is_safe to false.\n"
-            "- If is_safe is false, provide a clear, supportive refusal message indicating why it cannot be answered (e.g. lack of context in current documentation)."
+            "Vous êtes un juge strict de vérification de contexte pour une pipeline RAG.\n"
+            "Évaluez si les documents 'Contexte' fournis contiennent des informations suffisantes, pertinentes et non contradictoires "
+            "pour répondre complètement et en toute sécurité à la 'Requête' de l'utilisateur sans hallucination.\n\n"
+            "Retournez UNIQUEMENT un objet JSON valide correspondant exactement à ce schéma :\n"
+            '{"is_safe": true|false, "refusal_message": "<explication amicale>"}\n\n'
+            "Règles :\n"
+            "- Si le contexte n'a aucune information pertinente pour la requête, mettez is_safe à false.\n"
+            "- Si le contexte ne répond que partiellement à la requête avec un risque élevé d'hallucination pour le reste, mettez is_safe à false.\n"
+            "- Si is_safe est false, fournissez un message de refus clair et bienveillant indiquant pourquoi la réponse ne peut pas être donnée."
         )
     )
 
@@ -71,35 +75,72 @@ class VerifiedAnswerBlock(BaseBlock):
         ]
         formatted_docs = self._format_documents(retrieved_docs)
 
+        # Cost tracking setup
+        _org_id = input_data.get("org_id") if isinstance(input_data, dict) else ""
+        cost_tracker = input_data.get("_cost_tracker") if isinstance(input_data, dict) else None
+        pipeline_run_id = input_data.get("_pipeline_run_id", "") if isinstance(input_data, dict) else ""
+
+        async def _judge_usage_callback(usage: dict, request_id: str = ""):
+            """Record cost for the judge (non-streaming) call."""
+            if cost_tracker and _org_id:
+                record = await cost_tracker.record_usage(
+                    org_id=_org_id,
+                    model=self.judge_model_name,
+                    usage=usage,
+                    cost_type="generation",
+                    pipeline_run_id=pipeline_run_id,
+                    request_id=request_id,
+                    block_name=f"{self.name}.judge",
+                )
+                # Send cost to Langfuse (with full precision)
+                if record and hasattr(langfuse, "update_current_generation"):
+                    langfuse.update_current_generation(
+                        usage_details={
+                            "input": record.prompt_tokens,
+                            "output": record.completion_tokens,
+                            "total": record.total_tokens,
+                        },
+                        cost_details={
+                            "amount": record.cost_usd,
+                            "currency": "USD",
+                            "amount_raw": record.cost_usd_raw,  # Full precision for billing
+                        },
+                        metadata={
+                            "block_name": record.block_name,
+                            "model": record.model,
+                            "cost_usd_raw": record.cost_usd_raw,
+                        }
+                    )
+
         client = OpenRouterClient()
         try:
             # Judge Phase
             judge_messages = [
                 {"role": "system", "content": self.judge_system_prompt},
-                {"role": "user", "content": f"Query: {query}\n\nContext:\n{formatted_docs}"}
+                {"role": "user", "content": f"Requête : {query}\n\nContexte :\n{formatted_docs}"}
             ]
-            
+
             judge_response_raw = await client.chat_completion(
                 model=self.judge_model_name,
                 messages=judge_messages,
                 temperature=0.0,
-                max_tokens=512,
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
+                usage_callback=_judge_usage_callback,
             )
-            
+
             decision = self._parse_judge_decision(judge_response_raw)
-            
+
             if not decision.get("is_safe", True):
-                yield decision.get("refusal_message", "I cannot safely answer this query based on the available context.")
+                yield json.dumps({"type": "refusal", "data": decision.get("refusal_message", "I cannot safely answer this query based on the available context.")}) + "\n"
                 return
-                
+
             # Generation Phase
             generation_messages = [
                 {"role": "system", "content": self.system_prompt},
                 *history,
                 {
                     "role": "user",
-                    "content": f"Context:\n{formatted_docs}\n\nQuestion: {query}\n\nAnswer:",
+                    "content": f"Contexte :\n{formatted_docs}\n\nQuestion : {query}\n\nRéponse :",
                 },
             ]
 
@@ -109,13 +150,51 @@ class VerifiedAnswerBlock(BaseBlock):
                 input=generation_messages,
             )
 
-            async for chunk in client.chat_completion_stream(
-                model=self.model_name,
-                messages=generation_messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-            ):
-                yield chunk
+            async def _generation_usage_callback(usage: dict, request_id: str = ""):
+                """Record cost for the generation (streaming) call."""
+                if cost_tracker and _org_id:
+                    record = await cost_tracker.record_usage(
+                        org_id=_org_id,
+                        model=self.model_name,
+                        usage=usage,
+                        cost_type="generation",
+                        pipeline_run_id=pipeline_run_id,
+                        request_id=request_id,
+                        block_name=f"{self.name}.generation",
+                    )
+                    # Send cost to Langfuse (with full precision)
+                    if record and hasattr(langfuse, "update_current_generation"):
+                        langfuse.update_current_generation(
+                            usage_details={
+                                "input": record.prompt_tokens,
+                                "output": record.completion_tokens,
+                                "total": record.total_tokens,
+                            },
+                            cost_details={
+                                "amount": record.cost_usd,
+                                "currency": "USD",
+                                "amount_raw": record.cost_usd_raw,  # Full precision for billing
+                            },
+                            metadata={
+                                "block_name": record.block_name,
+                                "model": record.model,
+                                "cost_usd_raw": record.cost_usd_raw,
+                            }
+                        )
+
+            try:
+                async for chunk in client.chat_completion_stream(
+                    model=self.model_name,
+                    messages=generation_messages,
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
+                    usage_callback=_generation_usage_callback,
+                ):
+                    yield json.dumps({"type": "token", "data": chunk}) + "\n"
+            except Exception as e:
+                error_msg = f"\n\n[Generation Error: {type(e).__name__}: {e}]"
+                print(error_msg)
+                yield json.dumps({"type": "error", "data": error_msg}) + "\n"
                 
         finally:
             await client.close()
@@ -134,12 +213,12 @@ class VerifiedAnswerBlock(BaseBlock):
 
     def _format_documents(self, documents: list) -> str:
         if not documents:
-            return "No relevant documents found"
+            return "Aucun document pertinent trouvé"
 
         formatted = []
         for doc in documents:
             text = doc.get("text", "")
-            source = doc.get("filename", doc.get("url", "Unknown Source"))
+            source = doc.get("filename", doc.get("url", "Source inconnue"))
             confidence = doc.get("confidence_score", 0.0)
-            formatted.append(f"Source: {source}\nContent: {text}\nConfidence: {confidence}")
+            formatted.append(f"Source : {source}\nContenu : {text}\nConfiance : {confidence}")
         return "\n\n".join(formatted)

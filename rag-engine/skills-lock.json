@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "langfuse": {
+      "source": "langfuse/skills",
+      "sourceType": "github",
+      "computedHash": "bef547e21d59cc32f84120e83295e54560935132b5870bf16f3383faae32acba"
+    }
+  }
+}

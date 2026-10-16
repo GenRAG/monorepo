@@ -1,0 +1,8 @@
+# HTTPS for the GenRAG API. Caddy obtains and renews the Let's Encrypt certificate
+# automatically, so DNS for rag-engine.genrag.app must point at the server before the first start.
+rag-engine.genrag.app {
+    reverse_proxy rag_api:8000 {
+        # Flush each NDJSON line from /rag/stream as it is produced instead of buffering it.
+        flush_interval -1
+    }
+}

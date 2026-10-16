@@ -8,7 +8,7 @@ dotenv.load_dotenv()
 API_KEY = os.getenv("RAG_ENGINE_API_KEY")
 
 async def test_streaming_rag_rerank():
-    url = "http://141.94.174.134:8000/rag/stream"
+    url = "http://127.0.0.1:8000/rag/stream"
 
     payload = {
         "pipeline": {
@@ -201,7 +201,7 @@ async def test_streaming_rag_query_rewrite():
 
 
 async def test_streaming_rag_query_rewrite_greeting():
-    url = "http://141.94.174.134:8000/rag/stream"
+    url = "http://127.0.0.1:8000/rag/stream"
 
     payload = {
         "pipeline": {
@@ -213,14 +213,14 @@ async def test_streaming_rag_query_rewrite_greeting():
                     "type": "retrieve",
                     "name": "retrieve",
                     "collection_name": "genrag_knowledge_base",
-                    "top_k": 5,
+                    "top_k": 50,
                 },
                 {
                     "type": "rerank",
                     "name": "rerank",
                     "provider": "zeroentropy",
                     "model": "zerank-2",
-                    "top_k": 3,
+                    "top_k": 10,
                 },
                 {
                     "type": "answer",
@@ -230,7 +230,7 @@ async def test_streaming_rag_query_rewrite_greeting():
             ],
         },
         "query": "Hi there! Can you give me a brief overview of what this document is about? Please cite the filenames of the sources you are using.",
-        "org_id": "string",
+        "org_id": "lepetitcoin",
     }
 
     print(f"Sending greeting request to {url}...")

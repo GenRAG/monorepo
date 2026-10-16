@@ -1,0 +1,33 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}  # allows manually re-triggering from the GitHub Actions tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into server and redeploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            git fetch origin main
+            git reset --hard origin/main
+            # Compose v2 (`docker compose`, the docker-compose-v2 package on
+            # Ubuntu 24.04): the old v1 `docker-compose` binary isn't installed,
+            # and v2 recreates containers cleanly, so the v1 KeyError
+            # 'ContainerConfig' workaround (force-removing containers) is gone.
+            docker compose up -d --build --remove-orphans
+            # Only prune images older than 1h: the legacy builder caches build
+            # steps as dangling images, and pruning them immediately after every
+            # build (as `docker image prune -f` alone would) forces a full
+            # rebuild (apt-get, uv sync, ...) from scratch on every deploy.
+            docker image prune -f --filter "until=1h"

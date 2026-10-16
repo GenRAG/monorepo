@@ -11,4 +11,10 @@ class QueryBlock(BaseBlock): # A block to normalize and extract the user query
             query = input_data.get("query", "")
         else:
             query = str(input_data)
-        return {"query": query} # Returns the query in a standardized dictionary format
+        # Preserve internal tracking keys
+        result = {"query": query}
+        if isinstance(input_data, dict):
+            for key in ["_cost_tracker", "_pipeline_run_id", "org_id", "original_query", "chat_history"]:
+                if key in input_data:
+                    result[key] = input_data[key]
+        return result

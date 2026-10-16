@@ -10,15 +10,13 @@ dependencies = [
     "cohere>=5.20.4",
     "fastapi[standard]>=0.128.0",
     "gunicorn>=23.0.0",
+    "ipykernel>=7.3.0",
     "langfuse>=3.14.3",
-    "pdfreader>=0.1.15",
     "pydantic>=2.12.5",
-    "pypdf>=6.6.0",
     "python-multipart>=0.0.21",
-    "qdrant-client>=1.16.2",
+    "qdrant-client>=1.19.0",
+    "redis[hiredis]>=5.2.1",
     "requests>=2.32.5",
-    "semchunk>=0.1.20",
-    "trafilatura>=1.15.1",
     "zeroentropy>=0.1.0a8",
 ]
 

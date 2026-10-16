@@ -6,8 +6,8 @@ import dotenv
 dotenv.load_dotenv()
 
 API_KEY = os.getenv("RAG_ENGINE_API_KEY")
-URL = "http://localhost:8000/rag/stream"
-ORG_ID = "string"
+URL = "http://57.130.64.104:8000/rag/stream"
+ORG_ID = "onboarding"
 
 async def chat():
     print("Welcome to GenRAG Terminal Chat!")
@@ -31,16 +31,20 @@ async def chat():
                         "pipeline_name": "terminal_chat_pipeline",
                         "blocks": [
                             {"type": "query", "name": "query"},
-                            {
-                                "type": "query_rewrite",
-                                "name": "query_rewrite",
-                                "model_name": "google/gemini-2.5-flash",
-                            },
+                            # {"type": "query_rewrite", "name": "rewrite", "num_queries": 3},
+                            # {"type": "hyde", "name": "hyde", "num_queries": 2, "mode": "compose"},
                             {
                                 "type": "retrieve",
                                 "name": "retrieve",
                                 "collection_name": "genrag_knowledge_base",
-                                "top_k": 5,
+                                "top_k": 50,
+                            },
+                            {
+                                "type": "rerank",
+                                "name": "rerank",
+                                "provider": "zeroentropy",
+                                "model": "zerank-2",
+                                "top_k": 10,
                             },
                             {
                                 "type": "answer",

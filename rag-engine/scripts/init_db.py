@@ -1,27 +1,28 @@
-from qdrant_client import QdrantClient, models
+"""
+Create an org's Qdrant collection (org_{org_id}) and its payload indexes.
 
-client = QdrantClient(url="http://localhost:6333")
-COLLECTION_NAME = "genrag_knowledge_base"
+Optional: the ingestion worker creates the collection automatically on an
+org's first ingestion.
 
+Usage:
+    uv run python scripts/init_db.py --org-id ORG
+"""
 
-def setup_db():
-    if not client.collection_exists(COLLECTION_NAME):
-        print(f"Creating collection: {COLLECTION_NAME}...")
-        client.create_collection(
-            collection_name=COLLECTION_NAME,
-            vectors_config=models.VectorParams(
-                size=4096,  # Qwen embedding size is 4096 dimensions
-                distance=models.Distance.COSINE,
-            ),
-        )
-    else:
-        print(f"Collection {COLLECTION_NAME} already exists.")
+import argparse
+import os
+import sys
 
-    client.create_payload_index(
-        collection_name=COLLECTION_NAME,
-        field_name="org_id",
-        field_schema=models.PayloadSchemaType.KEYWORD,
-    )
+from dotenv import load_dotenv
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+load_dotenv()
+
+from worker.vector_db import ensure_collection, org_collection  # noqa: E402
 
 if __name__ == "__main__":
-    setup_db()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--org-id", required=True)
+    args = parser.parse_args()
+    collection = org_collection(args.org_id)
+    ensure_collection(collection, vector_size=4096)  # Qwen embedding size is 4096 dimensions
+    print(f"Collection {collection} ready.")

@@ -50,17 +50,34 @@ class RerankBlock(BaseBlock):  # Block for reranking retrieved documents
         if not query:
             raise ValueError("Query cannot be empty")
         if not text_docs:
-            raise ValueError("No documents to rerank")
+            print("[WARN] RerankBlock: no documents to rerank, passing through empty list")
+            return {**input_data, "retrieved_documents": []}
 
         # Call the appropriate reranking provider based on configuration
         if self.provider == "zeroentropy":
-            return await self._rerank_zeroentropy(
+            result = await self._rerank_zeroentropy(
                 query, text_docs, documents, input_data
             )
         elif self.provider == "cohere":
-            return await self._rerank_cohere(query, text_docs, documents, input_data)
+            result = await self._rerank_cohere(query, text_docs, documents, input_data)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
+        
+        # Record reranking cost
+        cost_tracker = input_data.get("_cost_tracker") if isinstance(input_data, dict) else None
+        pipeline_run_id = input_data.get("_pipeline_run_id", "") if isinstance(input_data, dict) else ""
+        _org_id = input_data.get("org_id") if isinstance(input_data, dict) else ""
+        if cost_tracker and _org_id:
+            await cost_tracker.record_rerank(
+                org_id=_org_id,
+                provider=self.provider,
+                model=self.model,
+                n_docs=len(text_docs),
+                pipeline_run_id=pipeline_run_id,
+                block_name=self.name,
+            )
+
+        return result
 
     async def _rerank_zeroentropy(
         self,  # Reranks documents using the ZeroEntropy API
@@ -73,22 +90,33 @@ class RerankBlock(BaseBlock):  # Block for reranking retrieved documents
 
         if not settings.zeroentropy_key:
             raise ValueError("ZEROENTROPY_API_KEY not found in environment variables")
-        zclient = ZeroEntropy(api_key=settings.zeroentropy_key)
-        response = zclient.models.rerank(
-            model=self.model,
-            query=query,
-            documents=text_documents,
-        )
-        # Extract and sort reranked indices by relevance score
-        top_results = sorted(
-            response.results, key=lambda x: x.relevance_score, reverse=True
-        )[: self.top_k]
-        reranked_dicts = []
-        for item in top_results:
-            doc = dict(original_documents[item.index])
-            doc["confidence_score"] = float(item.relevance_score)
-            reranked_dicts.append(doc)
-        return {**input_data, "retrieved_documents": reranked_dicts}
+
+        try:
+            zclient = ZeroEntropy(api_key=settings.zeroentropy_key)
+            response = zclient.models.rerank(
+                model=self.model,
+                query=query,
+                documents=text_documents,
+            )
+            # Extract and sort reranked indices by relevance score
+            top_results = sorted(
+                response.results, key=lambda x: x.relevance_score, reverse=True
+            )[: self.top_k]
+            reranked_dicts = []
+            for item in top_results:
+                doc = dict(original_documents[item.index])
+                doc["confidence_score"] = float(item.relevance_score)
+                reranked_dicts.append(doc)
+            return {**input_data, "retrieved_documents": reranked_dicts}
+        except Exception as e:
+            print(f"[WARN] ZeroEntropy reranking failed ({type(e).__name__}: {e}), using unreranked documents")
+            # Fallback: pass through original docs with neutral confidence
+            fallback_docs = []
+            for doc in original_documents[: self.top_k]:
+                d = dict(doc)
+                d["confidence_score"] = d.get("confidence_score", 0.5)
+                fallback_docs.append(d)
+            return {**input_data, "retrieved_documents": fallback_docs}
 
     async def _rerank_cohere(
         self,  # Reranks documents using the Cohere API
@@ -101,20 +129,31 @@ class RerankBlock(BaseBlock):  # Block for reranking retrieved documents
 
         if not settings.cohere_key:
             raise ValueError("COHERE_API_KEY not found in environment variables")
-        co = cohere.ClientV2(api_key=settings.cohere_key)
-        response = co.rerank(
-            model=self.model,
-            query=query,
-            documents=text_documents,
-            top_n=self.top_k,
-        )
-        # Extract and sort reranked indices by relevance score
-        top_results = sorted(
-            response.results, key=lambda x: x.relevance_score, reverse=True
-        )
-        reranked_dicts = []
-        for item in top_results:
-            doc = dict(original_documents[item.index])
-            doc["confidence_score"] = float(item.relevance_score)
-            reranked_dicts.append(doc)
-        return {**input_data, "retrieved_documents": reranked_dicts}
+
+        try:
+            co = cohere.ClientV2(api_key=settings.cohere_key)
+            response = co.rerank(
+                model=self.model,
+                query=query,
+                documents=text_documents,
+                top_n=self.top_k,
+            )
+            # Extract and sort reranked indices by relevance score
+            top_results = sorted(
+                response.results, key=lambda x: x.relevance_score, reverse=True
+            )
+            reranked_dicts = []
+            for item in top_results:
+                doc = dict(original_documents[item.index])
+                doc["confidence_score"] = float(item.relevance_score)
+                reranked_dicts.append(doc)
+            return {**input_data, "retrieved_documents": reranked_dicts}
+        except Exception as e:
+            print(f"[WARN] Cohere reranking failed ({type(e).__name__}: {e}), using unreranked documents")
+            # Fallback: pass through original docs with neutral confidence
+            fallback_docs = []
+            for doc in original_documents[: self.top_k]:
+                d = dict(doc)
+                d["confidence_score"] = d.get("confidence_score", 0.5)
+                fallback_docs.append(d)
+            return {**input_data, "retrieved_documents": fallback_docs}

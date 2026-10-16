@@ -1,6 +1,7 @@
 import trafilatura
 import time
 from app.ingestion.sqlite_store import SQLiteStore
+from app.services.storage import upload_page, page_exists_with_same_hash
 from lxml import etree
 import requests
 
@@ -12,14 +13,19 @@ class Loader:
         sitemaps: list[str] = [f"{BASE_SITEMAP_URL}/sitemap-cms-content.xml"],
         max_pages: int | None = None,
         interactive: bool = True,
+        org_id: str | None = None,
     ):
-        """Crawling sitemap urls and saving retrieved content to embedded sqlite database"""
+        """Crawling sitemap urls and saving retrieved content.
+
+        When org_id is provided, stores pages in MinIO instead of SQLite.
+        """
         self.sitemaps = sitemaps
         self.max_pages = max_pages
         self.pages_scraped = 0
         self.interactive = interactive
         self.visited_urls = set()
         self.visited_sitemaps = set()
+        self.org_id = org_id
 
     def get_crawlable_urls(self, url: str):
         """Fetches and parses the sitemap to extract all URLs."""
@@ -52,16 +58,23 @@ class Loader:
 
         return urls_to_crawl, sitemaps
 
-    @staticmethod
-    def store_data(data, store: SQLiteStore):
-        store.upsert_page({
+    def store_data(self, data, store: SQLiteStore | None = None):
+        page_data = {
             "url": data["url"],
             "title": data["title"],
             "description": data["description"],
             "content_md": data["text"],
             "last_modified": data["last_modified"],
             "last_crawled": data["last_crawled"],
-        })
+        }
+
+        if self.org_id:
+            if not page_exists_with_same_hash(self.org_id, data["url"], data["text"]):
+                upload_page(self.org_id, page_data)
+            return
+
+        if store is not None:
+            store.upsert_page(page_data)
 
     def scrape_page(self, url, lastmod):
         """Scrapes and extracts the title and content using Trafilatura."""

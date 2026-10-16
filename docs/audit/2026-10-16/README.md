@@ -11,6 +11,25 @@ Commit audité : `904c1d3` (`origin/dev`, merge de #92), complété par le **con
 - Hors périmètre : `rag-engine/` (demandé) et `RAG-GenRag/` (absent du checkout). La copie `rag-engine/` n'a servi qu'à lire le contrat.
 - L'audit précédent ([`AUDIT_REPORT.md`](../../../AUDIT_REPORT.md)) sert de référence : les ID `B-xx`, `F-xx`, `W-xx`, `R-xx` et `V-xx` qui suivent sont les siens.
 
+## Décisions et corrections (mise à jour)
+
+Décisions prises après l'audit :
+- **Playground payant** (n° 3) : c'est la doc qui se trompait, pas le code.
+- **Aucun document en prod** (n° 4) : la migration s'applique telle quelle, le constat est retiré.
+- **Nouveau moteur poussé dans `dev`** (n° 6) : le back doit s'y aligner.
+- **Fichiers mis à la corbeille dans Drive supprimés à la resynchro**, et indiqués dans le compte rendu (C2).
+- **Route `activate` supprimée** (n° 10).
+
+| Constat | Correction | PR |
+|---|---|---|
+| n° 6, contrat du moteur (`org_id` = workspace, `dataset_id`, `datasetIds`, `model_name`) | Aligne le back sur le nouveau `rag-engine` : indexation, suppression, recherche | [#95](https://github.com/GenRAG/monorepo/pull/95) |
+| n° 1, bonus d'onboarding obtenu en boucle | Éligibilité lue dans le registre des crédits | [#94](https://github.com/GenRAG/monorepo/pull/94) |
+| n° 2, réponse interrompue gratuite | Débit dès que le moteur a produit quelque chose, quel que soit le statut | [#96](https://github.com/GenRAG/monorepo/pull/96) |
+| C1 et C2, resynchro Drive | Vérification avant suppression, suppression des fichiers à la corbeille | [#97](https://github.com/GenRAG/monorepo/pull/97) |
+| n° 10, prod modifiable sans déploiement | Suppression de `PATCH …/workflow/activate` | [#98](https://github.com/GenRAG/monorepo/pull/98) |
+| n° 3, playground | Doc alignée : le playground est débité | [#99](https://github.com/GenRAG/monorepo/pull/99) |
+| n° 4, migration des datasets | Aucune, il n'y a pas de document en prod | — |
+
 ## Vérifications lancées sur `904c1d3`
 
 | Périmètre | Lint | Typecheck | Tests | Build |

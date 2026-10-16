@@ -11,6 +11,8 @@ import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 import { sanitizeFilename } from 'src/lib/filename.util';
 import ms from 'ms';
 import { MAX_DATASET_STORAGE_BYTES } from 'src/dataset/dataset.constants';
+import { matchesDeclaredType } from 'src/lib/file-signature.util';
+import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './document.constants';
 
 const MAX_TEXT_CONTENT_BYTES = 2 * 1024 * 1024;
 const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024;
@@ -74,6 +76,16 @@ export class DocumentService {
         file: IngestFileInput,
         origin: DocumentOrigin = { source: DocumentSource.UPLOAD },
     ) {
+        // Validated here rather than in the controller: connector files are untrusted bytes too.
+        if (file.buffer.length === 0) throw new BadRequestException('Le fichier est vide');
+        if (file.buffer.length > MAX_FILE_SIZE) {
+            throw new BadRequestException(`Le fichier dépasse ${MAX_FILE_SIZE / 1024 / 1024} Mo`);
+        }
+        if (!ALLOWED_MIME_TYPES.has(file.mimeType)) throw new BadRequestException('Type de fichier non supporté');
+        if (!matchesDeclaredType(file.buffer, file.mimeType)) {
+            throw new BadRequestException('Le contenu du fichier ne correspond pas à son type');
+        }
+
         const usedStorage = await this.documentRepository.getTotalSize(datasetId);
         if (usedStorage + file.size > MAX_DATASET_STORAGE_BYTES) {
             throw new BadRequestException(

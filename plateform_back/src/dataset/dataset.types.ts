@@ -22,6 +22,7 @@ export interface DatasetListItem {
 }
 
 export interface DatasetCleanupJob {
+    workspaceId: string;
     datasetId: string;
     documents: { name: string; storageKey: string }[];
 }

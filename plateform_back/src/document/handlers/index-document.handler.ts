@@ -26,7 +26,8 @@ export class IndexDocumentHandler {
             ? Buffer.from(command.buffer, 'base64')
             : await this.storage.get(command.storageKey);
 
-        await this.ragEngineService.indexDocument(command.name, command.datasetId, fileBuffer, command.mimeType);
+        const scope = await this.documentRepository.findEngineScope(command.datasetId);
+        await this.ragEngineService.indexDocument(scope, command.name, fileBuffer, command.mimeType);
 
         await this.documentRepository.updateStatus(command.documentId, DocumentStatus.INDEXED, {
             indexedAt: new Date(),

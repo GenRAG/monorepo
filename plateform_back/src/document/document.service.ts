@@ -225,7 +225,10 @@ export class DocumentService {
         if (!doc) throw new NotFoundException('Document not found');
 
         try {
-            await this.ragEngineService.deleteDocument(doc.name, datasetId);
+            await this.ragEngineService.deleteDocument(
+                await this.documentRepository.findEngineScope(datasetId),
+                doc.name,
+            );
         } catch (error) {
             // 404: the document never reached the vector store (failed or still pending indexing).
             if (!(error instanceof AxiosError && error.response?.status === 404)) throw error;

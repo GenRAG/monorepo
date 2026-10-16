@@ -9,6 +9,13 @@ type RawBlock = Record<string, unknown>;
 const isRetrieveBlock = (block: unknown): block is RawBlock =>
     typeof block === 'object' && block !== null && (block as RawBlock).type === 'retrieve';
 
+/** Stored blocks keep the builder's field names; the RAG engine reads the rewrite model as `model_name`. */
+const toEngineBlock = (block: unknown): unknown => {
+    if (typeof block !== 'object' || block === null || (block as RawBlock).type !== 'query_rewrite') return block;
+    const { model, ...rest } = block as RawBlock;
+    return { ...rest, model_name: model ?? rest.model_name };
+};
+
 const datasetIdsOf = (retrieve: RawBlock): string[] =>
     Array.isArray(retrieve.datasetIds) ? retrieve.datasetIds.filter((id): id is string => typeof id === 'string') : [];
 
@@ -40,7 +47,7 @@ export class RagPipelineBuilder {
         }
 
         const blocks = Array.isArray(rawBlocks)
-            ? await this.resolveRetrieveBlocks(agentId, rawBlocks, orgIdOverride)
+            ? (await this.resolveRetrieveBlocks(agentId, rawBlocks, orgIdOverride)).map(toEngineBlock)
             : rawBlocks;
 
         const result = PipelineSchema.safeParse(blocks);
@@ -57,7 +64,7 @@ export class RagPipelineBuilder {
         const rawBlocks = await this.loadRawBlocks(agentId, false);
         const retrieve = Array.isArray(rawBlocks) ? rawBlocks.find(isRetrieveBlock) : undefined;
         if (!retrieve) return [];
-        return this.datasetService.resolveOrgIdsForAgent(agentId, datasetIdsOf(retrieve));
+        return this.datasetService.resolveDatasetIdsForAgent(agentId, datasetIdsOf(retrieve));
     }
 
     /** Blocks of the production workflow (the active one if never deployed, or with forceActive); null without workflow. */
@@ -75,8 +82,10 @@ export class RagPipelineBuilder {
     }
 
     /**
-     * The stored retrieve block only carries `datasetIds` chosen in the builder. They are validated here and
-     * turned into `org_ids`; a retrieve block with no allowed dataset is dropped, never sent unfiltered.
+     * The stored retrieve block only carries the `datasetIds` chosen in the builder. They are replaced by the
+     * datasets the agent may search; a retrieve block with none is dropped. With an org override (a server-side
+     * base), the whole org is searched. Other stored fields (`collection_name`, tenant ids) are stripped by
+     * `PipelineSchema`.
      */
     private async resolveRetrieveBlocks(
         agentId: string,
@@ -86,19 +95,19 @@ export class RagPipelineBuilder {
         const retrieve = blocks.find(isRetrieveBlock);
         if (!retrieve) return blocks;
 
-        const orgIds = orgIdOverride
-            ? [orgIdOverride]
-            : await this.datasetService.resolveOrgIdsForAgent(agentId, datasetIdsOf(retrieve));
+        const datasetIds = orgIdOverride
+            ? undefined
+            : await this.datasetService.resolveDatasetIdsForAgent(agentId, datasetIdsOf(retrieve));
 
-        if (orgIds.length === 0) {
+        if (datasetIds?.length === 0) {
             this.logger.log(`Agent ${agentId}: no dataset available, retrieve block skipped`);
             return blocks.filter((block) => !isRetrieveBlock(block));
         }
 
         return blocks.map((block) => {
             if (!isRetrieveBlock(block)) return block;
-            const { datasetIds: _datasetIds, org_id: _orgId, ...rest } = block;
-            return { ...rest, org_ids: orgIds };
+            const { datasetIds: _stored, ...rest } = block;
+            return datasetIds ? { ...rest, datasetIds } : rest;
         });
     }
 

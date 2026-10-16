@@ -27,7 +27,7 @@ const mockAgentService = {
 };
 
 const mockDatasetService = {
-    resolveOrgIdsForAgent: jest.fn() as any,
+    resolveDatasetIdsForAgent: jest.fn() as any,
 };
 
 const withRetrieve = (retrieve: Record<string, unknown>) => ({
@@ -55,7 +55,7 @@ describe('RagPipelineBuilder', () => {
 
         builder = module.get<RagPipelineBuilder>(RagPipelineBuilder);
         jest.clearAllMocks();
-        mockDatasetService.resolveOrgIdsForAgent.mockResolvedValue(['dataset-1']);
+        mockDatasetService.resolveDatasetIdsForAgent.mockResolvedValue(['dataset-1']);
     });
 
     describe('buildPipeline', () => {
@@ -95,7 +95,7 @@ describe('RagPipelineBuilder', () => {
             expect(mockWorkflowService.findByVersion).not.toHaveBeenCalled();
         });
 
-        it('should return blocks from workflow definition, with org_ids instead of datasetIds', async () => {
+        it('should return blocks from workflow definition, with the resolved datasetIds and no collection_name', async () => {
             mockAgentService.findProductionWorkflowVersion.mockResolvedValue(null);
             mockWorkflowService.findActive.mockResolvedValue(fakeWorkflow);
 
@@ -103,9 +103,27 @@ describe('RagPipelineBuilder', () => {
 
             expect(result).toEqual([
                 fakeBlocks[0],
-                { name: 'retrieve', type: 'retrieve', collection_name: 'kb', top_k: 5, org_ids: ['dataset-1'] },
+                { name: 'retrieve', type: 'retrieve', top_k: 5, datasetIds: ['dataset-1'] },
                 fakeBlocks[2],
             ]);
+        });
+
+        it('should send the rewrite model as model_name, the field the RAG engine reads', async () => {
+            mockAgentService.findProductionWorkflowVersion.mockResolvedValue(null);
+            mockWorkflowService.findActive.mockResolvedValue({
+                ...fakeWorkflow,
+                definition: {
+                    blocks: [
+                        fakeBlocks[0],
+                        { name: 'rewrite', type: 'query_rewrite', model: 'mistral' },
+                        fakeBlocks[2],
+                    ],
+                },
+            });
+
+            const result = await builder.buildPipeline({ agentId: 'agent-1' });
+
+            expect(result[1]).toEqual({ name: 'rewrite', type: 'query_rewrite', model_name: 'mistral' });
         });
 
         it('should read legacy workflows whose definition is the blocks array', async () => {
@@ -163,69 +181,70 @@ describe('RagPipelineBuilder', () => {
                 mockAgentService.findProductionWorkflowVersion.mockResolvedValue(null);
             });
 
-            it('should build one retrieve block with the org_ids of every valid Dataset setting, deduplicated', async () => {
+            it('should build one retrieve block with every valid Dataset setting, deduplicated', async () => {
                 mockWorkflowService.findActive.mockResolvedValue(
                     retrieveWith({ datasetIds: ['d1', 'd2', 'd1', 'foreign'] }),
                 );
-                mockDatasetService.resolveOrgIdsForAgent.mockResolvedValue(['d1', 'd2']);
+                mockDatasetService.resolveDatasetIdsForAgent.mockResolvedValue(['d1', 'd2']);
 
                 const result = await builder.buildPipeline({ agentId: 'agent-1' });
 
-                expect(mockDatasetService.resolveOrgIdsForAgent).toHaveBeenCalledWith('agent-1', [
+                expect(mockDatasetService.resolveDatasetIdsForAgent).toHaveBeenCalledWith('agent-1', [
                     'd1',
                     'd2',
                     'd1',
                     'foreign',
                 ]);
                 const retrieves = result.filter((b) => b.type === 'retrieve');
-                expect(retrieves).toEqual([
-                    { name: 'retrieve', type: 'retrieve', collection_name: 'kb', top_k: 5, org_ids: ['d1', 'd2'] },
-                ]);
+                expect(retrieves).toEqual([{ name: 'retrieve', type: 'retrieve', top_k: 5, datasetIds: ['d1', 'd2'] }]);
             });
 
             it('should use every attached dataset when the retriever has no Dataset setting', async () => {
                 mockWorkflowService.findActive.mockResolvedValue(retrieveWith({}));
-                mockDatasetService.resolveOrgIdsForAgent.mockResolvedValue(['d1', 'd2']);
+                mockDatasetService.resolveDatasetIdsForAgent.mockResolvedValue(['d1', 'd2']);
 
                 const result = await builder.buildPipeline({ agentId: 'agent-1' });
 
-                expect(mockDatasetService.resolveOrgIdsForAgent).toHaveBeenCalledWith('agent-1', []);
-                expect(result.find((b) => b.type === 'retrieve')).toMatchObject({ org_ids: ['d1', 'd2'] });
+                expect(mockDatasetService.resolveDatasetIdsForAgent).toHaveBeenCalledWith('agent-1', []);
+                expect(result.find((b) => b.type === 'retrieve')).toMatchObject({ datasetIds: ['d1', 'd2'] });
             });
 
-            it('should never emit a retrieve block without org_id when the agent has no dataset', async () => {
+            it('should drop the retrieve block when the agent has no dataset', async () => {
                 mockWorkflowService.findActive.mockResolvedValue(fakeWorkflow);
-                mockDatasetService.resolveOrgIdsForAgent.mockResolvedValue([]);
+                mockDatasetService.resolveDatasetIdsForAgent.mockResolvedValue([]);
 
                 const result = await builder.buildPipeline({ agentId: 'agent-1' });
 
                 expect(result.map((b) => b.type)).toEqual(['query', 'answer']);
             });
 
-            it('should ignore an org_id stored in the workflow', async () => {
+            it('should ignore tenant fields stored in the workflow', async () => {
                 mockWorkflowService.findActive.mockResolvedValue(
                     retrieveWith({ org_id: 'other-tenant', org_ids: ['other-tenant'] }),
                 );
-                mockDatasetService.resolveOrgIdsForAgent.mockResolvedValue(['d1']);
+                mockDatasetService.resolveDatasetIdsForAgent.mockResolvedValue(['d1']);
 
                 const result = await builder.buildPipeline({ agentId: 'agent-1' });
 
                 expect(result.find((b) => b.type === 'retrieve')).toEqual({
                     name: 'retrieve',
                     type: 'retrieve',
-                    collection_name: 'kb',
                     top_k: 5,
-                    org_ids: ['d1'],
+                    datasetIds: ['d1'],
                 });
             });
 
-            it('should use the org override instead of the agent datasets', async () => {
+            it('should search the whole override org instead of the agent datasets', async () => {
                 mockWorkflowService.findActive.mockResolvedValue(fakeWorkflow);
 
                 const result = await builder.buildPipeline({ agentId: 'agent-1', orgIdOverride: 'onboarding' });
 
-                expect(mockDatasetService.resolveOrgIdsForAgent).not.toHaveBeenCalled();
-                expect(result.find((b) => b.type === 'retrieve')).toMatchObject({ org_ids: ['onboarding'] });
+                expect(mockDatasetService.resolveDatasetIdsForAgent).not.toHaveBeenCalled();
+                expect(result.find((b) => b.type === 'retrieve')).toEqual({
+                    name: 'retrieve',
+                    type: 'retrieve',
+                    top_k: 5,
+                });
             });
         });
     });
@@ -236,10 +255,10 @@ describe('RagPipelineBuilder', () => {
             mockWorkflowService.findByVersion.mockResolvedValue(
                 withRetrieve({ type: 'retrieve', datasetIds: ['d1', 'foreign'] }),
             );
-            mockDatasetService.resolveOrgIdsForAgent.mockResolvedValue(['d1']);
+            mockDatasetService.resolveDatasetIdsForAgent.mockResolvedValue(['d1']);
 
             await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual(['d1']);
-            expect(mockDatasetService.resolveOrgIdsForAgent).toHaveBeenCalledWith('agent-1', ['d1', 'foreign']);
+            expect(mockDatasetService.resolveDatasetIdsForAgent).toHaveBeenCalledWith('agent-1', ['d1', 'foreign']);
         });
 
         it('should return no dataset when the workflow has no retriever, or there is no workflow', async () => {
@@ -250,7 +269,7 @@ describe('RagPipelineBuilder', () => {
 
             await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual([]);
             await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual([]);
-            expect(mockDatasetService.resolveOrgIdsForAgent).not.toHaveBeenCalled();
+            expect(mockDatasetService.resolveDatasetIdsForAgent).not.toHaveBeenCalled();
         });
     });
 });

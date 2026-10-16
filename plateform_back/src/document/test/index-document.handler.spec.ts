@@ -5,7 +5,10 @@ import { IndexDocumentHandler } from 'src/document/handlers/index-document.handl
 import { DocumentRepository } from 'src/document/document.repository';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 
-const mockDocumentRepository = { updateStatus: jest.fn() as any };
+const mockDocumentRepository = {
+    updateStatus: jest.fn() as any,
+    findEngineScope: jest.fn() as any,
+};
 const mockRagEngineService = { indexDocument: jest.fn() as any };
 const mockStorage = { get: jest.fn() as any };
 
@@ -27,9 +30,10 @@ describe('IndexDocumentHandler', () => {
 
         handler = module.get<IndexDocumentHandler>(IndexDocumentHandler);
         jest.clearAllMocks();
+        mockDocumentRepository.findEngineScope.mockResolvedValue({ orgId: 'workspace-1', datasetId: 'dataset-1' });
     });
 
-    it('should index the document with org_id = datasetId', async () => {
+    it("should index the document in its workspace's collection and its dataset", async () => {
         await handler.execute({
             documentId: 'doc-1',
             datasetId: 'dataset-1',
@@ -40,11 +44,12 @@ describe('IndexDocumentHandler', () => {
         });
 
         expect(mockRagEngineService.indexDocument).toHaveBeenCalledWith(
+            { orgId: 'workspace-1', datasetId: 'dataset-1' },
             'a.pdf',
-            'dataset-1',
             Buffer.from('hi'),
             'application/pdf',
         );
+        expect(mockDocumentRepository.findEngineScope).toHaveBeenCalledWith('dataset-1');
         expect(mockDocumentRepository.updateStatus).toHaveBeenLastCalledWith('doc-1', DocumentStatus.INDEXED, {
             indexedAt: expect.any(Date),
         });
@@ -64,8 +69,8 @@ describe('IndexDocumentHandler', () => {
 
         expect(mockStorage.get).toHaveBeenCalledWith('k');
         expect(mockRagEngineService.indexDocument).toHaveBeenCalledWith(
+            { orgId: 'workspace-1', datasetId: 'dataset-1' },
             'a.pdf',
-            'dataset-1',
             Buffer.from('big'),
             'application/pdf',
         );

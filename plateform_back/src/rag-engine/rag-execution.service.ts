@@ -277,7 +277,10 @@ export class RagEngineService {
 
         while (Date.now() - start < timeoutMs) {
             const response = await firstValueFrom(
-                this.httpService.get(`${this.ragEngineUrl}/job/${jobId}/status`, { timeout: 10_000 }),
+                this.httpService.get(`${this.ragEngineUrl}/job/${jobId}/status`, {
+                    headers: { 'X-API-Key': this.apiKey },
+                    timeout: 10_000,
+                }),
             );
 
             const { status, error } = response.data as {

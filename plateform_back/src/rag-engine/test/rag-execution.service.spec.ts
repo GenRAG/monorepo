@@ -6,7 +6,7 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 
 describe('RagEngineService', () => {
-    const httpService = { get: jest.fn() as any };
+    const httpService = { get: jest.fn() as any, post: jest.fn() as any };
     const configService = {
         getOrThrow: (key: string) => ({ RAGENGINE_URL: 'http://rag.local', RAGENGINE_API_KEY: 'secret' })[key],
     } as unknown as ConfigService;
@@ -45,6 +45,24 @@ describe('RagEngineService', () => {
         ])('should reject %s without calling the RAG engine', async (modelId) => {
             await expect(service.getModelInfo(modelId)).rejects.toThrow(BadRequestException);
             expect(httpService.get).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('indexDocument', () => {
+        it('should poll the ingestion job status with the API key until it completes', async () => {
+            jest.useFakeTimers();
+            httpService.post.mockReturnValue(of({ data: { job_id: 'job-1' } }));
+            httpService.get.mockReturnValue(of({ data: { status: 'completed' } }));
+
+            const indexing = service.indexDocument('a.pdf', 'dataset-1', Buffer.from('%PDF-'), 'application/pdf');
+            await jest.advanceTimersByTimeAsync(2_000);
+            await indexing;
+            jest.useRealTimers();
+
+            expect(httpService.get).toHaveBeenCalledWith('http://rag.local/job/job-1/status', {
+                headers: { 'X-API-Key': 'secret' },
+                timeout: 10_000,
+            });
         });
     });
 });

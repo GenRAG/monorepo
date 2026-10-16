@@ -8,7 +8,8 @@ import { IndexDocumentHandler } from './handlers/index-document.handler';
 
 @Injectable()
 @Processor('documents', {
-    concurrency: 2,
+    // Jobs mostly wait on the RAG engine: match its ingestion workers (rag-engine/app/main.py, num_workers=5).
+    concurrency: 5,
     lockDuration: 120_000,
     stalledInterval: 120_000,
     drainDelay: 2_000,

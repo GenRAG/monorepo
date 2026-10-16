@@ -64,7 +64,7 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 | Workflow builder | Pipeline RAG drag-and-drop, aperçus animés des blocs | `pages/Agents/Workflow`, `components/Agents/Workflow` | `workflow/` | `services/workflow/workflow.ts`, `services/models/models.ts` |
 | Documents | Import, indexation asynchrone, statuts | `components/Document` | `document/`, `storage/` | `services/document/document.ts` |
 | Connecteurs | Import et resynchro de fichiers depuis un service externe (Google Drive seulement), jeton OAuth du navigateur jamais stocké | `components/Dataset/Detail/DatasetSourcesTab.tsx`, `hooks/connector/`, `lib/googlePicker.ts` | `connector/` | `services/connector/connector.ts` |
-| Playground | Test d'un agent en SSE, sans crédits | `components/ui/chat`, `hooks/chat/` | `agent-runtime/` | `services/agentRuntime/agentRuntime.ts` |
+| Playground | Test d'un agent en SSE, débité en crédits comme l'assistant (bloqué à 0 crédit), sans persistance des messages | `components/ui/chat`, `hooks/chat/` | `agent-runtime/` | `services/agentRuntime/agentRuntime.ts` |
 | Assistant final | Chat de l'utilisateur final, conversations persistées | `pages/Assistant` | `conversation/`, `agent-runtime/` | `services/chat/chat.ts` |
 | Déploiement | Versions, snapshots de workflow, rollback | `components/Deployment` | `deployment/` | `services/deployment/deployment.ts` |
 | Crédits & billing | Solde, transactions, Stripe | `pages/Billing`, `components/Billing` | `credit/`, `plans/` | `services/credit/credit.ts`, `services/billing/billing.ts` |

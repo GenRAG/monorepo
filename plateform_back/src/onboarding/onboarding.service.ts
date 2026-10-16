@@ -6,6 +6,7 @@ import { WorkflowService } from 'src/workflow/workflow.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import type { PipelineBlock } from 'src/rag-engine/pipeline.schema';
 import { CreditBalanceService } from 'src/credit/credit-balance.service';
+import { CreditTransactionService } from 'src/credit/credit-transaction.service';
 import { OnboardingRepository } from './onboarding.repository';
 import { OnboardingSessionResponse } from './dto/onboarding-session.response';
 import { CompareOnboardingResponse } from './dto/compare-onboarding.request';
@@ -13,6 +14,7 @@ import { InstructionStyle } from './dto/complete-onboarding.request';
 import { DEMO_WORKFLOW_DEFINITION } from './demo-workflow.definition';
 
 const ONBOARDING_INITIAL_CREDITS = 20;
+const ONBOARDING_BONUS_SOURCE = 'onboarding_bonus';
 const DEMO_DATASET_NAME = 'Documents de démonstration';
 
 // Steps whose chat goes through GET /onboarding/stream. `compare-intelligence` uses POST /compare.
@@ -46,6 +48,7 @@ export class OnboardingService {
         private readonly workflowService: WorkflowService,
         private readonly orchestrator: AgentRuntimeOrchestrator,
         private readonly creditBalanceService: CreditBalanceService,
+        private readonly creditTransactionService: CreditTransactionService,
         private readonly datasetService: DatasetService,
     ) {}
 
@@ -56,8 +59,8 @@ export class OnboardingService {
             return this.toResponse(existing);
         }
 
-        // The bonus belongs to the workspace: only the first member to start the onboarding gets it.
-        const grantsBonus = (await this.onboardingRepository.countByWorkspace(workspaceId)) === 0;
+        // Decided from the credit ledger, which the user cannot delete: the session goes away with the demo agent.
+        const grantsBonus = !(await this.creditTransactionService.hasGrantFrom(workspaceId, ONBOARDING_BONUS_SOURCE));
 
         const agent = await this.agentService.insertOne(
             {
@@ -96,7 +99,7 @@ export class OnboardingService {
                 await this.creditBalanceService.grantInitial(
                     { workspaceId, amount: ONBOARDING_INITIAL_CREDITS },
                     CreditTransactionType.SUBSCRIPTION,
-                    { source: 'onboarding_bonus' },
+                    { source: ONBOARDING_BONUS_SOURCE },
                 );
             }
         } catch (err) {

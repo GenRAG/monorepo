@@ -72,6 +72,24 @@ describe('UsageTrackerService', () => {
             });
         });
 
+        it('should debit a query that failed after the RAG engine did paid work', async () => {
+            const mockTx = {
+                creditBalance: { update: jest.fn() as any },
+                agentQueryLog: { create: jest.fn() as any },
+            } as any;
+            mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
+
+            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.ERROR, creditsUsed: 4 });
+
+            expect(mockTx.creditBalance.update).toHaveBeenCalledWith({
+                where: { workspaceId: 'ws-1' },
+                data: { balance: { decrement: 4 } },
+            });
+            expect(mockTx.agentQueryLog.create).toHaveBeenCalledWith({
+                data: expect.objectContaining({ status: QueryLogStatus.ERROR, creditsUsed: 4 }),
+            });
+        });
+
         it('should only create log without debit on OUT_OF_CREDITS', async () => {
             const mockTx = {
                 creditBalance: { findUnique: jest.fn() as any, update: jest.fn() as any },

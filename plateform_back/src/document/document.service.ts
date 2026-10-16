@@ -95,7 +95,7 @@ export class DocumentService {
 
         const safeFilename = sanitizeFilename(file.filename);
 
-        // The RAG engine identifies a document by (org_id, filename): two files with the same name would collide.
+        // The RAG engine identifies a document of a dataset by its filename: two files with the same name would collide.
         const sameName = await this.documentRepository.findByName(datasetId, safeFilename);
         if (sameName && sameName.id !== replacing?.id) {
             throw new ConflictException(`Un document nommé « ${safeFilename} » existe déjà dans cette base`);

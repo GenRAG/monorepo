@@ -5,8 +5,6 @@ import { CreditBalanceService } from './credit-balance.service';
 
 @Injectable()
 export class UsageTrackerService {
-    private static readonly COST_PER_QUERY = 1;
-
     constructor(
         private readonly creditService: CreditBalanceService,
         private readonly prisma: PrismaService,
@@ -18,7 +16,7 @@ export class UsageTrackerService {
         query,
         durationMs,
         status,
-        creditsUsed = UsageTrackerService.COST_PER_QUERY,
+        creditsUsed = 0,
         costByModel,
         costByType,
     }: {
@@ -31,7 +29,9 @@ export class UsageTrackerService {
         costByModel?: Record<string, number>;
         costByType?: Record<string, number>;
     }): Promise<void> {
-        const shouldDebit = status === QueryLogStatus.SUCCESS;
+        // The sinks bill whatever the RAG engine did paid work for, whatever the status: a client that disconnects
+        // mid-answer or an engine error after its cost summary still costs the LLM calls already made.
+        const shouldDebit = creditsUsed > 0;
 
         await this.prisma.$transaction(async (tx) => {
             if (shouldDebit) {

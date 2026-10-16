@@ -45,7 +45,7 @@ describe('UsageTrackerService', () => {
             } as any;
             mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
 
-            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.SUCCESS });
+            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.SUCCESS, creditsUsed: 1 });
 
             expect(mockTx.creditBalance.update).toHaveBeenCalledWith({
                 where: { workspaceId: 'ws-1' },
@@ -56,7 +56,7 @@ describe('UsageTrackerService', () => {
             });
         });
 
-        it('should only create log without debit on ERROR', async () => {
+        it('should only create log without debit when no credits are given (nothing was produced)', async () => {
             const mockTx = {
                 creditBalance: { findUnique: jest.fn() as any, update: jest.fn() as any },
                 agentQueryLog: { create: jest.fn() as any },

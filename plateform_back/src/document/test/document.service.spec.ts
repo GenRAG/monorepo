@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { DocumentSource, Prisma } from 'generated/prisma';
+import { MAX_DATASET_STORAGE_BYTES } from 'src/dataset/dataset.constants';
 import { DocumentService } from 'src/document/document.service';
 import { DocumentRepository } from 'src/document/document.repository';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
@@ -174,6 +175,36 @@ describe('DocumentService', () => {
             mockStorage.get.mockResolvedValue(Buffer.from('# Hello'));
 
             await expect(service.getContent('doc-1', 'dataset-1')).resolves.toBe('# Hello');
+        });
+    });
+
+    describe('assertIngestable', () => {
+        it("should accept the name of the document being replaced", async () => {
+            mockDocumentRepository.getTotalSize.mockResolvedValue(0);
+            mockDocumentRepository.findByName.mockResolvedValue({ id: 'doc-1' });
+
+            await expect(
+                service.assertIngestable('dataset-1', file, { id: 'doc-1', size: 10 }),
+            ).resolves.toBeUndefined();
+        });
+
+        it('should still refuse the name of another document', async () => {
+            mockDocumentRepository.getTotalSize.mockResolvedValue(0);
+            mockDocumentRepository.findByName.mockResolvedValue({ id: 'doc-2' });
+
+            await expect(service.assertIngestable('dataset-1', file, { id: 'doc-1', size: 10 })).rejects.toThrow(
+                ConflictException,
+            );
+        });
+
+        it('should count the quota without the document being replaced', async () => {
+            mockDocumentRepository.getTotalSize.mockResolvedValue(MAX_DATASET_STORAGE_BYTES);
+            mockDocumentRepository.findByName.mockResolvedValue(null);
+
+            await expect(service.assertIngestable('dataset-1', file)).rejects.toThrow(BadRequestException);
+            await expect(
+                service.assertIngestable('dataset-1', file, { id: 'doc-1', size: 10 }),
+            ).resolves.toBeUndefined();
         });
     });
 

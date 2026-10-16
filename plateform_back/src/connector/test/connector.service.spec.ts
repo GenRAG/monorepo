@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { DocumentSource } from 'generated/prisma';
@@ -14,6 +14,7 @@ import {
 const mockDocumentService = {
     getByDataset: jest.fn() as any,
     ingestFile: jest.fn() as any,
+    assertIngestable: jest.fn() as any,
     delete: jest.fn() as any,
 };
 
@@ -150,7 +151,7 @@ describe('ConnectorService', () => {
 
             const result = await service.syncGoogleDrive('dataset-1', 'token');
 
-            expect(result).toEqual({ updated: 0, unchanged: 1, failed: [] });
+            expect(result).toEqual({ updated: 0, unchanged: 1, removed: [], failed: [] });
             expect(mockDrive.download).not.toHaveBeenCalled();
             expect(mockDocumentService.delete).not.toHaveBeenCalled();
         });
@@ -160,7 +161,7 @@ describe('ConnectorService', () => {
 
             const result = await service.syncGoogleDrive('dataset-1', 'token');
 
-            expect(result).toEqual({ updated: 1, unchanged: 0, failed: [] });
+            expect(result).toEqual({ updated: 1, unchanged: 0, removed: [], failed: [] });
             expect(mockDocumentService.delete).toHaveBeenCalledWith('doc-1', 'dataset-1');
             expect(mockDocumentService.ingestFile).toHaveBeenCalledWith(
                 'dataset-1',
@@ -169,6 +170,33 @@ describe('ConnectorService', () => {
                     externalModifiedAt: new Date('2026-10-12T08:00:00.000Z'),
                 }),
             );
+        });
+
+        it('should keep the document when the dataset would refuse its new version', async () => {
+            mockDrive.getFile.mockResolvedValue(
+                driveFile({ name: 'Notes.pdf', modifiedTime: '2026-10-12T08:00:00.000Z' }),
+            );
+            mockDocumentService.assertIngestable.mockRejectedValueOnce(
+                new ConflictException('Un document nommé « Notes.pdf » existe déjà dans cette base'),
+            );
+
+            const result = await service.syncGoogleDrive('dataset-1', 'token');
+
+            expect(mockDocumentService.assertIngestable).toHaveBeenCalledWith('dataset-1', downloaded, imported);
+            expect(mockDocumentService.delete).not.toHaveBeenCalled();
+            expect(result.failed).toEqual([
+                { name: 'Rapport.pdf', reason: 'Un document nommé « Notes.pdf » existe déjà dans cette base' },
+            ]);
+        });
+
+        it('should remove a document whose Drive file is in the trash, and report it', async () => {
+            mockDrive.getFile.mockResolvedValue(driveFile({ trashed: true }));
+
+            const result = await service.syncGoogleDrive('dataset-1', 'token');
+
+            expect(mockDrive.download).not.toHaveBeenCalled();
+            expect(mockDocumentService.delete).toHaveBeenCalledWith('doc-1', 'dataset-1');
+            expect(result).toEqual({ updated: 0, unchanged: 0, removed: ['Rapport.pdf'], failed: [] });
         });
 
         it('should keep the document when the new version cannot be downloaded', async () => {

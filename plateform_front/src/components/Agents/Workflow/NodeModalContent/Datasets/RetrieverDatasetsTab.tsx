@@ -19,6 +19,8 @@ interface RetrieverDatasetsTabProps {
     onRemove: (settingNodeId: string) => void;
 }
 
+const noop = () => undefined;
+
 /** Datasets searched by the retriever: none selected means every dataset attached to the agent. */
 export const RetrieverDatasetsTab = ({
     retrieverId,
@@ -29,7 +31,6 @@ export const RetrieverDatasetsTab = ({
 }: RetrieverDatasetsTabProps) => {
     const navigate = useNavigate();
     const { attached, others } = useAgentDatasets(workspaceId, agentId);
-    const { pick, isAttaching } = usePickDataset(workspaceId, agentId, onAdd);
 
     const connections = useNodeConnections({
         id: retrieverId,
@@ -45,6 +46,9 @@ export const RetrieverDatasetsTab = ({
             datasetId: node.data.inputs?.[DATASET_ID_INPUT] ?? "",
         }));
     const datasetById = new Map(attached.map((d) => [d.id, d]));
+    // Nothing to limit yet: picking a base only attaches it, and the retriever keeps searching all of them.
+    const isAddingFirstBase = attached.length === 0 && selected.length === 0;
+    const { pick, isAttaching } = usePickDataset(workspaceId, agentId, isAddingFirstBase ? noop : onAdd);
 
     return (
         <VStack align="stretch" spacing={4} p={4}>
@@ -56,14 +60,18 @@ export const RetrieverDatasetsTab = ({
                             <Text variant="body-xs-muted">
                                 Cet agent n&apos;a encore aucune base : il répondra sans consulter de documents.
                             </Text>
-                            <Button
-                                size="xs"
-                                variant="secondary"
-                                w="fit-content"
-                                onClick={() => void navigate(`/workspaces/${workspaceId}/agents/${agentId}/datasets`)}
-                            >
-                                Ajouter des bases à l&apos;agent
-                            </Button>
+                            {others.length === 0 && (
+                                <Button
+                                    size="xs"
+                                    variant="secondary"
+                                    w="fit-content"
+                                    onClick={() =>
+                                        void navigate(`/workspaces/${workspaceId}/agents/${agentId}/datasets`)
+                                    }
+                                >
+                                    Ajouter des bases à l&apos;agent
+                                </Button>
+                            )}
                         </>
                     ) : (
                         <Text variant="body-xs-muted">
@@ -109,14 +117,16 @@ export const RetrieverDatasetsTab = ({
                 </Stack>
             )}
 
-            <DatasetPicker
-                label="Limiter à une base"
-                attached={attached}
-                others={others}
-                excludedIds={selected.map((s) => s.datasetId)}
-                onPick={(dataset, needsAttach) => void pick(dataset, needsAttach)}
-                isLoading={isAttaching}
-            />
+            {(!isAddingFirstBase || others.length > 0) && (
+                <DatasetPicker
+                    label={isAddingFirstBase ? "Ajouter une base à l'agent" : "Limiter à une base"}
+                    attached={attached}
+                    others={others}
+                    excludedIds={selected.map((s) => s.datasetId)}
+                    onPick={(dataset, needsAttach) => void pick(dataset, needsAttach)}
+                    isLoading={isAttaching}
+                />
+            )}
         </VStack>
     );
 };

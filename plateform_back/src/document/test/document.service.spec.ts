@@ -35,10 +35,10 @@ const mockQueue = {
 };
 
 const file = {
-    buffer: Buffer.from('hello'),
+    buffer: Buffer.from('%PDF-hello'),
     filename: 'Mon rapport.pdf',
     mimeType: 'application/pdf',
-    size: 5,
+    size: 10,
 };
 
 describe('DocumentService', () => {
@@ -112,6 +112,20 @@ describe('DocumentService', () => {
                     externalModifiedAt,
                 }),
             );
+        });
+
+        it('should refuse a file whose content does not match its type, whatever its source', async () => {
+            await expect(
+                service.ingestFile(
+                    'dataset-1',
+                    { ...file, buffer: Buffer.from('<html>') },
+                    {
+                        source: DocumentSource.GOOGLE_DRIVE,
+                        externalId: 'drive-123',
+                    },
+                ),
+            ).rejects.toThrow(BadRequestException);
+            expect(mockStorage.put).not.toHaveBeenCalled();
         });
 
         it('should refuse a file whose name already exists in the dataset', async () => {

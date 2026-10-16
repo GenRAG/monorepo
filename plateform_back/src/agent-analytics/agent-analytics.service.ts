@@ -15,10 +15,14 @@ import {
     LatencyPoint,
     QueryLogPage,
 } from './agent-analytics.types';
+import { RagPipelineBuilder } from 'src/agent-runtime/agent-runtime.builder';
 
 @Injectable()
 export class AgentAnalyticsService {
-    constructor(private readonly analyticsRepository: AgentAnalyticsRepository) {}
+    constructor(
+        private readonly analyticsRepository: AgentAnalyticsRepository,
+        private readonly pipelineBuilder: RagPipelineBuilder,
+    ) {}
 
     async getDailyMetrics(agentId: string, days: number): Promise<DailyMetricPoint[]> {
         const since = this._startOfRange(days);
@@ -42,7 +46,9 @@ export class AgentAnalyticsService {
     }
 
     async getDocumentHealth(agentId: string): Promise<DocumentHealthBreakdown> {
-        const counts = await this.analyticsRepository.getDocumentStatusCounts(agentId);
+        // Only the datasets the retriever searches: an attached dataset left out of the workflow does not matter here.
+        const datasetIds = await this.pipelineBuilder.resolveDatasetIds(agentId);
+        const counts = await this.analyticsRepository.getDocumentStatusCounts(datasetIds);
         const { UPLOADED, PROCESSING, INDEXED, FAILED } = counts;
 
         return {

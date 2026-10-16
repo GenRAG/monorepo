@@ -63,6 +63,7 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 | Agents | CRUD, export et partage d'agents | `pages/Agents`, `components/Agents` | `agent/` | `services/agent/agent.ts`, `agentMembers.ts` |
 | Workflow builder | Pipeline RAG drag-and-drop, aperçus animés des blocs | `pages/Agents/Workflow`, `components/Agents/Workflow` | `workflow/` | `services/workflow/workflow.ts`, `services/models/models.ts` |
 | Documents | Import, indexation asynchrone, statuts | `components/Document` | `document/`, `storage/` | `services/document/document.ts` |
+| Connecteurs | Import et resynchro de fichiers depuis un service externe (Google Drive seulement), jeton OAuth du navigateur jamais stocké | `components/Dataset/Detail/DatasetSourcesTab.tsx`, `hooks/connector/`, `lib/googlePicker.ts` | `connector/` | `services/connector/connector.ts` |
 | Playground | Test d'un agent en SSE, sans crédits | `components/ui/chat`, `hooks/chat/` | `agent-runtime/` | `services/agentRuntime/agentRuntime.ts` |
 | Assistant final | Chat de l'utilisateur final, conversations persistées | `pages/Assistant` | `conversation/`, `agent-runtime/` | `services/chat/chat.ts` |
 | Déploiement | Versions, snapshots de workflow, rollback | `components/Deployment` | `deployment/` | `services/deployment/deployment.ts` |

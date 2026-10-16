@@ -229,4 +229,28 @@ describe('RagPipelineBuilder', () => {
             });
         });
     });
+
+    describe('resolveDatasetIds', () => {
+        it('should return the datasets of the deployed retriever, filtered by the attached ones', async () => {
+            mockAgentService.findProductionWorkflowVersion.mockResolvedValue(2);
+            mockWorkflowService.findByVersion.mockResolvedValue(
+                withRetrieve({ type: 'retrieve', datasetIds: ['d1', 'foreign'] }),
+            );
+            mockDatasetService.resolveOrgIdsForAgent.mockResolvedValue(['d1']);
+
+            await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual(['d1']);
+            expect(mockDatasetService.resolveOrgIdsForAgent).toHaveBeenCalledWith('agent-1', ['d1', 'foreign']);
+        });
+
+        it('should return no dataset when the workflow has no retriever, or there is no workflow', async () => {
+            mockAgentService.findProductionWorkflowVersion.mockResolvedValue(null);
+            mockWorkflowService.findActive
+                .mockResolvedValueOnce(withRetrieve({ type: 'answer' }))
+                .mockResolvedValueOnce(null);
+
+            await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual([]);
+            await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual([]);
+            expect(mockDatasetService.resolveOrgIdsForAgent).not.toHaveBeenCalled();
+        });
+    });
 });

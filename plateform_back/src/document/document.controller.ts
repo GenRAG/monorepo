@@ -16,20 +16,9 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { DatasetBelongsToWorkspaceGuard } from 'src/dataset/guard/dataset-workspace.guard';
 import { DocumentService } from './document.service';
-import { matchesDeclaredType } from 'src/lib/file-signature.util';
+import { MAX_FILE_SIZE } from './document.constants';
 import { DocumentPaginationQuery } from './dto/document-pagination.query';
 import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
-
-const ALLOWED_MIME_TYPES = new Set([
-    'application/pdf',
-    'text/plain',
-    'text/markdown',
-    'text/x-markdown',
-    'text/html',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-]);
-
-const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 const toArray = <T>(value?: T | T[]): T[] | undefined =>
     value === undefined ? undefined : Array.isArray(value) ? value : [value];
@@ -52,11 +41,6 @@ export class DocumentController {
     })
     upload(@Param('datasetId') datasetId: string, @UploadedFile() file: Express.Multer.File) {
         if (!file) throw new BadRequestException('Aucun fichier fourni');
-        if (!file.buffer || file.buffer.length === 0) throw new BadRequestException('Le fichier est vide');
-        if (!ALLOWED_MIME_TYPES.has(file.mimetype)) throw new BadRequestException('Type de fichier non supporté');
-        if (!matchesDeclaredType(file.buffer, file.mimetype)) {
-            throw new BadRequestException('Le contenu du fichier ne correspond pas à son type');
-        }
         return this.documentService.upload(file, datasetId);
     }
 

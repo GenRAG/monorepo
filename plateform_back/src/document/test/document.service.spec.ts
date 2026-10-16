@@ -179,7 +179,7 @@ describe('DocumentService', () => {
     });
 
     describe('assertIngestable', () => {
-        it("should accept the name of the document being replaced", async () => {
+        it('should accept the name of the document being replaced', async () => {
             mockDocumentRepository.getTotalSize.mockResolvedValue(0);
             mockDocumentRepository.findByName.mockResolvedValue({ id: 'doc-1' });
 

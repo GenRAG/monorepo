@@ -77,10 +77,19 @@ export const useGoogleDrive = (workspaceId: string, datasetId: string) => {
 
     const sync = async (accessToken: string) => {
         try {
-            const { updated, unchanged, failed } = await syncFiles({ workspaceId, datasetId, accessToken }).unwrap();
+            const { updated, unchanged, removed, failed } = await syncFiles({
+                workspaceId,
+                datasetId,
+                accessToken,
+            }).unwrap();
+            const removedSummary =
+                removed.length > 0
+                    ? `, ${pluralize(removed.length, "supprimé (corbeille Drive)", "supprimés (corbeille Drive)")}`
+                    : "";
+            const removedDetail = removed.length > 0 ? `Supprimés : ${removed.join(", ")}` : undefined;
             toast({
-                title: `${pluralize(updated, "document mis à jour", "documents mis à jour")}, ${pluralize(unchanged, "déjà à jour", "déjà à jour")}`,
-                description: describeFailures(failed),
+                title: `${pluralize(updated, "document mis à jour", "documents mis à jour")}, ${pluralize(unchanged, "déjà à jour", "déjà à jour")}${removedSummary}`,
+                description: [removedDetail, describeFailures(failed)].filter(Boolean).join(" · ") || undefined,
                 status: failed.length === 0 ? "success" : "warning",
                 duration: failed.length === 0 ? 4000 : 8000,
             });

@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { IngestFileInput } from 'src/document/document.service';
 
 const DRIVE_FILES_API = 'https://www.googleapis.com/drive/v3/files';
-const FILE_FIELDS = 'id,name,mimeType,modifiedTime,webViewLink,size';
+const FILE_FIELDS = 'id,name,mimeType,modifiedTime,webViewLink,size,trashed';
 
 /** Google-native files have no binary content: they are exported to a format the RAG engine indexes. */
 export const GOOGLE_EXPORTS: Record<string, { mimeType: string; extension: string }> = {
@@ -24,6 +24,8 @@ export interface DriveFile {
     webViewLink?: string;
     /** Absent for Google-native files. */
     size?: string;
+    /** Drive still serves a file in the trash (200): this is the only sign that the user deleted it. */
+    trashed?: boolean;
 }
 
 /** The file was deleted, or the Google account no longer has access to it. */

@@ -45,6 +45,10 @@ export class ConnectorService {
             try {
                 const file = await this.googleDrive.getFile(accessToken, fileId);
                 name = file.name;
+                if (file.trashed) {
+                    result.failed.push({ name, reason: 'Dans la corbeille de Google Drive' });
+                    continue;
+                }
                 if (alreadyImported.has(file.id)) {
                     result.failed.push({
                         name,
@@ -71,6 +75,7 @@ export class ConnectorService {
         const result: ConnectorSyncResult = {
             updated: 0,
             unchanged: 0,
+            removed: [],
             failed: [],
         };
 
@@ -84,15 +89,22 @@ export class ConnectorService {
             }
             try {
                 const file = await this.googleDrive.getFile(accessToken, doc.externalId);
+                if (file.trashed) {
+                    await this.documentService.delete(doc.id, datasetId);
+                    result.removed.push(doc.name);
+                    continue;
+                }
                 if (doc.externalModifiedAt && new Date(file.modifiedTime) <= doc.externalModifiedAt) {
                     result.unchanged++;
                     continue;
                 }
 
-                // Downloaded before the old version is deleted, so a Drive failure leaves the document untouched.
+                // Downloaded and checked against every ingest rule before the old version is deleted: a Drive failure or
+                // a refused new version (name taken, quota, content) leaves the document untouched.
                 const download = await this.download(accessToken, file);
-                // shortcut: delete then re-ingest; if the re-ingest fails the document leaves the dataset (it is still in
-                // Drive, re-importable). Replace in place in DocumentService if that happens in practice.
+                await this.documentService.assertIngestable(datasetId, download, doc);
+                // shortcut: only an infrastructure failure (S3, database, queue) between these two calls removes the
+                // document; replace it in place in DocumentService if that happens in practice.
                 await this.documentService.delete(doc.id, datasetId);
                 await this.documentService.ingestFile(datasetId, download, toOrigin(file));
                 result.updated++;

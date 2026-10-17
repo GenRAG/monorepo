@@ -3,7 +3,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { CreateWorkflowRequest } from 'src/workflow/dto/create-workflow.request';
 import { UpdateWorkflowRequest } from 'src/workflow/dto/update-workflow.request';
-import { ActivateWorkflowRequest } from 'src/workflow/dto/activate-workflow.request';
 import { WorkflowService } from 'src/workflow/workflow.service';
 import { AgentBelongsToWorkspaceGuard } from 'src/agent/guard/agent-workspace.guard';
 
@@ -35,11 +34,6 @@ export class WorkflowController {
     @Patch()
     update(@Param('agentId') agentId: string, @Body() updateWorkflowRequest: UpdateWorkflowRequest) {
         return this.workflowService.update(agentId, updateWorkflowRequest);
-    }
-
-    @Patch('activate')
-    activate(@Param('agentId') agentId: string, @Body() body: ActivateWorkflowRequest) {
-        return this.workflowService.activate(body.id, agentId);
     }
 
     @Post()

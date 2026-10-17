@@ -182,69 +182,6 @@ describe('Workflow (e2e)', () => {
         });
     });
 
-    describe('PATCH /workflow/activate', () => {
-        it('should reactivate version 1 and return it as active', async () => {
-            const res = await request(app.getHttpServer())
-                .patch(`${workflowUrl}/activate`)
-                .set('Cookie', cookie)
-                .send({ id: workflowV1Id })
-                .expect(200);
-
-            expect(res.body.id).toBe(workflowV1Id);
-            expect(res.body.version).toBe(1);
-            expect(res.body.isActive).toBe(true);
-
-            const activeRes = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie).expect(200);
-
-            expect(activeRes.body.id).toBe(workflowV1Id);
-        });
-
-        it('should return 404 for unknown workflow id', async () => {
-            await request(app.getHttpServer())
-                .patch(`${workflowUrl}/activate`)
-                .set('Cookie', cookie)
-                .send({ id: 'unknown-workflow-id' })
-                .expect(404);
-        });
-
-        it('should return 403 for non-member', async () => {
-            await request(app.getHttpServer())
-                .patch(`${workflowUrl}/activate`)
-                .set('Cookie', cookieUser2)
-                .send({ id: workflowV1Id })
-                .expect(403);
-        });
-
-        it("should return 404 and leave both agents untouched when activating another tenant's workflow", async () => {
-            const otherWorkspaceId = await createWorkspace(app, cookieUser2, { name: 'Other WS', description: '' });
-            const otherAgentId = await createAgent(app, cookieUser2, otherWorkspaceId, {
-                name: 'Other tenant agent',
-                description: '',
-            });
-            const otherWorkflowUrl = `/workspaces/${otherWorkspaceId}/agents/${otherAgentId}/workflow`;
-            const otherWorkflowRes = await request(app.getHttpServer())
-                .post(otherWorkflowUrl)
-                .set('Cookie', cookieUser2)
-                .send({ definition: WORKFLOW_DEFINITION })
-                .expect(201);
-            const activeBefore = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie).expect(200);
-
-            await request(app.getHttpServer())
-                .patch(`${workflowUrl}/activate`)
-                .set('Cookie', cookie)
-                .send({ id: otherWorkflowRes.body.id })
-                .expect(404);
-
-            const activeAfter = await request(app.getHttpServer()).get(workflowUrl).set('Cookie', cookie).expect(200);
-            expect(activeAfter.body.id).toBe(activeBefore.body.id);
-            const otherHistory = await request(app.getHttpServer())
-                .get(`${otherWorkflowUrl}/history`)
-                .set('Cookie', cookieUser2)
-                .expect(200);
-            expect(otherHistory.body.filter((w: { isActive: boolean }) => w.isActive)).toHaveLength(1);
-        });
-    });
-
     describe('GET /workflow/:id', () => {
         it('should return a specific workflow version by id', async () => {
             const historyRes = await request(app.getHttpServer()).get(`${workflowUrl}/history`).set('Cookie', cookie);

@@ -30,6 +30,9 @@ export class TransientResultSink extends BaseResultSink {
                     query: this.logCtx.query.slice(0, 500),
                     durationMs: Date.now() - this.logCtx.startedAt,
                     status: QueryLogStatus.ERROR,
+                    creditsUsed: this.creditsUsed(outcome),
+                    costByModel: outcome.costSummary?.by_model,
+                    costByType: outcome.costSummary?.by_type,
                 });
             }
             const message = toClientSafeErrorMessage(outcome.error, 'RAG stream error', this.logger);

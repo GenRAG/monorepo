@@ -126,8 +126,22 @@ describe('Auth (e2e)', () => {
                 .send({ email: bruteEmail, password: 'Password123!', name: 'Brute' });
         });
 
+        const registered: string[] = [bruteEmail];
+
+        const register = async (prefix: string) => {
+            const email = `${prefix}-${Date.now()}@test.com`;
+            await request(app.getHttpServer())
+                .post('/auth/register')
+                .send({ email, password: 'Password123!', name: prefix });
+            registered.push(email);
+            return email;
+        };
+
         afterAll(async () => {
-            await redis.del(`login:attempts:${bruteEmail}`);
+            for (const email of registered) {
+                const keys = await redis.keys(`*attempts:*${email}`);
+                if (keys.length) await redis.del(...keys);
+            }
         });
 
         it('should block after 5 failed login attempts', async () => {
@@ -143,6 +157,46 @@ describe('Auth (e2e)', () => {
                 .send({ email: bruteEmail, password: 'Password123!' })
                 .expect(401);
 
+            expect(res.body.error.message).toContain('Too many failed attempts');
+        });
+
+        it('should check only 5 of 20 parallel guesses', async () => {
+            const email = await register('race');
+            // One listening server for all requests: otherwise supertest opens one per request and some get reset.
+            const server = app.getHttpServer();
+            if (!server.listening) await new Promise<void>((resolve) => server.listen(0, resolve));
+
+            const responses = await Promise.all(
+                Array.from({ length: 20 }, () =>
+                    request(server).post('/auth/login').send({ email, password: 'WrongPass123!' }),
+                ),
+            );
+
+            const checked = responses
+                .map((res) => res.body.error?.message)
+                .filter((message) => message === 'Credentials are not valid.');
+            expect(checked).toHaveLength(5);
+        });
+
+        it('should not let a successful login reset the guesses of a password reset code', async () => {
+            const email = await register('reset-guess');
+            const guessCode = () =>
+                request(app.getHttpServer()).post('/auth/verify-password-reset-token').send({
+                    email,
+                    token: 123456,
+                    password: 'N3wStrongP@ssword!',
+                });
+
+            for (let i = 0; i < 4; i++) {
+                await guessCode().expect(401);
+            }
+            await request(app.getHttpServer())
+                .post('/auth/login')
+                .send({ email, password: 'Password123!' })
+                .expect(201);
+            await guessCode().expect(401);
+
+            const res = await guessCode().expect(401);
             expect(res.body.error.message).toContain('Too many failed attempts');
         });
     });

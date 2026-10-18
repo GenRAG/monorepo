@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtBlacklistService } from 'src/auth/jwt-blacklist.service';
-import { LoginAttemptService } from 'src/auth/login-attempt.service';
+import { AttemptFlow, LoginAttemptService } from 'src/auth/login-attempt.service';
 import { TokenService } from 'src/auth/token.service';
 import { UsersService } from 'src/users/users.service';
 import { jest, describe, beforeEach, it, expect } from '@jest/globals';
@@ -80,12 +80,11 @@ const mockJwtBlacklist = {
 };
 
 const mockLoginAttempt = {
-    isBlocked: jest.fn() as jest.MockedFunction<(email: string) => Promise<boolean>>,
-    recordFailure: jest.fn() as jest.MockedFunction<(email: string) => Promise<void>>,
-    reset: jest.fn() as jest.MockedFunction<(email: string) => Promise<void>>,
+    consume: jest.fn() as jest.MockedFunction<(flow: AttemptFlow, email: string) => Promise<void>>,
+    reset: jest.fn() as jest.MockedFunction<(flow: AttemptFlow, email: string) => Promise<void>>,
 };
 
-mockLoginAttempt.isBlocked.mockResolvedValue(false);
+mockLoginAttempt.consume.mockResolvedValue(undefined);
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -109,7 +108,7 @@ describe('AuthService', () => {
         cookieMock = jest.fn();
         response = { cookie: cookieMock } as unknown as Response;
         jest.clearAllMocks();
-        mockLoginAttempt.isBlocked.mockResolvedValue(false);
+        mockLoginAttempt.consume.mockResolvedValue(undefined);
         mockConfigService.get.mockImplementation(
             (key: string) => ({ NODE_ENV: 'development', JWT_EXPIRATION: '7d' })[key],
         );
@@ -196,26 +195,30 @@ describe('AuthService', () => {
     });
 
     describe('verifyUser', () => {
-        it('should throw UnauthorizedException if email is blocked', async () => {
-            mockLoginAttempt.isBlocked.mockResolvedValue(true);
+        it('should throw UnauthorizedException if the attempt is refused', async () => {
+            mockLoginAttempt.consume.mockRejectedValue(
+                new UnauthorizedException('Too many failed attempts. Try again later.'),
+            );
 
             await expect(service.verifyUser('test@genrag.com', 'Pass123!')).rejects.toThrow(UnauthorizedException);
             expect(mockUsersService.findOneWithCredentials).not.toHaveBeenCalled();
         });
 
-        it('should record failure and throw if user not found', async () => {
+        it('should count the attempt and throw if user not found', async () => {
             mockUsersService.findOneWithCredentials.mockResolvedValue(null);
 
             await expect(service.verifyUser('unknown@genrag.com', 'Pass123!')).rejects.toThrow(UnauthorizedException);
-            expect(mockLoginAttempt.recordFailure).toHaveBeenCalledWith('unknown@genrag.com');
+            expect(mockLoginAttempt.consume).toHaveBeenCalledWith('login', 'unknown@genrag.com');
+            expect(mockLoginAttempt.reset).not.toHaveBeenCalled();
         });
 
-        it('should record failure and throw if password is wrong', async () => {
+        it('should count the attempt and throw if password is wrong', async () => {
             mockUsersService.findOneWithCredentials.mockResolvedValue(fakeUser);
             mockedBcryptCompare.mockImplementation(() => Promise.resolve(false));
 
             await expect(service.verifyUser('test@genrag.com', 'WrongPass!')).rejects.toThrow(UnauthorizedException);
-            expect(mockLoginAttempt.recordFailure).toHaveBeenCalledWith('test@genrag.com');
+            expect(mockLoginAttempt.consume).toHaveBeenCalledWith('login', 'test@genrag.com');
+            expect(mockLoginAttempt.reset).not.toHaveBeenCalled();
         });
 
         it('should reset counter and return user on success', async () => {
@@ -224,7 +227,7 @@ describe('AuthService', () => {
 
             const result = await service.verifyUser('test@genrag.com', 'Pass123!');
 
-            expect(mockLoginAttempt.reset).toHaveBeenCalledWith('test@genrag.com');
+            expect(mockLoginAttempt.reset).toHaveBeenCalledWith('login', 'test@genrag.com');
             expect(result).toEqual(fakeUser);
         });
 
@@ -261,28 +264,32 @@ describe('AuthService', () => {
     describe('verifyPasswordResetToken', () => {
         const validBody = { email: 'test@genrag.com', token: 123456, password: 'NewPass123!' };
 
-        it('should throw if email is blocked', async () => {
-            mockLoginAttempt.isBlocked.mockResolvedValue(true);
+        it('should throw if the attempt is refused', async () => {
+            mockLoginAttempt.consume.mockRejectedValue(
+                new UnauthorizedException('Too many failed attempts. Try again later.'),
+            );
 
             await expect(service.verifyPasswordResetToken(validBody)).rejects.toThrow(UnauthorizedException);
         });
 
-        it('should record failure and throw if user not found', async () => {
+        it('should count the attempt and throw if user not found', async () => {
             mockUsersService.findOneWithCredentials.mockResolvedValue(null);
 
             await expect(service.verifyPasswordResetToken(validBody)).rejects.toThrow(UnauthorizedException);
-            expect(mockLoginAttempt.recordFailure).toHaveBeenCalled();
+            expect(mockLoginAttempt.consume).toHaveBeenCalledWith('password-reset', 'test@genrag.com');
+            expect(mockLoginAttempt.reset).not.toHaveBeenCalled();
         });
 
-        it('should record failure and throw if code is wrong', async () => {
+        it('should count the attempt and throw if code is wrong', async () => {
             mockUsersService.findOneWithCredentials.mockResolvedValue(fakeUser);
             mockTokenService.hashOtpCode.mockReturnValue('different-hash');
 
             await expect(service.verifyPasswordResetToken(validBody)).rejects.toThrow(UnauthorizedException);
-            expect(mockLoginAttempt.recordFailure).toHaveBeenCalled();
+            expect(mockLoginAttempt.consume).toHaveBeenCalledWith('password-reset', 'test@genrag.com');
+            expect(mockLoginAttempt.reset).not.toHaveBeenCalled();
         });
 
-        it('should record failure and throw if token is expired', async () => {
+        it('should count the attempt and throw if token is expired', async () => {
             mockUsersService.findOneWithCredentials.mockResolvedValue({
                 ...fakeUser,
                 passwordResetLastSentAt: new Date(Date.now() - 20 * 60 * 1000),
@@ -290,10 +297,11 @@ describe('AuthService', () => {
             mockTokenService.hashOtpCode.mockReturnValue('hashed-reset-token');
 
             await expect(service.verifyPasswordResetToken(validBody)).rejects.toThrow(UnauthorizedException);
-            expect(mockLoginAttempt.recordFailure).toHaveBeenCalled();
+            expect(mockLoginAttempt.consume).toHaveBeenCalledWith('password-reset', 'test@genrag.com');
+            expect(mockLoginAttempt.reset).not.toHaveBeenCalled();
         });
 
-        it('should update password and reset counter on success', async () => {
+        it('should update password and reset the reset and login counters on success', async () => {
             mockUsersService.findOneWithCredentials.mockResolvedValue(fakeUser);
             mockTokenService.hashOtpCode.mockReturnValue('hashed-reset-token');
             mockedBcryptHash.mockImplementation(() => Promise.resolve('new-hashed-password'));
@@ -301,7 +309,8 @@ describe('AuthService', () => {
 
             await service.verifyPasswordResetToken(validBody);
 
-            expect(mockLoginAttempt.reset).toHaveBeenCalledWith('test@genrag.com');
+            expect(mockLoginAttempt.reset).toHaveBeenCalledWith('password-reset', 'test@genrag.com');
+            expect(mockLoginAttempt.reset).toHaveBeenCalledWith('login', 'test@genrag.com');
             expect(mockUsersService.update).toHaveBeenCalledWith(
                 expect.objectContaining({
                     data: expect.objectContaining({ password: 'new-hashed-password', passwordResetToken: null }),
@@ -382,7 +391,7 @@ describe('AuthService — production mode', () => {
 
         service = module.get<AuthService>(AuthService);
         jest.clearAllMocks();
-        mockLoginAttempt.isBlocked.mockResolvedValue(false);
+        mockLoginAttempt.consume.mockResolvedValue(undefined);
     });
 
     it('should send verification token after register', async () => {

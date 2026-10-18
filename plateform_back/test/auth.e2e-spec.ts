@@ -115,6 +115,21 @@ describe('Auth (e2e)', () => {
         it('should succeed even without a cookie (idempotent logout)', async () => {
             await request(app.getHttpServer()).post('/auth/logout').expect(201);
         });
+
+        it('should clear the cookie with the attributes it was set with, or the browser keeps it', async () => {
+            const attributes = (setCookie: string) =>
+                setCookie
+                    .split(';')
+                    .slice(1)
+                    .map((a) => a.trim().toLowerCase())
+                    .filter((a) => !a.startsWith('expires='))
+                    .sort();
+
+            const res = await request(app.getHttpServer()).post('/auth/logout').set('Cookie', cookie).expect(201);
+            const cleared = (res.headers['set-cookie'] as unknown as string[])[0];
+
+            expect(attributes(cleared)).toEqual(attributes(cookie));
+        });
     });
 
     describe('Per-email brute-force protection', () => {

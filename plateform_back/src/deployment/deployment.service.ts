@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { AgentStatus } from 'generated/prisma';
 import { AgentRepository } from 'src/agent/agent.repository';
 import { WorkflowService } from 'src/workflow/workflow.service';
+import { RagPipelineBuilder } from 'src/agent-runtime/agent-runtime.builder';
 import EventBus from 'src/lib/event-bus';
 import { AgentDeployedEvent, AgentStatusChangedEvent } from 'src/events/agent/agent-events';
 import { AgentEventType } from 'src/events/agent/agent-events.type';
@@ -15,6 +16,7 @@ export class DeploymentService {
         private readonly deploymentRepository: DeploymentRepository,
         private readonly agentRepository: AgentRepository,
         private readonly workflowService: WorkflowService,
+        private readonly pipelineBuilder: RagPipelineBuilder,
     ) {}
 
     private async createDeploymentAndEmitEvents({
@@ -74,6 +76,10 @@ export class DeploymentService {
         const definition = workflow.definition as { nodes?: Array<{ data?: { isPlaceholder?: boolean } }> };
         const hasPlaceholders = definition.nodes?.some((n) => n.data?.isPlaceholder === true);
         if (hasPlaceholders) throw new BadRequestException('Workflow has unconfigured nodes');
+
+        // Checked against the engine's schema (422 with the details): an invalid pipeline would fail every end-user
+        // question instead. Drafts stay free to be incomplete until they are deployed.
+        await this.pipelineBuilder.assertDeployable(agentId);
 
         const { version } = await this.workflowService.createSnapshot(agentId, {
             definition: workflow.definition as Record<string, unknown>,

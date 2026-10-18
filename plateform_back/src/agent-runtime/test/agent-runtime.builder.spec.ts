@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { RagPipelineBuilder } from 'src/agent-runtime/agent-runtime.builder';
@@ -252,6 +252,30 @@ describe('RagPipelineBuilder', () => {
             await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual([]);
             await expect(builder.resolveDatasetIds('agent-1')).resolves.toEqual([]);
             expect(mockDatasetService.resolveDatasetIdsForAgent).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('assertDeployable', () => {
+        it('should accept the active draft, whose stored datasetIds are replaced at query time', async () => {
+            mockWorkflowService.findActive.mockResolvedValue(fakeWorkflow);
+
+            await expect(builder.assertDeployable('agent-1')).resolves.toBeUndefined();
+            expect(mockAgentService.findProductionWorkflowVersion).not.toHaveBeenCalled();
+        });
+
+        it('should reject an invalid retrieve block even when the agent has no dataset yet', async () => {
+            mockDatasetService.resolveDatasetIdsForAgent.mockResolvedValue([]);
+            mockWorkflowService.findActive.mockResolvedValue(
+                withRetrieve({ name: 'retrieve', type: 'retrieve', top_k: 500, datasetIds: [] }),
+            );
+
+            await expect(builder.assertDeployable('agent-1')).rejects.toThrow(UnprocessableEntityException);
+        });
+
+        it('should throw NotFoundException without an active workflow', async () => {
+            mockWorkflowService.findActive.mockResolvedValue(null);
+
+            await expect(builder.assertDeployable('agent-1')).rejects.toThrow(NotFoundException);
         });
     });
 });

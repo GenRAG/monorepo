@@ -43,13 +43,37 @@ export class RagPipelineBuilder {
             ? await this.resolveRetrieveBlocks(agentId, rawBlocks, orgIdOverride)
             : rawBlocks;
 
+        return this.applyInstructionOverride(this.parsePipeline(blocks), instructionOverride);
+    }
+
+    /**
+     * Checks every block of the active workflow against the engine's schema before it is deployed, the retrieve block
+     * included even when the agent has no dataset yet (it would be dropped from today's pipeline, then fail every
+     * question once a dataset is attached). Throws 422 with the details.
+     */
+    async assertDeployable(agentId: string): Promise<void> {
+        const rawBlocks = await this.loadRawBlocks(agentId, true);
+        if (rawBlocks === null) {
+            throw new NotFoundException('No active workflow found for this agent');
+        }
+        const blocks = Array.isArray(rawBlocks)
+            ? rawBlocks.map((block) => {
+                  if (!isRetrieveBlock(block)) return block;
+                  // Replaced at query time by the datasets the agent may search.
+                  const { datasetIds: _stored, ...rest } = block;
+                  return rest;
+              })
+            : rawBlocks;
+        this.parsePipeline(blocks);
+    }
+
+    private parsePipeline(blocks: unknown): Pipeline {
         const result = PipelineSchema.safeParse(blocks);
         if (!result.success) {
             const details = result.error.issues.map((i) => `[${i.path.join('.')}] ${i.message}`).join('; ');
             throw new UnprocessableEntityException(`Pipeline invalide : ${details}`);
         }
-
-        return this.applyInstructionOverride(result.data, instructionOverride);
+        return result.data;
     }
 
     /** Datasets the deployed agent actually searches: the same ones its pipeline sends to the RAG engine. */

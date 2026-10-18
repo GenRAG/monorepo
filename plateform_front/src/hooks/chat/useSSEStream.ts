@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { RagSource, ThinkingEvent } from "./types";
 
 const makeEventId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -30,7 +30,27 @@ export interface SSEResult {
     durationMs?: number;
 }
 
-export function useSSEStream() {
+export interface SSEStreamOptions {
+    /**
+     * Close the streams still open when the screen unmounts, so the server stops generating an answer nobody will read.
+     * Only for answers that are not kept: a persisted conversation keeps streaming, and the user finds the answer back.
+     */
+    closeOnUnmount?: boolean;
+}
+
+export function useSSEStream({ closeOnUnmount = false }: SSEStreamOptions = {}) {
+    const openStreams = useRef(new Set<EventSource>());
+
+    useEffect(() => {
+        const streams = openStreams.current;
+        return () => {
+            if (!closeOnUnmount) return;
+            // The pending promises stay unsettled: rejecting them would show an error toast on the next screen.
+            streams.forEach((es) => es.close());
+            streams.clear();
+        };
+    }, [closeOnUnmount]);
+
     const stream = useCallback(
         (
             url: string,
@@ -40,13 +60,18 @@ export function useSSEStream() {
         ): Promise<SSEResult> => {
             return new Promise((resolve, reject) => {
                 const es = new EventSource(url, { withCredentials: true });
+                openStreams.current.add(es);
+                const close = () => {
+                    es.close();
+                    openStreams.current.delete(es);
+                };
                 let fullText = "";
 
                 es.onmessage = (e: MessageEvent) => {
                     try {
                         const parsed = JSON.parse(e.data as string) as SSEEvent;
                         if (parsed.done) {
-                            es.close();
+                            close();
                             resolve({
                                 text: fullText,
                                 conversationId: parsed.conversationId,
@@ -55,7 +80,7 @@ export function useSSEStream() {
                             return;
                         }
                         if (parsed.error) {
-                            es.close();
+                            close();
                             if (parsed.isOutOfCredits) {
                                 reject(new InsufficientCreditsError());
                             } else {
@@ -85,7 +110,7 @@ export function useSSEStream() {
                 };
 
                 es.onerror = () => {
-                    es.close();
+                    close();
                     reject(new Error("Erreur de connexion au serveur."));
                 };
             });

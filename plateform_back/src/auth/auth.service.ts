@@ -204,6 +204,8 @@ export class AuthService {
         }
 
         await this.loginAttempt.reset('password-reset', email);
+        // The code proves the email is theirs, and they now pick a new password: lift a login block too.
+        await this.loginAttempt.reset('login', email);
 
         const hashedPassword = await bcryptjs.hash(password, 10);
 

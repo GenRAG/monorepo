@@ -172,10 +172,9 @@ describe('Auth (e2e)', () => {
                 ),
             );
 
-            const checked = responses
-                .map((res) => res.body.error?.message)
-                .filter((message) => message === 'Credentials are not valid.');
-            expect(checked).toHaveLength(5);
+            const messages = responses.map((res) => res.body.error?.message);
+            expect(messages.filter((message) => message === 'Credentials are not valid.')).toHaveLength(5);
+            expect(messages.filter((message) => message?.includes('Too many failed attempts'))).toHaveLength(15);
         });
 
         it('should not let a successful login reset the guesses of a password reset code', async () => {

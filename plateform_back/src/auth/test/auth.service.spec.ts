@@ -301,7 +301,7 @@ describe('AuthService', () => {
             expect(mockLoginAttempt.reset).not.toHaveBeenCalled();
         });
 
-        it('should update password and reset counter on success', async () => {
+        it('should update password and reset the reset and login counters on success', async () => {
             mockUsersService.findOneWithCredentials.mockResolvedValue(fakeUser);
             mockTokenService.hashOtpCode.mockReturnValue('hashed-reset-token');
             mockedBcryptHash.mockImplementation(() => Promise.resolve('new-hashed-password'));
@@ -310,6 +310,7 @@ describe('AuthService', () => {
             await service.verifyPasswordResetToken(validBody);
 
             expect(mockLoginAttempt.reset).toHaveBeenCalledWith('password-reset', 'test@genrag.com');
+            expect(mockLoginAttempt.reset).toHaveBeenCalledWith('login', 'test@genrag.com');
             expect(mockUsersService.update).toHaveBeenCalledWith(
                 expect.objectContaining({
                     data: expect.objectContaining({ password: 'new-hashed-password', passwordResetToken: null }),

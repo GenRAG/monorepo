@@ -6,8 +6,8 @@ import { REDIS_CLIENT } from 'src/redis/redis.module';
 import { describe, expect, it, beforeEach, jest } from '@jest/globals';
 
 const mockTransaction = {
+    set: jest.fn().mockReturnThis(),
     incr: jest.fn().mockReturnThis(),
-    expire: jest.fn().mockReturnThis(),
     exec: jest.fn<() => Promise<[Error | null, unknown][] | null>>(),
 };
 
@@ -22,8 +22,8 @@ const mockConfig = {
 
 const countIs = (count: number) =>
     mockTransaction.exec.mockResolvedValue([
+        [null, count === 1 ? 'OK' : null],
         [null, count],
-        [null, 1],
     ]);
 
 describe('LoginAttemptService', () => {
@@ -44,13 +44,13 @@ describe('LoginAttemptService', () => {
     });
 
     describe('consume', () => {
-        it('should count the attempt and set the TTL only if the key has none, in one transaction', async () => {
+        it('should start the window if the key is new, then count the attempt, in one transaction', async () => {
             countIs(1);
 
             await service.consume('login', 'TEST@GENRAG.COM');
 
+            expect(mockTransaction.set).toHaveBeenCalledWith('auth:attempts:login:test@genrag.com', 0, 'EX', 900, 'NX');
             expect(mockTransaction.incr).toHaveBeenCalledWith('auth:attempts:login:test@genrag.com');
-            expect(mockTransaction.expire).toHaveBeenCalledWith('auth:attempts:login:test@genrag.com', 900, 'NX');
             expect(mockTransaction.exec).toHaveBeenCalled();
         });
 
@@ -72,6 +72,16 @@ describe('LoginAttemptService', () => {
             countIs(6);
 
             await expect(service.consume('login', 'test@genrag.com')).rejects.toThrow(UnauthorizedException);
+        });
+
+        it('should surface a Redis error instead of reporting a block', async () => {
+            const error = new Error('READONLY');
+            mockTransaction.exec.mockResolvedValue([
+                [null, null],
+                [error, null],
+            ]);
+
+            await expect(service.consume('login', 'test@genrag.com')).rejects.toBe(error);
         });
 
         it('should refuse when the transaction gives no count', async () => {

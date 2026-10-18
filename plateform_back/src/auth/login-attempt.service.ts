@@ -26,11 +26,14 @@ export class LoginAttemptService {
     /**
      * Counts this attempt before it is checked, in one Redis transaction, and refuses it past the limit: parallel
      * requests can no longer all read a counter below the limit. Call `reset` once the attempt succeeds.
+     * `SET NX EX` starts the window on the first attempt (`EXPIRE ... NX` would need Redis 7).
      */
     async consume(flow: AttemptFlow, email: string): Promise<void> {
         const key = this.key(flow, email);
-        const results = await this.redis.multi().incr(key).expire(key, this.blockTtlSeconds, 'NX').exec();
-        const count = Number(results?.[0]?.[1]);
+        const results = await this.redis.multi().set(key, 0, 'EX', this.blockTtlSeconds, 'NX').incr(key).exec();
+        const error = results?.find(([err]) => err)?.[0];
+        if (error) throw error;
+        const count = Number(results?.[1]?.[1]);
         if (!(count <= this.maxAttempts)) {
             throw new UnauthorizedException('Too many failed attempts. Try again later.');
         }

@@ -86,6 +86,8 @@ export class TokenService {
         }
 
         await this.loginAttempt.reset('email-verification', email);
+        // The code proves the email is theirs: lift a login block too, as before counters were split per flow.
+        await this.loginAttempt.reset('login', email);
         await this.usersService.update({
             where: { email },
             data: {

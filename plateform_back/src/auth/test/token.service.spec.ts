@@ -196,7 +196,7 @@ describe('TokenService', () => {
             expect(mockLoginAttempt.reset).not.toHaveBeenCalled();
         });
 
-        it('should mark email as verified and reset counter on success', async () => {
+        it('should mark email as verified and reset the verification and login counters on success', async () => {
             const hash = service.hashOtpCode(123456);
             mockUsersService.findOneWithCredentials
                 .mockImplementationOnce(() => Promise.resolve({ ...fakeUser, emailVerificationToken: hash }))
@@ -207,6 +207,7 @@ describe('TokenService', () => {
             const result = await service.verifyEmailToken({ email: fakeUser.email, token: 123456 });
 
             expect(mockLoginAttempt.reset).toHaveBeenCalledWith('email-verification', fakeUser.email);
+            expect(mockLoginAttempt.reset).toHaveBeenCalledWith('login', fakeUser.email);
             expect(mockUsersService.update).toHaveBeenCalledWith(
                 expect.objectContaining({
                     data: expect.objectContaining({ isEmailVerified: true, emailVerificationToken: null }),

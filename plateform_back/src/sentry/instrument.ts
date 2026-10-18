@@ -7,4 +7,9 @@ Sentry.init({
     // To disable sending user data, uncomment the line below. For more info visit:
     // https://docs.sentry.io/platforms/javascript/guides/node/configuration/options/#dataCollection
     // dataCollection: { userInfo: false },
+    integrations: [
+        // The SDK attaches incoming request bodies to events by default, even without sendDefaultPii: they hold
+        // passwords, OTP codes and end-user questions.
+        Sentry.httpIntegration({ maxIncomingRequestBodySize: 'none' }),
+    ],
 });

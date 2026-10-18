@@ -4,7 +4,7 @@ import { getQueueToken } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { DocumentSource, Prisma } from 'generated/prisma';
+import { DocumentSource, DocumentStatus, Prisma } from 'generated/prisma';
 import { MAX_DATASET_STORAGE_BYTES } from 'src/dataset/dataset.constants';
 import { DocumentService } from 'src/document/document.service';
 import { DocumentRepository } from 'src/document/document.repository';
@@ -25,6 +25,7 @@ const mockDocumentRepository = {
     touchDataset: jest.fn() as any,
     delete: jest.fn() as any,
     findByDatasetPaginated: jest.fn() as any,
+    resetForRetry: jest.fn() as any,
 };
 
 const mockRagEngineService = {
@@ -206,6 +207,45 @@ describe('DocumentService', () => {
                 service.assertIngestable('dataset-1', file, { id: 'doc-1', size: 10 }),
             ).resolves.toBeUndefined();
         });
+    });
+
+    describe('retry', () => {
+        const failedLongAgo = {
+            id: 'doc-1',
+            name: 'a.pdf',
+            storageKey: 'k',
+            mimeType: 'application/pdf',
+            status: DocumentStatus.FAILED,
+            updatedAt: new Date(Date.now() - 10 * 60 * 1000),
+        };
+
+        it('should queue a failed document again', async () => {
+            mockDocumentRepository.findById.mockResolvedValue(failedLongAgo);
+            mockDocumentRepository.resetForRetry.mockResolvedValue({ count: 1 });
+
+            await service.retry('doc-1', 'dataset-1');
+
+            expect(mockDocumentRepository.resetForRetry).toHaveBeenCalledWith('doc-1');
+            expect(mockQueue.add).toHaveBeenCalled();
+        });
+
+        it('should queue a single job when two retries run at once', async () => {
+            mockDocumentRepository.findById.mockResolvedValue(failedLongAgo);
+            mockDocumentRepository.resetForRetry.mockResolvedValue({ count: 0 });
+
+            await expect(service.retry('doc-1', 'dataset-1')).rejects.toThrow(ConflictException);
+            expect(mockQueue.add).not.toHaveBeenCalled();
+        });
+
+        it.each([DocumentStatus.UPLOADED, DocumentStatus.PROCESSING, DocumentStatus.INDEXED])(
+            'should refuse a %s document: it would be indexed twice',
+            async (status) => {
+                mockDocumentRepository.findById.mockResolvedValue({ ...failedLongAgo, status });
+
+                await expect(service.retry('doc-1', 'dataset-1')).rejects.toThrow(ConflictException);
+                expect(mockQueue.add).not.toHaveBeenCalled();
+            },
+        );
     });
 
     describe('delete', () => {

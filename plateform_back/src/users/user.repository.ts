@@ -56,6 +56,23 @@ export class UserRepository {
         });
     }
 
+    /** Workspaces the user is the only member of (deleted with the account), with their documents' stored files. */
+    async findSoleWorkspaceFiles(userId: string): Promise<{ workspaceId: string; storageKeys: string[] }[]> {
+        const memberships = await this.prisma.userWorkspace.findMany({
+            where: { userId, workspace: { users: { every: { userId } } } },
+            select: { workspaceId: true },
+        });
+        const workspaceIds = memberships.map((m) => m.workspaceId);
+        const documents = await this.prisma.document.findMany({
+            where: { dataset: { workspaceId: { in: workspaceIds } } },
+            select: { storageKey: true, dataset: { select: { workspaceId: true } } },
+        });
+        return workspaceIds.map((workspaceId) => ({
+            workspaceId,
+            storageKeys: documents.filter((d) => d.dataset.workspaceId === workspaceId).map((d) => d.storageKey),
+        }));
+    }
+
     async delete(id: string): Promise<UserSafe> {
         return this.prisma.$transaction(async (tx) => {
             const memberships = await tx.userWorkspace.findMany({

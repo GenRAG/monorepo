@@ -4,10 +4,14 @@ import { CreateUserRequest, UserMe, UserSafe } from 'src/users/dto/create-user.r
 import { UpdateProfileRequest } from 'src/users/dto/update-profile.request';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from 'src/users/user.repository';
+import { DatasetService } from 'src/dataset/dataset.service';
 
 @Injectable()
 export class UsersService {
-    constructor(private readonly userRepository: UserRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly datasetService: DatasetService,
+    ) {}
 
     async create(
         request: CreateUserRequest & {
@@ -71,7 +75,19 @@ export class UsersService {
         await this.userRepository.update({ id: userId }, { password: await bcrypt.hash(newPassword, 10) });
     }
 
+    /**
+     * The rows of the user's own workspace go with the account (cascade); its engine collection and stored files are
+     * removed by a cleanup job, queued first so a Redis outage fails the delete instead of orphaning them.
+     */
     async delete(id: string): Promise<UserSafe> {
-        return this.userRepository.delete(id);
+        const workspaces = await this.userRepository.findSoleWorkspaceFiles(id);
+        const jobs = await this.datasetService.queueWorkspaceCleanup(workspaces);
+        try {
+            return await this.userRepository.delete(id);
+        } catch (error) {
+            // A failing removal must not hide why the delete failed: the job skips a workspace that still exists.
+            await Promise.all(jobs.map((job) => job.remove().catch(() => undefined)));
+            throw error;
+        }
     }
 }

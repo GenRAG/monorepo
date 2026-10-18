@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { Job, Queue } from 'bullmq';
 import { Dataset } from 'generated/prisma';
 import { AgentRepository } from 'src/agent/agent.repository';
 import { DatasetRepository } from './dataset.repository';
 import { CreateDatasetRequest } from './dto/create-dataset.request';
 import { UpdateDatasetRequest } from './dto/update-dataset.request';
-import { DatasetAnalytics, DatasetCleanupJob, DatasetListItem } from './dataset.types';
+import { DatasetAnalytics, DatasetCleanupJob, DatasetListItem, WorkspaceCleanupJob } from './dataset.types';
 import { MAX_DATASET_STORAGE_BYTES, MAX_DATASETS_PER_AGENT } from './dataset.constants';
 
 export const DATASET_CLEANUP_QUEUE = 'dataset-cleanup';
@@ -30,6 +30,7 @@ const dayRange = (days: number) => {
 };
 
 export const DATASET_CLEANUP_JOB = 'cleanup-dataset';
+export const WORKSPACE_CLEANUP_JOB = 'cleanup-workspace';
 
 /** Leaves the dataset delete time to commit before the cleanup of its files starts. */
 const CLEANUP_DELAY_MS = 30_000;
@@ -42,7 +43,7 @@ export class DatasetService {
         private readonly datasetRepository: DatasetRepository,
         private readonly agentRepository: AgentRepository,
         @InjectQueue(DATASET_CLEANUP_QUEUE)
-        private readonly cleanupQueue: Queue<DatasetCleanupJob>,
+        private readonly cleanupQueue: Queue<DatasetCleanupJob | WorkspaceCleanupJob>,
     ) {}
 
     create(workspaceId: string, dto: CreateDatasetRequest): Promise<Dataset> {
@@ -111,6 +112,24 @@ export class DatasetService {
             await job.remove();
             throw error;
         }
+    }
+
+    /**
+     * Queues, delayed like a dataset cleanup, the removal of workspaces about to be deleted with their owner's account:
+     * their engine collection and their documents' stored files. The caller removes the jobs if the delete fails.
+     */
+    queueWorkspaceCleanup(workspaces: WorkspaceCleanupJob[]): Promise<Job[]> {
+        return Promise.all(
+            workspaces.map((workspace) =>
+                this.cleanupQueue.add(WORKSPACE_CLEANUP_JOB, workspace, {
+                    delay: CLEANUP_DELAY_MS,
+                    attempts: 5,
+                    backoff: { type: 'exponential', delay: 5000 },
+                    removeOnComplete: true,
+                    removeOnFail: false,
+                }),
+            ),
+        );
     }
 
     async attachToAgent(datasetId: string, agentId: string, workspaceId: string): Promise<void> {

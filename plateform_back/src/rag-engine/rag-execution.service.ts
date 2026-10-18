@@ -284,6 +284,21 @@ export class RagEngineService {
         }
     }
 
+    /** Drops the workspace's collection and every file the engine stored for it. 404: nothing was ever stored. */
+    async deleteOrg(orgId: string): Promise<void> {
+        const response = await firstValueFrom(
+            this.httpService.delete(`${this.ragEngineUrl}/orgs/${encodeURIComponent(orgId)}`, {
+                headers: { 'X-API-Key': this.apiKey },
+                timeout: 30_000,
+            }),
+        );
+
+        const { status } = response.data as { status: string };
+        if (status !== 'deleted') {
+            throw new Error(`RAG engine failed to delete org '${orgId}'`);
+        }
+    }
+
     private async waitForJob(jobId: string, timeoutMs = 300_000): Promise<void> {
         const start = Date.now();
         await new Promise((resolve) => setTimeout(resolve, 2_000));

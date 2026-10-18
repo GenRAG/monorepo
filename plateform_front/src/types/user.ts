@@ -41,7 +41,6 @@ export interface NewPasswordRequest extends VerifyTokenRequest {
 
 export interface UpdateProfileRequest {
     name?: string;
-    email?: string;
 }
 
 export interface ChangePasswordRequest {

@@ -8,6 +8,7 @@ import { AgentService } from 'src/agent/agent.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import { CreditBalanceService } from 'src/credit/credit-balance.service';
+import { CreditTransactionService } from 'src/credit/credit-transaction.service';
 import { DEMO_WORKFLOW_DEFINITION } from '../demo-workflow.definition';
 
 describe('OnboardingService', () => {
@@ -17,7 +18,6 @@ describe('OnboardingService', () => {
         findByUserAndWorkspace: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
-        countByWorkspace: jest.fn(),
         tryIncrementQueryCount: jest.fn(),
         mergeStepData: jest.fn(),
     } as any;
@@ -40,6 +40,9 @@ describe('OnboardingService', () => {
         grantInitial: jest.fn(),
     } as any;
 
+    const mockCreditTransactionService = {
+        hasGrantFrom: jest.fn() as any,
+    };
     const mockDatasetService = {
         create: jest.fn(() => Promise.resolve({ id: 'dataset-1' })),
         attachToAgent: jest.fn(),
@@ -55,6 +58,7 @@ describe('OnboardingService', () => {
                 { provide: WorkflowService, useValue: mockWorkflowService },
                 { provide: AgentRuntimeOrchestrator, useValue: mockOrchestrator },
                 { provide: CreditBalanceService, useValue: mockCreditBalanceService },
+                { provide: CreditTransactionService, useValue: mockCreditTransactionService },
                 { provide: DatasetService, useValue: mockDatasetService },
             ],
         }).compile();
@@ -115,7 +119,7 @@ describe('OnboardingService', () => {
                 stepsData: null,
             });
             mockCreditBalanceService.grantInitial.mockResolvedValue(undefined);
-            mockRepository.countByWorkspace.mockResolvedValue(0);
+            mockCreditTransactionService.hasGrantFrom.mockResolvedValue(false);
 
             const result = await service.start(userId, workspaceId);
 
@@ -139,20 +143,21 @@ describe('OnboardingService', () => {
             expect(result.sessionId).toBe('session-1');
         });
 
-        it('should not grant the bonus again when another member already started the onboarding', async () => {
+        it('should not grant the bonus again after the demo agent (and its session) was deleted', async () => {
             mockRepository.findByUserAndWorkspace.mockResolvedValue(null);
-            mockRepository.countByWorkspace.mockResolvedValue(1);
+            mockCreditTransactionService.hasGrantFrom.mockResolvedValue(true);
             mockAgentService.insertOne.mockResolvedValue({ id: 'agent-1' });
             mockRepository.create.mockResolvedValue({ id: 'session-2', agentId: 'agent-1', stepsData: null });
 
-            await service.start('user-2', 'workspace-1');
+            await service.start('user-1', 'workspace-1');
 
+            expect(mockCreditTransactionService.hasGrantFrom).toHaveBeenCalledWith('workspace-1', 'onboarding_bonus');
             expect(mockCreditBalanceService.grantInitial).not.toHaveBeenCalled();
         });
 
         it('should roll back the agent and dataset when a later step fails, then rethrow', async () => {
             mockRepository.findByUserAndWorkspace.mockResolvedValue(null);
-            mockRepository.countByWorkspace.mockResolvedValue(0);
+            mockCreditTransactionService.hasGrantFrom.mockResolvedValue(false);
             mockAgentService.insertOne.mockResolvedValue({ id: 'agent-1' });
             mockRepository.create.mockResolvedValue({ id: 'session-1', agentId: 'agent-1', stepsData: null });
             mockCreditBalanceService.grantInitial.mockRejectedValue(new Error('Credit failure'));

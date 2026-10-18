@@ -19,6 +19,11 @@ export class CreditTransactionService {
         return this.creditTransactionRepository.findAll(workspaceId);
     }
 
+    /** Whether the workspace already received credits tagged with this `metadata.source`. */
+    hasGrantFrom(workspaceId: string, source: string): Promise<boolean> {
+        return this.creditTransactionRepository.existsFromSource(workspaceId, source);
+    }
+
     getTotalGranted(workspaceId: string): Promise<number> {
         return this.creditTransactionRepository.sumGranted(workspaceId);
     }

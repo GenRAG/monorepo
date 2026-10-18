@@ -149,4 +149,25 @@ describe('AgentMember (e2e)', () => {
                 .expect(401);
         });
     });
+
+    describe('POST /workspaces/:workspaceId/agents/:agentId/members with a differently cased email', () => {
+        it('should find the account whatever the case of the typed email', async () => {
+            await request(app.getHttpServer())
+                .post('/auth/register')
+                .send({ email: 'casey@test.com', password: 'Password123!', name: 'Casey' })
+                .expect(201);
+            const otherAgentId = await createAgent(app, cookie, workspaceId, {
+                name: 'Sales Agent',
+                description: 'Agent used for the email case test',
+            });
+
+            const res = await request(app.getHttpServer())
+                .post(`/workspaces/${workspaceId}/agents/${otherAgentId}/members`)
+                .set('Cookie', cookie)
+                .send({ email: 'Casey@Test.COM' })
+                .expect(201);
+
+            expect(res.body.email).toBe('casey@test.com');
+        });
+    });
 });

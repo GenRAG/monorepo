@@ -8,7 +8,7 @@ const QueryBlock = z.object({
 const RewriteBlock = z.object({
     name: z.string(),
     type: z.literal('query_rewrite'),
-    model_name: z.string(),
+    model: z.string(),
 });
 
 const RetrieveBlock = z.object({

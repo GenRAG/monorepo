@@ -9,13 +9,6 @@ type RawBlock = Record<string, unknown>;
 const isRetrieveBlock = (block: unknown): block is RawBlock =>
     typeof block === 'object' && block !== null && (block as RawBlock).type === 'retrieve';
 
-/** Stored blocks keep the builder's field names; the RAG engine reads the rewrite model as `model_name`. */
-const toEngineBlock = (block: unknown): unknown => {
-    if (typeof block !== 'object' || block === null || (block as RawBlock).type !== 'query_rewrite') return block;
-    const { model, ...rest } = block as RawBlock;
-    return { ...rest, model_name: model ?? rest.model_name };
-};
-
 const datasetIdsOf = (retrieve: RawBlock): string[] =>
     Array.isArray(retrieve.datasetIds) ? retrieve.datasetIds.filter((id): id is string => typeof id === 'string') : [];
 
@@ -47,7 +40,7 @@ export class RagPipelineBuilder {
         }
 
         const blocks = Array.isArray(rawBlocks)
-            ? (await this.resolveRetrieveBlocks(agentId, rawBlocks, orgIdOverride)).map(toEngineBlock)
+            ? await this.resolveRetrieveBlocks(agentId, rawBlocks, orgIdOverride)
             : rawBlocks;
 
         const result = PipelineSchema.safeParse(blocks);

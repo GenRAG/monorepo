@@ -108,24 +108,6 @@ describe('RagPipelineBuilder', () => {
             ]);
         });
 
-        it('should send the rewrite model as model_name, the field the RAG engine reads', async () => {
-            mockAgentService.findProductionWorkflowVersion.mockResolvedValue(null);
-            mockWorkflowService.findActive.mockResolvedValue({
-                ...fakeWorkflow,
-                definition: {
-                    blocks: [
-                        fakeBlocks[0],
-                        { name: 'rewrite', type: 'query_rewrite', model: 'mistral' },
-                        fakeBlocks[2],
-                    ],
-                },
-            });
-
-            const result = await builder.buildPipeline({ agentId: 'agent-1' });
-
-            expect(result[1]).toEqual({ name: 'rewrite', type: 'query_rewrite', model_name: 'mistral' });
-        });
-
         it('should read legacy workflows whose definition is the blocks array', async () => {
             mockAgentService.findProductionWorkflowVersion.mockResolvedValue(null);
             mockWorkflowService.findActive.mockResolvedValue({ ...fakeWorkflow, definition: fakeBlocks });

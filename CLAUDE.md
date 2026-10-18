@@ -76,7 +76,7 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 - `RAGENGINE_URL`, header `X-API-Key: RAGENGINE_API_KEY`. Consommée uniquement par `plateform_back/src/rag-engine/` (`rag-execution.service.ts`).
 - Tenant : `org_id` = **id du workspace** (une collection Qdrant par workspace), `dataset_id` = id du dataset. Le back ne les reçoit jamais du client.
 - `POST /rag/stream` `{ pipeline: { blocks }, query, org_id }` (réponse streamée en NDJSON). `POST /ingest` (multipart `file`, `org_id`, `dataset_id`) puis `GET /job/:id/status`. `DELETE /documents` `{ org_id, dataset_id, filename }`.
-- Le `pipeline` part des `blocks` produits par `serializeWorkflow` (`packages/workflow`) et stockés tels quels. `agent-runtime.builder.ts` les traduit pour le moteur (`retrieve.datasetIds` = datasets autorisés de l'agent, sans `collection_name` ; `query_rewrite.model` → `model_name`), puis Zod valide le résultat (`rag-engine/pipeline.schema.ts` côté back). Format : `rag-engine/BLOCKS_FORMAT.md`. `RAG_MOCK=true` appelle `/rag/stream/mock` (le moteur doit tourner).
+- Le `pipeline` part des `blocks` produits par `serializeWorkflow` (`packages/workflow`) et stockés tels quels. `agent-runtime.builder.ts` les traduit pour le moteur (`retrieve.datasetIds` = datasets autorisés de l'agent, sans `collection_name`). Tous les blocks qui ont un modèle l'envoient dans `model`, rewrite compris, puis Zod valide le résultat (`rag-engine/pipeline.schema.ts` côté back). Format : `rag-engine/BLOCKS_FORMAT.md`. `RAG_MOCK=true` appelle `/rag/stream/mock` (le moteur doit tourner).
 
 ## Règles transverses
 

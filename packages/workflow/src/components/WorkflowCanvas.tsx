@@ -61,6 +61,8 @@ const WorkflowCanvasInner = ({
             nodesDraggable={!readonly}
             nodesConnectable={!readonly}
             elementsSelectable={!readonly}
+            // Backspace would delete the selected edge or node and cut the pipeline; removals go through buttons.
+            deleteKeyCode={null}
             fitView={fitView}
             fitViewOptions={fitViewOptions}
             colorMode={colorMode}

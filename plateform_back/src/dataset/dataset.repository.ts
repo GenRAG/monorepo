@@ -98,6 +98,15 @@ export class DatasetRepository {
         });
     }
 
+    /** Among `agentIds`, the agents not yet linked to the dataset that already use `limit` datasets or more. */
+    async findAgentsAtDatasetLimit(agentIds: string[], datasetId: string, limit: number): Promise<{ name: string }[]> {
+        const agents = await this.prisma.agent.findMany({
+            where: { id: { in: agentIds }, datasets: { none: { datasetId } } },
+            select: { name: true, _count: { select: { datasets: true } } },
+        });
+        return agents.filter((agent) => agent._count.datasets >= limit);
+    }
+
     async addAgentToDataset(datasetId: string, agentId: string): Promise<void> {
         await this.prisma.agentDataset.upsert({
             where: { agentId_datasetId: { agentId, datasetId } },

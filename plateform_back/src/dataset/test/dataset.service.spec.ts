@@ -23,6 +23,7 @@ const mockDatasetRepository = {
     findDocumentsForCleanup: jest.fn() as any,
     countAgentsInWorkspace: jest.fn() as any,
     addAgentToDataset: jest.fn() as any,
+    findAgentsAtDatasetLimit: jest.fn() as any,
     removeAgentFromDataset: jest.fn() as any,
     setAgents: jest.fn() as any,
     findDatasetIdsByAgent: jest.fn() as any,
@@ -63,6 +64,7 @@ describe('DatasetService', () => {
         jest.clearAllMocks();
         mockDatasetRepository.exists.mockImplementation(scopeTo('workspace-1', { id: 'dataset-1' }));
         mockAgentRepository.findOne.mockImplementation(scopeTo('workspace-1', { id: 'agent-1' }));
+        mockDatasetRepository.findAgentsAtDatasetLimit.mockResolvedValue([]);
     });
 
     describe('create', () => {

@@ -7,7 +7,7 @@ import { DatasetRepository } from './dataset.repository';
 import { CreateDatasetRequest } from './dto/create-dataset.request';
 import { UpdateDatasetRequest } from './dto/update-dataset.request';
 import { DatasetAnalytics, DatasetCleanupJob, DatasetListItem } from './dataset.types';
-import { MAX_DATASET_STORAGE_BYTES } from './dataset.constants';
+import { MAX_DATASET_STORAGE_BYTES, MAX_DATASETS_PER_AGENT } from './dataset.constants';
 
 export const DATASET_CLEANUP_QUEUE = 'dataset-cleanup';
 
@@ -115,6 +115,7 @@ export class DatasetService {
     async attachToAgent(datasetId: string, agentId: string, workspaceId: string): Promise<void> {
         await this._assertDatasetInWorkspace(datasetId, workspaceId);
         await this._assertAgentInWorkspace(agentId, workspaceId);
+        await this._assertAgentsBelowDatasetLimit([agentId], datasetId);
         await this.datasetRepository.addAgentToDataset(datasetId, agentId);
     }
 
@@ -133,9 +134,19 @@ export class DatasetService {
             if (count !== uniqueIds.length) {
                 throw new BadRequestException("Un ou plusieurs agents n'appartiennent pas à cette entreprise");
             }
+            await this._assertAgentsBelowDatasetLimit(uniqueIds, datasetId);
         }
 
         await this.datasetRepository.setAgents(datasetId, uniqueIds);
+    }
+
+    private async _assertAgentsBelowDatasetLimit(agentIds: string[], datasetId: string): Promise<void> {
+        const full = await this.datasetRepository.findAgentsAtDatasetLimit(agentIds, datasetId, MAX_DATASETS_PER_AGENT);
+        if (full.length > 0) {
+            throw new BadRequestException(
+                `Un agent peut utiliser au plus ${MAX_DATASETS_PER_AGENT} bases : ${full.map((a) => a.name).join(', ')} en a déjà ${MAX_DATASETS_PER_AGENT}`,
+            );
+        }
     }
 
     /**

@@ -63,6 +63,7 @@ const mockTokenService = {
     verifyEmailToken: jest.fn() as jest.MockedFunction<(body: Record<string, unknown>) => Promise<unknown>>,
     generateAndSendVerificationToken: jest.fn() as jest.MockedFunction<(email: string) => Promise<void>>,
     hashOtpCode: jest.fn() as jest.MockedFunction<(code: number) => string>,
+    generateAndSendPasswordResetToken: jest.fn() as jest.MockedFunction<(user: unknown) => Promise<void>>,
 };
 
 mockTokenService.hashOtpCode.mockReturnValue('hashed-code');
@@ -353,6 +354,8 @@ describe('AuthService', () => {
 
 describe('AuthService — production mode', () => {
     let service: AuthService;
+    let response: Response;
+    let cookieMock: jest.Mock;
 
     beforeEach(async () => {
         const prodConfigService = {
@@ -362,6 +365,7 @@ describe('AuthService — production mode', () => {
                     JWT_SECRET: 'test-secret',
                     JWT_EXPIRATION: '7d',
                     TOKEN_VALIDITY: '15m',
+                    GOOGLE_CLIENT_ID: 'genrag-client-id.apps.googleusercontent.com',
                 };
                 if (!(key in cfg)) throw new Error(`Missing config: ${key}`);
                 return cfg[key];
@@ -381,6 +385,8 @@ describe('AuthService — production mode', () => {
         }).compile();
 
         service = module.get<AuthService>(AuthService);
+        cookieMock = jest.fn();
+        response = { cookie: cookieMock } as unknown as Response;
         jest.clearAllMocks();
         mockLoginAttempt.isBlocked.mockResolvedValue(false);
     });
@@ -393,6 +399,26 @@ describe('AuthService — production mode', () => {
         await service.register({ email: 'new@genrag.com', password: 'Pass123!' });
 
         expect(mockTokenService.generateAndSendVerificationToken).toHaveBeenCalledWith(fakeUser.email);
+    });
+
+    it('should refuse a Google login into an existing account whose email is not verified', async () => {
+        mockGetTokenInfo.mockResolvedValue({
+            aud: 'genrag-client-id.apps.googleusercontent.com',
+            email: 'victim@example.com',
+            email_verified: 'true',
+        });
+        mockUsersService.findOneWithCredentials.mockResolvedValue({ ...fakeUser, isEmailVerified: false });
+
+        await expect(service.loginWithGoogle('access-token', response)).rejects.toThrow(UnauthorizedException);
+        expect(cookieMock).not.toHaveBeenCalled();
+    });
+
+    it('should not send a password reset code for an account whose email is not verified', async () => {
+        mockUsersService.findOneWithCredentials.mockResolvedValue({ ...fakeUser, isEmailVerified: false });
+
+        await service.initiatePasswordReset('victim@example.com');
+
+        expect(mockTokenService.generateAndSendPasswordResetToken).not.toHaveBeenCalled();
     });
 
     it('should throw if email is not verified on login', async () => {

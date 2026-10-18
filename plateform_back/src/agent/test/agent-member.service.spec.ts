@@ -2,6 +2,7 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AgentMemberService } from 'src/agent/agent-member.service';
 import { AgentMemberRepository } from 'src/agent/agent-member.repository';
+import { ConfigService } from '@nestjs/config';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 
 const mockAgentMemberRepository: any = {
@@ -28,7 +29,11 @@ describe('AgentMemberService', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [AgentMemberService, { provide: AgentMemberRepository, useValue: mockAgentMemberRepository }],
+            providers: [
+                AgentMemberService,
+                { provide: AgentMemberRepository, useValue: mockAgentMemberRepository },
+                { provide: ConfigService, useValue: { get: (key: string) => ({ NODE_ENV: 'production' })[key] } },
+            ],
         }).compile();
 
         service = module.get<AgentMemberService>(AgentMemberService);
@@ -36,6 +41,15 @@ describe('AgentMemberService', () => {
     });
 
     describe('addMember', () => {
+        it('should not share with an account whose email is not verified', async () => {
+            mockAgentMemberRepository.findUserByEmail.mockImplementation(() =>
+                Promise.resolve({ id: 'user-2', isEmailVerified: false }),
+            );
+
+            await expect(service.addMember('agent-1', 'victim@example.com')).rejects.toThrow(NotFoundException);
+            expect(mockAgentMemberRepository.create).not.toHaveBeenCalled();
+        });
+
         it('should throw NotFoundException when user does not exist', async () => {
             mockAgentMemberRepository.findUserByEmail.mockImplementation(() => Promise.resolve(null));
 
@@ -44,7 +58,7 @@ describe('AgentMemberService', () => {
         });
 
         it('should throw ConflictException when membership already exists', async () => {
-            mockAgentMemberRepository.findUserByEmail.mockImplementation(() => Promise.resolve({ id: 'user-1' }));
+            mockAgentMemberRepository.findUserByEmail.mockImplementation(() => Promise.resolve({ id: 'user-1', isEmailVerified: true }));
             mockAgentMemberRepository.findMembership.mockImplementation(() => Promise.resolve({ id: 'existing' }));
 
             await expect(service.addMember('agent-1', 'member@genrag.com')).rejects.toThrow(ConflictException);
@@ -52,7 +66,7 @@ describe('AgentMemberService', () => {
         });
 
         it('should create and map member data on success', async () => {
-            mockAgentMemberRepository.findUserByEmail.mockImplementation(() => Promise.resolve({ id: 'user-1' }));
+            mockAgentMemberRepository.findUserByEmail.mockImplementation(() => Promise.resolve({ id: 'user-1', isEmailVerified: true }));
             mockAgentMemberRepository.findMembership.mockImplementation(() => Promise.resolve(null));
             mockAgentMemberRepository.create.mockImplementation(() => Promise.resolve(memberEntity));
 

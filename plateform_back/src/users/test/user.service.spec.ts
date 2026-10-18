@@ -138,11 +138,24 @@ describe('UsersService', () => {
 
     describe('updateProfile', () => {
         it('should store the email lowercased and trimmed, like register and login expect it', async () => {
+            mockUserRepository.findOne.mockResolvedValue({ ...fakeUserSafe, email: 'alice@example.com' });
             mockUserRepository.update.mockResolvedValue({ ...fakeUserSafe, email: 'alice@example.com' });
 
             await service.updateProfile('user-1', { email: '  Alice@Example.COM ' });
 
             expect(mockUserRepository.update).toHaveBeenCalledWith({ id: 'user-1' }, { email: 'alice@example.com' });
+        });
+
+        it('should mark the account unverified when the email changes: the new address is not proven', async () => {
+            mockUserRepository.findOne.mockResolvedValue({ ...fakeUserSafe, email: 'old@example.com' });
+            mockUserRepository.update.mockResolvedValue({ ...fakeUserSafe, email: 'victim@example.com' });
+
+            await service.updateProfile('user-1', { email: 'victim@example.com' });
+
+            expect(mockUserRepository.update).toHaveBeenCalledWith(
+                { id: 'user-1' },
+                { email: 'victim@example.com', isEmailVerified: false },
+            );
         });
 
         it('should leave a name-only update untouched', async () => {

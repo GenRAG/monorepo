@@ -101,11 +101,8 @@ export class DeploymentService {
             throw new BadRequestException('This deployment has no associated workflow version');
         }
 
-        const targetWorkflow = await this.workflowService.findByVersion(agentId, target.workflowVersion);
-
-        await this.workflowService.update(agentId, {
-            definition: targetWorkflow.definition as Record<string, unknown>,
-        });
+        // 404 if that version is gone. Production runs the deployment's version: the draft being edited stays as it is.
+        await this.workflowService.findByVersion(agentId, target.workflowVersion);
 
         return this.createDeploymentAndEmitEvents({
             agentId,

@@ -72,7 +72,7 @@ describe('Users (e2e)', () => {
     });
 
     describe('PATCH /users/me', () => {
-        it("should not change the email: an address must be proven before it opens or receives anything", async () => {
+        it('should not change the email: an address must be proven before it opens or receives anything', async () => {
             const user = { email: 'owner@test.com', password: 'Password123!', name: 'Owner' };
             const userCookie = await registerAndLogin(app, user);
 

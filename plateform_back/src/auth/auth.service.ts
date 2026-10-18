@@ -91,24 +91,20 @@ export class AuthService {
     async verifyUser(email: string, password: string) {
         const normalizedEmail = email.toLowerCase().trim();
 
-        if (await this.loginAttempt.isBlocked(normalizedEmail)) {
-            throw new UnauthorizedException('Too many failed attempts. Try again later.');
-        }
+        await this.loginAttempt.consume('login', normalizedEmail);
 
         const user = await this.usersService.findOneWithCredentials({ email: normalizedEmail });
 
         if (!user || !user.password || typeof user.password !== 'string') {
-            await this.loginAttempt.recordFailure(normalizedEmail);
             throw new UnauthorizedException('Credentials are not valid.');
         }
 
         const authenticated = await bcryptjs.compare(password, user.password);
         if (!authenticated) {
-            await this.loginAttempt.recordFailure(normalizedEmail);
             throw new UnauthorizedException('Credentials are not valid.');
         }
 
-        await this.loginAttempt.reset(normalizedEmail);
+        await this.loginAttempt.reset('login', normalizedEmail);
 
         if (this.isProduction && !user.isEmailVerified) {
             throw new UnauthorizedException('Account not verified');
@@ -183,20 +179,16 @@ export class AuthService {
         const { token: code, password } = verifyTokenBody;
         const email = verifyTokenBody.email.toLowerCase().trim();
 
-        if (await this.loginAttempt.isBlocked(email)) {
-            throw new UnauthorizedException('Too many failed attempts. Try again later.');
-        }
+        await this.loginAttempt.consume('password-reset', email);
 
         const user = await this.usersService.findOneWithCredentials({ email });
 
         if (!user || !user.passwordResetToken || !user.passwordResetLastSentAt) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Invalid credentials.');
         }
 
         const hashedIncoming = this.tokenService.hashOtpCode(code);
         if (user.passwordResetToken !== hashedIncoming) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Invalid credentials.');
         }
 
@@ -208,11 +200,10 @@ export class AuthService {
         }
 
         if (tokenAgeMs > tokenValidityMs) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Password reset token has expired.');
         }
 
-        await this.loginAttempt.reset(email);
+        await this.loginAttempt.reset('password-reset', email);
 
         const hashedPassword = await bcryptjs.hash(password, 10);
 

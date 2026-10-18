@@ -66,31 +66,26 @@ export class TokenService {
         const email = emailVerificationToken.email.toLowerCase().trim();
         const { token: code } = emailVerificationToken;
 
-        if (await this.loginAttempt.isBlocked(email)) {
-            throw new UnauthorizedException('Too many failed attempts. Try again later.');
-        }
+        await this.loginAttempt.consume('email-verification', email);
 
         const user = await this.usersService.findOneWithCredentials({ email });
 
         if (!user || !user.emailVerificationToken || !user.emailVerificationLastSentAt) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Invalid verification token.');
         }
 
         const tokenAgeMs = Date.now() - user.emailVerificationLastSentAt.getTime();
         const tokenValidityMs = ms(this.configService.getOrThrow<string>('TOKEN_VALIDITY') as ms.StringValue);
         if (tokenAgeMs > tokenValidityMs) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Email verification token has expired.');
         }
 
         const hashedIncoming = this.hashOtpCode(code);
         if (user.emailVerificationToken !== hashedIncoming) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Invalid verification token.');
         }
 
-        await this.loginAttempt.reset(email);
+        await this.loginAttempt.reset('email-verification', email);
         await this.usersService.update({
             where: { email },
             data: {

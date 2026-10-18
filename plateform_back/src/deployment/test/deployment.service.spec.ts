@@ -125,7 +125,7 @@ describe('DeploymentService', () => {
     });
 
     describe('rollback', () => {
-        it('should rollback to previous deployment version', async () => {
+        it('should put the previous version back in production without touching the draft', async () => {
             const agent = { id: 'agent-1', workspaceId: 'ws-1' };
             mockAgentRepository.findOne.mockResolvedValue(agent);
 
@@ -152,9 +152,8 @@ describe('DeploymentService', () => {
                 'user-1',
             );
 
-            expect(mockWorkflowService.update).toHaveBeenCalledWith('agent-1', {
-                definition: { nodes: [] },
-            });
+            // Production runs the version of the deployment: the draft being edited stays as it is.
+            expect(mockWorkflowService.update).not.toHaveBeenCalled();
             expect(mockDeploymentRepository.createWithAgentUpdate).toHaveBeenCalledWith({
                 agentId: 'agent-1',
                 workflowVersion: 7,

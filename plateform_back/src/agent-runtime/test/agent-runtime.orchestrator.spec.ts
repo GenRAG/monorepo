@@ -94,14 +94,14 @@ describe('AgentRuntimeOrchestrator', () => {
             ).rejects.toThrow(ForbiddenException);
         });
 
-        it('should use agentId as orgId by default', async () => {
+        it('should use the workspace as orgId by default (one collection per workspace)', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
             mockRagEngineService.getQueryStream.mockResolvedValue(createMockStream());
 
             await orchestrator.streamQuery({ query: 'test', agentId: 'agent-1', workspaceId: 'ws-1' });
 
             expect(mockRagEngineService.getQueryStream).toHaveBeenCalledWith(
-                expect.objectContaining({ orgId: 'agent-1' }),
+                expect.objectContaining({ orgId: 'ws-1' }),
             );
         });
 

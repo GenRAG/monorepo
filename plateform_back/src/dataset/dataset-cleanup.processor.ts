@@ -8,7 +8,7 @@ import { DATASET_CLEANUP_QUEUE } from './dataset.service';
 import { DatasetCleanupJob } from './dataset.types';
 
 /**
- * The RAG engine has no route to drop a whole `org_id` yet: vectors are deleted document by document.
+ * Vectors are deleted document by document, in the workspace's collection (`org_id`) and the dataset.
  * A 404 from the engine means the document was never indexed (or already removed) and is not an error.
  */
 @Injectable()
@@ -25,13 +25,16 @@ export class DatasetCleanupProcessor extends WorkerHost {
     }
 
     async process(job: Job<DatasetCleanupJob>): Promise<void> {
-        const { datasetId, documents } = job.data;
+        const { workspaceId, datasetId, documents } = job.data;
 
         for (const document of documents) {
-            try {
-                await this.ragEngineService.deleteDocument(document.name, datasetId);
-            } catch (error) {
-                if (!(error instanceof AxiosError && error.response?.status === 404)) throw error;
+            // Jobs queued before the engine kept one collection per workspace carry no workspaceId.
+            if (workspaceId) {
+                try {
+                    await this.ragEngineService.deleteDocument({ orgId: workspaceId, datasetId }, document.name);
+                } catch (error) {
+                    if (!(error instanceof AxiosError && error.response?.status === 404)) throw error;
+                }
             }
             await this.storage.delete(document.storageKey);
         }

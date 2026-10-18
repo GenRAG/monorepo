@@ -94,7 +94,7 @@ export class DatasetService {
         // fails the job is removed, and otherwise it runs after the delete has committed.
         const job = await this.cleanupQueue.add(
             DATASET_CLEANUP_JOB,
-            { datasetId: id, documents },
+            { workspaceId, datasetId: id, documents },
             {
                 delay: CLEANUP_DELAY_MS,
                 attempts: 5,
@@ -150,11 +150,11 @@ export class DatasetService {
     }
 
     /**
-     * Vector-store `org_id`s an agent may search. Only datasets that are attached to the agent and belong to the
+     * Datasets an agent may search. Only datasets that are attached to the agent and belong to the
      * agent's workspace are returned: anything else coming from the workflow definition is dropped and logged.
      * An empty `datasetIds` means "every attached dataset". The result may be empty.
      */
-    async resolveOrgIdsForAgent(agentId: string, datasetIds?: string[]): Promise<string[]> {
+    async resolveDatasetIdsForAgent(agentId: string, datasetIds?: string[]): Promise<string[]> {
         const attached = await this.datasetRepository.findDatasetIdsByAgent(agentId);
         if (!datasetIds?.length) return attached;
 

@@ -4,7 +4,7 @@ import { DocumentStatus, Prisma } from 'generated/prisma';
 import { DocumentFailedEvent, DocumentIndexedEvent } from 'src/events/document/document-event';
 import { DocumentEventType } from 'src/events/document/document-event.type';
 import EventBus from 'src/lib/event-bus';
-import { RagEngineService } from 'src/rag-engine/rag-execution.service';
+import { RagDocumentScope, RagEngineService } from 'src/rag-engine/rag-execution.service';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from '../document.repository';
 import { IndexDocumentCommandProps } from 'src/document/commands/index-document.command';
@@ -36,7 +36,8 @@ export class IndexDocumentHandler {
             ? Buffer.from(command.buffer, 'base64')
             : await this.storage.get(command.storageKey);
 
-        await this.ragEngineService.indexDocument(command.name, command.datasetId, fileBuffer, command.mimeType);
+        const scope = await this.documentRepository.findEngineScope(command.datasetId);
+        await this.ragEngineService.indexDocument(scope, command.name, fileBuffer, command.mimeType);
 
         try {
             await this.documentRepository.updateStatus(command.documentId, DocumentStatus.INDEXED, {
@@ -45,8 +46,9 @@ export class IndexDocumentHandler {
         } catch (error) {
             if (!isRecordNotFound(error)) throw error;
             // Deleted while the engine was indexing it: the delete found no vectors yet (404), the engine stored them
-            // since. Left there, the agent would keep citing a document the user removed.
-            return this.dropVectorsOfDeletedDocument(command);
+            // since. Left there, the agent would keep citing a document the user removed. The scope read before
+            // indexing still holds if the dataset is gone too.
+            return this.dropVectorsOfDeletedDocument(command, scope);
         }
 
         EventBus.emit(
@@ -83,7 +85,10 @@ export class IndexDocumentHandler {
         this.logger.warn(`Document marked as FAILED: ${command.documentId}`);
     }
 
-    private async dropVectorsOfDeletedDocument(command: IndexDocumentCommandProps): Promise<void> {
+    private async dropVectorsOfDeletedDocument(
+        command: IndexDocumentCommandProps,
+        knownScope?: RagDocumentScope,
+    ): Promise<void> {
         // The engine knows a document by its name only: a document added since under the same name owns them now.
         if (await this.documentRepository.findByName(command.datasetId, command.name)) {
             this.logger.warn(
@@ -92,8 +97,20 @@ export class IndexDocumentHandler {
             return;
         }
 
+        let scope = knownScope;
+        if (!scope) {
+            try {
+                scope = await this.documentRepository.findEngineScope(command.datasetId);
+            } catch (error) {
+                if (!isRecordNotFound(error)) throw error;
+                // The dataset is gone as well: its own cleanup removes the vectors of its documents.
+                this.logger.warn(`Document and dataset deleted before indexing: ${command.documentId}`);
+                return;
+            }
+        }
+
         try {
-            await this.ragEngineService.deleteDocument(command.name, command.datasetId);
+            await this.ragEngineService.deleteDocument(scope, command.name);
         } catch (error) {
             // 404: nothing was stored for it.
             if (!(error instanceof AxiosError && error.response?.status === 404)) throw error;

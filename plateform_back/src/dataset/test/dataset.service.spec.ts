@@ -152,7 +152,7 @@ describe('DatasetService', () => {
             expect(mockDatasetRepository.delete).toHaveBeenCalledWith('dataset-1');
             expect(mockQueue.add).toHaveBeenCalledWith(
                 DATASET_CLEANUP_JOB,
-                { datasetId: 'dataset-1', documents },
+                { workspaceId: 'workspace-1', datasetId: 'dataset-1', documents },
                 expect.any(Object),
             );
         });
@@ -238,19 +238,19 @@ describe('DatasetService', () => {
         });
     });
 
-    describe('resolveOrgIdsForAgent', () => {
+    describe('resolveDatasetIdsForAgent', () => {
         beforeEach(() => {
             // The repository only returns datasets attached to the agent AND in the agent's workspace.
             mockDatasetRepository.findDatasetIdsByAgent.mockResolvedValue(['d1', 'd2']);
         });
 
         it('should return every attached dataset when no dataset is selected', async () => {
-            await expect(service.resolveOrgIdsForAgent('agent-1')).resolves.toEqual(['d1', 'd2']);
-            await expect(service.resolveOrgIdsForAgent('agent-1', [])).resolves.toEqual(['d1', 'd2']);
+            await expect(service.resolveDatasetIdsForAgent('agent-1')).resolves.toEqual(['d1', 'd2']);
+            await expect(service.resolveDatasetIdsForAgent('agent-1', [])).resolves.toEqual(['d1', 'd2']);
         });
 
         it('should ignore datasets that are not attached, deleted or from another workspace', async () => {
-            const result = await service.resolveOrgIdsForAgent('agent-1', ['d2', 'deleted', 'foreign', 'd2']);
+            const result = await service.resolveDatasetIdsForAgent('agent-1', ['d2', 'deleted', 'foreign', 'd2']);
 
             expect(result).toEqual(['d2']);
         });
@@ -258,7 +258,7 @@ describe('DatasetService', () => {
         it('should return an empty list when the agent has no dataset', async () => {
             mockDatasetRepository.findDatasetIdsByAgent.mockResolvedValue([]);
 
-            await expect(service.resolveOrgIdsForAgent('agent-1', ['d1'])).resolves.toEqual([]);
+            await expect(service.resolveDatasetIdsForAgent('agent-1', ['d1'])).resolves.toEqual([]);
         });
     });
 

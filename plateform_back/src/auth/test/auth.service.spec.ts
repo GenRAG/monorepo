@@ -70,6 +70,7 @@ mockTokenService.hashOtpCode.mockReturnValue('hashed-code');
 const mockJwtService = {
     sign: jest.fn() as jest.MockedFunction<(payload: Record<string, unknown>) => string>,
     decode: jest.fn() as jest.MockedFunction<(token: string) => unknown>,
+    verify: jest.fn() as jest.MockedFunction<(token: string) => unknown>,
 };
 
 mockJwtService.sign.mockReturnValue('signed.jwt.token');
@@ -142,28 +143,63 @@ describe('AuthService', () => {
     });
 
     describe('logout', () => {
-        it('should blacklist the jti with remaining TTL', async () => {
-            const futureExp = Math.floor(Date.now() / 1000) + 3600;
-            mockJwtService.decode.mockReturnValue({ jti: 'test-jti', exp: futureExp });
+        let clearCookieMock: jest.Mock;
+        let logoutResponse: Response;
 
-            await service.logout('some.jwt.token');
+        beforeEach(() => {
+            clearCookieMock = jest.fn();
+            logoutResponse = { clearCookie: clearCookieMock } as unknown as Response;
+        });
+
+        it('should clear the cookie with the attributes it was set with in production (SameSite=None; Secure)', async () => {
+            const prodConfig = {
+                ...mockConfigService,
+                get: jest.fn((key: string) => ({ NODE_ENV: 'production', JWT_EXPIRATION: '7d' })[key]),
+            };
+            const prodService = new AuthService(
+                mockUsersService as unknown as UsersService,
+                prodConfig as unknown as ConfigService,
+                mockTokenService as unknown as TokenService,
+                mockJwtService as unknown as JwtService,
+                mockJwtBlacklist as unknown as JwtBlacklistService,
+                mockLoginAttempt as unknown as LoginAttemptService,
+            );
+            prodService.login(fakeUser, response);
+            const setOptions = cookieMock.mock.calls[0][2] as Record<string, unknown>;
+
+            await prodService.logout(undefined, logoutResponse);
+
+            const { expires: _expires, ...setWithoutExpiry } = setOptions;
+            expect(clearCookieMock).toHaveBeenCalledWith('Authentication', setWithoutExpiry);
+            expect(setWithoutExpiry).toMatchObject({ secure: true, sameSite: 'none', httpOnly: true });
+        });
+
+        it('should blacklist the jti of a valid token with its remaining TTL', async () => {
+            const futureExp = Math.floor(Date.now() / 1000) + 3600;
+            mockJwtService.verify.mockReturnValue({ jti: 'test-jti', exp: futureExp });
+
+            await service.logout('some.jwt.token', logoutResponse);
 
             expect(mockJwtBlacklist.blacklist).toHaveBeenCalledWith('test-jti', expect.any(Number));
+            expect(clearCookieMock).toHaveBeenCalled();
         });
 
-        it('should not throw if token has no jti', async () => {
-            mockJwtService.decode.mockReturnValue({ userId: 'user-1' });
-
-            await expect(service.logout('token.without.jti')).resolves.not.toThrow();
-            expect(mockJwtBlacklist.blacklist).not.toHaveBeenCalled();
-        });
-
-        it('should not throw if decode fails', async () => {
-            mockJwtService.decode.mockImplementation(() => {
-                throw new Error('invalid');
+        it('should not blacklist anything for a token whose signature does not verify', async () => {
+            mockJwtService.verify.mockImplementation(() => {
+                throw new Error('invalid signature');
             });
 
-            await expect(service.logout('invalid-token')).resolves.not.toThrow();
+            await expect(service.logout('forged.jwt.token', logoutResponse)).resolves.toBeUndefined();
+            expect(mockJwtBlacklist.blacklist).not.toHaveBeenCalled();
+            expect(clearCookieMock).toHaveBeenCalled();
+        });
+
+        it('should fail when the blacklist cannot be written: the session would silently stay valid', async () => {
+            mockJwtService.verify.mockReturnValue({ jti: 'test-jti', exp: Math.floor(Date.now() / 1000) + 3600 });
+            mockJwtBlacklist.blacklist.mockRejectedValueOnce(new Error('Redis down') as never);
+
+            await expect(service.logout('some.jwt.token', logoutResponse)).rejects.toThrow('Redis down');
+            expect(clearCookieMock).toHaveBeenCalled();
         });
     });
 

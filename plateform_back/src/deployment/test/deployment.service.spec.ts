@@ -1,9 +1,10 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DeploymentService } from '../deployment.service';
 import { DeploymentRepository } from '../deployment.repository';
 import { AgentRepository } from 'src/agent/agent.repository';
 import { WorkflowService } from 'src/workflow/workflow.service';
+import { RagPipelineBuilder } from 'src/agent-runtime/agent-runtime.builder';
 import { AgentStatus } from 'generated/prisma';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 import EventBus from 'src/lib/event-bus';
@@ -27,6 +28,10 @@ const mockAgentRepository: any = {
     findOne: jest.fn(),
 };
 
+const mockPipelineBuilder: any = {
+    assertDeployable: jest.fn(),
+};
+
 const mockWorkflowService: any = {
     createSnapshot: jest.fn(),
     findByVersion: jest.fn(),
@@ -43,11 +48,13 @@ describe('DeploymentService', () => {
                 { provide: DeploymentRepository, useValue: mockDeploymentRepository },
                 { provide: AgentRepository, useValue: mockAgentRepository },
                 { provide: WorkflowService, useValue: mockWorkflowService },
+                { provide: RagPipelineBuilder, useValue: mockPipelineBuilder },
             ],
         }).compile();
 
         service = module.get<DeploymentService>(DeploymentService);
         jest.clearAllMocks();
+        mockPipelineBuilder.assertDeployable.mockResolvedValue(undefined);
     });
 
     describe('deploy', () => {
@@ -81,6 +88,23 @@ describe('DeploymentService', () => {
             // eslint-disable-next-line @typescript-eslint/unbound-method
             expect(EventBus.emit).toHaveBeenCalledTimes(2);
             expect(result).toEqual(deployment);
+        });
+
+        it('should not deploy a pipeline the RAG engine schema rejects', async () => {
+            mockAgentRepository.findOneWithActiveWorkflow.mockResolvedValue({
+                id: 'agent-1',
+                workflow: { id: 'wf-1', definition: { nodes: [] } },
+            });
+            mockPipelineBuilder.assertDeployable.mockRejectedValue(
+                new UnprocessableEntityException('Pipeline invalide : [1.top_k] Too big'),
+            );
+
+            await expect(service.deploy('agent-1', 'ws-1', { name: 'Deploy' }, 'user-1')).rejects.toThrow(
+                UnprocessableEntityException,
+            );
+            expect(mockPipelineBuilder.assertDeployable).toHaveBeenCalledWith('agent-1');
+            expect(mockWorkflowService.createSnapshot).not.toHaveBeenCalled();
+            expect(mockDeploymentRepository.createWithAgentUpdate).not.toHaveBeenCalled();
         });
 
         it('should throw NotFoundException when agent not found', async () => {

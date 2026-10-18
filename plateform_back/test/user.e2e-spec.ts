@@ -72,29 +72,18 @@ describe('Users (e2e)', () => {
     });
 
     describe('PATCH /users/me', () => {
-        it('should normalize a changed email so the user can still log in with it', async () => {
-            const user = { email: 'casechange@test.com', password: 'Password123!', name: 'Case' };
+        it("should not change the email: an address must be proven before it opens or receives anything", async () => {
+            const user = { email: 'owner@test.com', password: 'Password123!', name: 'Owner' };
             const userCookie = await registerAndLogin(app, user);
 
             const res = await request(app.getHttpServer())
                 .patch('/users/me')
                 .set('Cookie', userCookie)
-                .send({ email: 'CaseChanged@Test.com' })
+                .send({ name: 'Renamed', email: 'victim@test.com' })
                 .expect(200);
-            expect(res.body.email).toBe('casechanged@test.com');
 
-            await request(app.getHttpServer())
-                .post('/auth/login')
-                .send({ email: 'CaseChanged@Test.com', password: user.password })
-                .expect(201);
-        });
-
-        it('should return 409 when the email is already used by another account', async () => {
-            await request(app.getHttpServer())
-                .patch('/users/me')
-                .set('Cookie', cookie)
-                .send({ email: 'casechanged@test.com' })
-                .expect(409);
+            expect(res.body.name).toBe('Renamed');
+            expect(res.body.email).toBe('owner@test.com');
         });
     });
 

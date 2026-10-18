@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
 import { useSSEStream, InsufficientCreditsError } from "./useSSEStream";
-import type { SSEResult } from "./useSSEStream";
+import type { SSEResult, SSEStreamOptions } from "./useSSEStream";
 import { RagSource, ThinkingEvent } from "./types";
 import { useAppDispatch } from "store";
 import { backendApi } from "services/api";
 import { Tag } from "services/tags/tag";
 
-export function useStreamQuery() {
-    const { stream } = useSSEStream();
+export function useStreamQuery(options?: SSEStreamOptions) {
+    const { stream } = useSSEStream(options);
     const [isOutOfCredits, setIsOutOfCredits] = useState(false);
     const dispatch = useAppDispatch();
 

@@ -29,6 +29,21 @@ Décisions prises après l'audit :
 | n° 10, prod modifiable sans déploiement | Suppression de `PATCH …/workflow/activate` | [#98](https://github.com/GenRAG/monorepo/pull/98) |
 | n° 3, playground | Doc alignée : le playground est débité | [#99](https://github.com/GenRAG/monorepo/pull/99) |
 | n° 4, migration des datasets | Aucune, il n'y a pas de document en prod | — |
+| n° 5, e-mail modifiable sans vérification | `PATCH /users/me` ne change plus l'e-mail (le front ne l'envoyait pas) | [#100](https://github.com/GenRAG/monorepo/pull/100) |
+| C4, corps de requête dans Sentry | `httpIntegration({ maxIncomingRequestBodySize: 'none' })` | [#101](https://github.com/GenRAG/monorepo/pull/101) |
+| n° 8, blocage contournable | Essai compté avant vérification (transaction Redis), un compteur par flux | [#102](https://github.com/GenRAG/monorepo/pull/102) |
+| n° 9, document supprimé pendant l'indexation | Vecteurs supprimés à la fin du job, `retry` seulement en `FAILED` | [#103](https://github.com/GenRAG/monorepo/pull/103) |
+| n° 7, Retour arrière dans le builder | `deleteKeyCode={null}` sur les deux canevas | [#104](https://github.com/GenRAG/monorepo/pull/104) |
+| C3, titres Drive coupés par les `/` | `/` remplacés par `-` au lieu de `basename` | [#105](https://github.com/GenRAG/monorepo/pull/105) |
+| n° 10, rollback qui écrase le brouillon | Le rollback ne réécrit plus le workflow actif | [#106](https://github.com/GenRAG/monorepo/pull/106) |
+| n° 16, session expirée | Un 401 hors `/auth/` renvoie vers `/login` | [#107](https://github.com/GenRAG/monorepo/pull/107) |
+| n° 15, flux SSE jamais fermé | Fermé au démontage pour le playground et l'onboarding, pas pour l'assistant (réponse gardée) | [#108](https://github.com/GenRAG/monorepo/pull/108) |
+| n° 11, changement de conversation pendant une réponse | La réponse ne change plus de conversation ; une nouvelle conversation a son URL | [#109](https://github.com/GenRAG/monorepo/pull/109) |
+| n° 19, logout | Cookie effacé avec ses attributs, erreur de liste noire remontée, jeton vérifié | [#110](https://github.com/GenRAG/monorepo/pull/110) |
+| n° 19, e-mail des invitations | Mis en minuscules avant la recherche du compte | [#111](https://github.com/GenRAG/monorepo/pull/111) |
+| Limite de 50 bases (contrat de #95) | Relier une 51e base à un agent est refusé | [#112](https://github.com/GenRAG/monorepo/pull/112) |
+| n° 14, pipeline validé seulement à la question | En attente de #95 (le schéma change) ; validation au déploiement, pas à l'enregistrement des brouillons | — |
+| B-35, suppression du compte | En attente de #95 : `DELETE /orgs/{workspaceId}` n'a de sens qu'avec `org_id` = workspace | — |
 
 ## Vérifications lancées sur `904c1d3`
 

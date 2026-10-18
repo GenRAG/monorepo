@@ -2,8 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from 'src/users/users.service';
 import { UserRepository } from 'src/users/user.repository';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 const fakeUserSafe = {
     id: 'user-1',
@@ -137,33 +136,12 @@ describe('UsersService', () => {
     });
 
     describe('updateProfile', () => {
-        it('should store the email lowercased and trimmed, like register and login expect it', async () => {
-            mockUserRepository.update.mockResolvedValue({ ...fakeUserSafe, email: 'alice@example.com' });
-
-            await service.updateProfile('user-1', { email: '  Alice@Example.COM ' });
-
-            expect(mockUserRepository.update).toHaveBeenCalledWith({ id: 'user-1' }, { email: 'alice@example.com' });
-        });
-
-        it('should leave a name-only update untouched', async () => {
+        it('should only update the name: the email cannot be changed in place', async () => {
             mockUserRepository.update.mockResolvedValue({ ...fakeUserSafe, name: 'Alice' });
 
-            await service.updateProfile('user-1', { name: 'Alice' });
+            await service.updateProfile('user-1', { name: 'Alice', email: 'victim@example.com' } as never);
 
             expect(mockUserRepository.update).toHaveBeenCalledWith({ id: 'user-1' }, { name: 'Alice' });
-        });
-
-        it('should answer 409 instead of 500 when the email already belongs to another account', async () => {
-            mockUserRepository.update.mockRejectedValue(
-                new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
-                    code: 'P2002',
-                    clientVersion: '6.9.0',
-                }),
-            );
-
-            await expect(service.updateProfile('user-1', { email: 'taken@example.com' })).rejects.toThrow(
-                ConflictException,
-            );
         });
     });
 

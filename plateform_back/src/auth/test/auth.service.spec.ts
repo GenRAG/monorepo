@@ -184,6 +184,13 @@ describe('AuthService', () => {
             expect(clearCookieMock).toHaveBeenCalled();
         });
 
+        it('should not blacklist anything for a verified token without jti', async () => {
+            mockJwtService.verify.mockReturnValue({ userId: 'user-1' });
+
+            await expect(service.logout('token.without.jti', logoutResponse)).resolves.toBeUndefined();
+            expect(mockJwtBlacklist.blacklist).not.toHaveBeenCalled();
+        });
+
         it('should not blacklist anything for a token whose signature does not verify', async () => {
             mockJwtService.verify.mockImplementation(() => {
                 throw new Error('invalid signature');

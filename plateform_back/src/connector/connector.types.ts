@@ -11,5 +11,7 @@ export interface ConnectorImportResult {
 export interface ConnectorSyncResult {
     updated: number;
     unchanged: number;
+    /** Names of the documents removed because their Drive file is in the trash. */
+    removed: string[];
     failed: FailedFile[];
 }

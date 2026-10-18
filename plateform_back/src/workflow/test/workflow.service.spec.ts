@@ -1,5 +1,4 @@
 import { NotFoundException } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
 import { Test, TestingModule } from '@nestjs/testing';
 import { WorkflowRepository } from 'src/workflow/workflow.repository';
 import { WorkflowService } from 'src/workflow/workflow.service';
@@ -22,7 +21,6 @@ const mockWorkflowRepository = {
     findAll: jest.fn() as any,
     findOne: jest.fn() as any,
     findByVersion: jest.fn() as any,
-    activate: jest.fn() as any,
     update: jest.fn() as any,
     transaction: jest.fn() as any,
 };
@@ -89,42 +87,6 @@ describe('WorkflowService', () => {
             mockWorkflowRepository.findActive.mockResolvedValue(null);
 
             await expect(service.findActive('agent-1')).rejects.toThrow(NotFoundException);
-        });
-    });
-
-    describe('activate', () => {
-        it('should activate the specified workflow', async () => {
-            const activated = { ...fakeWorkflow, id: 'workflow-2', isActive: true };
-            mockWorkflowRepository.activate.mockResolvedValue(activated);
-
-            const result = await service.activate('workflow-2', 'agent-1');
-
-            expect(result.id).toBe('workflow-2');
-            expect(mockWorkflowRepository.activate).toHaveBeenCalledWith('workflow-2', 'agent-1');
-        });
-
-        it('should throw NotFoundException when workflow not found', async () => {
-            mockWorkflowRepository.activate.mockRejectedValue(
-                new Prisma.PrismaClientKnownRequestError('Record to update not found.', {
-                    code: 'P2025',
-                    clientVersion: '6.9.0',
-                }),
-            );
-
-            await expect(service.activate('unknown-id', 'agent-1')).rejects.toThrow(NotFoundException);
-        });
-
-        it('should not disguise other database errors as a missing workflow', async () => {
-            const dbDown = new Error("Can't reach database server");
-            mockWorkflowRepository.activate.mockRejectedValue(dbDown);
-
-            await expect(service.activate('workflow-2', 'agent-1')).rejects.toBe(dbDown);
-        });
-
-        it('should throw NotFoundException when the workflow belongs to another agent', async () => {
-            mockWorkflowRepository.activate.mockResolvedValue(null);
-
-            await expect(service.activate('workflow-of-another-agent', 'agent-1')).rejects.toThrow(NotFoundException);
         });
     });
 

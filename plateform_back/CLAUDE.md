@@ -23,7 +23,7 @@ Particularités :
 ## Runtime RAG (`agent-runtime/`)
 
 - Endpoints SSE (`@Sse`, query en query-string `?query=`, max `MAX_RUNTIME_QUERY_LENGTH`, throttle 20 req/min) :
-  - `GET /workspaces/:workspaceId/agents/:agentId/runtime/playground` : test, sans persistance ni crédits ;
+  - `GET /workspaces/:workspaceId/agents/:agentId/runtime/playground` : test, sans persistance des messages, mais **débité en crédits** (refusé à 0 crédit) ;
   - `GET /assistants/:agentId/stream?conversationId=` (`conversation.controller.ts`) : assistant en production, persiste la conversation ;
   - `onboarding.controller.ts` passe par `streamWithOrgOverride`.
 - `agent-runtime.service.ts` expose `playgroundStream`, `streamWithPersistence`, `streamWithOrgOverride`. Le pipeline vient d'`agent-runtime.builder.ts` (workflow **actif** → `definition.blocks`, ou `definition` entière pour les anciens workflows).

@@ -131,8 +131,9 @@ export class AuthService {
         const normalizedEmail = email.toLowerCase().trim();
         const user = await this.usersService.findOneWithCredentials({ email: normalizedEmail });
 
-        if (!user) {
-            this.logger.debug(`Password reset requested for unknown email: ${normalizedEmail}`);
+        // Same silent answer for an unverified address: its owner has not proven it, so the code must not reach it.
+        if (!user || (this.isProduction && !user.isEmailVerified)) {
+            this.logger.debug(`Password reset requested for unknown or unverified email: ${normalizedEmail}`);
             return;
         }
 
@@ -168,6 +169,11 @@ export class AuthService {
         const email = tokenInfo.email.toLowerCase();
 
         let user = await this.usersService.findOneWithCredentials({ email });
+
+        // An unverified account may hold an address its creator does not own: Google must not log its owner into it.
+        if (user && this.isProduction && !user.isEmailVerified) {
+            throw new UnauthorizedException('Account not verified');
+        }
 
         if (!user) {
             user = (await this.usersService.createGoogleUser({

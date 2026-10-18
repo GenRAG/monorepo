@@ -54,7 +54,15 @@ export class UsersService {
     async updateProfile(userId: string, profile: UpdateProfileRequest): Promise<UserSafe> {
         // Emails are stored lowercased and trimmed everywhere else (register, login, reset), and looked up
         // that way: storing "Alice@X.com" here would make the account impossible to log into.
-        const data = profile.email !== undefined ? { ...profile, email: profile.email.toLowerCase().trim() } : profile;
+        const email = profile.email?.toLowerCase().trim();
+        // A new address is not proven: the next login asks for its verification code again.
+        const changesEmail =
+            email !== undefined && email !== (await this.userRepository.findOne({ id: userId }))?.email;
+        const data = {
+            ...profile,
+            ...(email !== undefined && { email }),
+            ...(changesEmail && { isEmailVerified: false }),
+        };
 
         try {
             return await this.userRepository.update({ id: userId }, data);

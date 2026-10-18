@@ -10,8 +10,8 @@ export type AgentMemberWithUser = Prisma.AgentMemberGetPayload<{
 export class AgentMemberRepository {
     constructor(private readonly prisma: PrismaService) {}
 
-    findUserByEmail(email: string): Promise<{ id: string } | null> {
-        return this.prisma.user.findUnique({ where: { email }, select: { id: true } });
+    findUserByEmail(email: string): Promise<{ id: string; isEmailVerified: boolean } | null> {
+        return this.prisma.user.findUnique({ where: { email }, select: { id: true, isEmailVerified: true } });
     }
 
     findMembership(agentId: string, userId: string): Promise<AgentMember | null> {

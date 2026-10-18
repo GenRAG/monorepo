@@ -58,7 +58,9 @@ describe('AgentMemberService', () => {
         });
 
         it('should throw ConflictException when membership already exists', async () => {
-            mockAgentMemberRepository.findUserByEmail.mockImplementation(() => Promise.resolve({ id: 'user-1', isEmailVerified: true }));
+            mockAgentMemberRepository.findUserByEmail.mockImplementation(() =>
+                Promise.resolve({ id: 'user-1', isEmailVerified: true }),
+            );
             mockAgentMemberRepository.findMembership.mockImplementation(() => Promise.resolve({ id: 'existing' }));
 
             await expect(service.addMember('agent-1', 'member@genrag.com')).rejects.toThrow(ConflictException);
@@ -66,7 +68,9 @@ describe('AgentMemberService', () => {
         });
 
         it('should create and map member data on success', async () => {
-            mockAgentMemberRepository.findUserByEmail.mockImplementation(() => Promise.resolve({ id: 'user-1', isEmailVerified: true }));
+            mockAgentMemberRepository.findUserByEmail.mockImplementation(() =>
+                Promise.resolve({ id: 'user-1', isEmailVerified: true }),
+            );
             mockAgentMemberRepository.findMembership.mockImplementation(() => Promise.resolve(null));
             mockAgentMemberRepository.create.mockImplementation(() => Promise.resolve(memberEntity));
 

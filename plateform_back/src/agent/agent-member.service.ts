@@ -1,13 +1,22 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AgentMemberRepository } from './agent-member.repository';
 
 @Injectable()
 export class AgentMemberService {
-    constructor(private readonly agentMemberRepository: AgentMemberRepository) {}
+    private readonly isProduction: boolean;
+
+    constructor(
+        private readonly agentMemberRepository: AgentMemberRepository,
+        configService: ConfigService,
+    ) {
+        this.isProduction = configService.get('NODE_ENV') === 'production';
+    }
 
     async addMember(agentId: string, email: string) {
         const user = await this.agentMemberRepository.findUserByEmail(email);
-        if (!user) {
+        // An unverified account may hold an address its creator does not own: it must not receive the invitation.
+        if (!user || (this.isProduction && !user.isEmailVerified)) {
             throw new NotFoundException(
                 `Aucun compte GenRAG n'existe avec l'email ${email}. Cette personne doit d'abord créer un compte avant de pouvoir être ajoutée.`,
             );

@@ -74,7 +74,6 @@ export class DatasetService {
     }
 
     async update(id: string, workspaceId: string, dto: UpdateDatasetRequest): Promise<Dataset> {
-        await this._assertDatasetInWorkspace(id, workspaceId);
         return this.datasetRepository.update(id, {
             name: dto.name?.trim(),
             description: dto.description,
@@ -82,6 +81,8 @@ export class DatasetService {
     }
 
     async delete(id: string, workspaceId: string): Promise<void> {
+        // Kept on top of DatasetBelongsToWorkspaceGuard: the delete is destructive and also runs outside the controller
+        // (onboarding rollback).
         await this._assertDatasetInWorkspace(id, workspaceId);
 
         const documents = await this.datasetRepository.findDocumentsForCleanup(id);
@@ -113,21 +114,17 @@ export class DatasetService {
     }
 
     async attachToAgent(datasetId: string, agentId: string, workspaceId: string): Promise<void> {
-        await this._assertDatasetInWorkspace(datasetId, workspaceId);
         await this._assertAgentInWorkspace(agentId, workspaceId);
         await this._assertAgentsBelowDatasetLimit([agentId], datasetId);
         await this.datasetRepository.addAgentToDataset(datasetId, agentId);
     }
 
     async detachFromAgent(datasetId: string, agentId: string, workspaceId: string): Promise<void> {
-        await this._assertDatasetInWorkspace(datasetId, workspaceId);
         await this._assertAgentInWorkspace(agentId, workspaceId);
         await this.datasetRepository.removeAgentFromDataset(datasetId, agentId);
     }
 
     async setAgents(datasetId: string, agentIds: string[], workspaceId: string): Promise<void> {
-        await this._assertDatasetInWorkspace(datasetId, workspaceId);
-
         const uniqueIds = [...new Set(agentIds)];
         if (uniqueIds.length > 0) {
             const count = await this.datasetRepository.countAgentsInWorkspace(uniqueIds, workspaceId);
@@ -170,8 +167,6 @@ export class DatasetService {
     }
 
     async getAnalytics(id: string, workspaceId: string, days: number): Promise<DatasetAnalytics> {
-        await this._assertDatasetInWorkspace(id, workspaceId);
-
         const { since, keys } = dayRange(days);
 
         const [rows, breakdowns] = await Promise.all([

@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, NotFoundExc
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { AxiosError } from 'axios';
-import { Document, DocumentSource, Prisma } from 'generated/prisma';
+import { Document, DocumentSource, DocumentStatus, Prisma } from 'generated/prisma';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from './document.repository';
 import { IndexDocumentCommandProps } from './commands/index-document.command';
@@ -197,10 +197,16 @@ export class DocumentService {
     async retry(id: string, datasetId: string) {
         const doc = await this.documentRepository.findById(id, datasetId);
         if (!doc) throw new NotFoundException('Document not found');
+        // Any other status already has a job (or its vectors): queueing one more would index it twice.
+        if (doc.status !== DocumentStatus.FAILED) {
+            throw new ConflictException('Seul un document en échec peut être réindexé');
+        }
 
         this._checkRetryAllowed(doc.updatedAt);
 
-        await this.documentRepository.resetForRetry(id);
+        // Conditional on FAILED, so two retries at once queue a single job.
+        const { count } = await this.documentRepository.resetForRetry(id);
+        if (count === 0) throw new ConflictException('Seul un document en échec peut être réindexé');
 
         await this.documentQueue.add(
             INDEX_DOCUMENT_JOB,

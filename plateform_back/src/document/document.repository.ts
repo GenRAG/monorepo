@@ -118,8 +118,8 @@ export class DocumentRepository {
     }
 
     resetForRetry(id: string) {
-        return this.prisma.document.update({
-            where: { id },
+        return this.prisma.document.updateMany({
+            where: { id, status: DocumentStatus.FAILED },
             data: {
                 status: DocumentStatus.UPLOADED,
                 failedAt: null,

@@ -102,7 +102,8 @@ export class UsersService {
         try {
             return await this.userRepository.delete(id);
         } catch (error) {
-            await Promise.all(jobs.map((job) => job.remove()));
+            // A failing removal must not hide why the delete failed: the job skips a workspace that still exists.
+            await Promise.all(jobs.map((job) => job.remove().catch(() => undefined)));
             throw error;
         }
     }

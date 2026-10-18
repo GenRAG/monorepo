@@ -220,13 +220,22 @@ describe('UsersService', () => {
         });
 
         it('should drop the queued cleanup when the delete fails, so a surviving account keeps its files', async () => {
-            const job = { remove: jest.fn() as any };
+            const job = { remove: (jest.fn() as any).mockResolvedValue(undefined) };
             mockUserRepository.findSoleWorkspaceFiles.mockResolvedValue(workspaces);
             mockDatasetService.queueWorkspaceCleanup.mockResolvedValue([job]);
             mockUserRepository.delete.mockRejectedValue(new Error('db down'));
 
             await expect(service.delete('user-1')).rejects.toThrow('db down');
             expect(job.remove).toHaveBeenCalled();
+        });
+
+        it('should report the delete failure even when removing the queued job fails too', async () => {
+            const job = { remove: (jest.fn() as any).mockRejectedValue(new Error('job locked')) };
+            mockUserRepository.findSoleWorkspaceFiles.mockResolvedValue(workspaces);
+            mockDatasetService.queueWorkspaceCleanup.mockResolvedValue([job]);
+            mockUserRepository.delete.mockRejectedValue(new Error('db down'));
+
+            await expect(service.delete('user-1')).rejects.toThrow('db down');
         });
 
         it('should not delete the account when the cleanup cannot be queued', async () => {

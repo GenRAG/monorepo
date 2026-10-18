@@ -53,4 +53,19 @@ describe('Account deletion (e2e)', () => {
         expect(cleanup?.data).toEqual({ workspaceId, storageKeys: [storageKey] });
         await Promise.all(jobs.map((job) => job.remove()));
     });
+
+    it('should leave a workspace shared with another member untouched', async () => {
+        const prisma = app.get(PrismaService);
+        const cookie = await registerAndLogin(app, { email: 'partner@test.com', password: 'Password123!', name: 'P' });
+        const workspaceId = await createWorkspace(app, cookie);
+        const colleague = await prisma.user.create({ data: { email: 'colleague@test.com', name: 'C' } });
+        await prisma.userWorkspace.create({ data: { userId: colleague.id, workspaceId } });
+
+        await request(app.getHttpServer()).delete('/users/me').set('Cookie', cookie).expect(204);
+
+        const jobs = await queue.getJobs(['delayed', 'waiting', 'active', 'completed', 'failed']);
+        expect(jobs.filter((job) => job.data?.workspaceId === workspaceId)).toHaveLength(0);
+        expect(await prisma.workspace.findUnique({ where: { id: workspaceId } })).not.toBeNull();
+        await Promise.all(jobs.map((job) => job.remove()));
+    });
 });

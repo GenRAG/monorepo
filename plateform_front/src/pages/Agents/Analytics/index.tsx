@@ -7,7 +7,6 @@ import { useGetAgentByIdQuery } from "services/agent/agent";
 import { VolumeChart } from "components/Agents/Analytics/VolumeChart";
 import { LatencyChart } from "components/Agents/Analytics/LatencyChart";
 import { ErrorsChart } from "components/Agents/Analytics/ErrorsChart";
-import { DocumentHealthCard } from "components/Agents/Analytics/DocumentHealthCard";
 import { RecentQueriesCard } from "components/Agents/Analytics/RecentQueriesCard";
 import { CostChart } from "components/Agents/Analytics/CostChart";
 import { CostByTypeCard } from "components/Agents/Analytics/CostByTypeCard";
@@ -27,12 +26,7 @@ const AnalyticsWorkspace = () => {
                 return (
                     <VStack w="100%" align="stretch" spacing={5}>
                         <ActivityHeatmapCard workspaceId={workspaceId} agentId={agentId} />
-
-                        <Grid templateColumns={{ base: "1fr", xl: "3fr 2fr" }} gap={5} alignItems="stretch">
-                            <VolumeChart workspaceId={workspaceId} agentId={agentId} />
-                            <DocumentHealthCard workspaceId={workspaceId} agentId={agentId} />
-                        </Grid>
-
+                        <VolumeChart workspaceId={workspaceId} agentId={agentId} />
                         <Grid templateColumns={{ base: "1fr", xl: "2fr 1fr" }} gap={5} alignItems="stretch">
                             <VStack spacing={5} align="stretch">
                                 <LatencyChart workspaceId={workspaceId} agentId={agentId} />

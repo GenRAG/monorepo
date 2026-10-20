@@ -120,6 +120,8 @@ const WorkflowInner = ({ initialNodes, initialEdges, workflowExists, workspaceId
                     fitViewOptions={FIT_VIEW_OPTIONS}
                     fitView
                     onDragOver={onDragOver}
+                    // Backspace would delete the selected edge or node and cut the pipeline; removals go through buttons.
+                    deleteKeyCode={null}
                 >
                     <WorkflowMiniMap isDark={colorMode === "dark"} />
                     <Background variant={BackgroundVariant.Lines} color={lineColor} gap={36} />

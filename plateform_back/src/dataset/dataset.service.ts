@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { Job, Queue } from 'bullmq';
 import { Dataset } from 'generated/prisma';
 import { AgentRepository } from 'src/agent/agent.repository';
 import { DatasetRepository } from './dataset.repository';
 import { CreateDatasetRequest } from './dto/create-dataset.request';
 import { UpdateDatasetRequest } from './dto/update-dataset.request';
-import { DatasetAnalytics, DatasetCleanupJob, DatasetListItem } from './dataset.types';
-import { MAX_DATASET_STORAGE_BYTES } from './dataset.constants';
+import { DatasetAnalytics, DatasetCleanupJob, DatasetListItem, WorkspaceCleanupJob } from './dataset.types';
+import { MAX_DATASET_STORAGE_BYTES, MAX_DATASETS_PER_AGENT } from './dataset.constants';
 
 export const DATASET_CLEANUP_QUEUE = 'dataset-cleanup';
 
@@ -30,6 +30,7 @@ const dayRange = (days: number) => {
 };
 
 export const DATASET_CLEANUP_JOB = 'cleanup-dataset';
+export const WORKSPACE_CLEANUP_JOB = 'cleanup-workspace';
 
 /** Leaves the dataset delete time to commit before the cleanup of its files starts. */
 const CLEANUP_DELAY_MS = 30_000;
@@ -42,7 +43,7 @@ export class DatasetService {
         private readonly datasetRepository: DatasetRepository,
         private readonly agentRepository: AgentRepository,
         @InjectQueue(DATASET_CLEANUP_QUEUE)
-        private readonly cleanupQueue: Queue<DatasetCleanupJob>,
+        private readonly cleanupQueue: Queue<DatasetCleanupJob | WorkspaceCleanupJob>,
     ) {}
 
     create(workspaceId: string, dto: CreateDatasetRequest): Promise<Dataset> {
@@ -74,7 +75,6 @@ export class DatasetService {
     }
 
     async update(id: string, workspaceId: string, dto: UpdateDatasetRequest): Promise<Dataset> {
-        await this._assertDatasetInWorkspace(id, workspaceId);
         return this.datasetRepository.update(id, {
             name: dto.name?.trim(),
             description: dto.description,
@@ -82,6 +82,8 @@ export class DatasetService {
     }
 
     async delete(id: string, workspaceId: string): Promise<void> {
+        // Kept on top of DatasetBelongsToWorkspaceGuard: the delete is destructive and also runs outside the controller
+        // (onboarding rollback).
         await this._assertDatasetInWorkspace(id, workspaceId);
 
         const documents = await this.datasetRepository.findDocumentsForCleanup(id);
@@ -112,30 +114,55 @@ export class DatasetService {
         }
     }
 
+    /**
+     * Queues, delayed like a dataset cleanup, the removal of workspaces about to be deleted with their owner's account:
+     * their engine collection and their documents' stored files. The caller removes the jobs if the delete fails.
+     */
+    queueWorkspaceCleanup(workspaces: WorkspaceCleanupJob[]): Promise<Job[]> {
+        return Promise.all(
+            workspaces.map((workspace) =>
+                this.cleanupQueue.add(WORKSPACE_CLEANUP_JOB, workspace, {
+                    delay: CLEANUP_DELAY_MS,
+                    attempts: 5,
+                    backoff: { type: 'exponential', delay: 5000 },
+                    removeOnComplete: true,
+                    removeOnFail: false,
+                }),
+            ),
+        );
+    }
+
     async attachToAgent(datasetId: string, agentId: string, workspaceId: string): Promise<void> {
-        await this._assertDatasetInWorkspace(datasetId, workspaceId);
         await this._assertAgentInWorkspace(agentId, workspaceId);
+        await this._assertAgentsBelowDatasetLimit([agentId], datasetId);
         await this.datasetRepository.addAgentToDataset(datasetId, agentId);
     }
 
     async detachFromAgent(datasetId: string, agentId: string, workspaceId: string): Promise<void> {
-        await this._assertDatasetInWorkspace(datasetId, workspaceId);
         await this._assertAgentInWorkspace(agentId, workspaceId);
         await this.datasetRepository.removeAgentFromDataset(datasetId, agentId);
     }
 
     async setAgents(datasetId: string, agentIds: string[], workspaceId: string): Promise<void> {
-        await this._assertDatasetInWorkspace(datasetId, workspaceId);
-
         const uniqueIds = [...new Set(agentIds)];
         if (uniqueIds.length > 0) {
             const count = await this.datasetRepository.countAgentsInWorkspace(uniqueIds, workspaceId);
             if (count !== uniqueIds.length) {
                 throw new BadRequestException("Un ou plusieurs agents n'appartiennent pas à cette entreprise");
             }
+            await this._assertAgentsBelowDatasetLimit(uniqueIds, datasetId);
         }
 
         await this.datasetRepository.setAgents(datasetId, uniqueIds);
+    }
+
+    private async _assertAgentsBelowDatasetLimit(agentIds: string[], datasetId: string): Promise<void> {
+        const full = await this.datasetRepository.findAgentsAtDatasetLimit(agentIds, datasetId, MAX_DATASETS_PER_AGENT);
+        if (full.length > 0) {
+            throw new BadRequestException(
+                `Un agent peut utiliser au plus ${MAX_DATASETS_PER_AGENT} bases : ${full.map((a) => a.name).join(', ')} en a déjà ${MAX_DATASETS_PER_AGENT}`,
+            );
+        }
     }
 
     /**
@@ -159,8 +186,6 @@ export class DatasetService {
     }
 
     async getAnalytics(id: string, workspaceId: string, days: number): Promise<DatasetAnalytics> {
-        await this._assertDatasetInWorkspace(id, workspaceId);
-
         const { since, keys } = dayRange(days);
 
         const [rows, breakdowns] = await Promise.all([

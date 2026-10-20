@@ -27,6 +27,12 @@ export interface DatasetCleanupJob {
     documents: { name: string; storageKey: string }[];
 }
 
+/** A workspace deleted with its owner's account: its engine collection and the stored files of its documents. */
+export interface WorkspaceCleanupJob {
+    workspaceId: string;
+    storageKeys: string[];
+}
+
 export interface DatasetDailyAdditions {
     /** YYYY-MM-DD */
     date: string;

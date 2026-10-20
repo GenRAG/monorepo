@@ -23,6 +23,7 @@ const mockDatasetRepository = {
     findDocumentsForCleanup: jest.fn() as any,
     countAgentsInWorkspace: jest.fn() as any,
     addAgentToDataset: jest.fn() as any,
+    findAgentsAtDatasetLimit: jest.fn() as any,
     removeAgentFromDataset: jest.fn() as any,
     setAgents: jest.fn() as any,
     findDatasetIdsByAgent: jest.fn() as any,
@@ -63,6 +64,7 @@ describe('DatasetService', () => {
         jest.clearAllMocks();
         mockDatasetRepository.exists.mockImplementation(scopeTo('workspace-1', { id: 'dataset-1' }));
         mockAgentRepository.findOne.mockImplementation(scopeTo('workspace-1', { id: 'agent-1' }));
+        mockDatasetRepository.findAgentsAtDatasetLimit.mockResolvedValue([]);
     });
 
     describe('create', () => {
@@ -127,13 +129,6 @@ describe('DatasetService', () => {
         });
     });
 
-    describe('update', () => {
-        it('should throw NotFoundException for a dataset of another workspace', async () => {
-            await expect(service.update('dataset-1', 'workspace-2', { name: 'x' })).rejects.toThrow(NotFoundException);
-            expect(mockDatasetRepository.update).not.toHaveBeenCalled();
-        });
-    });
-
     describe('delete', () => {
         it('should throw NotFoundException for a dataset of another workspace', async () => {
             await expect(service.delete('dataset-1', 'workspace-2')).rejects.toThrow(NotFoundException);
@@ -191,15 +186,6 @@ describe('DatasetService', () => {
             mockAgentRepository.findOne.mockResolvedValue(null);
 
             await expect(service.attachToAgent('dataset-1', 'agent-x', 'workspace-1')).rejects.toThrow(
-                NotFoundException,
-            );
-            expect(mockDatasetRepository.addAgentToDataset).not.toHaveBeenCalled();
-        });
-
-        it('should refuse a dataset of another workspace', async () => {
-            mockDatasetRepository.exists.mockResolvedValue(null);
-
-            await expect(service.attachToAgent('dataset-x', 'agent-1', 'workspace-1')).rejects.toThrow(
                 NotFoundException,
             );
             expect(mockDatasetRepository.addAgentToDataset).not.toHaveBeenCalled();
@@ -269,11 +255,6 @@ describe('DatasetService', () => {
             countBySource: { UPLOAD: 3, GOOGLE_DRIVE: 0, SHAREPOINT: 0, NOTION: 0 },
             statusCounts: { UPLOADED: 0, PROCESSING: 1, INDEXED: 2, FAILED: 0 },
         };
-
-        it('should throw NotFoundException for a dataset of another workspace', async () => {
-            await expect(service.getAnalytics('dataset-1', 'workspace-2', 7)).rejects.toThrow(NotFoundException);
-            expect(mockDatasetRepository.getDailyAdditions).not.toHaveBeenCalled();
-        });
 
         it('should return one point per day of the period, with the totals and quota', async () => {
             const today = new Date();

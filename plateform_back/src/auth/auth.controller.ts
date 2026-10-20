@@ -69,11 +69,7 @@ export class AuthController {
 
     @Post('logout')
     async logout(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
-        const token: string | undefined = request.cookies['Authentication'];
-        if (token) {
-            await this.authService.logout(token);
-        }
-        response.clearCookie('Authentication', { httpOnly: true, path: '/' });
+        await this.authService.logout(request.cookies['Authentication'] as string | undefined, response);
         return { success: true };
     }
 }

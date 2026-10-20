@@ -43,6 +43,12 @@ interface RagModel {
     provider?: string;
 }
 
+/** Where a document lives in the RAG engine: the workspace (`org_id`, one collection each) and its dataset. */
+export interface RagDocumentScope {
+    orgId: string;
+    datasetId: string;
+}
+
 @Injectable()
 export class RagEngineService {
     private readonly logger = new Logger(RagEngineService.name);
@@ -234,9 +240,8 @@ export class RagEngineService {
     }
 
     async indexDocument(
+        { orgId, datasetId }: RagDocumentScope,
         name: string,
-        orgId: string,
-        datasetId: string,
         buffer: Buffer,
         mimeType: string,
     ): Promise<void> {
@@ -263,7 +268,7 @@ export class RagEngineService {
         await this.waitForJob(job_id);
     }
 
-    async deleteDocument(filename: string, orgId: string, datasetId: string): Promise<void> {
+    async deleteDocument({ orgId, datasetId }: RagDocumentScope, filename: string): Promise<void> {
         const response = await firstValueFrom(
             this.httpService.delete(`${this.ragEngineUrl}/documents`, {
                 headers: { 'X-API-Key': this.apiKey, 'Content-Type': 'application/json' },
@@ -272,21 +277,26 @@ export class RagEngineService {
             }),
         );
 
-        const { status, file_deleted } = response.data as { status: string; file_deleted: boolean };
-        if (status !== 'deleted' || !file_deleted) {
-            throw new Error(`RAG engine failed to delete document '${filename}' for org '${orgId}'`);
+        // 200 with `file_deleted: false` means the vectors were removed but the stored copy was already gone.
+        const { status } = response.data as { status: string };
+        if (status !== 'deleted') {
+            throw new Error(`RAG engine failed to delete document '${filename}' of dataset '${datasetId}'`);
         }
     }
 
-    /** Drops every chunk and file of a dataset. A 404 means the engine had nothing for it. */
-    async deleteDataset(orgId: string, datasetId: string): Promise<void> {
-        await firstValueFrom(
-            this.httpService.delete(`${this.ragEngineUrl}/datasets/${encodeURIComponent(datasetId)}`, {
-                headers: { 'X-API-Key': this.apiKey, 'Content-Type': 'application/json' },
-                data: { org_id: orgId },
+    /** Drops the workspace's collection and every file the engine stored for it. 404: nothing was ever stored. */
+    async deleteOrg(orgId: string): Promise<void> {
+        const response = await firstValueFrom(
+            this.httpService.delete(`${this.ragEngineUrl}/orgs/${encodeURIComponent(orgId)}`, {
+                headers: { 'X-API-Key': this.apiKey },
                 timeout: 30_000,
             }),
         );
+
+        const { status } = response.data as { status: string };
+        if (status !== 'deleted') {
+            throw new Error(`RAG engine failed to delete org '${orgId}'`);
+        }
     }
 
     private async waitForJob(jobId: string, timeoutMs = 300_000): Promise<void> {

@@ -104,6 +104,18 @@ describe('PersistingResultSink', () => {
         });
     });
 
+    it('bills an answer cut short by a client disconnect', async () => {
+        await build().onCompleted({
+            kind: 'error',
+            error: new Error('Stream closed before completion'),
+            fullText: 'Partial',
+        });
+
+        expect(usageRecorder.recordSafely).toHaveBeenCalledWith(
+            expect.objectContaining({ status: QueryLogStatus.ERROR, creditsUsed: 1 }),
+        );
+    });
+
     it('persists the sanitized error message when there is no partial text to fall back on', async () => {
         await build().onCompleted({ kind: 'error', error: new Error('Internal orchestrator failure'), fullText: '' });
 

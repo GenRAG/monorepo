@@ -4,7 +4,7 @@ import bcryptjs from 'bcryptjs';
 import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
 import { User } from 'generated/prisma';
-import { Response } from 'express';
+import { CookieOptions, Response } from 'express';
 import ms from 'ms';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from 'src/auth/token-payload.interface';
@@ -44,29 +44,42 @@ export class AuthService {
         const tokenPayload: TokenPayload = { userId: user.id, jti: randomUUID() };
         const token = this.jwtService.sign(tokenPayload);
 
-        response.cookie('Authentication', token, {
-            secure: this.isProduction,
-            httpOnly: true,
-            expires,
-            sameSite: this.isProduction ? 'none' : 'lax',
-        });
+        response.cookie('Authentication', token, { ...this.authCookieOptions(), expires });
 
         return { success: true };
     }
 
-    async logout(token: string): Promise<void> {
+    /**
+     * Clears the cookie, then revokes the token. A blacklist failure is not swallowed: the session would silently stay
+     * valid. A token whose signature does not verify (forged, expired) has nothing to revoke.
+     */
+    async logout(token: string | undefined, response: Response): Promise<void> {
+        response.clearCookie('Authentication', this.authCookieOptions());
+        if (!token) return;
+
+        let payload: TokenPayload & { exp?: number };
         try {
-            const payload = this.jwtService.decode(token);
-            if (!payload?.jti) return;
-
-            const tokenValidityMs = ms(this.configService.getOrThrow<string>('JWT_EXPIRATION') as ms.StringValue);
-            const remainingMs = payload.exp ? payload.exp * 1000 - Date.now() : tokenValidityMs;
-            const ttlSeconds = Math.max(1, Math.ceil(Math.min(remainingMs, tokenValidityMs) / 1000));
-
-            await this.jwtBlacklist.blacklist(payload.jti, ttlSeconds);
+            payload = this.jwtService.verify(token);
         } catch {
-            // best-effort: if decode fails the token was invalid anyway
+            return;
         }
+        if (!payload.jti) return;
+
+        const tokenValidityMs = ms(this.configService.getOrThrow<string>('JWT_EXPIRATION') as ms.StringValue);
+        const remainingMs = payload.exp ? payload.exp * 1000 - Date.now() : tokenValidityMs;
+        const ttlSeconds = Math.max(1, Math.ceil(Math.min(remainingMs, tokenValidityMs) / 1000));
+
+        await this.jwtBlacklist.blacklist(payload.jti, ttlSeconds);
+    }
+
+    /** One set of attributes to set and to clear the cookie: a browser only removes a cookie they all match. */
+    private authCookieOptions(): CookieOptions {
+        return {
+            secure: this.isProduction,
+            httpOnly: true,
+            sameSite: this.isProduction ? 'none' : 'lax',
+            path: '/',
+        };
     }
 
     async register(registerBody: CreateUserRequest): Promise<void> {
@@ -91,24 +104,20 @@ export class AuthService {
     async verifyUser(email: string, password: string) {
         const normalizedEmail = email.toLowerCase().trim();
 
-        if (await this.loginAttempt.isBlocked(normalizedEmail)) {
-            throw new UnauthorizedException('Too many failed attempts. Try again later.');
-        }
+        await this.loginAttempt.consume('login', normalizedEmail);
 
         const user = await this.usersService.findOneWithCredentials({ email: normalizedEmail });
 
         if (!user || !user.password || typeof user.password !== 'string') {
-            await this.loginAttempt.recordFailure(normalizedEmail);
             throw new UnauthorizedException('Credentials are not valid.');
         }
 
         const authenticated = await bcryptjs.compare(password, user.password);
         if (!authenticated) {
-            await this.loginAttempt.recordFailure(normalizedEmail);
             throw new UnauthorizedException('Credentials are not valid.');
         }
 
-        await this.loginAttempt.reset(normalizedEmail);
+        await this.loginAttempt.reset('login', normalizedEmail);
 
         if (this.isProduction && !user.isEmailVerified) {
             throw new UnauthorizedException('Account not verified');
@@ -183,20 +192,16 @@ export class AuthService {
         const { token: code, password } = verifyTokenBody;
         const email = verifyTokenBody.email.toLowerCase().trim();
 
-        if (await this.loginAttempt.isBlocked(email)) {
-            throw new UnauthorizedException('Too many failed attempts. Try again later.');
-        }
+        await this.loginAttempt.consume('password-reset', email);
 
         const user = await this.usersService.findOneWithCredentials({ email });
 
         if (!user || !user.passwordResetToken || !user.passwordResetLastSentAt) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Invalid credentials.');
         }
 
         const hashedIncoming = this.tokenService.hashOtpCode(code);
         if (user.passwordResetToken !== hashedIncoming) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Invalid credentials.');
         }
 
@@ -208,11 +213,12 @@ export class AuthService {
         }
 
         if (tokenAgeMs > tokenValidityMs) {
-            await this.loginAttempt.recordFailure(email);
             throw new UnauthorizedException('Password reset token has expired.');
         }
 
-        await this.loginAttempt.reset(email);
+        await this.loginAttempt.reset('password-reset', email);
+        // The code proves the email is theirs, and they now pick a new password: lift a login block too.
+        await this.loginAttempt.reset('login', email);
 
         const hashedPassword = await bcryptjs.hash(password, 10);
 

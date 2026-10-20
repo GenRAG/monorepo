@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, NotFoundExc
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { AxiosError } from 'axios';
-import { DocumentSource, Prisma } from 'generated/prisma';
+import { Document, DocumentSource, DocumentStatus, Prisma } from 'generated/prisma';
 import { IStorageStrategy } from 'src/storage/storage.strategy';
 import { DocumentRepository } from './document.repository';
 import { IndexDocumentCommandProps } from './commands/index-document.command';
@@ -68,14 +68,14 @@ export class DocumentService {
     }
 
     /**
-     * Single entry point to add a file to a dataset: S3 upload, Document row, indexing job.
-     * Manual uploads and future connectors both go through here.
+     * Every rule `ingestFile` applies before storing anything. `replacing` is a document of the dataset that the
+     * file replaces (connector resync): its name and its size do not count, so it can be checked before the delete.
      */
-    async ingestFile(
+    async assertIngestable(
         datasetId: string,
         file: IngestFileInput,
-        origin: DocumentOrigin = { source: DocumentSource.UPLOAD },
-    ) {
+        replacing?: Pick<Document, 'id' | 'size'>,
+    ): Promise<void> {
         // Validated here rather than in the controller: connector files are untrusted bytes too.
         if (file.buffer.length === 0) throw new BadRequestException('Le fichier est vide');
         if (file.buffer.length > MAX_FILE_SIZE) {
@@ -86,7 +86,7 @@ export class DocumentService {
             throw new BadRequestException('Le contenu du fichier ne correspond pas à son type');
         }
 
-        const usedStorage = await this.documentRepository.getTotalSize(datasetId);
+        const usedStorage = (await this.documentRepository.getTotalSize(datasetId)) - (replacing?.size ?? 0);
         if (usedStorage + file.size > MAX_DATASET_STORAGE_BYTES) {
             throw new BadRequestException(
                 `Espace de stockage plein : une base de connaissances ne peut pas dépasser ${MAX_DATASET_STORAGE_BYTES / 1024 / 1024} Mo`,
@@ -95,10 +95,24 @@ export class DocumentService {
 
         const safeFilename = sanitizeFilename(file.filename);
 
-        // The RAG engine identifies a document by (org_id, dataset_id, filename): two files with the same name would collide.
-        if (await this.documentRepository.findByName(datasetId, safeFilename)) {
+        // The RAG engine identifies a document of a dataset by its filename: two files with the same name would collide.
+        const sameName = await this.documentRepository.findByName(datasetId, safeFilename);
+        if (sameName && sameName.id !== replacing?.id) {
             throw new ConflictException(`Un document nommé « ${safeFilename} » existe déjà dans cette base`);
         }
+    }
+
+    /**
+     * Single entry point to add a file to a dataset: S3 upload, Document row, indexing job.
+     * Manual uploads and future connectors both go through here.
+     */
+    async ingestFile(
+        datasetId: string,
+        file: IngestFileInput,
+        origin: DocumentOrigin = { source: DocumentSource.UPLOAD },
+    ) {
+        await this.assertIngestable(datasetId, file);
+        const safeFilename = sanitizeFilename(file.filename);
 
         const storageKey = `datasets/${datasetId}/${Date.now()}-${safeFilename}`;
         await this.storage.put(storageKey, file.buffer, file.mimeType);
@@ -183,10 +197,16 @@ export class DocumentService {
     async retry(id: string, datasetId: string) {
         const doc = await this.documentRepository.findById(id, datasetId);
         if (!doc) throw new NotFoundException('Document not found');
+        // Any other status already has a job (or its vectors): queueing one more would index it twice.
+        if (doc.status !== DocumentStatus.FAILED) {
+            throw new ConflictException('Seul un document en échec peut être réindexé');
+        }
 
         this._checkRetryAllowed(doc.updatedAt);
 
-        await this.documentRepository.resetForRetry(id);
+        // Conditional on FAILED, so two retries at once queue a single job.
+        const { count } = await this.documentRepository.resetForRetry(id);
+        if (count === 0) throw new ConflictException('Seul un document en échec peut être réindexé');
 
         await this.documentQueue.add(
             INDEX_DOCUMENT_JOB,
@@ -222,11 +242,13 @@ export class DocumentService {
 
     async delete(id: string, datasetId: string): Promise<void> {
         const doc = await this.documentRepository.findById(id, datasetId);
-        const workspaceId = doc && (await this.documentRepository.findWorkspaceId(datasetId));
-        if (!doc || !workspaceId) throw new NotFoundException('Document not found');
+        if (!doc) throw new NotFoundException('Document not found');
 
         try {
-            await this.ragEngineService.deleteDocument(doc.name, workspaceId, datasetId);
+            await this.ragEngineService.deleteDocument(
+                await this.documentRepository.findEngineScope(datasetId),
+                doc.name,
+            );
         } catch (error) {
             // 404: the document never reached the vector store (failed or still pending indexing).
             if (!(error instanceof AxiosError && error.response?.status === 404)) throw error;

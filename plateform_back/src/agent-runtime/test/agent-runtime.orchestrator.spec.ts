@@ -94,7 +94,7 @@ describe('AgentRuntimeOrchestrator', () => {
             ).rejects.toThrow(ForbiddenException);
         });
 
-        it('should use the workspace as orgId by default', async () => {
+        it('should use the workspace as orgId by default (one collection per workspace)', async () => {
             mockRagPipelineBuilder.buildPipeline.mockResolvedValue(fakePipeline);
             mockRagEngineService.getQueryStream.mockResolvedValue(createMockStream());
 

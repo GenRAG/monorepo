@@ -54,23 +54,31 @@ export const Assistant = () => {
                 throw new Error("ID assistant manquant.");
             }
 
-            const wasNewConversation = currentConversationIdRef.current === null;
+            const startedIn = currentConversationIdRef.current;
 
             const {
                 text,
                 conversationId: newConvId,
                 durationMs,
-            } = await sendQuery(question, currentConversationIdRef.current, onChunk, onSources, onThinking);
+            } = await sendQuery(question, startedIn, onChunk, onSources, onThinking);
             onMeta?.({ durationMs });
+
+            if (startedIn === null) {
+                void refetchConversations();
+            }
+            // The user opened another conversation while this answer streamed: stay where they are.
+            if (currentConversationIdRef.current !== startedIn) {
+                return text;
+            }
             currentConversationIdRef.current = newConvId;
             setCurrentConversationId(newConvId);
-
-            if (wasNewConversation) {
-                void refetchConversations();
+            // A new conversation gets its own URL, so a reload keeps it.
+            if (startedIn === null) {
+                void navigate(`/assistants/${assistantId}/conversations/${newConvId}`, { replace: true });
             }
             return text;
         },
-        [assistantId, sendQuery, refetchConversations],
+        [assistantId, sendQuery, refetchConversations, navigate],
     );
 
     const { messages, setMessages, sendMessage, isLoading } = useChat({
@@ -86,11 +94,13 @@ export const Assistant = () => {
     const handleConversationSelect = (convId: string) => {
         if (convId === currentConversationId) return;
         setMessages([]);
+        currentConversationIdRef.current = convId;
         setCurrentConversationId(convId);
         void navigate(`/assistants/${assistantId}/conversations/${convId}`);
     };
 
     const handleNewConversation = () => {
+        currentConversationIdRef.current = null;
         setCurrentConversationId(null);
         setMessages([]);
     };

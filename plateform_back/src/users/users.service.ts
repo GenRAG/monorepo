@@ -1,19 +1,17 @@
-import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Prisma, User } from 'generated/prisma';
 import { CreateUserRequest, UserMe, UserSafe } from 'src/users/dto/create-user.request';
 import { UpdateProfileRequest } from 'src/users/dto/update-profile.request';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from 'src/users/user.repository';
+import { DatasetService } from 'src/dataset/dataset.service';
 
 @Injectable()
 export class UsersService {
-    constructor(private readonly userRepository: UserRepository) {}
+    constructor(
+        private readonly userRepository: UserRepository,
+        private readonly datasetService: DatasetService,
+    ) {}
 
     async create(
         request: CreateUserRequest & {
@@ -51,19 +49,8 @@ export class UsersService {
         return this.userRepository.update(where, data);
     }
 
-    async updateProfile(userId: string, profile: UpdateProfileRequest): Promise<UserSafe> {
-        // Emails are stored lowercased and trimmed everywhere else (register, login, reset), and looked up
-        // that way: storing "Alice@X.com" here would make the account impossible to log into.
-        const data = profile.email !== undefined ? { ...profile, email: profile.email.toLowerCase().trim() } : profile;
-
-        try {
-            return await this.userRepository.update({ id: userId }, data);
-        } catch (e) {
-            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-                throw new ConflictException('An account with this email already exists.');
-            }
-            throw e;
-        }
+    updateProfile(userId: string, profile: UpdateProfileRequest): Promise<UserSafe> {
+        return this.userRepository.update({ id: userId }, { name: profile.name });
     }
 
     /** Accounts created through Google have no password until they set one with the reset flow. */
@@ -88,7 +75,19 @@ export class UsersService {
         await this.userRepository.update({ id: userId }, { password: await bcrypt.hash(newPassword, 10) });
     }
 
+    /**
+     * The rows of the user's own workspace go with the account (cascade); its engine collection and stored files are
+     * removed by a cleanup job, queued first so a Redis outage fails the delete instead of orphaning them.
+     */
     async delete(id: string): Promise<UserSafe> {
-        return this.userRepository.delete(id);
+        const workspaces = await this.userRepository.findSoleWorkspaceFiles(id);
+        const jobs = await this.datasetService.queueWorkspaceCleanup(workspaces);
+        try {
+            return await this.userRepository.delete(id);
+        } catch (error) {
+            // A failing removal must not hide why the delete failed: the job skips a workspace that still exists.
+            await Promise.all(jobs.map((job) => job.remove().catch(() => undefined)));
+            throw error;
+        }
     }
 }

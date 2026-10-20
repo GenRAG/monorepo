@@ -1,13 +1,13 @@
 import type { Edge } from "@xyflow/react";
 import type { AppNode } from "./app-node";
 
-// Blocks sent to the RAG engine (`POST /rag/stream`): mirror of plateform_back/src/rag-engine/pipeline.schema.ts
-// and rag-engine/BLOCKS_FORMAT.md. Any change here must be made there too.
+// Blocks stored in `Workflow.definition.blocks`. plateform_back/src/agent-runtime/agent-runtime.builder.ts translates
+// them to the RAG engine format (rag-engine/BLOCKS_FORMAT.md, validated by plateform_back/src/rag-engine/pipeline.schema.ts).
 export type QueryBlock = { name: string; type: "query" };
 export type RewriteBlock = { name: string; type: "query_rewrite"; model: string };
 /**
- * `datasetIds` are the datasets chosen in the builder (empty = every dataset of the agent). The backend validates
- * them and sends the allowed ones as the engine `dataset_ids`: they are never sent as is.
+ * `datasetIds` are the datasets chosen in the builder (empty = every dataset of the agent). The backend keeps only
+ * the datasets the agent may search before calling the engine.
  */
 export type RetrieveBlock = {
     name: string;

@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from 'src/users/users.service';
 import { UserRepository } from 'src/users/user.repository';
+import { DatasetService } from 'src/dataset/dataset.service';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 const fakeUserSafe = {
     id: 'user-1',
@@ -30,6 +30,11 @@ const mockUserRepository = {
     create: jest.fn() as any,
     update: jest.fn() as any,
     delete: jest.fn() as any,
+    findSoleWorkspaceFiles: jest.fn() as any,
+};
+
+const mockDatasetService = {
+    queueWorkspaceCleanup: jest.fn() as any,
 };
 
 describe('UsersService', () => {
@@ -43,6 +48,7 @@ describe('UsersService', () => {
                     provide: UserRepository,
                     useValue: mockUserRepository,
                 },
+                { provide: DatasetService, useValue: mockDatasetService },
             ],
         }).compile();
 
@@ -137,33 +143,12 @@ describe('UsersService', () => {
     });
 
     describe('updateProfile', () => {
-        it('should store the email lowercased and trimmed, like register and login expect it', async () => {
-            mockUserRepository.update.mockResolvedValue({ ...fakeUserSafe, email: 'alice@example.com' });
-
-            await service.updateProfile('user-1', { email: '  Alice@Example.COM ' });
-
-            expect(mockUserRepository.update).toHaveBeenCalledWith({ id: 'user-1' }, { email: 'alice@example.com' });
-        });
-
-        it('should leave a name-only update untouched', async () => {
+        it('should only update the name: the email cannot be changed in place', async () => {
             mockUserRepository.update.mockResolvedValue({ ...fakeUserSafe, name: 'Alice' });
 
-            await service.updateProfile('user-1', { name: 'Alice' });
+            await service.updateProfile('user-1', { name: 'Alice', email: 'victim@example.com' } as never);
 
             expect(mockUserRepository.update).toHaveBeenCalledWith({ id: 'user-1' }, { name: 'Alice' });
-        });
-
-        it('should answer 409 instead of 500 when the email already belongs to another account', async () => {
-            mockUserRepository.update.mockRejectedValue(
-                new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
-                    code: 'P2002',
-                    clientVersion: '6.9.0',
-                }),
-            );
-
-            await expect(service.updateProfile('user-1', { email: 'taken@example.com' })).rejects.toThrow(
-                ConflictException,
-            );
         });
     });
 
@@ -197,13 +182,46 @@ describe('UsersService', () => {
     });
 
     describe('delete', () => {
-        it('should delete user and return UserSafe', async () => {
+        const workspaces = [{ workspaceId: 'workspace-1', storageKeys: ['datasets/d1/1-a.pdf'] }];
+
+        it('should queue the cleanup of the workspaces deleted with the account, then delete it', async () => {
+            mockUserRepository.findSoleWorkspaceFiles.mockResolvedValue(workspaces);
+            mockDatasetService.queueWorkspaceCleanup.mockResolvedValue([]);
             mockUserRepository.delete.mockResolvedValue(fakeUserSafe);
 
             const result = await service.delete('user-1');
 
             expect(result).toEqual(fakeUserSafe);
+            expect(mockUserRepository.findSoleWorkspaceFiles).toHaveBeenCalledWith('user-1');
+            expect(mockDatasetService.queueWorkspaceCleanup).toHaveBeenCalledWith(workspaces);
             expect(mockUserRepository.delete).toHaveBeenCalledWith('user-1');
+        });
+
+        it('should drop the queued cleanup when the delete fails, so a surviving account keeps its files', async () => {
+            const job = { remove: (jest.fn() as any).mockResolvedValue(undefined) };
+            mockUserRepository.findSoleWorkspaceFiles.mockResolvedValue(workspaces);
+            mockDatasetService.queueWorkspaceCleanup.mockResolvedValue([job]);
+            mockUserRepository.delete.mockRejectedValue(new Error('db down'));
+
+            await expect(service.delete('user-1')).rejects.toThrow('db down');
+            expect(job.remove).toHaveBeenCalled();
+        });
+
+        it('should report the delete failure even when removing the queued job fails too', async () => {
+            const job = { remove: (jest.fn() as any).mockRejectedValue(new Error('job locked')) };
+            mockUserRepository.findSoleWorkspaceFiles.mockResolvedValue(workspaces);
+            mockDatasetService.queueWorkspaceCleanup.mockResolvedValue([job]);
+            mockUserRepository.delete.mockRejectedValue(new Error('db down'));
+
+            await expect(service.delete('user-1')).rejects.toThrow('db down');
+        });
+
+        it('should not delete the account when the cleanup cannot be queued', async () => {
+            mockUserRepository.findSoleWorkspaceFiles.mockResolvedValue(workspaces);
+            mockDatasetService.queueWorkspaceCleanup.mockRejectedValue(new Error('redis down'));
+
+            await expect(service.delete('user-1')).rejects.toThrow('redis down');
+            expect(mockUserRepository.delete).not.toHaveBeenCalled();
         });
     });
 });

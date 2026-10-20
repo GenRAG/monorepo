@@ -64,7 +64,7 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 | Workflow builder | Pipeline RAG drag-and-drop, aperçus animés des blocs | `pages/Agents/Workflow`, `components/Agents/Workflow` | `workflow/` | `services/workflow/workflow.ts`, `services/models/models.ts` |
 | Documents | Import, indexation asynchrone, statuts | `components/Document` | `document/`, `storage/` | `services/document/document.ts` |
 | Connecteurs | Import et resynchro de fichiers depuis un service externe (Google Drive seulement), jeton OAuth du navigateur jamais stocké | `components/Dataset/Detail/DatasetSourcesTab.tsx`, `hooks/connector/`, `lib/googlePicker.ts` | `connector/` | `services/connector/connector.ts` |
-| Playground | Test d'un agent en SSE, sans crédits | `components/ui/chat`, `hooks/chat/` | `agent-runtime/` | `services/agentRuntime/agentRuntime.ts` |
+| Playground | Test d'un agent en SSE, débité en crédits comme l'assistant (bloqué à 0 crédit), sans persistance des messages | `components/ui/chat`, `hooks/chat/` | `agent-runtime/` | `services/agentRuntime/agentRuntime.ts` |
 | Assistant final | Chat de l'utilisateur final, conversations persistées | `pages/Assistant` | `conversation/`, `agent-runtime/` | `services/chat/chat.ts` |
 | Déploiement | Versions, snapshots de workflow, rollback | `components/Deployment` | `deployment/` | `services/deployment/deployment.ts` |
 | Crédits & billing | Solde, transactions, Stripe | `pages/Billing`, `components/Billing` | `credit/`, `plans/` | `services/credit/credit.ts`, `services/billing/billing.ts` |
@@ -74,8 +74,9 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 ## API RAG externe
 
 - `RAGENGINE_URL`, header `X-API-Key: RAGENGINE_API_KEY`. Consommée uniquement par `plateform_back/src/rag-engine/` (`rag-execution.service.ts`).
-- `POST /rag/stream` `{ pipeline, query }` (réponse streamée) et `POST /rag/index` (multipart `file` + `document_id`).
-- Le `pipeline` est le tableau `blocks` produit par `serializeWorkflow` (`packages/workflow`), validé par Zod (`rag-engine/pipeline.schema.ts` côté back). Format : `rag-engine/BLOCKS_FORMAT.md`. `RAG_MOCK=true` court-circuite l'appel en dev.
+- Tenant : `org_id` = **id du workspace** (une collection Qdrant par workspace), `dataset_id` = id du dataset. Le back ne les reçoit jamais du client.
+- `POST /rag/stream` `{ pipeline: { blocks }, query, org_id }` (réponse streamée en NDJSON). `POST /ingest` (multipart `file`, `org_id`, `dataset_id`) puis `GET /job/:id/status`. `DELETE /documents` `{ org_id, dataset_id, filename }`.
+- Le `pipeline` part des `blocks` produits par `serializeWorkflow` (`packages/workflow`) et stockés tels quels. `agent-runtime.builder.ts` les traduit pour le moteur (`retrieve.datasetIds` = datasets autorisés de l'agent, sans `collection_name`). Tous les blocks qui ont un modèle l'envoient dans `model`, rewrite compris, puis Zod valide le résultat (`rag-engine/pipeline.schema.ts` côté back). Format : `rag-engine/BLOCKS_FORMAT.md`. `RAG_MOCK=true` appelle `/rag/stream/mock` (le moteur doit tourner).
 
 ## Règles transverses
 

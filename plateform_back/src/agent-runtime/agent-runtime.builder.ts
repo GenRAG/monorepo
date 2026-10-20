@@ -43,13 +43,37 @@ export class RagPipelineBuilder {
             ? await this.resolveRetrieveBlocks(agentId, rawBlocks, orgIdOverride)
             : rawBlocks;
 
+        return this.applyInstructionOverride(this.parsePipeline(blocks), instructionOverride);
+    }
+
+    /**
+     * Checks every block of the active workflow against the engine's schema before it is deployed, the retrieve block
+     * included even when the agent has no dataset yet (it would be dropped from today's pipeline, then fail every
+     * question once a dataset is attached). Throws 422 with the details.
+     */
+    async assertDeployable(agentId: string): Promise<void> {
+        const rawBlocks = await this.loadRawBlocks(agentId, true);
+        if (rawBlocks === null) {
+            throw new NotFoundException('No active workflow found for this agent');
+        }
+        const blocks = Array.isArray(rawBlocks)
+            ? rawBlocks.map((block) => {
+                  if (!isRetrieveBlock(block)) return block;
+                  // Replaced at query time by the datasets the agent may search.
+                  const { datasetIds: _stored, ...rest } = block;
+                  return rest;
+              })
+            : rawBlocks;
+        this.parsePipeline(blocks);
+    }
+
+    private parsePipeline(blocks: unknown): Pipeline {
         const result = PipelineSchema.safeParse(blocks);
         if (!result.success) {
             const details = result.error.issues.map((i) => `[${i.path.join('.')}] ${i.message}`).join('; ');
             throw new UnprocessableEntityException(`Pipeline invalide : ${details}`);
         }
-
-        return this.applyInstructionOverride(result.data, instructionOverride);
+        return result.data;
     }
 
     /** Datasets the deployed agent actually searches: the same ones its pipeline sends to the RAG engine. */
@@ -75,8 +99,10 @@ export class RagPipelineBuilder {
     }
 
     /**
-     * The stored retrieve block only carries `datasetIds` chosen in the builder. They are validated here and
-     * sent as `dataset_ids`; a retrieve block with no allowed dataset is dropped, never sent unfiltered.
+     * The stored retrieve block only carries the `datasetIds` chosen in the builder. They are replaced by the
+     * datasets the agent may search; a retrieve block with none is dropped. With an org override (a server-side
+     * base), the whole org is searched. Other stored fields (`collection_name`, tenant ids) are stripped by
+     * `PipelineSchema`.
      */
     private async resolveRetrieveBlocks(
         agentId: string,
@@ -97,9 +123,8 @@ export class RagPipelineBuilder {
 
         return blocks.map((block) => {
             if (!isRetrieveBlock(block)) return block;
-            // Never trust ids stored in the workflow; the schema then drops any other unknown key.
-            const { datasetIds: _datasetIds, dataset_ids: _storedIds, ...rest } = block;
-            return datasetIds ? { ...rest, dataset_ids: datasetIds } : rest;
+            const { datasetIds: _stored, ...rest } = block;
+            return datasetIds ? { ...rest, datasetIds } : rest;
         });
     }
 

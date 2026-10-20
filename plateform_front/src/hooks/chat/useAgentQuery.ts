@@ -11,7 +11,8 @@ export const useAgentQuery = (
     streamUrlOverride?: string,
     streamStepId?: string,
 ) => {
-    const { query, isOutOfCredits } = useStreamQuery();
+    // Playground and onboarding answers are not kept: leaving the screen stops generating them.
+    const { query, isOutOfCredits } = useStreamQuery({ closeOnUnmount: true });
     const conversationIdRef = useRef<string | null>(null);
 
     const sendQuery = useCallback(

@@ -142,6 +142,39 @@ describe('TransientResultSink', () => {
         expect(usageRecorder.recordSafely).toHaveBeenCalledWith(expect.objectContaining({ creditsUsed: 111 }));
     });
 
+    it('bills an answer cut short by a client disconnect', () => {
+        const sink = new TransientResultSink(
+            subscriber as any,
+            usageRecorder as unknown as RuntimeUsageRecorder,
+            logger,
+            fakeLogCtx,
+        );
+
+        sink.onCompleted({ kind: 'error', error: new Error('Stream closed before completion'), fullText: 'Partial' });
+
+        expect(usageRecorder.recordSafely).toHaveBeenCalledWith(
+            expect.objectContaining({ status: QueryLogStatus.ERROR, creditsUsed: 1 }),
+        );
+    });
+
+    it('bills the reported cost of a stream that failed after its cost summary', () => {
+        const sink = new TransientResultSink(
+            subscriber as any,
+            usageRecorder as unknown as RuntimeUsageRecorder,
+            logger,
+            fakeLogCtx,
+        );
+
+        sink.onCompleted({
+            kind: 'error',
+            error: new Error('Stream closed before completion'),
+            fullText: '',
+            costSummary: { total_cost_usd: 0.014729510000000001 },
+        });
+
+        expect(usageRecorder.recordSafely).toHaveBeenCalledWith(expect.objectContaining({ creditsUsed: 111 }));
+    });
+
     it('passes through the message of a recognized business error (HttpException)', () => {
         const sink = new TransientResultSink(
             subscriber as any,

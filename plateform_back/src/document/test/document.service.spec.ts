@@ -4,7 +4,8 @@ import { getQueueToken } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { DocumentSource, Prisma } from 'generated/prisma';
+import { DocumentSource, DocumentStatus, Prisma } from 'generated/prisma';
+import { MAX_DATASET_STORAGE_BYTES } from 'src/dataset/dataset.constants';
 import { DocumentService } from 'src/document/document.service';
 import { DocumentRepository } from 'src/document/document.repository';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
@@ -19,12 +20,13 @@ const mockStorage = {
 const mockDocumentRepository = {
     create: jest.fn() as any,
     findById: jest.fn() as any,
-    findWorkspaceId: jest.fn() as any,
+    findEngineScope: jest.fn() as any,
     findByName: jest.fn() as any,
     getTotalSize: jest.fn() as any,
     touchDataset: jest.fn() as any,
     delete: jest.fn() as any,
     findByDatasetPaginated: jest.fn() as any,
+    resetForRetry: jest.fn() as any,
 };
 
 const mockRagEngineService = {
@@ -67,7 +69,6 @@ describe('DocumentService', () => {
         jest.clearAllMocks();
         mockDocumentRepository.getTotalSize.mockResolvedValue(0);
         mockDocumentRepository.findByName.mockResolvedValue(null);
-        mockDocumentRepository.findWorkspaceId.mockResolvedValue('ws-1');
         mockDocumentRepository.create.mockImplementation((data: Record<string, unknown>) =>
             Promise.resolve({ id: 'doc-1', ...data }),
         );
@@ -179,6 +180,75 @@ describe('DocumentService', () => {
         });
     });
 
+    describe('assertIngestable', () => {
+        it('should accept the name of the document being replaced', async () => {
+            mockDocumentRepository.getTotalSize.mockResolvedValue(0);
+            mockDocumentRepository.findByName.mockResolvedValue({ id: 'doc-1' });
+
+            await expect(
+                service.assertIngestable('dataset-1', file, { id: 'doc-1', size: 10 }),
+            ).resolves.toBeUndefined();
+        });
+
+        it('should still refuse the name of another document', async () => {
+            mockDocumentRepository.getTotalSize.mockResolvedValue(0);
+            mockDocumentRepository.findByName.mockResolvedValue({ id: 'doc-2' });
+
+            await expect(service.assertIngestable('dataset-1', file, { id: 'doc-1', size: 10 })).rejects.toThrow(
+                ConflictException,
+            );
+        });
+
+        it('should count the quota without the document being replaced', async () => {
+            mockDocumentRepository.getTotalSize.mockResolvedValue(MAX_DATASET_STORAGE_BYTES);
+            mockDocumentRepository.findByName.mockResolvedValue(null);
+
+            await expect(service.assertIngestable('dataset-1', file)).rejects.toThrow(BadRequestException);
+            await expect(
+                service.assertIngestable('dataset-1', file, { id: 'doc-1', size: 10 }),
+            ).resolves.toBeUndefined();
+        });
+    });
+
+    describe('retry', () => {
+        const failedLongAgo = {
+            id: 'doc-1',
+            name: 'a.pdf',
+            storageKey: 'k',
+            mimeType: 'application/pdf',
+            status: DocumentStatus.FAILED,
+            updatedAt: new Date(Date.now() - 10 * 60 * 1000),
+        };
+
+        it('should queue a failed document again', async () => {
+            mockDocumentRepository.findById.mockResolvedValue(failedLongAgo);
+            mockDocumentRepository.resetForRetry.mockResolvedValue({ count: 1 });
+
+            await service.retry('doc-1', 'dataset-1');
+
+            expect(mockDocumentRepository.resetForRetry).toHaveBeenCalledWith('doc-1');
+            expect(mockQueue.add).toHaveBeenCalled();
+        });
+
+        it('should queue a single job when two retries run at once', async () => {
+            mockDocumentRepository.findById.mockResolvedValue(failedLongAgo);
+            mockDocumentRepository.resetForRetry.mockResolvedValue({ count: 0 });
+
+            await expect(service.retry('doc-1', 'dataset-1')).rejects.toThrow(ConflictException);
+            expect(mockQueue.add).not.toHaveBeenCalled();
+        });
+
+        it.each([DocumentStatus.UPLOADED, DocumentStatus.PROCESSING, DocumentStatus.INDEXED])(
+            'should refuse a %s document: it would be indexed twice',
+            async (status) => {
+                mockDocumentRepository.findById.mockResolvedValue({ ...failedLongAgo, status });
+
+                await expect(service.retry('doc-1', 'dataset-1')).rejects.toThrow(ConflictException);
+                expect(mockQueue.add).not.toHaveBeenCalled();
+            },
+        );
+    });
+
     describe('delete', () => {
         it('should throw NotFoundException for a document of another dataset', async () => {
             mockDocumentRepository.findById.mockResolvedValue(null);
@@ -186,7 +256,8 @@ describe('DocumentService', () => {
             await expect(service.delete('doc-1', 'dataset-2')).rejects.toThrow(NotFoundException);
         });
 
-        it('should delete the vectors with org_id = workspaceId, then the file and the row', async () => {
+        it("should delete the vectors in the document's workspace and dataset, then the file and the row", async () => {
+            mockDocumentRepository.findEngineScope.mockResolvedValue({ orgId: 'workspace-1', datasetId: 'dataset-1' });
             mockDocumentRepository.findById.mockResolvedValue({
                 id: 'doc-1',
                 name: 'a.pdf',
@@ -195,7 +266,10 @@ describe('DocumentService', () => {
 
             await service.delete('doc-1', 'dataset-1');
 
-            expect(mockRagEngineService.deleteDocument).toHaveBeenCalledWith('a.pdf', 'ws-1', 'dataset-1');
+            expect(mockRagEngineService.deleteDocument).toHaveBeenCalledWith(
+                { orgId: 'workspace-1', datasetId: 'dataset-1' },
+                'a.pdf',
+            );
             expect(mockStorage.delete).toHaveBeenCalledWith('k');
             expect(mockDocumentRepository.delete).toHaveBeenCalledWith('doc-1');
         });

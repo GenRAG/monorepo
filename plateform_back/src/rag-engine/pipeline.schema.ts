@@ -14,11 +14,10 @@ const RewriteBlock = z.object({
 const RetrieveBlock = z.object({
     name: z.string(),
     type: z.literal('retrieve'),
-    collection_name: z.string(),
-    top_k: z.number().int().positive(),
-    // Validated by the backend; the tenant is the request's org_id. Omitted only for a server-side org (the
-    // onboarding demo base), where the engine then searches every dataset of that org.
-    dataset_ids: z.array(z.string().min(1)).min(1).optional(),
+    top_k: z.number().int().positive().max(100),
+    // The tenant is the request's `org_id` (one collection per workspace). `datasetIds` narrows the search to
+    // the agent's datasets; it is left out only for a server-side org such as the onboarding demo base.
+    datasetIds: z.array(z.string().min(1)).min(1).max(50).optional(),
 });
 
 const RerankBlock = z.object({

@@ -141,8 +141,7 @@ export class AgentRuntimeOrchestrator {
             forceActive,
         });
 
-        const orgId = orgIdOverride ?? workspaceId;
-
-        return { pipeline, orgId };
+        // The RAG engine keeps one collection per workspace.
+        return { pipeline, orgId: orgIdOverride ?? workspaceId };
     }
 }

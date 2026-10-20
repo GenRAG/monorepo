@@ -1,6 +1,6 @@
 import type { Logger, MessageEvent } from '@nestjs/common';
 import type { Subscriber } from 'rxjs';
-import { costToCredits } from 'src/credit/credit-pricing';
+import { costToCredits, MIN_QUERY_CREDITS } from 'src/credit/credit-pricing';
 import { toClientSafeErrorMessage } from 'src/agent-runtime/client-safe-error';
 import { RagStreamOutcome } from 'src/agent-runtime/streaming/rag-stream-accumulator';
 import { RagLiveEvent, encodeSseEvent } from 'src/agent-runtime/streaming/runtime-sse-event';
@@ -37,8 +37,10 @@ export abstract class BaseResultSink implements RuntimeResultSink {
 
     abstract onCompleted(outcome: StreamCompletionOutcome): Promise<void> | void;
 
-    protected creditsUsed(outcome: StreamCompletionOutcome): number | undefined {
-        return outcome.costSummary ? costToCredits(outcome.costSummary.total_cost_usd) : undefined;
+    /** The reported cost, or one credit for text produced without a cost summary (e.g. a client disconnect). */
+    protected creditsUsed(outcome: StreamCompletionOutcome): number {
+        if (outcome.costSummary) return costToCredits(outcome.costSummary.total_cost_usd);
+        return outcome.fullText ? MIN_QUERY_CREDITS : 0;
     }
 
     /** Error to show the client for a stream that ended normally: an error event of the RAG engine, or no answer. */

@@ -5,7 +5,9 @@ import { AgentMemberRepository } from './agent-member.repository';
 export class AgentMemberService {
     constructor(private readonly agentMemberRepository: AgentMemberRepository) {}
 
-    async addMember(agentId: string, email: string) {
+    async addMember(agentId: string, typedEmail: string) {
+        // Accounts are stored with a lowercase email (register, Google): match the typed address the same way.
+        const email = typedEmail.toLowerCase().trim();
         const user = await this.agentMemberRepository.findUserByEmail(email);
         if (!user) {
             throw new NotFoundException(

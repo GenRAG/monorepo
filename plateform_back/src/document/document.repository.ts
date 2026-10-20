@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DocumentSource, DocumentStatus, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
+import type { RagDocumentScope } from 'src/rag-engine/rag-execution.service';
 
 /** Grouped by source (enum declaration order: manual import first), newest first inside a source. */
 const LIST_ORDER: Prisma.DocumentOrderByWithRelationInput[] = [{ source: 'asc' }, { createdAt: 'desc' }];
@@ -27,6 +28,15 @@ export class DocumentRepository {
 
     findById(id: string, datasetId: string) {
         return this.prisma.document.findFirst({ where: { id, datasetId } });
+    }
+
+    /** The RAG engine stores a document under its workspace (`org_id`) and its dataset. */
+    async findEngineScope(datasetId: string): Promise<RagDocumentScope> {
+        const { workspaceId } = await this.prisma.dataset.findUniqueOrThrow({
+            where: { id: datasetId },
+            select: { workspaceId: true },
+        });
+        return { orgId: workspaceId, datasetId };
     }
 
     findByName(datasetId: string, name: string) {
@@ -118,22 +128,14 @@ export class DocumentRepository {
     }
 
     resetForRetry(id: string) {
-        return this.prisma.document.update({
-            where: { id },
+        return this.prisma.document.updateMany({
+            where: { id, status: DocumentStatus.FAILED },
             data: {
                 status: DocumentStatus.UPLOADED,
                 failedAt: null,
                 indexError: null,
             },
         });
-    }
-
-    async findWorkspaceId(datasetId: string): Promise<string | null> {
-        const dataset = await this.prisma.dataset.findUnique({
-            where: { id: datasetId },
-            select: { workspaceId: true },
-        });
-        return dataset?.workspaceId ?? null;
     }
 
     async touchDataset(datasetId: string): Promise<void> {

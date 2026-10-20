@@ -76,13 +76,13 @@ export const DeleteDatasetModal = ({ dataset, workspaceId, onClose, onDeleted }:
                             supprimés définitivement.
                         </Text>
                         {agents.length > 0 && (
-                            <VStack align="stretch" spacing={1} mt={4} p={3} borderRadius="10px" bg="surfaceSubtle">
+                            <VStack align="stretch" spacing={1} mt={4} p={3} borderRadius="10px">
                                 <Text variant="body-xs-semibold" color="textStrong">
                                     Ces agents ne pourront plus l&apos;utiliser :
                                 </Text>
                                 {agents.map((agent) => (
-                                    <Text key={agent.id} variant="body-xs-muted">
-                                        • {agent.name}
+                                    <Text key={agent.id} variant="body-sm-muted">
+                                        {agent.name}
                                     </Text>
                                 ))}
                             </VStack>

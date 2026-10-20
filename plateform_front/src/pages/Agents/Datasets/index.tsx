@@ -121,14 +121,7 @@ export const AgentDatasets = () => {
                 title="Bases de connaissances"
                 description="Choisissez les bases dans lesquelles cet agent cherche ses réponses."
             />
-            <VStack
-                align="stretch"
-                spacing={6}
-                px={{ base: 4, md: 16 }}
-                py={{ base: 4, md: 8 }}
-                overflow="auto"
-                flex={1}
-            >
+            <VStack align="stretch" spacing={6} p={{ base: 4, md: 5 }} overflow="auto" flex={1}>
                 {renderBody()}
             </VStack>
         </VStack>

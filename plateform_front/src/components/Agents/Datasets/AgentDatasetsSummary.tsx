@@ -1,6 +1,6 @@
 import { Box, HStack, Icon, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { Info } from "lucide-react";
-import { GlassPanel } from "components/ui/GlassPanel";
+import { Panel } from "components/ui/Panel";
 import { DatasetEntity } from "types/dataset/dataset";
 import { formatFileSize } from "utils/documentFormatters";
 
@@ -26,7 +26,7 @@ export const AgentDatasetsSummary = ({ attached, total }: AgentDatasetsSummaryPr
     const size = attached.reduce((sum, d) => sum + d.totalSize, 0);
 
     return (
-        <GlassPanel p={{ base: 4, md: 5 }} flexShrink={0}>
+        <Panel p={{ base: 4, md: 5 }} flexShrink={0}>
             <SimpleGrid columns={3} spacing={{ base: 3, md: 6 }}>
                 <Stat label="Bases" value={`${attached.length}/${total}`} />
                 <Stat label="Documents" value={String(documents)} />
@@ -41,6 +41,6 @@ export const AgentDatasetsSummary = ({ attached, total }: AgentDatasetsSummaryPr
                     Architecture.
                 </Text>
             </HStack>
-        </GlassPanel>
+        </Panel>
     );
 };

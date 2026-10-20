@@ -3,7 +3,6 @@ import { CheckCircle2, Library, Plus, Unplug, type LucideIcon } from "lucide-rea
 import { useNavigate } from "react-router-dom";
 import BoxIcon from "components/ui/BoxIcon";
 import Button from "components/ui/Button";
-import { GlassPanel } from "components/ui/GlassPanel";
 
 export type AgentDatasetsEmptyKind = "no-dataset" | "none-attached" | "all-attached";
 
@@ -31,7 +30,8 @@ const CONTENT: Record<
     "all-attached": {
         icon: CheckCircle2,
         title: "Toutes vos bases sont utilisées",
-        description: "Cet agent a accès à l'ensemble des bases de l'entreprise. Créez-en d'autres depuis la page Bases.",
+        description:
+            "Cet agent a accès à l'ensemble des bases de l'entreprise. Créez-en d'autres depuis la page Bases.",
         cta: { label: "Gérer les bases", icon: Library },
     },
 };
@@ -42,7 +42,7 @@ export const AgentDatasetsEmptyState = ({ kind, workspaceId }: AgentDatasetsEmpt
     const isHero = kind === "no-dataset";
 
     return (
-        <GlassPanel borderStyle="dashed" px={6} py={isHero ? 14 : 8}>
+        <VStack borderStyle="dashed" px={6} py={isHero ? 14 : 8}>
             <VStack spacing={3} maxW="420px" mx="auto" textAlign="center">
                 <BoxIcon icon={icon} size={isHero ? "lg" : "md"} />
                 <Text variant="body-md-semibold">{title}</Text>
@@ -58,6 +58,6 @@ export const AgentDatasetsEmptyState = ({ kind, workspaceId }: AgentDatasetsEmpt
                     </Button>
                 )}
             </VStack>
-        </GlassPanel>
+        </VStack>
     );
 };

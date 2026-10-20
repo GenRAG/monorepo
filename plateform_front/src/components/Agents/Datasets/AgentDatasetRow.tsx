@@ -3,7 +3,7 @@ import { ExternalLink, Library } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BoxIcon from "components/ui/BoxIcon";
 import Button from "components/ui/Button";
-import { GlassPanel } from "components/ui/GlassPanel";
+import { Panel } from "components/ui/Panel";
 import { DatasetHealthBadge } from "components/Dataset/DatasetHealthBadge";
 import { DatasetEntity } from "types/dataset/dataset";
 import { formatFileSize } from "utils/documentFormatters";
@@ -25,12 +25,13 @@ export const AgentDatasetRow = ({ dataset, workspaceId, action, isExcluded }: Ag
     const navigate = useNavigate();
 
     return (
-        <GlassPanel
+        <Panel
+            w="100%"
             px={4}
             py={3}
+            opacity={isExcluded ? 0.75 : 1}
             transition="border-color 0.15s"
             _hover={{ borderColor: "borderStrong" }}
-            opacity={isExcluded ? 0.75 : 1}
         >
             <Flex align="center" gap={3} wrap={{ base: "wrap", md: "nowrap" }}>
                 <HStack spacing={3} flex="1 1 220px" minW={0}>
@@ -62,6 +63,6 @@ export const AgentDatasetRow = ({ dataset, workspaceId, action, isExcluded }: Ag
                     </Button>
                 </HStack>
             </Flex>
-        </GlassPanel>
+        </Panel>
     );
 };

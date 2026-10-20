@@ -6,7 +6,7 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 import { RagEngineService } from 'src/rag-engine/rag-execution.service';
 
 describe('RagEngineService', () => {
-    const httpService = { get: jest.fn() as any, post: jest.fn() as any };
+    const httpService = { get: jest.fn() as any, post: jest.fn() as any, delete: jest.fn() as any };
     const configService = {
         getOrThrow: (key: string) => ({ RAGENGINE_URL: 'http://rag.local', RAGENGINE_API_KEY: 'secret' })[key],
     } as unknown as ConfigService;
@@ -48,13 +48,47 @@ describe('RagEngineService', () => {
         });
     });
 
+    describe('deleteDocument', () => {
+        it('should address the document by org, dataset and filename', async () => {
+            httpService.delete.mockReturnValue(of({ data: { status: 'deleted', file_deleted: true } }));
+
+            await service.deleteDocument('a.pdf', 'ws-1', 'dataset-1');
+
+            expect(httpService.delete).toHaveBeenCalledWith('http://rag.local/documents', {
+                headers: { 'X-API-Key': 'secret', 'Content-Type': 'application/json' },
+                data: { filename: 'a.pdf', org_id: 'ws-1', dataset_id: 'dataset-1' },
+                timeout: 30_000,
+            });
+        });
+    });
+
+    describe('deleteDataset', () => {
+        it('should drop the dataset of the org', async () => {
+            httpService.delete.mockReturnValue(of({ data: { status: 'deleted' } }));
+
+            await service.deleteDataset('ws-1', 'dataset-1');
+
+            expect(httpService.delete).toHaveBeenCalledWith('http://rag.local/datasets/dataset-1', {
+                headers: { 'X-API-Key': 'secret', 'Content-Type': 'application/json' },
+                data: { org_id: 'ws-1' },
+                timeout: 30_000,
+            });
+        });
+    });
+
     describe('indexDocument', () => {
         it('should poll the ingestion job status with the API key until it completes', async () => {
             jest.useFakeTimers();
             httpService.post.mockReturnValue(of({ data: { job_id: 'job-1' } }));
             httpService.get.mockReturnValue(of({ data: { status: 'completed' } }));
 
-            const indexing = service.indexDocument('a.pdf', 'dataset-1', Buffer.from('%PDF-'), 'application/pdf');
+            const indexing = service.indexDocument(
+                'a.pdf',
+                'ws-1',
+                'dataset-1',
+                Buffer.from('%PDF-'),
+                'application/pdf',
+            );
             await jest.advanceTimersByTimeAsync(2_000);
             await indexing;
             jest.useRealTimers();

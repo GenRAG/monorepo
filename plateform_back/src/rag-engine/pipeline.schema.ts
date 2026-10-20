@@ -16,9 +16,9 @@ const RetrieveBlock = z.object({
     type: z.literal('retrieve'),
     collection_name: z.string(),
     top_k: z.number().int().positive(),
-    // Vector-store tenant filter, always computed by the backend from validated datasets. Never empty: an
-    // unfiltered retrieve would search every customer's documents in the shared collection.
-    org_ids: z.array(z.string().min(1)).min(1),
+    // Validated by the backend; the tenant is the request's org_id. Omitted only for a server-side org (the
+    // onboarding demo base), where the engine then searches every dataset of that org.
+    dataset_ids: z.array(z.string().min(1)).min(1).optional(),
 });
 
 const RerankBlock = z.object({

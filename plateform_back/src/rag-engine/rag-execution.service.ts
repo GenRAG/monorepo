@@ -233,7 +233,13 @@ export class RagEngineService {
         return response.data;
     }
 
-    async indexDocument(name: string, orgId: string, buffer: Buffer, mimeType: string): Promise<void> {
+    async indexDocument(
+        name: string,
+        orgId: string,
+        datasetId: string,
+        buffer: Buffer,
+        mimeType: string,
+    ): Promise<void> {
         const form = new FormData();
 
         form.append('file', buffer, {
@@ -241,6 +247,7 @@ export class RagEngineService {
             contentType: mimeType,
         });
         form.append('org_id', orgId);
+        form.append('dataset_id', datasetId);
 
         const response = await firstValueFrom(
             this.httpService.post(`${this.ragEngineUrl}/ingest`, form, {
@@ -256,11 +263,11 @@ export class RagEngineService {
         await this.waitForJob(job_id);
     }
 
-    async deleteDocument(filename: string, orgId: string): Promise<void> {
+    async deleteDocument(filename: string, orgId: string, datasetId: string): Promise<void> {
         const response = await firstValueFrom(
             this.httpService.delete(`${this.ragEngineUrl}/documents`, {
                 headers: { 'X-API-Key': this.apiKey, 'Content-Type': 'application/json' },
-                data: { filename, org_id: orgId },
+                data: { filename, org_id: orgId, dataset_id: datasetId },
                 timeout: 30_000,
             }),
         );
@@ -269,6 +276,17 @@ export class RagEngineService {
         if (status !== 'deleted' || !file_deleted) {
             throw new Error(`RAG engine failed to delete document '${filename}' for org '${orgId}'`);
         }
+    }
+
+    /** Drops every chunk and file of a dataset. A 404 means the engine had nothing for it. */
+    async deleteDataset(orgId: string, datasetId: string): Promise<void> {
+        await firstValueFrom(
+            this.httpService.delete(`${this.ragEngineUrl}/datasets/${encodeURIComponent(datasetId)}`, {
+                headers: { 'X-API-Key': this.apiKey, 'Content-Type': 'application/json' },
+                data: { org_id: orgId },
+                timeout: 30_000,
+            }),
+        );
     }
 
     private async waitForJob(jobId: string, timeoutMs = 300_000): Promise<void> {

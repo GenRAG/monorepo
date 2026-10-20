@@ -57,7 +57,7 @@ export class RagPipelineBuilder {
         const rawBlocks = await this.loadRawBlocks(agentId, false);
         const retrieve = Array.isArray(rawBlocks) ? rawBlocks.find(isRetrieveBlock) : undefined;
         if (!retrieve) return [];
-        return this.datasetService.resolveOrgIdsForAgent(agentId, datasetIdsOf(retrieve));
+        return this.datasetService.resolveDatasetIdsForAgent(agentId, datasetIdsOf(retrieve));
     }
 
     /** Blocks of the production workflow (the active one if never deployed, or with forceActive); null without workflow. */
@@ -76,7 +76,7 @@ export class RagPipelineBuilder {
 
     /**
      * The stored retrieve block only carries `datasetIds` chosen in the builder. They are validated here and
-     * turned into `org_ids`; a retrieve block with no allowed dataset is dropped, never sent unfiltered.
+     * sent as `dataset_ids`; a retrieve block with no allowed dataset is dropped, never sent unfiltered.
      */
     private async resolveRetrieveBlocks(
         agentId: string,
@@ -86,19 +86,20 @@ export class RagPipelineBuilder {
         const retrieve = blocks.find(isRetrieveBlock);
         if (!retrieve) return blocks;
 
-        const orgIds = orgIdOverride
-            ? [orgIdOverride]
-            : await this.datasetService.resolveOrgIdsForAgent(agentId, datasetIdsOf(retrieve));
+        const datasetIds = orgIdOverride
+            ? undefined
+            : await this.datasetService.resolveDatasetIdsForAgent(agentId, datasetIdsOf(retrieve));
 
-        if (orgIds.length === 0) {
+        if (datasetIds?.length === 0) {
             this.logger.log(`Agent ${agentId}: no dataset available, retrieve block skipped`);
             return blocks.filter((block) => !isRetrieveBlock(block));
         }
 
         return blocks.map((block) => {
             if (!isRetrieveBlock(block)) return block;
-            const { datasetIds: _datasetIds, org_id: _orgId, ...rest } = block;
-            return { ...rest, org_ids: orgIds };
+            // Never trust ids stored in the workflow; the schema then drops any other unknown key.
+            const { datasetIds: _datasetIds, dataset_ids: _storedIds, ...rest } = block;
+            return datasetIds ? { ...rest, dataset_ids: datasetIds } : rest;
         });
     }
 

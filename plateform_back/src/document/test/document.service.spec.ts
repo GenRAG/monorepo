@@ -19,6 +19,7 @@ const mockStorage = {
 const mockDocumentRepository = {
     create: jest.fn() as any,
     findById: jest.fn() as any,
+    findWorkspaceId: jest.fn() as any,
     findByName: jest.fn() as any,
     getTotalSize: jest.fn() as any,
     touchDataset: jest.fn() as any,
@@ -66,6 +67,7 @@ describe('DocumentService', () => {
         jest.clearAllMocks();
         mockDocumentRepository.getTotalSize.mockResolvedValue(0);
         mockDocumentRepository.findByName.mockResolvedValue(null);
+        mockDocumentRepository.findWorkspaceId.mockResolvedValue('ws-1');
         mockDocumentRepository.create.mockImplementation((data: Record<string, unknown>) =>
             Promise.resolve({ id: 'doc-1', ...data }),
         );
@@ -184,7 +186,7 @@ describe('DocumentService', () => {
             await expect(service.delete('doc-1', 'dataset-2')).rejects.toThrow(NotFoundException);
         });
 
-        it('should delete the vectors with org_id = datasetId, then the file and the row', async () => {
+        it('should delete the vectors with org_id = workspaceId, then the file and the row', async () => {
             mockDocumentRepository.findById.mockResolvedValue({
                 id: 'doc-1',
                 name: 'a.pdf',
@@ -193,7 +195,7 @@ describe('DocumentService', () => {
 
             await service.delete('doc-1', 'dataset-1');
 
-            expect(mockRagEngineService.deleteDocument).toHaveBeenCalledWith('a.pdf', 'dataset-1');
+            expect(mockRagEngineService.deleteDocument).toHaveBeenCalledWith('a.pdf', 'ws-1', 'dataset-1');
             expect(mockStorage.delete).toHaveBeenCalledWith('k');
             expect(mockDocumentRepository.delete).toHaveBeenCalledWith('doc-1');
         });

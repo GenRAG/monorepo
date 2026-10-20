@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DocumentStatus } from 'generated/prisma';
 import { DocumentFailedEvent, DocumentIndexedEvent } from 'src/events/document/document-event';
 import { DocumentEventType } from 'src/events/document/document-event.type';
@@ -26,7 +26,17 @@ export class IndexDocumentHandler {
             ? Buffer.from(command.buffer, 'base64')
             : await this.storage.get(command.storageKey);
 
-        await this.ragEngineService.indexDocument(command.name, command.datasetId, fileBuffer, command.mimeType);
+        // Read at run time rather than carried by the job: the workspace is the RAG engine's org.
+        const workspaceId = await this.documentRepository.findWorkspaceId(command.datasetId);
+        if (!workspaceId) throw new NotFoundException(`Dataset ${command.datasetId} not found`);
+
+        await this.ragEngineService.indexDocument(
+            command.name,
+            workspaceId,
+            command.datasetId,
+            fileBuffer,
+            command.mimeType,
+        );
 
         await this.documentRepository.updateStatus(command.documentId, DocumentStatus.INDEXED, {
             indexedAt: new Date(),

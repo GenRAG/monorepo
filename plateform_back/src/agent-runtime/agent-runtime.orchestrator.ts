@@ -141,6 +141,8 @@ export class AgentRuntimeOrchestrator {
             forceActive,
         });
 
-        return { pipeline, orgId: orgIdOverride ?? agentId };
+        const orgId = orgIdOverride ?? workspaceId;
+
+        return { pipeline, orgId };
     }
 }

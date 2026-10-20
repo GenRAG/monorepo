@@ -128,6 +128,14 @@ export class DocumentRepository {
         });
     }
 
+    async findWorkspaceId(datasetId: string): Promise<string | null> {
+        const dataset = await this.prisma.dataset.findUnique({
+            where: { id: datasetId },
+            select: { workspaceId: true },
+        });
+        return dataset?.workspaceId ?? null;
+    }
+
     async touchDataset(datasetId: string): Promise<void> {
         await this.prisma.dataset.update({
             where: { id: datasetId },

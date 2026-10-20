@@ -7,7 +7,7 @@ export type QueryBlock = { name: string; type: "query" };
 export type RewriteBlock = { name: string; type: "query_rewrite"; model: string };
 /**
  * `datasetIds` are the datasets chosen in the builder (empty = every dataset of the agent). The backend validates
- * them and replaces them by the engine `org_ids` before calling the engine: they are never sent as is.
+ * them and sends the allowed ones as the engine `dataset_ids`: they are never sent as is.
  */
 export type RetrieveBlock = {
     name: string;

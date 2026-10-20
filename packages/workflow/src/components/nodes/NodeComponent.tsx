@@ -130,60 +130,60 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                 </Box>
 
                 <Flex direction="column" gap={0}>
-                    {!task.isEntryPoint && (
-                        <Box>
-                            <HStack
-                                justify="start"
-                                align="center"
-                                borderRadius="6px"
+                    {/* The entry point and the end point keep their row, unconnectable, for the typed question and answer. */}
+                    <Box>
+                        <HStack
+                            justify="start"
+                            align="center"
+                            borderRadius="6px"
+                            position="relative"
+                            _hover={{ bg: rowHoverBg }}
+                            transition="background 0.1s"
+                            ml="-3px"
+                            h="full"
+                        >
+                            <Box
                                 position="relative"
-                                _hover={{ bg: rowHoverBg }}
-                                transition="background 0.1s"
-                                ml="-3px"
+                                w="8px"
                                 h="full"
+                                flexShrink={0}
                             >
-                                <Box
-                                    position="relative"
-                                    w="8px"
-                                    h="full"
-                                    flexShrink={0}
-                                >
-                                    <Handle
-                                        id="main-target"
-                                        type="target"
-                                        position={Position.Left}
-                                        style={{
-                                            position: "relative",
-                                            top: "auto",
-                                            right: "auto",
-                                            transform: "none",
-                                            backgroundColor: "#34D3A9",
-                                            borderRadius: "0px",
-                                            borderRight: props.selected
-                                                ? "1px solid #34D3A9"
-                                                : "1px solid #E7E7E7",
-                                            borderColor: "transparent",
-                                            borderRightColor: props.selected
-                                                ? "#34D3A9"
-                                                : "#E7E7E7",
-                                            width: "8px",
-                                            height: "26px",
-                                            display: "block",
-                                        }}
-                                    />
-                                </Box>
-                                <Text
-                                    fontSize={isMobile ? "9px" : "11px"}
-                                    fontWeight={500}
-                                    color={labelColor}
-                                    letterSpacing="0.02em"
-                                    noOfLines={1}
-                                >
-                                    Entrée
-                                </Text>
-                            </HStack>
-                        </Box>
-                    )}
+                                <Handle
+                                    id="main-target"
+                                    type="target"
+                                    position={Position.Left}
+                                    isConnectable={!task.isEntryPoint}
+                                    style={{
+                                        position: "relative",
+                                        top: "auto",
+                                        right: "auto",
+                                        transform: "none",
+                                        backgroundColor: "#34D3A9",
+                                        borderRadius: "0px",
+                                        borderRight: props.selected
+                                            ? "1px solid #34D3A9"
+                                            : "1px solid #E7E7E7",
+                                        borderColor: "transparent",
+                                        borderRightColor: props.selected
+                                            ? "#34D3A9"
+                                            : "#E7E7E7",
+                                        width: "8px",
+                                        height: "26px",
+                                        display: "block",
+                                    }}
+                                />
+                            </Box>
+                            <Text
+                                fontSize={isMobile ? "9px" : "11px"}
+                                fontWeight={500}
+                                color={labelColor}
+                                letterSpacing="0.02em"
+                                noOfLines={1}
+                            >
+                                Entrée
+                            </Text>
+                        </HStack>
+                    </Box>
 
                     <Box borderTop="1px solid" borderColor={dividerColor} />
 
@@ -245,64 +245,61 @@ const NodeComponent = memo((props: WorkflowNodeProps) => {
                         </Box>
                     ))}
 
-                    {!task.isEndPoint && (
-                        <>
+                    <Box
+                        borderTop="1px solid"
+                        borderColor={dividerColor}
+                    />
+                    <Box>
+                        <HStack
+                            justify="end"
+                            align="center"
+                            borderRadius="6px"
+                            position="relative"
+                            _hover={{ bg: rowHoverBg }}
+                            transition="background 0.1s"
+                            mr="-3px"
+                        >
+                            <Text
+                                fontSize={isMobile ? "9px" : "11px"}
+                                fontWeight={500}
+                                color={labelColor}
+                                letterSpacing="0.02em"
+                                noOfLines={1}
+                            >
+                                Sortie
+                            </Text>
                             <Box
-                                borderTop="1px solid"
-                                borderColor={dividerColor}
-                            />
-                            <Box>
-                                <HStack
-                                    justify="end"
-                                    align="center"
-                                    borderRadius="6px"
-                                    position="relative"
-                                    _hover={{ bg: rowHoverBg }}
-                                    transition="background 0.1s"
-                                    mr="-3px"
-                                >
-                                    <Text
-                                        fontSize={isMobile ? "9px" : "11px"}
-                                        fontWeight={500}
-                                        color={labelColor}
-                                        letterSpacing="0.02em"
-                                        noOfLines={1}
-                                    >
-                                        Sortie
-                                    </Text>
-                                    <Box
-                                        position="relative"
-                                        w="8px"
-                                        flexShrink={0}
-                                    >
-                                        <Handle
-                                            id="main-source"
-                                            type="source"
-                                            position={Position.Right}
-                                            style={{
-                                                position: "relative",
-                                                top: "auto",
-                                                right: "auto",
-                                                transform: "none",
-                                                backgroundColor: "#34D3A9",
-                                                borderRadius: "0px",
-                                                borderLeft: props.selected
-                                                    ? "1px solid #34D3A9"
-                                                    : "1px solid #E7E7E7",
-                                                borderColor: "transparent",
-                                                borderLeftColor: props.selected
-                                                    ? "#34D3A9"
-                                                    : "#E7E7E7",
-                                                width: "8px",
-                                                height: "26px",
-                                                display: "block",
-                                            }}
-                                        />
-                                    </Box>
-                                </HStack>
+                                position="relative"
+                                w="8px"
+                                flexShrink={0}
+                            >
+                                <Handle
+                                    id="main-source"
+                                    type="source"
+                                    position={Position.Right}
+                                    isConnectable={!task.isEndPoint}
+                                    style={{
+                                        position: "relative",
+                                        top: "auto",
+                                        right: "auto",
+                                        transform: "none",
+                                        backgroundColor: "#34D3A9",
+                                        borderRadius: "0px",
+                                        borderLeft: props.selected
+                                            ? "1px solid #34D3A9"
+                                            : "1px solid #E7E7E7",
+                                        borderColor: "transparent",
+                                        borderLeftColor: props.selected
+                                            ? "#34D3A9"
+                                            : "#E7E7E7",
+                                        width: "8px",
+                                        height: "26px",
+                                        display: "block",
+                                    }}
+                                />
                             </Box>
-                        </>
-                    )}
+                        </HStack>
+                    </Box>
                 </Flex>
             </Box>
         </Box>

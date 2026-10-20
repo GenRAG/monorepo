@@ -44,8 +44,8 @@ yarn test        # tsc -p tsconfig.test.json + node --test (test/*.test.ts)
 
 | Edge | Type ReactFlow | Rôle |
 |---|---|---|
-| `GenEdge` | `default` (`EdgeType.Main`) | Chaîne principale (animée) |
-| `SettingsEdge` | `settings` (`EdgeType.Settings`) | Node principal → MODEL / INSTRUCTION (pointillés) |
+| `GenEdge` | `default` (`EdgeType.Main`) | Chaîne principale. Animation : un jeton par cycle, en séquence depuis QUERY (`graph/flow-timeline.ts`, testé), dont la forme dépend de la tâche source (`components/edges/flow-data.tsx`), plus le halo des nodes, une infobulle au survol, et une question (une ligne de traits) qui s'écrit avant QUERY puis une réponse (un paragraphe de traits) après RESPONSE (`TypedBubble`, ancrées sur les poignées non connectables `main-target` de QUERY et `main-source` de RESPONSE). Tout est en SMIL ; ReactFlow mettant chaque edge dans son propre `<svg>` (une horloge chacun), chaque edge animé cale l'horloge de son `<svg>` sur `performance.now()` (`useSmilClock`) au montage et quand sa place dans la chaîne change, pour que les edges ajoutés plus tard restent en phase ; `prefers-reduced-motion` affiche le jeton fixe au milieu de la liaison. |
+| `SettingsEdge` | `settings` (`EdgeType.Settings`) | Node principal → MODEL / INSTRUCTION / DATASET (pointillés). Pendant que son node tient la donnée (`flowNodeBeats(...).settings`), le réglage s'allume et un point remonte vers le node. Halo et horloge partagés dans `flow-data.tsx` (`NodeHalo`, `useSmilClock`). |
 
 Handles : `HandleId.MainSource` / `MainTarget` (chaîne), `settingSourceHandle(inputName)` = `setting-source-{inputName}`, `HandleId.SettingTarget`. Ne jamais écrire ces chaînes en dur.
 

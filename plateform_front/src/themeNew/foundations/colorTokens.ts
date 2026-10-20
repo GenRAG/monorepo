@@ -49,6 +49,7 @@ const colorTokens = {
     borderAccentCard: { default: "green.200", _dark: "green.300" }, // Bordure de carte accentuée
     borderAccentCardActive: { default: "green.400", _dark: "green.500" }, // Bordure de carte accentuée, état actif
     borderAccentCardMuted: { default: "green.200", _dark: "green.700" }, // Bordure de carte accentuée, état atténué
+    edgeMain: { default: "green.400", _dark: "green.300" }, // Liaison principale du workflow, au repos
 
     // === DANGER (confirmation de suppression, zones destructrices) ===
     dangerBorder: { default: "red.100", _dark: "rgba(239,68,68,0.2)" },

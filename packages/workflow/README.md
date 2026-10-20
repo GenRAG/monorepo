@@ -51,7 +51,7 @@ Seules limites de l'aller-retour : `collection_name` et `top_k` d'un block `retr
 
 ## Thème
 
-Les nodes utilisent Chakra UI. Il faut un `ChakraProvider` avec le thème GenRAG (`plateform_front/src/themeNew`) : palettes `grey` (dont `grey.750`, `grey.850`, `grey.950`) et `green`, tokens sémantiques de `colorTokens.ts` (`accentIconBg`, `iconAccent`, `accentCardBg`, `borderAccentCard`, `borderAccentCardActive`, `surfaceAction`, `textPrimary`, `textLabel`, `warningAccent`, `warningIconBg`), et variante de bouton `superPrimary` (bouton « Valider » des instructions, en édition seulement). Sans ce thème, le rendu retombe sur les couleurs Chakra par défaut.
+Les nodes utilisent Chakra UI. Il faut un `ChakraProvider` avec le thème GenRAG (`plateform_front/src/themeNew`) : palettes `grey` (dont `grey.750`, `grey.850`, `grey.950`) et `green`, tokens sémantiques de `colorTokens.ts` (`accentIconBg`, `iconAccent`, `accentCardBg`, `borderAccentCard`, `borderAccentCardActive`, `surfaceAction`, `textPrimary`, `textLabel`, `warningAccent`, `warningIconBg`, et pour les liaisons `edgeMain`, `bubbleAccentBg`, `surfaceCard`, `textBody`, `borderDefault`), et variante de bouton `superPrimary` (bouton « Valider » des instructions, en édition seulement). Sans ce thème, le rendu retombe sur les couleurs Chakra par défaut.
 
 ## Éditer un workflow
 

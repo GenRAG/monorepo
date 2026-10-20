@@ -16,7 +16,8 @@ export const getProviderSlug = (
   provider?: string,
 ): string | null => {
   const raw = provider ?? (id.includes("/") ? id.split("/")[0] : "");
-  const slug = raw.trim().toLowerCase().replace(/\s+/g, "-");
+  // "~openai/..." is an alias route to the same provider.
+  const slug = raw.trim().toLowerCase().replace(/^~/, "").replace(/\s+/g, "-");
   if (!/^[a-z0-9][a-z0-9._-]*$/.test(slug)) return null;
   return PROVIDER_ALIASES[slug] ?? slug;
 };

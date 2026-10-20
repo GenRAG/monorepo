@@ -5,8 +5,15 @@ import { List, useListRef, type RowComponentProps } from "react-window";
 import { RagModel } from "types/models/models";
 import { ModelListItem } from "./ModelListItem";
 import { ActionMenu } from "components/ui/ActionMenu";
-
-type SortMode = "default" | "price-asc" | "price-desc";
+import { ModelFilterBar } from "./ModelFilterBar";
+import {
+    ModelFilters,
+    NO_FILTERS,
+    SortMode,
+    applyModelFilters,
+    countActiveFilters,
+    getProviderOptions,
+} from "utils/models/modelFilters";
 
 interface Props {
     models: RagModel[];
@@ -16,10 +23,9 @@ interface Props {
 
 const ROW_HEIGHT = 56;
 
-const getInputPrice = (m: RagModel) => parseFloat(m.pricing?.prompt ?? "0");
-
 const SORT_LABELS: Record<SortMode, string> = {
     default: "Défaut",
+    recent: "Plus récents",
     "price-asc": "Prix croissant",
     "price-desc": "Prix décroissant",
 };
@@ -44,16 +50,13 @@ const ModelRow = ({ index, style, models, selectedId, onSelect }: RowComponentPr
 export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelect }) => {
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortMode>("default");
+    const [filters, setFilters] = useState<ModelFilters>(NO_FILTERS);
     const [searchIconColor] = useToken("colors", ["textFaint"]);
     const listRef = useListRef(null);
     const hasScrolledToSelection = useRef(false);
 
-    const filtered = useMemo(() => {
-        const list = models.filter((m) => m.name?.toLowerCase().includes(search.toLowerCase()));
-        if (sort === "price-asc") return [...list].sort((a, b) => getInputPrice(a) - getInputPrice(b));
-        if (sort === "price-desc") return [...list].sort((a, b) => getInputPrice(b) - getInputPrice(a));
-        return list;
-    }, [models, search, sort]);
+    const providers = useMemo(() => getProviderOptions(models), [models]);
+    const filtered = useMemo(() => applyModelFilters(models, search, filters, sort), [models, search, filters, sort]);
 
     useEffect(() => {
         if (hasScrolledToSelection.current || !selectedModel) return;
@@ -63,7 +66,7 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
         hasScrolledToSelection.current = true;
     }, [filtered, selectedModel, listRef]);
 
-    const sortItems = (["default", "price-asc", "price-desc"] as SortMode[]).map((mode) => ({
+    const sortItems = (Object.keys(SORT_LABELS) as SortMode[]).map((mode) => ({
         label: SORT_LABELS[mode],
         badge: sort === mode ? "✓" : undefined,
         onClick: () => setSort(mode),
@@ -115,11 +118,19 @@ export const ModelListPanel: React.FC<Props> = ({ models, selectedModel, onSelec
                     />
                 </HStack>
             </Box>
+            <ModelFilterBar filters={filters} providers={providers} onChange={setFilters} />
             <Box flex={1} minH={0} pt={2}>
                 {filtered.length === 0 ? (
-                    <Text fontSize="11px" color="textFaint" textAlign="center" pt={4}>
-                        Aucun modèle
-                    </Text>
+                    <VStack spacing={1} pt={4}>
+                        <Text fontSize="11px" color="textFaint">
+                            Aucun modèle
+                        </Text>
+                        {countActiveFilters(filters) > 0 && (
+                            <Text as="button" fontSize="11px" color="iconAccent" onClick={() => setFilters(NO_FILTERS)}>
+                                Réinitialiser les filtres
+                            </Text>
+                        )}
+                    </VStack>
                 ) : (
                     <List
                         listRef={listRef}

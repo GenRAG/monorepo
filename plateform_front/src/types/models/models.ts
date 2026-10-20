@@ -15,6 +15,8 @@ export interface RagModel {
     };
     supported_parameters?: string[];
     provider?: string;
+    /** Release date, Unix seconds. */
+    created?: number;
 }
 
 export interface RagModelInfo {

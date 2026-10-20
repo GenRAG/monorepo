@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { ExternalLink, MoreVertical } from "lucide-react";
 import React from "react";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 
 export interface ActionMenuItem {
     label: string;
@@ -27,10 +28,13 @@ export interface ActionMenuItem {
     danger?: boolean;
     isHidden?: boolean;
     disabled?: boolean;
+    /** Explanation shown in an info tooltip next to the label. */
+    hint?: React.ReactNode;
 }
 
 export interface ActionMenuSection {
     label?: string;
+    hint?: React.ReactNode;
     items: ActionMenuItem[];
 }
 
@@ -56,6 +60,8 @@ interface ActionMenuProps {
         | "left-start"
         | "left-end";
     width?: string | number;
+    /** Scrolls the menu past this height (long lists). */
+    maxHeight?: string | number;
     fullWidth?: boolean;
 }
 
@@ -69,6 +75,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
     "aria-label": ariaLabel = "Actions",
     placement = "bottom-end",
     width = "220px",
+    maxHeight,
     fullWidth = false,
 }) => {
     const { isOpen, onClose, onToggle } = useDisclosure();
@@ -130,7 +137,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                     overflow="hidden"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <PopoverBody p={0}>
+                    <PopoverBody p={0} maxH={maxHeight} overflowY={maxHeight ? "auto" : undefined}>
                         {header && (
                             <>
                                 {resolveSlot(header)}
@@ -143,17 +150,20 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                                 {si > 0 && <Divider borderColor="borderDivider" />}
                                 <Box px={2} pt={2} pb={2}>
                                     {section.label && (
-                                        <Text
-                                            px={2}
-                                            pb={1}
-                                            fontSize="10px"
-                                            fontWeight="600"
-                                            textTransform="uppercase"
-                                            letterSpacing="0.7px"
-                                            color="textFaint"
-                                        >
-                                            {section.label}
-                                        </Text>
+                                        <HStack px={2} pb={1} spacing={1}>
+                                            <Text
+                                                fontSize="10px"
+                                                fontWeight="600"
+                                                textTransform="uppercase"
+                                                letterSpacing="0.7px"
+                                                color="textFaint"
+                                            >
+                                                {section.label}
+                                            </Text>
+                                            {section.hint && (
+                                                <ChartInfoTooltip label={section.hint} placement="right" />
+                                            )}
+                                        </HStack>
                                     )}
                                     {section.items.map((item, ii) => (
                                         <HStack
@@ -188,6 +198,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = ({
                                                 >
                                                     {item.label}
                                                 </Text>
+                                                {item.hint && <ChartInfoTooltip label={item.hint} placement="right" />}
                                             </HStack>
                                             <HStack spacing={1.5} flexShrink={0}>
                                                 {item.badge && (

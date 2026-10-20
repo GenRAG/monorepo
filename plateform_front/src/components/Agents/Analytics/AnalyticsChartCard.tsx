@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Card, type CardProps, Divider, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import MultiOptionButtons from "components/ui/MultiOptionButtons";
-import { ChartInfoTooltip } from "./ChartInfoTooltip";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 import { type Period } from "./types";
 
 interface AnalyticsChartCardProps {

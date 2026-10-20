@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Box, Card, Divider, HStack, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
 import { ParentSize } from "@visx/responsive";
 import { Gauge } from "components/charts";
-import { ChartInfoTooltip } from "components/Agents/Analytics/ChartInfoTooltip";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 import { PieLegendSwatch } from "components/Agents/Analytics/PieLegendSwatch";
 import { DatasetAnalytics } from "types/dataset/dataset";
 import { formatFileSize } from "utils/documentFormatters";

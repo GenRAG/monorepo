@@ -1,7 +1,7 @@
 import { Box, Card, Divider, HStack, SkeletonCircle, Stack, Text, VStack } from "@chakra-ui/react";
 import { PieChart as PieChartIcon } from "lucide-react";
 import { PieCenter, PieChart, PieSlice, type PieData } from "components/charts";
-import { ChartInfoTooltip } from "components/Agents/Analytics/ChartInfoTooltip";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 import { PieLegendSwatch } from "components/Agents/Analytics/PieLegendSwatch";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 

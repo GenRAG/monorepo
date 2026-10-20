@@ -15,7 +15,7 @@ import {
 } from "components/charts";
 import { useGetActivityHeatmapQuery } from "services/analytics/analytics";
 import { toHeatmapColumns } from "../../../utils/analytics/heatmapUtils";
-import { ChartInfoTooltip } from "./ChartInfoTooltip";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 
 const HEATMAP_LEVEL_STYLES: HeatmapLevelStyles = [
     {

@@ -21,7 +21,7 @@ import {
 } from "./ModelDetailHelpers";
 import { ModelAvatar } from "./ModelAvatar";
 import Button from "components/ui/Button";
-import { ChartInfoTooltip } from "components/Agents/Analytics/ChartInfoTooltip";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 
 const SECTION_TOOLTIPS: Record<string, string> = {
     Latence:

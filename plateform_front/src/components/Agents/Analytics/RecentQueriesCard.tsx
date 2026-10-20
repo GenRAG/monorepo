@@ -2,7 +2,7 @@ import { Badge, Box, Card, Divider, HStack, Skeleton, Stack, Text, VStack } from
 import { useGetRecentQueriesQuery, type QueryLogEntry } from "services/analytics/analytics";
 import { fmtDateTime } from "utils/analytics/dateUtils";
 import { STATUS_COLOR_SCHEME, STATUS_LABEL } from "./types";
-import { ChartInfoTooltip } from "./ChartInfoTooltip";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 import Button from "components/ui/Button";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useMemo, useState } from "react";

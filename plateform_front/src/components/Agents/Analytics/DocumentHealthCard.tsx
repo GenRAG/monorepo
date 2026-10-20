@@ -4,7 +4,7 @@ import { CHART_GREEN_SHADES, STATUS_COLORS } from "themeNew/foundations/themeCon
 import { PieChart, PieSlice, type PieData, PieCenter } from "components/charts";
 import { useGetDocumentHealthQuery } from "services/analytics/analytics";
 import { PatternLines } from "components/charts/visx-pattern";
-import { ChartInfoTooltip } from "./ChartInfoTooltip";
+import { ChartInfoTooltip } from "components/ui/ChartInfoTooltip";
 import { PieLegendSwatch } from "./PieLegendSwatch";
 import { CardEmptyState } from "components/Dashboard/CardEmptyState";
 import { PieChart as PieChartIcon } from "lucide-react";

@@ -31,17 +31,79 @@ export interface PipelineToWorkflowOptions {
     registry?: TaskSpecRegistry;
 }
 
-/** Setting values of a block, keyed by the input names of its task (the first MODEL / INSTRUCTION input). */
-function settingValuesOf(block: PipelineBlock, type: TaskType, registry: TaskSpecRegistry): Record<string, string> {
+/** The values a chain node gives its single-valued settings. `null` / absent: not chosen yet (placeholder). */
+export interface ChainSettingValues {
+    model?: string | null;
+    instruction?: string | null;
+}
+
+/** A chain node to draw, in chain order. */
+export interface ChainEntry {
+    /** Node id, made unique when several entries share it. */
+    name: string;
+    type: TaskType;
+    settings: ChainSettingValues;
+    /** One DATASET setting node each (RETRIEVER). */
+    datasetIds?: readonly string[];
+}
+
+/** Setting values keyed by the input names of the task (the first MODEL / INSTRUCTION input). */
+function settingValuesByInput(type: TaskType, settings: ChainSettingValues, registry: TaskSpecRegistry): Record<string, string> {
     const inputs = registry[type]?.inputs ?? [];
     const values: Record<string, string> = {};
     const modelInput = inputs.find((i) => i.nodeType === TaskType.MODEL);
     const instructionInput = inputs.find((i) => i.nodeType === TaskType.INSTRUCTION);
-    if ("model" in block && modelInput) values[modelInput.name] = block.model;
-    if ("system_prompt" in block && block.system_prompt && instructionInput) {
-        values[instructionInput.name] = block.system_prompt;
-    }
+    if (settings.model != null && modelInput) values[modelInput.name] = settings.model;
+    if (settings.instruction && instructionInput) values[instructionInput.name] = settings.instruction;
     return values;
+}
+
+/**
+ * Draws a chain: one chain node per entry, linked in order and placed by the layout, with its MODEL / INSTRUCTION
+ * settings filled from the entry (placeholders when missing) and one DATASET node per dataset.
+ */
+export function chainToWorkflow(
+    entries: readonly ChainEntry[],
+    options: PipelineToWorkflowOptions = {},
+): { nodes: AppNode[]; edges: Edge[] } {
+    const layout = options.layout ?? DEFAULT_LAYOUT;
+    const registry = options.registry ?? TASK_SPECS;
+    const nodes: AppNode[] = [];
+    const edges: Edge[] = [];
+    const settingValues: Record<string, Record<string, string>> = {};
+    const usedIds = new Set<string>();
+    const datasetIdsByNode: Record<string, string[]> = {};
+
+    for (const entry of entries) {
+        let id = entry.name;
+        for (let n = 2; usedIds.has(id); n += 1) id = `${entry.name}-${n}`;
+        usedIds.add(id);
+
+        const previous = nodes[nodes.length - 1];
+        const node = makeFlowNode(id, entry.type, 0, 0);
+        nodes.push(node);
+        if (previous) edges.push(linkNodes(previous.id, id));
+        node.position = layout.computePlacements(nodes, edges, id)[0]?.position ?? layout.getInitialPosition();
+
+        settingValues[id] = settingValuesByInput(entry.type, entry.settings, registry);
+        if (entry.datasetIds?.length) datasetIdsByNode[id] = [...new Set(entry.datasetIds)];
+    }
+
+    const graph = withAutoSettings(nodes, edges, settingValues, layout, registry);
+
+    // One DATASET node per dataset, after the single-valued settings.
+    for (const [nodeId, datasetIds] of Object.entries(datasetIdsByNode)) {
+        const parent = graph.nodes.find((n) => n.id === nodeId)!;
+        const input = registry[parent.data.type]?.inputs.find((i) => i.nodeType === TaskType.DATASET);
+        if (!input) continue;
+        datasetIds.forEach((datasetId, index) => {
+            const { node, edge } = createMultipleSettingNode(parent, input, datasetId, index, layout);
+            graph.nodes.push(node);
+            graph.edges.push(edge);
+        });
+    }
+
+    return graph;
 }
 
 /**
@@ -58,46 +120,18 @@ export function pipelineToWorkflow(
     blocks: readonly PipelineBlock[],
     options: PipelineToWorkflowOptions = {},
 ): { nodes: AppNode[]; edges: Edge[] } {
-    const layout = options.layout ?? DEFAULT_LAYOUT;
-    const registry = options.registry ?? TASK_SPECS;
-    const nodes: AppNode[] = [];
-    const edges: Edge[] = [];
-    const settingValues: Record<string, Record<string, string>> = {};
-    const usedIds = new Set<string>();
-    const datasetIdsByNode: Record<string, string[]> = {};
-
-    blocks.forEach((block, index) => {
+    const entries = blocks.map((block, index): ChainEntry => {
         const type = TASK_TYPE_BY_BLOCK[block?.type];
         if (!type) throw new UnsupportedPipelineBlockError(block?.type, index);
-
-        const baseId = block.name || block.type;
-        let id = baseId;
-        for (let n = 2; usedIds.has(id); n += 1) id = `${baseId}-${n}`;
-        usedIds.add(id);
-
-        const previous = nodes[nodes.length - 1];
-        const node = makeFlowNode(id, type, 0, 0);
-        nodes.push(node);
-        if (previous) edges.push(linkNodes(previous.id, id));
-        node.position = layout.computePlacements(nodes, edges, id)[0]?.position ?? layout.getInitialPosition();
-
-        settingValues[id] = settingValuesOf(block, type, registry);
-        if (block.type === "retrieve" && block.datasetIds?.length) datasetIdsByNode[id] = [...new Set(block.datasetIds)];
+        return {
+            name: block.name || block.type,
+            type,
+            settings: {
+                model: "model" in block ? block.model : undefined,
+                instruction: "system_prompt" in block ? block.system_prompt : undefined,
+            },
+            datasetIds: block.type === "retrieve" ? block.datasetIds : undefined,
+        };
     });
-
-    const graph = withAutoSettings(nodes, edges, settingValues, layout, registry);
-
-    // One DATASET node per dataset of a retrieve block, after the single-valued settings.
-    for (const [nodeId, datasetIds] of Object.entries(datasetIdsByNode)) {
-        const parent = graph.nodes.find((n) => n.id === nodeId)!;
-        const input = registry[parent.data.type]?.inputs.find((i) => i.nodeType === TaskType.DATASET);
-        if (!input) continue;
-        datasetIds.forEach((datasetId, index) => {
-            const { node, edge } = createMultipleSettingNode(parent, input, datasetId, index, layout);
-            graph.nodes.push(node);
-            graph.edges.push(edge);
-        });
-    }
-
-    return graph;
+    return chainToWorkflow(entries, options);
 }

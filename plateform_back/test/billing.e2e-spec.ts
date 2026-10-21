@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { CreditTransactionType, PlanTier, QueryLogStatus } from 'generated/prisma';
 import Stripe from 'stripe';
 import request from 'supertest';
@@ -9,6 +9,7 @@ import { createAgent, registerAndLogin } from './helpers/auth.helper';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { UsageTrackerService } from '../src/credit/usage-tracker.service';
 import { STRIPE_CLIENT } from '../src/billing/stripe.provider';
+import { DatasetService } from '../src/dataset/dataset.service';
 
 const WEBHOOK_SECRET = 'whsec_test_billing';
 const realStripe = new Stripe('sk_test_billing');
@@ -18,8 +19,15 @@ const subscriptions = new Map<string, Stripe.Subscription.Status>();
 let retrieve = (id: string): Promise<Stripe.Subscription> =>
     Promise.resolve(subscriptionOf(id, subscriptions.get(id)!));
 const cancelled: string[] = [];
+const deletedCustomers: string[] = [];
 const fakeStripe = {
     webhooks: realStripe.webhooks,
+    customers: {
+        del: (id: string) => {
+            deletedCustomers.push(id);
+            return Promise.resolve();
+        },
+    },
     subscriptions: {
         retrieve: (id: string) => retrieve(id),
         cancel: (id: string) => {
@@ -325,6 +333,23 @@ describe('Billing (e2e)', () => {
                 payment_status: 'paid',
                 metadata: { workspaceId: 'gone', credits: '5000' },
             }).expect(200);
+        });
+    });
+
+    describe('account deletion', () => {
+        it('a delete that fails after removing the Stripe customer forgets that customer, so a new one is created at the next payment', async () => {
+            const { cookie, workspaceId } = await workspaceOn('undeleted@test.com', PlanTier.FREE);
+            await prisma.workspace.update({ where: { id: workspaceId }, data: { stripeCustomerId: 'cus_undeleted' } });
+            jest.spyOn(app.get(DatasetService), 'queueWorkspaceCleanup').mockRejectedValueOnce(new Error('Redis down'));
+
+            await request(app.getHttpServer()).delete('/users/me').set('Cookie', cookie).expect(500);
+
+            expect(deletedCustomers).toContain('cus_undeleted');
+            const workspace = await prisma.workspace.findUniqueOrThrow({
+                where: { id: workspaceId },
+                select: { stripeCustomerId: true },
+            });
+            expect(workspace.stripeCustomerId).toBeNull();
         });
     });
 });

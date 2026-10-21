@@ -15,10 +15,11 @@ const realStripe = new Stripe('sk_test_billing');
 
 /** Stripe's side of the subscriptions: what `subscriptions.retrieve` returns at the time it is called. */
 const subscriptions = new Map<string, Stripe.Subscription.Status>();
+/** What each `subscriptions.cancel` asked Stripe for. */
+const cancelParams = new Map<string, Stripe.SubscriptionCancelParams | undefined>();
 let retrieve = (id: string): Promise<Stripe.Subscription> =>
     Promise.resolve(subscriptionOf(id, subscriptions.get(id)!));
 const cancelled: string[] = [];
-const cancelParams = new Map<string, Stripe.SubscriptionCancelParams | undefined>();
 const fakeStripe = {
     webhooks: realStripe.webhooks,
     subscriptions: {

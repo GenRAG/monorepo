@@ -1,7 +1,9 @@
-import { describe, expect, it } from '@jest/globals';
+import { ConflictException, ForbiddenException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { PlanTier } from 'generated/prisma';
 import Stripe from 'stripe';
-import { toSubscriptionState } from 'src/billing/billing.service';
+import { BillingService, toSubscriptionState } from 'src/billing/billing.service';
 
 const subscription = (status: Stripe.Subscription.Status, cancelAtPeriodEnd = false) =>
     ({
@@ -34,4 +36,108 @@ describe('toSubscriptionState', () => {
             });
         },
     );
+});
+
+describe('BillingService checkouts', () => {
+    const workspace = (plan: PlanTier, stripeCustomerId: string | null = 'cus_1') => ({
+        id: 'w1',
+        plan,
+        stripeCustomerId,
+    });
+    const repository = {
+        findWorkspace: jest.fn<(id: string) => Promise<unknown>>(),
+        setCustomerId: jest.fn<(id: string, customerId: string) => Promise<void>>(),
+    };
+    const stripe = {
+        customers: { create: jest.fn<(...args: unknown[]) => Promise<{ id: string }>>() },
+        subscriptions: { list: jest.fn<(...args: unknown[]) => Promise<{ data: { status: string }[] }>>() },
+        checkout: {
+            sessions: {
+                create: jest.fn<(params: Stripe.Checkout.SessionCreateParams) => Promise<{ url: string }>>(),
+                list: jest.fn<(...args: unknown[]) => Promise<{ data: { id: string; mode: string }[] }>>(),
+                expire: jest.fn<(id: string) => Promise<void>>(),
+            },
+        },
+    };
+    const config = { getOrThrow: () => 'https://app.genrag.test' } as unknown as ConfigService;
+    const service = new BillingService(stripe as unknown as Stripe, repository as never, config);
+    const createdSession = () => stripe.checkout.sessions.create.mock.calls[0][0];
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        repository.findWorkspace.mockResolvedValue(workspace(PlanTier.FREE));
+        stripe.customers.create.mockResolvedValue({ id: 'cus_new' });
+        stripe.subscriptions.list.mockResolvedValue({ data: [] });
+        stripe.checkout.sessions.list.mockResolvedValue({ data: [] });
+        stripe.checkout.sessions.create.mockResolvedValue({ url: 'https://checkout.stripe.test/s' });
+    });
+
+    describe('subscription', () => {
+        it('refuses a workspace already subscribed, before calling Stripe', async () => {
+            repository.findWorkspace.mockResolvedValue(workspace(PlanTier.PRO));
+
+            await expect(service.createSubscriptionCheckout('w1', 'a@test.com')).rejects.toThrow(ConflictException);
+            expect(stripe.checkout.sessions.create).not.toHaveBeenCalled();
+        });
+
+        it('refuses when Stripe already holds a paid subscription whose webhook has not arrived', async () => {
+            stripe.subscriptions.list.mockResolvedValue({ data: [{ status: 'canceled' }, { status: 'past_due' }] });
+
+            await expect(service.createSubscriptionCheckout('w1', 'a@test.com')).rejects.toThrow(ConflictException);
+            expect(stripe.checkout.sessions.create).not.toHaveBeenCalled();
+        });
+
+        it('expires the subscription checkouts still open, then opens one for the workspace', async () => {
+            stripe.checkout.sessions.list.mockResolvedValue({
+                data: [
+                    { id: 'cs_sub', mode: 'subscription' },
+                    { id: 'cs_topup', mode: 'payment' },
+                ],
+            });
+
+            await expect(service.createSubscriptionCheckout('w1', 'a@test.com')).resolves.toEqual({
+                url: 'https://checkout.stripe.test/s',
+            });
+            expect(stripe.checkout.sessions.expire.mock.calls).toEqual([['cs_sub']]);
+            expect(createdSession()).toMatchObject({
+                mode: 'subscription',
+                customer: 'cus_1',
+                client_reference_id: 'w1',
+                metadata: { workspaceId: 'w1' },
+                subscription_data: { metadata: { workspaceId: 'w1' } },
+            });
+        });
+
+        it('creates the Stripe customer once per workspace and keeps it', async () => {
+            repository.findWorkspace.mockResolvedValue(workspace(PlanTier.NONE, null));
+
+            await service.createSubscriptionCheckout('w1', 'a@test.com');
+
+            expect(stripe.customers.create).toHaveBeenCalledWith(
+                { email: 'a@test.com', metadata: { workspaceId: 'w1' } },
+                { idempotencyKey: 'customer-w1' },
+            );
+            expect(repository.setCustomerId).toHaveBeenCalledWith('w1', 'cus_new');
+            expect(createdSession()).toMatchObject({ customer: 'cus_new' });
+        });
+    });
+
+    describe('top-up', () => {
+        it.each([PlanTier.NONE, PlanTier.FREE])('refuses a workspace on %s, before calling Stripe', async (plan) => {
+            repository.findWorkspace.mockResolvedValue(workspace(plan));
+
+            await expect(service.createTopUpCheckout('w1', 'a@test.com', 20)).rejects.toThrow(ForbiddenException);
+            expect(stripe.checkout.sessions.create).not.toHaveBeenCalled();
+        });
+
+        it('charges the euros asked and records the credits sold in the session', async () => {
+            repository.findWorkspace.mockResolvedValue(workspace(PlanTier.PRO));
+
+            await service.createTopUpCheckout('w1', 'a@test.com', 20);
+
+            const session = createdSession();
+            expect(session).toMatchObject({ mode: 'payment', metadata: { workspaceId: 'w1', credits: '20000' } });
+            expect(session.line_items?.[0].price_data?.unit_amount).toBe(2_000);
+        });
+    });
 });

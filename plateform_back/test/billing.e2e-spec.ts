@@ -212,6 +212,40 @@ describe('Billing (e2e)', () => {
             expect(ledger.filter((t) => t.amount === 50_000)).toHaveLength(1);
         });
 
+        it.each<[string, PlanTier, ('checkout' | 'invoice')[]]>([
+            ['no plan, checkout first', PlanTier.NONE, ['checkout', 'invoice']],
+            ['Découverte, invoice first', PlanTier.FREE, ['invoice', 'checkout']],
+        ])('a first subscription (%s) moves the workspace to PRO with its quota', async (_, plan, order) => {
+            const { workspaceId } = await workspaceOn(`first-${plan}@test.com`, plan);
+            const before = await balanceOf(workspaceId);
+            const subscriptionId = `sub_first_${plan}`;
+            subscriptions.set(subscriptionId, 'active');
+            const events = {
+                checkout: () =>
+                    deliver('checkout.session.completed', {
+                        id: `cs_first_${plan}`,
+                        object: 'checkout.session',
+                        mode: 'subscription',
+                        subscription: subscriptionId,
+                        metadata: { workspaceId },
+                    }),
+                invoice: () =>
+                    deliver(
+                        'invoice.paid',
+                        invoice(`in_first_${plan}`, subscriptionId, workspaceId, 'subscription_create'),
+                    ),
+            };
+
+            for (const event of order) await events[event]().expect(200);
+
+            expect(await workspaceOf(workspaceId)).toEqual({
+                plan: PlanTier.PRO,
+                stripeSubscriptionId: subscriptionId,
+            });
+            // The credits held before (Découverte's 5 000) stay on top of the quota.
+            expect(await balanceOf(workspaceId)).toEqual({ balance: before.balance + 50_000, monthlyCredits: 50_000 });
+        });
+
         it('a proration invoice does not reset the quota', async () => {
             const { workspaceId } = await subscribed('proration@test.com', 'sub_prorate', 3_000, 1_000);
 

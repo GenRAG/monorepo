@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OnboardingSession, Prisma } from 'generated/prisma';
+import { OnboardingSession, PlanTier, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -9,6 +9,30 @@ export class OnboardingRepository {
     findByUserAndWorkspace(userId: string, workspaceId: string): Promise<OnboardingSession | null> {
         return this.prisma.onboardingSession.findUnique({
             where: { userId_workspaceId: { userId, workspaceId } },
+        });
+    }
+
+    /**
+     * Marks the workspace's onboarding as started, at most once: its demo agent and dataset bypass the plan limits,
+     * and the session goes away with the demo agent, so a replay would add a dataset each time.
+     */
+    async claimStart(workspaceId: string): Promise<'claimed' | 'no-plan' | 'started'> {
+        const workspace = await this.prisma.workspace.findUnique({
+            where: { id: workspaceId },
+            select: { plan: true },
+        });
+        if (!workspace || workspace.plan === PlanTier.NONE) return 'no-plan';
+        const { count } = await this.prisma.workspace.updateMany({
+            where: { id: workspaceId, onboardingStartedAt: null },
+            data: { onboardingStartedAt: new Date() },
+        });
+        return count === 1 ? 'claimed' : 'started';
+    }
+
+    async releaseStart(workspaceId: string): Promise<void> {
+        await this.prisma.workspace.update({
+            where: { id: workspaceId },
+            data: { onboardingStartedAt: null },
         });
     }
 

@@ -29,18 +29,17 @@ export class CreditTransactionRepository {
         });
     }
 
-    async existsFromSource(workspaceId: string, source: string): Promise<boolean> {
-        const count = await this.prisma.creditTransaction.count({
-            where: { workspaceId, metadata: { path: ['source'], equals: source } },
-        });
-        return count > 0;
-    }
-
     async sumGranted(workspaceId: string): Promise<number> {
         const result = await this.prisma.creditTransaction.aggregate({
             where: {
                 workspaceId,
-                type: { in: [CreditTransactionType.SUBSCRIPTION, CreditTransactionType.PURCHASE] },
+                type: {
+                    in: [
+                        CreditTransactionType.SUBSCRIPTION,
+                        CreditTransactionType.PURCHASE,
+                        CreditTransactionType.EXPIRATION,
+                    ],
+                },
             },
             _sum: { amount: true },
         });

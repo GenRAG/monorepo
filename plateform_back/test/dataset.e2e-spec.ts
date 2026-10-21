@@ -4,12 +4,14 @@ import request from 'supertest';
 import { createTestApp } from './helpers/app.helper';
 import { cleanDatabase } from './helpers/db.helper';
 import { createAgent, createWorkspace, registerAndLogin } from './helpers/auth.helper';
+import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('Dataset (e2e)', () => {
     let app: INestApplication;
     let cookie: string;
     let datasetsUrl: string;
     let agentId: string;
+    let workspaceId: string;
 
     beforeAll(async () => {
         app = await createTestApp();
@@ -18,7 +20,7 @@ describe('Dataset (e2e)', () => {
             password: 'Password123!',
             name: 'Librarian',
         });
-        const workspaceId = await createWorkspace(app, cookie);
+        workspaceId = await createWorkspace(app, cookie);
         agentId = await createAgent(app, cookie, workspaceId);
         datasetsUrl = `/workspaces/${workspaceId}/datasets`;
     });
@@ -31,15 +33,11 @@ describe('Dataset (e2e)', () => {
     describe('linking datasets to an agent', () => {
         it('should refuse a 51st dataset: the RAG engine searches at most 50 datasets at once', async () => {
             const server = app.getHttpServer();
-            const ids: string[] = [];
-            for (let i = 0; i < 51; i++) {
-                const res = await request(server)
-                    .post(datasetsUrl)
-                    .set('Cookie', cookie)
-                    .send({ name: `Base ${i}` })
-                    .expect(201);
-                ids.push(res.body.id);
-            }
+            // Written directly: no plan lets a workspace create 51 datasets through the API.
+            const datasets = await app.get(PrismaService).dataset.createManyAndReturn({
+                data: Array.from({ length: 51 }, (_, i) => ({ workspaceId, name: `Base ${i}` })),
+            });
+            const ids = datasets.map((dataset) => dataset.id);
             for (const id of ids.slice(0, 50)) {
                 await request(server).post(`${datasetsUrl}/${id}/agents/${agentId}`).set('Cookie', cookie).expect(204);
             }

@@ -10,7 +10,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    // rawBody: the Stripe webhook checks its signature against the exact bytes received.
+    const app = await NestFactory.create(AppModule, { rawBody: true });
     app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
     const config = new DocumentBuilder().setTitle('GenRAG API').setVersion('1.0').build();

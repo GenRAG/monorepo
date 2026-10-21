@@ -5,9 +5,10 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserRepository } from 'src/users/user.repository';
 import { DatasetModule } from 'src/dataset/dataset.module';
+import { BillingModule } from 'src/billing/billing.module';
 
 @Module({
-    imports: [PrismaModule, DatasetModule],
+    imports: [PrismaModule, DatasetModule, BillingModule],
     controllers: [UsersController],
     providers: [UsersService, CurrentUserPipe, UserRepository],
     exports: [UsersService],

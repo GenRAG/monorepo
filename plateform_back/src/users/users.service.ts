@@ -5,12 +5,14 @@ import { UpdateProfileRequest } from 'src/users/dto/update-profile.request';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from 'src/users/user.repository';
 import { DatasetService } from 'src/dataset/dataset.service';
+import { BillingService } from 'src/billing/billing.service';
 
 @Injectable()
 export class UsersService {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly datasetService: DatasetService,
+        private readonly billingService: BillingService,
     ) {}
 
     async create(
@@ -77,10 +79,13 @@ export class UsersService {
 
     /**
      * The rows of the user's own workspace go with the account (cascade); its engine collection and stored files are
-     * removed by a cleanup job, queued first so a Redis outage fails the delete instead of orphaning them.
+     * removed by a cleanup job, queued first so a Redis outage fails the delete instead of orphaning them. Its Stripe
+     * customer is deleted, which cancels the subscription.
      */
     async delete(id: string): Promise<UserSafe> {
         const workspaces = await this.userRepository.findSoleWorkspaceFiles(id);
+        // First, so a deleted account is never billed again; a delete that then fails leaves the account unsubscribed.
+        await this.billingService.deleteCustomers(workspaces.map((w) => w.workspaceId));
         const jobs = await this.datasetService.queueWorkspaceCleanup(workspaces);
         try {
             return await this.userRepository.delete(id);

@@ -12,6 +12,7 @@ import { WorkflowModule } from './workflow/workflow.module';
 import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
 import { AgentAnalyticsModule } from './agent-analytics/agent-analytics.module';
 import { CreditModule } from 'src/credit/credit.module';
+import { BillingModule } from 'src/billing/billing.module';
 import { DocumentModule } from './document/document.module';
 import { ConnectorModule } from './connector/connector.module';
 import { DatasetModule } from './dataset/dataset.module';
@@ -86,6 +87,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
         UsersModule,
         AuthModule,
         WorkspaceModule,
+        BillingModule,
         DatasetModule,
         DocumentModule,
         ConnectorModule,

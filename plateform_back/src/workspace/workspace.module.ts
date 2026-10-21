@@ -5,11 +5,12 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { WorkspaceRepository } from 'src/workspace/workspace.repository';
 import { WorkspaceStatsService } from 'src/workspace/workspace-stats.service';
 import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
+import { PlanLimitGuard } from 'src/workspace/guards/plan-limit.guard';
 
 @Module({
     imports: [PrismaModule],
-    providers: [WorkspaceService, WorkspaceRepository, WorkspaceStatsService, WorkspaceMemberGuard],
+    providers: [WorkspaceService, WorkspaceRepository, WorkspaceStatsService, WorkspaceMemberGuard, PlanLimitGuard],
     controllers: [WorkspaceController],
-    exports: [WorkspaceService, WorkspaceRepository, WorkspaceMemberGuard],
+    exports: [WorkspaceService, WorkspaceRepository, WorkspaceMemberGuard, PlanLimitGuard],
 })
 export class WorkspaceModule {}

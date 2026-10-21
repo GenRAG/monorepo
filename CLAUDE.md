@@ -67,7 +67,7 @@ Docker (`docker-compose.yml`) : `postgres` 5433, `postgres_test` 5434, `pgadmin`
 | Playground | Test d'un agent en SSE, débité en crédits comme l'assistant (bloqué à 0 crédit), sans persistance des messages | `components/ui/chat`, `hooks/chat/` | `agent-runtime/` | `services/agentRuntime/agentRuntime.ts` |
 | Assistant final | Chat de l'utilisateur final, conversations persistées | `pages/Assistant` | `conversation/`, `agent-runtime/` | `services/chat/chat.ts` |
 | Déploiement | Versions, snapshots de workflow, rollback | `components/Deployment` | `deployment/` | `services/deployment/deployment.ts` |
-| Crédits & billing | Solde, transactions, Stripe | `pages/Billing`, `components/Billing` | `credit/`, `plans/` | `services/credit/credit.ts`, `services/billing/billing.ts` |
+| Crédits & billing | Offres (Découverte, Abonnement), limites, quota mensuel, recharges, Stripe Checkout + webhook | `pages/Billing`, `components/Billing` | `credit/`, `plans/`, `billing/`, `workspace/guards/plan-limit.guard.ts` | `services/credit/credit.ts`, `services/billing/billing.ts` |
 | Analytics | Stats par agent et par workspace | `components/Agents/Analytics`, `components/Dashboard` | `agent-analytics/`, `workspace/workspace-stats.service.ts` | `services/analytics/analytics.ts` |
 | Rétention | Purge planifiée des logs de requêtes | — | `retention/` | — |
 

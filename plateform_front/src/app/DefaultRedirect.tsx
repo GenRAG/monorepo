@@ -22,7 +22,10 @@ export default function DefaultRedirect() {
             const workspace = await createWorkspace({
                 name: organizationName.trim() || DEFAULT_WORKSPACE_NAME,
             }).unwrap();
-            void navigate(`/onboarding/${workspace.id}`, { replace: true });
+            // Without an invitation there is nothing to try yet: the guided tour waits for a subscription.
+            const next =
+                workspace.plan === "NONE" ? `/workspaces/${workspace.id}/billing` : `/onboarding/${workspace.id}`;
+            void navigate(next, { replace: true });
         } catch {
             toast({
                 title: "Impossible de créer votre espace",

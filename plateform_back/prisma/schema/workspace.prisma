@@ -1,15 +1,22 @@
+/// NONE: no subscription and not invited. FREE: Découverte (beta, invitation only). PRO: paid subscription.
 enum PlanTier {
+  NONE
   FREE
   PRO
-  BUSINESS
-  ENTERPRISE
 }
 
 model Workspace {
   id                 String              @id @default(cuid())
   name               String
   description        String?
-  plan               PlanTier            @default(FREE)
+  plan               PlanTier            @default(NONE)
+  stripeCustomerId     String?           @unique
+  stripeSubscriptionId String?           @unique
+  subscriptionStatus   String?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean           @default(false)
+  /// Set by the first onboarding: its demo agent and dataset bypass the plan limits once, never again.
+  onboardingStartedAt  DateTime?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   users              UserWorkspace[]

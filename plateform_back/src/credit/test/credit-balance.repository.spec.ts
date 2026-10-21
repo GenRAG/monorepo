@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreditTransactionType } from 'generated/prisma';
 import { CreditBalanceRepository } from '../credit-balance.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
@@ -7,12 +6,7 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 const mockPrismaService: any = {
     creditBalance: {
         findUnique: jest.fn(),
-        upsert: jest.fn(),
     },
-    creditTransaction: {
-        create: jest.fn(),
-    },
-    $transaction: jest.fn((ops: unknown[]) => Promise.all(ops)),
 };
 
 describe('CreditBalanceRepository', () => {
@@ -43,50 +37,6 @@ describe('CreditBalanceRepository', () => {
             const result = await repository.getBalance('ws-1');
 
             expect(result).toBe(0);
-        });
-    });
-
-    describe('incrementOrCreate', () => {
-        it('should create balance if not exists', async () => {
-            mockPrismaService.creditBalance.upsert.mockResolvedValue({ workspaceId: 'ws-1', balance: 100 });
-            mockPrismaService.creditTransaction.create.mockResolvedValue({});
-
-            await repository.incrementOrCreate('ws-1', 100, CreditTransactionType.SUBSCRIPTION);
-
-            expect(mockPrismaService.creditBalance.upsert).toHaveBeenCalledWith({
-                where: { workspaceId: 'ws-1' },
-                update: { balance: { increment: 100 } },
-                create: { workspaceId: 'ws-1', balance: 100 },
-            });
-        });
-
-        it('should increment balance if exists', async () => {
-            mockPrismaService.creditBalance.upsert.mockResolvedValue({ workspaceId: 'ws-1', balance: 200 });
-            mockPrismaService.creditTransaction.create.mockResolvedValue({});
-
-            await repository.incrementOrCreate('ws-1', 100, CreditTransactionType.SUBSCRIPTION);
-
-            expect(mockPrismaService.creditBalance.upsert).toHaveBeenCalledWith({
-                where: { workspaceId: 'ws-1' },
-                update: { balance: { increment: 100 } },
-                create: { workspaceId: 'ws-1', balance: 100 },
-            });
-        });
-
-        it('should also record a credit transaction', async () => {
-            mockPrismaService.creditBalance.upsert.mockResolvedValue({ workspaceId: 'ws-1', balance: 100 });
-            mockPrismaService.creditTransaction.create.mockResolvedValue({});
-
-            await repository.incrementOrCreate('ws-1', 100, CreditTransactionType.SUBSCRIPTION, { source: 'test' });
-
-            expect(mockPrismaService.creditTransaction.create).toHaveBeenCalledWith({
-                data: {
-                    workspaceId: 'ws-1',
-                    amount: 100,
-                    type: CreditTransactionType.SUBSCRIPTION,
-                    metadata: { source: 'test' },
-                },
-            });
         });
     });
 });

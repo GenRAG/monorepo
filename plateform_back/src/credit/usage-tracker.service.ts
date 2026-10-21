@@ -39,10 +39,13 @@ export class UsageTrackerService {
                 // pushes the balance below zero, otherwise the balance freezes above zero and every
                 // later checkOrThrow() keeps passing, giving unlimited free queries once the balance
                 // is smaller than a single query's cost.
-                await tx.creditBalance.update({
-                    where: { workspaceId },
-                    data: { balance: { decrement: creditsUsed } },
-                });
+                // The monthly quota is spent first: it shrinks with the balance, down to zero.
+                await tx.$executeRaw`
+                    UPDATE "CreditBalance"
+                    SET "balance" = "balance" - ${creditsUsed},
+                        "monthlyCredits" = GREATEST("monthlyCredits" - ${creditsUsed}, 0),
+                        "updatedAt" = NOW()
+                    WHERE "workspaceId" = ${workspaceId}`;
             }
 
             await tx.agentQueryLog.create({

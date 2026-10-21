@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from 'src/users/users.service';
 import { UserRepository } from 'src/users/user.repository';
 import { DatasetService } from 'src/dataset/dataset.service';
+import { BillingService } from 'src/billing/billing.service';
 import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
@@ -37,6 +38,10 @@ const mockDatasetService = {
     queueWorkspaceCleanup: jest.fn() as any,
 };
 
+const mockBillingService = {
+    deleteCustomers: jest.fn() as any,
+};
+
 describe('UsersService', () => {
     let service: UsersService;
 
@@ -49,6 +54,7 @@ describe('UsersService', () => {
                     useValue: mockUserRepository,
                 },
                 { provide: DatasetService, useValue: mockDatasetService },
+                { provide: BillingService, useValue: mockBillingService },
             ],
         }).compile();
 
@@ -195,6 +201,16 @@ describe('UsersService', () => {
             expect(mockUserRepository.findSoleWorkspaceFiles).toHaveBeenCalledWith('user-1');
             expect(mockDatasetService.queueWorkspaceCleanup).toHaveBeenCalledWith(workspaces);
             expect(mockUserRepository.delete).toHaveBeenCalledWith('user-1');
+            expect(mockBillingService.deleteCustomers).toHaveBeenCalledWith(['workspace-1']);
+        });
+
+        it('should keep the account when its Stripe customer cannot be deleted, so nobody pays for a deleted account', async () => {
+            mockUserRepository.findSoleWorkspaceFiles.mockResolvedValue(workspaces);
+            mockBillingService.deleteCustomers.mockRejectedValueOnce(new Error('stripe down'));
+
+            await expect(service.delete('user-1')).rejects.toThrow('stripe down');
+            expect(mockDatasetService.queueWorkspaceCleanup).not.toHaveBeenCalled();
+            expect(mockUserRepository.delete).not.toHaveBeenCalled();
         });
 
         it('should drop the queued cleanup when the delete fails, so a surviving account keeps its files', async () => {

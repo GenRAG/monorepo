@@ -1,5 +1,7 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { PlanTier } from 'generated/prisma';
 import { WorkspaceRepository, WorkspaceWithUsers } from 'src/workspace/workspace.repository';
 import { WorkspaceStatsService } from 'src/workspace/workspace-stats.service';
 import { WorkspaceService } from 'src/workspace/workspace.service';
@@ -22,6 +24,10 @@ const mockWorkspaceRepository = {
     updateName: jest.fn() as any,
 };
 
+const env: Record<string, string | undefined> = {};
+const mockConfigService = { get: (key: string) => env[key] };
+const user = { id: 'user-1', email: 'beta@acme.fr' };
+
 const mockWorkspaceStatsService = {
     getStats: jest.fn() as any,
 };
@@ -35,18 +41,21 @@ describe('WorkspaceService', () => {
                 WorkspaceService,
                 { provide: WorkspaceRepository, useValue: mockWorkspaceRepository },
                 { provide: WorkspaceStatsService, useValue: mockWorkspaceStatsService },
+                { provide: ConfigService, useValue: mockConfigService },
             ],
         }).compile();
 
         service = module.get<WorkspaceService>(WorkspaceService);
         jest.clearAllMocks();
+        delete env.NODE_ENV;
+        delete env.DISCOVERY_EMAILS;
     });
 
     describe('create', () => {
         it('should create a workspace and assign creator as ADMIN', async () => {
             mockWorkspaceRepository.create.mockImplementation(() => Promise.resolve(fakeWorkspace));
 
-            const result = await service.create({ name: 'Mon Workspace', description: 'Test description' }, 'user-1');
+            const result = await service.create({ name: 'Mon Workspace', description: 'Test description' }, user);
 
             expect(result.name).toBe('Mon Workspace');
             expect(result.users[0].userId).toBe('user-1');
@@ -54,27 +63,32 @@ describe('WorkspaceService', () => {
                 name: 'Mon Workspace',
                 description: 'Test description',
                 userId: 'user-1',
+                plan: PlanTier.FREE,
             });
         });
 
         it('should pass description to repository', async () => {
             mockWorkspaceRepository.create.mockImplementation(() => Promise.resolve(fakeWorkspace));
 
-            await service.create({ name: 'Test', description: 'My description' }, 'user-1');
+            await service.create({ name: 'Test', description: 'My description' }, user);
 
             expect(mockWorkspaceRepository.create).toHaveBeenCalledWith(
                 expect.objectContaining({ description: 'My description' }),
             );
         });
 
-        it('should not pass plan to repository (fixed to FREE server-side)', async () => {
+        it.each([
+            ['outside production, every new workspace gets Découverte', undefined, undefined, PlanTier.FREE],
+            ['in production, an invited email gets Découverte', 'production', 'x@y.fr, Beta@Acme.fr', PlanTier.FREE],
+            ['in production, anyone else gets no plan until they subscribe', 'production', 'x@y.fr', PlanTier.NONE],
+        ])('%s', async (_case, nodeEnv, discoveryEmails, plan) => {
+            env.NODE_ENV = nodeEnv;
+            env.DISCOVERY_EMAILS = discoveryEmails;
             mockWorkspaceRepository.create.mockImplementation(() => Promise.resolve(fakeWorkspace));
 
-            await service.create({ name: 'Test' }, 'user-1');
+            await service.create({ name: 'Test' }, user);
 
-            expect(mockWorkspaceRepository.create).toHaveBeenCalledWith(
-                expect.not.objectContaining({ plan: expect.anything() }),
-            );
+            expect(mockWorkspaceRepository.create).toHaveBeenCalledWith(expect.objectContaining({ plan }));
         });
     });
 
@@ -82,19 +96,19 @@ describe('WorkspaceService', () => {
         it('should throw ConflictException when the user already has a workspace', async () => {
             mockWorkspaceRepository.create.mockImplementation(() => Promise.resolve(null));
 
-            await expect(service.create({ name: 'Second' }, 'user-1')).rejects.toThrow(ConflictException);
+            await expect(service.create({ name: 'Second' }, user)).rejects.toThrow(ConflictException);
         });
 
         it('should trim the name', async () => {
             mockWorkspaceRepository.create.mockImplementation(() => Promise.resolve(fakeWorkspace));
 
-            await service.create({ name: '  Acme  ' }, 'user-1');
+            await service.create({ name: '  Acme  ' }, user);
 
             expect(mockWorkspaceRepository.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Acme' }));
         });
 
         it('should reject a blank name', async () => {
-            await expect(service.create({ name: '   ' }, 'user-1')).rejects.toThrow(BadRequestException);
+            await expect(service.create({ name: '   ' }, user)).rejects.toThrow(BadRequestException);
             expect(mockWorkspaceRepository.create).not.toHaveBeenCalled();
         });
     });

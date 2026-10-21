@@ -1,13 +1,16 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModuleBuilder } from '@nestjs/testing';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '../../src/app.module';
 import { AllExceptionsFilter } from '../../src/exeptions/interceptor.service';
 import { Logger } from 'nestjs-pino';
 
-export async function createTestApp(): Promise<INestApplication> {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+/** `override` replaces providers of the real app, e.g. the Stripe client of the billing suite. */
+export async function createTestApp(
+    override: (builder: TestingModuleBuilder) => TestingModuleBuilder = (builder) => builder,
+): Promise<INestApplication> {
+    const builder = Test.createTestingModule({
         imports: [AppModule],
     })
         .overrideModule(ThrottlerModule)
@@ -15,10 +18,10 @@ export async function createTestApp(): Promise<INestApplication> {
         // Routes set their own @Throttle limits (e.g. 10 logins/min), which the module-level override above
         // does not relax: the suites share one IP, so rate limiting is disabled for e2e tests.
         .overrideGuard(ThrottlerGuard)
-        .useValue({ canActivate: () => true })
-        .compile();
+        .useValue({ canActivate: () => true });
+    const moduleFixture = await override(builder).compile();
 
-    const app = moduleFixture.createNestApplication({ logger: false });
+    const app = moduleFixture.createNestApplication({ logger: false, rawBody: true });
 
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     app.useGlobalFilters(new AllExceptionsFilter(app.get(Logger)));

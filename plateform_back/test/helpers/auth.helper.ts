@@ -1,5 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { PlanTier } from 'generated/prisma';
+import { PrismaService } from '../../src/prisma/prisma.service';
 
 export const TEST_USER = {
     email: 'test@genrag.com',
@@ -29,6 +31,11 @@ export async function createWorkspace(
     data = { name: 'Test Workspace', description: 'Test description' },
 ): Promise<string> {
     const res = await request(app.getHttpServer()).post('/workspaces').set('Cookie', cookie).send(data);
+    // Subscribed, so the suites are not bound by the Découverte limits (billing.e2e-spec.ts covers them).
+    await app.get(PrismaService).workspace.update({
+        where: { id: res.body.id },
+        data: { plan: PlanTier.PRO },
+    });
 
     return res.body.id;
 }

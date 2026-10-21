@@ -31,7 +31,7 @@ export class WorkspaceController {
         @CurrentUser(CurrentUserPipe) user: UserSafe,
         @Body() createWorkspaceRequest: CreateWorkspaceRequest,
     ): Promise<WorkspaceWithUsers> {
-        return this.workspaceService.create(createWorkspaceRequest, user.id);
+        return this.workspaceService.create(createWorkspaceRequest, user);
     }
 
     @Get()

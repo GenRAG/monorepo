@@ -294,8 +294,9 @@ export class BillingService {
         if (outcome === 'missing') {
             this.logger.warn(`Subscription ${subscriptionId} matches no workspace`);
         } else if (outcome === 'duplicate') {
-            // The unused part goes to the customer's balance and pays the next invoice of the subscription kept.
-            await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true });
+            // The final invoice credits the unused part to the customer's balance, which pays the next invoice of the
+            // subscription kept. Without invoice_now, that credit would stay pending on the cancelled subscription.
+            await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true, invoice_now: true });
             this.logger.error(`Workspace ${workspaceId}: second subscription ${subscriptionId} cancelled`);
         } else if (outcome === 'saved' && renewal) {
             this.logger.log(

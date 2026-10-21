@@ -11,8 +11,9 @@ const DEFAULT_MODELS = { rewrite: 'gpt-4o', rerank: 'bge', answer: 'gpt-4o' } as
 const COLLECTION_NAME = 'genrag_knowledge_base';
 const DEFAULT_TOP_K = 5;
 
-type NodeSettings = { model?: string; instruction?: string; datasetIds?: string[] };
-type BlockFactory = (s: NodeSettings) => PipelineBlock;
+/** The settings a chain node gives its block. Missing models fall back to `DEFAULT_MODELS`. */
+export type BlockSettings = { model?: string; instruction?: string; datasetIds?: string[] };
+type BlockFactory = (s: BlockSettings) => PipelineBlock;
 
 const BLOCK_FACTORIES: Partial<Record<TaskType, BlockFactory>> = {
     [TaskType.QUERY]:     ()  => ({ name: 'query',    type: 'query' }),
@@ -22,9 +23,14 @@ const BLOCK_FACTORIES: Partial<Record<TaskType, BlockFactory>> = {
     [TaskType.RESPONSE]:  (s) => ({ name: 'answer',   type: 'answer',   model: s.model ?? DEFAULT_MODELS.answer, system_prompt: s.instruction }),
 };
 
-function buildSettingsMap(nodes: AppNode[], edges: Edge[]): Map<string, NodeSettings> {
+/** The engine block of a chain task (`undefined` for a settings task). Shared by every pipeline model. */
+export function blockFor(type: TaskType, settings: BlockSettings): PipelineBlock | undefined {
+    return BLOCK_FACTORIES[type]?.(settings);
+}
+
+function buildSettingsMap(nodes: AppNode[], edges: Edge[]): Map<string, BlockSettings> {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
-    const settingsMap = new Map<string, NodeSettings>();
+    const settingsMap = new Map<string, BlockSettings>();
 
     edges
         .filter((e) => e.type === EdgeType.Settings)
@@ -76,7 +82,7 @@ export function serializeWorkflow(nodes: AppNode[], edges: Edge[]): WorkflowDefi
     const orderedNodes = collectMainChainNodes(nodes, edges);
 
     const blocks = orderedNodes
-        .map((node) => BLOCK_FACTORIES[node.data.type]?.(settingsMap.get(node.id) ?? {}) ?? null)
+        .map((node) => blockFor(node.data.type, settingsMap.get(node.id) ?? {}) ?? null)
         .filter((b): b is PipelineBlock => b !== null);
 
     return { nodes, edges, blocks };

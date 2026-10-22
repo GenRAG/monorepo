@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { CreditTransactionType, PlanTier, QueryLogStatus } from 'generated/prisma';
 import Stripe from 'stripe';
 import request from 'supertest';
@@ -9,21 +9,32 @@ import { createAgent, registerAndLogin } from './helpers/auth.helper';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { UsageTrackerService } from '../src/credit/usage-tracker.service';
 import { STRIPE_CLIENT } from '../src/billing/stripe.provider';
+import { DatasetService } from '../src/dataset/dataset.service';
 
 const WEBHOOK_SECRET = 'whsec_test_billing';
 const realStripe = new Stripe('sk_test_billing');
 
 /** Stripe's side of the subscriptions: what `subscriptions.retrieve` returns at the time it is called. */
 const subscriptions = new Map<string, Stripe.Subscription.Status>();
+/** What each `subscriptions.cancel` asked Stripe for. */
+const cancelParams = new Map<string, Stripe.SubscriptionCancelParams | undefined>();
 let retrieve = (id: string): Promise<Stripe.Subscription> =>
     Promise.resolve(subscriptionOf(id, subscriptions.get(id)!));
 const cancelled: string[] = [];
+const deletedCustomers: string[] = [];
 const fakeStripe = {
     webhooks: realStripe.webhooks,
+    customers: {
+        del: (id: string) => {
+            deletedCustomers.push(id);
+            return Promise.resolve();
+        },
+    },
     subscriptions: {
         retrieve: (id: string) => retrieve(id),
-        cancel: (id: string) => {
+        cancel: (id: string, params?: Stripe.SubscriptionCancelParams) => {
             cancelled.push(id);
+            cancelParams.set(id, params);
             subscriptions.set(id, 'canceled');
             return Promise.resolve();
         },
@@ -212,6 +223,40 @@ describe('Billing (e2e)', () => {
             expect(ledger.filter((t) => t.amount === 50_000)).toHaveLength(1);
         });
 
+        it.each<[string, PlanTier, ('checkout' | 'invoice')[]]>([
+            ['no plan, checkout first', PlanTier.NONE, ['checkout', 'invoice']],
+            ['Découverte, invoice first', PlanTier.FREE, ['invoice', 'checkout']],
+        ])('a first subscription (%s) moves the workspace to PRO with its quota', async (_, plan, order) => {
+            const { workspaceId } = await workspaceOn(`first-${plan}@test.com`, plan);
+            const before = await balanceOf(workspaceId);
+            const subscriptionId = `sub_first_${plan}`;
+            subscriptions.set(subscriptionId, 'active');
+            const events = {
+                checkout: () =>
+                    deliver('checkout.session.completed', {
+                        id: `cs_first_${plan}`,
+                        object: 'checkout.session',
+                        mode: 'subscription',
+                        subscription: subscriptionId,
+                        metadata: { workspaceId },
+                    }),
+                invoice: () =>
+                    deliver(
+                        'invoice.paid',
+                        invoice(`in_first_${plan}`, subscriptionId, workspaceId, 'subscription_create'),
+                    ),
+            };
+
+            for (const event of order) await events[event]().expect(200);
+
+            expect(await workspaceOf(workspaceId)).toEqual({
+                plan: PlanTier.PRO,
+                stripeSubscriptionId: subscriptionId,
+            });
+            // The credits held before (Découverte's 5 000) stay on top of the quota.
+            expect(await balanceOf(workspaceId)).toEqual({ balance: before.balance + 50_000, monthlyCredits: 50_000 });
+        });
+
         it('a proration invoice does not reset the quota', async () => {
             const { workspaceId } = await subscribed('proration@test.com', 'sub_prorate', 3_000, 1_000);
 
@@ -221,6 +266,25 @@ describe('Billing (e2e)', () => {
             ).expect(200);
 
             expect(await balanceOf(workspaceId)).toEqual({ balance: 3_000, monthlyCredits: 1_000 });
+        });
+
+        it('a renewal on a negative balance takes the debt off the new quota, so it is never charged twice', async () => {
+            const { cookie, workspaceId } = await subscribed('debt@test.com', 'sub_debt', -200, 0);
+            const agentId = await createAgent(app, cookie, workspaceId);
+
+            await deliver('invoice.paid', invoice('in_debt_1', 'sub_debt', workspaceId)).expect(200);
+            expect(await balanceOf(workspaceId)).toEqual({ balance: 49_800, monthlyCredits: 49_800 });
+
+            await app.get(UsageTrackerService).recordQuery({
+                workspaceId,
+                agentId,
+                query: 'q',
+                durationMs: 1,
+                status: QueryLogStatus.SUCCESS,
+                creditsUsed: 49_800,
+            });
+            await deliver('invoice.paid', invoice('in_debt_2', 'sub_debt', workspaceId)).expect(200);
+            expect(await balanceOf(workspaceId)).toEqual({ balance: 50_000, monthlyCredits: 50_000 });
         });
 
         it('an invoice paid after the subscription ended grants nothing', async () => {
@@ -245,7 +309,7 @@ describe('Billing (e2e)', () => {
             expect(await balanceOf(workspaceId)).toEqual({ balance: 8_000, monthlyCredits: 6_000 });
         });
 
-        it('a second paid subscription is cancelled and the first one stays', async () => {
+        it('a second paid subscription is cancelled, its unused time credited on a final invoice, and the first one stays', async () => {
             const { workspaceId } = await subscribed('twice@test.com', 'sub_first', 50_000, 50_000);
             subscriptions.set('sub_second', 'active');
 
@@ -256,6 +320,8 @@ describe('Billing (e2e)', () => {
             ).expect(200);
 
             expect(cancelled).toContain('sub_second');
+            // Without invoice_now, the proration credit stays a pending item of a cancelled subscription.
+            expect(cancelParams.get('sub_second')).toEqual({ prorate: true, invoice_now: true });
             expect(await workspaceOf(workspaceId)).toEqual({ plan: PlanTier.PRO, stripeSubscriptionId: 'sub_first' });
             expect(await balanceOf(workspaceId)).toEqual({ balance: 50_000, monthlyCredits: 50_000 });
         });
@@ -325,6 +391,23 @@ describe('Billing (e2e)', () => {
                 payment_status: 'paid',
                 metadata: { workspaceId: 'gone', credits: '5000' },
             }).expect(200);
+        });
+    });
+
+    describe('account deletion', () => {
+        it('a delete that fails after removing the Stripe customer forgets that customer, so a new one is created at the next payment', async () => {
+            const { cookie, workspaceId } = await workspaceOn('undeleted@test.com', PlanTier.FREE);
+            await prisma.workspace.update({ where: { id: workspaceId }, data: { stripeCustomerId: 'cus_undeleted' } });
+            jest.spyOn(app.get(DatasetService), 'queueWorkspaceCleanup').mockRejectedValueOnce(new Error('Redis down'));
+
+            await request(app.getHttpServer()).delete('/users/me').set('Cookie', cookie).expect(500);
+
+            expect(deletedCustomers).toContain('cus_undeleted');
+            const workspace = await prisma.workspace.findUniqueOrThrow({
+                where: { id: workspaceId },
+                select: { stripeCustomerId: true },
+            });
+            expect(workspace.stripeCustomerId).toBeNull();
         });
     });
 });

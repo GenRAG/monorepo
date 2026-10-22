@@ -199,17 +199,19 @@ export class BillingService {
     /**
      * Deleting the customer cancels its subscriptions at once, so a deleted account is never billed again.
      * Called before the account goes: without Stripe configured, a workspace that has a customer cannot be deleted.
+     * The workspace forgets the customer at once, so if the account then stays, its next payment creates a new one.
      */
     async deleteCustomers(workspaceIds: string[]): Promise<void> {
-        const customerIds = await this.billingRepository.findCustomerIds(workspaceIds);
-        for (const customerId of customerIds) {
+        const customers = await this.billingRepository.findCustomers(workspaceIds);
+        for (const { workspaceId, stripeCustomerId } of customers) {
             try {
-                await this.stripe.customers.del(customerId);
+                await this.stripe.customers.del(stripeCustomerId);
             } catch (error) {
                 if (!(error instanceof Stripe.errors.StripeInvalidRequestError && error.code === 'resource_missing')) {
                     throw error;
                 }
             }
+            await this.billingRepository.clearCustomerId(workspaceId);
         }
     }
 
@@ -318,8 +320,9 @@ export class BillingService {
         if (outcome === 'missing') {
             this.logger.warn(`Subscription ${subscriptionId} matches no workspace`);
         } else if (outcome === 'duplicate') {
-            // The unused part goes to the customer's balance and pays the next invoice of the subscription kept.
-            await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true });
+            // The final invoice credits the unused part to the customer's balance, which pays the next invoice of the
+            // subscription kept. Without invoice_now, that credit would stay pending on the cancelled subscription.
+            await this.stripe.subscriptions.cancel(subscriptionId, { prorate: true, invoice_now: true });
             this.logger.error(`Workspace ${workspaceId}: second subscription ${subscriptionId} cancelled`);
         } else if (outcome === 'saved' && renewal) {
             this.logger.log(

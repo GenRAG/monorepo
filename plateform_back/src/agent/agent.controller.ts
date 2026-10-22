@@ -4,7 +4,7 @@ import { CreateAgentRequest } from './dto/create-agent.request';
 import { UpdateAgentRequest } from './dto/update-agent.request';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
-import { PlanLimit, PlanLimitGuard } from 'src/workspace/guards/plan-limit.guard';
+import { PlanLimit } from 'src/workspace/guards/plan-limit.guard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { UserSafe } from 'src/users/dto/create-user.request';
@@ -19,7 +19,6 @@ export class AgentController {
 
     @Post()
     @PlanLimit('agents')
-    @UseGuards(PlanLimitGuard)
     create(
         @Param('workspaceId') workspaceId: string,
         @CurrentUser(CurrentUserPipe) user: UserSafe,

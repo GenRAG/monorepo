@@ -57,12 +57,16 @@ export class BillingRepository {
     }
 
     /** Stripe customers of the workspaces about to be deleted with an account. */
-    async findCustomerIds(workspaceIds: string[]): Promise<string[]> {
+    async findCustomers(workspaceIds: string[]): Promise<{ workspaceId: string; stripeCustomerId: string }[]> {
         const workspaces = await this.prisma.workspace.findMany({
             where: { id: { in: workspaceIds }, stripeCustomerId: { not: null } },
-            select: { stripeCustomerId: true },
+            select: { id: true, stripeCustomerId: true },
         });
-        return workspaces.map((w) => w.stripeCustomerId!);
+        return workspaces.map((w) => ({ workspaceId: w.id, stripeCustomerId: w.stripeCustomerId! }));
+    }
+
+    async clearCustomerId(workspaceId: string): Promise<void> {
+        await this.prisma.workspace.update({ where: { id: workspaceId }, data: { stripeCustomerId: null } });
     }
 
     /**
@@ -124,7 +128,10 @@ export class BillingRepository {
         }
     }
 
-    /** A new billing period: what is left of the previous quota expires and the full quota comes back, once per invoice. */
+    /**
+     * A new billing period: what is left of the previous quota expires and the full quota comes back, once per invoice.
+     * A negative balance is paid from the new quota, which never exceeds the balance: the debt is taken once.
+     */
     private async renewMonthlyCredits(tx: Tx, workspaceId: string, credits: number, invoiceId: string): Promise<void> {
         const alreadyApplied = await tx.creditTransaction.findUnique({ where: { stripeRef: invoiceId } });
         if (alreadyApplied) return;
@@ -134,7 +141,9 @@ export class BillingRepository {
         });
         await tx.$executeRaw`
             UPDATE "CreditBalance"
-            SET "balance" = "balance" + ${credits}, "monthlyCredits" = ${credits}, "updatedAt" = NOW()
+            SET "balance" = "balance" + ${credits},
+                "monthlyCredits" = LEAST(${credits}, GREATEST("balance" + ${credits}, 0)),
+                "updatedAt" = NOW()
             WHERE "workspaceId" = ${workspaceId}`;
     }
 

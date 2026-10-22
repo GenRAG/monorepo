@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { CREDITS_PER_EURO, getPlanConfig, PLANS, SUBSCRIPTION_PRICE_CENTS } from 'src/plans/plans.config';
 import { BillingRepository, SubscriptionState } from './billing.repository';
 import { BillingSummary } from './dto/billing-summary.response';
+import { InvoiceResponse } from './dto/invoice.response';
 import { requireStripe, STRIPE_CLIENT } from './stripe.provider';
 
 // Stripe keeps retrying a subscription in these states: the plan stays until it gives up (`canceled`, `unpaid`).
@@ -24,6 +25,20 @@ export function toSubscriptionState(subscription: Stripe.Subscription): Subscrip
         subscriptionStatus: subscription.status,
         currentPeriodEnd: paid && periodEnd ? new Date(periodEnd * 1000) : null,
         cancelAtPeriodEnd: paid && subscription.cancel_at_period_end,
+    };
+}
+
+export function toInvoiceResponse(invoice: Stripe.Invoice): InvoiceResponse {
+    return {
+        id: invoice.id!,
+        number: invoice.number,
+        createdAt: new Date(invoice.created * 1000),
+        // A top-up invoice has one line, named after the credits sold.
+        label: invoice.parent?.subscription_details ? 'Abonnement' : (invoice.lines.data[0]?.description ?? 'Crédits'),
+        totalCents: invoice.total,
+        currency: invoice.currency,
+        status: invoice.status,
+        pdfUrl: invoice.invoice_pdf ?? null,
     };
 }
 
@@ -141,6 +156,15 @@ export class BillingService {
             cancel_url: `${this.frontendUrl}/workspaces/${workspaceId}/billing?checkout=cancel`,
         });
         return { url: session.url! };
+    }
+
+    /** The last invoices, newest first. Drafts are left out: they have no number nor PDF yet. */
+    async listInvoices(workspaceId: string): Promise<InvoiceResponse[]> {
+        const workspace = await this.findWorkspace(workspaceId);
+        if (!workspace.stripeCustomerId) return [];
+
+        const invoices = await this.stripe.invoices.list({ customer: workspace.stripeCustomerId, limit: 24 });
+        return invoices.data.filter((invoice) => invoice.status !== 'draft').map(toInvoiceResponse);
     }
 
     /** Stripe's own page for the card, the invoices and cancelling. */

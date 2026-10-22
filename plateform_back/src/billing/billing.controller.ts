@@ -6,6 +6,7 @@ import { CurrentUserPipe } from 'src/users/pipes/user-validation.pipe';
 import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
 import { BillingService } from './billing.service';
 import { BillingSummary } from './dto/billing-summary.response';
+import { InvoiceResponse } from './dto/invoice.response';
 import { TopUpRequest } from './dto/top-up.request';
 
 @Controller('workspaces/:workspaceId/billing')
@@ -16,6 +17,11 @@ export class BillingController {
     @Get()
     getSummary(@Param('workspaceId') workspaceId: string): Promise<BillingSummary> {
         return this.billingService.getSummary(workspaceId);
+    }
+
+    @Get('invoices')
+    listInvoices(@Param('workspaceId') workspaceId: string): Promise<InvoiceResponse[]> {
+        return this.billingService.listInvoices(workspaceId);
     }
 
     @Post('subscription')

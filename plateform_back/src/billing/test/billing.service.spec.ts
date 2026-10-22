@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { PlanTier } from 'generated/prisma';
 import Stripe from 'stripe';
-import { toSubscriptionState } from 'src/billing/billing.service';
+import { toInvoiceResponse, toSubscriptionState } from 'src/billing/billing.service';
 
 const subscription = (status: Stripe.Subscription.Status, cancelAtPeriodEnd = false) =>
     ({
@@ -34,4 +34,38 @@ describe('toSubscriptionState', () => {
             });
         },
     );
+});
+
+describe('toInvoiceResponse', () => {
+    const invoice = (fields: Partial<Stripe.Invoice>) =>
+        ({
+            id: 'in_1',
+            number: 'GEN-0001',
+            created: 1_800_000_000,
+            total: 6000,
+            currency: 'eur',
+            status: 'paid',
+            invoice_pdf: 'https://pay.stripe.com/pdf',
+            parent: null,
+            lines: { data: [{ description: '35 000 crédits GenRAG' }] },
+            ...fields,
+        }) as unknown as Stripe.Invoice;
+
+    it('names a subscription invoice after the subscription', () => {
+        const parent = { subscription_details: { subscription: 'sub_1' } } as Stripe.Invoice['parent'];
+        expect(toInvoiceResponse(invoice({ parent }))).toEqual({
+            id: 'in_1',
+            number: 'GEN-0001',
+            createdAt: new Date(1_800_000_000 * 1000),
+            label: 'Abonnement',
+            totalCents: 6000,
+            currency: 'eur',
+            status: 'paid',
+            pdfUrl: 'https://pay.stripe.com/pdf',
+        });
+    });
+
+    it('names a top-up invoice after the credits sold', () => {
+        expect(toInvoiceResponse(invoice({})).label).toBe('35 000 crédits GenRAG');
+    });
 });

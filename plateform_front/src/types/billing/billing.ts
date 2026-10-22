@@ -16,3 +16,16 @@ export interface BillingSummary {
 
 export const MIN_TOP_UP_EUROS = 5;
 export const MAX_TOP_UP_EUROS = 1_000;
+
+/** Mirrors `InvoiceResponse` (plateform_back/src/billing/dto/invoice.response.ts). */
+export interface Invoice {
+    id: string;
+    number: string | null;
+    createdAt: string;
+    label: string;
+    /** Tax included, in the smallest unit of `currency`. */
+    totalCents: number;
+    currency: string;
+    status: "draft" | "open" | "paid" | "uncollectible" | "void" | null;
+    pdfUrl: string | null;
+}

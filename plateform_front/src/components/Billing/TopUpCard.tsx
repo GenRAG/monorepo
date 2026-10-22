@@ -44,6 +44,7 @@ const TopUpCard: React.FC<TopUpCardProps> = ({ workspaceId, creditsPerEuro }) =>
                     <InputGroup maxW={{ sm: "160px" }}>
                         <Input
                             aria-label="Montant en euros"
+                            variant="glass"
                             inputMode="numeric"
                             value={input}
                             onChange={(e) => setInput(e.target.value.replace(/\D/g, ""))}

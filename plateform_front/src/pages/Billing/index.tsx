@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import PlanCard from "components/Billing/PlanCard";
 import TopUpCard from "components/Billing/TopUpCard";
 import ConsumptionCard from "components/Billing/ConsumptionCard";
+import InvoicesCard from "components/Billing/InvoicesCard";
 import { MainLayoutContainer } from "components/ui/MainLayoutContainer";
 import useThemedToast from "hooks/useThemedToast";
 import { useGetBillingSummaryQuery } from "services/billing/billing";
@@ -65,6 +66,7 @@ export const BillingWorkspace = () => {
                     <TopUpCard workspaceId={workspaceId} creditsPerEuro={summary.creditsPerEuro} />
                 )}
                 <ConsumptionCard />
+                <InvoicesCard workspaceId={workspaceId} />
             </>
         );
     };

@@ -15,6 +15,8 @@ const realStripe = new Stripe('sk_test_billing');
 
 /** Stripe's side of the subscriptions: what `subscriptions.retrieve` returns at the time it is called. */
 const subscriptions = new Map<string, Stripe.Subscription.Status>();
+/** What each `subscriptions.cancel` asked Stripe for. */
+const cancelParams = new Map<string, Stripe.SubscriptionCancelParams | undefined>();
 let retrieve = (id: string): Promise<Stripe.Subscription> =>
     Promise.resolve(subscriptionOf(id, subscriptions.get(id)!));
 const cancelled: string[] = [];
@@ -22,8 +24,9 @@ const fakeStripe = {
     webhooks: realStripe.webhooks,
     subscriptions: {
         retrieve: (id: string) => retrieve(id),
-        cancel: (id: string) => {
+        cancel: (id: string, params?: Stripe.SubscriptionCancelParams) => {
             cancelled.push(id);
+            cancelParams.set(id, params);
             subscriptions.set(id, 'canceled');
             return Promise.resolve();
         },
@@ -279,7 +282,7 @@ describe('Billing (e2e)', () => {
             expect(await balanceOf(workspaceId)).toEqual({ balance: 8_000, monthlyCredits: 6_000 });
         });
 
-        it('a second paid subscription is cancelled and the first one stays', async () => {
+        it('a second paid subscription is cancelled, its unused time credited on a final invoice, and the first one stays', async () => {
             const { workspaceId } = await subscribed('twice@test.com', 'sub_first', 50_000, 50_000);
             subscriptions.set('sub_second', 'active');
 
@@ -290,6 +293,8 @@ describe('Billing (e2e)', () => {
             ).expect(200);
 
             expect(cancelled).toContain('sub_second');
+            // Without invoice_now, the proration credit stays a pending item of a cancelled subscription.
+            expect(cancelParams.get('sub_second')).toEqual({ prorate: true, invoice_now: true });
             expect(await workspaceOf(workspaceId)).toEqual({ plan: PlanTier.PRO, stripeSubscriptionId: 'sub_first' });
             expect(await balanceOf(workspaceId)).toEqual({ balance: 50_000, monthlyCredits: 50_000 });
         });

@@ -1,4 +1,12 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, SetMetadata } from '@nestjs/common';
+import {
+    applyDecorators,
+    CanActivate,
+    ExecutionContext,
+    ForbiddenException,
+    Injectable,
+    SetMetadata,
+    UseGuards,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { getPlanConfig } from 'src/plans/plans.config';
 import { WorkspaceRepository } from 'src/workspace/workspace.repository';
@@ -6,8 +14,12 @@ import { WorkspaceRepository } from 'src/workspace/workspace.repository';
 export type LimitedResource = 'agents' | 'datasets';
 
 const PLAN_LIMIT_KEY = 'planLimit';
-/** Refuses the route once the workspace of the path holds as many `resource` as its plan allows. */
-export const PlanLimit = (resource: LimitedResource) => SetMetadata(PLAN_LIMIT_KEY, resource);
+/**
+ * Refuses the route once the workspace of the path holds as many `resource` as its plan allows. Puts the guard on
+ * the route itself, so the limit cannot be declared without being enforced.
+ */
+export const PlanLimit = (resource: LimitedResource) =>
+    applyDecorators(SetMetadata(PLAN_LIMIT_KEY, resource), UseGuards(PlanLimitGuard));
 
 const MESSAGES: Record<LimitedResource, (max: number, plan: string) => string> = {
     agents: (max, plan) =>

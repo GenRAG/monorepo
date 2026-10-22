@@ -17,7 +17,6 @@ export const ChatRoute = () => {
 export const AppRoutes = () => (
     <Route element={<PrivateAppLayout />}>
         <Route path="/assistants" element={<AssistantsList />} />
-        <Route path="/billing" element={<BillingWorkspace />} />
 
         <Route element={<WorkspaceGuard />}>
             <Route path="/workspaces/:workspaceId/dashboard" element={<Dashboard />} />

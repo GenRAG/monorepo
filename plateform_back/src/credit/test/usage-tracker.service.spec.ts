@@ -35,96 +35,48 @@ describe('UsageTrackerService', () => {
     });
 
     describe('recordQuery', () => {
-        it('should debit credits and create log on SUCCESS', async () => {
-            const mockTx = {
-                creditBalance: {
-                    findUnique: (jest.fn() as any).mockResolvedValue({ balance: 10 }),
-                    update: (jest.fn() as any).mockResolvedValue({ balance: 9 }),
-                },
+        // How the debit splits between the monthly quota and the bought credits is covered on a real database in
+        // test/billing.e2e-spec.ts.
+        const txWith = () =>
+            ({
+                $executeRaw: jest.fn() as any,
                 agentQueryLog: { create: jest.fn() as any },
-            } as any;
-            mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
+            }) as any;
+        const debitedAmount = (tx: any) => tx.$executeRaw.mock.calls[0]?.[1];
 
-            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.SUCCESS, creditsUsed: 1 });
+        it.each([
+            ['an answer', QueryLogStatus.SUCCESS, 1],
+            ['a query that failed after the RAG engine did paid work', QueryLogStatus.ERROR, 4],
+        ])('should debit %s and log it', async (_case, status, creditsUsed) => {
+            const tx = txWith();
+            mockPrismaService.$transaction.mockImplementation((cb: any) => cb(tx));
 
-            expect(mockTx.creditBalance.update).toHaveBeenCalledWith({
-                where: { workspaceId: 'ws-1' },
-                data: { balance: { decrement: 1 } },
-            });
-            expect(mockTx.agentQueryLog.create).toHaveBeenCalledWith({
-                data: expect.objectContaining({ agentId: 'agent-1', status: QueryLogStatus.SUCCESS, creditsUsed: 1 }),
+            await service.recordQuery({ ...BASE_RECORD, status, creditsUsed });
+
+            expect(debitedAmount(tx)).toBe(creditsUsed);
+            expect(tx.agentQueryLog.create).toHaveBeenCalledWith({
+                data: expect.objectContaining({
+                    agentId: 'agent-1',
+                    status,
+                    creditsUsed,
+                }),
             });
         });
 
-        it('should only create log without debit when no credits are given (nothing was produced)', async () => {
-            const mockTx = {
-                creditBalance: { findUnique: jest.fn() as any, update: jest.fn() as any },
-                agentQueryLog: { create: jest.fn() as any },
-            } as any;
-            mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
+        it.each([QueryLogStatus.ERROR, QueryLogStatus.OUT_OF_CREDITS])(
+            'should only log, without debit, a %s query that produced nothing',
+            async (status) => {
+                const tx = txWith();
+                mockPrismaService.$transaction.mockImplementation((cb: any) => cb(tx));
 
-            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.ERROR });
+                await service.recordQuery({ ...BASE_RECORD, status });
 
-            expect(mockTx.creditBalance.findUnique).not.toHaveBeenCalled();
-            expect(mockTx.creditBalance.update).not.toHaveBeenCalled();
-            expect(mockTx.agentQueryLog.create).toHaveBeenCalledWith({
-                data: expect.objectContaining({ status: QueryLogStatus.ERROR, creditsUsed: 0 }),
-            });
-        });
-
-        it('should debit a query that failed after the RAG engine did paid work', async () => {
-            const mockTx = {
-                creditBalance: { update: jest.fn() as any },
-                agentQueryLog: { create: jest.fn() as any },
-            } as any;
-            mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
-
-            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.ERROR, creditsUsed: 4 });
-
-            expect(mockTx.creditBalance.update).toHaveBeenCalledWith({
-                where: { workspaceId: 'ws-1' },
-                data: { balance: { decrement: 4 } },
-            });
-            expect(mockTx.agentQueryLog.create).toHaveBeenCalledWith({
-                data: expect.objectContaining({ status: QueryLogStatus.ERROR, creditsUsed: 4 }),
-            });
-        });
-
-        it('should only create log without debit on OUT_OF_CREDITS', async () => {
-            const mockTx = {
-                creditBalance: { findUnique: jest.fn() as any, update: jest.fn() as any },
-                agentQueryLog: { create: jest.fn() as any },
-            } as any;
-            mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
-
-            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.OUT_OF_CREDITS });
-
-            expect(mockTx.creditBalance.update).not.toHaveBeenCalled();
-            expect(mockTx.agentQueryLog.create).toHaveBeenCalledWith({
-                data: expect.objectContaining({ creditsUsed: 0 }),
-            });
-        });
-
-        it('should still debit (even below zero) and log when balance is smaller than the query cost', async () => {
-            const mockTx = {
-                creditBalance: {
-                    findUnique: (jest.fn() as any).mockResolvedValue({ balance: 0 }),
-                    update: (jest.fn() as any).mockResolvedValue({ balance: -4 }),
-                },
-                agentQueryLog: { create: jest.fn() as any },
-            } as any;
-            mockPrismaService.$transaction.mockImplementation((cb: any) => cb(mockTx));
-
-            await service.recordQuery({ ...BASE_RECORD, status: QueryLogStatus.SUCCESS, creditsUsed: 4 });
-
-            expect(mockTx.creditBalance.update).toHaveBeenCalledWith({
-                where: { workspaceId: 'ws-1' },
-                data: { balance: { decrement: 4 } },
-            });
-            expect(mockTx.agentQueryLog.create).toHaveBeenCalledWith({
-                data: expect.objectContaining({ status: QueryLogStatus.SUCCESS, creditsUsed: 4 }),
-            });
-        });
+                expect(tx.$executeRaw).not.toHaveBeenCalled();
+                expect(tx.agentQueryLog.create).toHaveBeenCalledWith({
+                    data: expect.objectContaining({ status, creditsUsed: 0 }),
+                });
+            },
+        );
     });
 
     describe('checkOrThrow', () => {

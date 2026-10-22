@@ -4,6 +4,8 @@ import request from 'supertest';
 import { createTestApp } from './helpers/app.helper';
 import { cleanDatabase } from './helpers/db.helper';
 import { TEST_USER, registerAndLogin, createWorkspace } from './helpers/auth.helper';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { PlanTier } from 'generated/prisma';
 
 describe('Onboarding (e2e)', () => {
     let app: INestApplication;
@@ -29,27 +31,28 @@ describe('Onboarding (e2e)', () => {
         return res.body.balance;
     };
 
-    const start = async (): Promise<string> => {
-        const res = await request(app.getHttpServer())
+    const start = (expected: number) =>
+        request(app.getHttpServer())
             .post(`/workspaces/${workspaceId}/onboarding/start`)
             .set('Cookie', cookie)
-            .expect(201);
-        return res.body.agentId;
-    };
+            .expect(expected);
 
-    it('should grant the onboarding bonus once, even after the demo agent is deleted', async () => {
+    it('gives no credits, and cannot be replayed once the demo agent is deleted', async () => {
         const before = await balance();
 
-        const demoAgentId = await start();
-        const afterFirstStart = await balance();
-        expect(afterFirstStart).toBe(before + 20);
+        const demoAgentId = (await start(201)).body.agentId;
+        expect(await balance()).toBe(before);
 
         await request(app.getHttpServer())
             .delete(`/workspaces/${workspaceId}/agents/${demoAgentId}`)
             .set('Cookie', cookie)
             .expect(204);
 
-        await start();
-        expect(await balance()).toBe(afterFirstStart);
+        await start(409);
+    });
+
+    it('is refused to a workspace with no plan', async () => {
+        await app.get(PrismaService).workspace.update({ where: { id: workspaceId }, data: { plan: PlanTier.NONE } });
+        await start(403);
     });
 });

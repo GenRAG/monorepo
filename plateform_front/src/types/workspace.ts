@@ -1,6 +1,9 @@
+import type { PlanTier } from "types/billing/billing";
+
 export interface Workspace {
     id: string;
     name: string;
+    plan: PlanTier;
     createdAt: string;
     updatedAt: string;
     description: string | null;

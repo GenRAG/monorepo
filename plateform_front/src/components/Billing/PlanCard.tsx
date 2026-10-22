@@ -1,43 +1,102 @@
 import React from "react";
-import { Box, Card, HStack, Skeleton, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, Card, HStack, SimpleGrid, Stack, Text, VStack } from "@chakra-ui/react";
 import { ParentSize } from "@visx/responsive";
+import { CreditCard, Sparkles } from "lucide-react";
 import { Gauge } from "components/charts";
-import { useParams } from "react-router-dom";
-import { useGetCreditBalanceQuery } from "services/credit/credit";
+import Button from "components/ui/Button";
+import useApiErrorToast from "hooks/useApiErrorToast";
+import { useOpenBillingPortalMutation, useStartSubscriptionMutation } from "services/billing/billing";
+import type { BillingSummary } from "types/billing/billing";
 
-// Target width (px) of one notch + its gap, so notch count adapts to the
-// gauge's rendered width instead of a fixed count that looks sparse/cramped
-// once the container shrinks.
+// Target width (px) of one notch + its gap, so notch count adapts to the gauge's rendered width.
 const NOTCH_PITCH_PX = 4;
 
-const TIER_DATA: Record<string, { displayName: string }> = {
-    free: { displayName: "Découverte" },
-    pro: { displayName: "Pro" },
-    business: { displayName: "Business" },
-    enterprise: { displayName: "Enterprise" },
-};
+const fmtNumber = (n: number) => n.toLocaleString("fr-FR");
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+
+const Stat = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
+    <VStack align="start" spacing={0} minW={0}>
+        <Text variant="caption-sm-muted">{label}</Text>
+        <Text fontSize="lg" fontWeight="bold" color="textPrimary">
+            {value}
+        </Text>
+        {hint && <Text variant="body-xs-muted">{hint}</Text>}
+    </VStack>
+);
+
+const StatusBadge = ({ label, tone }: { label: string; tone: "accent" | "muted" }) => (
+    <HStack bg={tone === "accent" ? "accentIconBg" : "surfaceSubtle"} px={2} py={0.5} borderRadius="full" spacing={1}>
+        <Box w={1.5} h={1.5} borderRadius="full" bg={tone === "accent" ? "iconAccent" : "textFaint"} />
+        <Text fontSize="xs" color={tone === "accent" ? "iconAccent" : "textLabel"} fontWeight="semibold">
+            {label}
+        </Text>
+    </HStack>
+);
+
+/** The quota left this month, as a gauge that empties with use. */
+const MonthlyQuota = ({ left, quota, renewsOn }: { left: number; quota: number; renewsOn: string | null }) => (
+    <Box>
+        <HStack align="baseline" spacing={1} mb={1.5} flexWrap="wrap">
+            <Text fontSize="xl" fontWeight="bold" color="textPrimary">
+                {fmtNumber(left)}
+            </Text>
+            <Text variant="body-md-muted">/ {fmtNumber(quota)} crédits restants ce mois-ci</Text>
+        </HStack>
+        {/* ParentSize fills its parent: without a height, the text below would slide under the gauge. */}
+        <Box h="10px">
+            <ParentSize debounceTime={10}>
+                {({ width }) =>
+                    width > 0 ? (
+                        <Gauge
+                            orientation="linear"
+                            value={quota > 0 ? Math.round((left / quota) * 100) : 0}
+                            width={width}
+                            linearHeight={10}
+                            notchCornerRadius={3}
+                            notchWidthPercent={60}
+                            totalNotches={Math.max(20, Math.round(width / NOTCH_PITCH_PX))}
+                            inactiveFill="var(--border)"
+                        />
+                    ) : null
+                }
+            </ParentSize>
+        </Box>
+        {renewsOn && (
+            <Text variant="body-sm-muted" mt={1}>
+                Remis à {fmtNumber(quota)} le {fmtDate(renewsOn)}
+            </Text>
+        )}
+    </Box>
+);
 
 interface PlanCardProps {
-    tier: string;
+    workspaceId: string;
+    summary: BillingSummary;
 }
 
-const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
-    const { workspaceId } = useParams();
-    const { data: creditBalance, isLoading } = useGetCreditBalanceQuery(workspaceId ?? "", {
-        skip: !workspaceId,
-    });
+const PlanCard: React.FC<PlanCardProps> = ({ workspaceId, summary }) => {
+    const notifyError = useApiErrorToast();
+    const [startSubscription, { isLoading: isSubscribing }] = useStartSubscriptionMutation();
+    const [openPortal, { isLoading: isOpeningPortal }] = useOpenBillingPortalMutation();
+    const { plan, credits, limits, usage, subscription, subscriptionOffer: offer } = summary;
+    const price = offer.priceCents / 100;
+    const isSubscribed = plan === "PRO";
 
-    const data = TIER_DATA[tier] ?? TIER_DATA.free;
+    const goTo = async (start: () => Promise<{ url: string }>, errorTitle: string) => {
+        try {
+            window.location.assign((await start()).url);
+        } catch (error) {
+            notifyError(errorTitle, error);
+        }
+    };
 
-    const now = new Date();
-    const daysFromMonday = (now.getDay() + 6) % 7;
-    const lastMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysFromMonday);
-    const fmt = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
-
-    const total = creditBalance?.totalGranted ?? 0;
-    const balance = creditBalance?.balance ?? 0;
-    const consumed = total > 0 ? total - balance : 0;
-    const progress = total > 0 ? Math.min(100, Math.round((consumed / total) * 100)) : 0;
+    const badge = isSubscribed
+        ? subscription?.cancelAtPeriodEnd && subscription.currentPeriodEnd
+            ? { label: `Résilié, actif jusqu'au ${fmtDate(subscription.currentPeriodEnd)}`, tone: "muted" as const }
+            : { label: "Actif", tone: "accent" as const }
+        : plan === "FREE"
+          ? { label: "Bêta", tone: "accent" as const }
+          : null;
 
     return (
         <VStack w="100%" align="stretch" spacing={3}>
@@ -45,65 +104,60 @@ const PlanCard: React.FC<PlanCardProps> = ({ tier }) => {
                 Plan actuel
             </Text>
             <Card size="none" p={{ base: 4, md: 5 }}>
-                <HStack justify="space-between" mb={5} flexWrap="wrap" gap={3}>
+                <Stack direction={{ base: "column", md: "row" }} justify="space-between" mb={5} gap={3}>
                     <VStack align="start" spacing={0.5}>
                         <HStack spacing={2} flexWrap="wrap">
                             <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="textPrimary">
-                                {data.displayName}
+                                {plan === "NONE" ? "Aucun abonnement" : summary.planName}
                             </Text>
-                            <HStack bg="rgba(52,211,169,0.12)" px={2} py={0.5} borderRadius="full" spacing={1}>
-                                <Box w={1.5} h={1.5} borderRadius="full" bg="iconAccent" />
-                                <Text fontSize="xs" color="iconAccent" fontWeight="semibold">
-                                    Actif
-                                </Text>
-                            </HStack>
+                            {badge && <StatusBadge {...badge} />}
                         </HStack>
-                    </VStack>
-                </HStack>
-
-                <Stack direction={{ base: "column", md: "row" }} spacing={5} align={{ base: "center", md: "start" }}>
-                    <VStack flex={1} align="stretch" spacing={3} minW={0} w="100%">
-                        <Box>
-                            <Text variant="caption-sm-muted" mb={1}>
-                                Crédits du cycle
+                        {!isSubscribed && (
+                            <Text variant="body-sm-muted">
+                                Abonnement : {price} € par mois, {fmtNumber(offer.monthlyCredits)} crédits renouvelés
+                                chaque mois, {offer.maxAgents} agents et {offer.maxDatasets} bases.
                             </Text>
-                            {isLoading ? (
-                                <>
-                                    <Skeleton h="28px" w="180px" borderRadius="4px" mb={1.5} />
-                                    <Skeleton h="10px" borderRadius="4px" />
-                                </>
-                            ) : (
-                                <>
-                                    <HStack align="baseline" spacing={1} mb={1.5} flexWrap="wrap">
-                                        <Text fontSize="xl" fontWeight="bold" color="textPrimary">
-                                            {consumed.toLocaleString("fr-FR")}{" "}
-                                        </Text>
-                                        <Text variant="body-md-muted">/ {total.toLocaleString("fr-FR")} consommés</Text>
-                                    </HStack>
-                                    <ParentSize debounceTime={10}>
-                                        {({ width }) =>
-                                            width > 0 ? (
-                                                <Gauge
-                                                    orientation="linear"
-                                                    value={progress}
-                                                    width={width}
-                                                    linearHeight={10}
-                                                    notchCornerRadius={3}
-                                                    notchWidthPercent={60}
-                                                    totalNotches={Math.max(20, Math.round(width / NOTCH_PITCH_PX))}
-                                                    inactiveFill="var(--border)"
-                                                />
-                                            ) : null
-                                        }
-                                    </ParentSize>
-                                </>
-                            )}
-                            <HStack justify="space-between" mt={1} flexWrap="wrap" gap={1}>
-                                <Text variant="body-sm-muted">Cycle commencé le {fmt(lastMonday)}</Text>
-                            </HStack>
-                        </Box>
+                        )}
                     </VStack>
+                    {isSubscribed ? (
+                        <Button
+                            variant="secondary"
+                            leftIcon={CreditCard}
+                            isLoading={isOpeningPortal}
+                            onClick={() => goTo(() => openPortal(workspaceId).unwrap(), "Ouverture impossible")}
+                        >
+                            Gérer l&apos;abonnement
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="superPrimary"
+                            leftIcon={Sparkles}
+                            isLoading={isSubscribing}
+                            onClick={() => goTo(() => startSubscription(workspaceId).unwrap(), "Paiement impossible")}
+                        >
+                            S&apos;abonner, {price} €/mois
+                        </Button>
+                    )}
                 </Stack>
+
+                <VStack align="stretch" spacing={5}>
+                    {isSubscribed && (
+                        <MonthlyQuota
+                            left={credits.monthly}
+                            quota={credits.monthlyQuota}
+                            renewsOn={subscription?.cancelAtPeriodEnd ? null : (subscription?.currentPeriodEnd ?? null)}
+                        />
+                    )}
+                    <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={4}>
+                        <Stat
+                            label={isSubscribed ? "Crédits supplémentaires" : "Crédits disponibles"}
+                            value={fmtNumber(isSubscribed ? credits.purchased : credits.balance)}
+                            hint="Sans expiration"
+                        />
+                        <Stat label="Agents" value={`${usage.agents} / ${limits.agents}`} />
+                        <Stat label="Bases de connaissances" value={`${usage.datasets} / ${limits.datasets}`} />
+                    </SimpleGrid>
+                </VStack>
             </Card>
         </VStack>
     );

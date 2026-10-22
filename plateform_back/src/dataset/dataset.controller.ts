@@ -18,6 +18,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Dataset } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from 'src/workspace/guards/workspace-member.guard';
+import { PlanLimit } from 'src/workspace/guards/plan-limit.guard';
 import { DatasetService } from './dataset.service';
 import { DatasetBelongsToWorkspaceGuard } from './guard/dataset-workspace.guard';
 import { CreateDatasetRequest } from './dto/create-dataset.request';
@@ -32,6 +33,7 @@ export class DatasetController {
     constructor(private readonly datasetService: DatasetService) {}
 
     @Post()
+    @PlanLimit('datasets')
     create(@Param('workspaceId') workspaceId: string, @Body() dto: CreateDatasetRequest): Promise<Dataset> {
         return this.datasetService.create(workspaceId, dto);
     }

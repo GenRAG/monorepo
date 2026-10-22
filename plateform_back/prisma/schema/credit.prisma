@@ -2,6 +2,8 @@ model CreditBalance {
   id          String    @id @default(cuid())
   workspaceId String    @unique
   balance     Int       @default(0)
+  /// Part of `balance` that comes from the monthly quota: spent first, replaced at each paid invoice.
+  monthlyCredits Int     @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -13,6 +15,8 @@ model CreditTransaction {
   amount      Int
   type        CreditTransactionType
   metadata    Json?
+  /// Stripe object (invoice, checkout session) that granted these credits: a webhook delivered twice grants once.
+  stripeRef   String?               @unique
   createdAt   DateTime              @default(now())
   workspace   Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
@@ -21,4 +25,6 @@ enum CreditTransactionType {
   SUBSCRIPTION
   USAGE
   PURCHASE
+  /// Negative: what was left of a monthly quota when it was replaced or the subscription ended.
+  EXPIRATION
 }

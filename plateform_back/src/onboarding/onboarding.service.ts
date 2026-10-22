@@ -1,20 +1,23 @@
-import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { CreditTransactionType, OnboardingSession, Prisma } from 'generated/prisma';
+import {
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    Logger,
+    NotFoundException,
+} from '@nestjs/common';
+import { OnboardingSession, Prisma } from 'generated/prisma';
 import { AgentService } from 'src/agent/agent.service';
 import { DatasetService } from 'src/dataset/dataset.service';
 import { WorkflowService } from 'src/workflow/workflow.service';
 import { AgentRuntimeOrchestrator } from 'src/agent-runtime/agent-runtime.orchestrator';
 import type { PipelineBlock } from 'src/rag-engine/pipeline.schema';
-import { CreditBalanceService } from 'src/credit/credit-balance.service';
-import { CreditTransactionService } from 'src/credit/credit-transaction.service';
 import { OnboardingRepository } from './onboarding.repository';
 import { OnboardingSessionResponse } from './dto/onboarding-session.response';
 import { CompareOnboardingResponse } from './dto/compare-onboarding.request';
 import { InstructionStyle } from './dto/complete-onboarding.request';
 import { DEMO_WORKFLOW_DEFINITION } from './demo-workflow.definition';
 
-const ONBOARDING_INITIAL_CREDITS = 20;
-const ONBOARDING_BONUS_SOURCE = 'onboarding_bonus';
 const DEMO_DATASET_NAME = 'Documents de démonstration';
 
 // Steps whose chat goes through GET /onboarding/stream. `compare-intelligence` uses POST /compare.
@@ -47,8 +50,6 @@ export class OnboardingService {
         private readonly agentService: AgentService,
         private readonly workflowService: WorkflowService,
         private readonly orchestrator: AgentRuntimeOrchestrator,
-        private readonly creditBalanceService: CreditBalanceService,
-        private readonly creditTransactionService: CreditTransactionService,
         private readonly datasetService: DatasetService,
     ) {}
 
@@ -59,9 +60,23 @@ export class OnboardingService {
             return this.toResponse(existing);
         }
 
-        // Decided from the credit ledger, which the user cannot delete: the session goes away with the demo agent.
-        const grantsBonus = !(await this.creditTransactionService.hasGrantFrom(workspaceId, ONBOARDING_BONUS_SOURCE));
+        const claim = await this.onboardingRepository.claimStart(workspaceId);
+        if (claim === 'no-plan') throw new ForbiddenException('Abonnez-vous pour lancer la découverte guidée.');
+        if (claim === 'started') {
+            const winner = await this.onboardingRepository.findByUserAndWorkspace(userId, workspaceId);
+            if (winner) return this.toResponse(winner);
+            throw new ConflictException('La découverte guidée a déjà été faite pour cette entreprise.');
+        }
 
+        try {
+            return await this.createDemo(userId, workspaceId);
+        } catch (err) {
+            await this.onboardingRepository.releaseStart(workspaceId);
+            throw err;
+        }
+    }
+
+    private async createDemo(userId: string, workspaceId: string): Promise<OnboardingSessionResponse> {
         const agent = await this.agentService.insertOne(
             {
                 name: 'Demo Assistant',
@@ -89,19 +104,12 @@ export class OnboardingService {
         }
 
         // Everything below must succeed together: on failure the half-built onboarding is removed so that a
-        // retry starts clean instead of returning a session that lacks its dataset or credits.
+        // retry starts clean instead of returning a session that lacks its dataset.
         let datasetId: string | undefined;
         try {
             const dataset = await this.datasetService.create(workspaceId, { name: DEMO_DATASET_NAME });
             datasetId = dataset.id;
             await this.datasetService.attachToAgent(dataset.id, agent.id, workspaceId);
-            if (grantsBonus) {
-                await this.creditBalanceService.grantInitial(
-                    { workspaceId, amount: ONBOARDING_INITIAL_CREDITS },
-                    CreditTransactionType.SUBSCRIPTION,
-                    { source: ONBOARDING_BONUS_SOURCE },
-                );
-            }
         } catch (err) {
             await this.rollbackStart(agent.id, datasetId, workspaceId);
             throw err;

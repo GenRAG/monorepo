@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AgentFormPanel, type Template } from "components/Agents/AgentFormPanel";
 import { AgentPreviewPanel } from "components/Agents/AgentPreviewPanel";
 import { useCreateAgentMutation } from "services/agent/agent";
-import useThemedToast from "hooks/useThemedToast";
+import useApiErrorToast from "hooks/useApiErrorToast";
 import { makeFlowNode, linkNodes, withAutoSettings, serializeWorkflow, TaskType } from "@genrag/workflow";
 import mixpanel from "lib/mixpanel";
 import { BLANK_WORKFLOW } from "constants/agent/blankWorkflow";
@@ -38,7 +38,7 @@ interface CreateAgentModalProps {
 
 export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onClose, workspaceId }) => {
     const navigate = useNavigate();
-    const toast = useThemedToast();
+    const notifyError = useApiErrorToast();
     const [createAgent, { isLoading }] = useCreateAgentMutation();
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
     // Voile clair en light mode : un blackAlpha assombrit le fond flouté et donne un
@@ -67,16 +67,11 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
                 });
                 onClose();
                 void navigate(`/workspaces/${workspaceId}/agents/${agent.id}/workflow`);
-            } catch {
-                toast({
-                    title: "Erreur lors de la création",
-                    description: "Veuillez réessayer.",
-                    status: "error",
-                    duration: 3000,
-                });
+            } catch (error) {
+                notifyError("Erreur lors de la création", error);
             }
         },
-        [selectedTemplate, workspaceId, createAgent, navigate, onClose, toast],
+        [selectedTemplate, workspaceId, createAgent, navigate, onClose, notifyError],
     );
 
     return (

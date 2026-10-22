@@ -89,9 +89,9 @@ export class WorkspaceRepository {
         name: string;
         description?: string;
         userId: string;
-        plan?: PlanTier;
+        plan: PlanTier;
     }): Promise<WorkspaceWithUsers | null> {
-        const { name, description, userId, plan = PlanTier.FREE } = data;
+        const { name, description, userId, plan } = data;
         const { initialCredits } = getPlanConfig(plan);
 
         return this.prisma.$transaction(async (tx) => {
@@ -126,6 +126,14 @@ export class WorkspaceRepository {
 
     async updateName(id: string, name: string): Promise<Workspace> {
         return this.prisma.workspace.update({ where: { id }, data: { name } });
+    }
+
+    async findPlanUsage(id: string): Promise<{ plan: PlanTier; agents: number; datasets: number } | null> {
+        const workspace = await this.prisma.workspace.findUnique({
+            where: { id },
+            select: { plan: true, _count: { select: { agents: true, datasets: true } } },
+        });
+        return workspace && { plan: workspace.plan, ...workspace._count };
     }
 
     async exists(id: string): Promise<boolean> {

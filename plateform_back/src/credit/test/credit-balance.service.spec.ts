@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreditTransactionType } from 'generated/prisma';
 import { CreditBalanceService } from '../credit-balance.service';
 import { CreditBalanceRepository } from '../credit-balance.repository';
 import { CreditTransactionService } from '../credit-transaction.service';
@@ -7,7 +6,6 @@ import { jest, describe, expect, it, beforeEach } from '@jest/globals';
 
 const mockRepository: any = {
     getBalance: jest.fn(),
-    incrementOrCreate: jest.fn(),
 };
 
 const mockCreditTransactionService: any = {
@@ -46,51 +44,6 @@ describe('CreditBalanceService', () => {
             const result = await service.getBalance('ws-1');
 
             expect(result).toBe(0);
-        });
-    });
-
-    describe('grantInitial', () => {
-        it('should grant initial credits with upsert', async () => {
-            mockRepository.incrementOrCreate.mockResolvedValue(undefined);
-
-            await service.grantInitial({ workspaceId: 'ws-1', amount: 100 });
-
-            expect(mockRepository.incrementOrCreate).toHaveBeenCalledWith(
-                'ws-1',
-                100,
-                CreditTransactionType.SUBSCRIPTION,
-                undefined,
-            );
-        });
-
-        it('should create balance if not exists', async () => {
-            mockRepository.incrementOrCreate.mockResolvedValue(undefined);
-
-            await service.grantInitial({ workspaceId: 'new-ws', amount: 50 });
-
-            expect(mockRepository.incrementOrCreate).toHaveBeenCalledWith(
-                'new-ws',
-                50,
-                CreditTransactionType.SUBSCRIPTION,
-                undefined,
-            );
-        });
-
-        it('should forward a custom type and metadata', async () => {
-            mockRepository.incrementOrCreate.mockResolvedValue(undefined);
-
-            await service.grantInitial({ workspaceId: 'ws-1', amount: 20 }, CreditTransactionType.SUBSCRIPTION, {
-                source: 'onboarding_bonus',
-            });
-
-            expect(mockRepository.incrementOrCreate).toHaveBeenCalledWith(
-                'ws-1',
-                20,
-                CreditTransactionType.SUBSCRIPTION,
-                {
-                    source: 'onboarding_bonus',
-                },
-            );
         });
     });
 

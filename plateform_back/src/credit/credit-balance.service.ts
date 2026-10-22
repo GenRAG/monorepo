@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreditTransactionType } from 'generated/prisma';
 import { CreditBalanceRepository } from './credit-balance.repository';
 import { CreditTransactionService } from './credit-transaction.service';
-
-export type UpdateCreditBalance = {
-    workspaceId: string;
-    amount: number;
-};
 
 @Injectable()
 export class CreditBalanceService {
@@ -25,13 +19,5 @@ export class CreditBalanceService {
             this.creditTransactionService.getTotalGranted(workspaceId),
         ]);
         return { balance, totalGranted };
-    }
-
-    async grantInitial(
-        { workspaceId, amount }: UpdateCreditBalance,
-        type: CreditTransactionType = CreditTransactionType.SUBSCRIPTION,
-        metadata?: Record<string, unknown>,
-    ): Promise<void> {
-        await this.creditBalanceRepository.incrementOrCreate(workspaceId, amount, type, metadata);
     }
 }

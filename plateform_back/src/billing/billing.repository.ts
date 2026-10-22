@@ -57,12 +57,16 @@ export class BillingRepository {
     }
 
     /** Stripe customers of the workspaces about to be deleted with an account. */
-    async findCustomerIds(workspaceIds: string[]): Promise<string[]> {
+    async findCustomers(workspaceIds: string[]): Promise<{ workspaceId: string; stripeCustomerId: string }[]> {
         const workspaces = await this.prisma.workspace.findMany({
             where: { id: { in: workspaceIds }, stripeCustomerId: { not: null } },
-            select: { stripeCustomerId: true },
+            select: { id: true, stripeCustomerId: true },
         });
-        return workspaces.map((w) => w.stripeCustomerId!);
+        return workspaces.map((w) => ({ workspaceId: w.id, stripeCustomerId: w.stripeCustomerId! }));
+    }
+
+    async clearCustomerId(workspaceId: string): Promise<void> {
+        await this.prisma.workspace.update({ where: { id: workspaceId }, data: { stripeCustomerId: null } });
     }
 
     /**

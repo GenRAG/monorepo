@@ -124,7 +124,10 @@ export class BillingRepository {
         }
     }
 
-    /** A new billing period: what is left of the previous quota expires and the full quota comes back, once per invoice. */
+    /**
+     * A new billing period: what is left of the previous quota expires and the full quota comes back, once per invoice.
+     * A negative balance is paid from the new quota, which never exceeds the balance: the debt is taken once.
+     */
     private async renewMonthlyCredits(tx: Tx, workspaceId: string, credits: number, invoiceId: string): Promise<void> {
         const alreadyApplied = await tx.creditTransaction.findUnique({ where: { stripeRef: invoiceId } });
         if (alreadyApplied) return;
@@ -134,7 +137,9 @@ export class BillingRepository {
         });
         await tx.$executeRaw`
             UPDATE "CreditBalance"
-            SET "balance" = "balance" + ${credits}, "monthlyCredits" = ${credits}, "updatedAt" = NOW()
+            SET "balance" = "balance" + ${credits},
+                "monthlyCredits" = LEAST(${credits}, GREATEST("balance" + ${credits}, 0)),
+                "updatedAt" = NOW()
             WHERE "workspaceId" = ${workspaceId}`;
     }
 

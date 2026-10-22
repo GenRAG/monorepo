@@ -260,6 +260,25 @@ describe('Billing (e2e)', () => {
             expect(await balanceOf(workspaceId)).toEqual({ balance: 3_000, monthlyCredits: 1_000 });
         });
 
+        it('a renewal on a negative balance takes the debt off the new quota, so it is never charged twice', async () => {
+            const { cookie, workspaceId } = await subscribed('debt@test.com', 'sub_debt', -200, 0);
+            const agentId = await createAgent(app, cookie, workspaceId);
+
+            await deliver('invoice.paid', invoice('in_debt_1', 'sub_debt', workspaceId)).expect(200);
+            expect(await balanceOf(workspaceId)).toEqual({ balance: 49_800, monthlyCredits: 49_800 });
+
+            await app.get(UsageTrackerService).recordQuery({
+                workspaceId,
+                agentId,
+                query: 'q',
+                durationMs: 1,
+                status: QueryLogStatus.SUCCESS,
+                creditsUsed: 49_800,
+            });
+            await deliver('invoice.paid', invoice('in_debt_2', 'sub_debt', workspaceId)).expect(200);
+            expect(await balanceOf(workspaceId)).toEqual({ balance: 50_000, monthlyCredits: 50_000 });
+        });
+
         it('an invoice paid after the subscription ended grants nothing', async () => {
             const { workspaceId } = await subscribed('late@test.com', 'sub_late', 8_000, 6_000);
             subscriptions.set('sub_late', 'canceled');

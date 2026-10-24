@@ -1,0 +1,195 @@
+.scene {
+  position: relative;
+  padding: 72px 0 84px;
+}
+
+/* Halo teinté derrière la base */
+.scene::before {
+  content: "";
+  position: absolute;
+  inset: 4% -6% 4% 0;
+  z-index: -1;
+  border-radius: 40px;
+  background:
+    radial-gradient(260px circle at 85% 20%, rgba(139, 92, 246, 0.16), transparent 70%),
+    radial-gradient(300px circle at 15% 80%, rgba(18, 185, 140, 0.18), transparent 70%);
+  filter: blur(8px);
+}
+
+[data-tone] {
+  --tone-a: var(--green-300);
+  --tone-b: var(--green-600);
+}
+
+[data-tone="violet"] {
+  --tone-a: var(--violet-300);
+  --tone-b: var(--violet-500);
+}
+
+[data-tone="mix"] {
+  --tone-a: var(--green-400);
+  --tone-b: var(--violet-500);
+}
+
+.hub {
+  width: min(340px, 78%);
+  margin: 0 auto;
+  border-radius: 22px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 60px -32px rgba(var(--fg-rgb), 0.4);
+  overflow: hidden;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--text-strong);
+}
+
+.hubIcon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.pill {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  display: grid;
+  gap: 2px;
+}
+
+.rows li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.rows li svg {
+  grid-row: span 2;
+  color: var(--tone-b);
+}
+
+.rows li small {
+  font-size: 0.72rem;
+  color: var(--text-label);
+}
+
+/* Assistants d'équipe, posés autour de la base */
+.team {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(250px, 66%);
+  padding: 10px 14px 10px 10px;
+  border-radius: 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px -20px rgba(var(--fg-rgb), 0.45);
+}
+
+.team[data-pos="0"] {
+  top: 0;
+  left: 0;
+}
+
+.team[data-pos="1"] {
+  top: 46%;
+  right: -4%;
+}
+
+.team[data-pos="2"] {
+  bottom: 0;
+  left: 8%;
+}
+
+:global(:root:not([data-scheme="light"])) .hub,
+:global(:root:not([data-scheme="light"])) .team {
+  box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.8);
+}
+
+.teamIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--tone-a), var(--tone-b));
+  color: var(--light-surface);
+  box-shadow: 0 8px 18px -10px var(--tone-b);
+}
+
+.teamText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.teamText strong {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.teamText small {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.step {
+  animation: rise 0.6s var(--ease-out) both paused;
+  animation-delay: calc(0.3s + var(--d) * 0.18s);
+}
+
+/* Les animations attendent que l'illustration soit à l'écran ([data-in] posé par motion/stage.ts) */
+:global([data-in]) .step {
+  animation-play-state: running;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 560px) {
+  .team[data-pos="1"] {
+    right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step {
+    animation: none;
+  }
+}

@@ -1,9 +1,16 @@
 import { Search, CornerDownLeft } from "lucide-react";
-import { problem } from "../content";
 import { Panel } from "../components/Panel";
 import { DocIcon, SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
 import styles from "./Problem.module.css";
+
+const results = [
+  { name: "Contrat_Durand_v2.docx", where: "Drive › Commercial › 2024", kind: "doc" },
+  { name: "Contrat_Durand_v2_FINAL.docx", where: "Bureau", kind: "doc" },
+  { name: "Contrat_Durand_v3_signé.pdf", where: "Téléchargements", kind: "pdf" },
+  { name: "RE: RE: TR: contrat Durand", where: "Boîte mail", kind: "mail" },
+  { name: "Suivi_clients.xlsx", where: "Drive › Direction", kind: "sheet" },
+];
 
 const highlight = (name: string) =>
   name
@@ -13,7 +20,11 @@ const highlight = (name: string) =>
 export function Problem() {
   return (
     <Panel id="constat" label="Le constat" tone="open" className={styles.grid}>
-      <SectionIntro index={2} eyebrow={problem.eyebrow} title={problem.title} text={problem.text} />
+      <SectionIntro
+        eyebrow="Le constat"
+        title="L'information existe. Personne ne la trouve."
+        text="Un contrat sur le Drive, une procédure dans un PDF, des tarifs dans un Excel, la réponse dans un mail. Chaque question devient une chasse au fichier."
+      />
 
       <div
         className={styles.window}
@@ -23,17 +34,15 @@ export function Problem() {
       >
         <div className={styles.searchBar}>
           <Search size={16} aria-hidden />
-          <span className={styles.query}>{problem.search}</span>
+          <span className={styles.query}>contrat durand préavis</span>
           <span className={styles.caret} aria-hidden />
           <kbd className={styles.kbd}>
             <CornerDownLeft size={12} aria-hidden />
           </kbd>
         </div>
-        <p className={styles.count}>
-          {problem.results.length} {problem.resultsLabel}
-        </p>
+        <p className={styles.count}>{results.length} résultats</p>
         <ul className={styles.results}>
-          {problem.results.map((r, i) => (
+          {results.map((r, i) => (
             <li key={r.name} className={styles.row} {...reveal(3 + i)}>
               <DocIcon kind={r.kind} />
               <span className={styles.name}>{highlight(r.name)}</span>
@@ -42,7 +51,7 @@ export function Problem() {
           ))}
         </ul>
         <p className={styles.footnote} {...reveal(9)}>
-          {problem.footnote}
+          Laquelle est la bonne version ?
         </p>
       </div>
     </Panel>

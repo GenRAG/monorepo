@@ -5,37 +5,46 @@ import styles from "./ui.module.css";
 import { reveal } from "./reveal";
 
 interface SectionIntroProps {
-  index: number;
-  eyebrow: string;
+  /** Numéro « 01, 02… » calculé par un compteur CSS, propre à chaque page. */
+  numbered?: boolean;
+  eyebrow?: string;
   title: string;
   text?: string;
   align?: "left" | "center";
   as?: "h1" | "h2";
   wide?: boolean;
+  /** Le texte prolonge le titre, en plus discret, dans le même paragraphe. */
+  split?: boolean;
   children?: ReactNode;
 }
 
 export function SectionIntro({
-  index,
+  numbered = true,
   eyebrow,
   title,
   text,
   align = "left",
   as = "h2",
   wide,
+  split,
   children,
 }: SectionIntroProps) {
   const Title = as;
   return (
-    <div className={`${styles.intro} ${align === "center" ? styles.center : ""} ${wide ? styles.wide : ""}`}>
-      <p className={styles.eyebrow} {...reveal(0)}>
-        <span className={styles.eyebrowIndex}>{String(index).padStart(2, "0")}</span>
-        {eyebrow}
-      </p>
+    <div
+      className={`${styles.intro} ${align === "center" ? styles.center : ""} ${wide ? styles.wide : ""} ${split ? styles.split : ""}`}
+    >
+      {eyebrow && (
+        <p className={styles.eyebrow} {...reveal(0)}>
+          {numbered && <span className={styles.eyebrowIndex} />}
+          {eyebrow}
+        </p>
+      )}
       <Title className={as === "h1" ? styles.display : styles.title} {...reveal(1)}>
         {title}
+        {split && text && <span className={styles.muted}> {text}</span>}
       </Title>
-      {text && (
+      {!split && text && (
         <p className={styles.lead} {...reveal(2)}>
           {text}
         </p>

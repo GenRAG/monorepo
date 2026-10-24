@@ -1,5 +1,5 @@
 import { Bot, Check, LoaderCircle } from "lucide-react";
-import { reasoning } from "../../content";
+import { reasoning } from "./data";
 import { DocIcon } from "../../components/ui";
 import type { ReasoningDemoState } from "./useReasoningDemo";
 import styles from "./ReasoningChat.module.css";

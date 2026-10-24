@@ -1,14 +1,57 @@
-.grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 40px;
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(64px, 12vh, 128px);
+  padding-top: calc(var(--header-h) + clamp(24px, 6vh, 72px));
+}
+
+/* Le ruban déborde à droite jusqu'au bord de l'écran, derrière le texte */
+.art {
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * clamp(96px, 13vh, 160px) - var(--header-h));
+  right: calc(50% - 50vw);
+  width: min(64vw, 1040px);
+  height: calc(100% + 2 * clamp(96px, 13vh, 160px));
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
 }
 
 .copy {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 28px;
+  max-width: 680px;
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  padding: 6px 14px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-1);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 var(--accent-glow);
+  animation: pulse 2.4s ease-out infinite;
+}
+
+@keyframes pulse {
+  70% {
+    box-shadow: 0 0 0 8px transparent;
+  }
 }
 
 .ctas {
@@ -17,14 +60,15 @@
   gap: 12px;
 }
 
-.visualWrap {
-  display: flex;
-  justify-content: center;
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+  }
 }
 
-@media (max-width: 1023px) {
-  .grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 56px;
+@media (max-width: 860px) {
+  .art {
+    width: 120vw;
+    opacity: 0.45;
   }
 }

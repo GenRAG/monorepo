@@ -14,7 +14,7 @@ import {
   Maximize,
   Save,
 } from "lucide-react";
-import { builder } from "../content";
+import { builder } from "../sections/builder/data";
 import { GRAPHS, isShown, type GraphLayout, type MainNode, type OptionalBlock, type SettingNode } from "./builderGraph";
 import styles from "./BuilderCanvas.module.css";
 

@@ -1,0 +1,166 @@
+.grid {
+  list-style: none;
+  margin: clamp(48px, 8vh, 80px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  position: relative;
+  min-height: 420px;
+  border-radius: var(--r-xl);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    border-color 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out);
+}
+
+.wide {
+  grid-column: span 4;
+}
+.narrow {
+  grid-column: span 2;
+}
+.full {
+  grid-column: 1 / -1;
+  min-height: 300px;
+}
+
+/* Halo de couleur qui déborde du bas de la carte, derrière la maquette */
+.card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 35% -20% -45%;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.55;
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.8s var(--ease-out);
+}
+
+.green::before {
+  background: radial-gradient(closest-side, var(--green-300), rgba(52, 211, 169, 0.3) 55%, transparent);
+}
+.violet::before {
+  background: radial-gradient(closest-side, var(--violet-300), rgba(139, 92, 246, 0.28) 55%, transparent);
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 30px 70px -40px rgba(var(--fg-rgb), 0.35);
+}
+
+.card:hover::before {
+  opacity: 0.85;
+  transform: translateY(-6%) scale(1.05);
+}
+
+.link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.head {
+  display: grid;
+  gap: 8px;
+  padding: 28px 72px 0 28px;
+}
+
+.title {
+  font-size: clamp(1.2rem, 1rem + 0.5vw, 1.45rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-strong);
+}
+
+.text {
+  max-width: 420px;
+  color: var(--text-secondary);
+}
+
+.more {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.card:hover .more {
+  transform: translate(2px, -2px);
+}
+
+.visual {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+}
+
+.full .link {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+}
+
+.full .head {
+  padding-bottom: 28px;
+}
+
+/* La flèche occupe le coin haut : le graphique descend sous elle */
+.full .visual {
+  padding: 76px 28px 28px 0;
+}
+
+@media (max-width: 1023px) {
+  .wide,
+  .full {
+    grid-column: 1 / -1;
+  }
+  .narrow {
+    grid-column: span 3;
+  }
+}
+
+@media (max-width: 640px) {
+  .narrow {
+    grid-column: 1 / -1;
+  }
+  .card {
+    min-height: 0;
+  }
+  .full .link {
+    grid-template-columns: 1fr;
+  }
+  .full .head {
+    padding-bottom: 0;
+  }
+  .full .visual {
+    padding: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card::before,
+  .more {
+    transition: none;
+  }
+}

@@ -10,7 +10,7 @@
   gap: 12px;
   padding: 14px 16px 16px;
   border-radius: 12px;
-  background: var(--grey-950);
+  background: var(--bg-page);
   border: 1px solid var(--border-strong);
   box-shadow: -20px 0 50px -20px rgba(0, 0, 0, 0.8);
   overflow: hidden;
@@ -32,14 +32,14 @@
 .title {
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 .subtitle {
   margin-top: 2px;
   font-size: 10.5px;
   line-height: 1.4;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .close {
@@ -50,12 +50,12 @@
   height: 24px;
   margin-left: auto;
   border-radius: 6px;
-  color: var(--grey-300);
+  color: var(--text-secondary);
   transition: background 0.2s;
 }
 
 .closeHover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--fg-rgb), 0.1);
 }
 
 .tabs {
@@ -65,7 +65,7 @@
   padding: 0 16px;
   border-bottom: 1px solid var(--border);
   font-size: 11.5px;
-  color: var(--grey-300);
+  color: var(--text-secondary);
 }
 
 .tabs span {
@@ -73,7 +73,7 @@
 }
 
 .tabs .tabActive {
-  color: var(--grey-50);
+  color: var(--text-strong);
   box-shadow: inset 0 -2px 0 var(--green-400);
 }
 

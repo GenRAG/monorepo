@@ -32,6 +32,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Remis à zéro sur <main> : chaque page numérote ses sections à partir de 01 */
+.eyebrowIndex::before {
+  counter-increment: intro;
+  content: counter(intro, decimal-leading-zero);
+}
+
 .eyebrowRule {
   width: 28px;
   height: 1px;
@@ -41,7 +47,7 @@
 
 .display,
 .title {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-strong);
   letter-spacing: -0.035em;
   line-height: 1.02;
@@ -55,6 +61,42 @@
 .title {
   font-size: var(--fs-h2);
   line-height: 1.05;
+}
+
+/* Titre en deux tons : une phrase forte, prolongée par le texte en plus discret */
+.split {
+  max-width: 760px;
+}
+
+.split .display,
+.split .title {
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  text-wrap: pretty;
+}
+
+.split .display {
+  font-size: clamp(2rem, 1.25rem + 2.2vw, 3.2rem);
+}
+
+.split .title {
+  font-size: clamp(1.75rem, 1.1rem + 1.9vw, 2.75rem);
+}
+
+/* Le texte reste dans le titre (une seule phrase lue d'un trait), mais sur sa ligne et en plus petit */
+.muted {
+  display: block;
+  margin-top: 0.75rem;
+  max-width: 560px;
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+
+.display .muted {
+  font-size: clamp(1.05rem, 0.95rem + 0.3vw, 1.25rem);
 }
 
 .lead {
@@ -107,14 +149,14 @@
 
 .ghost {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--fg-rgb), 0.04);
   border: 1px solid var(--border-strong);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
 }
 .ghost:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(var(--fg-rgb), 0.08);
+  border-color: rgba(var(--fg-rgb), 0.24);
 }
 
 .docIcon {
@@ -124,7 +166,7 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--fg-rgb), 0.06);
   color: var(--grey-300);
 }
 .k_pdf {

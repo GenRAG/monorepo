@@ -1,0 +1,200 @@
+.scene {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(40px, 0.7fr) auto;
+  align-items: center;
+  min-height: 340px;
+}
+
+/* Halo derrière la base */
+.scene::before {
+  content: "";
+  position: absolute;
+  right: -10%;
+  top: 50%;
+  width: 70%;
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 60% 50%, rgba(139, 92, 246, 0.18), transparent 60%),
+    radial-gradient(circle at 40% 60%, rgba(18, 185, 140, 0.2), transparent 65%);
+  filter: blur(10px);
+}
+
+.files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.files li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 34px -22px rgba(var(--fg-rgb), 0.45);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Fichiers décalés, comme posés à la main */
+.files li:nth-child(even) {
+  margin-left: 18px;
+  margin-right: -18px;
+}
+
+.files li span:not(:first-child) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files li i {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.files li i[data-status="running"] {
+  background: var(--ai);
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+:global(:root:not([data-scheme="light"])) .files li {
+  box-shadow: 0 16px 34px -18px rgba(0, 0, 0, 0.8);
+}
+
+.lanes {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.lanes path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.7;
+  animation: flow 1.6s linear infinite;
+  animation-delay: calc(var(--d) * -0.4s);
+}
+
+.hub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  margin-bottom: 10px;
+  border-radius: 32px;
+  background: linear-gradient(135deg, var(--green-400), var(--violet-500));
+  color: var(--light-surface);
+  box-shadow:
+    0 24px 50px -20px var(--violet-500),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Onde qui part de la base à chaque passage indexé */
+.core::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 40px;
+  border: 1.5px solid var(--accent);
+  opacity: 0;
+  animation: wave 2.4s var(--ease-out) infinite;
+}
+
+.hub strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.hub small {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-label);
+}
+
+.step {
+  animation: rise 0.6s var(--ease-out) both paused;
+  animation-delay: calc(0.3s + var(--d) * 0.15s);
+}
+
+/* Les animations attendent que l'illustration soit à l'écran ([data-in] posé par motion/stage.ts) */
+:global([data-in]) .step {
+  animation-play-state: running;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes wave {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@media (max-width: 560px) {
+  .core {
+    width: 80px;
+    height: 80px;
+    border-radius: 26px;
+  }
+  .files li:nth-child(even) {
+    margin-left: 10px;
+    margin-right: -10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step,
+  .lanes path,
+  .core::after,
+  .files li i {
+    animation: none;
+  }
+}

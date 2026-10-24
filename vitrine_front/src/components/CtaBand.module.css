@@ -1,0 +1,50 @@
+.band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 64px);
+  width: 100%;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.title {
+  font-size: clamp(1.9rem, 1.1rem + 2.4vw, 3.1rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text-strong);
+  text-wrap: balance;
+}
+
+.text {
+  max-width: 520px;
+  font-size: var(--fs-lead);
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.art {
+  max-width: 380px;
+  justify-self: end;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .band {
+    grid-template-columns: 1fr;
+  }
+  .art {
+    display: none;
+  }
+}

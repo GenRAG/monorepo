@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Lock, RotateCw } from "lucide-react";
-import { builder } from "@vitrine/content";
+import { builder } from "@vitrine/sections/builder/data";
 import { DemoCursor } from "@vitrine/components/DemoCursor";
 import { AppSidebar } from "@vitrine/mockups/AppSidebar";
 import { BuilderCanvas } from "@vitrine/mockups/BuilderCanvas";

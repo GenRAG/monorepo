@@ -1,0 +1,28 @@
+.withArt,
+.solo {
+  width: 100%;
+  padding-top: calc(var(--header-h) - 24px);
+}
+
+.withArt {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 72px);
+}
+
+.art {
+  width: 100%;
+  max-width: 520px;
+  justify-self: end;
+}
+
+@media (max-width: 860px) {
+  .withArt {
+    grid-template-columns: 1fr;
+  }
+  .art {
+    max-width: 420px;
+    justify-self: center;
+  }
+}

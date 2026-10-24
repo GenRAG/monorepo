@@ -70,7 +70,7 @@
 }
 
 .swatch input:focus-visible + .swatchDot {
-  outline: 2px solid var(--green-400);
+  outline: 2px solid var(--accent);
   outline-offset: 6px;
 }
 
@@ -98,7 +98,7 @@
   height: 20px;
   border-radius: 50%;
   background: var(--accent-soft);
-  color: var(--green-400);
+  color: var(--accent);
 }
 
 .demo {
@@ -116,11 +116,11 @@
   border-radius: 50%;
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
-  color: var(--grey-300);
+  color: var(--text-secondary);
 }
 
 .pause:hover {
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 @media (max-width: 1023px) {

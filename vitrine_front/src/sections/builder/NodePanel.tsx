@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { builder } from "../../content";
+import { builder } from "./data";
 import type { BuilderDemoState } from "./useBuilderDemo";
 import { BlockOverview } from "./BlockOverview";
 import { ModelPicker } from "./ModelPicker";

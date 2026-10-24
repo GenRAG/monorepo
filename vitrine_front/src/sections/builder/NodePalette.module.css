@@ -34,6 +34,15 @@
   overflow: hidden;
 }
 
+:global(:root[data-scheme="light"]) .backdrop {
+  background: rgba(var(--fg-rgb), 0.08);
+}
+
+:global(:root[data-scheme="light"]) .palette {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 30px 60px -20px rgba(var(--fg-rgb), 0.3);
+}
+
 .open .palette {
   transform: none;
 }
@@ -49,7 +58,7 @@
 .searchIcon,
 .close {
   flex: none;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .search {
@@ -59,7 +68,7 @@
   height: 34px;
   padding: 0 10px;
   border-radius: 8px;
-  border: 1px solid var(--grey-700);
+  border: 1px solid var(--border-strong);
   font-size: 12.5px;
   transition:
     border-color 0.2s,
@@ -72,11 +81,11 @@
 }
 
 .placeholder {
-  color: var(--grey-500);
+  color: var(--text-faint);
 }
 
 .query {
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 .caret {
@@ -109,7 +118,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .divider {
@@ -144,7 +153,7 @@
 }
 
 .active {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(var(--fg-rgb), 0.07);
 }
 
 .rowIcon {
@@ -154,7 +163,7 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--fg-rgb), 0.06);
   color: var(--green-300);
 }
 
@@ -171,12 +180,12 @@
   gap: 8px;
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 .rowDesc {
   font-size: 10.5px;
-  color: var(--grey-400);
+  color: var(--text-label);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -185,7 +194,7 @@
 .info {
   flex: none;
   margin-left: auto;
-  color: var(--grey-500);
+  color: var(--text-faint);
 }
 
 .used {
@@ -200,7 +209,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .hints {
@@ -210,7 +219,7 @@
   padding: 9px 12px;
   border-top: 1px solid var(--border);
   font-size: 10px;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .hint {
@@ -223,11 +232,11 @@
   min-width: 16px;
   padding: 1px 4px;
   border-radius: 4px;
-  border: 1px solid var(--grey-600);
+  border: 1px solid var(--border-strong);
   font-family: inherit;
   font-size: 9px;
   text-align: center;
-  color: var(--grey-200);
+  color: var(--text-primary);
 }
 
 @media (max-width: 560px) {

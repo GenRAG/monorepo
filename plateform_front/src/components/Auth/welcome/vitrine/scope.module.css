@@ -59,6 +59,7 @@
   --accent-glow: rgba(18, 185, 140, 0.2);
   --ai: var(--violet-400);
   --ai-soft: rgba(139, 92, 246, 0.14);
+  --fg-rgb: 255, 255, 255;
 
   /* Section claire */
   --light-bg: var(--olive-50);

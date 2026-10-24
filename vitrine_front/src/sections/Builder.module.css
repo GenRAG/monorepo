@@ -32,7 +32,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--green-300);
+  color: var(--accent);
 }
 
 .head {
@@ -62,11 +62,11 @@
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  color: var(--grey-300);
+  color: var(--text-secondary);
 }
 
 .pause:hover {
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 /* Fenêtre de navigateur, même chrome que la section Partage */
@@ -77,6 +77,12 @@
   box-shadow:
     var(--glass-shadow),
     0 50px 100px -40px rgba(0, 0, 0, 0.9);
+}
+
+:global(:root[data-scheme="light"]) .browser {
+  background: var(--surface-2);
+  border-color: var(--border);
+  box-shadow: 0 40px 80px -40px rgba(var(--fg-rgb), 0.28);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   overflow: hidden;
@@ -99,7 +105,7 @@
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(var(--fg-rgb), 0.14);
 }
 
 .url {
@@ -113,9 +119,9 @@
   margin: 0 auto;
   padding: 0 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--fg-rgb), 0.06);
   font-size: 0.8125rem;
-  color: var(--grey-100);
+  color: var(--text-primary);
 }
 
 .url span {
@@ -131,17 +137,16 @@
 
 .reload {
   flex: none;
-  color: var(--grey-500);
+  color: var(--text-faint);
 }
 
 .window {
   display: flex;
   gap: 8px;
-  height: clamp(340px, calc(100vh - 440px), 560px);
+  height: clamp(460px, calc(100vh - 280px), 680px);
   margin: 0 8px 8px;
-  padding: 8px;
   border-radius: 16px;
-  background: var(--grey-975);
+  background: var(--bg-shell);
 }
 
 /* Le canvas en disposition verticale fixe lui-même sa hauteur */
@@ -154,7 +159,7 @@
     --pad: clamp(72px, 12vw, 104px);
   }
   .window {
-    height: 420px;
+    height: 500px;
   }
 }
 

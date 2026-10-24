@@ -13,6 +13,13 @@
   overflow: hidden;
 }
 
+/* Thème clair du site vitrine (l'app n'a pas data-scheme sur <html> : reste sombre) */
+:global(:root[data-scheme="light"]) .browser {
+  background: var(--surface-2);
+  border-color: var(--border);
+  box-shadow: 0 40px 80px -40px rgba(var(--fg-rgb), 0.28);
+}
+
 .chrome {
   display: flex;
   align-items: center;
@@ -30,7 +37,7 @@
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(var(--fg-rgb), 0.14);
 }
 
 .url {
@@ -44,9 +51,9 @@
   margin: 0 auto;
   padding: 0 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--fg-rgb), 0.06);
   font-size: 0.8125rem;
-  color: var(--grey-100);
+  color: var(--text-primary);
   transition: box-shadow 0.25s;
 }
 
@@ -58,7 +65,7 @@
 
 .url svg {
   flex: none;
-  color: var(--green-400);
+  color: var(--accent);
 }
 
 .urlEditing {
@@ -83,7 +90,7 @@
 
 .reload {
   flex: none;
-  color: var(--grey-500);
+  color: var(--text-faint);
 }
 
 /* ---------- Écrans (déploiement puis chatbot) ---------- */
@@ -121,7 +128,7 @@
   display: flex;
   flex-direction: column;
   padding: 22px 24px;
-  background: var(--grey-950);
+  background: var(--bg-page);
   border: 1px solid var(--border);
 }
 
@@ -145,12 +152,12 @@
 .deployTitle {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 .deploySub {
   font-size: 0.75rem;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .label {
@@ -159,7 +166,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .field {
@@ -169,8 +176,8 @@
   margin-bottom: 18px;
   padding: 0 12px;
   border-radius: 10px;
-  border: 1px solid var(--grey-700);
-  background: var(--grey-900);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-1);
   font-size: 0.9375rem;
   transition:
     border-color 0.2s,
@@ -178,17 +185,17 @@
 }
 
 .fieldFocus {
-  border-color: var(--green-400);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(52, 211, 169, 0.14);
 }
 
 .sub {
-  color: var(--grey-50);
+  color: var(--text-strong);
   font-weight: 600;
 }
 
 .domain {
-  color: var(--grey-500);
+  color: var(--text-faint);
 }
 
 .colors {
@@ -208,7 +215,7 @@
 
 .colorOn {
   box-shadow:
-    0 0 0 2px var(--grey-950),
+    0 0 0 2px var(--bg-page),
     0 0 0 4px var(--c);
 }
 
@@ -219,7 +226,7 @@
   gap: 8px;
   height: 42px;
   border-radius: 10px;
-  background: var(--green-400);
+  background: var(--accent);
   color: var(--grey-975);
   font-size: 0.875rem;
   font-weight: 700;
@@ -238,7 +245,7 @@
   transform: none;
   box-shadow: none;
   background: rgba(52, 211, 169, 0.16);
-  color: var(--green-300);
+  color: var(--accent);
 }
 
 .spin {
@@ -259,7 +266,7 @@
   padding: 0;
   list-style: none;
   font-size: 0.8125rem;
-  color: var(--grey-500);
+  color: var(--text-faint);
   opacity: 0;
   transform: translateY(6px);
   transition:
@@ -285,7 +292,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 1px solid var(--grey-700);
+  border: 1px solid var(--border-strong);
   color: transparent;
   transition:
     background 0.3s,
@@ -294,12 +301,12 @@
 }
 
 .steps .stepDone {
-  color: var(--grey-100);
+  color: var(--text-primary);
 }
 
 .stepDone .tick {
-  background: var(--green-400);
-  border-color: var(--green-400);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--grey-975);
   animation: tick 0.35s var(--ease-out);
 }

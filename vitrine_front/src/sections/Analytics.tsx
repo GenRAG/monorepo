@@ -1,15 +1,32 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { MessagesSquare, Timer, Coins, Info } from "lucide-react";
-import { analytics, site } from "../content";
 import { Panel } from "../components/Panel";
 import { SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
 import { useHasEntered } from "../motion/store";
-import { sectionIndex } from "../motion/MotionContext";
 import { prefersReducedMotion } from "../motion/reduced";
 import styles from "./Analytics.module.css";
 
-const INDEX = sectionIndex("suivi");
+const kpis = [
+  { label: "Questions ce mois", value: 1284, format: "int" },
+  { label: "Temps de réponse moyen", value: 2.1, format: "sec" },
+  { label: "Crédits consommés ce mois", value: 1284, format: "credits" },
+];
+
+// 30 points fictifs
+const series = [
+  18, 22, 20, 26, 31, 12, 9, 34, 38, 36, 41, 44, 15, 11, 40, 46, 43, 49, 52, 19, 14, 47, 55, 51, 58, 61, 22, 17, 57, 64,
+];
+
+const topics = [
+  { label: "Télétravail", value: 142 },
+  { label: "Congés", value: 118 },
+  { label: "Notes de frais", value: 87 },
+  { label: "Mutuelle", value: 61 },
+  { label: "Tickets restaurant", value: 44 },
+];
+
+const ID = "suivi";
 const kpiIcons = [MessagesSquare, Timer, Coins];
 const CHART = { w: 640, h: 200, pad: 8 };
 
@@ -56,8 +73,8 @@ function smoothPath(values: number[]) {
   return { line: d, area: `${d}L${CHART.w} ${CHART.h}L0 ${CHART.h}Z` };
 }
 
-const { line, area } = smoothPath(analytics.series);
-const topicMax = Math.max(...analytics.topics.map((t) => t.value));
+const { line, area } = smoothPath(series);
+const topicMax = Math.max(...topics.map((t) => t.value));
 
 function Kpi({
   label,
@@ -81,20 +98,24 @@ function Kpi({
       </p>
       <p className={styles.kpiValue}>
         {fmt(v, format)}
-        {format === "credits" && <span className={styles.unit}>{analytics.creditUnit}</span>}
+        {format === "credits" && <span className={styles.unit}>crédits</span>}
       </p>
     </div>
   );
 }
 
 export function Analytics() {
-  const entered = useHasEntered(INDEX);
+  const entered = useHasEntered(ID);
   return (
     <Panel id="suivi" label="Suivi" tone="open" className={styles.layout}>
       <div className={styles.side}>
-        <SectionIntro index={9} eyebrow={analytics.eyebrow} title={analytics.title} text={analytics.text}>
+        <SectionIntro
+          eyebrow="Suivi"
+          title="Sachez ce que votre équipe demande."
+          text="Volume de questions, sujets fréquents, temps de réponse et crédits consommés, assistant par assistant."
+        >
           <p className={styles.demo} {...reveal(3)}>
-            {site.demoLabel}
+            Données de démonstration
           </p>
         </SectionIntro>
       </div>
@@ -106,7 +127,7 @@ export function Analytics() {
         role="img"
         aria-label="Tableau de bord d'exemple : nombre de questions, temps de réponse, crédits consommés ce mois, évolution sur 30 jours et questions fréquentes"
       >
-        {analytics.kpis.map((k, i) => (
+        {kpis.map((k, i) => (
           <Kpi key={k.label} {...k} index={i} start={entered} />
         ))}
         <span className={`${styles.cell} ${styles.empty}`} data-area="e1" aria-hidden />
@@ -115,7 +136,7 @@ export function Analytics() {
         <div className={styles.cell} data-area="ch" aria-hidden>
           <div className={styles.cellHead}>
             <p className={styles.cellTitle}>
-              {analytics.chartTitle} <Info size={12} />
+              Volume de questions <Info size={12} />
             </p>
             <span className={styles.periods}>
               <i>7j</i>
@@ -155,10 +176,10 @@ export function Analytics() {
 
         <div className={styles.cell} data-area="tp" aria-hidden>
           <div className={styles.cellHead}>
-            <p className={styles.cellTitle}>{analytics.topicsTitle}</p>
+            <p className={styles.cellTitle}>Questions fréquentes</p>
           </div>
           <ul className={styles.topics}>
-            {analytics.topics.map((t, i) => (
+            {topics.map((t, i) => (
               <li key={t.label} style={{ "--w": t.value / topicMax, "--d": `${i * 90}ms` } as CSSProperties}>
                 <span className={styles.topicLabel}>{t.label}</span>
                 <span className={styles.topicValue}>{t.value}</span>

@@ -1,0 +1,190 @@
+.grid {
+  list-style: none;
+  margin: clamp(40px, 6vh, 64px) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.card {
+  --tone-a: var(--green-300);
+  --tone-b: var(--green-600);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 24px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 60px -48px rgba(var(--fg-rgb), 0.4);
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.4s var(--ease-out),
+    border-color 0.3s,
+    box-shadow 0.4s;
+}
+
+:global(:root:not([data-scheme="light"])) .card {
+  box-shadow: 0 30px 60px -40px rgba(0, 0, 0, 0.8);
+}
+
+.card[data-tone="violet"] {
+  --tone-a: var(--violet-300);
+  --tone-b: var(--violet-500);
+}
+
+.card[data-tone="mix"] {
+  --tone-a: var(--green-400);
+  --tone-b: var(--violet-500);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--tone-b) 40%, var(--border));
+}
+
+/* Échange type, sur un fond teinté de la couleur de l'équipe */
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 20px;
+  background:
+    radial-gradient(260px circle at 90% 0%, color-mix(in srgb, var(--tone-a) 24%, transparent), transparent 70%),
+    var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.question {
+  align-self: flex-end;
+  max-width: 88%;
+  padding: 8px 12px;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--text-strong);
+  color: var(--bg-shell);
+}
+
+.answer {
+  display: flex;
+  gap: 10px;
+  color: var(--text-primary);
+}
+
+.bot {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--tone-a), var(--tone-b));
+  color: var(--light-surface);
+}
+
+.source {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.source svg {
+  color: var(--accent);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--tone-a), var(--tone-b));
+  color: var(--light-surface);
+  box-shadow: 0 10px 22px -12px var(--tone-b);
+}
+
+.team {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text-strong);
+}
+
+.docs {
+  font-size: 0.85rem;
+  color: var(--text-label);
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.more svg,
+.all svg {
+  transition: transform 0.3s var(--ease-out);
+}
+
+.card:hover .more svg,
+.all:hover svg {
+  transform: translateX(4px);
+}
+
+.all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .more svg,
+  .all svg {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}

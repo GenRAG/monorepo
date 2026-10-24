@@ -12,7 +12,7 @@ import {
   Languages,
   ListCollapse,
 } from "lucide-react";
-import { builder } from "../../content";
+import { builder } from "./data";
 import { BLOCK_ORDER, type BuilderDemoState } from "./useBuilderDemo";
 import styles from "./NodePalette.module.css";
 

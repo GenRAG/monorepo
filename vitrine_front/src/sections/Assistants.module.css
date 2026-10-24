@@ -31,7 +31,7 @@
   padding: 0 14px 0 5px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(var(--fg-rgb), 0.03);
   color: var(--text-label);
   font-size: 0.875rem;
   font-weight: 500;
@@ -61,7 +61,7 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(var(--fg-rgb), 0.06);
   transition:
     background-color 0.25s,
     color 0.25s;
@@ -123,26 +123,47 @@
 
 .card {
   --gap: 28px;
+  --tone-a: var(--green-300);
+  --tone-b: var(--green-600);
   grid-area: 1 / 1;
   justify-self: center;
   width: min(100%, 1040px);
-  min-height: clamp(460px, 58vh, 560px);
+  min-height: clamp(460px, 56vh, 540px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  border-radius: var(--r-xl);
-  background: linear-gradient(180deg, var(--grey-900), var(--grey-950));
-  border: 1px solid var(--border-strong);
-  box-shadow:
-    0 40px 90px -40px rgba(0, 0, 0, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  border-radius: 28px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 40px 80px -48px rgba(var(--fg-rgb), 0.45);
   overflow: hidden;
   transform: translateX(calc(var(--off) * (100% + var(--gap)))) scale(0.93);
   opacity: 0;
   transition:
     transform 0.8s var(--ease-out),
-    opacity 0.8s var(--ease-out),
-    border-color 0.3s;
+    opacity 0.8s var(--ease-out);
   user-select: none;
+}
+
+/* En sombre, une ombre de la couleur du texte ferait un halo clair */
+:global(:root:not([data-scheme="light"])) .card {
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+}
+
+:global(:root:not([data-scheme="light"])) .chat {
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+}
+
+.card[data-tone="violet"] {
+  --tone-a: var(--violet-300);
+  --tone-b: var(--violet-500);
+}
+.card[data-tone="mix"] {
+  --tone-a: var(--green-400);
+  --tone-b: var(--violet-500);
+}
+.card[data-tone="warm"] {
+  --tone-a: var(--orange-400);
+  --tone-b: var(--red-400);
 }
 
 .card[data-position="center"] {
@@ -153,12 +174,12 @@
 }
 
 .card[data-position="side"] {
-  opacity: 0.32;
+  opacity: 0.4;
   cursor: pointer;
 }
 
 .card[data-position="side"]:hover {
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 /* Une carte qui passe d'un bord à l'autre ne doit pas traverser l'écran */
@@ -166,49 +187,186 @@
   transition: opacity 0.4s;
 }
 
-/* ---------- Volet conversation ---------- */
-.chatPane {
-  position: relative;
+/* ---------- Volet présentation ---------- */
+.infoPane {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 32px;
-  background: radial-gradient(420px circle at 0% 0%, rgba(18, 185, 140, 0.1), transparent 70%), var(--grey-975);
-  border-right: 1px solid var(--border);
+  gap: 18px;
+  padding: 40px 36px 32px 40px;
+}
+
+.portrait {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, var(--tone-a), var(--tone-b));
+  color: var(--light-surface);
+  box-shadow: 0 12px 28px -12px var(--tone-b);
+}
+
+.discover {
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.cardTitle {
+  font-size: clamp(1.5rem, 1.2rem + 0.7vw, 1.9rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text-strong);
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 0.975rem;
+}
+
+.skills {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 12px;
+}
+
+.skills li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.more {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 0.8125rem;
+  color: var(--text-label);
+}
+
+/* ---------- Volet conversation : une fenêtre de chat posée sur un fond teinté ---------- */
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 36px;
+  background:
+    radial-gradient(380px circle at 85% 10%, color-mix(in srgb, var(--tone-a) 28%, transparent), transparent 70%),
+    radial-gradient(360px circle at 10% 100%, color-mix(in srgb, var(--tone-b) 20%, transparent), transparent 70%),
+    var(--surface-2);
+  border-left: 1px solid var(--border);
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+  border-radius: 18px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 48px -28px rgba(var(--fg-rgb), 0.4);
+  overflow: hidden;
+}
+
+.chatHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--text-strong);
+}
+
+.chatAvatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--tone-a), var(--tone-b));
+  color: var(--light-surface);
+}
+
+.online {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-label);
+}
+
+.online::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.chatBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 18px;
 }
 
 .userMsg {
   align-self: flex-end;
   max-width: 85%;
-  padding: 11px 15px;
+  padding: 10px 14px;
   border-radius: 16px 16px 4px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  font-size: 0.9375rem;
+  background: var(--text-strong);
+  color: var(--bg-shell);
+  font-size: 0.9rem;
 }
 
 .botMsg {
   display: flex;
-  gap: 12px;
-  flex: 1;
+  gap: 10px;
 }
 
 .botAvatar {
   display: grid;
   place-items: center;
   flex: none;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 8px;
-  background: rgba(52, 211, 169, 0.12);
-  border: 1px solid rgba(52, 211, 169, 0.3);
-  color: var(--green-300);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .answer {
   min-height: 4.8em;
   color: var(--text-primary);
-  font-size: 0.9375rem;
+  font-size: 0.9rem;
   line-height: 1.6;
 }
 
@@ -218,16 +376,15 @@
   height: 7px;
   margin-left: 4px;
   border-radius: 50%;
-  background: var(--green-400);
+  background: var(--accent);
   animation: pulse 0.9s ease-in-out infinite;
 }
 
 .sources {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 10px;
   opacity: 0;
   transform: translateY(6px);
   transition:
@@ -240,38 +397,34 @@
   transform: none;
 }
 
-.sourcesLabel {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin-right: 4px;
-}
-
 .source {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 4px 9px;
   border-radius: 8px;
-  border: 1px solid rgba(52, 211, 169, 0.3);
-  background: rgba(52, 211, 169, 0.06);
-  color: var(--green-200);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-secondary);
   font-size: 0.75rem;
+}
+
+.source svg {
+  color: var(--accent);
 }
 
 .input {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 44px;
-  padding: 0 7px 0 15px;
+  height: 42px;
+  margin: 0 14px 14px;
+  padding: 0 6px 0 14px;
   border-radius: 12px;
-  background: var(--grey-900);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text-faint);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
 }
 
 .send {
@@ -280,96 +433,8 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: var(--grey-800);
-  color: var(--grey-400);
-}
-
-/* ---------- Volet présentation ---------- */
-.infoPane {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 36px 36px 30px;
-}
-
-.identity {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.portrait {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: radial-gradient(circle at 30% 20%, rgba(110, 231, 199, 0.35), transparent 60%), var(--green-800);
-  border: 1px solid rgba(110, 231, 199, 0.35);
-  color: var(--green-100);
-  box-shadow: 0 10px 30px -10px rgba(52, 211, 169, 0.5);
-}
-
-.discover {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--green-300);
-}
-
-.cardTitle {
-  font-size: clamp(1.5rem, 1.2rem + 0.7vw, 1.95rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--text-strong);
-}
-
-.description {
-  color: var(--text-secondary);
-  font-size: 1rem;
-}
-
-.skills {
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.skills li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 52px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid var(--border);
-  font-size: 0.9375rem;
-  color: var(--text-primary);
-}
-
-.check {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(52, 211, 169, 0.14);
-  color: var(--green-300);
-}
-
-.more {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: auto;
-  font-size: 0.8125rem;
-  color: var(--text-label);
+  background: var(--text-strong);
+  color: var(--bg-shell);
 }
 
 @keyframes pulse {
@@ -403,13 +468,12 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .infoPane {
-    order: -1;
-    padding: 20px;
+    padding: 24px 20px 20px;
   }
-  .chatPane {
-    border-right: 0;
+  .stage {
+    border-left: 0;
     border-top: 1px solid var(--border);
-    padding: 20px;
+    padding: 16px;
   }
   .card[data-position="side"] {
     opacity: 0;

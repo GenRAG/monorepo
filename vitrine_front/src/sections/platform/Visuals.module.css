@@ -1,0 +1,423 @@
+/* Mini-maquettes des cartes : surfaces claires sur le halo, ombres douces */
+.canvas,
+.models,
+.docs,
+.chat,
+.browser,
+.chart {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ---------- Éditeur ---------- */
+.canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: none;
+  padding: 36px 20px;
+  border-radius: var(--r-lg);
+  background-color: var(--surface-1);
+  background-image: radial-gradient(rgba(var(--fg-rgb), 0.14) 1px, transparent 1px);
+  background-size: 16px 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 60px -36px rgba(var(--fg-rgb), 0.4);
+}
+
+.nodeWrap {
+  display: flex;
+  align-items: center;
+  animation: pop 0.6s var(--ease-out) both;
+  animation-delay: calc(var(--n) * 160ms + 200ms);
+}
+
+.node {
+  display: grid;
+  gap: 8px;
+  min-width: 128px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 8px 20px -12px rgba(var(--fg-rgb), 0.35);
+}
+
+.nodeAi {
+  border-color: var(--ai);
+}
+
+.nodeIcon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.nodeAi .nodeIcon {
+  background: var(--ai-soft);
+  color: var(--ai);
+}
+
+.nodeLabel {
+  font-weight: 600;
+  font-size: var(--fs-small);
+  color: var(--text-strong);
+}
+
+.modelChip {
+  justify-self: start;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ai-soft);
+  color: var(--ai);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.edge {
+  width: clamp(20px, 4vw, 48px);
+  height: 0;
+  border-top: 2px dashed var(--accent);
+  opacity: 0.7;
+}
+
+/* ---------- Modèles ---------- */
+.models {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.modelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 24px -18px rgba(var(--fg-rgb), 0.4);
+  color: var(--text-strong);
+}
+
+.picked {
+  border-color: var(--ai);
+}
+
+.modelLogo {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  background: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+.modelName {
+  display: grid;
+  flex: 1;
+  font-weight: 600;
+  font-size: var(--fs-small);
+}
+
+.modelName small {
+  font-weight: 400;
+  color: var(--text-label);
+}
+
+.pickedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--ai-soft);
+  color: var(--ai);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* ---------- Documents ---------- */
+.docs {
+  display: grid;
+  gap: 14px;
+}
+
+.files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.files li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  animation: pop 0.6s var(--ease-out) both;
+  animation-delay: calc(var(--n) * 140ms + 200ms);
+}
+
+.base {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px -26px rgba(var(--fg-rgb), 0.45);
+  color: var(--text-strong);
+  font-size: var(--fs-small);
+}
+
+.progress {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(var(--fg-rgb), 0.1);
+  overflow: hidden;
+}
+
+.progress::after {
+  content: "";
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  animation: fill 2.4s var(--ease-out) both 0.6s;
+}
+
+.indexed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ---------- Réponses ---------- */
+.chat {
+  display: grid;
+  gap: 10px;
+}
+
+.question {
+  justify-self: end;
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--accent);
+  color: var(--bg-shell);
+  font-size: var(--fs-small);
+  font-weight: 500;
+}
+
+.answer {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px -26px rgba(var(--fg-rgb), 0.45);
+  font-size: var(--fs-small);
+  color: var(--text-primary);
+}
+
+.answerIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--ai-soft);
+  color: var(--ai);
+}
+
+.source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ---------- Partage ---------- */
+.browser {
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px -26px rgba(var(--fg-rgb), 0.45);
+  overflow: hidden;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bar i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(var(--fg-rgb), 0.15);
+}
+
+.url {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 28px 16px;
+  background: linear-gradient(180deg, var(--accent-soft), transparent 70%), var(--surface-1);
+}
+
+.live,
+.people {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.live {
+  background: var(--accent);
+  color: var(--bg-shell);
+}
+
+.people {
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+/* ---------- Suivi ---------- */
+.chart {
+  max-width: none;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px -26px rgba(var(--fg-rgb), 0.45);
+}
+
+.chartLabel {
+  margin-bottom: 14px;
+  font-size: var(--fs-small);
+  color: var(--text-label);
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 140px;
+}
+
+.bars span {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--ai), var(--violet-300));
+  transform-origin: 50% 100%;
+  animation: grow 0.9s var(--ease-out) both;
+  animation-delay: calc(var(--n) * 45ms + 200ms);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Les animations attendent que la carte soit à l'écran ([data-in] posé par motion/stage.ts) */
+.nodeWrap,
+.files li,
+.progress::after,
+.bars span {
+  animation-play-state: paused;
+}
+
+:global([data-in]) .nodeWrap,
+:global([data-in]) .files li,
+:global([data-in]) .progress::after,
+:global([data-in]) .bars span {
+  animation-play-state: running;
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .canvas,
+  .nodeWrap {
+    flex-direction: column;
+  }
+  .edge {
+    width: 0;
+    height: 22px;
+    border-top: 0;
+    border-left: 2px dashed var(--accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nodeWrap,
+  .files li,
+  .progress::after,
+  .bars span {
+    animation: none;
+  }
+}

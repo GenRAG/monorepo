@@ -1,17 +1,18 @@
 import { useRef, useState, type CSSProperties } from "react";
 import { Check, Pause, Play } from "lucide-react";
-import { share } from "../content";
+import { share } from "./share/data";
 import { Panel } from "../components/Panel";
 import { SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
-import { useActivePanel } from "../motion/store";
-import { sectionIndex } from "../motion/MotionContext";
+import { useIsActivePanel } from "../motion/store";
 import { prefersReducedMotion } from "../motion/reduced";
 import { useShareDemo } from "./share/useShareDemo";
 import { ShareBrowser } from "./share/ShareBrowser";
 import styles from "./Share.module.css";
 
-const INDEX = sectionIndex("partage");
+const points = ["Déployé en un clic", "Sous-domaine dédié", "Couleurs de votre entreprise"];
+
+const ID = "partage";
 
 export function Share() {
   const browser = useRef<HTMLDivElement | null>(null);
@@ -20,7 +21,7 @@ export function Share() {
   // Dès que le visiteur choisit une couleur, la démo la reprend au lieu de faire défiler les siennes.
   const userColor = useRef<number | null>(null);
   const reduced = prefersReducedMotion();
-  const isActive = useActivePanel() === INDEX;
+  const isActive = useIsActivePanel(ID);
 
   const demo = useShareDemo(isActive && !stopped, reduced, {
     locate: (key) => {
@@ -42,9 +43,13 @@ export function Share() {
 
   return (
     <Panel id="partage" label="Déploiement" tone="open" className={styles.grid}>
-      <SectionIntro index={8} eyebrow={share.eyebrow} title={share.title} text={share.text}>
+      <SectionIntro
+        eyebrow="Déploiement"
+        title="En ligne en un clic, à vos couleurs."
+        text="Choisissez une adresse et les couleurs de votre entreprise, puis déployez. Votre équipe utilise l'assistant dans la minute, sans rien installer."
+      >
         <ul className={styles.points} {...reveal(3)}>
-          {share.points.map((p) => (
+          {points.map((p) => (
             <li key={p}>
               <Check size={14} strokeWidth={3} aria-hidden />
               {p}
@@ -52,7 +57,7 @@ export function Share() {
           ))}
         </ul>
         <fieldset className={styles.picker} {...reveal(4)}>
-          <legend>{share.colorLabel}</legend>
+          <legend>Couleur de l'entreprise</legend>
           <div className={styles.swatches}>
             {share.colors.map((c, i) => (
               <label key={c.value} className={styles.swatch} style={{ "--c": c.value } as CSSProperties}>
@@ -89,7 +94,7 @@ export function Share() {
             type="button"
             className={styles.pause}
             onClick={() => setStopped((s) => !s)}
-            aria-label={stopped ? share.play : share.pause}
+            aria-label={stopped ? "Reprendre l'animation" : "Mettre en pause l'animation"}
           >
             {stopped ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}
           </button>

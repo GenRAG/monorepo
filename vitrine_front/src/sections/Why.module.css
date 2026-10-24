@@ -28,7 +28,7 @@
   left: 0;
   width: 100%;
   height: 1px;
-  background: var(--green-400);
+  background: var(--accent);
   transform: scaleX(0);
   transform-origin: 0 50%;
   transition: transform 0.6s var(--ease-out);
@@ -46,7 +46,7 @@
   border-radius: 12px;
   background: var(--accent-soft);
   border: 1px solid rgba(52, 211, 169, 0.25);
-  color: var(--green-300);
+  color: var(--accent);
   margin-bottom: 8px;
 }
 
@@ -72,14 +72,14 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  color: var(--grey-200);
+  color: var(--text-secondary);
 }
 
 .chain span {
   padding: 4px 8px;
   border-radius: 6px;
-  background: var(--grey-900);
-  border: 1px solid var(--grey-700);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -89,7 +89,7 @@
 .chain i {
   width: 14px;
   height: 2px;
-  background: var(--green-400);
+  background: var(--accent);
 }
 
 .chip {
@@ -100,14 +100,14 @@
   border-radius: 8px;
   border: 1px solid rgba(52, 211, 169, 0.3);
   background: rgba(52, 211, 169, 0.06);
-  color: var(--green-200);
+  color: var(--accent);
 }
 
 .checks {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  color: var(--grey-200);
+  color: var(--text-secondary);
 }
 
 .checks span {
@@ -116,12 +116,12 @@
   gap: 6px;
   padding: 4px 9px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--fg-rgb), 0.05);
   border: 1px solid var(--border);
 }
 
 .checks svg {
-  color: var(--green-400);
+  color: var(--accent);
 }
 
 @media (max-width: 860px) {

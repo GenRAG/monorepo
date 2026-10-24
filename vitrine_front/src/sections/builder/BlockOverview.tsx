@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { FileText, Sparkles, User } from "lucide-react";
-import { builder } from "../../content";
+import { builder } from "./data";
 import type { BlockId } from "./useBuilderDemo";
 import styles from "./BlockOverview.module.css";
 

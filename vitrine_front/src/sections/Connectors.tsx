@@ -1,17 +1,16 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { Cloud, Share2, NotebookText, Upload, RefreshCw, Database, Loader2, Check, Pause, Play } from "lucide-react";
-import { connectors } from "../content";
+import { connectors } from "./connectors/data";
 import { Panel } from "../components/Panel";
 import { DocIcon, SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
-import { useActivePanel } from "../motion/store";
-import { sectionIndex } from "../motion/MotionContext";
+import { useIsActivePanel } from "../motion/store";
 import { prefersReducedMotion } from "../motion/reduced";
 import { DEMO, useConnectorDemo, type Point, type Target } from "./connectors/useConnectorDemo";
 import styles from "./Connectors.module.css";
 
 const icons = { drive: Cloud, sharepoint: Share2, notion: NotebookText, upload: Upload };
-const INDEX = sectionIndex("connecteurs");
+const ID = "connecteurs";
 const POPUP_W = 260;
 /** Écart vertical entre les départs de lignes d'un même connecteur. */
 const FAN = 12;
@@ -56,7 +55,7 @@ export function Connectors() {
   const [lines, setLines] = useState<Line[]>([]);
   const [stopped, setStopped] = useState(false);
   const reduced = prefersReducedMotion();
-  const isActive = useActivePanel() === INDEX;
+  const isActive = useIsActivePanel(ID);
 
   const rel = (el: HTMLElement | null | undefined) => layoutRect(el, flow.current);
 
@@ -169,7 +168,11 @@ export function Connectors() {
 
   return (
     <Panel id="connecteurs" label="Vos documents" tone="light" className={styles.grid}>
-      <SectionIntro index={6} eyebrow={connectors.eyebrow} title={connectors.title} text={connectors.text} />
+      <SectionIntro
+        eyebrow="Vos documents"
+        title="Vos outils restent les mêmes."
+        text="Reliez vos espaces de stockage ou importez vos fichiers. Quand un document change, l'assistant est à jour."
+      />
 
       <div className={styles.demo} {...reveal(3)}>
         <div
@@ -209,8 +212,8 @@ export function Connectors() {
                 <Database size={18} strokeWidth={1.75} />
               </span>
               <div>
-                <p className={styles.baseTitle}>{connectors.base.title}</p>
-                <p className={styles.baseSub}>{connectors.base.subtitle}</p>
+                <p className={styles.baseTitle}>Base de connaissances</p>
+                <p className={styles.baseSub}>Acme · Assistant RH</p>
               </div>
             </div>
             <ul ref={baseList} className={styles.docs}>
@@ -225,7 +228,7 @@ export function Connectors() {
                   <span className={styles.docName}>{d.name}</span>
                   <span className={`${styles.status} ${d.indexed ? "" : styles.pending}`}>
                     {!d.indexed && <Loader2 size={11} className={styles.spin} />}
-                    {d.indexed ? connectors.base.indexed : connectors.base.pending}
+                    {d.indexed ? "Indexé" : "En cours"}
                   </span>
                 </li>
               ))}
@@ -233,13 +236,13 @@ export function Connectors() {
                 <li key={name} data-source={source} data-key={name} className={styles.doc}>
                   <DocIcon kind={kindOf(name)} size={14} />
                   <span className={styles.docName}>{name}</span>
-                  <span className={styles.status}>{connectors.base.indexed}</span>
+                  <span className={styles.status}>Indexé</span>
                 </li>
               ))}
             </ul>
             <p className={styles.sync}>
               <RefreshCw size={12} className={styles.spinSlow} />
-              {connectors.base.sync}
+              Synchronisé il y a 2 min
             </p>
           </div>
 
@@ -276,7 +279,7 @@ export function Connectors() {
               </span>
               <div>
                 <p className={styles.popupTitle}>{source.label}</p>
-                <p className={styles.popupHint}>{connectors.picker.hint}</p>
+                <p className={styles.popupHint}>Choisissez les fichiers à synchroniser</p>
               </div>
             </div>
             <ul className={styles.popupFiles}>
@@ -299,7 +302,7 @@ export function Connectors() {
             </ul>
             <div className={styles.popupFoot}>
               <span ref={button} className={styles.popupButton}>
-                {demo.popup === "remove" ? connectors.picker.save : connectors.picker.add}
+                {demo.popup === "remove" ? "Enregistrer" : "Ajouter"}
               </span>
             </div>
           </div>
@@ -331,7 +334,7 @@ export function Connectors() {
             type="button"
             className={styles.pause}
             onClick={() => setStopped((s) => !s)}
-            aria-label={stopped ? connectors.play : connectors.pause}
+            aria-label={stopped ? "Reprendre l'animation" : "Mettre en pause l'animation"}
           >
             {stopped ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}
           </button>

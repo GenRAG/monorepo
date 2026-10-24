@@ -10,7 +10,7 @@
 .heading {
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 .stage {
@@ -18,8 +18,8 @@
   flex: none;
   padding: 40px 14px 22px;
   border-radius: 12px;
-  border: 1px solid var(--grey-700);
-  background: var(--grey-900);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-1);
   overflow: hidden;
 }
 
@@ -36,7 +36,7 @@
   background: rgba(52, 211, 169, 0.08);
   font-size: 10px;
   font-weight: 600;
-  color: var(--grey-100);
+  color: var(--text-primary);
   animation: chipIn 0.45s var(--ease-out);
 }
 
@@ -65,7 +65,7 @@
   flex: 1;
   height: 3px;
   border-radius: 2px;
-  background: var(--grey-700);
+  background: rgba(var(--fg-rgb), 0.12);
   transition: background 0.5s;
 }
 
@@ -90,7 +90,7 @@
   border-radius: 8px;
   font-size: 11.5px;
   font-weight: 600;
-  color: var(--grey-400);
+  color: var(--text-label);
   transition:
     background 0.4s,
     color 0.4s;
@@ -98,14 +98,14 @@
 
 .steps .current {
   background: rgba(52, 211, 169, 0.08);
-  color: var(--grey-50);
+  color: var(--text-strong);
 }
 
 .dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--grey-600);
+  background: rgba(var(--fg-rgb), 0.18);
   transition:
     background 0.4s,
     box-shadow 0.4s;
@@ -126,8 +126,8 @@
 .card {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid var(--grey-700);
-  background: var(--grey-800);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-3);
   transition:
     border-color 0.4s,
     box-shadow 0.4s;
@@ -146,7 +146,7 @@
   font-size: 8.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .cardLabel svg {
@@ -156,7 +156,7 @@
 .text {
   font-size: 11.5px;
   line-height: 1.45;
-  color: var(--grey-100);
+  color: var(--text-primary);
 }
 
 .vague {
@@ -204,8 +204,8 @@
 .tags span {
   padding: 2px 7px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--grey-300);
+  background: rgba(var(--fg-rgb), 0.06);
+  color: var(--text-secondary);
   transition:
     background 0.4s,
     color 0.4s;
@@ -239,7 +239,7 @@
   gap: 8px;
   font-size: 10px;
   font-weight: 600;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 .scores p > span:last-child {
@@ -253,7 +253,7 @@
 .bar {
   height: 5px;
   border-radius: 3px;
-  background: var(--grey-700);
+  background: rgba(var(--fg-rgb), 0.12);
   overflow: hidden;
 }
 
@@ -295,8 +295,8 @@
   height: 24px;
   padding: 0 8px;
   border-radius: 7px;
-  border: 1px solid var(--grey-700);
-  background: var(--grey-800);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-3);
   font-size: 10.5px;
   transform: translateY(calc(var(--row) * 28px));
   transition:
@@ -313,10 +313,10 @@
   width: 16px;
   height: 15px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(var(--fg-rgb), 0.07);
   font-size: 9px;
   font-weight: 700;
-  color: var(--grey-300);
+  color: var(--text-secondary);
 }
 
 .fileIcon {
@@ -331,7 +331,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   font-weight: 600;
-  color: var(--grey-100);
+  color: var(--text-primary);
 }
 
 .results .bar {
@@ -376,7 +376,7 @@
   display: inline;
   position: absolute;
   right: 0;
-  color: var(--grey-400);
+  color: var(--text-label);
   animation: out 0.3s both;
   animation-delay: calc(0.6s + var(--i) * 0.3s);
 }
@@ -418,7 +418,7 @@
 
 .droppedTag {
   font-size: 9.5px;
-  color: var(--grey-400);
+  color: var(--text-label);
 }
 
 /* Fenêtres basses : on garde la scène, la liste d'étapes est déjà résumée par la pastille */

@@ -1,9 +1,11 @@
 import { forwardRef, useEffect, useState } from "react";
-import { ArrowRight, Menu, X } from "lucide-react";
-import { nav, site, type SectionId } from "../content";
+import { ArrowRight, Menu, Moon, Sun, X } from "lucide-react";
+import { menu, pages, type PageId } from "../routes";
 import { useActivePanel } from "../motion/store";
 import { useAnchor } from "../motion/MotionContext";
+import { currentScheme, setScheme, type Scheme } from "../theme";
 import { Logo } from "./Logo";
+import { NavMenu } from "./NavMenu";
 import styles from "./Chrome.module.css";
 
 export const ProgressBar = forwardRef<HTMLDivElement>((_, ref) => (
@@ -13,11 +15,32 @@ export const ProgressBar = forwardRef<HTMLDivElement>((_, ref) => (
 ));
 ProgressBar.displayName = "ProgressBar";
 
-const headerLinks = nav.flatMap((item, index) => ("short" in item ? [{ ...item, index }] : []));
+const labelOf = (id: PageId) => {
+  const page = pages[id];
+  return "label" in page ? page.label : id;
+};
 
-export function Header() {
-  const anchor = useAnchor();
-  const active = useActivePanel();
+function ThemeToggle() {
+  const [scheme, setLocal] = useState<Scheme>(currentScheme);
+  const next: Scheme = scheme === "dark" ? "light" : "dark";
+  const label = next === "light" ? "Passer en mode clair" : "Passer en mode sombre";
+  return (
+    <button
+      type="button"
+      className={styles.iconButton}
+      aria-label={label}
+      title={label}
+      onClick={() => {
+        setScheme(next);
+        setLocal(next);
+      }}
+    >
+      {scheme === "dark" ? <Sun size={17} aria-hidden /> : <Moon size={17} aria-hidden />}
+    </button>
+  );
+}
+
+export function Header({ current }: { current: PageId }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -27,85 +50,95 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const go = (id: SectionId) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-    setOpen(false);
-    anchor(id)(e);
-  };
-
   return (
-    <>
-      <div className={styles.veil} aria-hidden />
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <a href="#accueil" onClick={go("accueil")} className={styles.brand} aria-label="GenRAG, retour en haut">
-            <Logo />
-          </a>
+    <header className={styles.header}>
+      <div className={styles.headerInner}>
+        <a href={pages.accueil.path} className={styles.brand} aria-label="GenRAG, accueil">
+          <Logo />
+        </a>
 
-          <nav className={styles.links} aria-label="Navigation principale">
-            {headerLinks.map((item) => (
+        <nav className={styles.links} aria-label="Navigation principale">
+          {menu.map((entry) =>
+            "items" in entry ? (
+              <NavMenu key={entry.label} label={entry.label} items={entry.items} current={current} />
+            ) : (
               <a
-                key={item.id}
-                href={`#${item.id}`}
-                onClick={go(item.id)}
+                key={entry.label}
+                href={pages[entry.page].path}
                 className={styles.link}
-                aria-current={item.index === active ? "true" : undefined}
+                aria-current={entry.page === current ? "page" : undefined}
               >
-                {item.short}
+                {entry.label}
+              </a>
+            ),
+          )}
+        </nav>
+
+        <div className={styles.actions}>
+          <ThemeToggle />
+          <a href={pages.contact.path} className={styles.headerCta}>
+            Demander un accès
+          </a>
+          <button
+            type="button"
+            className={`${styles.iconButton} ${styles.menuButton}`}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+            onClick={() => setOpen((o) => !o)}
+          >
+            {open ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
+          </button>
+        </div>
+      </div>
+
+      <nav id="mobile-menu" className={styles.menu} aria-label="Pages" hidden={!open}>
+        {menu.map((entry) => (
+          <div key={entry.label} className={styles.menuGroup}>
+            {"items" in entry && <p className={styles.menuTitle}>{entry.label}</p>}
+            {("items" in entry ? entry.items : [entry.page]).map((id) => (
+              <a
+                key={id}
+                href={pages[id].path}
+                className={styles.menuLink}
+                aria-current={id === current ? "page" : undefined}
+              >
+                {labelOf(id)}
               </a>
             ))}
-          </nav>
-
-          <div className={styles.actions}>
-            <a href="#contact" onClick={go("contact")} className={styles.headerCta}>
-              {site.primaryCta}
-              <ArrowRight size={16} aria-hidden />
-            </a>
-            <button
-              type="button"
-              className={styles.menuButton}
-              aria-expanded={open}
-              aria-controls="mobile-menu"
-              aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-              onClick={() => setOpen((o) => !o)}
-            >
-              {open ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
-            </button>
           </div>
-        </div>
-
-        <nav id="mobile-menu" className={styles.menu} aria-label="Sections" hidden={!open}>
-          {headerLinks.map((item) => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              onClick={go(item.id)}
-              className={styles.menuLink}
-              aria-current={item.index === active ? "true" : undefined}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-      </header>
-    </>
+        ))}
+        <a href={pages.contact.path} className={`${styles.headerCta} ${styles.menuCta}`}>
+          Demander un accès
+          <ArrowRight size={16} aria-hidden />
+        </a>
+      </nav>
+    </header>
   );
 }
 
-export function SideNav() {
+export interface PanelLink {
+  id: string;
+  label: string;
+}
+
+/** Points de navigation entre les sections de la page courante. */
+export function SideNav({ panels }: { panels: PanelLink[] }) {
   const active = useActivePanel();
   const anchor = useAnchor();
+  if (panels.length < 3) return null;
   return (
-    <nav className={styles.sideNav} aria-label="Sections">
+    <nav className={styles.sideNav} aria-label="Sections de la page">
       <ol>
-        {nav.map((item, i) => (
-          <li key={item.id}>
+        {panels.map((panel) => (
+          <li key={panel.id}>
             <a
-              href={`#${item.id}`}
-              onClick={anchor(item.id)}
+              href={`#${panel.id}`}
+              onClick={anchor(panel.id)}
               className={styles.dot}
-              aria-current={i === active ? "true" : undefined}
+              aria-current={panel.id === active ? "true" : undefined}
             >
-              <span className={styles.dotLabel}>{item.label}</span>
+              <span className={styles.dotLabel}>{panel.label}</span>
             </a>
           </li>
         ))}

@@ -1,5 +1,5 @@
 import { useRef, useState, type CSSProperties } from "react";
-import { share } from "@vitrine/content";
+import { share } from "@vitrine/sections/share/data";
 import { prefersReducedMotion } from "@vitrine/motion/reduced";
 import { useShareDemo } from "@vitrine/sections/share/useShareDemo";
 import { ShareBrowser } from "@vitrine/sections/share/ShareBrowser";

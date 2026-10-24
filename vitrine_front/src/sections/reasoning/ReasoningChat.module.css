@@ -4,10 +4,20 @@
   gap: 18px;
   padding: clamp(16px, 2.2vw, 24px);
   border-radius: var(--r-xl);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  background: linear-gradient(180deg, rgba(var(--fg-rgb), 0.045), rgba(var(--fg-rgb), 0.015));
   border: 1px solid var(--border);
   box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.8);
   transition: opacity 0.5s;
+}
+
+/* Thème clair du site vitrine (l'app n'a pas data-scheme sur <html> : reste sombre) */
+:global(:root[data-scheme="light"]) .window {
+  background: var(--surface-1);
+  box-shadow: 0 40px 80px -48px rgba(var(--fg-rgb), 0.4);
+}
+
+:global(:root[data-scheme="light"]) .compare {
+  background: var(--surface-2);
 }
 
 .window[data-fading] {
@@ -46,7 +56,7 @@
   max-width: 88%;
   padding: 11px 15px;
   border-radius: 16px 16px 4px 16px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(var(--fg-rgb), 0.08);
   color: var(--text-primary);
   font-size: 0.9375rem;
   line-height: 1.5;
@@ -64,9 +74,9 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: rgba(52, 211, 169, 0.12);
-  border: 1px solid rgba(52, 211, 169, 0.3);
-  color: var(--green-300);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent);
 }
 
 .body {
@@ -130,14 +140,14 @@
 .traceItem[data-status="done"] .traceIcon {
   border-color: transparent;
   background: var(--accent-soft);
-  color: var(--green-400);
+  color: var(--accent);
 }
 
 .traceDone {
   padding: 1px 8px;
   border-radius: 999px;
   background: var(--accent-soft);
-  color: var(--green-300);
+  color: var(--accent);
   font-size: 0.75rem;
   opacity: 0;
   transition: opacity 0.3s;
@@ -151,7 +161,7 @@
 .compare {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: var(--grey-975);
+  background: var(--bg-shell);
   overflow: hidden;
 }
 
@@ -236,7 +246,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--green-400);
+  background: var(--accent);
   animation: pulse 0.9s ease-in-out infinite;
 }
 

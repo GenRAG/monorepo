@@ -1,0 +1,30 @@
+/** Scénario de la démo de déploiement. Données fictives. */
+export const share = {
+  url: "acme-rh.genrag.app",
+  subdomain: "acme-rh",
+  domain: ".genrag.app",
+  setup: {
+    url: "studio.genrag.app/acme/assistant-rh/deploiement",
+    title: "Déployer l'assistant",
+    subtitle: "Assistant RH · version 3",
+    address: "Adresse",
+    color: "Couleur",
+    deploy: "Déployer",
+    deploying: "Déploiement…",
+    steps: ["Assistant publié", "Certificat HTTPS activé", "Couleurs appliquées"],
+  },
+  inputPlaceholder: "Votre question…",
+  online: "En ligne",
+  company: "Acme",
+  assistantName: "Assistant RH",
+  welcome: "Bonjour Camille, que puis-je faire pour vous ?",
+  question: "Comment poser un jour de congé ?",
+  answer: "Depuis l'espace salarié, rubrique « Absences ». Votre responsable valide sous 48 h.",
+  source: "Livret_accueil.docx",
+  colors: [
+    { name: "Menthe", value: "#34D3A9", ink: "#0B0E11" },
+    { name: "Bleu", value: "#3B6FE0", ink: "#FFFFFF" },
+    { name: "Corail", value: "#E8603C", ink: "#FFFFFF" },
+    { name: "Prune", value: "#8E3F7E", ink: "#FFFFFF" },
+  ],
+};

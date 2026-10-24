@@ -40,7 +40,44 @@
   --orange-400: #ffa980;
   --red-400: #f97071;
 
-  /* Sémantique — sombre */
+  /* Section claire */
+  --light-bg: var(--olive-50);
+  --light-surface: #ffffff;
+  --light-text: var(--grey-900);
+  --light-text-muted: var(--grey-600);
+  --light-border: rgba(15, 23, 42, 0.1);
+
+  /* Typo */
+  --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-display: clamp(2.6rem, 1.2rem + 4.4vw, 5.25rem);
+  --fs-h2: clamp(2.1rem, 1.1rem + 3.1vw, 4rem);
+  --fs-h3: clamp(1.15rem, 1rem + 0.4vw, 1.35rem);
+  --fs-lead: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-micro: 0.6875rem;
+
+  /* Rayons (app : nodes 12px, cartes 16px) */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+
+  /* Layout */
+  --maxw: 1200px;
+  --gutter: clamp(20px, 4vw, 48px);
+  --header-h: 72px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * Sémantique — sombre : thème par défaut, et îlots sombres d'une page claire
+ * (dalles sombres, maquettes de l'app marquées data-scheme="dark").
+ */
+:root,
+[data-scheme="dark"],
+:root[data-scheme="light"] [data-slab][data-theme="dark"] {
   --bg-shell: var(--grey-975);
   --bg-page: var(--grey-950);
   --surface-1: var(--grey-900);
@@ -59,13 +96,9 @@
   --accent-glow: rgba(18, 185, 140, 0.2);
   --ai: var(--violet-400);
   --ai-soft: rgba(139, 92, 246, 0.14);
-
-  /* Section claire */
-  --light-bg: var(--olive-50);
-  --light-surface: #ffffff;
-  --light-text: var(--grey-900);
-  --light-text-muted: var(--grey-600);
-  --light-border: rgba(15, 23, 42, 0.1);
+  /* Couleur du texte en composantes, pour les voiles et traits : rgba(var(--fg-rgb), 0.06) */
+  --fg-rgb: 255, 255, 255;
+  --menu-bg: rgba(11, 14, 17, 0.86);
 
   /* Verre (GlassSurface, variante dark) */
   --glass-bg: rgba(11, 14, 17, 0.52);
@@ -79,27 +112,37 @@
     rgba(255, 255, 255, 0.04) 32%,
     rgba(255, 255, 255, 0) 55%
   );
+  color-scheme: dark;
+}
 
-  /* Typo */
-  --font: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --fs-display: clamp(2.6rem, 1.2rem + 4.4vw, 5.25rem);
-  --fs-h2: clamp(2.1rem, 1.1rem + 3.1vw, 4rem);
-  --fs-h3: clamp(1.15rem, 1rem + 0.4vw, 1.35rem);
-  --fs-lead: clamp(1.05rem, 0.98rem + 0.3vw, 1.25rem);
-  --fs-body: 1rem;
-  --fs-small: 0.875rem;
-  --fs-micro: 0.6875rem;
+/* Sémantique — clair : thème clair (data-scheme sur <html>) et dalle claire d'une page sombre */
+:root[data-scheme="light"],
+[data-panel][data-theme="light"] {
+  --bg-shell: #ffffff;
+  --bg-page: var(--grey-50);
+  --surface-1: #ffffff;
+  --surface-2: var(--grey-50);
+  --surface-3: var(--grey-100);
+  --text-strong: var(--grey-975);
+  --text-primary: var(--grey-900);
+  --text-secondary: var(--grey-700);
+  --text-label: var(--grey-600);
+  --text-faint: var(--grey-500);
+  --border: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.16);
+  --accent: var(--green-600);
+  --accent-strong: var(--green-700);
+  --accent-soft: rgba(18, 185, 140, 0.12);
+  --accent-glow: rgba(18, 185, 140, 0.18);
+  --ai: var(--violet-500);
+  --ai-soft: rgba(139, 92, 246, 0.12);
+  --fg-rgb: 15, 23, 42;
+  --menu-bg: rgba(255, 255, 255, 0.97);
 
-  /* Rayons (app : nodes 12px, cartes 16px) */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 22px;
-
-  /* Layout */
-  --maxw: 1200px;
-  --gutter: clamp(20px, 4vw, 48px);
-  --header-h: 68px;
-
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(15, 23, 42, 0.12);
+  --glass-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.1), inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(15, 23, 42, 0.08);
+  --glass-sheen: linear-gradient(155deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 55%);
+  color-scheme: light;
 }

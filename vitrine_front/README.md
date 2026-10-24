@@ -15,9 +15,25 @@ npm run lint
 
 ## Modifier le contenu
 
-- **Tous les textes** : `src/content.ts` (une constante par section ; `nav` définit l'ordre des sections).
-- **Couleurs, typo, rayons** : `src/styles/tokens.css` (repris de `plateform_front/src/themeNew`).
-- Une section = un composant dans `src/sections/`. Les maquettes réutilisables sont dans `src/mockups/`.
+- **Textes** : écrits directement dans le composant qui les affiche (`src/sections/*.tsx`, `src/pages/*.tsx`).
+  Les listes (cartes, FAQ, offres) sont un petit tableau en haut du même fichier. Les scénarios des démos animées
+  sont dans le `data.ts` du dossier de la démo (ex. `src/sections/builder/data.ts`).
+- **Pages et menus** : `src/routes.ts`. `pages` donne l'adresse, le titre et la description de chaque page,
+  `menu` la barre du haut, `footerNav` le pied de page.
+- **Couleurs, typo, rayons** : `src/styles/tokens.css` (repris de `plateform_front/src/themeNew`), en deux jeux
+  sombre et clair.
+- Une page = un composant dans `src/pages/`, qui assemble des sections (`src/sections/`) dans `<Layout>`.
+  Les maquettes réutilisables sont dans `src/mockups/`, les illustrations dans `src/illustrations/`.
+
+## Pages
+
+`/`, `/produit/creer`, `/produit/documents`, `/produit/deployer`, `/cas-usage`, `/tarifs`, `/mises-a-jour`,
+`/a-propos`, `/securite`, `/contact`. Le routage est fait par `src/main.tsx` ; `vercel.json` renvoie toutes les
+adresses vers `index.html`.
+
+## Thème clair et sombre
+
+Le site s'ouvre en clair, quelle que soit la préférence du système. Le bouton soleil / lune du header mémorise le choix (`src/theme.ts`).
 
 ## Formulaire de contact
 
@@ -34,13 +50,17 @@ Sans cette variable, le formulaire affiche une erreur explicite.
 - Les démos « Vos documents » et « Éditeur » sont des scénarios en boucle avec un curseur
   (`sections/connectors/useConnectorDemo.ts`, `sections/builder/useBuilderDemo.ts`) : elles ne tournent que
   quand leur section est active, ont un bouton pause, et affichent un état figé si `prefers-reduced-motion`.
-  Les textes et le catalogue de modèles de l'éditeur sont dans `builder` (`src/content.ts`).
+  Les textes et le catalogue de modèles de l'éditeur sont dans `src/sections/builder/data.ts`.
 
 ## Vérifier visuellement
 
 ```bash
-CHROME_PATH=/chemin/vers/chrome node scripts/shots.mjs http://localhost:3001/   # captures dans shots/
+CHROME_PATH=/chemin/vers/chrome node scripts/shots.mjs http://localhost:3001   # captures dans shots/
+PAGES=/,/tarifs THEMES=light WIDTHS=390 node scripts/shots.mjs                  # restreindre
 ```
+
+Une capture pleine page par page, thème et largeur ; le script échoue s'il voit une erreur console ou un
+débordement horizontal.
 
 `CHROME_PATH` est optionnel si les navigateurs Playwright sont installés (`npx playwright install chromium`).
 

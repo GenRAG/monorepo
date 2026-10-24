@@ -1,4 +1,4 @@
-import { reasoning } from "../../content";
+import { reasoning } from "./data";
 import { useScenario, type ScenarioApi } from "../../motion/scenario";
 
 /**

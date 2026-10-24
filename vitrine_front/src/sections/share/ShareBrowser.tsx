@@ -1,6 +1,6 @@
 import type { CSSProperties, Ref } from "react";
 import { ArrowUp, Check, FileText, Loader2, Lock, RotateCw, Rocket } from "lucide-react";
-import { share } from "../../content";
+import { share } from "./data";
 import { DemoCursor } from "../../components/DemoCursor";
 import { AssistantLogo } from "../../components/Logo";
 import type { ShareDemoState } from "./useShareDemo";

@@ -1,27 +1,25 @@
 import { useRef, useState } from "react";
 import { Lock, Pause, Play, RotateCw } from "lucide-react";
-import { builder } from "../content";
+import { builder } from "./builder/data";
 import { Panel } from "../components/Panel";
 import { SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
 import { DemoCursor } from "../components/DemoCursor";
-import { AppSidebar } from "../mockups/AppSidebar";
 import { BuilderCanvas } from "../mockups/BuilderCanvas";
-import { useActivePanel } from "../motion/store";
-import { sectionIndex } from "../motion/MotionContext";
+import { useIsActivePanel } from "../motion/store";
 import { prefersReducedMotion } from "../motion/reduced";
 import { useBuilderDemo } from "./builder/useBuilderDemo";
 import { NodePalette } from "./builder/NodePalette";
 import { NodePanel } from "./builder/NodePanel";
 import styles from "./Builder.module.css";
 
-const INDEX = sectionIndex("editeur");
+const ID = "editeur";
 
 export function Builder() {
   const canvas = useRef<HTMLDivElement | null>(null);
   const [stopped, setStopped] = useState(false);
   const reduced = prefersReducedMotion();
-  const isActive = useActivePanel() === INDEX;
+  const isActive = useIsActivePanel(ID);
 
   const demo = useBuilderDemo(isActive && !stopped, reduced, {
     locate: (key) => {
@@ -42,14 +40,13 @@ export function Builder() {
   return (
     <Panel id="editeur" label="Éditeur sans code" tone="open" className={styles.layout}>
       <div className={styles.bridge} aria-hidden {...reveal(0)}>
-        <span>{builder.bridge}</span>
+        <span>ou alors</span>
       </div>
       <div className={styles.head}>
         <SectionIntro
-          index={5}
-          eyebrow={builder.eyebrow}
-          title={builder.title}
-          text={builder.text}
+          eyebrow="Éditeur sans code"
+          title="Utilisez GenRAG Studio."
+          text="Vous voulez plus de contrôle ? Construisez votre assistant comme un schéma, en reliant des blocs entre eux. Chaque étape est visible, chaque réglage à portée de clic."
           align="center"
           wide
         />
@@ -59,7 +56,7 @@ export function Builder() {
         <div
           className={styles.browser}
           role="img"
-          aria-label="Démonstration de l'éditeur GenRAG : on ajoute les blocs Reformulation puis Classement depuis la palette, on découvre leur fonctionnement, puis on leur choisit un modèle d'IA"
+          aria-label="Démonstration de GenRAG Studio : on ajoute les blocs Reformulation puis Classement depuis la palette, on découvre leur fonctionnement, puis on leur choisit un modèle d'IA"
         >
           <div className={styles.chrome} aria-hidden>
             <span className={styles.lights}>
@@ -74,7 +71,6 @@ export function Builder() {
             <RotateCw size={13} className={styles.reload} />
           </div>
           <div className={styles.window}>
-            <AppSidebar active={builder.sidebar.active} />
             <BuilderCanvas view={demo} rootRef={canvas}>
               <NodePalette state={demo} />
               <NodePanel state={demo} />
@@ -88,7 +84,7 @@ export function Builder() {
             type="button"
             className={styles.pause}
             onClick={() => setStopped((s) => !s)}
-            aria-label={stopped ? builder.play : builder.pause}
+            aria-label={stopped ? "Reprendre l'animation" : "Mettre en pause l'animation"}
           >
             {stopped ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}
           </button>

@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { contact } from "../content";
 import { Panel } from "../components/Panel";
 import { SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
@@ -11,6 +10,7 @@ type State = "idle" | "loading" | "success" | "error";
 const ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT as string | undefined;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+/** Ouverture de la page /contact : son titre est le h1 de la page. */
 export function Contact() {
   const [state, setState] = useState<State>("idle");
   const [message, setMessage] = useState("");
@@ -27,15 +27,15 @@ export function Contact() {
     };
 
     const nextErrors = {
-      email: EMAIL_RE.test(payload.email) ? undefined : contact.invalidEmail,
-      company: payload.company ? undefined : contact.requiredCompany,
+      email: EMAIL_RE.test(payload.email) ? undefined : "Indiquez une adresse email valide.",
+      company: payload.company ? undefined : "Indiquez le nom de votre entreprise.",
     };
     setErrors(nextErrors);
     if (nextErrors.email || nextErrors.company) return;
 
     if (!ENDPOINT) {
       setState("error");
-      setMessage(contact.notConfigured);
+      setMessage("Formulaire non configuré (VITE_CONTACT_ENDPOINT manquant).");
       return;
     }
 
@@ -48,16 +48,22 @@ export function Contact() {
       });
       if (!res.ok) throw new Error(String(res.status));
       setState("success");
-      setMessage(contact.success);
+      setMessage("Merci, votre demande est bien arrivée. Nous vous recontactons rapidement.");
     } catch {
       setState("error");
-      setMessage(contact.error);
+      setMessage("L'envoi a échoué. Réessayez dans un instant.");
     }
   };
 
   return (
     <Panel id="contact" label="Contact" tone="slab" glow className={styles.grid}>
-      <SectionIntro index={11} eyebrow={contact.eyebrow} title={contact.title} text={contact.text} />
+      <SectionIntro
+        eyebrow="Accès anticipé"
+        title="Donnez à votre équipe un assistant qui connaît vos documents."
+        text="Laissez-nous vos coordonnées. Nous revenons vers vous pour organiser un accès."
+        as="h1"
+        numbered={false}
+      />
 
       <form className={styles.form} onSubmit={onSubmit} noValidate {...reveal(3)}>
         {state === "success" ? (
@@ -70,24 +76,13 @@ export function Contact() {
             <Field
               name="email"
               type="email"
-              label={contact.fields.email}
+              label="Email professionnel"
               autoComplete="email"
               required
               error={errors.email}
             />
-            <Field
-              name="company"
-              label={contact.fields.company}
-              autoComplete="organization"
-              required
-              error={errors.company}
-            />
-            <Field
-              name="role"
-              label={contact.fields.role}
-              hint={contact.fields.optional}
-              autoComplete="organization-title"
-            />
+            <Field name="company" label="Entreprise" autoComplete="organization" required error={errors.company} />
+            <Field name="role" label="Votre rôle" hint="facultatif" autoComplete="organization-title" />
             <input
               type="text"
               name="website"
@@ -100,11 +95,11 @@ export function Contact() {
             <button type="submit" className={styles.submit} disabled={state === "loading"}>
               {state === "loading" ? (
                 <>
-                  <Loader2 size={18} className={styles.spin} aria-hidden /> {contact.sending}
+                  <Loader2 size={18} className={styles.spin} aria-hidden /> Envoi…
                 </>
               ) : (
                 <>
-                  {contact.submit} <ArrowRight size={18} aria-hidden />
+                  Demander un accès <ArrowRight size={18} aria-hidden />
                 </>
               )}
             </button>

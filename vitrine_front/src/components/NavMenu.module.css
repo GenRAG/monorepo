@@ -1,0 +1,132 @@
+.root {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  opacity: 0.55;
+}
+
+.trigger[data-current] {
+  color: var(--accent);
+}
+
+.chevron {
+  transition: transform 0.25s var(--ease-out);
+}
+
+.trigger[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+/* Le pont invisible (padding-top) garde le survol entre le bouton et le panneau */
+.panel {
+  position: absolute;
+  top: 100%;
+  left: -12px;
+  z-index: 10;
+  padding-top: 14px;
+  animation: panelIn 0.2s var(--ease-out);
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.card {
+  min-width: 230px;
+  padding: 10px 8px 8px;
+  border-radius: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 40px -12px rgba(var(--fg-rgb), 0.22);
+}
+
+.title {
+  padding: 2px 8px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--text-strong);
+  transition: background-color 0.15s;
+}
+
+.item:hover,
+.item:focus-visible {
+  background: rgba(var(--fg-rgb), 0.05);
+}
+
+.item[aria-current="page"] {
+  color: var(--accent);
+}
+
+/* Petite tuile en dégradé, glyphe blanc */
+.icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  color: var(--light-surface);
+}
+
+.green {
+  background: linear-gradient(135deg, var(--green-300), var(--green-600));
+}
+.violet {
+  background: linear-gradient(135deg, var(--violet-300), var(--violet-500));
+}
+.mix {
+  background: linear-gradient(135deg, var(--green-400), var(--violet-500));
+}
+.warm {
+  background: linear-gradient(135deg, var(--orange-400), var(--red-400));
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}

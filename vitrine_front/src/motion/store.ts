@@ -1,25 +1,24 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Petit store global : panel actif (navigation, thème du header) et panels déjà « entrés »
- * (déclenchement unique des animations internes des maquettes).
+ * Petit store global, indexé par l'id des sections : section active (navigation, thème du header) et
+ * sections déjà « entrées » (déclenchement unique des animations internes des maquettes).
  */
-let active = 0;
-let entered = new Set<number>([0]);
+let active = "";
+let entered = new Set<string>();
 const listeners = new Set<() => void>();
 
 const emit = () => listeners.forEach((l) => l());
 
 export const panelStore = {
-  getActive: () => active,
-  setActive(index: number) {
-    if (index === active) return;
-    active = index;
+  setActive(id: string) {
+    if (id === active) return;
+    active = id;
     emit();
   },
-  markEntered(index: number) {
-    if (entered.has(index)) return;
-    entered = new Set(entered).add(index);
+  markEntered(id: string) {
+    if (entered.has(id)) return;
+    entered = new Set(entered).add(id);
     emit();
   },
   subscribe(listener: () => void) {
@@ -32,12 +31,14 @@ export const useActivePanel = () =>
   useSyncExternalStore(
     panelStore.subscribe,
     () => active,
-    () => 0,
+    () => "",
   );
 
-export const useHasEntered = (index: number) =>
+export const useIsActivePanel = (id: string) => useActivePanel() === id;
+
+export const useHasEntered = (id: string) =>
   useSyncExternalStore(
     panelStore.subscribe,
-    () => entered.has(index),
+    () => entered.has(id),
     () => false,
   );

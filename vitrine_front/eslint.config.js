@@ -14,6 +14,8 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // Les textes sont écrits dans le JSX, avec une espace insécable avant « ? : ! ; »
+      "no-irregular-whitespace": ["error", { skipStrings: true, skipJSXText: true, skipTemplates: true }],
     },
   },
 );

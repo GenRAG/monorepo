@@ -1,32 +1,39 @@
 import { ArrowRight } from "lucide-react";
-import { hero, site } from "../content";
+import { pages } from "../routes";
 import { Panel } from "../components/Panel";
 import { ButtonLink, SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
 import { useAnchor } from "../motion/MotionContext";
-import { useActivePanel } from "../motion/store";
-import { Ingestion } from "./hero/Ingestion";
+import { ProviderStrip } from "./hero/ProviderStrip";
+import { Ribbon } from "./hero/Ribbon";
 import styles from "./Hero.module.css";
 
 export function Hero() {
   const anchor = useAnchor();
-  const isActive = useActivePanel() === 0;
   return (
-    <Panel id="accueil" label="Accueil" tone="open" glow full className={styles.grid}>
+    <Panel id="accueil" label="Accueil" tone="open" className={styles.hero}>
+      <div className={styles.art}>
+        <Ribbon />
+      </div>
       <div className={styles.copy}>
-        <SectionIntro index={1} eyebrow={hero.eyebrow} title={hero.title} text={hero.subtitle} as="h1" />
+        <SectionIntro
+          as="h1"
+          split
+          title="Vos documents éparpillés, enfin connectés."
+          text="GenRAG transforme vos documents en un assistant qui répond à votre équipe, sources à l'appui. Sans une ligne de code."
+        />
         <div className={styles.ctas} {...reveal(3)}>
-          <ButtonLink href="#contact" onClick={anchor("contact")}>
-            {site.primaryCta}
+          <ButtonLink href={pages.contact.path}>
+            Demander un accès
             <ArrowRight size={18} aria-hidden />
           </ButtonLink>
-          <ButtonLink href="#etapes" variant="ghost" onClick={anchor("etapes")}>
-            {site.secondaryCta}
+          <ButtonLink href="#plateforme" variant="ghost" onClick={anchor("plateforme")}>
+            Voir comment ça marche
           </ButtonLink>
         </div>
       </div>
-      <div {...reveal(2)} className={styles.visualWrap}>
-        <Ingestion paused={!isActive} />
+      <div {...reveal(4)}>
+        <ProviderStrip />
       </div>
     </Panel>
   );

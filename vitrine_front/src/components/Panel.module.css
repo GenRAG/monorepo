@@ -21,7 +21,7 @@
   z-index: -1;
   width: min(calc(var(--maxw) + 2 * var(--gutter)), 100%);
   margin: 0 auto;
-  border-inline: 1px solid rgba(255, 255, 255, 0.045);
+  border-inline: 1px solid rgba(var(--fg-rgb), 0.045);
   pointer-events: none;
 }
 
@@ -39,30 +39,29 @@
   background:
     radial-gradient(900px 420px at 50% -10%, rgba(18, 185, 140, 0.13), transparent 70%),
     linear-gradient(180deg, var(--grey-900), var(--grey-950) 60%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(var(--fg-rgb), 0.07);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.07),
     0 -30px 120px -60px rgba(52, 211, 169, 0.25),
     0 50px 120px -50px rgba(0, 0, 0, 0.9);
 }
 
+/* Sur la page claire, l'ombre noire de la dalle pèserait trop : simple ombre douce */
+:global(:root[data-scheme="light"]) .slab {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 40px 80px -50px rgba(15, 23, 42, 0.45);
+}
+
 .light {
-  --text-strong: var(--grey-975);
-  --text-primary: var(--grey-900);
-  --text-secondary: var(--grey-700);
-  --text-label: var(--grey-600);
-  --text-faint: var(--grey-500);
-  --border: var(--light-border);
-  --border-strong: rgba(15, 23, 42, 0.16);
-  --accent: var(--green-600);
+  /* Les tokens clairs viennent de styles/tokens.css ([data-theme="light"]) */
   background: radial-gradient(1000px 500px at 50% 0%, rgba(168, 243, 223, 0.45), transparent 70%), var(--light-bg);
   color: var(--grey-900);
-  color-scheme: light;
   /* Halo vert projeté sur la base sombre : la dalle claire « éclaire » ses voisines */
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.5),
-    0 -40px 140px -40px rgba(52, 211, 169, 0.35),
-    0 60px 140px -50px rgba(52, 211, 169, 0.3);
+    0 0 0 1px var(--border-strong),
+    0 -24px 90px -50px rgba(52, 211, 169, 0.16),
+    0 40px 90px -50px rgba(52, 211, 169, 0.12);
 }
 
 /* ---------- Contenu ---------- */

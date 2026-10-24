@@ -28,7 +28,6 @@
 html {
   overflow-x: clip;
   -webkit-text-size-adjust: 100%;
-  color-scheme: dark;
 }
 
 body {
@@ -68,6 +67,10 @@ a {
 
 svg {
   display: block;
+}
+
+main {
+  counter-reset: intro;
 }
 
 ::selection {

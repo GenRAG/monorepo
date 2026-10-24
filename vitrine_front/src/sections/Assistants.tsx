@@ -13,18 +13,19 @@ import {
   Play,
   PencilLine,
 } from "lucide-react";
-import { assistants } from "../content";
+import { assistants } from "./assistants/data";
 import { Panel } from "../components/Panel";
 import { SectionIntro } from "../components/ui";
 import { reveal } from "../components/reveal";
-import { useActivePanel } from "../motion/store";
-import { sectionIndex } from "../motion/MotionContext";
+import { useIsActivePanel } from "../motion/store";
 import { prefersReducedMotion } from "../motion/reduced";
 import { useTypewriter } from "./useTypewriter";
 import styles from "./Assistants.module.css";
 
 const icons = { commercial: Briefcase, rh: Users, finance: Calculator, admin: Building2, marketing: Megaphone };
-const INDEX = sectionIndex("assistants");
+/** Teinte de chaque carte (variables --tone-a / --tone-b du CSS). */
+const tones = { commercial: "green", rh: "violet", finance: "mix", admin: "warm", marketing: "violet" };
+const ID = "assistants";
 const AUTOPLAY_MS = 6000;
 const SWIPE_PX = 50;
 const items = assistants.items;
@@ -40,7 +41,7 @@ const offsetOf = (i: number, current: number) => {
 };
 
 function Card({ item, offset, onSelect }: { item: Item; offset: number; onSelect: () => void }) {
-  const isActive = useActivePanel() === INDEX;
+  const isActive = useIsActivePanel(ID);
   const centered = offset === 0;
   const answer = useTypewriter(item.answer, isActive && centered, item.id);
   const Icon = icons[item.id as keyof typeof icons];
@@ -55,68 +56,75 @@ function Card({ item, offset, onSelect }: { item: Item; offset: number; onSelect
       inert={!centered}
       className={styles.card}
       data-position={position}
+      data-tone={tones[item.id as keyof typeof tones]}
       style={{ "--off": offset } as CSSProperties}
       onClick={centered ? undefined : onSelect}
     >
-      <div className={styles.chatPane}>
-        <p className={styles.userMsg}>{item.question}</p>
-        <div className={styles.botMsg}>
-          <span className={styles.botAvatar}>
-            <Bot size={14} aria-hidden />
-          </span>
-          <div>
-            <p className={styles.answer}>
-              <span className="sr-only">{item.answer}</span>
-              <span aria-hidden>
-                {answer.text}
-                {!answer.done && <span className={styles.cursor} />}
-              </span>
-            </p>
-            <div className={`${styles.sources} ${answer.done ? styles.sourcesIn : ""}`}>
-              <span className={styles.sourcesLabel}>{assistants.sourcesLabel}</span>
-              {item.sources.map((s) => (
-                <span key={s} className={styles.source}>
-                  <FileText size={12} aria-hidden />
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className={styles.input} aria-hidden>
-          <span>{assistants.inputPlaceholder}</span>
-          <span className={styles.send}>
-            <ArrowUp size={14} />
-          </span>
-        </div>
-      </div>
-
       <div className={styles.infoPane}>
-        <div className={styles.identity}>
-          <span className={styles.portrait}>
-            <Icon size={26} strokeWidth={1.6} aria-hidden />
-          </span>
-          <div>
-            <p className={styles.discover}>{assistants.discover}</p>
-            <h3 className={styles.cardTitle}>
-              {assistants.chatTitle} {item.label}
-            </h3>
-          </div>
+        <span className={styles.portrait}>
+          <Icon size={24} strokeWidth={1.7} aria-hidden />
+        </span>
+        <div>
+          <p className={styles.discover}>Découvrez l'assistant</p>
+          <h3 className={styles.cardTitle}>Assistant {item.label}</h3>
         </div>
         <p className={styles.description}>{item.description}</p>
         <ul className={styles.skills}>
           {item.skills.map((skill) => (
             <li key={skill}>
               <span className={styles.check}>
-                <Check size={12} strokeWidth={3} aria-hidden />
+                <Check size={11} strokeWidth={3} aria-hidden />
               </span>
               {skill}
             </li>
           ))}
         </ul>
         <p className={styles.more}>
-          <PencilLine size={13} aria-hidden /> {assistants.editable} · {assistants.more}
+          <PencilLine size={13} aria-hidden /> Modifiable après import · Et tout ce que contiennent vos documents.
         </p>
+      </div>
+
+      <div className={styles.stage}>
+        <div className={styles.chat}>
+          <div className={styles.chatHead}>
+            <span className={styles.chatAvatar}>
+              <Icon size={14} strokeWidth={1.8} aria-hidden />
+            </span>
+            <strong>Assistant {item.label}</strong>
+            <span className={styles.online}>En ligne</span>
+          </div>
+          <div className={styles.chatBody}>
+            <p className={styles.userMsg}>{item.question}</p>
+            <div className={styles.botMsg}>
+              <span className={styles.botAvatar}>
+                <Bot size={14} aria-hidden />
+              </span>
+              <div>
+                <p className={styles.answer}>
+                  <span className="sr-only">{item.answer}</span>
+                  <span aria-hidden>
+                    {answer.text}
+                    {!answer.done && <span className={styles.cursor} />}
+                  </span>
+                </p>
+                <div className={`${styles.sources} ${answer.done ? styles.sourcesIn : ""}`}>
+                  {item.sources.map((s) => (
+                    <span key={s} className={styles.source}>
+                      <FileText size={12} aria-hidden />
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={styles.input} aria-hidden>
+            <span>Posez votre question…</span>
+            <span className={styles.send}>
+              <ArrowUp size={14} />
+            </span>
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -126,7 +134,7 @@ export function Assistants() {
   const [current, setCurrent] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [stopped, setStopped] = useState(false);
-  const isActive = useActivePanel() === INDEX;
+  const isActive = useIsActivePanel(ID);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const swipeStart = useRef<number | null>(null);
   const pillRow = useRef<HTMLDivElement>(null);
@@ -168,10 +176,9 @@ export function Assistants() {
   return (
     <Panel id="assistants" label="Assistants métier" tone="open" className={styles.layout}>
       <SectionIntro
-        index={4}
-        eyebrow={assistants.eyebrow}
-        title={assistants.title}
-        text={assistants.text}
+        eyebrow="Assistants métier"
+        title="Un assistant prêt pour chaque service."
+        text="Démarrez avec un modèle adapté à votre métier, puis ajustez-le à votre façon de travailler."
         align="center"
         wide
       />
@@ -220,7 +227,7 @@ export function Assistants() {
             type="button"
             className={styles.pause}
             onClick={() => setStopped((s) => !s)}
-            aria-label={stopped ? assistants.play : assistants.pause}
+            aria-label={stopped ? "Reprendre le défilement" : "Mettre en pause le défilement"}
           >
             {stopped ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}
           </button>

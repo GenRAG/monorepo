@@ -9,6 +9,18 @@
       content="GenRAG transforme les documents de votre entreprise en un assistant qui répond à votre équipe, sources à l'appui. Sans code, en quelques minutes."
     />
     <meta name="theme-color" content="#0B0E11" />
+    <script>
+      // Avant le premier rendu : choix mémorisé (src/theme.ts), sinon thème clair.
+      (function () {
+        var scheme;
+        try {
+          scheme = localStorage.getItem("genrag-scheme");
+        } catch (e) {}
+        if (scheme !== "dark") scheme = "light";
+        document.documentElement.dataset.scheme = scheme;
+        if (scheme === "light") document.querySelector('meta[name="theme-color"]').content = "#FFFFFF";
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preload" href="/fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
 

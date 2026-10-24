@@ -1,5 +1,5 @@
 import { LayoutGrid, MessageCircle, FileText, Workflow, BarChart3, Cloud, Settings, ChevronsLeft } from "lucide-react";
-import { builder } from "../content";
+import { builder } from "../sections/builder/data";
 import styles from "./AppSidebar.module.css";
 
 const icons: Record<string, typeof LayoutGrid> = {

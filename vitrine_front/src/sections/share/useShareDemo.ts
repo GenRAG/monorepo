@@ -1,4 +1,4 @@
-import { share } from "../../content";
+import { share } from "./data";
 import { useScenario, type Point, type ScenarioApi } from "../../motion/scenario";
 import type { CursorState } from "../../components/DemoCursor";
 

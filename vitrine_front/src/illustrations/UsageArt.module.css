@@ -1,0 +1,171 @@
+.scene {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Halo derrière l'anneau */
+.scene::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 360px;
+  aspect-ratio: 1;
+  translate: -50% -6%;
+  z-index: -1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 70% 30%, rgba(139, 92, 246, 0.2), transparent 60%),
+    radial-gradient(circle at 30% 70%, rgba(18, 185, 140, 0.2), transparent 60%);
+  filter: blur(12px);
+}
+
+.ringWrap {
+  position: relative;
+  width: min(300px, 80vw);
+  aspect-ratio: 1;
+}
+
+.ring {
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+}
+
+.track,
+.segment {
+  fill: none;
+  stroke-width: 18;
+}
+
+.track {
+  stroke: rgba(var(--fg-rgb), 0.07);
+}
+
+.segment {
+  stroke-linecap: round;
+  stroke-dasharray: var(--len) var(--ring);
+  stroke-dashoffset: var(--offset);
+  animation: draw 1.2s var(--ease-out) both paused;
+  animation-delay: calc(0.3s + var(--d) * 0.3s);
+}
+
+.center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.center strong {
+  margin: 6px 0 4px;
+  font-size: clamp(2.2rem, 1.8rem + 1.4vw, 2.8rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: var(--text-strong);
+}
+
+.sub {
+  font-size: 0.8rem;
+  color: var(--text-label);
+}
+
+/* Une réponse qui retire ses crédits du solde, en boucle */
+.token {
+  position: absolute;
+  top: 6%;
+  right: 2%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--green-400), var(--violet-500));
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--light-surface);
+  box-shadow: 0 10px 24px -10px var(--violet-500);
+  animation: drop 3.2s var(--ease-out) 1.6s infinite both paused;
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legend svg {
+  color: var(--c);
+}
+
+.legend b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+
+/* Les animations attendent que l'illustration soit à l'écran ([data-in] posé par motion/stage.ts) */
+:global([data-in]) .segment,
+:global([data-in]) .token {
+  animation-play-state: running;
+}
+
+@keyframes draw {
+  from {
+    stroke-dasharray: 0 var(--ring);
+  }
+}
+
+@keyframes drop {
+  0% {
+    opacity: 0;
+    transform: translate(0, -10px);
+  }
+  15%,
+  60% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: translate(-30px, 34px) scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment,
+  .token {
+    animation: none;
+  }
+}

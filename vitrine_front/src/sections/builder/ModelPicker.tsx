@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Check, Search, ArrowUpDown } from "lucide-react";
-import { builder } from "../../content";
+import { builder } from "./data";
 import type { BlockId } from "./useBuilderDemo";
 import styles from "./ModelPicker.module.css";
 

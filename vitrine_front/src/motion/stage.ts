@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
 export interface MotionController {
-  scrollToPanel: (index: number) => void;
+  scrollToPanel: (id: string) => void;
   destroy: () => void;
 }
 
@@ -21,6 +21,7 @@ export function initMotion(stage: HTMLElement, progressBar: HTMLElement | null):
   const panels = Array.from(stage.querySelectorAll<HTMLElement>(":scope > [data-panel]"));
   const reduced = () => window.matchMedia(REDUCED).matches;
 
+  if (panels[0]) panelStore.markEntered(panels[0].id);
   const mm = gsap.matchMedia();
 
   mm.add({ reduce: REDUCED, motion: `not ${REDUCED}` }, (ctx) => {
@@ -63,7 +64,7 @@ export function initMotion(stage: HTMLElement, progressBar: HTMLElement | null):
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
           const idx = panels.indexOf(entry.target as HTMLElement);
-          panelStore.markEntered(idx);
+          panelStore.markEntered(panels[idx].id);
           timelines.get(idx)?.play();
         }),
       { threshold: 0.25 },
@@ -84,15 +85,12 @@ export function initMotion(stage: HTMLElement, progressBar: HTMLElement | null):
     const onScroll = () => {
       const probe = window.innerHeight * 0.45;
       let active = 0;
-      let underHeader = 0;
       panels.forEach((p, i) => {
         const top = p.getBoundingClientRect().top;
         if (top <= probe) active = i;
-        if (top <= 40) underHeader = i;
       });
-      panelStore.setActive(active);
+      panelStore.setActive(panels[active]?.id ?? "");
       document.body.dataset.panelTheme = panels[active]?.dataset.theme ?? "dark";
-      document.body.dataset.headerTheme = panels[underHeader]?.dataset.theme ?? "dark";
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -114,7 +112,7 @@ export function initMotion(stage: HTMLElement, progressBar: HTMLElement | null):
   });
 
   return {
-    scrollToPanel: (index) => panels[index]?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth" }),
+    scrollToPanel: (id) => document.getElementById(id)?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth" }),
     destroy: () => mm.revert(),
   };
 }

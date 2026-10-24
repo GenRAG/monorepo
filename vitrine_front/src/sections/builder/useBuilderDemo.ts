@@ -1,4 +1,4 @@
-import { builder } from "../../content";
+import { builder } from "./data";
 import { useScenario, type Point, type ScenarioApi } from "../../motion/scenario";
 import type { CursorState } from "../../components/DemoCursor";
 

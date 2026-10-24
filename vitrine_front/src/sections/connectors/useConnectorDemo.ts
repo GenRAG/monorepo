@@ -1,4 +1,4 @@
-import { connectors } from "../../content";
+import { connectors } from "./data";
 import { useScenario, type Point, type ScenarioApi } from "../../motion/scenario";
 
 /**
